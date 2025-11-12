@@ -1,0 +1,208 @@
+/**
+ * Cloudflare Pages Function for /api/content
+ * Handles GET, POST, PUT, DELETE for content management
+ */
+
+// Helper to parse JSON body
+async function getBody(request) {
+  if (request.method === 'GET' || request.method === 'HEAD') {
+    return null;
+  }
+  try {
+    return await request.json();
+  } catch {
+    return null;
+  }
+}
+
+// KV namespace (bound by wrangler.toml)
+const kv = globalThis.IPL_CACHE;
+
+const KV_KEY = 'ipl:content';
+
+export const onRequest = async (context) => {
+  const { request, env } = context;
+  const kvNamespace = env.IPL_CACHE || kv;
+
+  // CORS headers
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+
+  // Handle OPTIONS
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: corsHeaders,
+    });
+  }
+
+  try {
+    // GET - fetch all content
+    if (request.method === 'GET') {
+      const url = new URL(request.url);
+      const type = url.searchParams.get('type');
+
+      const cached = await kvNamespace.get(KV_KEY);
+      let content = cached ? JSON.parse(cached) : [];
+
+      if (type) {
+        content = content.filter(c => c.type === type);
+      }
+
+      return new Response(JSON.stringify(content), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders,
+        },
+      });
+    }
+
+    // POST - create new content
+    if (request.method === 'POST') {
+      const body = await getBody(request);
+
+      if (!body || !body.title || !body.type) {
+        return new Response(
+          JSON.stringify({ error: 'Missing required fields: title, type' }),
+          {
+            status: 400,
+            headers: {
+              'Content-Type': 'application/json',
+              ...corsHeaders,
+            },
+          }
+        );
+      }
+
+      const existing = await kvNamespace.get(KV_KEY);
+      const content = existing ? JSON.parse(existing) : [];
+
+      const newContent = {
+        ...body,
+        id: Date.now().toString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      content.push(newContent);
+      await kvNamespace.put(KV_KEY, JSON.stringify(content));
+
+      return new Response(
+        JSON.stringify({
+          message: 'Content created successfully',
+          content: newContent,
+        }),
+        {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        }
+      );
+    }
+
+    // PUT - update content
+    if (request.method === 'PUT') {
+      const body = await getBody(request);
+
+      if (!body || !body.id) {
+        return new Response(
+          JSON.stringify({ error: 'Content ID is required' }),
+          {
+            status: 400,
+            headers: {
+              'Content-Type': 'application/json',
+              ...corsHeaders,
+            },
+          }
+        );
+      }
+
+      const existing = await kvNamespace.get(KV_KEY);
+      const content = existing ? JSON.parse(existing) : [];
+
+      const updated = content.map(c =>
+        c.id === body.id
+          ? { ...c, ...body, updatedAt: new Date().toISOString() }
+          : c
+      );
+
+      await kvNamespace.put(KV_KEY, JSON.stringify(updated));
+
+      return new Response(
+        JSON.stringify({
+          message: 'Content updated successfully',
+          content: { ...body, updatedAt: new Date().toISOString() },
+        }),
+        {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        }
+      );
+    }
+
+    // DELETE - remove content
+    if (request.method === 'DELETE') {
+      const url = new URL(request.url);
+      const id = url.searchParams.get('id');
+
+      if (!id) {
+        return new Response(
+          JSON.stringify({ error: 'Content ID is required' }),
+          {
+            status: 400,
+            headers: {
+              'Content-Type': 'application/json',
+              ...corsHeaders,
+            },
+          }
+        );
+      }
+
+      const existing = await kvNamespace.get(KV_KEY);
+      const content = existing ? JSON.parse(existing) : [];
+
+      const updated = content.filter(c => c.id !== id);
+      await kvNamespace.put(KV_KEY, JSON.stringify(updated));
+
+      return new Response(
+        JSON.stringify({ message: 'Content deleted successfully' }),
+        {
+          status: 200,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        }
+      );
+    }
+
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: {
+        'Content-Type': 'application/json',
+        ...corsHeaders,
+      },
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    return new Response(
+      JSON.stringify({ error: 'Internal server error', message: error.message }),
+      {
+        status: 500,
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders,
+        },
+      }
+    );
+  }
+};
