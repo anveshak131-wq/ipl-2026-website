@@ -1,2 +1,3 @@
 /_next/*  /_next/:splat  200
+ /admin/*  /admin/:splat/  301
 /* / 200
