@@ -1,36 +1,6 @@
 {
   "name": "ipl-2026-website",
   "compatibility_date": "2024-01-01",
-  "compatibility_flags": ["nodejs_compat"],
-  "kv_namespaces": [
-    {
-      "binding": "IPL_CACHE",
-      "id": "5c1beb13cd564dd5892612ac9d2e04c4",
-      "preview_id": "de6a22c437444d2eba9e63240f6e1f9b"
-    }
-  ],
-  "env": {
-    "production": {
-      "vars": {
-        "ENVIRONMENT": "production"
-      },
-      "kv_namespaces": [
-        {
-          "binding": "IPL_CACHE",
-          "id": "5c1beb13cd564dd5892612ac9d2e04c4"
-        }
-      ]
-    },
-    "preview": {
-      "vars": {
-        "ENVIRONMENT": "preview"
-      },
-      "kv_namespaces": [
-        {
-          "binding": "IPL_CACHE",
-          "id": "de6a22c437444d2eba9e63240f6e1f9b"
-        }
-      ]
-    }
-  }
+  "compatibility_flags": ["nodejs_compat"]
 }
+
