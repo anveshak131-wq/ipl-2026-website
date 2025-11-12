@@ -1,11 +1,5 @@
 /_next/*  /_next/:splat  200
- /admin/*/  /admin/:splat/  200
- # Explicit admin redirects to avoid matching asset requests (like .txt/.json)
- /admin/players  /admin/players/  301
- /admin/teams    /admin/teams/    301
- /admin/dashboard /admin/dashboard/ 301
- /admin/matches  /admin/matches/  301
- /admin/content  /admin/content/  301
- /admin/settings /admin/settings/ 301
- /admin         /admin/          301
+/admin/*/  /admin/:splat/  200
+# SPA fallback for client-side routing
 /* / 200
+

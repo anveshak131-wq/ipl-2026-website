@@ -6,6 +6,7 @@
   "exclude": [
     "/api/*",
     "/*.xml",
-    "/*.json"
+    "/*.json",
+    "/admin/*"
   ]
 }
