@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+// Mark this page as dynamic to ensure client-side redirects work
+export const dynamic = 'force-dynamic';
+
 export default function AdminDemoLogin() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);

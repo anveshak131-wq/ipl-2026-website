@@ -6,6 +6,9 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
 
+// Mark this page as dynamic to prevent pre-rendering
+export const dynamic = 'force-dynamic';
+
 export default function AdminPlayers() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);

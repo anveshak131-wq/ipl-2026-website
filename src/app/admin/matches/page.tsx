@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
+
+// Mark this page as dynamic to prevent pre-rendering
+export const dynamic = 'force-dynamic';
 import { Match } from '@/types';
 import { api } from '@/lib/data';
 
