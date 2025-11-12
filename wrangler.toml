@@ -17,6 +17,10 @@ preview_id = "de6a22c437444d2eba9e63240f6e1f9b"
 [env.production]
 vars = { ENVIRONMENT = "production" }
 
+[[env.production.kv_namespaces]]
+binding = "IPL_CACHE"
+id = "5c1beb13cd564dd5892612ac9d2e04c4"
+
 # Environment variables for preview
 [env.preview]
 vars = { ENVIRONMENT = "preview" }
