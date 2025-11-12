@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "include": [
+    "/*"
+  ],
+  "exclude": [
+    "/api/*",
+    "/_*",
+    "/*.txt",
+    "/*.xml",
+    "/*.json"
+  ]
+}

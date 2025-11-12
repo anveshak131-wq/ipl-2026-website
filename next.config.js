@@ -5,7 +5,8 @@ const nextConfig = {
   images: {
     domains: ['localhost', 'example.com'], // add your domains as needed
   },
-  output: 'export', // ← This is required for static export!
+  // Note: Removed 'output: export' to allow dynamic rendering on Cloudflare Pages
+  // Cloudflare Pages with .next output supports server-side rendering via Functions
 };
 
 module.exports = nextConfig;
