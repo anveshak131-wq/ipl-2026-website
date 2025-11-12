@@ -1,31 +1,4 @@
-# Cloudflare Pages and Workers configuration
+# Cloudflare Pages build configuration
 name = "ipl-2026-website"
-
-# Pages build configuration
 pages_build_command = "npm run build"
 pages_build_output_dir = "out"
-
-# Compatibility settings for Workers
-compatibility_date = "2024-01-01"
-compatibility_flags = ["nodejs_compat"]
-
-# KV namespace bindings for caching
-[[kv_namespaces]]
-binding = "IPL_CACHE"
-id = "5c1beb13cd564dd5892612ac9d2e04c4"
-preview_id = "de6a22c437444d2eba9e63240f6e1f9b"
-
-# Environment configurations
-[env.production]
-vars = { ENVIRONMENT = "production" }
-
-[[env.production.kv_namespaces]]
-binding = "IPL_CACHE"
-id = "5c1beb13cd564dd5892612ac9d2e04c4"
-
-[env.preview]
-vars = { ENVIRONMENT = "preview" }
-
-[[env.preview.kv_namespaces]]
-binding = "IPL_CACHE"
-id = "de6a22c437444d2eba9e63240f6e1f9b"
