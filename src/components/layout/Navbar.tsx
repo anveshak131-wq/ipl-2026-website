@@ -11,6 +11,7 @@ export default function Navbar() {
     { href: '/matches', label: 'Schedule' },
     { href: '/teams', label: 'Teams' },
     { href: '/news', label: 'News' },
+    { href: '/predictions', label: '🤖 Predictions' },
   ];
 
   return (
