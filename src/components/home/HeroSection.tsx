@@ -3,45 +3,45 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import LoadingSpinner from '../ui/LoadingSpinner';
-import IPLLogo from '../ui/IPLLogo';
 
 export default function HeroSection() {
   const router = useRouter();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   const highlights = [
     {
       id: 1,
       title: 'IPL 2026',
-      subtitle: 'The Biggest Cricket Festival',
+      subtitle: 'THE BIGGEST CRICKET FESTIVAL',
       tagline: 'Experience the Thrills. Chase the Glory.',
-      image: '/hero/ipl-2026.jpg',
-      cta: 'Explore Now',
-      gradient: 'from-blue-600 via-purple-500 to-pink-500'
+      stats: { teams: '10', matches: '74', cities: '12' },
+      gradient: 'from-orange-600 via-red-600 to-pink-600',
+      accentColor: '#F97316'
     },
     {
       id: 2,
-      title: 'Elite Players',
-      subtitle: 'World-Class Talent',
-      tagline: 'Watch legends battle on the biggest stage.',
-      image: '/hero/players.jpg',
-      cta: 'View Teams',
-      gradient: 'from-purple-600 via-blue-500 to-cyan-500'
+      title: 'ELITE SQUADS',
+      subtitle: 'WORLD-CLASS TALENT ASSEMBLY',
+      tagline: 'Watch cricket legends battle on the biggest stage.',
+      stats: { players: '200+', nations: '15+', records: '∞' },
+      gradient: 'from-blue-600 via-purple-600 to-indigo-700',
+      accentColor: '#3B82F6'
     },
     {
       id: 3,
-      title: 'Epic Moments',
-      subtitle: 'High-Octane Action',
+      title: 'EPIC MOMENTS',
+      subtitle: 'HIGH-OCTANE CRICKET ACTION',
       tagline: 'Last-ball finishes. Record-breaking performances.',
-      image: '/hero/action.jpg',
-      cta: 'Check Schedule',
-      gradient: 'from-orange-500 via-red-500 to-pink-600'
+      stats: { matches: '74', venues: '12', fans: '500M+' },
+      gradient: 'from-purple-600 via-pink-600 to-red-600',
+      accentColor: '#A855F7'
     }
   ];
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 800);
+    const timer = setTimeout(() => setIsLoading(false), 600);
     return () => clearTimeout(timer);
   }, []);
 
@@ -50,187 +50,220 @@ export default function HeroSection() {
     
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % highlights.length);
-    }, 6000);
+    }, 7000);
 
     return () => clearInterval(interval);
   }, [highlights.length, isLoading]);
 
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
   if (isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-black">
+      <div className="h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-black to-slate-900">
         <LoadingSpinner size="lg" />
       </div>
     );
   }
 
-  return (
-    <div className="relative h-screen overflow-hidden bg-black">
-      {/* Animated Background Gradient */}
-      <div className="absolute inset-0">
-        <div className={`absolute inset-0 bg-gradient-to-br ${highlights[currentSlide].gradient} opacity-20 transition-all duration-1000`} />
-        
-        {/* Grid Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0 bg-[linear-gradient(0deg,transparent_24%,rgba(255,255,255,.05)_25%,rgba(255,255,255,.05)_26%,transparent_27%,transparent_74%,rgba(255,255,255,.05)_75%,rgba(255,255,255,.05)_76%,transparent_77%,transparent),linear-gradient(90deg,transparent_24%,rgba(255,255,255,.05)_25%,rgba(255,255,255,.05)_26%,transparent_27%,transparent_74%,rgba(255,255,255,.05)_75%,rgba(255,255,255,.05)_76%,transparent_77%,transparent)] bg-[length:50px_50px]" />
-        </div>
+  const currentHighlight = highlights[currentSlide];
 
-        {/* Animated Orbs */}
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/30 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}} />
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-black">
+      {/* Dynamic Gradient Background */}
+      <div className="absolute inset-0">
+        <div className={`absolute inset-0 bg-gradient-to-br ${currentHighlight.gradient} opacity-25 transition-all duration-1000 blur-3xl scale-150`} />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.05)_0%,transparent_100%)]" />
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 h-full flex items-center justify-center">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+      {/* Animated Grid Pattern */}
+      <div className="absolute inset-0 opacity-[0.03]">
+        <div className="absolute inset-0 bg-[linear-gradient(0deg,transparent_24%,rgba(255,255,255,0.15)_25%,rgba(255,255,255,0.15)_26%,transparent_27%,transparent_74%,rgba(255,255,255,0.15)_75%,rgba(255,255,255,0.15)_76%,transparent_77%,transparent),linear-gradient(90deg,transparent_24%,rgba(255,255,255,0.15)_25%,rgba(255,255,255,0.15)_26%,transparent_27%,transparent_74%,rgba(255,255,255,0.15)_75%,rgba(255,255,255,0.15)_76%,transparent_77%,transparent)] bg-[length:60px_60px]" />
+      </div>
+
+      {/* Floating Orbs with Mouse Parallax */}
+      <div 
+        className="absolute w-[600px] h-[600px] rounded-full blur-3xl opacity-20 transition-all duration-300 pointer-events-none"
+        style={{
+          background: `radial-gradient(circle, ${currentHighlight.accentColor}80, transparent)`,
+          top: `${20 + (mousePosition.y / window.innerHeight) * 10}%`,
+          left: `${70 + (mousePosition.x / window.innerWidth) * 10}%`,
+          transform: 'translate(-50%, -50%)'
+        }}
+      />
+      <div 
+        className="absolute w-[500px] h-[500px] rounded-full blur-3xl opacity-15 transition-all duration-300 pointer-events-none"
+        style={{
+          background: `radial-gradient(circle, ${currentHighlight.accentColor}60, transparent)`,
+          bottom: `${10 + (mousePosition.y / window.innerHeight) * -10}%`,
+          left: `${20 + (mousePosition.x / window.innerWidth) * -10}%`,
+          transform: 'translate(-50%, 50%)'
+        }}
+      />
+
+      {/* Main Content */}
+      <div className="relative z-10 h-full min-h-screen flex items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            
             {/* Left Content */}
-            <div className="order-2 md:order-1 space-y-8">
-              {/* Badge */}
-              <div className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 w-fit">
-                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                <span className="text-sm text-gray-300">Live Cricket Action</span>
+            <div className="space-y-10 animate-fade-in">
+              {/* Live Badge */}
+              <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-xl px-5 py-3 rounded-full border border-white/20 shadow-xl hover:scale-105 transition-transform duration-300 cursor-default">
+                <span className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                </span>
+                <span className="text-sm font-bold text-white tracking-wider">SEASON 2026 • LIVE</span>
               </div>
 
-              {/* Main Title */}
-              <div>
-                <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 leading-tight">
-                  {highlights[currentSlide].title}
+              {/* Main Headline - Ultra Bold Typography */}
+              <div className="space-y-4">
+                <h1 className="text-7xl md:text-8xl lg:text-9xl font-black text-white leading-none tracking-tighter animate-slide-up"
+                    style={{
+                      textShadow: `0 0 80px ${currentHighlight.accentColor}60, 0 0 40px ${currentHighlight.accentColor}40`,
+                      background: `linear-gradient(135deg, #fff 0%, ${currentHighlight.accentColor} 100%)`,
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text'
+                    }}>
+                  {currentHighlight.title}
                 </h1>
-                <p className="text-xl text-gray-200 mb-2">
-                  {highlights[currentSlide].subtitle}
+                <p className="text-2xl md:text-3xl font-bold text-gray-300 tracking-wider">
+                  {currentHighlight.subtitle}
                 </p>
-                <p className="text-lg text-gray-400">
-                  {highlights[currentSlide].tagline}
+                <p className="text-lg md:text-xl text-gray-400 leading-relaxed max-w-xl">
+                  {currentHighlight.tagline}
                 </p>
               </div>
 
-              {/* Stats */}
+              {/* Stats Grid - Modern Cards */}
               <div className="grid grid-cols-3 gap-4">
-                <div className="bg-white/5 backdrop-blur-sm px-4 py-4 rounded-lg border border-white/10">
-                  <p className="text-2xl font-bold text-ipl-gold">10</p>
-                  <p className="text-sm text-gray-400">Teams</p>
-                </div>
-                <div className="bg-white/5 backdrop-blur-sm px-4 py-4 rounded-lg border border-white/10">
-                  <p className="text-2xl font-bold text-ipl-gold">70+</p>
-                  <p className="text-sm text-gray-400">Matches</p>
-                </div>
-                <div className="bg-white/5 backdrop-blur-sm px-4 py-4 rounded-lg border border-white/10">
-                  <p className="text-2xl font-bold text-ipl-gold">2026</p>
-                  <p className="text-sm text-gray-400">Season</p>
-                </div>
+                {Object.entries(currentHighlight.stats).map(([key, value], index) => (
+                  <div 
+                    key={key}
+                    className="group relative overflow-hidden bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl px-6 py-5 rounded-2xl border border-white/20 hover:border-white/40 hover:scale-110 transition-all duration-300 cursor-default shadow-xl"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300"
+                         style={{ background: `linear-gradient(135deg, ${currentHighlight.accentColor}, transparent)` }} />
+                    <p className="text-3xl md:text-4xl font-black relative z-10" 
+                       style={{ color: currentHighlight.accentColor }}>
+                      {value}
+                    </p>
+                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mt-1 relative z-10">
+                      {key}
+                    </p>
+                  </div>
+                ))}
               </div>
 
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
+              {/* CTA Buttons - Premium Design */}
+              <div className="flex flex-col sm:flex-row gap-4">
                 <button 
                   onClick={() => router.push('/matches')}
-                  className="relative overflow-hidden bg-gradient-to-r from-ipl-blue-dark via-ipl-purple to-ipl-gold text-white font-bold text-lg px-8 py-4 rounded-xl flex items-center justify-center gap-3 hover:shadow-2xl hover:shadow-ipl-gold/50 transition-all duration-300 transform hover:scale-105 cursor-pointer group border border-white/20"
+                  className="group relative overflow-hidden bg-gradient-to-r from-white via-white to-white text-black font-black text-lg px-10 py-5 rounded-2xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer border-2 border-white"
                 >
-                  <span className="relative z-10">{highlights[currentSlide].cta}</span>
-                  <svg className="w-5 h-5 relative z-10 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                  {/* Shine effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                  <span className="relative z-10 flex items-center justify-center gap-3">
+                    EXPLORE MATCHES
+                    <svg className="w-6 h-6 transform group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </span>
                 </button>
+                
                 <button 
                   onClick={() => router.push('/teams')}
-                  className="relative overflow-hidden bg-white/10 backdrop-blur-md text-white font-bold text-lg py-4 px-8 rounded-xl hover:bg-white/20 transition-all duration-300 transform hover:scale-105 border-2 border-white/30 hover:border-white/50 cursor-pointer group"
+                  className="group relative overflow-hidden backdrop-blur-xl bg-white/10 text-white font-black text-lg py-5 px-10 rounded-2xl hover:bg-white/20 transition-all duration-300 transform hover:scale-105 border-2 border-white/30 hover:border-white cursor-pointer"
                 >
-                  <span className="relative z-10">Learn More</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-ipl-blue-light/0 via-ipl-blue-light/20 to-ipl-blue-light/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <span className="relative z-10">VIEW TEAMS</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </button>
               </div>
             </div>
 
-            {/* Right Visual Element */}
-            <div className="order-1 md:order-2 relative h-96 md:h-full flex items-center justify-center">
-              {/* Glow effects */}
-              <div className="absolute inset-0 bg-gradient-to-br from-ipl-blue-light/30 to-ipl-gold/30 rounded-[3rem] blur-3xl animate-pulse" />
-              <div className="absolute inset-0 bg-gradient-to-tl from-ipl-purple/20 to-ipl-blue-dark/20 rounded-[3rem] blur-2xl" />
+            {/* Right Visual - 3D Cricket Stadium Illustration */}
+            <div className="relative h-[500px] lg:h-[600px] flex items-center justify-center animate-fade-in" style={{ animationDelay: '200ms' }}>
+              {/* Glow Effects */}
+              <div className="absolute inset-0 rounded-full blur-3xl opacity-30 animate-pulse"
+                   style={{ background: `radial-gradient(circle, ${currentHighlight.accentColor}, transparent)` }} />
               
-              {/* Main Panel */}
-              <div className="relative group">
-                <div className="w-80 h-80 sm:w-96 sm:h-96 md:w-[28rem] md:h-[28rem] rounded-[2.5rem] border-2 border-white/20 backdrop-blur-md overflow-hidden shadow-2xl relative transition-all duration-500 hover:scale-105 hover:border-white/30">
-                  {/* Animated gradient background */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-ipl-blue-dark/80 via-ipl-purple/60 to-ipl-gold/70 animate-gradient-shift" />
-                  
-                  {/* Shimmer overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent animate-shimmer" 
-                       style={{
-                         backgroundSize: '200% 200%',
-                         animation: 'shimmer 3s linear infinite'
-                       }} />
-                  
-                  {/* Content */}
-                  <div className="relative w-full h-full flex flex-col items-center justify-center p-8">
-                    {/* Logo with float animation */}
-                    <div className="mb-8 animate-float">
-                      <IPLLogo size="xl" animated={true} className="scale-125 sm:scale-150 md:scale-[1.8]" />
-                    </div>
-                    
-                    {/* Text */}
-                    <div className="text-center space-y-2">
-                      <p className="text-white font-black text-3xl md:text-4xl tracking-wider drop-shadow-lg bg-gradient-to-r from-white via-ipl-gold to-white bg-clip-text text-transparent animate-glow">
-                        IPL 2026
-                      </p>
-                      <div className="flex items-center justify-center gap-2 text-ipl-gold/80 text-sm font-semibold">
-                        <div className="w-8 h-0.5 bg-gradient-to-r from-transparent to-ipl-gold" />
-                        <span className="animate-pulse">SEASON 19</span>
-                        <div className="w-8 h-0.5 bg-gradient-to-l from-transparent to-ipl-gold" />
-                      </div>
-                    </div>
-
-                    {/* Decorative corner accents */}
-                    <div className="absolute top-4 left-4 w-12 h-12 border-t-2 border-l-2 border-ipl-gold/50 rounded-tl-xl" />
-                    <div className="absolute top-4 right-4 w-12 h-12 border-t-2 border-r-2 border-ipl-gold/50 rounded-tr-xl" />
-                    <div className="absolute bottom-4 left-4 w-12 h-12 border-b-2 border-l-2 border-ipl-gold/50 rounded-bl-xl" />
-                    <div className="absolute bottom-4 right-4 w-12 h-12 border-b-2 border-r-2 border-ipl-gold/50 rounded-br-xl" />
-                  </div>
+              {/* Central Visual Element */}
+              <div className="relative w-full h-full flex items-center justify-center">
+                {/* Rotating Ring */}
+                <div className="absolute inset-0 animate-spin-slow">
+                  <div className="absolute inset-0 rounded-full border-2 border-dashed border-white/20" />
                 </div>
                 
-                {/* Orbiting elements */}
-                <div className="absolute -top-4 -right-4 w-16 h-16 bg-ipl-gold/20 rounded-full blur-xl animate-ping" />
-                <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-ipl-blue-light/20 rounded-full blur-xl animate-pulse" />
+                {/* Center Badge - IPL Logo Style */}
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-br rounded-full blur-2xl opacity-50 group-hover:opacity-75 transition-opacity duration-500"
+                       style={{ background: `linear-gradient(135deg, ${currentHighlight.accentColor}, transparent)` }} />
+                  <div className="relative w-72 h-72 md:w-96 md:h-96 bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-xl rounded-full border-4 border-white/30 flex items-center justify-center shadow-2xl transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">
+                    <div className="text-center space-y-4">
+                      <div className="text-8xl md:text-9xl font-black"
+                           style={{
+                             background: `linear-gradient(135deg, #fff, ${currentHighlight.accentColor})`,
+                             WebkitBackgroundClip: 'text',
+                             WebkitTextFillColor: 'transparent',
+                             backgroundClip: 'text'
+                           }}>
+                        IPL
+                      </div>
+                      <div className="text-4xl font-black text-white tracking-wider">2026</div>
+                      <div className="h-1 w-24 mx-auto rounded-full"
+                           style={{ background: `linear-gradient(to right, ${currentHighlight.accentColor}, transparent)` }} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Stats Pills */}
+                <div className="absolute top-10 right-10 bg-white/10 backdrop-blur-xl px-6 py-3 rounded-full border border-white/20 shadow-xl animate-float">
+                  <p className="text-sm font-bold text-white">🏆 10 TEAMS</p>
+                </div>
+                <div className="absolute bottom-20 left-10 bg-white/10 backdrop-blur-xl px-6 py-3 rounded-full border border-white/20 shadow-xl animate-float" style={{ animationDelay: '1s' }}>
+                  <p className="text-sm font-bold text-white">🔥 74 MATCHES</p>
+                </div>
+                <div className="absolute top-1/2 -right-5 bg-white/10 backdrop-blur-xl px-6 py-3 rounded-full border border-white/20 shadow-xl animate-float" style={{ animationDelay: '2s' }}>
+                  <p className="text-sm font-bold text-white">⚡ LIVE</p>
+                </div>
               </div>
             </div>
+          </div>
+
+          {/* Slide Navigation Dots */}
+          <div className="flex justify-center gap-3 mt-16">
+            {highlights.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentSlide(index)}
+                className={`transition-all duration-300 rounded-full ${
+                  currentSlide === index 
+                    ? 'w-12 h-3' 
+                    : 'w-3 h-3 hover:scale-150'
+                }`}
+                style={{
+                  background: currentSlide === index 
+                    ? `linear-gradient(to right, ${currentHighlight.accentColor}, ${currentHighlight.accentColor}80)` 
+                    : 'rgba(255, 255, 255, 0.3)',
+                  boxShadow: currentSlide === index 
+                    ? `0 0 20px ${currentHighlight.accentColor}80` 
+                    : 'none'
+                }}
+              />
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Slide Indicators */}
-      <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 z-20">
-        <div className="flex space-x-3">
-          {highlights.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentSlide(index)}
-              className={`transition-all duration-300 rounded-full ${
-                index === currentSlide
-                  ? 'bg-ipl-gold w-8 h-2'
-                  : 'bg-white/30 hover:bg-white/50 w-2 h-2'
-              }`}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 animate-bounce-slow">
-        <svg
-          className="w-6 h-6 text-white/40"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 14l-7 7m0 0l-7-7m7 7V3"
-          />
-        </svg>
-      </div>
+      {/* Bottom Gradient Fade */}
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent pointer-events-none" />
     </div>
   );
 }

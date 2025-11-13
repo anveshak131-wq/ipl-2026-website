@@ -49,6 +49,30 @@ const IconX = ({ className }: { className?: string }) => (
     </svg>
 );
 
+// Official IPL Venues
+const IPL_VENUES = [
+    'Wankhede Stadium, Mumbai',
+    'M. A. Chidambaram Stadium, Chennai',
+    'M. Chinnaswamy Stadium, Bengaluru',
+    'Eden Gardens, Kolkata',
+    'Arun Jaitley Stadium, Delhi',
+    'Sawai Mansingh Stadium, Jaipur',
+    'Narendra Modi Stadium, Ahmedabad',
+    'Rajiv Gandhi International Stadium, Hyderabad',
+    'Punjab Cricket Association Stadium, Mohali',
+    'Himachal Pradesh Cricket Association Stadium, Dharamsala',
+    'Dr. Y.S. Rajasekhara Reddy ACA-VDCA Cricket Stadium, Visakhapatnam',
+    'Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium, Lucknow',
+    'Maharashtra Cricket Association Stadium, Pune',
+    'Maharaja Yadavindra Singh International Cricket Stadium, Mullanpur',
+    'Barsapara Cricket Stadium, Guwahati',
+    'Holkar Cricket Stadium, Indore',
+    'JSCA International Stadium Complex, Ranchi',
+    'Green Park, Kanpur',
+    'Barabati Stadium, Cuttack',
+    'ACA Stadium, Barsapara'
+];
+
 export default function AdminMatches() {
     const router = useRouter();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -64,6 +88,8 @@ export default function AdminMatches() {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [formStep, setFormStep] = useState(1);
+    const [isVenueDropdownOpen, setIsVenueDropdownOpen] = useState(false);
+    const [venueSearchQuery, setVenueSearchQuery] = useState('');
 
     const [filters, setFilters] = useState({
         status: 'all',
@@ -368,6 +394,115 @@ export default function AdminMatches() {
                         </div>
                     </div>
 
+                    {/* Venue Filter Dropdown */}
+                    <div className="mb-6 relative max-w-xs">
+                        <button
+                            onClick={() => setIsVenueDropdownOpen(!isVenueDropdownOpen)}
+                            className="glass-effect px-6 py-3 rounded-lg text-white font-medium flex items-center space-x-3 w-full hover:bg-white/10 transition-all duration-300 group"
+                        >
+                            <svg 
+                                className="w-5 h-5 text-ipl-gold" 
+                                fill="none" 
+                                stroke="currentColor" 
+                                viewBox="0 0 24 24"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span className="flex-1 text-left truncate">
+                                {filters.venue === 'all' ? 'All Venues' : filters.venue}
+                            </span>
+                            <svg 
+                                className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${isVenueDropdownOpen ? 'rotate-180' : ''}`}
+                                fill="none" 
+                                stroke="currentColor" 
+                                viewBox="0 0 24 24"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+
+                        {/* Dropdown Menu */}
+                        <div 
+                            className={`absolute left-0 right-0 mt-2 glass-effect rounded-lg shadow-xl overflow-hidden transition-all duration-300 ease-out origin-top z-20 ${
+                                isVenueDropdownOpen 
+                                    ? 'opacity-100 scale-y-100 max-h-[450px]' 
+                                    : 'opacity-0 scale-y-0 max-h-0 pointer-events-none'
+                            }`}
+                        >
+                            <div className="py-2 max-h-[430px] overflow-y-auto scrollbar-thin scrollbar-thumb-ipl-gold/50 scrollbar-track-white/5">
+                                {/* All Venues Option */}
+                                <button
+                                    onClick={() => {
+                                        setFilters({ ...filters, venue: 'all' });
+                                        setIsVenueDropdownOpen(false);
+                                    }}
+                                    className={`w-full px-6 py-3 text-left hover:bg-white/10 transition-colors duration-200 flex items-center space-x-3 ${
+                                        filters.venue === 'all' ? 'bg-ipl-gold/20 text-ipl-gold' : 'text-white'
+                                    }`}
+                                >
+                                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-ipl-gold to-ipl-purple">
+                                        <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="font-semibold">All Venues</div>
+                                        <div className="text-xs text-gray-400">{matches.length} matches</div>
+                                    </div>
+                                    {filters.venue === 'all' && (
+                                        <svg className="w-5 h-5 text-ipl-gold" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                        </svg>
+                                    )}
+                                </button>
+
+                                {/* Venue Options */}
+                                <div className="border-t border-white/10 mt-2 pt-2">
+                                    {venues.map((venue) => {
+                                        const venueMatchesCount = matches.filter(m => m.venue === venue).length;
+                                        // Extract city from venue string (usually after the comma)
+                                        const venueParts = venue.split(',');
+                                        const stadiumName = venueParts[0].trim();
+                                        const city = venueParts[1]?.trim() || '';
+                                        
+                                        return (
+                                            <button
+                                                key={venue}
+                                                onClick={() => {
+                                                    setFilters({ ...filters, venue: venue });
+                                                    setIsVenueDropdownOpen(false);
+                                                }}
+                                                className={`w-full px-6 py-3 text-left hover:bg-white/10 transition-all duration-200 flex items-center space-x-3 group ${
+                                                    filters.venue === venue ? 'bg-ipl-gold/20 text-ipl-gold' : 'text-white'
+                                                }`}
+                                            >
+                                                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-ipl-purple/30 text-white shadow-lg">
+                                                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                                                    </svg>
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="font-semibold truncate">{stadiumName}</div>
+                                                    <div className="text-xs text-gray-400 flex items-center gap-2">
+                                                        {city && <span>📍 {city}</span>}
+                                                        <span>•</span>
+                                                        <span>{venueMatchesCount} match{venueMatchesCount !== 1 ? 'es' : ''}</span>
+                                                    </div>
+                                                </div>
+                                                {filters.venue === venue && (
+                                                    <svg className="w-5 h-5 text-ipl-gold flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                    </svg>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     {showFilters && (
                         <div className="glass-effect rounded-xl p-6 mb-6 border border-white/10">
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
@@ -578,21 +713,80 @@ export default function AdminMatches() {
                                 )}
 
                                 {formStep === 3 && (
-                                    <div className="space-y-6">
-                                        <div>
-                                            <h3 className="text-lg font-semibold text-white mb-4">Venue & Status</h3>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                                <div className="md:col-span-2">
-                                                    <label className="block text-sm font-medium text-gray-300 mb-2">Venue</label>
-                                                    <input
-                                                        type="text"
-                                                        value={formData.venue}
-                                                        onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
-                                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ipl-gold transition-colors"
-                                                        placeholder="e.g., M. A. Chidambaram Stadium, Chennai"
-                                                        required
-                                                    />
-                                                </div>
+                                   <div className="space-y-6">
+                                       <div>
+                                           <h3 className="text-lg font-semibold text-white mb-4">Venue & Status</h3>
+                                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                               <div className="md:col-span-2 relative">
+                                                   <label className="block text-sm font-medium text-gray-300 mb-2">Venue</label>
+                                                   <div className="relative">
+                                                       <input
+                                                           type="text"
+                                                           value={formData.venue}
+                                                           onChange={(e) => {
+                                                               setFormData({ ...formData, venue: e.target.value });
+                                                               setVenueSearchQuery(e.target.value);
+                                                           }}
+                                                           onFocus={() => setVenueSearchQuery(formData.venue)}
+                                                           className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 pr-10 text-white focus:outline-none focus:border-ipl-gold transition-colors"
+                                                           placeholder="Search or select venue..."
+                                                           required
+                                                       />
+                                                       <svg 
+                                                           className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+                                                           fill="none" 
+                                                           stroke="currentColor" 
+                                                           viewBox="0 0 24 24"
+                                                       >
+                                                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                                       </svg>
+                                                   </div>
+                                                   
+                                                   {/* Venue Suggestions Dropdown */}
+                                                   {venueSearchQuery && (
+                                                       <div className="absolute z-20 w-full mt-2 glass-effect rounded-lg shadow-xl border border-white/10 max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-ipl-gold/50 scrollbar-track-white/5">
+                                                           {IPL_VENUES
+                                                               .filter(venue => 
+                                                                   venue.toLowerCase().includes(venueSearchQuery.toLowerCase())
+                                                               )
+                                                               .map((venue, index) => {
+                                                                   const [stadiumName, city] = venue.split(',').map(s => s.trim());
+                                                                   return (
+                                                                       <button
+                                                                           key={index}
+                                                                           type="button"
+                                                                           onClick={() => {
+                                                                               setFormData({ ...formData, venue });
+                                                                               setVenueSearchQuery('');
+                                                                           }}
+                                                                           className="w-full px-4 py-3 text-left hover:bg-white/10 transition-colors flex items-center space-x-3 border-b border-white/5 last:border-0"
+                                                                       >
+                                                                           <div className="flex items-center justify-center w-10 h-10 rounded-full bg-ipl-purple/30 flex-shrink-0">
+                                                                               <svg className="w-5 h-5 text-ipl-gold" fill="currentColor" viewBox="0 0 20 20">
+                                                                                   <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                                                                               </svg>
+                                                                           </div>
+                                                                           <div className="flex-1 min-w-0">
+                                                                               <div className="text-white font-medium truncate">{stadiumName}</div>
+                                                                               <div className="text-xs text-gray-400">📍 {city}</div>
+                                                                           </div>
+                                                                       </button>
+                                                                   );
+                                                               })}
+                                                           {IPL_VENUES.filter(venue => 
+                                                               venue.toLowerCase().includes(venueSearchQuery.toLowerCase())
+                                                           ).length === 0 && (
+                                                               <div className="px-4 py-8 text-center text-gray-400">
+                                                                   <svg className="w-12 h-12 mx-auto mb-2 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                   </svg>
+                                                                   <p>No venues found</p>
+                                                                   <p className="text-xs mt-1">Type to search or enter custom venue</p>
+                                                               </div>
+                                                           )}
+                                                       </div>
+                                                   )}
+                                               </div>
 
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
