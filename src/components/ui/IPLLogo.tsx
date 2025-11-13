@@ -57,20 +57,26 @@ export default function IPLLogo({ size = 'md', className = '', animated = false 
           opacity="0.3"
         />
 
-        {/* IPL Text - Large and Bold */}
-        <text
-          x="60"
-          y="58"
-          fontSize="36"
-          fontWeight="900"
-          textAnchor="middle"
-          fill="url(#ipl-text-gradient)"
-          fontFamily="Arial Black, sans-serif"
-          letterSpacing="2"
-          className="drop-shadow-lg"
-        >
-          IPL
-        </text>
+        {/* IPL Text - Custom SVG Letters (No Copyright) */}
+        <g transform="translate(60, 60)">
+          {/* Letter I */}
+          <path d="M -28 -18 L -28 -10 L -22 -10 L -22 10 L -28 10 L -28 18 L -12 18 L -12 10 L -18 10 L -18 -10 L -12 -10 L -12 -18 Z" 
+                fill="url(#ipl-text-gradient)" 
+                stroke="url(#ipl-text-gradient)" 
+                strokeWidth="0.5" />
+          
+          {/* Letter P */}
+          <path d="M -6 -18 L -6 18 L 2 18 L 2 2 L 8 2 Q 14 2 16 -2 Q 18 -6 18 -10 Q 18 -14 16 -16 Q 14 -18 8 -18 Z M 2 -10 L 2 -10 L 8 -10 Q 10 -10 10 -8 Q 10 -6 8 -6 L 2 -6 Z" 
+                fill="url(#ipl-text-gradient)" 
+                stroke="url(#ipl-text-gradient)" 
+                strokeWidth="0.5" />
+          
+          {/* Letter L */}
+          <path d="M 22 -18 L 22 10 L 22 10 L 22 18 L 38 18 L 38 10 L 30 10 L 30 -18 Z" 
+                fill="url(#ipl-text-gradient)" 
+                stroke="url(#ipl-text-gradient)" 
+                strokeWidth="0.5" />
+        </g>
 
         {/* Cricket Ball - Top Right */}
         <g transform="translate(82, 30)">
