@@ -24,6 +24,7 @@ export default function AdminPlayers() {
     age: string;
     nationality: string;
     photo: string;
+    jerseyNumber: string;
     bio: string;
     stats: {
       matches: string;
@@ -32,6 +33,12 @@ export default function AdminPlayers() {
       average: string;
       strikeRate: string;
       economy: string;
+      highest: string;
+      fours: string;
+      sixes: string;
+      fifties: string;
+      hundreds: string;
+      bestBowling: string;
     };
   }>({
     name: '',
@@ -40,6 +47,7 @@ export default function AdminPlayers() {
     age: '',
     nationality: '',
     photo: '',
+    jerseyNumber: '',
     bio: '',
     stats: {
       matches: '',
@@ -47,7 +55,13 @@ export default function AdminPlayers() {
       wickets: '',
       average: '',
       strikeRate: '',
-      economy: ''
+      economy: '',
+      highest: '',
+      fours: '',
+      sixes: '',
+      fifties: '',
+      hundreds: '',
+      bestBowling: ''
     }
   });
 
@@ -83,6 +97,7 @@ export default function AdminPlayers() {
       age: '',
       nationality: '',
       photo: '',
+      jerseyNumber: '',
       bio: '',
       stats: {
         matches: '',
@@ -90,7 +105,13 @@ export default function AdminPlayers() {
         wickets: '',
         average: '',
         strikeRate: '',
-        economy: ''
+        economy: '',
+        highest: '',
+        fours: '',
+        sixes: '',
+        fifties: '',
+        hundreds: '',
+        bestBowling: ''
       }
     });
     setShowForm(true);
@@ -105,6 +126,7 @@ export default function AdminPlayers() {
       age: player.age.toString(),
       nationality: player.nationality,
       photo: player.photo,
+      jerseyNumber: player.jerseyNumber.toString(),
       bio: player.bio,
       stats: {
         matches: player.stats.matches.toString(),
@@ -112,7 +134,13 @@ export default function AdminPlayers() {
         wickets: player.stats.wickets.toString(),
         average: player.stats.average.toString(),
         strikeRate: player.stats.strikeRate.toString(),
-        economy: player.stats.economy.toString()
+        economy: player.stats.economy.toString(),
+        highest: player.stats.highest.toString(),
+        fours: player.stats.fours.toString(),
+        sixes: player.stats.sixes.toString(),
+        fifties: player.stats.fifties.toString(),
+        hundreds: player.stats.hundreds.toString(),
+        bestBowling: player.stats.bestBowling
       }
     });
     setShowForm(true);
@@ -176,6 +204,9 @@ export default function AdminPlayers() {
                       Name
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      Jersey
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                       Role
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
@@ -185,10 +216,25 @@ export default function AdminPlayers() {
                       Age
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      Nationality
+                      Runs
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      Matches
+                      Wickets
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      Avg
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      SR
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      4s/6s
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      50s/100s
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      BBM
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                       Actions
@@ -204,6 +250,11 @@ export default function AdminPlayers() {
                           {player.name}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                          <span className="inline-flex items-center justify-center w-8 h-8 bg-ipl-gold/20 text-ipl-gold rounded-full font-bold text-xs">
+                            {player.jerseyNumber || '-'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-ipl-purple/20 text-ipl-purple border border-ipl-purple/30">
                             {player.role}
                           </span>
@@ -214,11 +265,26 @@ export default function AdminPlayers() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                           {player.age}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                          {player.nationality}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
+                          {player.stats.runs}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                          {player.stats.matches}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
+                          {player.stats.wickets}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
+                          {player.stats.average}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
+                          {player.stats.strikeRate}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
+                          {player.stats.fours}/{player.stats.sixes}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
+                          {player.stats.fifties}/{player.stats.hundreds}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
+                          {player.stats.bestBowling || '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                           <div className="flex space-x-2">
@@ -343,6 +409,20 @@ export default function AdminPlayers() {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Jersey Number
+                        </label>
+                        <input
+                          type="number"
+                          value={formData.jerseyNumber}
+                          onChange={(e) => setFormData({...formData, jerseyNumber: e.target.value})}
+                          className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                          placeholder="Enter jersey number"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
                           Photo URL
                         </label>
                         <input
@@ -446,6 +526,78 @@ export default function AdminPlayers() {
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, economy: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
                             placeholder="0.00"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Highest Score
+                          </label>
+                          <input
+                            type="number"
+                            value={formData.stats.highest}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, highest: e.target.value}})}
+                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                            placeholder="0"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Fours
+                          </label>
+                          <input
+                            type="number"
+                            value={formData.stats.fours}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, fours: e.target.value}})}
+                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                            placeholder="0"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Sixes
+                          </label>
+                          <input
+                            type="number"
+                            value={formData.stats.sixes}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, sixes: e.target.value}})}
+                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                            placeholder="0"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Fifties (50s)
+                          </label>
+                          <input
+                            type="number"
+                            value={formData.stats.fifties}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, fifties: e.target.value}})}
+                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                            placeholder="0"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Hundreds (100s)
+                          </label>
+                          <input
+                            type="number"
+                            value={formData.stats.hundreds}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, hundreds: e.target.value}})}
+                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                            placeholder="0"
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Best Bowling (BBM)
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.stats.bestBowling}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, bestBowling: e.target.value}})}
+                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                            placeholder="e.g., 4/21 or 3/45"
                           />
                         </div>
                       </div>

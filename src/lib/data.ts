@@ -105,13 +105,20 @@ export const mockPlayers: Player[] = [
     age: 35,
     nationality: 'India',
     photo: '/players/virat.png',
+    jerseyNumber: 18,
     stats: {
       matches: 237,
       runs: 7263,
       wickets: 0,
       average: 37.24,
       strikeRate: 130.02,
-      economy: 0
+      economy: 0,
+      highest: 113,
+      fours: 629,
+      sixes: 237,
+      fifties: 50,
+      hundreds: 7,
+      bestBowling: '-'
     },
     bio: 'One of the greatest batsmen in modern cricket, known for his consistency and aggressive style of play.'
   },
@@ -123,13 +130,20 @@ export const mockPlayers: Player[] = [
     age: 36,
     nationality: 'India',
     photo: '/players/rohit.png',
+    jerseyNumber: 45,
     stats: {
       matches: 243,
       runs: 6230,
       wickets: 0,
       average: 30.31,
       strikeRate: 130.39,
-      economy: 0
+      economy: 0,
+      highest: 109,
+      fours: 532,
+      sixes: 264,
+      fifties: 42,
+      hundreds: 2,
+      bestBowling: '-'
     },
     bio: 'The most successful captain in IPL history with 5 titles. Known for his elegant batting and tactical acumen.'
   },
@@ -141,13 +155,20 @@ export const mockPlayers: Player[] = [
     age: 30,
     nationality: 'India',
     photo: '/players/bumrah.png',
+    jerseyNumber: 93,
     stats: {
       matches: 145,
-      runs: 0,
+      runs: 56,
       wickets: 170,
       average: 23.95,
-      strikeRate: 0,
-      economy: 7.39
+      strikeRate: 87.45,
+      economy: 7.39,
+      highest: 14,
+      fours: 3,
+      sixes: 1,
+      fifties: 0,
+      hundreds: 0,
+      bestBowling: '5/10'
     },
     bio: 'One of the best fast bowlers in world cricket, known for his unorthodox action and yorkers.'
   }

@@ -21,6 +21,7 @@ export interface Player {
   age: number;
   nationality: string;
   photo: string;
+  jerseyNumber: number;
   stats: {
     matches: number;
     runs: number;
@@ -28,6 +29,12 @@ export interface Player {
     average: number;
     strikeRate: number;
     economy: number;
+    highest: number;
+    fours: number;
+    sixes: number;
+    fifties: number;
+    hundreds: number;
+    bestBowling: string; // Format: "wickets/runs" e.g., "4/21", "3/45"
   };
   bio: string;
 }
