@@ -12,7 +12,9 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
   const router = useRouter();
 
   const handleViewFullSquad = () => {
-    router.push(`/teams/${team.id}`);
+    // Ensure team ID has 'team' prefix for the route
+    const teamRoute = team.id.startsWith('team') ? team.id : `team${team.id}`;
+    router.push(`/teams/${teamRoute}`);
   };
 
   return (

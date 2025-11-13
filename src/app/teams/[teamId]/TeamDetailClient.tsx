@@ -24,11 +24,15 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
   useEffect(() => {
     const fetchTeamData = async () => {
       try {
+        // Convert teamId: 'team1' -> '1', 'team2' -> '2', or keep as is if numeric
+        const numericId = teamId.replace('team', '');
+        
         // Fetch all teams
         const teamsResponse = await fetch('/api/teams');
         if (teamsResponse.ok) {
           const allTeams = await teamsResponse.json();
-          const team = allTeams.find((t: Team) => t.id === teamId);
+          // Try to find team by numeric ID or original teamId
+          const team = allTeams.find((t: Team) => t.id === numericId || t.id === teamId);
           
           if (team) {
             // Fetch players
