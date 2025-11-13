@@ -42,16 +42,15 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group relative">
-            <div className="w-10 h-10 flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-              <IPLLogo size="md" />
+            <div className="flex items-center justify-center transform group-hover:scale-110 transition-all duration-300">
+              <IPLLogo size="md" animated={false} />
             </div>
-            <div className="flex flex-col">
-              <span className="text-white font-black text-lg leading-none group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-ipl-blue-light group-hover:to-ipl-purple transition-all duration-300">
+            <div className="flex flex-col -ml-1">
+              <span className="text-white font-black text-2xl leading-none tracking-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-ipl-blue-light group-hover:via-ipl-gold group-hover:to-ipl-blue-light transition-all duration-300">
                 IPL
               </span>
-              <span className="text-ipl-gold text-xs font-bold">2026</span>
+              <span className="text-ipl-gold text-sm font-bold tracking-widest">2026</span>
             </div>
-            <div className="absolute -inset-2 bg-gradient-to-r from-ipl-blue-light/20 to-ipl-purple/20 rounded-lg opacity-0 group-hover:opacity-100 blur-xl transition-opacity duration-300 -z-10" />
           </Link>
 
           {/* Desktop Navigation */}
