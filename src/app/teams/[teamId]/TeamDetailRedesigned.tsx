@@ -734,6 +734,8 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
           setIsModalOpen(false);
           setSelectedPlayer(null);
         }}
+        teamColors={teamData?.colors}
+        teamData={teamData || undefined}
       />
 
       <style jsx global>{`

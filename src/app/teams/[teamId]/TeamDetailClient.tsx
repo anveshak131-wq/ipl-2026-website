@@ -461,6 +461,8 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
           setIsModalOpen(false);
           setSelectedPlayer(null);
         }}
+        teamColors={teamData?.colors}
+        teamData={teamData || undefined}
       />
     </div>
   );

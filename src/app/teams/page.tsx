@@ -155,6 +155,8 @@ export default function TeamsPage() {
         player={selectedPlayer}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
+        teamColors={selectedPlayer ? teams.find(t => t.id === selectedPlayer.teamId)?.colors : undefined}
+        teamData={selectedPlayer ? teams.find(t => t.id === selectedPlayer.teamId) : undefined}
       />
     </div>
   );
