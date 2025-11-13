@@ -1,0 +1,23 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- GT Logo -->
+  <defs>
+    <linearGradient id="gtGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1B4F72;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0E4B50;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <circle cx="100" cy="100" r="85" fill="url(#gtGradient)"/>
+  
+  <!-- Giant Symbol -->
+  <rect x="70" y="80" width="60" height="80" rx="15" fill="#00D8FF"/>
+  <circle cx="85" cy="105" r="6" fill="#1B4F72"/>
+  <circle cx="115" cy="105" r="6" fill="#1B4F72"/>
+  <ellipse cx="100" cy="120" rx="10" ry="6" fill="#1B4F72"/>
+  <polygon points="100,130 95,145 105,145" fill="#1B4F72"/>
+  
+  <!-- Text -->
+  <text x="100" y="185" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#fff">GT</text>
+</svg>
+

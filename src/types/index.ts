@@ -20,8 +20,10 @@ export interface Player {
   teamId: string;
   age: number;
   nationality: string;
-  photo: string;
   jerseyNumber: number;
+  isCaptain: boolean;
+  bowlingStyle: string;
+  battingStyle: string;
   stats: {
     matches: number;
     runs: number;
@@ -36,7 +38,6 @@ export interface Player {
     hundreds: number;
     bestBowling: string; // Format: "wickets/runs" e.g., "4/21", "3/45"
   };
-  bio: string;
 }
 
 export interface Match {

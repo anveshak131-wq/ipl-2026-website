@@ -81,8 +81,10 @@ export async function onRequestPost(context) {
       teamId: newPlayer.teamId,
       age: parseInt(newPlayer.age) || 0,
       nationality: newPlayer.nationality || '',
-      photo: newPlayer.photo || '',
       jerseyNumber: parseInt(newPlayer.jerseyNumber) || 0,
+      isCaptain: newPlayer.isCaptain || false,
+      bowlingStyle: newPlayer.bowlingStyle || 'N/A (Batsman)',
+      battingStyle: newPlayer.battingStyle || 'Right-handed bat',
       stats: {
         matches: parseInt(newPlayer.stats?.matches) || 0,
         runs: parseInt(newPlayer.stats?.runs) || 0,
@@ -97,7 +99,6 @@ export async function onRequestPost(context) {
         hundreds: parseInt(newPlayer.stats?.hundreds) || 0,
         bestBowling: newPlayer.stats?.bestBowling || '-',
       },
-      bio: newPlayer.bio || '',
     };
 
     // Add to array
@@ -175,8 +176,10 @@ export async function onRequestPut(context) {
       teamId: updatedPlayer.teamId,
       age: parseInt(updatedPlayer.age) || 0,
       nationality: updatedPlayer.nationality || '',
-      photo: updatedPlayer.photo || '',
       jerseyNumber: parseInt(updatedPlayer.jerseyNumber) || 0,
+      isCaptain: updatedPlayer.isCaptain || false,
+      bowlingStyle: updatedPlayer.bowlingStyle || 'N/A (Batsman)',
+      battingStyle: updatedPlayer.battingStyle || 'Right-handed bat',
       stats: {
         matches: parseInt(updatedPlayer.stats?.matches) || 0,
         runs: parseInt(updatedPlayer.stats?.runs) || 0,
@@ -191,7 +194,6 @@ export async function onRequestPut(context) {
         hundreds: parseInt(updatedPlayer.stats?.hundreds) || 0,
         bestBowling: updatedPlayer.stats?.bestBowling || '-',
       },
-      bio: updatedPlayer.bio || '',
     };
 
     // Save to KV

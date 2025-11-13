@@ -6,6 +6,48 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
 
+// Cricket-playing countries
+const CRICKET_COUNTRIES = [
+  'India', 'Australia', 'England', 'South Africa', 'New Zealand', 'Pakistan', 
+  'Sri Lanka', 'West Indies', 'Bangladesh', 'Afghanistan', 'Ireland', 
+  'Netherlands', 'Scotland', 'Zimbabwe', 'Nepal', 'Oman', 'UAE', 'USA',
+  'Canada', 'Kenya', 'Namibia', 'Papua New Guinea', 'Hong Kong'
+];
+
+// Bowling styles
+const BOWLING_STYLES = [
+  'Right-arm fast',
+  'Right-arm fast-medium', 
+  'Right-arm medium-fast',
+  'Right-arm medium',
+  'Right-arm off-break',
+  'Right-arm leg-break',
+  'Left-arm fast',
+  'Left-arm fast-medium',
+  'Left-arm medium-fast', 
+  'Left-arm medium',
+  'Left-arm orthodox',
+  'Left-arm unorthodox',
+  'Right-arm wrist spin',
+  'Right-arm finger spin',
+  'N/A (Batsman)'
+];
+
+// Batting styles
+const BATTING_STYLES = [
+  'Right-handed bat',
+  'Left-handed bat',
+  'Right-hand bat',
+  'Left-hand bat',
+  'Opening batsman',
+  'Top-order batsman',
+  'Middle-order batsman',
+  'Lower-order batsman',
+  'Finisher',
+  'Pinch hitter',
+  'All-rounder'
+];
+
 // Mark this page as dynamic to prevent pre-rendering
 // Note: Removed for static export compatibility
 
@@ -23,9 +65,10 @@ export default function AdminPlayers() {
     teamId: string;
     age: string;
     nationality: string;
-    photo: string;
     jerseyNumber: string;
-    bio: string;
+    isCaptain: boolean;
+    bowlingStyle: string;
+    battingStyle: string;
     stats: {
       matches: string;
       runs: string;
@@ -46,9 +89,10 @@ export default function AdminPlayers() {
     teamId: '',
     age: '',
     nationality: '',
-    photo: '',
     jerseyNumber: '',
-    bio: '',
+    isCaptain: false,
+    bowlingStyle: 'N/A (Batsman)',
+    battingStyle: 'Right-handed bat',
     stats: {
       matches: '',
       runs: '',
@@ -96,9 +140,10 @@ export default function AdminPlayers() {
       teamId: '',
       age: '',
       nationality: '',
-      photo: '',
       jerseyNumber: '',
-      bio: '',
+      isCaptain: false,
+      bowlingStyle: 'N/A (Batsman)',
+      battingStyle: 'Right-handed bat',
       stats: {
         matches: '',
         runs: '',
@@ -125,9 +170,10 @@ export default function AdminPlayers() {
       teamId: player.teamId,
       age: player.age.toString(),
       nationality: player.nationality,
-      photo: player.photo,
       jerseyNumber: player.jerseyNumber.toString(),
-      bio: player.bio,
+      isCaptain: player.isCaptain || false,
+      bowlingStyle: player.bowlingStyle || 'N/A (Batsman)',
+      battingStyle: player.battingStyle || 'Right-handed bat',
       stats: {
         matches: player.stats.matches.toString(),
         runs: player.stats.runs.toString(),
@@ -154,6 +200,9 @@ export default function AdminPlayers() {
         ...formData,
         age: parseInt(formData.age),
         jerseyNumber: parseInt(formData.jerseyNumber),
+        isCaptain: formData.isCaptain,
+        bowlingStyle: formData.bowlingStyle,
+        battingStyle: formData.battingStyle,
         stats: {
           matches: parseInt(formData.stats.matches) || 0,
           runs: parseInt(formData.stats.runs) || 0,
@@ -312,8 +361,29 @@ export default function AdminPlayers() {
                     const team = teams.find(t => t.id === player.teamId);
                     return (
                       <tr key={player.id} className="hover:bg-white/5">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
-                          {player.name}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-white font-medium">
+                              {player.name}
+                            </span>
+                            <div className="flex space-x-1">
+                              {player.isCaptain && (
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
+                                  ⭐ C
+                                </span>
+                              )}
+                              {player.nationality !== 'India' && (
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                                  🌍 Foreign
+                                </span>
+                              )}
+                              {player.role === 'Wicket-keeper' && (
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/30">
+                                  🧤 WK
+                                </span>
+                              )}
+                            </div>
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                           <span className="inline-flex items-center justify-center w-8 h-8 bg-ipl-gold/20 text-ipl-gold rounded-full font-bold text-xs">
@@ -463,14 +533,19 @@ export default function AdminPlayers() {
                         <label className="block text-sm font-medium text-gray-300 mb-2">
                           Nationality
                         </label>
-                        <input
-                          type="text"
+                        <select
                           value={formData.nationality}
                           onChange={(e) => setFormData({...formData, nationality: e.target.value})}
-                          className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                          placeholder="Enter nationality"
+                          className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-ipl-gold"
                           required
-                        />
+                        >
+                          <option value="">Select nationality</option>
+                          {CRICKET_COUNTRIES.map(country => (
+                            <option key={country} value={country}>
+                              {country}
+                            </option>
+                          ))}
+                        </select>
                       </div>
 
                       <div>
@@ -489,31 +564,52 @@ export default function AdminPlayers() {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Photo URL
+                          Bowling Style
                         </label>
-                        <input
-                          type="text"
-                          value={formData.photo}
-                          onChange={(e) => setFormData({...formData, photo: e.target.value})}
-                          className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                          placeholder="Enter photo URL"
-                        />
+                        <select
+                          value={formData.bowlingStyle}
+                          onChange={(e) => setFormData({...formData, bowlingStyle: e.target.value})}
+                          className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-ipl-gold"
+                        >
+                          {BOWLING_STYLES.map(style => (
+                            <option key={style} value={style}>
+                              {style}
+                            </option>
+                          ))}
+                        </select>
                       </div>
-                    </div>
 
-                    {/* Bio */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Bio
-                      </label>
-                      <textarea
-                        value={formData.bio}
-                        onChange={(e) => setFormData({...formData, bio: e.target.value})}
-                        className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                        placeholder="Enter player bio"
-                        rows={3}
-                      />
-                    </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Batting Style
+                        </label>
+                        <select
+                          value={formData.battingStyle}
+                          onChange={(e) => setFormData({...formData, battingStyle: e.target.value})}
+                          className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-ipl-gold"
+                        >
+                          {BATTING_STYLES.map(style => (
+                            <option key={style} value={style}>
+                              {style}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="isCaptain"
+                          checked={formData.isCaptain}
+                          onChange={(e) => setFormData({...formData, isCaptain: e.target.checked})}
+                          className="w-4 h-4 bg-white/10 border border-white/20 rounded text-ipl-gold focus:outline-none focus:border-ipl-gold"
+                        />
+                        <label htmlFor="isCaptain" className="ml-2 text-sm font-medium text-gray-300">
+                          Is Captain
+                        </label>
+                      </div>
+
+                      </div>
 
                     {/* Stats */}
                     <div>

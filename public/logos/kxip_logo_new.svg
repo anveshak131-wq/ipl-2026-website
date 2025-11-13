@@ -1,0 +1,23 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- KXIP/PK Logo -->
+  <defs>
+    <linearGradient id="kxipGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ED1C24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#990000;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <circle cx="100" cy="100" r="85" fill="url(#kxipGradient)"/>
+  
+  <!-- Lions Symbol -->
+  <circle cx="70" cy="100" r="20" fill="#FFD700"/>
+  <circle cx="70" cy="100" r="10" fill="#000"/>
+  <circle cx="130" cy="100" r="20" fill="#FFD700"/>
+  <circle cx="130" cy="100" r="10" fill="#000"/>
+  <ellipse cx="100" cy="125" rx="30" ry="15" fill="#FFD700"/>
+  
+  <!-- Text -->
+  <text x="100" y="170" font-family="Arial, sans-serif" font-size="22" font-weight="bold" text-anchor="middle" fill="#fff">PUNJAB KINGS</text>
+</svg>
+

@@ -1,0 +1,20 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- RCB Logo -->
+  <defs>
+    <linearGradient id="rcbGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF0000;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#990000;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#660000;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="200" height="200" rx="40" fill="url(#rcbGradient)"/>
+  
+  <!-- Crown Symbol -->
+  <path d="M 60 140 L 40 100 L 60 100 L 70 80 L 80 100 L 100 100 L 120 80 L 130 100 L 150 100 L 140 140 Z" fill="#FFD700" stroke="#fff" stroke-width="3"/>
+  
+  <!-- Text -->
+  <text x="100" y="170" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#fff">RCB</text>
+</svg>
+

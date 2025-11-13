@@ -8,7 +8,7 @@ export const mockTeams: Team[] = [
     id: '1',
     name: 'Royal Challengers Bengaluru',
     shortName: 'RCB',
-    logo: '/teams/rcb.png',
+    logo: '/logos/rcb_logo_new.svg',
     description: 'One of the most popular IPL teams known for their aggressive batting',
     colors: { primary: '#EC1C24', secondary: '#000000' },
     players: []
@@ -17,7 +17,7 @@ export const mockTeams: Team[] = [
     id: '2',
     name: 'Mumbai Indians',
     shortName: 'MI',
-    logo: '/teams/mi.png',
+    logo: '/logos/mi_logo_new.svg',
     description: 'The most successful IPL team with 5 championship titles',
     colors: { primary: '#004BA0', secondary: '#FFFFFF' },
     players: []
@@ -26,7 +26,7 @@ export const mockTeams: Team[] = [
     id: '3',
     name: 'Sunrisers Hyderabad',
     shortName: 'SRH',
-    logo: '/teams/srh.png',
+    logo: '/logos/srh_logo_new.svg',
     description: 'Known for their strong bowling attack and consistent performances',
     colors: { primary: '#FF822A', secondary: '#000000' },
     players: []
@@ -35,7 +35,7 @@ export const mockTeams: Team[] = [
     id: '4',
     name: 'Gujarat Titans',
     shortName: 'GT',
-    logo: '/teams/gt.png',
+    logo: '/logos/gt_logo_new.svg',
     description: 'The newest powerhouse team that won IPL in their debut season',
     colors: { primary: '#1B2130', secondary: '#E15454' },
     players: []
@@ -44,7 +44,7 @@ export const mockTeams: Team[] = [
     id: '5',
     name: 'Punjab Kings',
     shortName: 'PBKS',
-    logo: '/teams/pbks.png',
+    logo: '/logos/kxip_logo_new.svg',
     description: 'Known for their explosive batting and never-say-die attitude',
     colors: { primary: '#ED1D24', secondary: '#FBDD0B' },
     players: []
@@ -53,7 +53,7 @@ export const mockTeams: Team[] = [
     id: '6',
     name: 'Delhi Capitals',
     shortName: 'DC',
-    logo: '/teams/dc.png',
+    logo: '/logos/dc_logo_new.svg',
     description: 'Young and dynamic team with a perfect blend of experience and youth',
     colors: { primary: '#0078BC', secondary: '#EF1B26' },
     players: []
@@ -62,7 +62,7 @@ export const mockTeams: Team[] = [
     id: '7',
     name: 'Lucknow Super Giants',
     shortName: 'LSG',
-    logo: '/teams/lsg.png',
+    logo: '/logos/lsg_logo_new.svg',
     description: 'The newest franchise making waves with their balanced squad',
     colors: { primary: '#9C2A2C', secondary: '#F7E17D' },
     players: []
@@ -71,7 +71,7 @@ export const mockTeams: Team[] = [
     id: '8',
     name: 'Rajasthan Royals',
     shortName: 'RR',
-    logo: '/teams/rr.png',
+    logo: '/logos/rr_logo_new.svg',
     description: 'The inaugural IPL champions known for nurturing young talent',
     colors: { primary: '#EA1A85', secondary: '#004B8D' },
     players: []
@@ -80,7 +80,7 @@ export const mockTeams: Team[] = [
     id: '9',
     name: 'Kolkata Knight Riders',
     shortName: 'KKR',
-    logo: '/teams/kkr.png',
+    logo: '/logos/kkr_logo_new.svg',
     description: 'Two-time champions with a massive fan following',
     colors: { primary: '#3A225D', secondary: '#B9975B' },
     players: []
@@ -89,7 +89,7 @@ export const mockTeams: Team[] = [
     id: '10',
     name: 'Chennai Super Kings',
     shortName: 'CSK',
-    logo: '/teams/csk.png',
+    logo: '/logos/csk_logo_new.svg',
     description: 'The Yellow Army led by the legendary MS Dhoni',
     colors: { primary: '#FFFF00', secondary: '#0081E8' },
     players: []
@@ -104,8 +104,10 @@ export const mockPlayers: Player[] = [
     teamId: '1',
     age: 35,
     nationality: 'India',
-    photo: '/players/virat.png',
     jerseyNumber: 18,
+    isCaptain: true,
+    bowlingStyle: 'N/A (Batsman)',
+    battingStyle: 'Right-handed bat',
     stats: {
       matches: 237,
       runs: 7263,
@@ -119,8 +121,7 @@ export const mockPlayers: Player[] = [
       fifties: 50,
       hundreds: 7,
       bestBowling: '-'
-    },
-    bio: 'One of the greatest batsmen in modern cricket, known for his consistency and aggressive style of play.'
+    }
   },
   {
     id: '2',
@@ -129,8 +130,10 @@ export const mockPlayers: Player[] = [
     teamId: '2',
     age: 36,
     nationality: 'India',
-    photo: '/players/rohit.png',
     jerseyNumber: 45,
+    isCaptain: true,
+    bowlingStyle: 'Right-arm off-break',
+    battingStyle: 'Right-handed bat',
     stats: {
       matches: 243,
       runs: 6230,
@@ -144,8 +147,7 @@ export const mockPlayers: Player[] = [
       fifties: 42,
       hundreds: 2,
       bestBowling: '-'
-    },
-    bio: 'The most successful captain in IPL history with 5 titles. Known for his elegant batting and tactical acumen.'
+    }
   },
   {
     id: '3',
@@ -154,8 +156,10 @@ export const mockPlayers: Player[] = [
     teamId: '2',
     age: 30,
     nationality: 'India',
-    photo: '/players/bumrah.png',
     jerseyNumber: 93,
+    isCaptain: false,
+    bowlingStyle: 'Right-arm fast',
+    battingStyle: 'Right-handed bat',
     stats: {
       matches: 145,
       runs: 56,
@@ -169,8 +173,7 @@ export const mockPlayers: Player[] = [
       fifties: 0,
       hundreds: 0,
       bestBowling: '5/10'
-    },
-    bio: 'One of the best fast bowlers in world cricket, known for his unorthodox action and yorkers.'
+    }
   }
 ];
 
@@ -247,13 +250,32 @@ export const mockHighlights: Highlight[] = [
 // TODO: Replace with actual API calls to Cloudflare Workers
 export const api = {
   getTeams: async (): Promise<Team[]> => {
-    await new Promise(resolve => setTimeout(resolve, 100));
-    return mockTeams;
+    try {
+      const response = await fetch('/api/teams');
+      if (!response.ok) {
+        throw new Error('Failed to fetch teams');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching teams:', error);
+      // Fallback to mock data if API fails
+      return mockTeams;
+    }
   },
   
   getPlayers: async (teamId?: string): Promise<Player[]> => {
-    await new Promise(resolve => setTimeout(resolve, 100));
-    return teamId ? mockPlayers.filter(p => p.teamId === teamId) : mockPlayers;
+    try {
+      const response = await fetch('/api/players');
+      if (!response.ok) {
+        throw new Error('Failed to fetch players');
+      }
+      const players = await response.json();
+      return teamId ? players.filter((p: Player) => p.teamId === teamId) : players;
+    } catch (error) {
+      console.error('Error fetching players:', error);
+      // Fallback to mock data if API fails
+      return teamId ? mockPlayers.filter(p => p.teamId === teamId) : mockPlayers;
+    }
   },
   
   getMatches: async (): Promise<Match[]> => {

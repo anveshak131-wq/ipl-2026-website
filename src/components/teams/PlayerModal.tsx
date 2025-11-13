@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Player } from '@/types';
 
 interface PlayerModalProps {
@@ -9,6 +10,7 @@ interface PlayerModalProps {
 }
 
 export default function PlayerModal({ player, isOpen, onClose }: PlayerModalProps) {
+  const [showFullStats, setShowFullStats] = useState(false);
   if (!isOpen || !player) return null;
 
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -74,66 +76,209 @@ export default function PlayerModal({ player, isOpen, onClose }: PlayerModalProp
             </div>
           </div>
 
-          {/* Player Stats */}
+          {/* Player Styles */}
           <div className="p-6 border-b border-white/10">
             <h3 className="text-lg font-semibold text-white mb-4">
-              Career Statistics
+              Playing Style
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="text-center">
-                <p className="text-2xl font-bold text-ipl-gold">
-                  {player.stats.matches}
+                <p className="text-lg font-bold text-ipl-gold mb-1">
+                  {player.battingStyle || 'N/A'}
                 </p>
-                <p className="text-gray-400 text-sm">Matches</p>
+                <p className="text-gray-400 text-sm">Batting Style</p>
               </div>
               <div className="text-center">
-                <p className="text-2xl font-bold text-ipl-gold">
-                  {player.stats.runs}
+                <p className="text-lg font-bold text-ipl-gold mb-1">
+                  {player.bowlingStyle || 'N/A'}
                 </p>
-                <p className="text-gray-400 text-sm">Runs</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-ipl-gold">
-                  {player.stats.wickets}
-                </p>
-                <p className="text-gray-400 text-sm">Wickets</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-ipl-gold">
-                  {player.stats.average}
-                </p>
-                <p className="text-gray-400 text-sm">Average</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-ipl-gold">
-                  {player.stats.strikeRate}
-                </p>
-                <p className="text-gray-400 text-sm">Strike Rate</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-ipl-gold">
-                  {player.stats.economy}
-                </p>
-                <p className="text-gray-400 text-sm">Economy</p>
+                <p className="text-gray-400 text-sm">Bowling Style</p>
               </div>
             </div>
           </div>
 
-          {/* Player Bio */}
-          <div className="p-6">
-            <h3 className="text-lg font-semibold text-white mb-3">
-              Biography
-            </h3>
-            <p className="text-gray-300 leading-relaxed">
-              {player.bio}
-            </p>
+          {/* Player Stats */}
+          <div className="p-6 border-b border-white/10">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-white">
+                Career Statistics
+              </h3>
+              {player.jerseyNumber && (
+                <div className="flex items-center space-x-2">
+                  <span className="text-gray-400 text-sm">Jersey:</span>
+                  <span className="inline-flex items-center justify-center w-10 h-10 bg-ipl-gold/20 text-ipl-gold rounded-full font-bold text-sm">
+                    {player.jerseyNumber}
+                  </span>
+                </div>
+              )}
+            </div>
+            
+            {!showFullStats ? (
+              // Basic Stats
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-ipl-gold">
+                    {player.stats.matches}
+                  </p>
+                  <p className="text-gray-400 text-sm">Matches</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-ipl-gold">
+                    {player.stats.runs}
+                  </p>
+                  <p className="text-gray-400 text-sm">Runs</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-ipl-gold">
+                    {player.stats.wickets}
+                  </p>
+                  <p className="text-gray-400 text-sm">Wickets</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-ipl-gold">
+                    {player.stats.average}
+                  </p>
+                  <p className="text-gray-400 text-sm">Average</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-ipl-gold">
+                    {player.stats.strikeRate}
+                  </p>
+                  <p className="text-gray-400 text-sm">Strike Rate</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-ipl-gold">
+                    {player.stats.economy}
+                  </p>
+                  <p className="text-gray-400 text-sm">Economy</p>
+                </div>
+              </div>
+            ) : (
+              // Full Enhanced Stats
+              <div className="space-y-6">
+                {/* Batting Stats */}
+                <div>
+                  <h4 className="text-md font-medium text-ipl-gold mb-3">Batting Performance</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-ipl-gold">
+                        {player.stats.highest}
+                      </p>
+                      <p className="text-gray-400 text-sm">Highest Score</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-ipl-gold">
+                        {player.stats.fours}
+                      </p>
+                      <p className="text-gray-400 text-sm">Fours (4s)</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-ipl-gold">
+                        {player.stats.sixes}
+                      </p>
+                      <p className="text-gray-400 text-sm">Sixes (6s)</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-ipl-gold">
+                        {player.stats.fifties}
+                      </p>
+                      <p className="text-gray-400 text-sm">Fifties (50s)</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-ipl-gold">
+                        {player.stats.hundreds}
+                      </p>
+                      <p className="text-gray-400 text-sm">Hundreds (100s)</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-ipl-gold">
+                        {player.stats.runs}
+                      </p>
+                      <p className="text-gray-400 text-sm">Total Runs</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-ipl-gold">
+                        {player.stats.average}
+                      </p>
+                      <p className="text-gray-400 text-sm">Batting Avg</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-ipl-gold">
+                        {player.stats.strikeRate}
+                      </p>
+                      <p className="text-gray-400 text-sm">Strike Rate</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bowling Stats */}
+                <div>
+                  <h4 className="text-md font-medium text-ipl-gold mb-3">Bowling Performance</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-ipl-gold">
+                        {player.stats.wickets}
+                      </p>
+                      <p className="text-gray-400 text-sm">Wickets</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-ipl-gold">
+                        {player.stats.economy}
+                      </p>
+                      <p className="text-gray-400 text-sm">Economy Rate</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-ipl-gold">
+                        {player.stats.average}
+                      </p>
+                      <p className="text-gray-400 text-sm">Bowling Avg</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-ipl-gold">
+                        {player.stats.bestBowling}
+                      </p>
+                      <p className="text-gray-400 text-sm">Best Bowling (BBM)</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Overall Stats */}
+                <div>
+                  <h4 className="text-md font-medium text-ipl-gold mb-3">Overall Performance</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-ipl-gold">
+                        {player.stats.matches}
+                      </p>
+                      <p className="text-gray-400 text-sm">Matches Played</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-ipl-gold">
+                        {Math.round((player.stats.fours + player.stats.sixes) / player.stats.matches * 10) / 10}
+                      </p>
+                      <p className="text-gray-400 text-sm">Boundaries/Match</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-ipl-gold">
+                        {Math.round(player.stats.runs / player.stats.matches * 10) / 10}
+                      </p>
+                      <p className="text-gray-400 text-sm">Runs/Match</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
+          
           {/* Action Buttons */}
           <div className="p-6 border-t border-white/10">
             <div className="flex space-x-4">
-              <button className="flex-1 ipl-button">
-                View Full Stats
+              <button 
+                onClick={() => setShowFullStats(!showFullStats)}
+                className="flex-1 ipl-button"
+              >
+                {showFullStats ? 'View Basic Stats' : 'View Full Stats'}
               </button>
               <button 
                 onClick={onClose}

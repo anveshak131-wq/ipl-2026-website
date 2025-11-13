@@ -1,0 +1,22 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- MI Logo -->
+  <defs>
+    <linearGradient id="miGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#004BAA;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#001F5C;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <circle cx="100" cy="100" r="85" fill="url(#miGradient)"/>
+  
+  <!-- Mumbai Skyline -->
+  <rect x="50" y="140" width="100" height="20" rx="5" fill="#FFD700"/>
+  <rect x="60" y="120" width="25" height="40" fill="#FFD700"/>
+  <rect x="90" y="110" width="30" height="50" fill="#FFD700"/>
+  <rect x="125" y="130" width="20" height="30" fill="#FFD700"/>
+  
+  <!-- Text -->
+  <text x="100" y="185" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#fff">MI</text>
+</svg>
+

@@ -1,0 +1,22 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- DC Logo -->
+  <defs>
+    <linearGradient id="dcGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2563EB;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1E40AF;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <circle cx="100" cy="100" r="85" fill="url(#dcGradient)"/>
+  
+  <!-- Shield Symbol -->
+  <path d="M 100 60 L 140 90 L 140 130 Q 140 150 120 150 L 100 170 L 80 150 Q 60 150 60 130 L 60 90 Z" fill="#FFD700" stroke="#fff" stroke-width="4"/>
+  <circle cx="100" cy="100" r="15" fill="#2563EB"/>
+  <line x1="100" y1="85" x2="100" y2="115" stroke="#2563EB" stroke-width="4"/>
+  <line x1="85" y1="100" x2="115" y2="100" stroke="#2563EB" stroke-width="4"/>
+  
+  <!-- Text -->
+  <text x="100" y="185" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#fff">DC</text>
+</svg>
+

@@ -20,8 +20,12 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-r from-ipl-purple to-ipl-gold rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-lg">IPL</span>
+            <div className="w-10 h-10 flex items-center justify-center">
+              <img 
+                src="/logos/ipl_logo_new.svg" 
+                alt="IPL 2026 logo"
+                className="w-full h-full object-contain"
+              />
             </div>
             <span className="text-white font-bold text-xl">2026</span>
           </Link>

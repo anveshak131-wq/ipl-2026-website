@@ -1,0 +1,22 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Custom IPL Logo -->
+  <defs>
+    <linearGradient id="iplGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF6B00;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="90" fill="url(#iplGradient)"/>
+  
+  <!-- Cricket Ball -->
+  <circle cx="100" cy="100" r="50" fill="#8B4513"/>
+  <path d="M 100 50 Q 120 70 120 100 Q 120 130 100 150 Q 80 130 80 100 Q 80 70 100 50 Z" fill="#E6D5C1" opacity="0.5"/>
+  <path d="M 70 90 Q 85 75 100 90 Q 115 105 130 120 Q 115 135 100 150 Q 85 135 70 120 Z" fill="#E6D5C1" opacity="0.5"/>
+  
+  <!-- Text -->
+  <text x="100" y="175" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#fff">IPL 2026</text>
+</svg>
+
