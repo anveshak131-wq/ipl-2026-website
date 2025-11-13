@@ -129,7 +129,7 @@ export function getOptimalTextColor(backgroundColor: string): string {
   const rgb = parseColorToRgb(backgroundColor);
   
   if (!rgb) {
-    // Default to white if parsing fails
+    // Default to white if parsing fails (safer for dark backgrounds)
     return '#FFFFFF';
   }
   
@@ -140,14 +140,26 @@ export function getOptimalTextColor(backgroundColor: string): string {
   const blackContrast = getContrastRatio(backgroundColor, '#000000');
   
   // Choose the color with better contrast
-  // Also consider luminance threshold (0.5) as a fallback
-  if (whiteContrast >= blackContrast && whiteContrast >= 4.5) {
-    return '#FFFFFF';
-  } else if (blackContrast >= 4.5) {
-    return '#000000';
+  // Prefer white if both are below threshold (safer for dark backgrounds)
+  // Use stricter threshold (4.5:1 for WCAG AA) but be more lenient for very dark/light colors
+  if (whiteContrast >= blackContrast) {
+    // If white has better or equal contrast, use it (especially if background is dark)
+    if (whiteContrast >= 3.0 || luminance < 0.5) {
+      return '#FFFFFF';
+    } else if (blackContrast >= 4.5) {
+      return '#000000';
+    } else {
+      // Fallback: use white for safety on dark backgrounds
+      return '#FFFFFF';
+    }
   } else {
-    // Fallback: use luminance threshold
-    return luminance > 0.5 ? '#000000' : '#FFFFFF';
+    // Black has better contrast
+    if (blackContrast >= 4.5 && luminance > 0.5) {
+      return '#000000';
+    } else {
+      // Fallback: use white for safety
+      return '#FFFFFF';
+    }
   }
 }
 
@@ -168,10 +180,12 @@ export function getOptimalTextColorForGradient(gradientString: string): string {
   // Calculate average luminance of all colors in gradient
   let totalLuminance = 0;
   let validColors = 0;
+  const rgbValues: Array<[number, number, number]> = [];
   
   for (const color of colorMatches) {
     const rgb = parseColorToRgb(color);
     if (rgb) {
+      rgbValues.push(rgb);
       totalLuminance += getRelativeLuminance(rgb[0], rgb[1], rgb[2]);
       validColors++;
     }
@@ -183,22 +197,22 @@ export function getOptimalTextColorForGradient(gradientString: string): string {
   
   const avgLuminance = totalLuminance / validColors;
   
-  // Use the darker color from gradient for better contrast calculation
-  let darkestColor = colorMatches[0];
-  let darkestLuminance = Infinity;
-  
-  for (const color of colorMatches) {
-    const rgb = parseColorToRgb(color);
-    if (rgb) {
-      const lum = getRelativeLuminance(rgb[0], rgb[1], rgb[2]);
-      if (lum < darkestLuminance) {
-        darkestLuminance = lum;
-        darkestColor = color;
-      }
-    }
+  // Calculate average RGB values for a more accurate representation
+  let avgR = 0, avgG = 0, avgB = 0;
+  for (const [r, g, b] of rgbValues) {
+    avgR += r;
+    avgG += g;
+    avgB += b;
   }
+  avgR = Math.round(avgR / rgbValues.length);
+  avgG = Math.round(avgG / rgbValues.length);
+  avgB = Math.round(avgB / rgbValues.length);
   
-  // Use the darkest color for contrast calculation
-  return getOptimalTextColor(darkestColor);
+  // Convert average RGB to hex
+  const avgColorHex = `#${avgR.toString(16).padStart(2, '0')}${avgG.toString(16).padStart(2, '0')}${avgB.toString(16).padStart(2, '0')}`;
+  
+  // Use the average color for contrast calculation
+  // This gives a better representation of the overall gradient
+  return getOptimalTextColor(avgColorHex);
 }
 

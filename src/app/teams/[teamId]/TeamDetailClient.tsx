@@ -205,7 +205,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                   <div className="w-6 h-6 flex-shrink-0">
                     <IPLLogo />
                   </div>
-                  <span className="text-sm font-bold text-white tracking-wider whitespace-nowrap">{teamData.shortName}</span>
+                  <span className="text-sm font-bold tracking-wider whitespace-nowrap" style={{ color: primaryColor.textOnLight }}>{teamData.shortName}</span>
                 </div>
 
                 {/* Team Name */}
@@ -231,7 +231,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                 </div>
                 
                 {/* Description */}
-                <p className="text-xl text-gray-300 leading-relaxed max-w-xl">
+                <p className="text-xl leading-relaxed max-w-xl" style={{ color: '#E5E7EB' }}>
                   {teamData.description}
                 </p>
                 

@@ -64,15 +64,17 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
           <h3 
             className="text-2xl font-black mb-1 transition-all duration-300 group-hover:scale-110"
             style={{
-              background: `linear-gradient(135deg, ${team.colors.primary}, ${team.colors.secondary})`,
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text'
+              // Card is on dark page background, so use light text with strong shadow for visibility
+              color: '#FFFFFF',
+              textShadow: '0 2px 8px rgba(0,0,0,0.8), 0 0 20px rgba(0,0,0,0.5), 2px 2px 4px rgba(0,0,0,0.9)'
             }}
           >
             {team.shortName}
           </h3>
-          <p className="text-gray-300 text-sm font-medium group-hover:text-white transition-colors duration-300">
+          <p className="text-sm font-medium transition-colors duration-300" style={{ 
+            color: '#E5E7EB',
+            textShadow: '0 1px 3px rgba(0,0,0,0.8)'
+          }}>
             {team.name}
           </p>
         </div>
@@ -99,7 +101,7 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
         </div>
 
         {/* Team Description */}
-        <p className="text-gray-300 text-sm leading-relaxed text-center line-clamp-2 group-hover:text-gray-200 transition-colors duration-300">
+        <p className="text-sm leading-relaxed text-center line-clamp-2 transition-colors duration-300" style={{ color: '#D1D5DB' }}>
           {team.description}
         </p>
 
