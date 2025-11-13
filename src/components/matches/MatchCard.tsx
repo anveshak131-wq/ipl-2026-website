@@ -148,7 +148,7 @@ export default function MatchCard({ match }: MatchCardProps) {
         )}
 
         {/* Action Button */}
-        <button className="w-full bg-gradient-to-r from-ipl-purple to-ipl-gold hover:from-ipl-gold hover:to-ipl-purple text-white font-bold text-sm py-2.5 rounded-lg transition-all duration-300 transform hover:scale-105 mt-4">
+        <button onClick={() => alert(`${match.status === 'upcoming' ? 'Reminder set!' : match.status === 'live' ? 'Opening stream...' : 'Loading highlights...'}`)} className="w-full bg-gradient-to-r from-ipl-purple to-ipl-gold hover:from-ipl-gold hover:to-ipl-purple text-white font-bold text-sm py-2.5 rounded-lg transition-all duration-300 transform hover:scale-105 mt-4 cursor-pointer">
           {match.status === 'upcoming' && 'Set Reminder'}
           {match.status === 'live' && 'Watch Live'}
           {match.status === 'completed' && 'View Highlights'}

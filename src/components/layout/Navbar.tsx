@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import IPLLogo from '../ui/IPLLogo';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -19,15 +20,11 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 flex items-center justify-center">
-              <img 
-                src="/logos/ipl_logo_new.svg" 
-                alt="IPL 2026 logo"
-                className="w-full h-full object-contain"
-              />
+          <Link href="/" className="flex items-center space-x-2 group">
+            <div className="w-10 h-10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <IPLLogo size="md" />
             </div>
-            <span className="text-white font-bold text-xl">2026</span>
+            <span className="text-white font-bold text-xl group-hover:text-ipl-gold transition-colors duration-300">2026</span>
           </Link>
 
           {/* Desktop Navigation */}

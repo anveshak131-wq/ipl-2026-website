@@ -54,8 +54,12 @@ export default function MatchesPage() {
     <div className="min-h-screen">
       <Navbar />
       
-      <main className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <main className="relative py-16 section-match-bg min-h-screen">
+        {/* Decorative Elements */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-ipl-gold/10 rounded-full blur-3xl -z-10" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-ipl-purple/10 rounded-full blur-3xl -z-10" />
+        
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="mb-12">
             <div className="inline-flex items-center space-x-2 mb-4">
@@ -121,7 +125,7 @@ export default function MatchesPage() {
           {/* Pagination */}
           {filteredMatches.length > 0 && (
             <div className="text-center mt-12">
-              <button className="bg-gradient-to-r from-ipl-purple to-ipl-gold hover:from-ipl-gold hover:to-ipl-purple text-white font-bold text-lg px-8 py-3 rounded-lg transition-all duration-300 transform hover:scale-105">
+              <button onClick={() => alert('Loading more matches...')} className="bg-gradient-to-r from-ipl-purple to-ipl-gold hover:from-ipl-gold hover:to-ipl-purple text-white font-bold text-lg px-8 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 cursor-pointer">
                 Load More Matches
               </button>
             </div>

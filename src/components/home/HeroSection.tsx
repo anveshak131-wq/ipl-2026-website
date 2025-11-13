@@ -1,9 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import LoadingSpinner from '../ui/LoadingSpinner';
+import IPLLogo from '../ui/IPLLogo';
 
 export default function HeroSection() {
+  const router = useRouter();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -119,13 +122,19 @@ export default function HeroSection() {
 
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="ipl-button text-lg px-8 py-4 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-ipl-gold/50 transition-all duration-300 transform hover:scale-105">
+                <button 
+                  onClick={() => router.push('/matches')}
+                  className="ipl-button text-lg px-8 py-4 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-ipl-gold/50 transition-all duration-300 transform hover:scale-105 cursor-pointer"
+                >
                   {highlights[currentSlide].cta}
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
                 </button>
-                <button className="glass-effect text-white font-bold py-4 px-8 rounded-lg hover:bg-white/20 transition-all duration-300 transform hover:scale-105 border border-white/20">
+                <button 
+                  onClick={() => router.push('/teams')}
+                  className="glass-effect text-white font-bold py-4 px-8 rounded-lg hover:bg-white/20 transition-all duration-300 transform hover:scale-105 border border-white/20 cursor-pointer"
+                >
                   Learn More
                 </button>
               </div>
@@ -138,11 +147,9 @@ export default function HeroSection() {
                 <div className="w-72 h-72 md:w-80 md:h-80 rounded-3xl border-2 border-white/10 backdrop-blur-sm overflow-hidden">
                   <div className="w-full h-full bg-gradient-to-br from-ipl-purple/40 to-ipl-gold/40 flex items-center justify-center">
                     <div className="text-center">
-                      <img 
-                        src="/logos/ipl_logo_new.svg" 
-                        alt="IPL 2026"
-                        className="w-40 h-40 object-contain mb-4 animate-bounce"
-                      />
+                      <div className="mb-4 animate-bounce">
+                        <IPLLogo size="xl" className="drop-shadow-lg" />
+                      </div>
                       <p className="text-white font-bold text-xl">IPL 2026</p>
                     </div>
                   </div>

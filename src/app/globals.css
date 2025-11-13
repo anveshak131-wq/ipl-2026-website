@@ -16,6 +16,109 @@
   }
 }
 
+/* Animated Background Gradients */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(20px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/* Enhanced Section Backgrounds */
+.section-hero-bg {
+  position: relative;
+  background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 50%, #2a1a3e 100%);
+  overflow: hidden;
+}
+
+.section-hero-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(251, 191, 36, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
+  animation: gradient-shift 15s ease infinite;
+  pointer-events: none;
+}
+
+.section-match-bg {
+  position: relative;
+  background: linear-gradient(135deg, #1a1a2e 0%, #2a1a3e 50%, #1a1a2e 100%);
+  overflow: hidden;
+}
+
+.section-match-bg::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  right: -50%;
+  bottom: -50%;
+  background: 
+    radial-gradient(circle at 30% 40%, rgba(124, 58, 237, 0.1) 0%, transparent 60%),
+    radial-gradient(circle at 70% 60%, rgba(251, 191, 36, 0.08) 0%, transparent 60%);
+  animation: gradient-shift 20s ease infinite;
+  pointer-events: none;
+}
+
+.section-news-bg {
+  position: relative;
+  background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 50%, #2a1a3e 100%);
+  overflow: hidden;
+}
+
+.section-news-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(45deg, transparent 30%, rgba(251, 191, 36, 0.05) 50%, transparent 70%),
+    linear-gradient(-45deg, transparent 30%, rgba(124, 58, 237, 0.05) 50%, transparent 70%);
+  background-size: 200% 200%;
+  animation: gradient-shift 25s ease infinite;
+  pointer-events: none;
+}
+
 @layer components {
   .glass-effect {
     background: rgba(255, 255, 255, 0.1);
@@ -36,6 +139,48 @@
   
   .ipl-card {
     @apply glass-effect rounded-xl p-6 hover:shadow-xl transition-all duration-300;
+  }
+
+  /* Gradient Text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-ipl-purple to-ipl-gold bg-clip-text text-transparent;
+  }
+
+  /* Animated Border */
+  .animated-border {
+    position: relative;
+    border: 1px solid transparent;
+    background-image: 
+      linear-gradient(rgb(15, 15, 30), rgb(15, 15, 30)),
+      linear-gradient(45deg, #7C3AED, #FBBF24, #7C3AED);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+  }
+
+  /* Glow Effect */
+  .glow-effect {
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.3), 0 0 40px rgba(251, 191, 36, 0.1);
+  }
+
+  .glow-effect:hover {
+    box-shadow: 0 0 30px rgba(124, 58, 237, 0.5), 0 0 60px rgba(251, 191, 36, 0.2);
+  }
+
+  /* Float Animation */
+  .float-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* Pulse Glow */
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  /* Shimmer Effect */
+  .shimmer-effect {
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
   }
 }
 
