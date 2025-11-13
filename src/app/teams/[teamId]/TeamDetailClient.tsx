@@ -336,19 +336,27 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
               </div>
             ) : (
               <div className="text-center py-12">
-                <div className="glass-effect rounded-xl p-8 max-w-md mx-auto">
-                  <h3 className="text-xl font-semibold text-white mb-4">
-                    No Players Added Yet
+                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 p-12 max-w-md mx-auto">
+                  {/* Background decoration */}
+                  <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-0 left-0 w-32 h-32 bg-gradient-to-br from-ipl-gold to-transparent rounded-full blur-3xl" />
+                    <div className="absolute bottom-0 right-0 w-32 h-32 bg-gradient-to-br from-ipl-purple to-transparent rounded-full blur-3xl" />
+                  </div>
+
+                  {/* Icon */}
+                  <div className="relative mb-6 flex justify-center">
+                    <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center backdrop-blur-sm border border-white/20">
+                      <Icon name="team" size={40} className="opacity-60" />
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <h3 className="relative text-2xl font-black text-white mb-3">
+                    Squad Coming Soon
                   </h3>
-                  <p className="text-gray-400 mb-6">
-                    Players can be added via the Admin Panel
+                  <p className="relative text-gray-300 leading-relaxed">
+                    The full squad for this team will be announced before the season starts. Stay tuned for updates!
                   </p>
-                  <button 
-                    onClick={() => router.push('/admin/players')}
-                    className="ipl-button"
-                  >
-                    Go to Admin Panel
-                  </button>
                 </div>
               </div>
             )}
