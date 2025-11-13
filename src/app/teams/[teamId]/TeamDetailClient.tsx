@@ -5,47 +5,56 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import PlayerModal from '@/components/teams/PlayerModal';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Team, Player } from '@/types';
 
 interface TeamDetailClientProps {
-  team: Team;
+  teamId: string;
 }
 
-export default function TeamDetailClient({ team }: TeamDetailClientProps) {
+export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
   const router = useRouter();
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [teamData, setTeamData] = useState<Team>(team);
+  const [teamData, setTeamData] = useState<Team | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchLiveTeamData = async () => {
+    const fetchTeamData = async () => {
       try {
-        // Fetch live teams data
+        // Fetch all teams
         const teamsResponse = await fetch('/api/teams');
         if (teamsResponse.ok) {
-          const liveTeams = await teamsResponse.json();
-          const liveTeam = liveTeams.find((t: Team) => t.id === team.id);
-          if (liveTeam) {
-            // Fetch live players data
+          const allTeams = await teamsResponse.json();
+          const team = allTeams.find((t: Team) => t.id === teamId);
+          
+          if (team) {
+            // Fetch players
             const playersResponse = await fetch('/api/players');
             if (playersResponse.ok) {
-              const livePlayers = await playersResponse.json();
-              const teamWithLivePlayers = {
-                ...liveTeam,
-                players: livePlayers.filter((p: Player) => p.teamId === liveTeam.id)
+              const allPlayers = await playersResponse.json();
+              const teamWithPlayers = {
+                ...team,
+                players: allPlayers.filter((p: Player) => p.teamId === team.id)
               };
-              setTeamData(teamWithLivePlayers);
+              setTeamData(teamWithPlayers);
+            } else {
+              setTeamData(team);
             }
+          } else {
+            setTeamData(null);
           }
         }
       } catch (error) {
-        console.error('Error fetching live data:', error);
-        // Keep using initial data if fetch fails
+        console.error('Error fetching team data:', error);
+        setTeamData(null);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    fetchLiveTeamData();
-  }, [team.id]);
+    fetchTeamData();
+  }, [teamId]);
 
   const handlePlayerClick = (player: Player) => {
     setSelectedPlayer(player);
@@ -56,6 +65,39 @@ export default function TeamDetailClient({ team }: TeamDetailClientProps) {
     setIsModalOpen(false);
     setSelectedPlayer(null);
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="flex items-center justify-center h-96">
+          <LoadingSpinner size="lg" />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Error state - team not found
+  if (!teamData) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="text-center py-20">
+          <h1 className="text-2xl font-bold text-white mb-4">Team Not Found</h1>
+          <p className="text-gray-400 mb-6">This team does not exist.</p>
+          <button
+            onClick={() => router.push('/teams')}
+            className="px-6 py-2 bg-ipl-purple hover:bg-ipl-purple/80 text-white rounded-lg transition-colors"
+          >
+            Back to Teams
+          </button>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
