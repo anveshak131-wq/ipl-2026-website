@@ -146,18 +146,84 @@ export default function AdminPlayers() {
     setShowForm(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Send to API
-    console.log('Submitting player:', formData);
-    setShowForm(false);
-    // In real app, would refresh players list
+    
+    try {
+      const playerData = {
+        ...formData,
+        age: parseInt(formData.age),
+        jerseyNumber: parseInt(formData.jerseyNumber),
+        stats: {
+          matches: parseInt(formData.stats.matches) || 0,
+          runs: parseInt(formData.stats.runs) || 0,
+          wickets: parseInt(formData.stats.wickets) || 0,
+          average: parseFloat(formData.stats.average) || 0,
+          strikeRate: parseFloat(formData.stats.strikeRate) || 0,
+          economy: parseFloat(formData.stats.economy) || 0,
+          highest: parseInt(formData.stats.highest) || 0,
+          fours: parseInt(formData.stats.fours) || 0,
+          sixes: parseInt(formData.stats.sixes) || 0,
+          fifties: parseInt(formData.stats.fifties) || 0,
+          hundreds: parseInt(formData.stats.hundreds) || 0,
+          bestBowling: formData.stats.bestBowling || '-',
+        }
+      };
+
+      if (editingPlayer) {
+        // Update existing player
+        const response = await fetch('/api/players', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ ...playerData, id: editingPlayer.id }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update player');
+        }
+      } else {
+        // Create new player
+        const response = await fetch('/api/players', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(playerData),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to create player');
+        }
+      }
+
+      // Refresh players list
+      await fetchData();
+      setShowForm(false);
+    } catch (error) {
+      console.error('Error saving player:', error);
+      alert('Failed to save player. Please try again.');
+    }
   };
 
-  const handleDeletePlayer = (playerId: string) => {
+  const handleDeletePlayer = async (playerId: string) => {
     if (confirm('Are you sure you want to delete this player?')) {
-      // TODO: Send delete request to API
-      setPlayers(players.filter(p => p.id !== playerId));
+      try {
+        const response = await fetch(`/api/players?id=${playerId}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to delete player');
+        }
+
+        // Refresh players list
+        await fetchData();
+      } catch (error) {
+        console.error('Error deleting player:', error);
+        alert('Failed to delete player. Please try again.');
+      }
     }
   };
 
