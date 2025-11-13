@@ -142,18 +142,53 @@ export default function HeroSection() {
 
             {/* Right Visual Element */}
             <div className="order-1 md:order-2 relative h-96 md:h-full flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-br from-ipl-purple/20 to-ipl-gold/20 rounded-3xl blur-2xl" />
-              <div className="relative">
-                <div className="w-72 h-72 md:w-80 md:h-80 rounded-3xl border-2 border-white/10 backdrop-blur-sm overflow-hidden">
-                  <div className="w-full h-full bg-gradient-to-br from-ipl-purple/40 to-ipl-gold/40 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="mb-4 animate-bounce">
-                        <IPLLogo size="xl" className="drop-shadow-lg" />
-                      </div>
-                      <p className="text-white font-bold text-xl">IPL 2026</p>
+              {/* Glow effects */}
+              <div className="absolute inset-0 bg-gradient-to-br from-ipl-blue-light/30 to-ipl-gold/30 rounded-[3rem] blur-3xl animate-pulse" />
+              <div className="absolute inset-0 bg-gradient-to-tl from-ipl-purple/20 to-ipl-blue-dark/20 rounded-[3rem] blur-2xl" />
+              
+              {/* Main Panel */}
+              <div className="relative group">
+                <div className="w-80 h-80 sm:w-96 sm:h-96 md:w-[28rem] md:h-[28rem] rounded-[2.5rem] border-2 border-white/20 backdrop-blur-md overflow-hidden shadow-2xl relative transition-all duration-500 hover:scale-105 hover:border-white/30">
+                  {/* Animated gradient background */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-ipl-blue-dark/80 via-ipl-purple/60 to-ipl-gold/70 animate-gradient-shift" />
+                  
+                  {/* Shimmer overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent animate-shimmer" 
+                       style={{
+                         backgroundSize: '200% 200%',
+                         animation: 'shimmer 3s linear infinite'
+                       }} />
+                  
+                  {/* Content */}
+                  <div className="relative w-full h-full flex flex-col items-center justify-center p-8">
+                    {/* Logo with float animation */}
+                    <div className="mb-8 animate-float">
+                      <IPLLogo size="xl" animated={true} className="scale-125 sm:scale-150 md:scale-[1.8]" />
                     </div>
+                    
+                    {/* Text */}
+                    <div className="text-center space-y-2">
+                      <p className="text-white font-black text-3xl md:text-4xl tracking-wider drop-shadow-lg bg-gradient-to-r from-white via-ipl-gold to-white bg-clip-text text-transparent animate-glow">
+                        IPL 2026
+                      </p>
+                      <div className="flex items-center justify-center gap-2 text-ipl-gold/80 text-sm font-semibold">
+                        <div className="w-8 h-0.5 bg-gradient-to-r from-transparent to-ipl-gold" />
+                        <span className="animate-pulse">SEASON 19</span>
+                        <div className="w-8 h-0.5 bg-gradient-to-l from-transparent to-ipl-gold" />
+                      </div>
+                    </div>
+
+                    {/* Decorative corner accents */}
+                    <div className="absolute top-4 left-4 w-12 h-12 border-t-2 border-l-2 border-ipl-gold/50 rounded-tl-xl" />
+                    <div className="absolute top-4 right-4 w-12 h-12 border-t-2 border-r-2 border-ipl-gold/50 rounded-tr-xl" />
+                    <div className="absolute bottom-4 left-4 w-12 h-12 border-b-2 border-l-2 border-ipl-gold/50 rounded-bl-xl" />
+                    <div className="absolute bottom-4 right-4 w-12 h-12 border-b-2 border-r-2 border-ipl-gold/50 rounded-br-xl" />
                   </div>
                 </div>
+                
+                {/* Orbiting elements */}
+                <div className="absolute -top-4 -right-4 w-16 h-16 bg-ipl-gold/20 rounded-full blur-xl animate-ping" />
+                <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-ipl-blue-light/20 rounded-full blur-xl animate-pulse" />
               </div>
             </div>
           </div>

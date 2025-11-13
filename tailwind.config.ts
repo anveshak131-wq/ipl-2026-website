@@ -25,6 +25,8 @@ const config: Config = {
         'slide-up': 'slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)',
         'fade-in': 'fadeIn 0.3s ease-out',
         'scale-in': 'scaleIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)',
+        'shimmer': 'shimmer 3s linear infinite',
+        'gradient-shift': 'gradient-shift-continuous 8s ease infinite',
       },
       keyframes: {
         aurora: {
