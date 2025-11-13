@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import AdminLogin from '@/components/admin/AdminLogin';
 
 // Mark this page as dynamic (not pre-rendered) to ensure client-side redirects work
-export const dynamic = 'force-dynamic';
+// Note: Removed for static export compatibility
 
 export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

@@ -7,7 +7,7 @@ import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
 
 // Mark this page as dynamic to prevent pre-rendering
-export const dynamic = 'force-dynamic';
+// Note: Removed for static export compatibility
 
 export default function AdminPlayers() {
   const router = useRouter();
