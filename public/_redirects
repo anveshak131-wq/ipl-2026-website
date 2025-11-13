@@ -1,5 +1,2 @@
 /_next/*  /_next/:splat  200
-/admin/*/  /admin/:splat/  200
-# SPA fallback for client-side routing
-/* / 200
 
