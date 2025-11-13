@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import IPLLogo from '../ui/IPLLogo';
 
 export default function Footer() {
   return (
@@ -7,13 +8,14 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-r from-ipl-purple to-ipl-gold rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-sm">IPL</span>
+            <div className="flex items-center space-x-3 mb-4">
+              <IPLLogo size="sm" />
+              <div className="flex flex-col">
+                <span className="text-white font-black text-xl leading-none">IPL</span>
+                <span className="text-ipl-gold text-sm font-bold">2026</span>
               </div>
-              <span className="text-white font-bold text-lg">2026</span>
             </div>
-            <p className="text-gray-300 text-sm">
+            <p className="text-gray-300 text-sm leading-relaxed">
               The official website for IPL 2026. Experience the excitement of the world's premier T20 cricket league.
             </p>
           </div>
