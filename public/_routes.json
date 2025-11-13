@@ -3,9 +3,5 @@
   "include": [
     "/*"
   ],
-  "exclude": [
-    "/api/*",
-    "/*.xml",
-    "/*.json"
-  ]
+  "exclude": []
 }
