@@ -121,21 +121,24 @@ export default function HeroSection() {
               </div>
 
               {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
                 <button 
                   onClick={() => router.push('/matches')}
-                  className="ipl-button text-lg px-8 py-4 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-ipl-gold/50 transition-all duration-300 transform hover:scale-105 cursor-pointer"
+                  className="relative overflow-hidden bg-gradient-to-r from-ipl-blue-dark via-ipl-purple to-ipl-gold text-white font-bold text-lg px-8 py-4 rounded-xl flex items-center justify-center gap-3 hover:shadow-2xl hover:shadow-ipl-gold/50 transition-all duration-300 transform hover:scale-105 cursor-pointer group border border-white/20"
                 >
-                  {highlights[currentSlide].cta}
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <span className="relative z-10">{highlights[currentSlide].cta}</span>
+                  <svg className="w-5 h-5 relative z-10 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
+                  {/* Shine effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
                 </button>
                 <button 
                   onClick={() => router.push('/teams')}
-                  className="glass-effect text-white font-bold py-4 px-8 rounded-lg hover:bg-white/20 transition-all duration-300 transform hover:scale-105 border border-white/20 cursor-pointer"
+                  className="relative overflow-hidden bg-white/10 backdrop-blur-md text-white font-bold text-lg py-4 px-8 rounded-xl hover:bg-white/20 transition-all duration-300 transform hover:scale-105 border-2 border-white/30 hover:border-white/50 cursor-pointer group"
                 >
-                  Learn More
+                  <span className="relative z-10">Learn More</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-ipl-blue-light/0 via-ipl-blue-light/20 to-ipl-blue-light/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </button>
               </div>
             </div>
