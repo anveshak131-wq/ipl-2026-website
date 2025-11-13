@@ -14,8 +14,12 @@ export default function AdminTeams() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [teams, setTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     shortName: '',
@@ -28,13 +32,25 @@ export default function AdminTeams() {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem('adminToken');
-    if (!token) {
-      router.push('/admin');
-      return;
-    }
-    setIsAuthenticated(true);
-    fetchTeams();
+    // Check authentication on client side only
+    const checkAuth = () => {
+      try {
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+          router.push('/admin');
+          return;
+        }
+        setIsAuthenticated(true);
+        fetchTeams();
+      } catch (error) {
+        // localStorage not available, redirect to login
+        router.push('/admin');
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+
+    checkAuth();
   }, [router]);
 
   const fetchTeams = async () => {
@@ -61,6 +77,23 @@ export default function AdminTeams() {
       }
     });
     setShowForm(true);
+    setError(null);
+  };
+
+  const resetForm = () => {
+    setEditingTeam(null);
+    setFormData({
+      name: '',
+      shortName: '',
+      logo: '',
+      description: '',
+      colors: {
+        primary: '#6B46C1',
+        secondary: '#FFD700'
+      }
+    });
+    setShowForm(false);
+    setError(null);
   };
 
   const handleEditTeam = (team: Team) => {
@@ -75,19 +108,62 @@ export default function AdminTeams() {
     setShowForm(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Send to API
-    console.log('Submitting team:', formData);
-    setShowForm(false);
-  };
-
-  const handleDeleteTeam = (teamId: string) => {
-    if (confirm('Are you sure you want to delete this team?')) {
-      // TODO: Send delete request to API
-      setTeams(teams.filter(t => t.id !== teamId));
+    setIsSubmitting(true);
+    setError(null);
+    
+    try {
+      if (editingTeam) {
+        // Update existing team
+        const updatedTeam = await api.updateTeam(editingTeam.id, formData);
+        setTeams(teams.map(t => t.id === editingTeam.id ? updatedTeam : t));
+        setSuccess('Team updated successfully');
+      } else {
+        // Create new team
+        const newTeam = await api.createTeam(formData);
+        setTeams([...teams, newTeam]);
+        setSuccess('Team created successfully');
+      }
+      
+      setShowForm(false);
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      setError(editingTeam ? 'Failed to update team' : 'Failed to create team');
+      console.error('Team submission error:', err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  const handleDeleteTeam = async (teamId: string) => {
+    if (!confirm('Are you sure you want to delete this team?')) return;
+    
+    setIsSubmitting(true);
+    setError(null);
+    
+    try {
+      await api.deleteTeam(teamId);
+      setTeams(teams.filter(t => t.id !== teamId));
+      setSuccess('Team deleted successfully');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (err) {
+      setError('Failed to delete team');
+      console.error('Team deletion error:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen bg-ipl-dark">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-white">Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return null;
@@ -98,7 +174,7 @@ export default function AdminTeams() {
       <div className="flex min-h-screen bg-ipl-dark">
         <AdminSidebar currentPage="/admin/teams" />
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-white">Loading...</div>
+          <div className="text-white">Loading teams...</div>
         </div>
       </div>
     );
@@ -110,13 +186,28 @@ export default function AdminTeams() {
       
       <div className="flex-1">
         <div className="p-8">
+          {/* Success Message */}
+          {success && (
+            <div className="mb-6 p-4 bg-green-500/20 border border-green-500/30 rounded-lg text-green-400">
+              {success}
+            </div>
+          )}
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400">
+              {error}
+            </div>
+          )}
+
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold text-white">
               Manage Teams
             </h1>
             <button 
               onClick={handleAddTeam}
-              className="ipl-button"
+              className="ipl-button disabled:opacity-50"
+              disabled={isSubmitting}
             >
               Add New Team
             </button>
@@ -158,13 +249,15 @@ export default function AdminTeams() {
                 <div className="flex space-x-2 pt-4 border-t border-white/10">
                   <button 
                     onClick={() => handleEditTeam(team)}
-                    className="flex-1 text-ipl-gold hover:text-ipl-purple transition-colors font-medium py-2"
+                    className="flex-1 text-ipl-gold hover:text-ipl-purple transition-colors font-medium py-2 disabled:opacity-50"
+                    disabled={isSubmitting}
                   >
                     Edit
                   </button>
                   <button 
                     onClick={() => handleDeleteTeam(team.id)}
-                    className="flex-1 text-red-400 hover:text-red-300 transition-colors font-medium py-2"
+                    className="flex-1 text-red-400 hover:text-red-300 transition-colors font-medium py-2 disabled:opacity-50"
+                    disabled={isSubmitting}
                   >
                     Delete
                   </button>
@@ -306,13 +399,14 @@ export default function AdminTeams() {
                     <div className="flex space-x-4 pt-6 border-t border-white/10">
                       <button
                         type="submit"
-                        className="ipl-button flex-1"
+                        disabled={isSubmitting}
+                        className="ipl-button flex-1 disabled:opacity-50"
                       >
-                        {editingTeam ? 'Update Team' : 'Add Team'}
+                        {isSubmitting ? 'Saving...' : (editingTeam ? 'Update Team' : 'Add Team')}
                       </button>
                       <button
                         type="button"
-                        onClick={() => setShowForm(false)}
+                        onClick={resetForm}
                         className="flex-1 glass-effect text-white font-semibold py-3 px-6 rounded-lg hover:bg-white/20 transition-all duration-200"
                       >
                         Cancel

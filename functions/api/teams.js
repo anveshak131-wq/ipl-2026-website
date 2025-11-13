@@ -1,30 +1,347 @@
 /**
  * Cloudflare Pages Function for teams API
+ * Handles GET, POST, PUT, DELETE operations for teams
  */
 
-export async function onRequestGet(context) {
+// Helper function to verify admin token
+function verifyAdminToken(request) {
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return false;
+  }
+  return true;
+}
+
+// Default mock teams
+const defaultTeams = [
+  {
+    id: '1',
+    name: 'Royal Challengers Bengaluru',
+    shortName: 'RCB',
+    logo: '/logos/rcb_logo_new.svg',
+    description: 'One of the most popular IPL teams known for their aggressive batting',
+    colors: { primary: '#EC1C24', secondary: '#000000' }
+  },
+  {
+    id: '2',
+    name: 'Mumbai Indians',
+    shortName: 'MI',
+    logo: '/logos/mi_logo_new.svg',
+    description: 'The most successful IPL team with 5 championship titles',
+    colors: { primary: '#004BA0', secondary: '#FFFFFF' }
+  },
+  {
+    id: '3',
+    name: 'Sunrisers Hyderabad',
+    shortName: 'SRH',
+    logo: '/logos/srh_logo_new.svg',
+    description: 'Known for their strong bowling attack and consistent performances',
+    colors: { primary: '#FF822A', secondary: '#000000' }
+  },
+  {
+    id: '4',
+    name: 'Gujarat Titans',
+    shortName: 'GT',
+    logo: '/logos/gt_logo_new.svg',
+    description: 'The newest powerhouse team that won IPL in their debut season',
+    colors: { primary: '#1B2130', secondary: '#E15454' }
+  },
+  {
+    id: '5',
+    name: 'Punjab Kings',
+    shortName: 'PBKS',
+    logo: '/logos/kxip_logo_new.svg',
+    description: 'Known for their explosive batting and never-say-die attitude',
+    colors: { primary: '#ED1D24', secondary: '#FBDD0B' }
+  },
+  {
+    id: '6',
+    name: 'Delhi Capitals',
+    shortName: 'DC',
+    logo: '/logos/dc_logo_new.svg',
+    description: 'Young and dynamic team with a perfect blend of experience and youth',
+    colors: { primary: '#0078BC', secondary: '#EF1B26' }
+  },
+  {
+    id: '7',
+    name: 'Lucknow Super Giants',
+    shortName: 'LSG',
+    logo: '/logos/lsg_logo_new.svg',
+    description: 'The newest franchise making waves with their balanced squad',
+    colors: { primary: '#9C2A2C', secondary: '#F7E17D' }
+  },
+  {
+    id: '8',
+    name: 'Rajasthan Royals',
+    shortName: 'RR',
+    logo: '/logos/rr_logo_new.svg',
+    description: 'The inaugural IPL champions known for nurturing young talent',
+    colors: { primary: '#EA1A85', secondary: '#004B8D' }
+  },
+  {
+    id: '9',
+    name: 'Kolkata Knight Riders',
+    shortName: 'KKR',
+    logo: '/logos/kkr_logo_new.svg',
+    description: 'Two-time champions with a massive fan following',
+    colors: { primary: '#3A225D', secondary: '#B9975B' }
+  },
+  {
+    id: '10',
+    name: 'Chennai Super Kings',
+    shortName: 'CSK',
+    logo: '/logos/csk_logo_new.svg',
+    description: 'The Yellow Army led by the legendary MS Dhoni',
+    colors: { primary: '#FFFF00', secondary: '#0081E8' }
+  }
+];
+
+// GET - Retrieve all teams
+async function handleGetRequest(context) {
   const { env } = context;
-
+  
   try {
-    // Get teams from KV storage
-    const teams = await env.IPL_CACHE.get('teams', 'json');
+    // Try to get teams from KV storage
+    let teams = await env.IPL_CACHE.get('teams', 'json');
     
+    // Fallback to default teams if KV storage is empty
     if (!teams) {
-      return new Response(JSON.stringify({ error: 'Teams not found' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' }
-      });
+      teams = defaultTeams;
     }
-
+    
     return new Response(JSON.stringify(teams), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' }
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate'
+      }
     });
   } catch (error) {
-    console.error('Error fetching teams:', error);
-    return new Response(JSON.stringify({ error: 'Failed to fetch teams' }), {
+    console.error('Error retrieving teams:', error);
+    return new Response(JSON.stringify({ error: 'Failed to retrieve teams' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
   }
+}
+
+// POST - Create a new team
+async function handlePostRequest(context) {
+  const { env, request } = context;
+  
+  // Verify admin authentication
+  if (!verifyAdminToken(request)) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+  
+  try {
+    const body = await request.json();
+    const { name, shortName, logo, description, colors } = body;
+    
+    // Validate required fields
+    if (!name || !shortName || !logo || !description) {
+      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
+    // Get existing teams
+    let teams = await env.IPL_CACHE.get('teams', 'json') || defaultTeams;
+    
+    // Generate new ID
+    const newId = String(Math.max(...teams.map(t => parseInt(t.id) || 0), 0) + 1);
+    
+    // Create new team
+    const newTeam = {
+      id: newId,
+      name,
+      shortName,
+      logo,
+      description,
+      colors: colors || { primary: '#6B46C1', secondary: '#FFD700' }
+    };
+    
+    // Add to teams array
+    teams.push(newTeam);
+    
+    // Save to KV
+    await env.IPL_CACHE.put('teams', JSON.stringify(teams));
+    
+    return new Response(JSON.stringify(newTeam), {
+      status: 201,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } catch (error) {
+    console.error('Error creating team:', error);
+    return new Response(JSON.stringify({ error: 'Failed to create team' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+// PUT - Update an existing team
+async function handlePutRequest(context) {
+  const { env, request } = context;
+  
+  // Verify admin authentication
+  if (!verifyAdminToken(request)) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+  
+  try {
+    const body = await request.json();
+    const { id, name, shortName, logo, description, colors } = body;
+    
+    if (!id) {
+      return new Response(JSON.stringify({ error: 'Team ID is required' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
+    // Get existing teams
+    let teams = await env.IPL_CACHE.get('teams', 'json') || defaultTeams;
+    
+    // Find and update team
+    const teamIndex = teams.findIndex(t => t.id === id);
+    
+    if (teamIndex === -1) {
+      return new Response(JSON.stringify({ error: 'Team not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
+    const updatedTeam = {
+      ...teams[teamIndex],
+      ...(name && { name }),
+      ...(shortName && { shortName }),
+      ...(logo && { logo }),
+      ...(description && { description }),
+      ...(colors && { colors })
+    };
+    
+    teams[teamIndex] = updatedTeam;
+    
+    // Save to KV
+    await env.IPL_CACHE.put('teams', JSON.stringify(teams));
+    
+    return new Response(JSON.stringify(updatedTeam), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } catch (error) {
+    console.error('Error updating team:', error);
+    return new Response(JSON.stringify({ error: 'Failed to update team' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+// DELETE - Delete a team
+async function handleDeleteRequest(context) {
+  const { env, request } = context;
+  
+  // Verify admin authentication
+  if (!verifyAdminToken(request)) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+  
+  try {
+    const url = new URL(request.url);
+    const teamId = url.searchParams.get('id');
+    
+    if (!teamId) {
+      return new Response(JSON.stringify({ error: 'Team ID is required' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
+    // Get existing teams
+    let teams = await env.IPL_CACHE.get('teams', 'json') || defaultTeams;
+    
+    // Filter out the team to delete
+    const filteredTeams = teams.filter(t => t.id !== teamId);
+    
+    if (filteredTeams.length === teams.length) {
+      return new Response(JSON.stringify({ error: 'Team not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
+    // Save to KV
+    await env.IPL_CACHE.put('teams', JSON.stringify(filteredTeams));
+    
+    return new Response(JSON.stringify({ success: true, message: 'Team deleted' }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  } catch (error) {
+    console.error('Error deleting team:', error);
+    return new Response(JSON.stringify({ error: 'Failed to delete team' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+}
+
+// Main request handler
+export async function onRequest(context) {
+  const { request } = context;
+  const method = request.method;
+  
+  // Enable CORS
+  if (method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+      }
+    });
+  }
+  
+  let response;
+  
+  switch (method) {
+    case 'GET':
+      response = await handleGetRequest(context);
+      break;
+    case 'POST':
+      response = await handlePostRequest(context);
+      break;
+    case 'PUT':
+      response = await handlePutRequest(context);
+      break;
+    case 'DELETE':
+      response = await handleDeleteRequest(context);
+      break;
+    default:
+      response = new Response(JSON.stringify({ error: 'Method not allowed' }), {
+        status: 405,
+        headers: { 'Content-Type': 'application/json' }
+      });
+  }
+  
+  // Add CORS headers to response
+  response.headers.set('Access-Control-Allow-Origin', '*');
+  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+  return response;
 }

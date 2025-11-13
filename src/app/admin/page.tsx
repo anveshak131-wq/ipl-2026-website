@@ -1,35 +1,57 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import AdminLogin from '@/components/admin/AdminLogin';
-
-// Mark this page as dynamic (not pre-rendered) to ensure client-side redirects work
-// Note: Removed for static export compatibility
+import AdminRouter from './AdminRouter';
 
 export default function AdminPage() {
+  const router = useRouter();
+  const pathname = usePathname();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('adminToken');
-    if (token) {
-      // TODO: Verify token validity
-      setIsAuthenticated(true);
-    }
+    // Check authentication on client side only
+    const checkAuth = () => {
+      try {
+        const token = localStorage.getItem('adminToken');
+        if (token) {
+          setIsAuthenticated(true);
+        }
+      } catch (error) {
+        // localStorage not available, continue with login
+        console.log('localStorage not available');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
   }, []);
 
   const handleLogin = (token: string) => {
     setIsAuthenticated(true);
+    // Store token in localStorage
+    try {
+      localStorage.setItem('adminToken', token);
+    } catch (error) {
+      console.log('localStorage not available');
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-ipl-dark flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return <AdminLogin onLogin={handleLogin} />;
   }
 
-  // Redirect to dashboard if already authenticated
-  if (typeof window !== 'undefined') {
-    window.location.href = '/admin/dashboard';
-    return null;
-  }
-
-  return null;
+  // Show admin router for authenticated users
+  return <AdminRouter />;
 }

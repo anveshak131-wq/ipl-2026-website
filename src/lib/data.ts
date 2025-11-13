@@ -1,7 +1,7 @@
 // Mock data for IPL 2026 website
 // TODO: Replace with Cloudflare Worker API calls
 
-import { Team, Player, Match, News, Highlight } from '@/types';
+import { Team, Player, Match, News, Highlight, Content } from '@/types';
 
 export const mockTeams: Team[] = [
   {
@@ -360,5 +360,178 @@ export const api = {
   getHighlights: async (): Promise<Highlight[]> => {
     await new Promise(resolve => setTimeout(resolve, 100));
     return mockHighlights;
+  },
+
+  // Teams API
+  createTeam: async (team: Omit<Team, 'id' | 'players'>): Promise<Team> => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch('/api/teams', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(team)
+      });
+      if (!response.ok) {
+        throw new Error('Failed to create team');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating team:', error);
+      throw error;
+    }
+  },
+
+  updateTeam: async (id: string, team: Partial<Omit<Team, 'id' | 'players'>>): Promise<Team> => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch('/api/teams', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ id, ...team })
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update team');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating team:', error);
+      throw error;
+    }
+  },
+
+  deleteTeam: async (id: string): Promise<void> => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`/api/teams?id=${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete team');
+      }
+    } catch (error) {
+      console.error('Error deleting team:', error);
+      throw error;
+    }
+  },
+
+  // Content API
+  getContent: async (): Promise<Content[]> => {
+    try {
+      const response = await fetch('/api/content');
+      if (!response.ok) {
+        throw new Error('Failed to fetch content');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching content:', error);
+      return [];
+    }
+  },
+
+  createContent: async (content: Omit<Content, 'id' | 'createdAt' | 'updatedAt'>): Promise<Content> => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch('/api/content', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(content)
+      });
+      if (!response.ok) {
+        throw new Error('Failed to create content');
+      }
+      const result = await response.json();
+      return result.content || result;
+    } catch (error) {
+      console.error('Error creating content:', error);
+      throw error;
+    }
+  },
+
+  updateContent: async (id: string, content: Partial<Omit<Content, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Content> => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch('/api/content', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ id, ...content })
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update content');
+      }
+      const result = await response.json();
+      return result.content || result;
+    } catch (error) {
+      console.error('Error updating content:', error);
+      throw error;
+    }
+  },
+
+  deleteContent: async (id: string): Promise<void> => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`/api/content?id=${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete content');
+      }
+    } catch (error) {
+      console.error('Error deleting content:', error);
+      throw error;
+    }
+  },
+
+  // Settings API
+  getSettings: async (): Promise<any> => {
+    try {
+      const response = await fetch('/api/settings');
+      if (!response.ok) {
+        throw new Error('Failed to fetch settings');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching settings:', error);
+      return {};
+    }
+  },
+
+  updateSettings: async (settings: any): Promise<any> => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch('/api/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(settings)
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update settings');
+      }
+      const result = await response.json();
+      return result.settings || result;
+    } catch (error) {
+      console.error('Error updating settings:', error);
+      throw error;
+    }
   }
 };

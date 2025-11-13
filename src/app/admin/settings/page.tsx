@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
+import { api } from '@/lib/data';
 
 // Mark this page as dynamic to prevent pre-rendering
 // Note: Removed for static export compatibility
@@ -22,7 +23,10 @@ export default function AdminSettings() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [settings, setSettings] = useState<Settings>({
     siteName: 'IPL 2026',
     siteDescription: 'The biggest cricket tournament in the world',
@@ -35,19 +39,33 @@ export default function AdminSettings() {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem('adminToken');
-    if (!token) {
-      router.push('/admin');
-      return;
-    }
-    setIsAuthenticated(true);
-    fetchSettings();
+    // Check authentication on client side only
+    const checkAuth = () => {
+      try {
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+          router.push('/admin');
+          return;
+        }
+        setIsAuthenticated(true);
+        fetchSettings();
+      } catch (error) {
+        // localStorage not available, redirect to login
+        router.push('/admin');
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+
+    checkAuth();
   }, [router]);
 
   const fetchSettings = async () => {
     try {
-      // TODO: Replace with API call
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const fetchedSettings = await api.getSettings();
+      if (fetchedSettings && Object.keys(fetchedSettings).length > 0) {
+        setSettings(fetchedSettings);
+      }
       setIsLoading(false);
     } catch (error) {
       console.error('Failed to fetch settings:', error);
@@ -58,18 +76,30 @@ export default function AdminSettings() {
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
+    setError(null);
+    setSuccess(null);
+    
     try {
-      // TODO: Send to API
-      console.log('Saving settings:', settings);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      alert('Settings saved successfully!');
+      await api.updateSettings(settings);
+      setSuccess('Settings saved successfully!');
+      setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
       console.error('Failed to save settings:', error);
-      alert('Failed to save settings');
+      setError('Failed to save settings');
     } finally {
       setIsSaving(false);
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen bg-ipl-dark">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-white">Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return null;
@@ -80,7 +110,7 @@ export default function AdminSettings() {
       <div className="flex min-h-screen bg-ipl-dark">
         <AdminSidebar currentPage="/admin/settings" />
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-white">Loading...</div>
+          <div className="text-white">Loading settings...</div>
         </div>
       </div>
     );
@@ -92,6 +122,20 @@ export default function AdminSettings() {
       
       <div className="flex-1">
         <div className="p-8">
+          {/* Success Message */}
+          {success && (
+            <div className="mb-6 p-4 bg-green-500/20 border border-green-500/30 rounded-lg text-green-400">
+              {success}
+            </div>
+          )}
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-lg text-red-400">
+              {error}
+            </div>
+          )}
+
           <h1 className="text-3xl font-bold text-white mb-8">
             System Settings
           </h1>

@@ -3,22 +3,68 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
-
-// Mark this page as dynamic to prevent pre-rendering
-// Note: Removed for static export compatibility
+import { api } from '@/lib/data';
 
 export default function AdminDashboard() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [stats, setStats] = useState({
+    teamsCount: 0,
+    matchesCount: 0,
+    contentCount: 0
+  });
 
   useEffect(() => {
-    const token = localStorage.getItem('adminToken');
-    if (!token) {
-      router.push('/admin');
-      return;
-    }
-    setIsAuthenticated(true);
+    const checkAuth = () => {
+      try {
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+          router.push('/admin');
+          return;
+        }
+        setIsAuthenticated(true);
+        fetchStats();
+      } catch (error) {
+        router.push('/admin');
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+
+    checkAuth();
   }, [router]);
+
+  const fetchStats = async () => {
+    try {
+      const [teams, matches, content] = await Promise.all([
+        api.getTeams(),
+        api.getMatches(),
+        api.getContent()
+      ]);
+      
+      setStats({
+        teamsCount: teams.length,
+        matchesCount: matches.length,
+        contentCount: content.length
+      });
+    } catch (error) {
+      console.error('Failed to fetch stats:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen bg-ipl-dark">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-white">Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return null;
@@ -39,37 +85,37 @@ export default function AdminDashboard() {
             <div className="glass-effect rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-3xl">🏏</span>
-                <span className="text-green-400 text-sm font-medium">+12%</span>
+                <span className="text-green-400 text-sm font-medium">✓</span>
               </div>
-              <h3 className="text-2xl font-bold text-white mb-1">10</h3>
+              <h3 className="text-2xl font-bold text-white mb-1">{stats.teamsCount}</h3>
               <p className="text-gray-400 text-sm">Total Teams</p>
             </div>
 
             <div className="glass-effect rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
-                <span className="text-3xl">👥</span>
-                <span className="text-green-400 text-sm font-medium">+8%</span>
+                <span className="text-3xl">�</span>
+                <span className="text-green-400 text-sm font-medium">✓</span>
               </div>
-              <h3 className="text-2xl font-bold text-white mb-1">3</h3>
-              <p className="text-gray-400 text-sm">Players Added</p>
-            </div>
-
-            <div className="glass-effect rounded-xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-3xl">📅</span>
-                <span className="text-green-400 text-sm font-medium">+25%</span>
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-1">3</h3>
+              <h3 className="text-2xl font-bold text-white mb-1">{stats.matchesCount}</h3>
               <p className="text-gray-400 text-sm">Matches Scheduled</p>
             </div>
 
             <div className="glass-effect rounded-xl p-6">
               <div className="flex items-center justify-between mb-4">
-                <span className="text-3xl">📰</span>
-                <span className="text-green-400 text-sm font-medium">+15%</span>
+                <span className="text-3xl">�</span>
+                <span className="text-green-400 text-sm font-medium">✓</span>
               </div>
-              <h3 className="text-2xl font-bold text-white mb-1">2</h3>
-              <p className="text-gray-400 text-sm">News Articles</p>
+              <h3 className="text-2xl font-bold text-white mb-1">{stats.contentCount}</h3>
+              <p className="text-gray-400 text-sm">Content Items</p>
+            </div>
+
+            <div className="glass-effect rounded-xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-3xl">⚙️</span>
+                <span className="text-green-400 text-sm font-medium">Live</span>
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-1">Online</h3>
+              <p className="text-gray-400 text-sm">System Status</p>
             </div>
           </div>
 
@@ -89,12 +135,12 @@ export default function AdminDashboard() {
               </button>
 
               <button 
-                onClick={() => router.push('/admin/players')}
+                onClick={() => router.push('/admin/teams')}
                 className="p-4 bg-white/5 hover:bg-white/10 rounded-lg transition-all duration-200 text-left"
               >
-                <span className="text-2xl mb-2 block">🏃</span>
-                <span className="text-white font-medium">Add Player</span>
-                <span className="text-gray-400 text-sm block">Register new player</span>
+                <span className="text-2xl mb-2 block">�</span>
+                <span className="text-white font-medium">Manage Teams</span>
+                <span className="text-gray-400 text-sm block">Add or edit teams</span>
               </button>
 
               <button 
@@ -102,8 +148,8 @@ export default function AdminDashboard() {
                 className="p-4 bg-white/5 hover:bg-white/10 rounded-lg transition-all duration-200 text-left"
               >
                 <span className="text-2xl mb-2 block">📝</span>
-                <span className="text-white font-medium">Add News</span>
-                <span className="text-gray-400 text-sm block">Publish news article</span>
+                <span className="text-white font-medium">Add Content</span>
+                <span className="text-gray-400 text-sm block">Manage banners & news</span>
               </button>
 
               <button 
@@ -117,43 +163,42 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Recent Activity */}
+          {/* System Status */}
           <div className="glass-effect rounded-xl p-6">
             <h2 className="text-xl font-semibold text-white mb-4">
-              Recent Activity
+              System Status
             </h2>
             <div className="space-y-4">
-              <div className="flex items-center space-x-4 p-3 bg-white/5 rounded-lg">
-                <div className="w-10 h-10 bg-ipl-gold/20 rounded-full flex items-center justify-center">
-                  <span className="text-ipl-gold">🏏</span>
+              <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <span className="text-white">Teams API</span>
                 </div>
-                <div className="flex-1">
-                  <p className="text-white font-medium">Match added: CSK vs RCB</p>
-                  <p className="text-gray-400 text-sm">Scheduled for March 23, 2026</p>
-                </div>
-                <span className="text-gray-500 text-sm">2h ago</span>
+                <span className="text-green-400 text-sm">Operational</span>
               </div>
 
-              <div className="flex items-center space-x-4 p-3 bg-white/5 rounded-lg">
-                <div className="w-10 h-10 bg-ipl-gold/20 rounded-full flex items-center justify-center">
-                  <span className="text-ipl-gold">🏃</span>
+              <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <span className="text-white">Matches API</span>
                 </div>
-                <div className="flex-1">
-                  <p className="text-white font-medium">Player added: Jasprit Bumrah</p>
-                  <p className="text-gray-400 text-sm">Joined Mumbai Indians</p>
-                </div>
-                <span className="text-gray-500 text-sm">4h ago</span>
+                <span className="text-green-400 text-sm">Operational</span>
               </div>
 
-              <div className="flex items-center space-x-4 p-3 bg-white/5 rounded-lg">
-                <div className="w-10 h-10 bg-ipl-gold/20 rounded-full flex items-center justify-center">
-                  <span className="text-ipl-gold">📰</span>
+              <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <span className="text-white">Content API</span>
                 </div>
-                <div className="flex-1">
-                  <p className="text-white font-medium">News published: IPL 2026 Schedule</p>
-                  <p className="text-gray-400 text-sm">Announcement article</p>
+                <span className="text-green-400 text-sm">Operational</span>
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <span className="text-white">Settings API</span>
                 </div>
-                <span className="text-gray-500 text-sm">6h ago</span>
+                <span className="text-green-400 text-sm">Operational</span>
               </div>
             </div>
           </div>

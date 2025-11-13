@@ -7,12 +7,14 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 // Mark this page as dynamic to prevent pre-rendering
 // Note: Removed for static export compatibility
 import { Content } from '@/types';
+import { api } from '@/lib/data';
 
 export default function AdminContent() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [content, setContent] = useState<Content[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingContent, setEditingContent] = useState<Content | null>(null);
   const [formData, setFormData] = useState<{
@@ -32,43 +34,31 @@ export default function AdminContent() {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem('adminToken');
-    if (!token) {
-      router.push('/admin');
-      return;
-    }
-    setIsAuthenticated(true);
-    fetchContent();
+    // Check authentication on client side only
+    const checkAuth = () => {
+      try {
+        const token = localStorage.getItem('adminToken');
+        if (!token) {
+          router.push('/admin');
+          return;
+        }
+        setIsAuthenticated(true);
+        fetchContent();
+      } catch (error) {
+        // localStorage not available, redirect to login
+        router.push('/admin');
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+
+    checkAuth();
   }, [router]);
 
   const fetchContent = async () => {
     try {
-      // TODO: Replace with API call
-      const mockContent: Content[] = [
-        {
-          id: '1',
-          type: 'banner',
-          title: 'IPL 2026 Launch',
-          content: 'Welcome to IPL 2026 - The biggest cricket tournament',
-          imageUrl: '/banners/ipl-2026.jpg',
-          videoUrl: '',
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        },
-        {
-          id: '2',
-          type: 'news',
-          title: 'Schedule Announced',
-          content: 'The complete IPL 2026 schedule has been announced',
-          imageUrl: '/news/schedule.jpg',
-          videoUrl: '',
-          isActive: true,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
-      ];
-      setContent(mockContent);
+      const contentData = await api.getContent();
+      setContent(contentData);
     } catch (error) {
       console.error('Failed to fetch content:', error);
     } finally {
@@ -102,17 +92,29 @@ export default function AdminContent() {
     setShowForm(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Send to API
-    console.log('Submitting content:', formData);
-    setShowForm(false);
+    try {
+      if (editingContent) {
+        const updated = await api.updateContent(editingContent.id, formData);
+        setContent(content.map(c => c.id === editingContent.id ? updated : c));
+      } else {
+        const newContent = await api.createContent(formData);
+        setContent([...content, newContent]);
+      }
+      setShowForm(false);
+    } catch (error) {
+      console.error('Failed to save content:', error);
+    }
   };
 
-  const handleDeleteContent = (contentId: string) => {
-    if (confirm('Are you sure you want to delete this content?')) {
-      // TODO: Send delete request to API
+  const handleDeleteContent = async (contentId: string) => {
+    if (!confirm('Are you sure you want to delete this content?')) return;
+    try {
+      await api.deleteContent(contentId);
       setContent(content.filter(c => c.id !== contentId));
+    } catch (error) {
+      console.error('Failed to delete content:', error);
     }
   };
 
@@ -123,6 +125,16 @@ export default function AdminContent() {
     ));
   };
 
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen bg-ipl-dark">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-white">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return null;
   }
@@ -132,7 +144,7 @@ export default function AdminContent() {
       <div className="flex min-h-screen bg-ipl-dark">
         <AdminSidebar currentPage="/admin/content" />
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-white">Loading...</div>
+          <div className="text-white">Loading content...</div>
         </div>
       </div>
     );
