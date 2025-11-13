@@ -1,0 +1,45 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      @keyframes sunRise {
+        0% { transform: translateY(10px) rotate(0deg); }
+        50% { transform: translateY(0px) rotate(180deg); }
+        100% { transform: translateY(10px) rotate(360deg); }
+      }
+      @keyframes orangeGlow {
+        0%, 100% { filter: drop-shadow(0 0 15px #FF822A); }
+        50% { filter: drop-shadow(0 0 30px #FF822A) drop-shadow(0 0 40px #FFA500); }
+      }
+      @keyframes sunPulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.9; transform: scale(1.1); }
+      }
+      @keyframes rayRotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      .srh-bg { animation: sunPulse 3s ease-in-out infinite; }
+      .srh-glow { animation: orangeGlow 2s ease-in-out infinite; }
+      .sun { animation: sunRise 4s ease-in-out infinite; }
+      .rays { animation: rayRotate 8s linear infinite; transform-origin: 100px 100px; }
+    </style>
+    <linearGradient id="srhGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF822A;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF6B00;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="200" height="200" rx="40" fill="url(#srhGradient)" class="srh-bg srh-glow"/>
+  
+  <g class="rays">
+    <line x1="100" y1="30" x2="100" y2="50" stroke="#FFD700" stroke-width="3"/>
+    <line x1="100" y1="150" x2="100" y2="170" stroke="#FFD700" stroke-width="3"/>
+    <line x1="30" y1="100" x2="50" y2="100" stroke="#FFD700" stroke-width="3"/>
+    <line x1="150" y1="100" x2="170" y2="100" stroke="#FFD700" stroke-width="3"/>
+  </g>
+  <circle cx="100" cy="100" r="35" fill="#FFD700" class="sun"/>
+  <circle cx="100" cy="100" r="25" fill="#FFA500"/>
+  
+  <text x="100" y="170" font-family="Arial, sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#fff">SRH</text>
+</svg>
+

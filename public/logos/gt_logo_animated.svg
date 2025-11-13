@@ -1,0 +1,42 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      @keyframes gtPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.08); }
+      }
+      @keyframes darkBlueGlow {
+        0%, 100% { filter: drop-shadow(0 0 15px #1B2130); }
+        50% { filter: drop-shadow(0 0 30px #1B2130) drop-shadow(0 0 40px #E15454); }
+      }
+      @keyframes giantBreathe {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+      }
+      @keyframes redAccent {
+        0%, 100% { opacity: 0.9; }
+        50% { opacity: 1; }
+      }
+      .gt-bg { animation: gtPulse 3s ease-in-out infinite; }
+      .gt-glow { animation: darkBlueGlow 2.5s ease-in-out infinite; }
+      .giant { animation: giantBreathe 2s ease-in-out infinite; }
+      .red-accent { animation: redAccent 1.5s ease-in-out infinite; }
+    </style>
+    <linearGradient id="gtGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1B2130;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0E4B50;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <circle cx="100" cy="100" r="85" fill="url(#gtGradient)" class="gt-bg gt-glow"/>
+  
+  <rect x="70" y="80" width="60" height="80" rx="15" fill="#00D8FF" class="giant"/>
+  <circle cx="85" cy="105" r="6" fill="#1B2130"/>
+  <circle cx="115" cy="105" r="6" fill="#1B2130"/>
+  <ellipse cx="100" cy="120" rx="10" ry="6" fill="#1B2130"/>
+  <polygon points="100,130 95,145 105,145" fill="#1B2130"/>
+  <circle cx="100" cy="60" r="8" fill="#E15454" class="red-accent"/>
+  
+  <text x="100" y="185" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#fff">GT</text>
+</svg>
+

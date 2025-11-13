@@ -1,0 +1,39 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      @keyframes pbksPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+      @keyframes redGoldGlow {
+        0%, 100% { filter: drop-shadow(0 0 15px #ED1D24); }
+        50% { filter: drop-shadow(0 0 25px #ED1D24) drop-shadow(0 0 30px #FBDD0B); }
+      }
+      @keyframes kingCrown {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-5px); }
+      }
+      @keyframes goldShimmer {
+        0% { opacity: 0.8; }
+        50% { opacity: 1; }
+        100% { opacity: 0.8; }
+      }
+      .pbks-bg { animation: pbksPulse 2.5s ease-in-out infinite; }
+      .pbks-glow { animation: redGoldGlow 2s ease-in-out infinite; }
+      .crown { animation: kingCrown 2s ease-in-out infinite; }
+      .gold { animation: goldShimmer 1.5s ease-in-out infinite; }
+    </style>
+    <linearGradient id="pbksGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ED1D24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B71C1C;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="200" height="200" rx="40" fill="url(#pbksGradient)" class="pbks-bg pbks-glow"/>
+  
+  <path d="M 50 120 L 60 90 L 70 100 L 80 80 L 90 100 L 100 70 L 110 100 L 120 80 L 130 100 L 140 90 L 150 120 Z" fill="#FBDD0B" class="crown gold"/>
+  <rect x="85" y="120" width="30" height="40" rx="5" fill="#FBDD0B" opacity="0.3"/>
+  
+  <text x="100" y="175" font-family="Arial, sans-serif" font-size="22" font-weight="bold" text-anchor="middle" fill="#fff">PBKS</text>
+</svg>
+

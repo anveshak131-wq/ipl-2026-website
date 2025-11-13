@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Team } from '@/types';
 import { api } from '@/lib/data';
 import LoadingSpinner from '../ui/LoadingSpinner';
+import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 
 export default function TeamsShowcase() {
   const router = useRouter();
@@ -95,13 +96,16 @@ export default function TeamsShowcase() {
 
               {/* Content */}
               <div className="relative aspect-square p-6 flex flex-col items-center justify-center space-y-4">
-                {/* Team Logo */}
+                {/* Team Logo with animated version */}
                 <div className="relative w-20 h-20 md:w-24 md:h-24 transform group-hover:scale-125 group-hover:rotate-12 transition-all duration-500">
-                  <div className="absolute inset-0 bg-white/20 rounded-full blur-md" />
+                  <div className="absolute inset-0 bg-white/20 rounded-full blur-md group-hover:blur-xl transition-all duration-500" />
                   <img 
-                    src={team.logo} 
+                    src={getAnimatedLogoPath(team.id)} 
                     alt={team.shortName}
                     className="relative w-full h-full object-contain drop-shadow-2xl"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = getLogoPath(team.id);
+                    }}
                   />
                 </div>
 

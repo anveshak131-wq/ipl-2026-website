@@ -90,24 +90,32 @@ export default function TeamsPage() {
             </p>
           </div>
 
-          {/* Teams Grid */}
+          {/* Teams Grid with staggered animations */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {teams.map((team) => (
-              <TeamCard
+            {teams.map((team, index) => (
+              <div
                 key={team.id}
-                team={team}
-                onPlayerClick={handlePlayerClick}
-              />
+                className="animate-fade-in"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <TeamCard
+                  team={team}
+                  onPlayerClick={handlePlayerClick}
+                />
+              </div>
             ))}
           </div>
 
-          {/* TODO: Add team statistics section */}
-          <div className="mt-16">
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 p-8 md:p-12">
+          {/* Team Statistics Section with enhanced animations */}
+          <div className="mt-16 animate-fade-in" style={{ animationDelay: '400ms' }}>
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 p-8 md:p-12 group hover:border-ipl-gold/50 transition-all duration-500">
               {/* Animated background */}
-              <div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-300">
-                <div className="absolute inset-0 bg-gradient-to-br from-ipl-gold/10 to-ipl-purple/10" />
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                <div className="absolute inset-0 bg-gradient-to-br from-ipl-gold/10 to-ipl-purple/10 animate-gradient" />
               </div>
+              
+              {/* Shimmer effect */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer" />
 
               {/* Content */}
               <div className="relative text-center">
@@ -116,14 +124,23 @@ export default function TeamsPage() {
                     <Icon name="stats" size={16} /> STATISTICS
                   </span>
                 </div>
-                <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
-                  Team <span className="bg-gradient-to-r from-ipl-gold to-ipl-purple bg-clip-text text-transparent">Performance</span>
+                <h2 className="text-3xl md:text-4xl font-black text-white mb-4 transform group-hover:scale-105 transition-transform duration-300">
+                  Team <span className="bg-gradient-to-r from-ipl-gold to-ipl-purple bg-clip-text text-transparent animate-glow">Performance</span>
                 </h2>
-                <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
+                <p className="text-gray-300 mb-8 max-w-2xl mx-auto group-hover:text-gray-200 transition-colors duration-300">
                   Comprehensive statistics and performance metrics for all IPL teams competing in 2026
                 </p>
-                <button onClick={() => alert('Opening team statistics...')} className="bg-gradient-to-r from-ipl-purple to-ipl-gold hover:from-ipl-gold hover:to-ipl-purple text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 cursor-pointer">
-                  View Detailed Stats
+                <button 
+                  onClick={() => alert('Opening team statistics...')} 
+                  className="bg-gradient-to-r from-ipl-purple to-ipl-gold hover:from-ipl-gold hover:to-ipl-purple text-white font-bold py-3 px-8 rounded-lg transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:shadow-ipl-gold/50 cursor-pointer relative overflow-hidden group/btn"
+                >
+                  <span className="relative z-10 flex items-center gap-2">
+                    View Detailed Stats
+                    <svg className="w-5 h-5 transform group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000" />
                 </button>
               </div>
             </div>

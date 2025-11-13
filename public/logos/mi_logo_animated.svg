@@ -1,0 +1,39 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      @keyframes miWave {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+      }
+      @keyframes blueGlow {
+        0%, 100% { filter: drop-shadow(0 0 15px #004BA0); }
+        50% { filter: drop-shadow(0 0 30px #004BA0) drop-shadow(0 0 40px #0066CC); }
+      }
+      @keyframes miGradient {
+        0% { stop-color: #004BA0; }
+        50% { stop-color: #0066CC; }
+        100% { stop-color: #004BA0; }
+      }
+      @keyframes starTwinkle {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.1); }
+      }
+      .mi-bg { animation: miWave 3s ease-in-out infinite; }
+      .mi-glow { animation: blueGlow 2s ease-in-out infinite; }
+      .mi-gradient-stop { animation: miGradient 3s ease-in-out infinite; }
+      .star { animation: starTwinkle 1.5s ease-in-out infinite; }
+    </style>
+    <linearGradient id="miGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" class="mi-gradient-stop" style="stop-color:#004BA0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#003366;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="200" height="200" rx="40" fill="url(#miGradient)" class="mi-bg mi-glow"/>
+  
+  <circle cx="100" cy="100" r="40" fill="#FFFFFF" opacity="0.2"/>
+  <path d="M 100 60 L 105 75 L 120 75 L 108 85 L 113 100 L 100 90 L 87 100 L 92 85 L 80 75 L 95 75 Z" fill="#FFD700" class="star"/>
+  
+  <text x="100" y="160" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#fff">MI</text>
+</svg>
+

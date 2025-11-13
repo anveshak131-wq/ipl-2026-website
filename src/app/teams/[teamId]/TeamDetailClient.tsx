@@ -20,24 +20,12 @@ import {
   TrophyIcon
 } from '@/components/ui/CustomIcons';
 import { Team, Player } from '@/types';
+import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 
 interface TeamDetailClientProps {
   teamId: string;
 }
 
-// Map team IDs to logo filenames
-const TEAM_LOGO_MAP: { [key: string]: string } = {
-  '1': 'rcb_logo_new.svg',
-  '2': 'csk_logo_new.svg',
-  '3': 'mi_logo_new.svg',
-  '4': 'kkr_logo_new.svg',
-  '5': 'dc_logo_new.svg',
-  '6': 'srh_logo_new.svg',
-  '7': 'kxip_logo_new.svg',
-  '8': 'rr_logo_new.svg',
-  '9': 'gt_logo_new.svg',
-  '10': 'lsg_logo_new.svg'
-};
 
 function createColorVariations(hex: string) {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -140,7 +128,8 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
   const primaryColor = createColorVariations(teamData.colors.primary);
   const secondaryColor = createColorVariations(teamData.colors.secondary);
   const numericId = teamId.replace('team', '');
-  const teamLogoPath = `/logos/${TEAM_LOGO_MAP[numericId] || 'rcb_logo_new.svg'}`;
+  const teamLogoPath = getAnimatedLogoPath(teamData.id);
+  const fallbackLogoPath = getLogoPath(teamData.id);
 
   const batsmen = teamData.players?.filter(p => p.role === 'Batsman') || [];
   const bowlers = teamData.players?.filter(p => p.role === 'Bowler') || [];
@@ -200,7 +189,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               {/* Left: Team Info */}
-              <div className="space-y-8 animate-fade-in">
+              <div className="space-y-8 animate-slide-up">
                 {/* Team Badge with IPL Logo */}
                 <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full backdrop-blur-xl border shadow-xl transition-all duration-300 hover:scale-105"
                      style={{
@@ -268,7 +257,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
               </div>
 
               {/* Right: Team Logo from /logos folder */}
-              <div className="relative flex items-center justify-center animate-fade-in" style={{ animationDelay: '200ms' }}>
+              <div className="relative flex items-center justify-center animate-scale-in" style={{ animationDelay: '200ms' }}>
                 {/* Glow effect */}
                 <div className="absolute inset-0 rounded-full blur-3xl opacity-30 animate-pulse"
                      style={{ 
@@ -283,30 +272,37 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                   </svg>
                 </div>
 
-                {/* Logo Container */}
+                {/* Logo Container with enhanced animations */}
                 <div className="relative group">
-                  <div className="absolute -inset-4 rounded-full opacity-50 group-hover:opacity-75 blur-2xl transition-all duration-500"
+                  <div className="absolute -inset-4 rounded-full opacity-50 group-hover:opacity-75 blur-2xl transition-all duration-500 animate-pulse"
                        style={{
                          background: `conic-gradient(from 0deg, ${primaryColor.solid}, ${secondaryColor.solid}, ${primaryColor.solid})`
                        }} />
                   
-                  <div className="relative w-80 h-80 md:w-96 md:h-96 rounded-full flex items-center justify-center backdrop-blur-xl border-2 shadow-2xl transform group-hover:scale-105 group-hover:rotate-3 transition-all duration-500"
+                  <div className="relative w-80 h-80 md:w-96 md:h-96 rounded-full flex items-center justify-center backdrop-blur-xl border-2 shadow-2xl transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 animate-glow-pulse"
                        style={{
                          background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-                         borderColor: primaryColor.medium
+                         borderColor: primaryColor.medium,
+                         boxShadow: `0 0 40px ${primaryColor.glow}, 0 0 80px ${secondaryColor.glow}40`
                        }}>
-                    {/* Actual Team Logo from /logos */}
+                    {/* Rotating gradient ring */}
+                    <div className="absolute inset-0 rounded-full opacity-30 animate-spin-slow"
+                         style={{
+                           background: `conic-gradient(from 0deg, transparent, ${primaryColor.solid}40, transparent)`
+                         }} />
+                    
+                    {/* Actual Team Logo from /logos - Animated */}
                     <img 
                       src={teamLogoPath}
                       alt={`${teamData.shortName} logo`}
-                      className="w-3/4 h-3/4 object-contain drop-shadow-2xl animate-float"
+                      className="w-3/4 h-3/4 object-contain drop-shadow-2xl animate-float relative z-10 transform group-hover:scale-110 transition-transform duration-500"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).src = teamData.logo;
+                        (e.target as HTMLImageElement).src = fallbackLogoPath;
                       }}
                     />
                     
-                    {/* IPL Logo Badge */}
-                    <div className="absolute -bottom-4 -right-4 w-20 h-20 rounded-full backdrop-blur-xl border-2 border-white/30 flex items-center justify-center shadow-xl transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 bg-gradient-to-br from-blue-900/80 to-purple-900/80">
+                    {/* IPL Logo Badge with enhanced animation */}
+                    <div className="absolute -bottom-4 -right-4 w-20 h-20 rounded-full backdrop-blur-xl border-2 border-white/30 flex items-center justify-center shadow-xl transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 bg-gradient-to-br from-blue-900/80 to-purple-900/80 animate-bounce-in z-20">
                       <div className="w-12 h-12">
                         <IPLLogo />
                       </div>
@@ -332,11 +328,12 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
               ].map((stat, index) => (
                 <div 
                   key={index}
-                  className="group relative overflow-hidden rounded-3xl backdrop-blur-xl p-8 border shadow-xl hover:scale-105 transition-all duration-300 animate-fade-in"
+                  className="group relative overflow-hidden rounded-3xl backdrop-blur-xl p-8 border shadow-xl hover:scale-105 transition-all duration-500 animate-slide-up hover:shadow-2xl"
                   style={{
                     background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
                     borderColor: primaryColor.medium,
-                    animationDelay: `${index * 100}ms`
+                    animationDelay: `${index * 100}ms`,
+                    boxShadow: `0 10px 30px ${primaryColor.glow}20`
                   }}
                 >
                   {/* IPL Logo Watermark */}
@@ -344,13 +341,16 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                     <IPLLogo />
                   </div>
                   
-                  <div className="mb-4 transform group-hover:scale-110 transition-transform duration-300">
+                  <div className="mb-4 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
                     <stat.Icon className="w-12 h-12" color={primaryColor.solid} />
                   </div>
-                  <p className="text-5xl font-black mb-2" style={{ color: primaryColor.solid }}>
+                  <p className="text-5xl font-black mb-2 transform group-hover:scale-110 transition-transform duration-300" style={{ color: primaryColor.solid }}>
                     {stat.value}
                   </p>
-                  <p className="text-sm font-semibold text-gray-300 uppercase tracking-wider">{stat.label}</p>
+                  <p className="text-sm font-semibold text-gray-300 uppercase tracking-wider group-hover:text-white transition-colors duration-300">{stat.label}</p>
+                  
+                  {/* Hover shimmer effect */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer" />
                 </div>
               ))}
             </div>
@@ -465,26 +465,31 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
   );
 }
 
-// Player Card Component
+// Player Card Component with enhanced animations
 function PlayerCard({ player, primaryColor, secondaryColor, onClick, index }: any) {
   return (
     <div
       onClick={onClick}
-      className="group relative overflow-hidden rounded-2xl backdrop-blur-xl p-6 border cursor-pointer transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-2xl animate-fade-in"
+      className="group relative overflow-hidden rounded-2xl backdrop-blur-xl p-6 border cursor-pointer transform hover:scale-105 hover:-translate-y-2 transition-all duration-500 shadow-xl hover:shadow-2xl animate-slide-up"
       style={{
         background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
         borderColor: primaryColor.medium,
-        animationDelay: `${index * 50}ms`
+        animationDelay: `${index * 50}ms`,
+        boxShadow: `0 10px 25px ${primaryColor.glow}20`
       }}
     >
-      {/* Jersey Number */}
-      <div className="absolute top-4 right-4 w-14 h-14 rounded-xl flex items-center justify-center font-black text-xl shadow-lg transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-300"
+      {/* Jersey Number with enhanced animation */}
+      <div className="absolute top-4 right-4 w-14 h-14 rounded-xl flex items-center justify-center font-black text-xl shadow-lg transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 z-10"
            style={{ 
              background: `linear-gradient(135deg, ${primaryColor.medium}, ${secondaryColor.medium})`,
-             color: '#fff'
+             color: '#fff',
+             boxShadow: `0 5px 15px ${primaryColor.glow}`
            }}>
         {player.jerseyNumber || '-'}
       </div>
+      
+      {/* Hover shimmer effect */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer" />
 
       {/* Player Name */}
       <h3 className="text-xl font-bold text-white mb-2 pr-16">{player.name}</h3>

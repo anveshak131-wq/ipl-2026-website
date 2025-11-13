@@ -1,0 +1,42 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      @keyframes lsgPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.06); }
+      }
+      @keyframes maroonGlow {
+        0%, 100% { filter: drop-shadow(0 0 15px #9C2A2C); }
+        50% { filter: drop-shadow(0 0 30px #9C2A2C) drop-shadow(0 0 40px #C0392B); }
+      }
+      @keyframes giantFloat {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-8px); }
+      }
+      @keyframes goldSparkle {
+        0%, 100% { opacity: 0.8; }
+        50% { opacity: 1; }
+      }
+      .lsg-bg { animation: lsgPulse 3s ease-in-out infinite; }
+      .lsg-glow { animation: maroonGlow 2.5s ease-in-out infinite; }
+      .giant { animation: giantFloat 3s ease-in-out infinite; }
+      .gold-accent { animation: goldSparkle 2s ease-in-out infinite; }
+    </style>
+    <linearGradient id="lsgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9C2A2C;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7A1F21;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="200" height="200" rx="40" fill="url(#lsgGradient)" class="lsg-bg lsg-glow"/>
+  
+  <rect x="70" y="80" width="60" height="80" rx="15" fill="#F7E17D" opacity="0.9" class="giant"/>
+  <circle cx="85" cy="105" r="6" fill="#9C2A2C"/>
+  <circle cx="115" cy="105" r="6" fill="#9C2A2C"/>
+  <ellipse cx="100" cy="120" rx="10" ry="6" fill="#9C2A2C"/>
+  <polygon points="100,130 95,145 105,145" fill="#9C2A2C"/>
+  <path d="M 100 60 L 105 75 L 120 75 L 108 85 L 113 100 L 100 90 L 87 100 L 92 85 L 80 75 L 95 75 Z" fill="#F7E17D" class="gold-accent"/>
+  
+  <text x="100" y="175" font-family="Arial, sans-serif" font-size="22" font-weight="bold" text-anchor="middle" fill="#fff">LSG</text>
+</svg>
+

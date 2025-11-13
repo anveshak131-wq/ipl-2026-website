@@ -1,0 +1,41 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      @keyframes cskRotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      @keyframes cskPulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.85; }
+      }
+      @keyframes yellowGlow {
+        0%, 100% { filter: drop-shadow(0 0 15px #FFFF00); }
+        50% { filter: drop-shadow(0 0 30px #FFFF00) drop-shadow(0 0 40px #FFD700); }
+      }
+      @keyframes lionBlink {
+        0%, 90%, 100% { opacity: 1; }
+        95% { opacity: 0.3; }
+      }
+      .csk-circle { animation: cskRotate 20s linear infinite; transform-origin: 100px 100px; }
+      .csk-bg { animation: cskPulse 2s ease-in-out infinite; }
+      .csk-glow { animation: yellowGlow 2.5s ease-in-out infinite; }
+      .lion-eye { animation: lionBlink 3s ease-in-out infinite; }
+    </style>
+    <linearGradient id="cskGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFF00;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFA500;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <circle cx="100" cy="100" r="90" fill="url(#cskGradient)" stroke="#fff" stroke-width="4" class="csk-bg csk-glow"/>
+  
+  <circle cx="100" cy="100" r="50" fill="#FF6B00" opacity="0.9"/>
+  <circle cx="85" cy="85" r="8" fill="#000" class="lion-eye"/>
+  <circle cx="115" cy="85" r="8" fill="#000" class="lion-eye"/>
+  <ellipse cx="100" cy="105" rx="15" ry="12" fill="#fff"/>
+  <ellipse cx="100" cy="115" rx="8" ry="6" fill="#000"/>
+  
+  <text x="100" y="175" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#fff">CSK</text>
+</svg>
+
