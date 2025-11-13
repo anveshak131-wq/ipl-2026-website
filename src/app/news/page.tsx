@@ -92,13 +92,17 @@ export default function NewsPage() {
       <main className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              IPL News & Updates
+          <div className="mb-12">
+            <div className="inline-flex items-center space-x-2 mb-4">
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold">
+                📰 LATEST UPDATES
+              </span>
+            </div>
+            <h1 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight">
+              IPL News & <span className="bg-gradient-to-r from-ipl-gold to-ipl-purple bg-clip-text text-transparent">Updates</span>
             </h1>
-            <div className="h-1 w-24 bg-gradient-to-r from-ipl-purple to-ipl-gold mx-auto mb-4" />
-            <p className="text-gray-300 text-lg">
-              Stay updated with the latest news, match reports, and player updates
+            <p className="text-gray-300 text-lg max-w-2xl">
+              Stay updated with the latest news, match reports, and exclusive player insights from IPL 2026
             </p>
           </div>
 
@@ -108,13 +112,13 @@ export default function NewsPage() {
             <div className="relative">
               <input
                 type="text"
-                placeholder="Search news..."
+                placeholder="Search news by title or content..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white/10 border border-white/20 rounded-lg px-6 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                className="w-full bg-gradient-to-r from-white/10 to-white/5 border border-white/20 rounded-xl px-6 py-3.5 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold/50 focus:ring-2 focus:ring-ipl-gold/20 transition-all duration-300 backdrop-blur-sm"
               />
               <svg
-                className="absolute right-4 top-3.5 w-5 h-5 text-gray-400"
+                className="absolute right-4 top-3.5 w-5 h-5 text-gray-400 pointer-events-none"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -129,21 +133,21 @@ export default function NewsPage() {
             </div>
 
             {/* Category Filter */}
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2">
               {[
-                { key: 'all', label: 'All News' },
+                { key: 'all', label: '📊 All News' },
                 { key: 'match', label: '🏏 Match' },
                 { key: 'team', label: '👥 Team' },
-                { key: 'player', label: '🏃 Player' },
+                { key: 'player', label: '⭐ Player' },
                 { key: 'general', label: '📰 General' }
               ].map((category) => (
                 <button
                   key={category.key}
                   onClick={() => setSelectedCategory(category.key as any)}
-                  className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${
+                  className={`px-4 py-2 rounded-lg font-bold text-sm transition-all duration-300 ${
                     selectedCategory === category.key
-                      ? 'bg-gradient-to-r from-ipl-purple to-ipl-gold text-white'
-                      : 'glass-effect text-gray-300 hover:text-white hover:bg-white/20'
+                      ? 'bg-gradient-to-r from-ipl-purple to-ipl-gold text-white shadow-lg shadow-ipl-purple/20'
+                      : 'bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm border border-white/10 text-gray-300 hover:text-white hover:border-ipl-gold/50 hover:bg-white/20'
                   }`}
                 >
                   {category.label}
@@ -154,14 +158,19 @@ export default function NewsPage() {
 
           {/* News Grid */}
           {filteredNews.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredNews.map((item) => (
                 <article
                   key={item.id}
-                  className="glass-effect rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer"
+                  className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 hover:border-ipl-gold/50 transition-all duration-300 hover:shadow-2xl hover:shadow-ipl-gold/20 transform hover:scale-105 cursor-pointer"
                 >
+                  {/* Animated background on hover */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute inset-0 bg-gradient-to-br from-ipl-gold/10 to-ipl-purple/10" />
+                  </div>
+
                   {/* News Image */}
-                  <div className="h-48 bg-white/5 overflow-hidden relative">
+                  <div className="h-48 overflow-hidden relative">
                     <img
                       src={item.image}
                       alt={item.title}
@@ -170,37 +179,40 @@ export default function NewsPage() {
                         (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"%3E%3Crect fill="%23333" width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" font-size="24" fill="%23999" text-anchor="middle" dy=".3em"%3EImage not found%3C/text%3E%3C/svg%3E';
                       }}
                     />
-                    <div className="absolute top-4 right-4">
-                      <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getCategoryColor(
-                          item.category
-                        )}`}
-                      >
-                        {item.category}
+                    {/* Overlay gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    {/* Category Badge */}
+                    <div className="absolute top-4 right-4 z-10">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${getCategoryColor(item.category)}`}>
+                        {item.category === 'match' && '🏏'}
+                        {item.category === 'team' && '👥'}
+                        {item.category === 'player' && '⭐'}
+                        {item.category === 'general' && '📰'}
+                        {' '}{item.category}
                       </span>
                     </div>
                   </div>
 
                   {/* News Content */}
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-3">
-                      <time className="text-xs text-gray-400">
-                        {formatDate(item.publishedAt)}
+                  <div className="relative p-6 space-y-3">
+                    <div className="flex items-center justify-between text-xs">
+                      <time className="text-gray-400 flex items-center">
+                        📅 {formatDate(item.publishedAt)}
                       </time>
                     </div>
 
-                    <h3 className="text-lg font-bold text-white mb-3 line-clamp-2 group-hover:text-ipl-gold transition-colors">
+                    <h3 className="text-lg font-black text-white line-clamp-2 group-hover:text-ipl-gold transition-colors duration-300">
                       {item.title}
                     </h3>
 
-                    <p className="text-gray-300 text-sm mb-4 line-clamp-3">
+                    <p className="text-gray-300 text-sm line-clamp-2 leading-relaxed">
                       {item.summary}
                     </p>
 
-                    <button className="inline-flex items-center text-ipl-gold hover:text-ipl-purple transition-colors font-medium text-sm">
-                      Read More
+                    <button className="inline-flex items-center text-ipl-gold hover:text-ipl-purple transition-colors font-bold text-sm group/btn pt-2">
+                      Read Story
                       <svg
-                        className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform"
+                        className="w-4 h-4 ml-1 transform group-hover/btn:translate-x-1 transition-transform"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -219,7 +231,7 @@ export default function NewsPage() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <div className="glass-effect rounded-xl p-8 max-w-md mx-auto">
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 p-8 max-w-md mx-auto">
                 <svg
                   className="w-16 h-16 mx-auto mb-4 text-gray-400"
                   fill="none"
@@ -233,7 +245,7 @@ export default function NewsPage() {
                     d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                   />
                 </svg>
-                <p className="text-gray-300 text-lg">
+                <p className="text-gray-300 text-lg font-semibold">
                   No news found
                 </p>
                 <p className="text-gray-400 text-sm mt-2">
@@ -246,7 +258,7 @@ export default function NewsPage() {
           {/* Pagination */}
           {filteredNews.length > 0 && (
             <div className="text-center mt-12">
-              <button className="ipl-button text-lg px-8 py-3">
+              <button className="bg-gradient-to-r from-ipl-purple to-ipl-gold hover:from-ipl-gold hover:to-ipl-purple text-white font-bold text-lg px-8 py-3 rounded-lg transition-all duration-300 transform hover:scale-105">
                 Load More News
               </button>
             </div>

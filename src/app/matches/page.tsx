@@ -57,31 +57,35 @@ export default function MatchesPage() {
       <main className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Match Schedule
+          <div className="mb-12">
+            <div className="inline-flex items-center space-x-2 mb-4">
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold">
+                🏏 MATCH SCHEDULE
+              </span>
+            </div>
+            <h1 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight">
+              IPL 2026 <span className="bg-gradient-to-r from-ipl-gold to-ipl-purple bg-clip-text text-transparent">Fixtures</span>
             </h1>
-            <div className="h-1 w-24 bg-gradient-to-r from-ipl-purple to-ipl-gold mx-auto mb-4" />
-            <p className="text-gray-300 text-lg">
-              Complete IPL 2026 match schedule with live scores and fixtures
+            <p className="text-gray-300 text-lg max-w-2xl">
+              Live scores, upcoming matches, and detailed fixtures for the entire IPL 2026 season
             </p>
           </div>
 
           {/* Filter Tabs */}
-          <div className="flex justify-center mb-8">
-            <div className="glass-effect rounded-lg p-1 inline-flex">
+          <div className="flex justify-start mb-12 overflow-x-auto">
+            <div className="inline-flex space-x-2 p-1 rounded-xl bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm border border-white/10">
               {[
-                { key: 'all', label: 'All Matches' },
-                { key: 'upcoming', label: 'Upcoming' },
-                { key: 'live', label: 'Live' },
-                { key: 'completed', label: 'Completed' }
+                { key: 'all', label: '📊 All Matches' },
+                { key: 'upcoming', label: '⏰ Upcoming' },
+                { key: 'live', label: '🔴 Live' },
+                { key: 'completed', label: '✅ Completed' }
               ].map((tab) => (
                 <button
                   key={tab.key}
                   onClick={() => setFilter(tab.key as any)}
-                  className={`px-6 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 whitespace-nowrap ${
                     filter === tab.key
-                      ? 'bg-gradient-to-r from-ipl-purple to-ipl-gold text-white'
+                      ? 'bg-gradient-to-r from-ipl-purple to-ipl-gold text-white shadow-lg shadow-ipl-purple/20'
                       : 'text-gray-300 hover:text-white hover:bg-white/10'
                   }`}
                 >
@@ -100,11 +104,11 @@ export default function MatchesPage() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <div className="glass-effect rounded-xl p-8 max-w-md mx-auto">
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 p-8 max-w-md mx-auto">
                 <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
-                <p className="text-gray-300 text-lg">
+                <p className="text-gray-300 text-lg font-semibold">
                   No {filter} matches found
                 </p>
                 <p className="text-gray-400 text-sm mt-2">
@@ -114,10 +118,10 @@ export default function MatchesPage() {
             </div>
           )}
 
-          {/* TODO: Add pagination for more matches */}
+          {/* Pagination */}
           {filteredMatches.length > 0 && (
             <div className="text-center mt-12">
-              <button className="ipl-button text-lg px-8 py-3">
+              <button className="bg-gradient-to-r from-ipl-purple to-ipl-gold hover:from-ipl-gold hover:to-ipl-purple text-white font-bold text-lg px-8 py-3 rounded-lg transition-all duration-300 transform hover:scale-105">
                 Load More Matches
               </button>
             </div>

@@ -10,30 +10,35 @@ export default function HeroSection() {
   const highlights = [
     {
       id: 1,
-      title: 'IPL 2026 Season',
-      subtitle: 'The Biggest Cricket Festival is Back',
+      title: 'IPL 2026',
+      subtitle: 'The Biggest Cricket Festival',
+      tagline: 'Experience the Thrills. Chase the Glory.',
       image: '/hero/ipl-2026.jpg',
-      description: 'Get ready for the most exciting cricket season with 10 teams competing for the prestigious trophy'
+      cta: 'Explore Now',
+      gradient: 'from-blue-600 via-purple-500 to-pink-500'
     },
     {
       id: 2,
-      title: 'Star Players to Watch',
-      subtitle: 'Legends in the Making',
+      title: 'Elite Players',
+      subtitle: 'World-Class Talent',
+      tagline: 'Watch legends battle on the biggest stage.',
       image: '/hero/players.jpg',
-      description: 'Witness cricketing giants battle it out in the world\'s premier T20 league'
+      cta: 'View Teams',
+      gradient: 'from-purple-600 via-blue-500 to-cyan-500'
     },
     {
       id: 3,
       title: 'Epic Moments',
-      subtitle: 'Unforgettable Action',
+      subtitle: 'High-Octane Action',
+      tagline: 'Last-ball finishes. Record-breaking performances.',
       image: '/hero/action.jpg',
-      description: 'Experience thrilling matches, last-ball finishes, and record-breaking performances'
+      cta: 'Check Schedule',
+      gradient: 'from-orange-500 via-red-500 to-pink-600'
     }
   ];
 
   useEffect(() => {
-    // Simulate loading
-    const timer = setTimeout(() => setIsLoading(false), 1000);
+    const timer = setTimeout(() => setIsLoading(false), 800);
     return () => clearTimeout(timer);
   }, []);
 
@@ -42,93 +47,123 @@ export default function HeroSection() {
     
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % highlights.length);
-    }, 5000);
+    }, 6000);
 
     return () => clearInterval(interval);
   }, [highlights.length, isLoading]);
 
   if (isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center">
+      <div className="h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-black">
         <LoadingSpinner size="lg" />
       </div>
     );
   }
 
   return (
-    <div className="relative h-screen overflow-hidden">
-      {/* Background Carousel */}
+    <div className="relative h-screen overflow-hidden bg-black">
+      {/* Animated Background Gradient */}
       <div className="absolute inset-0">
-        {highlights.map((slide, index) => (
-          <div
-            key={slide.id}
-            className={`absolute inset-0 transition-opacity duration-1000 ${
-              index === currentSlide ? 'opacity-100' : 'opacity-0'
-            }`}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/50 z-10" />
-            <img
-              src={slide.image}
-              alt={slide.title}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        ))}
+        <div className={`absolute inset-0 bg-gradient-to-br ${highlights[currentSlide].gradient} opacity-20 transition-all duration-1000`} />
+        
+        {/* Grid Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 bg-[linear-gradient(0deg,transparent_24%,rgba(255,255,255,.05)_25%,rgba(255,255,255,.05)_26%,transparent_27%,transparent_74%,rgba(255,255,255,.05)_75%,rgba(255,255,255,.05)_76%,transparent_77%,transparent),linear-gradient(90deg,transparent_24%,rgba(255,255,255,.05)_25%,rgba(255,255,255,.05)_26%,transparent_27%,transparent_74%,rgba(255,255,255,.05)_75%,rgba(255,255,255,.05)_76%,transparent_77%,transparent)] bg-[length:50px_50px]" />
+        </div>
+
+        {/* Animated Orbs */}
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/30 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}} />
       </div>
 
       {/* Content */}
-      <div className="relative z-20 h-full flex items-center">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <div className="mb-8">
-              <div className="inline-flex items-center justify-center w-24 h-24 mb-6 animate-pulse-slow">
-                <img 
-                  src="/logos/ipl_logo_new.svg" 
-                  alt="IPL 2026 logo"
-                  className="w-full h-full object-contain"
-                />
+      <div className="relative z-10 h-full flex items-center justify-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <div className="order-2 md:order-1 space-y-8">
+              {/* Badge */}
+              <div className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20 w-fit">
+                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                <span className="text-sm text-gray-300">Live Cricket Action</span>
               </div>
-              <h1 className="text-5xl md:text-7xl font-bold text-white mb-4">
-                IPL 2026
-              </h1>
-              <div className="h-1 w-32 bg-gradient-to-r from-ipl-purple to-ipl-gold mx-auto mb-6" />
+
+              {/* Main Title */}
+              <div>
+                <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 leading-tight">
+                  {highlights[currentSlide].title}
+                </h1>
+                <p className="text-xl text-gray-200 mb-2">
+                  {highlights[currentSlide].subtitle}
+                </p>
+                <p className="text-lg text-gray-400">
+                  {highlights[currentSlide].tagline}
+                </p>
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="bg-white/5 backdrop-blur-sm px-4 py-4 rounded-lg border border-white/10">
+                  <p className="text-2xl font-bold text-ipl-gold">10</p>
+                  <p className="text-sm text-gray-400">Teams</p>
+                </div>
+                <div className="bg-white/5 backdrop-blur-sm px-4 py-4 rounded-lg border border-white/10">
+                  <p className="text-2xl font-bold text-ipl-gold">70+</p>
+                  <p className="text-sm text-gray-400">Matches</p>
+                </div>
+                <div className="bg-white/5 backdrop-blur-sm px-4 py-4 rounded-lg border border-white/10">
+                  <p className="text-2xl font-bold text-ipl-gold">2026</p>
+                  <p className="text-sm text-gray-400">Season</p>
+                </div>
+              </div>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button className="ipl-button text-lg px-8 py-4 flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-ipl-gold/50 transition-all duration-300 transform hover:scale-105">
+                  {highlights[currentSlide].cta}
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </button>
+                <button className="glass-effect text-white font-bold py-4 px-8 rounded-lg hover:bg-white/20 transition-all duration-300 transform hover:scale-105 border border-white/20">
+                  Learn More
+                </button>
+              </div>
             </div>
 
-            <div className="max-w-3xl mx-auto">
-              <h2 className="text-2xl md:text-3xl text-white mb-4 animate-fade-in">
-                {highlights[currentSlide].title}
-              </h2>
-              <p className="text-xl text-gray-200 mb-8 animate-fade-in-delay">
-                {highlights[currentSlide].subtitle}
-              </p>
-              <p className="text-lg text-gray-300 mb-12 animate-fade-in-delay-2">
-                {highlights[currentSlide].description}
-              </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="ipl-button text-lg px-8 py-4">
-                Explore Teams
-              </button>
-              <button className="glass-effect text-white font-bold py-4 px-8 rounded-lg hover:bg-white/20 transition-all duration-200 text-lg">
-                View Schedule
-              </button>
+            {/* Right Visual Element */}
+            <div className="order-1 md:order-2 relative h-96 md:h-full flex items-center justify-center">
+              <div className="absolute inset-0 bg-gradient-to-br from-ipl-purple/20 to-ipl-gold/20 rounded-3xl blur-2xl" />
+              <div className="relative">
+                <div className="w-72 h-72 md:w-80 md:h-80 rounded-3xl border-2 border-white/10 backdrop-blur-sm overflow-hidden">
+                  <div className="w-full h-full bg-gradient-to-br from-ipl-purple/40 to-ipl-gold/40 flex items-center justify-center">
+                    <div className="text-center">
+                      <img 
+                        src="/logos/ipl_logo_new.svg" 
+                        alt="IPL 2026"
+                        className="w-40 h-40 object-contain mb-4 animate-bounce"
+                      />
+                      <p className="text-white font-bold text-xl">IPL 2026</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Slide Indicators */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-30">
-        <div className="flex space-x-2">
+      <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 z-20">
+        <div className="flex space-x-3">
           {highlights.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentSlide(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+              className={`transition-all duration-300 rounded-full ${
                 index === currentSlide
-                  ? 'bg-ipl-gold w-8'
-                  : 'bg-white/50 hover:bg-white/75'
+                  ? 'bg-ipl-gold w-8 h-2'
+                  : 'bg-white/30 hover:bg-white/50 w-2 h-2'
               }`}
             />
           ))}
@@ -136,9 +171,9 @@ export default function HeroSection() {
       </div>
 
       {/* Scroll Indicator */}
-      <div className="absolute bottom-8 right-8 z-30 animate-bounce-slow">
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 animate-bounce-slow">
         <svg
-          className="w-6 h-6 text-white/50"
+          className="w-6 h-6 text-white/40"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

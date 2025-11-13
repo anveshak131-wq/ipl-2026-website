@@ -46,93 +46,137 @@ export default function UpcomingMatches() {
   }
 
   return (
-    <section className="py-16">
+    <section className="py-20 bg-gradient-to-b from-black via-slate-900 to-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Upcoming Matches
+        {/* Section Header */}
+        <div className="text-center mb-16 space-y-4">
+          <div className="inline-flex items-center space-x-2 bg-ipl-gold/10 px-4 py-2 rounded-full border border-ipl-gold/30 mb-4">
+            <span className="w-2 h-2 bg-ipl-gold rounded-full" />
+            <span className="text-sm font-semibold text-ipl-gold">Featured Matches</span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold text-white">
+            Upcoming Fixtures
           </h2>
-          <div className="h-1 w-24 bg-gradient-to-r from-ipl-purple to-ipl-gold mx-auto mb-4" />
-          <p className="text-gray-300 text-lg">
-            Don't miss the exciting clashes between your favorite teams
+          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            Experience the most thrilling cricket matchups. Don't miss any action!
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {matches.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
           {matches.map((match) => (
             <div
               key={match.id}
-              className="ipl-card hover:scale-105 transform transition-all duration-300"
+              className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 hover:border-ipl-gold/50 transition-all duration-300 hover:shadow-2xl hover:shadow-ipl-gold/20 transform hover:scale-105"
             >
-              <div className="text-center">
-                {/* Match Status */}
-                <div className="mb-4">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-ipl-gold/20 text-ipl-gold border border-ipl-gold/30">
-                    {match.status === 'upcoming' && '📅 Upcoming'}
-                    {match.status === 'live' && '🔴 LIVE'}
-                    {match.status === 'completed' && '✅ Completed'}
+              {/* Animated Background */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="absolute inset-0 bg-gradient-to-br from-ipl-gold/10 to-ipl-purple/10" />
+              </div>
+
+              <div className="relative p-6 md:p-8 space-y-6">
+                {/* Status Badge */}
+                <div className="flex items-center justify-between">
+                  <span className={`inline-flex items-center px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wide border ${
+                    match.status === 'upcoming' 
+                      ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' 
+                      : match.status === 'live'
+                      ? 'bg-red-500/20 text-red-400 border-red-500/30 animate-pulse'
+                      : 'bg-green-500/20 text-green-400 border-green-500/30'
+                  }`}>
+                    {match.status === 'upcoming' && '🎯 Upcoming'}
+                    {match.status === 'live' && '🔴 Live Now'}
+                    {match.status === 'completed' && '✅ Finished'}
                   </span>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-ipl-gold">
+                      {new Date(match.date).getDate()}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {new Date(match.date).toLocaleString('en-US', { month: 'short' })}
+                    </p>
+                  </div>
                 </div>
 
-                {/* Date and Time */}
-                <div className="mb-4">
-                  <p className="text-white font-semibold">
-                    {formatDate(match.date)}
+                {/* Time */}
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-gray-300">
+                    📅 {formatDate(match.date)}
                   </p>
-                  <p className="text-gray-300 text-sm">
-                    {match.time} IST
+                  <p className="text-lg font-bold text-white">
+                    🕐 {match.time} IST
                   </p>
                 </div>
+
+                {/* Match Card Divider */}
+                <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
                 {/* Teams */}
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex-1 text-center">
-                    <div className="w-16 h-16 mx-auto mb-2 bg-gradient-to-r from-ipl-purple to-ipl-gold rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">
-                        {match.team1.shortName}
-                      </span>
+                <div className="space-y-4">
+                  {/* Team 1 */}
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 group/team hover:bg-white/10 transition-all">
+                    <div className="flex items-center space-x-3 flex-1">
+                      <div className="w-12 h-12 rounded-lg flex items-center justify-center text-sm font-bold text-white" style={{backgroundColor: match.team1.colors.primary}}>
+                        {match.team1.shortName[0]}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-white text-sm">{match.team1.shortName}</p>
+                        <p className="text-xs text-gray-400 truncate">{match.team1.name}</p>
+                      </div>
                     </div>
-                    <p className="text-white text-sm font-medium">
-                      {match.team1.shortName}
-                    </p>
                   </div>
-                  
-                  <div className="px-4">
-                    <span className="text-gray-400 font-bold text-xl">VS</span>
+
+                  {/* VS */}
+                  <div className="flex items-center justify-center py-2">
+                    <div className="w-px h-8 bg-gradient-to-b from-transparent via-white/30 to-transparent" />
+                    <span className="px-4 font-bold text-ipl-gold text-sm">VS</span>
+                    <div className="w-px h-8 bg-gradient-to-b from-transparent via-white/30 to-transparent" />
                   </div>
-                  
-                  <div className="flex-1 text-center">
-                    <div className="w-16 h-16 mx-auto mb-2 bg-gradient-to-r from-ipl-purple to-ipl-gold rounded-full flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">
-                        {match.team2.shortName}
-                      </span>
+
+                  {/* Team 2 */}
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 group/team hover:bg-white/10 transition-all">
+                    <div className="flex items-center space-x-3 flex-1">
+                      <div className="w-12 h-12 rounded-lg flex items-center justify-center text-sm font-bold text-white" style={{backgroundColor: match.team2.colors.primary}}>
+                        {match.team2.shortName[0]}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-white text-sm">{match.team2.shortName}</p>
+                        <p className="text-xs text-gray-400 truncate">{match.team2.name}</p>
+                      </div>
                     </div>
-                    <p className="text-white text-sm font-medium">
-                      {match.team2.shortName}
-                    </p>
                   </div>
                 </div>
 
                 {/* Venue */}
-                <div className="text-sm text-gray-300 mb-4">
-                  📍 {match.venue}
+                <div className="pt-2 border-t border-white/10">
+                  <p className="text-xs text-gray-400 mb-1">📍 Venue</p>
+                  <p className="text-sm font-medium text-white line-clamp-2">
+                    {match.venue}
+                  </p>
                 </div>
 
-                {/* Action Button */}
-                <button className="w-full ipl-button text-sm py-2">
-                  {match.status === 'upcoming' && 'Set Reminder'}
-                  {match.status === 'live' && 'Watch Live'}
-                  {match.status === 'completed' && 'View Highlights'}
+                {/* View Button */}
+                <button className="w-full mt-4 py-3 rounded-lg bg-gradient-to-r from-ipl-purple to-ipl-gold text-white font-bold text-sm uppercase tracking-wide hover:shadow-lg hover:shadow-ipl-gold/40 transition-all duration-300 transform hover:scale-105">
+                  View Details
                 </button>
               </div>
             </div>
           ))}
         </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-400 text-lg">No matches scheduled yet.</p>
+          </div>
+        )}
 
+        {/* View All Button */}
         <div className="text-center mt-12">
-          <button className="ipl-button text-lg px-8 py-3">
-            View Full Schedule
-          </button>
+          <a href="/matches" className="inline-flex items-center space-x-2 px-8 py-3 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold transition-all duration-300 transform hover:scale-105">
+            <span>View Full Schedule</span>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </a>
         </div>
       </div>
     </section>

@@ -59,90 +59,110 @@ export default function NewsSection() {
   }
 
   return (
-    <section className="py-16">
+    <section className="py-20 bg-gradient-to-b from-slate-900 via-black to-black">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Latest News
+        {/* Section Header */}
+        <div className="text-center mb-16 space-y-4">
+          <div className="inline-flex items-center space-x-2 bg-ipl-purple/10 px-4 py-2 rounded-full border border-ipl-purple/30 mb-4">
+            <span className="w-2 h-2 bg-ipl-purple rounded-full animate-pulse" />
+            <span className="text-sm font-semibold text-ipl-purple">Latest Updates</span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold text-white">
+            Breaking News & Stories
           </h2>
-          <div className="h-1 w-24 bg-gradient-to-r from-ipl-purple to-ipl-gold mx-auto mb-4" />
-          <p className="text-gray-300 text-lg">
-            Stay updated with the latest happenings from IPL 2026
+          <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+            Stay informed with the latest buzz from the cricket world
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {news.map((article) => (
+        {news.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+          {news.map((article, index) => (
             <article
               key={article.id}
-              className="ipl-card hover:scale-105 transform transition-all duration-300 cursor-pointer group"
+              className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 hover:border-ipl-purple/50 transition-all duration-300 hover:shadow-2xl hover:shadow-ipl-purple/20 transform hover:scale-105 cursor-pointer flex flex-col h-full"
+              style={{animationDelay: `${index * 100}ms`}}
             >
-              {/* News Image */}
-              <div className="relative mb-4 overflow-hidden rounded-lg">
+              {/* Image Container */}
+              <div className="relative h-48 overflow-hidden bg-gradient-to-br from-slate-700 to-slate-900">
                 <img
                   src={article.image}
                   alt={article.title}
-                  className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+                  className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-500 group-hover:brightness-110"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = `https://via.placeholder.com/400x300?text=${article.title.substring(0, 20)}`;
+                  }}
                 />
-                <div className="absolute top-4 left-4">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${getCategoryColor(article.category)}`}>
+                
+                {/* Overlay Gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+                {/* Category Badge */}
+                <div className="absolute top-4 right-4 z-10">
+                  <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide border ${getCategoryColor(article.category)}`}>
+                    {article.category === 'match' && '🏏'}
+                    {article.category === 'team' && '👥'}
+                    {article.category === 'player' && '⭐'}
+                    {article.category === 'general' && '📰'}
                     {article.category.charAt(0).toUpperCase() + article.category.slice(1)}
                   </span>
                 </div>
+
+                {/* Read Time */}
+                <div className="absolute bottom-4 left-4 text-xs text-white/80 font-medium">
+                  ⏱️ 5 min read
+                </div>
               </div>
 
-              {/* News Content */}
-              <div className="space-y-3">
+              {/* Content Section */}
+              <div className="relative p-6 flex-1 flex flex-col space-y-4">
+                {/* Date */}
                 <div className="flex items-center text-sm text-gray-400">
-                  <svg
-                    className="w-4 h-4 mr-1"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  {formatDate(article.publishedAt)}
+                  <span>{formatDate(article.publishedAt)}</span>
                 </div>
 
-                <h3 className="text-xl font-semibold text-white group-hover:text-ipl-gold transition-colors duration-200">
-                  {article.title}
-                </h3>
-                
-                <p className="text-gray-300 line-clamp-3">
-                  {article.summary}
+                {/* Title */}
+                <div>
+                  <h3 className="text-lg font-bold text-white group-hover:text-ipl-gold transition-colors duration-300 line-clamp-2">
+                    {article.title}
+                  </h3>
+                </div>
+
+                {/* Summary */}
+                <p className="text-sm text-gray-400 line-clamp-2 flex-1">
+                  {article.summary || article.content.substring(0, 100)}...
                 </p>
 
-                <button className="text-ipl-gold hover:text-ipl-purple font-medium text-sm transition-colors duration-200 flex items-center group">
-                  Read More
-                  <svg
-                    className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform duration-200"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </button>
+                {/* Read More Button */}
+                <div className="pt-4 border-t border-white/10">
+                  <button className="w-full flex items-center justify-center space-x-2 text-ipl-purple hover:text-ipl-gold font-bold text-sm transition-all duration-300 py-2 hover:bg-white/5 rounded-lg">
+                    <span>Read Full Story</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </article>
           ))}
         </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-400 text-lg">No news articles available yet.</p>
+          </div>
+        )}
 
+        {/* Browse All News Button */}
         <div className="text-center mt-12">
-          <button className="ipl-button text-lg px-8 py-3">
-            View All News
-          </button>
+          <a href="/news" className="inline-flex items-center space-x-2 px-8 py-3 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-ipl-purple/30">
+            <span>Browse All News</span>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </a>
         </div>
       </div>
     </section>

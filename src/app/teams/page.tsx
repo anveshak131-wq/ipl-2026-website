@@ -67,13 +67,17 @@ export default function TeamsPage() {
       <main className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              IPL Teams 2026
+          <div className="mb-12">
+            <div className="inline-flex items-center space-x-2 mb-4">
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold">
+                🏏 IPL TEAMS
+              </span>
+            </div>
+            <h1 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight">
+              Meet the <span className="bg-gradient-to-r from-ipl-gold to-ipl-purple bg-clip-text text-transparent">Champions</span>
             </h1>
-            <div className="h-1 w-24 bg-gradient-to-r from-ipl-purple to-ipl-gold mx-auto mb-4" />
-            <p className="text-gray-300 text-lg">
-              Meet the 10 teams competing for the IPL 2026 championship
+            <p className="text-gray-300 text-lg max-w-2xl">
+              Discover the 10 elite teams competing for the IPL 2026 championship with their squads and iconic colors
             </p>
           </div>
 
@@ -89,17 +93,30 @@ export default function TeamsPage() {
           </div>
 
           {/* TODO: Add team statistics section */}
-          <div className="mt-16 text-center">
-            <div className="glass-effect rounded-xl p-8 max-w-2xl mx-auto">
-              <h2 className="text-2xl font-bold text-white mb-4">
-                Team Statistics
-              </h2>
-              <p className="text-gray-300 mb-6">
-                Comprehensive statistics and performance metrics for all IPL teams
-              </p>
-              <button className="ipl-button">
-                View Detailed Stats
-              </button>
+          <div className="mt-16">
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 p-8 md:p-12">
+              {/* Animated background */}
+              <div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-300">
+                <div className="absolute inset-0 bg-gradient-to-br from-ipl-gold/10 to-ipl-purple/10" />
+              </div>
+
+              {/* Content */}
+              <div className="relative text-center">
+                <div className="inline-flex items-center space-x-2 mb-4">
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold">
+                    📊 STATISTICS
+                  </span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
+                  Team <span className="bg-gradient-to-r from-ipl-gold to-ipl-purple bg-clip-text text-transparent">Performance</span>
+                </h2>
+                <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
+                  Comprehensive statistics and performance metrics for all IPL teams competing in 2026
+                </p>
+                <button className="bg-gradient-to-r from-ipl-purple to-ipl-gold hover:from-ipl-gold hover:to-ipl-purple text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105">
+                  View Detailed Stats
+                </button>
+              </div>
             </div>
           </div>
         </div>
