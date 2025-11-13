@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
+import AuroraBackground from '@/components/ui/AuroraBackground';
 import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
 
@@ -59,6 +60,9 @@ export default function AdminPlayers() {
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
+  const [selectedTeam, setSelectedTeam] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [formData, setFormData] = useState<{
     name: string;
     role: 'Batsman' | 'Bowler' | 'All-rounder' | 'Wicket-keeper';
@@ -276,6 +280,11 @@ export default function AdminPlayers() {
     }
   };
 
+  // Filter players by selected team
+  const filteredPlayers = selectedTeam === 'all' 
+    ? players 
+    : players.filter(player => player.teamId === selectedTeam);
+
   if (!isAuthenticated) {
     return null;
   }
@@ -307,6 +316,111 @@ export default function AdminPlayers() {
             >
               Add New Player
             </button>
+          </div>
+
+          {/* Team Filter Dropdown */}
+          <div className="mb-6 relative">
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="glass-effect px-6 py-3 rounded-lg text-white font-medium flex items-center space-x-3 min-w-[280px] hover:bg-white/10 transition-all duration-300 group"
+            >
+              <svg 
+                className="w-5 h-5 text-ipl-gold" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+              </svg>
+              <span className="flex-1 text-left">
+                {selectedTeam === 'all' 
+                  ? 'All Teams' 
+                  : teams.find(t => t.id === selectedTeam)?.name || 'Select Team'
+                }
+              </span>
+              <svg 
+                className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`}
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {/* Dropdown Menu */}
+            <div 
+              className={`absolute left-0 right-0 mt-2 glass-effect rounded-lg shadow-xl overflow-hidden transition-all duration-300 ease-out origin-top z-10 ${
+                isDropdownOpen 
+                  ? 'opacity-100 scale-y-100 max-h-[400px]' 
+                  : 'opacity-0 scale-y-0 max-h-0 pointer-events-none'
+              }`}
+            >
+              <div className="py-2 max-h-[380px] overflow-y-auto scrollbar-thin scrollbar-thumb-ipl-gold/50 scrollbar-track-white/5">
+                {/* All Teams Option */}
+                <button
+                  onClick={() => {
+                    setSelectedTeam('all');
+                    setIsDropdownOpen(false);
+                  }}
+                  className={`w-full px-6 py-3 text-left hover:bg-white/10 transition-colors duration-200 flex items-center space-x-3 ${
+                    selectedTeam === 'all' ? 'bg-ipl-gold/20 text-ipl-gold' : 'text-white'
+                  }`}
+                >
+                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-ipl-gold to-ipl-purple">
+                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold">All Teams</div>
+                    <div className="text-xs text-gray-400">{players.length} players</div>
+                  </div>
+                  {selectedTeam === 'all' && (
+                    <svg className="w-5 h-5 text-ipl-gold" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                  )}
+                </button>
+
+                {/* Team Options */}
+                <div className="border-t border-white/10 mt-2 pt-2">
+                  {teams.map((team) => {
+                    const teamPlayersCount = players.filter(p => p.teamId === team.id).length;
+                    return (
+                      <button
+                        key={team.id}
+                        onClick={() => {
+                          setSelectedTeam(team.id);
+                          setIsDropdownOpen(false);
+                        }}
+                        className={`w-full px-6 py-3 text-left hover:bg-white/10 transition-all duration-200 flex items-center space-x-3 group ${
+                          selectedTeam === team.id ? 'bg-ipl-gold/20 text-ipl-gold' : 'text-white'
+                        }`}
+                      >
+                        <div 
+                          className="flex items-center justify-center w-10 h-10 rounded-full text-white font-bold text-sm shadow-lg"
+                          style={{ backgroundColor: team.primaryColor }}
+                        >
+                          {team.shortName}
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-semibold">{team.name}</div>
+                          <div className="text-xs text-gray-400">
+                            {teamPlayersCount} player{teamPlayersCount !== 1 ? 's' : ''}
+                          </div>
+                        </div>
+                        {selectedTeam === team.id && (
+                          <svg className="w-5 h-5 text-ipl-gold" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Players Table */}
@@ -357,7 +471,7 @@ export default function AdminPlayers() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/10">
-                  {players.map((player) => {
+                  {filteredPlayers.map((player) => {
                     const team = teams.find(t => t.id === player.teamId);
                     return (
                       <tr key={player.id} className="hover:bg-white/5">
