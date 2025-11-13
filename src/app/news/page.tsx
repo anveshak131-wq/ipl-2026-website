@@ -7,6 +7,7 @@ import { News } from '@/types';
 import { api } from '@/lib/data';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Icon from '@/components/ui/Icon';
+import AuroraBackground from '@/components/ui/AuroraBackground';
 
 export default function NewsPage() {
   const [news, setNews] = useState<News[]>([]);
@@ -90,21 +91,24 @@ export default function NewsPage() {
     <div className="min-h-screen">
       <Navbar />
 
-      <main className="relative py-16 section-news-bg min-h-screen">
-        {/* Decorative Elements */}
-        <div className="absolute top-20 right-10 w-96 h-96 bg-ipl-gold/10 rounded-full blur-3xl -z-10" />
-        <div className="absolute bottom-10 left-20 w-96 h-96 bg-ipl-purple/10 rounded-full blur-3xl -z-10" />
+      <main className="relative py-16 min-h-screen overflow-hidden">
+        <AuroraBackground />
+        
+        {/* Floating Animated Orbs */}
+        <div className="absolute top-20 right-10 w-96 h-96 bg-ipl-blue-light/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '0s' }} />
+        <div className="absolute bottom-10 left-20 w-96 h-96 bg-ipl-gold/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
+        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-ipl-purple/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '4s' }} />
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="mb-12">
+          <div className="mb-12 animate-slide-up">
             <div className="inline-flex items-center space-x-2 mb-4">
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2">
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2 hover:bg-white/15 transition-all duration-300 hover:scale-105 cursor-default">
                 <Icon name="news" size={16} /> LATEST UPDATES
               </span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight">
-              IPL News & <span className="bg-gradient-to-r from-ipl-gold to-ipl-purple bg-clip-text text-transparent">Updates</span>
+            <h1 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight hover:scale-[1.02] transition-transform duration-300">
+              IPL News & <span className="bg-gradient-to-r from-ipl-blue-light via-ipl-gold to-ipl-purple bg-clip-text text-transparent animate-glow">Updates</span>
             </h1>
             <p className="text-gray-300 text-lg max-w-2xl">
               Stay updated with the latest news, match reports, and exclusive player insights from IPL 2026
@@ -112,7 +116,7 @@ export default function NewsPage() {
           </div>
 
           {/* Search and Filter */}
-          <div className="mb-12 space-y-6">
+          <div className="mb-12 space-y-6 animate-fade-in">
             {/* Search Bar */}
             <div className="relative">
               <input
@@ -149,9 +153,9 @@ export default function NewsPage() {
                 <button
                   key={category.key}
                   onClick={() => setSelectedCategory(category.key as any)}
-                  className={`px-4 py-2 rounded-lg font-bold text-sm transition-all duration-300 flex items-center gap-2 ${
+                  className={`px-4 py-2 rounded-lg font-bold text-sm transition-all duration-300 flex items-center gap-2 hover:scale-105 ${
                     selectedCategory === category.key
-                      ? 'bg-gradient-to-r from-ipl-purple to-ipl-gold text-white shadow-lg shadow-ipl-purple/20'
+                      ? 'bg-gradient-to-r from-ipl-blue-dark to-ipl-purple text-white shadow-lg shadow-ipl-purple/30'
                       : 'bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm border border-white/10 text-gray-300 hover:text-white hover:border-ipl-gold/50 hover:bg-white/20'
                   }`}
                 >

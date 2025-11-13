@@ -72,12 +72,13 @@ export default function IPLLogo({ size = 'md', className = '', animated = false 
       {/* Gradient Definitions */}
       <defs>
         <linearGradient id="ipl-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#7C3AED" />
-          <stop offset="100%" stopColor="#FBBF24" />
+          <stop offset="0%" stopColor="#1D3D8D" />
+          <stop offset="50%" stopColor="#5091CD" />
+          <stop offset="100%" stopColor="#FFD700" />
         </linearGradient>
         <linearGradient id="ipl-gradient-fill" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#7C3AED" />
-          <stop offset="100%" stopColor="#FBBF24" />
+          <stop offset="0%" stopColor="#1D3D8D" />
+          <stop offset="100%" stopColor="#5091CD" />
         </linearGradient>
       </defs>
     </svg>

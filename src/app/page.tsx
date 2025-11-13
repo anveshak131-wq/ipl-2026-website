@@ -3,10 +3,12 @@ import HeroSection from '@/components/home/HeroSection';
 import UpcomingMatches from '@/components/home/UpcomingMatches';
 import NewsSection from '@/components/home/NewsSection';
 import Footer from '@/components/layout/Footer';
+import AuroraBackground from '@/components/ui/AuroraBackground';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-slate-950 to-black">
+    <div className="min-h-screen">
+      <AuroraBackground />
       <Navbar />
       <main>
         <HeroSection />

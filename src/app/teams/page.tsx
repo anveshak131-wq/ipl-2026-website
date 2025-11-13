@@ -9,6 +9,7 @@ import { Team, Player } from '@/types';
 import { api } from '@/lib/data';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Icon from '@/components/ui/Icon';
+import AuroraBackground from '@/components/ui/AuroraBackground';
 
 export default function TeamsPage() {
   const [teams, setTeams] = useState<Team[]>([]);
@@ -65,21 +66,24 @@ export default function TeamsPage() {
     <div className="min-h-screen">
       <Navbar />
       
-      <main className="relative py-16 section-hero-bg min-h-screen">
-        {/* Decorative Elements */}
-        <div className="absolute top-20 left-10 w-96 h-96 bg-ipl-purple/15 rounded-full blur-3xl -z-10" />
-        <div className="absolute bottom-10 right-20 w-96 h-96 bg-ipl-gold/10 rounded-full blur-3xl -z-10" />
+      <main className="relative py-16 min-h-screen">
+        <AuroraBackground />
+        
+        {/* Floating Animated Orbs */}
+        <div className="absolute top-20 left-10 w-96 h-96 bg-ipl-blue-light/10 rounded-full blur-3xl -z-10 animate-float" />
+        <div className="absolute bottom-10 right-20 w-96 h-96 bg-ipl-gold/10 rounded-full blur-3xl -z-10 animate-float" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-ipl-purple/10 rounded-full blur-3xl -z-10 animate-float" style={{ animationDelay: '2s' }} />
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="mb-12">
+          <div className="mb-12 animate-slide-up">
             <div className="inline-flex items-center space-x-2 mb-4">
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2">
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2 hover:bg-white/15 transition-all duration-300 hover:scale-105 cursor-default">
                 <Icon name="cricket" size={16} /> IPL TEAMS
               </span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight">
-              Meet the <span className="bg-gradient-to-r from-ipl-gold to-ipl-purple bg-clip-text text-transparent">Champions</span>
+            <h1 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight hover:scale-[1.02] transition-transform duration-300">
+              Meet the <span className="bg-gradient-to-r from-ipl-blue-light via-ipl-gold to-ipl-purple bg-clip-text text-transparent animate-glow">Champions</span>
             </h1>
             <p className="text-gray-300 text-lg max-w-2xl">
               Discover the 10 elite teams competing for the IPL 2026 championship with their squads and iconic colors
@@ -108,7 +112,7 @@ export default function TeamsPage() {
               {/* Content */}
               <div className="relative text-center">
                 <div className="inline-flex items-center space-x-2 mb-4">
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2">
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2 hover:bg-white/15 transition-all duration-300 hover:scale-105 cursor-default">
                     <Icon name="stats" size={16} /> STATISTICS
                   </span>
                 </div>
