@@ -367,11 +367,12 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
               </div>
             </div>
             
-            {/* Tab Container - Removed absolute positioning of logo */}
-            <div className="relative inline-flex gap-3 p-2 rounded-2xl backdrop-blur-xl border shadow-xl"
+            {/* Tab Container - Premium Design with Team Colors */}
+            <div className="relative inline-flex gap-2 p-1.5 rounded-2xl backdrop-blur-xl border-2 shadow-xl"
                  style={{
                    background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-                   borderColor: primaryColor.medium
+                   borderColor: primaryColor.medium,
+                   boxShadow: `0 10px 30px ${primaryColor.glow}20`
                  }}>
               {[
                 { id: 'squad', label: 'Squad' },
@@ -381,15 +382,50 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 whitespace-nowrap ${
-                    activeTab === tab.id ? 'scale-105 shadow-lg' : 'hover:bg-white/10'
+                  className={`group relative overflow-hidden px-8 py-4 rounded-xl font-bold text-lg transition-all duration-500 whitespace-nowrap transform ${
+                    activeTab === tab.id ? 'scale-105' : 'hover:scale-105'
                   }`}
                   style={activeTab === tab.id ? {
                     background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
-                    color: '#fff'
-                  } : { color: '#fff' }}
+                    color: '#fff',
+                    boxShadow: `0 10px 30px ${primaryColor.glow}40, 0 0 40px ${secondaryColor.glow}20`,
+                    border: `2px solid ${primaryColor.medium}`,
+                  } : {
+                    background: 'transparent',
+                    color: '#9CA3AF',
+                    border: '2px solid transparent',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (activeTab !== tab.id) {
+                      e.currentTarget.style.color = '#fff';
+                      e.currentTarget.style.background = `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`;
+                      e.currentTarget.style.borderColor = `${primaryColor.medium}60`;
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (activeTab !== tab.id) {
+                      e.currentTarget.style.color = '#9CA3AF';
+                      e.currentTarget.style.background = 'transparent';
+                      e.currentTarget.style.borderColor = 'transparent';
+                    }
+                  }}
                 >
-                  {tab.label}
+                  {/* Shimmer effect for active tab */}
+                  {activeTab === tab.id && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                  )}
+                  
+                  <span className="relative z-10">{tab.label}</span>
+                  
+                  {/* Glow effect for active tab */}
+                  {activeTab === tab.id && (
+                    <div 
+                      className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-lg -z-10"
+                      style={{
+                        background: `radial-gradient(circle, ${primaryColor.medium}, transparent)`,
+                      }}
+                    />
+                  )}
                 </button>
               ))}
             </div>

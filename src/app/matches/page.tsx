@@ -79,26 +79,64 @@ export default function MatchesPage() {
             </p>
           </div>
 
-          {/* Filter Tabs */}
+          {/* Filter Tabs - Premium Design */}
           <div className="flex justify-start mb-12 overflow-x-auto animate-fade-in">
-            <div className="inline-flex space-x-2 p-1 rounded-xl bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm border border-white/10 hover:border-white/20 transition-all duration-300">
+            <div className="inline-flex space-x-2 p-1.5 rounded-xl backdrop-blur-xl border-2 border-white/10 shadow-xl transition-all duration-300"
+                 style={{
+                   background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
+                 }}>
               {[
-                { key: 'all', label: 'All Matches', icon: 'stats' as const },
-                { key: 'upcoming', label: 'Upcoming', icon: 'target' as const },
-                { key: 'live', label: 'Live', icon: 'cricket' as const },
-                { key: 'completed', label: 'Completed', icon: 'trophy' as const }
+                { key: 'all', label: 'All Matches', icon: 'stats' as const, color: '#7C3AED' },
+                { key: 'upcoming', label: 'Upcoming', icon: 'target' as const, color: '#3B82F6' },
+                { key: 'live', label: 'Live', icon: 'cricket' as const, color: '#EF4444' },
+                { key: 'completed', label: 'Completed', icon: 'trophy' as const, color: '#10B981' }
               ].map((tab) => (
                 <button
                   key={tab.key}
                   onClick={() => setFilter(tab.key as any)}
-                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 whitespace-nowrap flex items-center gap-2 hover:scale-105 ${
-                    filter === tab.key
-                      ? 'bg-gradient-to-r from-ipl-blue-dark to-ipl-purple text-white shadow-lg shadow-ipl-purple/30 scale-105'
-                      : 'text-gray-300 hover:text-white hover:bg-white/10'
+                  className={`group relative overflow-hidden px-6 py-3 rounded-lg text-sm font-bold transition-all duration-500 whitespace-nowrap flex items-center gap-2 transform hover:scale-105 ${
+                    filter === tab.key ? 'scale-105' : ''
                   }`}
+                  style={filter === tab.key ? {
+                    background: `linear-gradient(135deg, ${tab.color}, ${tab.color}dd)`,
+                    color: '#fff',
+                    boxShadow: `0 10px 30px ${tab.color}40, 0 0 40px ${tab.color}20`,
+                    border: `2px solid ${tab.color}60`,
+                  } : {
+                    background: 'transparent',
+                    color: '#9CA3AF',
+                    border: '2px solid transparent',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (filter !== tab.key) {
+                      e.currentTarget.style.color = '#fff';
+                      e.currentTarget.style.background = `linear-gradient(135deg, ${tab.color}20, ${tab.color}10)`;
+                      e.currentTarget.style.borderColor = `${tab.color}40`;
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (filter !== tab.key) {
+                      e.currentTarget.style.color = '#9CA3AF';
+                      e.currentTarget.style.background = 'transparent';
+                      e.currentTarget.style.borderColor = 'transparent';
+                    }
+                  }}
                 >
+                  {/* Shimmer effect for active tab */}
+                  {filter === tab.key && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                  )}
+                  
                   <Icon name={tab.icon} size={16} />
-                  {tab.label}
+                  <span className="relative z-10">{tab.label}</span>
+                  
+                  {/* Pulse effect for active tab */}
+                  {filter === tab.key && (
+                    <div 
+                      className="absolute inset-0 rounded-lg border-2 opacity-0 group-hover:opacity-100 animate-ping"
+                      style={{ borderColor: tab.color }}
+                    />
+                  )}
                 </button>
               ))}
             </div>
@@ -127,11 +165,45 @@ export default function MatchesPage() {
             </div>
           )}
 
-          {/* Pagination */}
+          {/* Pagination - Premium Design */}
           {filteredMatches.length > 0 && (
-            <div className="text-center mt-12">
-              <button onClick={() => alert('Loading more matches...')} className="bg-gradient-to-r from-ipl-purple to-ipl-gold hover:from-ipl-gold hover:to-ipl-purple text-white font-bold text-lg px-8 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 cursor-pointer">
-                Load More Matches
+            <div className="text-center mt-12 animate-fade-in" style={{ animationDelay: '200ms' }}>
+              <button 
+                onClick={() => alert('Loading more matches...')} 
+                className="group relative overflow-hidden rounded-xl font-bold text-lg px-10 py-4 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                style={{
+                  background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #A855F7 100%)',
+                  boxShadow: '0 10px 40px rgba(124, 58, 237, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)',
+                  border: '2px solid rgba(124, 58, 237, 0.5)',
+                  color: '#fff',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = '0 20px 60px rgba(124, 58, 237, 0.6), 0 0 80px rgba(147, 51, 234, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = '0 10px 40px rgba(124, 58, 237, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)';
+                }}
+              >
+                {/* Shimmer effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                
+                {/* Glow effect */}
+                <div 
+                  className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10"
+                  style={{
+                    background: 'radial-gradient(circle, rgba(124, 58, 237, 0.6), transparent)',
+                  }}
+                />
+                
+                <span className="relative z-10 flex items-center justify-center gap-2 font-black tracking-tight">
+                  Load More Matches
+                  <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </span>
+                
+                {/* Pulse animation ring */}
+                <div className="absolute inset-0 rounded-xl border-2 opacity-0 group-hover:opacity-100 animate-ping border-purple-500" />
               </button>
             </div>
           )}

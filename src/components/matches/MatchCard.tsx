@@ -147,11 +147,70 @@ export default function MatchCard({ match }: MatchCardProps) {
           </div>
         )}
 
-        {/* Action Button */}
-        <button onClick={() => alert(`${match.status === 'upcoming' ? 'Reminder set!' : match.status === 'live' ? 'Opening stream...' : 'Loading highlights...'}`)} className="w-full bg-gradient-to-r from-ipl-purple to-ipl-gold hover:from-ipl-gold hover:to-ipl-purple text-white font-bold text-sm py-2.5 rounded-lg transition-all duration-300 transform hover:scale-105 mt-4 cursor-pointer">
-          {match.status === 'upcoming' && 'Set Reminder'}
-          {match.status === 'live' && 'Watch Live'}
-          {match.status === 'completed' && 'View Highlights'}
+        {/* Action Button - Premium Design */}
+        <button 
+          onClick={() => alert(`${match.status === 'upcoming' ? 'Reminder set!' : match.status === 'live' ? 'Opening stream...' : 'Loading highlights...'}`)} 
+          className="group w-full relative overflow-hidden rounded-xl font-bold text-sm py-3 mt-4 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+          style={{
+            background: match.status === 'live' 
+              ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 50%, #B91C1C 100%)'
+              : match.status === 'completed'
+              ? 'linear-gradient(135deg, #10B981 0%, #059669 50%, #047857 100%)'
+              : 'linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #A855F7 100%)',
+            boxShadow: match.status === 'live'
+              ? '0 10px 40px rgba(239, 68, 68, 0.4), 0 0 60px rgba(220, 38, 38, 0.3)'
+              : match.status === 'completed'
+              ? '0 10px 40px rgba(16, 185, 129, 0.4), 0 0 60px rgba(5, 150, 105, 0.3)'
+              : '0 10px 40px rgba(124, 58, 237, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)',
+            border: match.status === 'live'
+              ? '2px solid rgba(239, 68, 68, 0.5)'
+              : match.status === 'completed'
+              ? '2px solid rgba(16, 185, 129, 0.5)'
+              : '2px solid rgba(124, 58, 237, 0.5)',
+            color: '#fff',
+          }}
+          onMouseEnter={(e) => {
+            if (match.status === 'live') {
+              e.currentTarget.style.boxShadow = '0 20px 60px rgba(239, 68, 68, 0.6), 0 0 80px rgba(220, 38, 38, 0.5)';
+            } else if (match.status === 'completed') {
+              e.currentTarget.style.boxShadow = '0 20px 60px rgba(16, 185, 129, 0.6), 0 0 80px rgba(5, 150, 105, 0.5)';
+            } else {
+              e.currentTarget.style.boxShadow = '0 20px 60px rgba(124, 58, 237, 0.6), 0 0 80px rgba(147, 51, 234, 0.4)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (match.status === 'live') {
+              e.currentTarget.style.boxShadow = '0 10px 40px rgba(239, 68, 68, 0.4), 0 0 60px rgba(220, 38, 38, 0.3)';
+            } else if (match.status === 'completed') {
+              e.currentTarget.style.boxShadow = '0 10px 40px rgba(16, 185, 129, 0.4), 0 0 60px rgba(5, 150, 105, 0.3)';
+            } else {
+              e.currentTarget.style.boxShadow = '0 10px 40px rgba(124, 58, 237, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)';
+            }
+          }}
+        >
+          {/* Shimmer effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+          
+          {/* Glow effect */}
+          <div 
+            className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10"
+            style={{
+              background: match.status === 'live'
+                ? 'radial-gradient(circle, rgba(239, 68, 68, 0.6), transparent)'
+                : match.status === 'completed'
+                ? 'radial-gradient(circle, rgba(16, 185, 129, 0.6), transparent)'
+                : 'radial-gradient(circle, rgba(124, 58, 237, 0.6), transparent)',
+            }}
+          />
+          
+          <span className="relative z-10 flex items-center justify-center gap-2 font-black tracking-tight">
+            {match.status === 'upcoming' && 'Set Reminder'}
+            {match.status === 'live' && 'Watch Live'}
+            {match.status === 'completed' && 'View Highlights'}
+            <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </span>
         </button>
       </div>
     </div>

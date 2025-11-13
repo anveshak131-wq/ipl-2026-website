@@ -141,26 +141,53 @@ export default function NewsPage() {
               </svg>
             </div>
 
-            {/* Category Filter */}
-            <div className="flex flex-wrap gap-2">
+            {/* Category Filter - Premium Design */}
+            <div className="flex flex-wrap gap-3">
               {[
-                { key: 'all', label: 'All News', icon: 'stats' as const },
-                { key: 'match', label: 'Match', icon: 'cricket' as const },
-                { key: 'team', label: 'Team', icon: 'team' as const },
-                { key: 'player', label: 'Player', icon: 'trophy' as const },
-                { key: 'general', label: 'General', icon: 'news' as const }
+                { key: 'all', label: 'All News', icon: 'stats' as const, color: '#7C3AED' },
+                { key: 'match', label: 'Match', icon: 'cricket' as const, color: '#3B82F6' },
+                { key: 'team', label: 'Team', icon: 'team' as const, color: '#8B5CF6' },
+                { key: 'player', label: 'Player', icon: 'trophy' as const, color: '#10B981' },
+                { key: 'general', label: 'General', icon: 'news' as const, color: '#F59E0B' }
               ].map((category) => (
                 <button
                   key={category.key}
                   onClick={() => setSelectedCategory(category.key as any)}
-                  className={`px-4 py-2 rounded-lg font-bold text-sm transition-all duration-300 flex items-center gap-2 hover:scale-105 ${
-                    selectedCategory === category.key
-                      ? 'bg-gradient-to-r from-ipl-blue-dark to-ipl-purple text-white shadow-lg shadow-ipl-purple/30'
-                      : 'bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm border border-white/10 text-gray-300 hover:text-white hover:border-ipl-gold/50 hover:bg-white/20'
+                  className={`group relative overflow-hidden px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-500 flex items-center gap-2 transform hover:scale-105 ${
+                    selectedCategory === category.key ? 'scale-105' : ''
                   }`}
+                  style={selectedCategory === category.key ? {
+                    background: `linear-gradient(135deg, ${category.color}, ${category.color}dd)`,
+                    color: '#fff',
+                    boxShadow: `0 10px 30px ${category.color}40, 0 0 40px ${category.color}20`,
+                    border: `2px solid ${category.color}60`,
+                  } : {
+                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
+                    border: '2px solid rgba(255, 255, 255, 0.1)',
+                    color: '#9CA3AF',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (selectedCategory !== category.key) {
+                      e.currentTarget.style.color = '#fff';
+                      e.currentTarget.style.background = `linear-gradient(135deg, ${category.color}20, ${category.color}10)`;
+                      e.currentTarget.style.borderColor = `${category.color}40`;
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (selectedCategory !== category.key) {
+                      e.currentTarget.style.color = '#9CA3AF';
+                      e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))';
+                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                    }
+                  }}
                 >
+                  {/* Shimmer effect for active category */}
+                  {selectedCategory === category.key && (
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                  )}
+                  
                   <Icon name={category.icon} size={16} />
-                  {category.label}
+                  <span className="relative z-10">{category.label}</span>
                 </button>
               ))}
             </div>
@@ -219,10 +246,29 @@ export default function NewsPage() {
                       {item.summary}
                     </p>
 
-                    <button className="inline-flex items-center text-ipl-gold hover:text-ipl-purple transition-colors font-bold text-sm group/btn pt-2">
-                      Read Story
+                    <button className="group/btn inline-flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all duration-500 transform hover:scale-105 relative overflow-hidden"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(147, 51, 234, 0.1))',
+                        border: '1px solid rgba(124, 58, 237, 0.3)',
+                        color: '#A855F7',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(147, 51, 234, 0.2))';
+                        e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.5)';
+                        e.currentTarget.style.color = '#C084FC';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(147, 51, 234, 0.1))';
+                        e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.3)';
+                        e.currentTarget.style.color = '#A855F7';
+                      }}
+                    >
+                      {/* Shimmer effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform translate-x-[-200%] group-hover/btn:translate-x-[200%] transition-transform duration-1000" />
+                      
+                      <span className="relative z-10">Read Story</span>
                       <svg
-                        className="w-4 h-4 ml-1 transform group-hover/btn:translate-x-1 transition-transform"
+                        className="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform duration-300 relative z-10"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"
@@ -230,8 +276,8 @@ export default function NewsPage() {
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5l7 7-7 7"
+                          strokeWidth={2.5}
+                          d="M13 7l5 5m0 0l-5 5m5-5H6"
                         />
                       </svg>
                     </button>
@@ -265,11 +311,45 @@ export default function NewsPage() {
             </div>
           )}
 
-          {/* Pagination */}
+          {/* Pagination - Premium Design */}
           {filteredNews.length > 0 && (
-            <div className="text-center mt-12">
-              <button onClick={() => alert('Loading more news...')} className="bg-gradient-to-r from-ipl-purple to-ipl-gold hover:from-ipl-gold hover:to-ipl-purple text-white font-bold text-lg px-8 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 cursor-pointer">
-                Load More News
+            <div className="text-center mt-12 animate-fade-in" style={{ animationDelay: '200ms' }}>
+              <button 
+                onClick={() => alert('Loading more news...')} 
+                className="group relative overflow-hidden rounded-xl font-bold text-lg px-10 py-4 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                style={{
+                  background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #A855F7 100%)',
+                  boxShadow: '0 10px 40px rgba(124, 58, 237, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)',
+                  border: '2px solid rgba(124, 58, 237, 0.5)',
+                  color: '#fff',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = '0 20px 60px rgba(124, 58, 237, 0.6), 0 0 80px rgba(147, 51, 234, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = '0 10px 40px rgba(124, 58, 237, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)';
+                }}
+              >
+                {/* Shimmer effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                
+                {/* Glow effect */}
+                <div 
+                  className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10"
+                  style={{
+                    background: 'radial-gradient(circle, rgba(124, 58, 237, 0.6), transparent)',
+                  }}
+                />
+                
+                <span className="relative z-10 flex items-center justify-center gap-2 font-black tracking-tight">
+                  Load More News
+                  <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </span>
+                
+                {/* Pulse animation ring */}
+                <div className="absolute inset-0 rounded-xl border-2 opacity-0 group-hover:opacity-100 animate-ping border-purple-500" />
               </button>
             </div>
           )}

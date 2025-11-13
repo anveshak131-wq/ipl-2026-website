@@ -136,19 +136,44 @@ export default function TeamsShowcase() {
           ))}
         </div>
 
-        {/* View All Teams Button */}
+        {/* View All Teams Button - Premium Design */}
         <div className="text-center">
           <button
             onClick={() => router.push('/teams')}
-            className="group relative overflow-hidden bg-gradient-to-r from-orange-600 via-red-600 to-pink-600 text-white font-black text-lg px-12 py-5 rounded-2xl hover:shadow-2xl hover:shadow-orange-600/50 transition-all duration-300 transform hover:scale-105"
+            className="group relative overflow-hidden rounded-xl font-black text-lg px-12 py-5 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+            style={{
+              background: 'linear-gradient(135deg, #FF6B35 0%, #F7931E 50%, #FFD23F 100%)',
+              boxShadow: '0 10px 40px rgba(255, 107, 53, 0.4), 0 0 60px rgba(247, 147, 30, 0.3)',
+              border: '2px solid rgba(255, 107, 53, 0.5)',
+              color: '#fff',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = '0 20px 60px rgba(255, 107, 53, 0.6), 0 0 80px rgba(247, 147, 30, 0.5)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = '0 10px 40px rgba(255, 107, 53, 0.4), 0 0 60px rgba(247, 147, 30, 0.3)';
+            }}
           >
-            <span className="relative z-10 flex items-center gap-3">
+            {/* Shimmer effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+            
+            {/* Glow effect */}
+            <div 
+              className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10"
+              style={{
+                background: 'radial-gradient(circle, rgba(255, 107, 53, 0.6), transparent)',
+              }}
+            />
+            
+            <span className="relative z-10 flex items-center gap-3 font-black tracking-tight">
               EXPLORE ALL TEAMS
-              <svg className="w-6 h-6 transform group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              <svg className="w-6 h-6 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
             </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+            
+            {/* Pulse animation ring */}
+            <div className="absolute inset-0 rounded-xl border-2 opacity-0 group-hover:opacity-100 animate-ping border-orange-500" />
           </button>
         </div>
       </div>

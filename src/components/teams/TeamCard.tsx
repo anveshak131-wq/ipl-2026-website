@@ -110,18 +110,54 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
           </span>
         </div>
 
-        {/* View Team Button with enhanced animations */}
+        {/* View Team Button with Premium Design - Using Team Colors */}
         <button 
           onClick={handleViewFullSquad}
-          className="w-full bg-gradient-to-r from-ipl-purple to-ipl-gold hover:from-ipl-gold hover:to-ipl-purple text-white font-bold text-sm py-3 rounded-lg transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:shadow-ipl-gold/50 mt-2 relative overflow-hidden group/btn"
+          className="group w-full relative overflow-hidden rounded-xl font-bold text-sm py-3.5 mt-2 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+          style={{
+            background: `linear-gradient(135deg, ${team.colors.primary}, ${team.colors.secondary})`,
+            boxShadow: `0 10px 40px ${team.colors.primary}40, 0 0 60px ${team.colors.secondary}30`,
+            border: `2px solid ${team.colors.primary}60`,
+            color: '#fff',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.boxShadow = `0 20px 60px ${team.colors.primary}60, 0 0 80px ${team.colors.secondary}40`;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.boxShadow = `0 10px 40px ${team.colors.primary}40, 0 0 60px ${team.colors.secondary}30`;
+          }}
         >
-          <span className="relative z-10 flex items-center justify-center gap-2">
+          {/* Shimmer effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+          
+          {/* Glow effect on hover */}
+          <div 
+            className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10"
+            style={{
+              background: `radial-gradient(circle, ${team.colors.primary}60, transparent)`,
+            }}
+          />
+          
+          {/* Content */}
+          <span className="relative z-10 flex items-center justify-center gap-2 font-black tracking-tight">
             View Full Squad
-            <svg className="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            <svg 
+              className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
           </span>
-          <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000" />
+          
+          {/* Pulse animation ring */}
+          <div 
+            className="absolute inset-0 rounded-xl border-2 opacity-0 group-hover:opacity-100 animate-ping"
+            style={{
+              borderColor: team.colors.primary,
+            }}
+          />
         </button>
       </div>
     </div>

@@ -132,15 +132,40 @@ export default function TeamsPage() {
                 </p>
                 <button 
                   onClick={() => alert('Opening team statistics...')} 
-                  className="bg-gradient-to-r from-ipl-purple to-ipl-gold hover:from-ipl-gold hover:to-ipl-purple text-white font-bold py-3 px-8 rounded-lg transition-all duration-500 transform hover:scale-105 hover:shadow-2xl hover:shadow-ipl-gold/50 cursor-pointer relative overflow-hidden group/btn"
+                  className="group relative overflow-hidden rounded-xl font-bold py-3.5 px-10 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                  style={{
+                    background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #A855F7 100%)',
+                    boxShadow: '0 10px 40px rgba(124, 58, 237, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)',
+                    border: '2px solid rgba(124, 58, 237, 0.5)',
+                    color: '#fff',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = '0 20px 60px rgba(124, 58, 237, 0.6), 0 0 80px rgba(147, 51, 234, 0.4)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = '0 10px 40px rgba(124, 58, 237, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)';
+                  }}
                 >
-                  <span className="relative z-10 flex items-center gap-2">
+                  {/* Shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                  
+                  {/* Glow effect */}
+                  <div 
+                    className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10"
+                    style={{
+                      background: 'radial-gradient(circle, rgba(124, 58, 237, 0.6), transparent)',
+                    }}
+                  />
+                  
+                  <span className="relative z-10 flex items-center gap-2 font-black tracking-tight">
                     View Detailed Stats
-                    <svg className="w-5 h-5 transform group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                   </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000" />
+                  
+                  {/* Pulse animation ring */}
+                  <div className="absolute inset-0 rounded-xl border-2 opacity-0 group-hover:opacity-100 animate-ping border-purple-500" />
                 </button>
               </div>
             </div>

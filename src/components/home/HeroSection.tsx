@@ -168,22 +168,77 @@ export default function HeroSection() {
               <div className="flex flex-col sm:flex-row gap-4">
                 <button 
                   onClick={() => router.push('/matches')}
-                  className="group relative overflow-hidden bg-gradient-to-r from-white via-white to-white text-black font-black text-lg px-10 py-5 rounded-2xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105 cursor-pointer border-2 border-white"
+                  className="group relative overflow-hidden rounded-xl font-black text-lg px-10 py-5 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                  style={{
+                    background: 'linear-gradient(135deg, #FFFFFF 0%, #F3F4F6 50%, #E5E7EB 100%)',
+                    boxShadow: '0 10px 40px rgba(255, 255, 255, 0.3), 0 0 60px rgba(255, 255, 255, 0.2)',
+                    border: '2px solid rgba(255, 255, 255, 0.8)',
+                    color: '#000',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = '0 20px 60px rgba(255, 255, 255, 0.5), 0 0 80px rgba(255, 255, 255, 0.4)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = '0 10px 40px rgba(255, 255, 255, 0.3), 0 0 60px rgba(255, 255, 255, 0.2)';
+                  }}
                 >
-                  <span className="relative z-10 flex items-center justify-center gap-3">
+                  {/* Shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                  
+                  {/* Glow effect */}
+                  <div 
+                    className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10"
+                    style={{
+                      background: 'radial-gradient(circle, rgba(255, 255, 255, 0.6), transparent)',
+                    }}
+                  />
+                  
+                  <span className="relative z-10 flex items-center justify-center gap-3 font-black tracking-tight">
                     EXPLORE MATCHES
-                    <svg className="w-6 h-6 transform group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    <svg className="w-6 h-6 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                   </span>
                 </button>
                 
                 <button 
                   onClick={() => router.push('/teams')}
-                  className="group relative overflow-hidden backdrop-blur-xl bg-white/10 text-white font-black text-lg py-5 px-10 rounded-2xl hover:bg-white/20 transition-all duration-300 transform hover:scale-105 border-2 border-white/30 hover:border-white cursor-pointer"
+                  className="group relative overflow-hidden rounded-xl font-black text-lg py-5 px-10 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05))',
+                    backdropFilter: 'blur(20px)',
+                    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3), 0 0 60px rgba(255, 255, 255, 0.1)',
+                    border: '2px solid rgba(255, 255, 255, 0.3)',
+                    color: '#fff',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15))';
+                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+                    e.currentTarget.style.boxShadow = '0 20px 60px rgba(0, 0, 0, 0.4), 0 0 80px rgba(255, 255, 255, 0.2)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05))';
+                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                    e.currentTarget.style.boxShadow = '0 10px 40px rgba(0, 0, 0, 0.3), 0 0 60px rgba(255, 255, 255, 0.1)';
+                  }}
                 >
-                  <span className="relative z-10">VIEW TEAMS</span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  {/* Shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                  
+                  {/* Glow effect */}
+                  <div 
+                    className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10"
+                    style={{
+                      background: 'radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent)',
+                    }}
+                  />
+                  
+                  <span className="relative z-10 flex items-center justify-center gap-3 font-black tracking-tight">
+                    VIEW TEAMS
+                    <svg className="w-6 h-6 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </span>
                 </button>
               </div>
             </div>

@@ -159,9 +159,38 @@ export default function UpcomingMatches() {
                   </p>
                 </div>
 
-                {/* View Button */}
-                <button className="w-full mt-4 py-3 rounded-lg bg-gradient-to-r from-ipl-purple to-ipl-gold text-white font-bold text-sm uppercase tracking-wide hover:shadow-lg hover:shadow-ipl-gold/40 transition-all duration-300 transform hover:scale-105">
-                  View Details
+                {/* View Button - Premium Design */}
+                <button className="group w-full mt-4 py-3.5 rounded-xl relative overflow-hidden font-bold text-sm uppercase tracking-wide transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                  style={{
+                    background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #A855F7 100%)',
+                    boxShadow: '0 10px 40px rgba(124, 58, 237, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)',
+                    border: '2px solid rgba(124, 58, 237, 0.5)',
+                    color: '#fff',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = '0 20px 60px rgba(124, 58, 237, 0.6), 0 0 80px rgba(147, 51, 234, 0.4)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = '0 10px 40px rgba(124, 58, 237, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)';
+                  }}
+                >
+                  {/* Shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                  
+                  {/* Glow effect */}
+                  <div 
+                    className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10"
+                    style={{
+                      background: 'radial-gradient(circle, rgba(124, 58, 237, 0.6), transparent)',
+                    }}
+                  />
+                  
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    View Details
+                    <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </span>
                 </button>
               </div>
             </div>
@@ -173,13 +202,41 @@ export default function UpcomingMatches() {
           </div>
         )}
 
-        {/* View All Button */}
+        {/* View All Button - Premium Design */}
         <div className="text-center mt-12">
-          <a href="/matches" className="inline-flex items-center space-x-2 px-8 py-3 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold transition-all duration-300 transform hover:scale-105">
-            <span>View Full Schedule</span>
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
+          <a 
+            href="/matches" 
+            className="group inline-flex items-center gap-3 px-10 py-4 rounded-xl relative overflow-hidden font-bold text-base transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+            style={{
+              background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF6347 100%)',
+              boxShadow: '0 10px 40px rgba(255, 215, 0, 0.4), 0 0 60px rgba(255, 165, 0, 0.3)',
+              border: '2px solid rgba(255, 215, 0, 0.5)',
+              color: '#000',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = '0 20px 60px rgba(255, 215, 0, 0.6), 0 0 80px rgba(255, 165, 0, 0.5)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = '0 10px 40px rgba(255, 215, 0, 0.4), 0 0 60px rgba(255, 165, 0, 0.3)';
+            }}
+          >
+            {/* Shimmer effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+            
+            {/* Glow effect */}
+            <div 
+              className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10"
+              style={{
+                background: 'radial-gradient(circle, rgba(255, 215, 0, 0.6), transparent)',
+              }}
+            />
+            
+            <span className="relative z-10 flex items-center gap-2 font-black tracking-tight">
+              View Full Schedule
+              <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </span>
           </a>
         </div>
       </div>

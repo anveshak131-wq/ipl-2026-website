@@ -140,13 +140,34 @@ export default function NewsSection() {
                   {article.summary || article.content.substring(0, 100)}...
                 </p>
 
-                {/* Read More Button */}
+                {/* Read More Button - Premium Design */}
                 <div className="pt-4 border-t border-white/10">
-                  <button className="w-full flex items-center justify-center space-x-2 text-ipl-purple hover:text-ipl-gold font-bold text-sm transition-all duration-300 py-2 hover:bg-white/5 rounded-lg">
-                    <span>Read Full Story</span>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
+                  <button className="group w-full relative overflow-hidden rounded-lg font-bold text-sm py-2.5 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(147, 51, 234, 0.1))',
+                      border: '1px solid rgba(124, 58, 237, 0.3)',
+                      color: '#A855F7',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(147, 51, 234, 0.2))';
+                      e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.5)';
+                      e.currentTarget.style.color = '#C084FC';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(147, 51, 234, 0.1))';
+                      e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.3)';
+                      e.currentTarget.style.color = '#A855F7';
+                    }}
+                  >
+                    {/* Shimmer effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                    
+                    <span className="relative z-10 flex items-center justify-center gap-2 font-bold">
+                      Read Full Story
+                      <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </span>
                   </button>
                 </div>
               </div>
@@ -159,13 +180,44 @@ export default function NewsSection() {
           </div>
         )}
 
-        {/* Browse All News Button */}
+        {/* Browse All News Button - Premium Design */}
         <div className="text-center mt-12">
-          <a href="/news" className="inline-flex items-center space-x-2 px-8 py-3 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-ipl-purple/30">
-            <span>Browse All News</span>
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
+          <a 
+            href="/news" 
+            className="group inline-flex items-center gap-3 px-10 py-4 rounded-xl relative overflow-hidden font-bold text-base transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+            style={{
+              background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #A855F7 100%)',
+              boxShadow: '0 10px 40px rgba(124, 58, 237, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)',
+              border: '2px solid rgba(124, 58, 237, 0.5)',
+              color: '#fff',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = '0 20px 60px rgba(124, 58, 237, 0.6), 0 0 80px rgba(147, 51, 234, 0.4)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = '0 10px 40px rgba(124, 58, 237, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)';
+            }}
+          >
+            {/* Shimmer effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+            
+            {/* Glow effect */}
+            <div 
+              className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10"
+              style={{
+                background: 'radial-gradient(circle, rgba(124, 58, 237, 0.6), transparent)',
+              }}
+            />
+            
+            <span className="relative z-10 flex items-center gap-2 font-black tracking-tight">
+              Browse All News
+              <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </span>
+            
+            {/* Pulse animation ring */}
+            <div className="absolute inset-0 rounded-xl border-2 opacity-0 group-hover:opacity-100 animate-ping border-purple-500" />
           </a>
         </div>
       </div>
