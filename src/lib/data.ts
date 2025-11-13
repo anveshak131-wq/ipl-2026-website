@@ -279,8 +279,77 @@ export const api = {
   },
   
   getMatches: async (): Promise<Match[]> => {
-    await new Promise(resolve => setTimeout(resolve, 100));
-    return mockMatches;
+    try {
+      const response = await fetch('/api/matches');
+      if (!response.ok) {
+        throw new Error('Failed to fetch matches');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching matches:', error);
+      // Fallback to mock data if API fails
+      return mockMatches;
+    }
+  },
+  
+  createMatch: async (match: Omit<Match, 'id' | 'team1' | 'team2'> & { team1Id: string; team2Id: string }): Promise<Match> => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch('/api/matches', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(match)
+      });
+      if (!response.ok) {
+        throw new Error('Failed to create match');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating match:', error);
+      throw error;
+    }
+  },
+  
+  updateMatch: async (id: string, match: Partial<Omit<Match, 'id' | 'team1' | 'team2'> & { team1Id?: string; team2Id?: string }>): Promise<Match> => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch('/api/matches', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ id, ...match })
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update match');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating match:', error);
+      throw error;
+    }
+  },
+  
+  deleteMatch: async (id: string): Promise<void> => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`/api/matches?id=${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete match');
+      }
+    } catch (error) {
+      console.error('Error deleting match:', error);
+      throw error;
+    }
   },
   
   getNews: async (): Promise<News[]> => {
