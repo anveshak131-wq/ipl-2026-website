@@ -28,7 +28,8 @@ export interface Player {
     matches: number;
     runs: number;
     wickets: number;
-    average: number;
+    average: number; // Batting average
+    bowlingAverage?: number; // Bowling average (runs conceded per wicket)
     strikeRate: number;
     economy: number;
     highest: number;

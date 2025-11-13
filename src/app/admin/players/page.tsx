@@ -7,6 +7,19 @@ import AuroraBackground from '@/components/ui/AuroraBackground';
 import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
 
+// Sort icons
+const ChevronUpIcon = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+  </svg>
+);
+
+const ChevronDownIcon = ({ className }: { className?: string }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+  </svg>
+);
+
 // Cricket-playing countries
 const CRICKET_COUNTRIES = [
   'India', 'Australia', 'England', 'South Africa', 'New Zealand', 'Pakistan', 
@@ -63,6 +76,8 @@ export default function AdminPlayers() {
   const [selectedTeam, setSelectedTeam] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [sortField, setSortField] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [formData, setFormData] = useState<{
     name: string;
     role: 'Batsman' | 'Bowler' | 'All-rounder' | 'Wicket-keeper';
@@ -78,6 +93,7 @@ export default function AdminPlayers() {
       runs: string;
       wickets: string;
       average: string;
+      bowlingAverage: string;
       strikeRate: string;
       economy: string;
       highest: string;
@@ -102,6 +118,7 @@ export default function AdminPlayers() {
       runs: '',
       wickets: '',
       average: '',
+      bowlingAverage: '',
       strikeRate: '',
       economy: '',
       highest: '',
@@ -153,6 +170,7 @@ export default function AdminPlayers() {
         runs: '',
         wickets: '',
         average: '',
+        bowlingAverage: '',
         strikeRate: '',
         economy: '',
         highest: '',
@@ -166,8 +184,23 @@ export default function AdminPlayers() {
     setShowForm(true);
   };
 
+  // Calculate bowling average from economy and wickets if not provided
+  const calculateBowlingAverage = (economy: number, wickets: number, matches: number): number => {
+    if (wickets === 0) return 0;
+    // Estimate overs bowled: assume average 4 overs per match for bowlers
+    const estimatedOvers = matches * 4;
+    const runsConceded = economy * estimatedOvers;
+    return runsConceded / wickets;
+  };
+
   const handleEditPlayer = (player: Player) => {
     setEditingPlayer(player);
+    // Calculate bowling average if not available (for backward compatibility)
+    const bowlingAvg = player.stats.bowlingAverage ?? 
+      (player.stats.wickets > 0 
+        ? calculateBowlingAverage(player.stats.economy, player.stats.wickets, player.stats.matches)
+        : 0);
+    
     setFormData({
       name: player.name,
       role: player.role,
@@ -183,6 +216,7 @@ export default function AdminPlayers() {
         runs: player.stats.runs.toString(),
         wickets: player.stats.wickets.toString(),
         average: player.stats.average.toString(),
+        bowlingAverage: bowlingAvg.toString(),
         strikeRate: player.stats.strikeRate.toString(),
         economy: player.stats.economy.toString(),
         highest: player.stats.highest.toString(),
@@ -212,6 +246,7 @@ export default function AdminPlayers() {
           runs: parseInt(formData.stats.runs) || 0,
           wickets: parseInt(formData.stats.wickets) || 0,
           average: parseFloat(formData.stats.average) || 0,
+          bowlingAverage: parseFloat(formData.stats.bowlingAverage) || 0,
           strikeRate: parseFloat(formData.stats.strikeRate) || 0,
           economy: parseFloat(formData.stats.economy) || 0,
           highest: parseInt(formData.stats.highest) || 0,
@@ -280,10 +315,70 @@ export default function AdminPlayers() {
     }
   };
 
-  // Filter players by selected team
-  const filteredPlayers = selectedTeam === 'all' 
+  // Handle sorting
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  // Filter and sort players
+  let filteredPlayers = selectedTeam === 'all' 
     ? players 
     : players.filter(player => player.teamId === selectedTeam);
+
+  // Apply sorting
+  if (sortField) {
+    filteredPlayers = [...filteredPlayers].sort((a, b) => {
+      let aValue: any;
+      let bValue: any;
+
+      switch (sortField) {
+        case 'battingAverage':
+          aValue = a.stats.average || 0;
+          bValue = b.stats.average || 0;
+          break;
+        case 'bowlingAverage':
+          // Calculate bowling average if not available
+          aValue = a.stats.bowlingAverage ?? 
+            (a.stats.wickets > 0 
+              ? calculateBowlingAverage(a.stats.economy, a.stats.wickets, a.stats.matches)
+              : 0);
+          bValue = b.stats.bowlingAverage ?? 
+            (b.stats.wickets > 0 
+              ? calculateBowlingAverage(b.stats.economy, b.stats.wickets, b.stats.matches)
+              : 0);
+          break;
+        case 'runs':
+          aValue = a.stats.runs || 0;
+          bValue = b.stats.runs || 0;
+          break;
+        case 'wickets':
+          aValue = a.stats.wickets || 0;
+          bValue = b.stats.wickets || 0;
+          break;
+        case 'name':
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        default:
+          return 0;
+      }
+
+      if (typeof aValue === 'string') {
+        return sortDirection === 'asc' 
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      } else {
+        return sortDirection === 'asc' 
+          ? (aValue as number) - (bValue as number)
+          : (bValue as number) - (aValue as number);
+      }
+    });
+  }
 
   if (!isAuthenticated) {
     return null;
@@ -429,8 +524,16 @@ export default function AdminPlayers() {
               <table className="w-full">
                 <thead className="bg-white/5">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      Name
+                    <th className="px-6 py-4 text-left">
+                      <button
+                        onClick={() => handleSort('name')}
+                        className="flex items-center gap-2 text-xs font-medium text-gray-400 uppercase tracking-wider hover:text-white transition-colors"
+                      >
+                        Name
+                        {sortField === 'name' && (
+                          sortDirection === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />
+                        )}
+                      </button>
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                       Jersey
@@ -444,14 +547,49 @@ export default function AdminPlayers() {
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                       Age
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      Runs
+                    <th className="px-6 py-4 text-left">
+                      <button
+                        onClick={() => handleSort('runs')}
+                        className="flex items-center gap-2 text-xs font-medium text-gray-400 uppercase tracking-wider hover:text-white transition-colors"
+                      >
+                        Runs
+                        {sortField === 'runs' && (
+                          sortDirection === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />
+                        )}
+                      </button>
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      Wickets
+                    <th className="px-6 py-4 text-left">
+                      <button
+                        onClick={() => handleSort('wickets')}
+                        className="flex items-center gap-2 text-xs font-medium text-gray-400 uppercase tracking-wider hover:text-white transition-colors"
+                      >
+                        Wickets
+                        {sortField === 'wickets' && (
+                          sortDirection === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />
+                        )}
+                      </button>
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      Avg
+                    <th className="px-6 py-4 text-left">
+                      <button
+                        onClick={() => handleSort('battingAverage')}
+                        className="flex items-center gap-2 text-xs font-medium text-gray-400 uppercase tracking-wider hover:text-white transition-colors"
+                      >
+                        Batting Avg
+                        {sortField === 'battingAverage' && (
+                          sortDirection === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />
+                        )}
+                      </button>
+                    </th>
+                    <th className="px-6 py-4 text-left">
+                      <button
+                        onClick={() => handleSort('bowlingAverage')}
+                        className="flex items-center gap-2 text-xs font-medium text-gray-400 uppercase tracking-wider hover:text-white transition-colors"
+                      >
+                        Bowling Avg
+                        {sortField === 'bowlingAverage' && (
+                          sortDirection === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />
+                        )}
+                      </button>
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                       SR
@@ -522,10 +660,19 @@ export default function AdminPlayers() {
                           {player.stats.wickets}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
-                          {player.stats.average}
+                          {player.stats.average.toFixed(2)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
-                          {player.stats.strikeRate}
+                          {(() => {
+                            const bowlingAvg = player.stats.bowlingAverage ?? 
+                              (player.stats.wickets > 0 
+                                ? calculateBowlingAverage(player.stats.economy, player.stats.wickets, player.stats.matches)
+                                : 0);
+                            return bowlingAvg > 0 ? bowlingAvg.toFixed(2) : '-';
+                          })()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
+                          {player.stats.strikeRate.toFixed(2)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
                           {player.stats.fours}/{player.stats.sixes}
@@ -767,7 +914,7 @@ export default function AdminPlayers() {
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Average
+                            Batting Average
                           </label>
                           <input
                             type="number"
@@ -777,6 +924,20 @@ export default function AdminPlayers() {
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
                             placeholder="0.00"
                           />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Bowling Average
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={formData.stats.bowlingAverage}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, bowlingAverage: e.target.value}})}
+                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                            placeholder="0.00"
+                          />
+                          <p className="text-xs text-gray-500 mt-1">Runs conceded per wicket</p>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
