@@ -38,6 +38,15 @@ function createColorVariations(hex: string) {
 export default function PlayerModal({ player, isOpen, onClose, teamColors, teamData }: PlayerModalProps) {
   const [teamColorsState, setTeamColorsState] = useState<{ primary: string; secondary: string } | null>(teamColors || null);
 
+  // Calculate bowling average from economy and wickets if not provided
+  const calculateBowlingAverage = (economy: number, wickets: number, matches: number): number => {
+    if (wickets === 0) return 0;
+    // Estimate overs bowled: assume average 4 overs per match for bowlers
+    const estimatedOvers = matches * 4;
+    const runsConceded = economy * estimatedOvers;
+    return runsConceded / wickets;
+  };
+
   useEffect(() => {
     // If team colors are provided directly, use them
     if (teamColors) {
@@ -390,7 +399,16 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                 {[
                   { label: 'Wickets', value: player.stats.wickets },
                   { label: 'Economy Rate', value: player.stats.economy },
-                  { label: 'Bowling Avg', value: player.stats.average },
+                  { 
+                    label: 'Bowling Avg', 
+                    value: (() => {
+                      const bowlingAvg = player.stats.bowlingAverage ?? 
+                        (player.stats.wickets > 0 
+                          ? calculateBowlingAverage(player.stats.economy, player.stats.wickets, player.stats.matches)
+                          : 0);
+                      return bowlingAvg > 0 ? bowlingAvg.toFixed(2) : '-';
+                    })()
+                  },
                   { label: 'Best Bowling (BBM)', value: player.stats.bestBowling || '-' },
                 ].map((stat, index) => (
                   <div
