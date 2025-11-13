@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
+import { getOptimalTextColor, getOptimalTextColorForGradient } from '@/lib/colorUtils';
 
 interface PlayerModalProps {
   player: Player | null;
@@ -21,12 +22,16 @@ function createColorVariations(hex: string) {
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
   
+  const light = `rgba(${r}, ${g}, ${b}, 0.15)`;
+  const medium = `rgba(${r}, ${g}, ${b}, 0.3)`;
+  
   return {
-    light: `rgba(${r}, ${g}, ${b}, 0.15)`,
-    medium: `rgba(${r}, ${g}, ${b}, 0.3)`,
+    light,
+    medium,
     solid: hex,
     glow: `rgba(${r}, ${g}, ${b}, 0.5)`,
-    text: hex,
+    text: getOptimalTextColor(hex),
+    textOnLight: getOptimalTextColorForGradient(`linear-gradient(135deg, ${light}, ${medium})`),
   };
 }
 
@@ -120,7 +125,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
               border: `2px solid ${primaryColor.medium}`
             }}
           >
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: primaryColor.textOnLight }}>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -161,8 +166,9 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                 />
                 
                 <span 
-                  className="relative text-white font-black text-3xl md:text-4xl z-10"
+                  className="relative font-black text-3xl md:text-4xl z-10"
                   style={{
+                    color: getOptimalTextColorForGradient(`linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`),
                     textShadow: `0 2px 10px rgba(0,0,0,0.5)`
                   }}
                 >
@@ -177,7 +183,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                       background: `linear-gradient(135deg, #FFD700, #FFA500)`,
                     }}
                   >
-                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" style={{ color: getOptimalTextColorForGradient('linear-gradient(135deg, #FFD700, #FFA500)') }}>
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                   </div>
@@ -245,7 +251,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                   className="absolute top-6 left-6 md:relative md:top-0 md:left-0 w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center font-black text-2xl md:text-3xl shadow-2xl transform hover:scale-110 transition-transform duration-300"
                   style={{
                     background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
-                    color: '#fff',
+                    color: getOptimalTextColorForGradient(`linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`),
                     boxShadow: `0 5px 25px ${primaryColor.glow}, 0 0 40px ${secondaryColor.glow}30`
                   }}
                 >
@@ -257,7 +263,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
 
           {/* Playing Style Section */}
           <div className="p-8 border-b-2" style={{ borderColor: primaryColor.medium }}>
-            <h3 className="text-2xl font-black text-white mb-6 flex items-center gap-3">
+            <h3 className="text-2xl font-black mb-6 flex items-center gap-3" style={{ color: primaryColor.textOnLight }}>
               <div 
                 className="w-1 h-8 rounded-full"
                 style={{ background: `linear-gradient(to bottom, ${primaryColor.solid}, ${secondaryColor.solid})` }}
@@ -293,7 +299,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                 >
                   {player.bowlingStyle || 'N/A'}
                 </p>
-                <p className="text-gray-400 text-sm font-semibold uppercase tracking-wider">Bowling Style</p>
+                <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: primaryColor.textOnLight }}>Bowling Style</p>
               </div>
             </div>
           </div>
@@ -301,7 +307,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
           {/* Career Statistics Section */}
           <div className="p-8">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-black text-white flex items-center gap-3">
+              <h3 className="text-2xl font-black flex items-center gap-3" style={{ color: primaryColor.textOnLight }}>
                 <div 
                   className="w-1 h-8 rounded-full"
                   style={{ background: `linear-gradient(to bottom, ${primaryColor.solid}, ${secondaryColor.solid})` }}
@@ -310,12 +316,12 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
               </h3>
               {player.jerseyNumber && (
                 <div className="flex items-center gap-3">
-                  <span className="text-gray-400 text-sm font-semibold">Jersey:</span>
+                  <span className="text-sm font-semibold" style={{ color: primaryColor.textOnLight }}>Jersey:</span>
                   <span 
                     className="inline-flex items-center justify-center w-12 h-12 rounded-full font-black text-lg shadow-lg"
                     style={{
                       background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
-                      color: '#fff',
+                      color: getOptimalTextColorForGradient(`linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`),
                       boxShadow: `0 5px 15px ${primaryColor.glow}`
                     }}
                   >
@@ -362,7 +368,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                     >
                       {stat.value}
                     </p>
-                    <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider">{stat.label}</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: primaryColor.textOnLight }}>{stat.label}</p>
                   </div>
                 ))}
               </div>
@@ -401,7 +407,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                     >
                       {stat.value}
                     </p>
-                    <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider">{stat.label}</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: primaryColor.textOnLight }}>{stat.label}</p>
                   </div>
                 ))}
               </div>
@@ -439,7 +445,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                     >
                       {stat.value}
                     </p>
-                    <p className="text-gray-400 text-sm font-semibold uppercase tracking-wider">{stat.label}</p>
+                    <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: primaryColor.textOnLight }}>{stat.label}</p>
                   </div>
                 ))}
               </div>

@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/CustomIcons';
 import { Team, Player } from '@/types';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
+import { getOptimalTextColor, getOptimalTextColorForGradient } from '@/lib/colorUtils';
 
 interface TeamDetailClientProps {
   teamId: string;
@@ -32,11 +33,16 @@ function createColorVariations(hex: string) {
   const g = parseInt(hex.slice(3, 5), 16);
   const b = parseInt(hex.slice(5, 7), 16);
   
+  const light = `rgba(${r}, ${g}, ${b}, 0.15)`;
+  const medium = `rgba(${r}, ${g}, ${b}, 0.3)`;
+  
   return {
-    light: `rgba(${r}, ${g}, ${b}, 0.15)`,
-    medium: `rgba(${r}, ${g}, ${b}, 0.3)`,
+    light,
+    medium,
     solid: hex,
-    glow: `rgba(${r}, ${g}, ${b}, 0.5)`
+    glow: `rgba(${r}, ${g}, ${b}, 0.5)`,
+    text: getOptimalTextColor(hex),
+    textOnLight: getOptimalTextColorForGradient(`linear-gradient(135deg, ${light}, ${medium})`),
   };
 }
 
@@ -344,10 +350,10 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                   <div className="mb-4 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
                     <stat.Icon className="w-12 h-12" color={primaryColor.solid} />
                   </div>
-                  <p className="text-5xl font-black mb-2 transform group-hover:scale-110 transition-transform duration-300" style={{ color: primaryColor.solid }}>
+                  <p className="text-5xl font-black mb-2 transform group-hover:scale-110 transition-transform duration-300" style={{ color: primaryColor.text }}>
                     {stat.value}
                   </p>
-                  <p className="text-sm font-semibold text-gray-300 uppercase tracking-wider group-hover:text-white transition-colors duration-300">{stat.label}</p>
+                  <p className="text-sm font-semibold uppercase tracking-wider transition-colors duration-300" style={{ color: primaryColor.textOnLight }}>{stat.label}</p>
                   
                   {/* Hover shimmer effect */}
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer" />
@@ -387,24 +393,24 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                   }`}
                   style={activeTab === tab.id ? {
                     background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
-                    color: '#fff',
+                    color: getOptimalTextColorForGradient(`linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`),
                     boxShadow: `0 10px 30px ${primaryColor.glow}40, 0 0 40px ${secondaryColor.glow}20`,
                     border: `2px solid ${primaryColor.medium}`,
                   } : {
                     background: 'transparent',
-                    color: '#9CA3AF',
+                    color: primaryColor.textOnLight,
                     border: '2px solid transparent',
                   }}
                   onMouseEnter={(e) => {
                     if (activeTab !== tab.id) {
-                      e.currentTarget.style.color = '#fff';
+                      e.currentTarget.style.color = primaryColor.textOnLight;
                       e.currentTarget.style.background = `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`;
                       e.currentTarget.style.borderColor = `${primaryColor.medium}60`;
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (activeTab !== tab.id) {
-                      e.currentTarget.style.color = '#9CA3AF';
+                      e.currentTarget.style.color = primaryColor.textOnLight;
                       e.currentTarget.style.background = 'transparent';
                       e.currentTarget.style.borderColor = 'transparent';
                     }
@@ -444,10 +450,10 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
               ].map((section, sectionIndex) => (
                 section.players.length > 0 && (
                   <div key={sectionIndex} className="animate-fade-in" style={{ animationDelay: `${sectionIndex * 100}ms` }}>
-                    <h3 className="text-3xl font-black text-white mb-8 flex items-center gap-4">
+                    <h3 className="text-3xl font-black mb-8 flex items-center gap-4" style={{ color: primaryColor.text }}>
                       <section.Icon className="w-10 h-10" color={primaryColor.solid} />
                       {section.title}
-                      <span className="text-lg font-normal text-gray-400">({section.players.length})</span>
+                      <span className="text-lg font-normal" style={{ color: primaryColor.textOnLight }}>({section.players.length})</span>
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {section.players.map((player, playerIndex) => (
@@ -521,7 +527,7 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index }: an
       <div className="absolute top-4 right-4 w-14 h-14 rounded-xl flex items-center justify-center font-black text-xl shadow-lg transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 z-10"
            style={{ 
              background: `linear-gradient(135deg, ${primaryColor.medium}, ${secondaryColor.medium})`,
-             color: '#fff',
+             color: getOptimalTextColorForGradient(`linear-gradient(135deg, ${primaryColor.medium}, ${secondaryColor.medium})`),
              boxShadow: `0 5px 15px ${primaryColor.glow}`
            }}>
         {player.jerseyNumber || '-'}
@@ -531,8 +537,8 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index }: an
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer" />
 
       {/* Player Name */}
-      <h3 className="text-xl font-bold text-white mb-2 pr-16">{player.name}</h3>
-      <p className="text-sm font-semibold text-gray-300 mb-4">{player.role}</p>
+      <h3 className="text-xl font-bold mb-2 pr-16" style={{ color: primaryColor.textOnLight }}>{player.name}</h3>
+      <p className="text-sm font-semibold mb-4" style={{ color: primaryColor.textOnLight }}>{player.role}</p>
 
       {/* Badges with Custom Icons */}
       <div className="flex flex-wrap gap-2 mb-4">
@@ -553,16 +559,16 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index }: an
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 pt-4 border-t" style={{ borderColor: primaryColor.medium }}>
         <div className="text-center">
-          <p className="text-2xl font-black" style={{ color: primaryColor.solid }}>{player.stats.matches}</p>
-          <p className="text-xs text-gray-400 uppercase">Matches</p>
+          <p className="text-2xl font-black" style={{ color: primaryColor.text }}>{player.stats.matches}</p>
+          <p className="text-xs uppercase" style={{ color: primaryColor.textOnLight }}>Matches</p>
         </div>
         <div className="text-center">
-          <p className="text-2xl font-black" style={{ color: primaryColor.solid }}>{player.stats.runs}</p>
-          <p className="text-xs text-gray-400 uppercase">Runs</p>
+          <p className="text-2xl font-black" style={{ color: primaryColor.text }}>{player.stats.runs}</p>
+          <p className="text-xs uppercase" style={{ color: primaryColor.textOnLight }}>Runs</p>
         </div>
         <div className="text-center">
-          <p className="text-2xl font-black" style={{ color: primaryColor.solid }}>{player.stats.wickets}</p>
-          <p className="text-xs text-gray-400 uppercase">Wickets</p>
+          <p className="text-2xl font-black" style={{ color: primaryColor.text }}>{player.stats.wickets}</p>
+          <p className="text-xs uppercase" style={{ color: primaryColor.textOnLight }}>Wickets</p>
         </div>
       </div>
 
@@ -587,7 +593,7 @@ function StatsTab({ teamData, primaryColor, secondaryColor, batsmen, bowlers, al
            }}>
         <div className="flex items-center gap-3 mb-6">
           <CricketBatIcon className="w-8 h-8" color={primaryColor.solid} />
-          <h3 className="text-2xl font-black text-white">Squad Composition</h3>
+          <h3 className="text-2xl font-black" style={{ color: primaryColor.textOnLight }}>Squad Composition</h3>
         </div>
         <div className="space-y-4">
           {[
@@ -597,11 +603,11 @@ function StatsTab({ teamData, primaryColor, secondaryColor, batsmen, bowlers, al
             { label: 'Wicket-keepers', value: wicketkeepers.length, Icon: WicketKeeperIcon }
           ].map((item, i) => (
             <div key={i} className="flex justify-between items-center p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-all">
-              <span className="text-gray-300 font-semibold flex items-center gap-3">
+              <span className="font-semibold flex items-center gap-3" style={{ color: primaryColor.textOnLight }}>
                 <item.Icon className="w-5 h-5" color={primaryColor.solid} />
                 {item.label}
               </span>
-              <span className="text-4xl font-black" style={{ color: primaryColor.solid }}>{item.value}</span>
+              <span className="text-4xl font-black" style={{ color: primaryColor.text }}>{item.value}</span>
             </div>
           ))}
         </div>
@@ -615,7 +621,7 @@ function StatsTab({ teamData, primaryColor, secondaryColor, batsmen, bowlers, al
            }}>
         <div className="flex items-center gap-3 mb-6">
           <GlobeIcon className="w-8 h-8" color={primaryColor.solid} />
-          <h3 className="text-2xl font-black text-white">Player Origin</h3>
+          <h3 className="text-2xl font-black" style={{ color: primaryColor.textOnLight }}>Player Origin</h3>
         </div>
         <div className="space-y-4">
           {[
@@ -623,8 +629,8 @@ function StatsTab({ teamData, primaryColor, secondaryColor, batsmen, bowlers, al
             { label: 'Foreign Players', value: teamData.players?.filter((p: Player) => p.nationality !== 'India').length || 0 }
           ].map((item, i) => (
             <div key={i} className="flex justify-between items-center p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-all">
-              <span className="text-gray-300 font-semibold">{item.label}</span>
-              <span className="text-4xl font-black" style={{ color: primaryColor.solid }}>{item.value}</span>
+              <span className="font-semibold" style={{ color: primaryColor.textOnLight }}>{item.label}</span>
+              <span className="text-4xl font-black" style={{ color: primaryColor.text }}>{item.value}</span>
             </div>
           ))}
         </div>
@@ -644,14 +650,14 @@ function AboutTab({ teamData, primaryColor, secondaryColor }: any) {
            }}>
         <div className="flex items-center gap-3 mb-8">
           <TrophyIcon className="w-10 h-10" color={primaryColor.solid} />
-          <h3 className="text-4xl font-black text-white">About {teamData.name}</h3>
+          <h3 className="text-4xl font-black" style={{ color: primaryColor.textOnLight }}>About {teamData.name}</h3>
         </div>
         
-        <p className="text-xl text-gray-300 leading-relaxed mb-12">{teamData.description}</p>
+        <p className="text-xl leading-relaxed mb-12" style={{ color: primaryColor.textOnLight }}>{teamData.description}</p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div>
-            <h4 className="text-2xl font-black text-white mb-6">Team Colors</h4>
+            <h4 className="text-2xl font-black mb-6" style={{ color: primaryColor.textOnLight }}>Team Colors</h4>
             <div className="flex gap-6">
               {[
                 { label: 'Primary', color: primaryColor.solid },
@@ -664,26 +670,26 @@ function AboutTab({ teamData, primaryColor, secondaryColor }: any) {
                     <div className="relative w-24 h-24 rounded-2xl shadow-2xl border-2 border-white/20 group-hover:scale-110 transition-transform duration-300" 
                          style={{ backgroundColor: item.color }} />
                   </div>
-                  <p className="text-gray-400 text-sm mt-3 font-semibold uppercase tracking-wider">{item.label}</p>
+                  <p className="text-sm mt-3 font-semibold uppercase tracking-wider" style={{ color: primaryColor.textOnLight }}>{item.label}</p>
                 </div>
               ))}
             </div>
           </div>
           
           <div>
-            <h4 className="text-2xl font-black text-white mb-6">Quick Facts</h4>
-            <ul className="space-y-3 text-gray-300 text-lg">
+            <h4 className="text-2xl font-black mb-6" style={{ color: primaryColor.textOnLight }}>Quick Facts</h4>
+            <ul className="space-y-3 text-lg" style={{ color: primaryColor.textOnLight }}>
               <li className="flex items-center gap-3">
                 <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: primaryColor.solid }} />
-                Short Name: <span className="text-white font-bold">{teamData.shortName}</span>
+                Short Name: <span className="font-bold">{teamData.shortName}</span>
               </li>
               <li className="flex items-center gap-3">
                 <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: primaryColor.solid }} />
-                Squad Size: <span className="text-white font-bold">{teamData.players?.length || 0} Players</span>
+                Squad Size: <span className="font-bold">{teamData.players?.length || 0} Players</span>
               </li>
               <li className="flex items-center gap-3">
                 <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: primaryColor.solid }} />
-                Foreign Players: <span className="text-white font-bold">{teamData.players?.filter((p: Player) => p.nationality !== 'India').length || 0}</span>
+                Foreign Players: <span className="font-bold">{teamData.players?.filter((p: Player) => p.nationality !== 'India').length || 0}</span>
               </li>
             </ul>
           </div>

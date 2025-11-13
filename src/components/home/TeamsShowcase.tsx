@@ -6,6 +6,7 @@ import { Team } from '@/types';
 import { api } from '@/lib/data';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
+import { getOptimalTextColorForGradient } from '@/lib/colorUtils';
 
 export default function TeamsShowcase() {
   const router = useRouter();
@@ -111,10 +112,20 @@ export default function TeamsShowcase() {
 
                 {/* Team Name */}
                 <div className="text-center space-y-1 transform group-hover:translate-y-1 transition-transform duration-300">
-                  <p className="font-black text-white text-lg md:text-xl tracking-tight">
+                  <p 
+                    className="font-black text-lg md:text-xl tracking-tight"
+                    style={{ 
+                      color: getOptimalTextColorForGradient(`linear-gradient(135deg, ${team.colors.primary}, ${team.colors.secondary})`)
+                    }}
+                  >
                     {team.shortName}
                   </p>
-                  <p className="text-xs text-white/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 line-clamp-1">
+                  <p 
+                    className="text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 line-clamp-1"
+                    style={{ 
+                      color: getOptimalTextColorForGradient(`linear-gradient(135deg, ${team.colors.primary}, ${team.colors.secondary})`)
+                    }}
+                  >
                     {team.name.split(' ').slice(-2).join(' ')}
                   </p>
                 </div>

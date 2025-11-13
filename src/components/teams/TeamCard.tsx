@@ -3,6 +3,7 @@
 import { Team } from '@/types';
 import { useRouter } from 'next/navigation';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
+import { getOptimalTextColorForGradient } from '@/lib/colorUtils';
 
 interface TeamCardProps {
   team: Team;
@@ -118,7 +119,7 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
             background: `linear-gradient(135deg, ${team.colors.primary}, ${team.colors.secondary})`,
             boxShadow: `0 10px 40px ${team.colors.primary}40, 0 0 60px ${team.colors.secondary}30`,
             border: `2px solid ${team.colors.primary}60`,
-            color: '#fff',
+            color: getOptimalTextColorForGradient(`linear-gradient(135deg, ${team.colors.primary}, ${team.colors.secondary})`),
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.boxShadow = `0 20px 60px ${team.colors.primary}60, 0 0 80px ${team.colors.secondary}40`;
