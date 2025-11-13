@@ -6,6 +6,7 @@ import Footer from '@/components/layout/Footer';
 import { News } from '@/types';
 import { api } from '@/lib/data';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import Icon from '@/components/ui/Icon';
 
 export default function NewsPage() {
   const [news, setNews] = useState<News[]>([]);
@@ -98,8 +99,8 @@ export default function NewsPage() {
           {/* Header */}
           <div className="mb-12">
             <div className="inline-flex items-center space-x-2 mb-4">
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold">
-                📰 LATEST UPDATES
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2">
+                <Icon name="news" size={16} /> LATEST UPDATES
               </span>
             </div>
             <h1 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight">
@@ -139,21 +140,22 @@ export default function NewsPage() {
             {/* Category Filter */}
             <div className="flex flex-wrap gap-2">
               {[
-                { key: 'all', label: '📊 All News' },
-                { key: 'match', label: '🏏 Match' },
-                { key: 'team', label: '👥 Team' },
-                { key: 'player', label: '⭐ Player' },
-                { key: 'general', label: '📰 General' }
+                { key: 'all', label: 'All News', icon: 'stats' as const },
+                { key: 'match', label: 'Match', icon: 'cricket' as const },
+                { key: 'team', label: 'Team', icon: 'team' as const },
+                { key: 'player', label: 'Player', icon: 'trophy' as const },
+                { key: 'general', label: 'General', icon: 'news' as const }
               ].map((category) => (
                 <button
                   key={category.key}
                   onClick={() => setSelectedCategory(category.key as any)}
-                  className={`px-4 py-2 rounded-lg font-bold text-sm transition-all duration-300 ${
+                  className={`px-4 py-2 rounded-lg font-bold text-sm transition-all duration-300 flex items-center gap-2 ${
                     selectedCategory === category.key
                       ? 'bg-gradient-to-r from-ipl-purple to-ipl-gold text-white shadow-lg shadow-ipl-purple/20'
                       : 'bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm border border-white/10 text-gray-300 hover:text-white hover:border-ipl-gold/50 hover:bg-white/20'
                   }`}
                 >
+                  <Icon name={category.icon} size={16} />
                   {category.label}
                 </button>
               ))}
@@ -187,12 +189,12 @@ export default function NewsPage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                     {/* Category Badge */}
                     <div className="absolute top-4 right-4 z-10">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${getCategoryColor(item.category)}`}>
-                        {item.category === 'match' && '🏏'}
-                        {item.category === 'team' && '👥'}
-                        {item.category === 'player' && '⭐'}
-                        {item.category === 'general' && '📰'}
-                        {' '}{item.category}
+                      <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border ${getCategoryColor(item.category)}`}>
+                        {item.category === 'match' && <Icon name="cricket" size={12} />}
+                        {item.category === 'team' && <Icon name="team" size={12} />}
+                        {item.category === 'player' && <Icon name="trophy" size={12} />}
+                        {item.category === 'general' && <Icon name="news" size={12} />}
+                        {item.category}
                       </span>
                     </div>
                   </div>
@@ -200,8 +202,8 @@ export default function NewsPage() {
                   {/* News Content */}
                   <div className="relative p-6 space-y-3">
                     <div className="flex items-center justify-between text-xs">
-                      <time className="text-gray-400 flex items-center">
-                        📅 {formatDate(item.publishedAt)}
+                      <time className="text-gray-400 text-sm">
+                        {formatDate(item.publishedAt)}
                       </time>
                     </div>
 

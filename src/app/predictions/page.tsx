@@ -6,6 +6,7 @@ import Footer from '@/components/layout/Footer';
 import { Match } from '@/types';
 import { api } from '@/lib/data';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import Icon from '@/components/ui/Icon';
 
 interface Prediction {
   matchId: string;
@@ -86,8 +87,8 @@ export default function PredictionsPage() {
           {/* Header */}
           <div className="mb-12">
             <div className="inline-flex items-center space-x-2 mb-4">
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold">
-                🤖 AI PREDICTIONS
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2">
+                <Icon name="target" size={16} /> AI PREDICTIONS
               </span>
             </div>
             <h1 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight">
@@ -110,8 +111,8 @@ export default function PredictionsPage() {
             {/* Matches List */}
             <div className="lg:col-span-1">
               <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 p-6 sticky top-8">
-                <h2 className="text-xl font-bold text-white mb-4">
-                  📅 Upcoming Matches
+                <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                  <Icon name="cricket" size={20} /> Upcoming Matches
                 </h2>
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {matches.length > 0 ? (
@@ -128,8 +129,8 @@ export default function PredictionsPage() {
                         <div className="font-bold mb-1 text-sm">
                           {match.team1.shortName} <span className="text-xs mx-1">vs</span> {match.team2.shortName}
                         </div>
-                        <div className="text-xs opacity-75 flex items-center">
-                          📅 {new Date(match.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        <div className="text-xs opacity-75">
+                          {new Date(match.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                         </div>
                       </button>
                     ))
@@ -188,7 +189,7 @@ export default function PredictionsPage() {
 
                             <div className="pt-6 border-t border-white/10 text-center space-y-1">
                               <p className="text-gray-300 font-semibold">
-                                📅 {new Date(match.date).toLocaleDateString('en-US', {
+                                {new Date(match.date).toLocaleDateString('en-US', {
                                   weekday: 'long',
                                   year: 'numeric',
                                   month: 'long',
@@ -196,7 +197,7 @@ export default function PredictionsPage() {
                                 })}
                               </p>
                               <p className="text-gray-400 text-sm">
-                                📍 {match.venue}
+                                {match.venue}
                               </p>
                             </div>
                           </div>
@@ -207,8 +208,8 @@ export default function PredictionsPage() {
 
                   {/* Win Probability */}
                   <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 p-8">
-                    <h3 className="text-2xl font-black text-white mb-8">
-                      📊 Win Probability
+                    <h3 className="text-2xl font-black text-white mb-8 flex items-center gap-2">
+                      <Icon name="stats" size={24} /> Win Probability
                     </h3>
 
                     {(() => {
@@ -261,8 +262,8 @@ export default function PredictionsPage() {
 
                   {/* Prediction */}
                   <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 p-8">
-                    <h3 className="text-2xl font-black text-white mb-6">
-                      🎯 Prediction
+                    <h3 className="text-2xl font-black text-white mb-6 flex items-center gap-2">
+                      <Icon name="target" size={24} /> Prediction
                     </h3>
 
                     <div className="mb-8 p-6 rounded-xl bg-gradient-to-r from-ipl-gold/20 to-ipl-purple/20 border border-ipl-gold/40">

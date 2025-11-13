@@ -7,6 +7,7 @@ import MatchCard from '@/components/matches/MatchCard';
 import { Match } from '@/types';
 import { api } from '@/lib/data';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import Icon from '@/components/ui/Icon';
 
 export default function MatchesPage() {
   const [matches, setMatches] = useState<Match[]>([]);
@@ -63,8 +64,8 @@ export default function MatchesPage() {
           {/* Header */}
           <div className="mb-12">
             <div className="inline-flex items-center space-x-2 mb-4">
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold">
-                🏏 MATCH SCHEDULE
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2">
+                <Icon name="cricket" size={16} /> MATCH SCHEDULE
               </span>
             </div>
             <h1 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight">
@@ -79,20 +80,21 @@ export default function MatchesPage() {
           <div className="flex justify-start mb-12 overflow-x-auto">
             <div className="inline-flex space-x-2 p-1 rounded-xl bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm border border-white/10">
               {[
-                { key: 'all', label: '📊 All Matches' },
-                { key: 'upcoming', label: '⏰ Upcoming' },
-                { key: 'live', label: '🔴 Live' },
-                { key: 'completed', label: '✅ Completed' }
+                { key: 'all', label: 'All Matches', icon: 'stats' as const },
+                { key: 'upcoming', label: 'Upcoming', icon: 'target' as const },
+                { key: 'live', label: 'Live', icon: 'cricket' as const },
+                { key: 'completed', label: 'Completed', icon: 'trophy' as const }
               ].map((tab) => (
                 <button
                   key={tab.key}
                   onClick={() => setFilter(tab.key as any)}
-                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 whitespace-nowrap ${
+                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 whitespace-nowrap flex items-center gap-2 ${
                     filter === tab.key
                       ? 'bg-gradient-to-r from-ipl-purple to-ipl-gold text-white shadow-lg shadow-ipl-purple/20'
                       : 'text-gray-300 hover:text-white hover:bg-white/10'
                   }`}
                 >
+                  <Icon name={tab.icon} size={16} />
                   {tab.label}
                 </button>
               ))}

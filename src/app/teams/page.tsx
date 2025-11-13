@@ -8,6 +8,7 @@ import PlayerModal from '@/components/teams/PlayerModal';
 import { Team, Player } from '@/types';
 import { api } from '@/lib/data';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import Icon from '@/components/ui/Icon';
 
 export default function TeamsPage() {
   const [teams, setTeams] = useState<Team[]>([]);
@@ -73,8 +74,8 @@ export default function TeamsPage() {
           {/* Header */}
           <div className="mb-12">
             <div className="inline-flex items-center space-x-2 mb-4">
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold">
-                🏏 IPL TEAMS
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2">
+                <Icon name="cricket" size={16} /> IPL TEAMS
               </span>
             </div>
             <h1 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight">
@@ -107,8 +108,8 @@ export default function TeamsPage() {
               {/* Content */}
               <div className="relative text-center">
                 <div className="inline-flex items-center space-x-2 mb-4">
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold">
-                    📊 STATISTICS
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2">
+                    <Icon name="stats" size={16} /> STATISTICS
                   </span>
                 </div>
                 <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
