@@ -35,6 +35,15 @@ function createColorVariations(hex: string) {
   };
 }
 
+// Helper function to adjust opacity of rgba color
+function adjustOpacity(rgbaColor: string, opacity: number): string {
+  const match = rgbaColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*[\d.]+)?\)/);
+  if (match) {
+    return `rgba(${match[1]}, ${match[2]}, ${match[3]}, ${opacity})`;
+  }
+  return rgbaColor;
+}
+
 export default function PlayerModal({ player, isOpen, onClose, teamColors, teamData }: PlayerModalProps) {
   const [teamColorsState, setTeamColorsState] = useState<{ primary: string; secondary: string } | null>(teamColors || null);
 
@@ -280,36 +289,68 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
               Playing Style
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div 
-                className="p-6 rounded-2xl backdrop-blur-sm border-2 transform hover:scale-105 transition-all duration-300"
-                style={{
-                  background: `linear-gradient(135deg, ${primaryColor.light}, transparent)`,
-                  borderColor: primaryColor.medium
-                }}
-              >
-                <p 
-                  className="text-2xl font-black mb-2"
-                  style={{ color: primaryColor.text }}
-                >
-                  {player.battingStyle || 'N/A'}
-                </p>
-                <p className="text-gray-400 text-sm font-semibold uppercase tracking-wider">Batting Style</p>
-              </div>
-              <div 
-                className="p-6 rounded-2xl backdrop-blur-sm border-2 transform hover:scale-105 transition-all duration-300"
-                style={{
-                  background: `linear-gradient(135deg, ${secondaryColor.light}, transparent)`,
-                  borderColor: secondaryColor.medium
-                }}
-              >
-                <p 
-                  className="text-2xl font-black mb-2"
-                  style={{ color: secondaryColor.text || primaryColor.text }}
-                >
-                  {player.bowlingStyle || 'N/A'}
-                </p>
-                <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: primaryColor.textOnLight }}>Bowling Style</p>
-              </div>
+              {/* Determine which cards should be highlighted based on role */}
+              {(() => {
+                const isBatsman = player.role === 'Batsman' || player.role === 'Wicket-keeper';
+                const isBowler = player.role === 'Bowler';
+                const isAllRounder = player.role === 'All-rounder';
+                
+                const highlightBatting = isBatsman || isAllRounder;
+                const highlightBowling = isBowler || isAllRounder;
+                
+                return (
+                  <>
+                    <div 
+                      className="p-6 rounded-2xl backdrop-blur-sm border-2 transform hover:scale-105 transition-all duration-300"
+                      style={{
+                        background: highlightBatting 
+                          ? `linear-gradient(135deg, ${primaryColor.light}, ${adjustOpacity(primaryColor.medium, 0.4)})`
+                          : `linear-gradient(135deg, ${adjustOpacity(primaryColor.light, 0.4)}, transparent)`,
+                        borderColor: highlightBatting ? primaryColor.solid : adjustOpacity(primaryColor.medium, 0.4),
+                        borderWidth: highlightBatting ? '2px' : '1px',
+                        boxShadow: highlightBatting ? `0 4px 20px ${adjustOpacity(primaryColor.glow, 0.4)}` : 'none'
+                      }}
+                    >
+                      <p 
+                        className="text-2xl font-black mb-2"
+                        style={{ color: primaryColor.text }}
+                      >
+                        {player.battingStyle || 'N/A'}
+                      </p>
+                      <p 
+                        className="text-sm font-semibold uppercase tracking-wider"
+                        style={{ color: highlightBatting ? primaryColor.textOnLight : 'rgba(156, 163, 175, 0.6)' }}
+                      >
+                        Batting Style
+                      </p>
+                    </div>
+                    <div 
+                      className="p-6 rounded-2xl backdrop-blur-sm border-2 transform hover:scale-105 transition-all duration-300"
+                      style={{
+                        background: highlightBowling 
+                          ? `linear-gradient(135deg, ${secondaryColor.light}, ${adjustOpacity(secondaryColor.medium || primaryColor.medium, 0.4)})`
+                          : `linear-gradient(135deg, ${adjustOpacity(secondaryColor.light || primaryColor.light, 0.4)}, transparent)`,
+                        borderColor: highlightBowling ? (secondaryColor.solid || primaryColor.solid) : adjustOpacity(secondaryColor.medium || primaryColor.medium, 0.4),
+                        borderWidth: highlightBowling ? '2px' : '1px',
+                        boxShadow: highlightBowling ? `0 4px 20px ${adjustOpacity(secondaryColor.glow || primaryColor.glow, 0.4)}` : 'none'
+                      }}
+                    >
+                      <p 
+                        className="text-2xl font-black mb-2"
+                        style={{ color: secondaryColor.text || primaryColor.text }}
+                      >
+                        {player.bowlingStyle || 'N/A'}
+                      </p>
+                      <p 
+                        className="text-sm font-semibold uppercase tracking-wider"
+                        style={{ color: highlightBowling ? primaryColor.textOnLight : 'rgba(156, 163, 175, 0.6)' }}
+                      >
+                        Bowling Style
+                      </p>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </div>
 
