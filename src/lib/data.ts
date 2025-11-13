@@ -353,13 +353,35 @@ export const api = {
   },
   
   getNews: async (): Promise<News[]> => {
-    await new Promise(resolve => setTimeout(resolve, 100));
-    return mockNews;
+    try {
+      const response = await fetch('/api/content');
+      if (!response.ok) {
+        throw new Error('Failed to fetch news');
+      }
+      const allContent = await response.json();
+      // Filter for news type content
+      return allContent.filter((item: Content) => item.type === 'news');
+    } catch (error) {
+      console.error('Error fetching news:', error);
+      // Fallback to mock data if API fails
+      return mockNews;
+    }
   },
   
   getHighlights: async (): Promise<Highlight[]> => {
-    await new Promise(resolve => setTimeout(resolve, 100));
-    return mockHighlights;
+    try {
+      const response = await fetch('/api/content');
+      if (!response.ok) {
+        throw new Error('Failed to fetch highlights');
+      }
+      const allContent = await response.json();
+      // Filter for highlight type content
+      return allContent.filter((item: Content) => item.type === 'highlight');
+    } catch (error) {
+      console.error('Error fetching highlights:', error);
+      // Fallback to mock data if API fails
+      return mockHighlights;
+    }
   },
 
   // Teams API
