@@ -6,6 +6,8 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import PlayerModal from '@/components/teams/PlayerModal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import AuroraBackground from '@/components/ui/AuroraBackground';
+import Icon from '@/components/ui/Icon';
 import { Team, Player } from '@/types';
 
 interface TeamDetailClientProps {
@@ -70,6 +72,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
   if (isLoading) {
     return (
       <div className="min-h-screen">
+        <AuroraBackground />
         <Navbar />
         <div className="flex items-center justify-center h-96">
           <LoadingSpinner size="lg" />
@@ -83,13 +86,14 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
   if (!teamData) {
     return (
       <div className="min-h-screen">
+        <AuroraBackground />
         <Navbar />
         <div className="text-center py-20">
           <h1 className="text-2xl font-bold text-white mb-4">Team Not Found</h1>
           <p className="text-gray-400 mb-6">This team does not exist.</p>
           <button
             onClick={() => router.push('/teams')}
-            className="px-6 py-2 bg-ipl-purple hover:bg-ipl-purple/80 text-white rounded-lg transition-colors"
+            className="px-6 py-2 bg-gradient-to-r from-ipl-blue-dark to-ipl-purple hover:from-ipl-purple hover:to-ipl-gold text-white rounded-lg transition-all duration-300 transform hover:scale-105"
           >
             Back to Teams
           </button>
@@ -101,83 +105,140 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
 
   return (
     <div className="min-h-screen">
+      <AuroraBackground />
       <Navbar />
       
-      <main className="py-16">
+      <main className="relative py-16">
+        {/* Floating orbs */}
+        <div className="absolute top-20 right-10 w-96 h-96 opacity-30 rounded-full blur-3xl animate-float" 
+             style={{ 
+               backgroundColor: teamData.colors.primary,
+               animationDelay: '0s' 
+             }} />
+        <div className="absolute bottom-20 left-10 w-80 h-80 opacity-20 rounded-full blur-3xl animate-float" 
+             style={{ 
+               backgroundColor: teamData.colors.secondary,
+               animationDelay: '2s' 
+             }} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Back Button */}
           <button 
             onClick={() => router.push('/teams')}
-            className="mb-8 flex items-center text-gray-300 hover:text-white transition-colors duration-200"
+            className="mb-8 flex items-center gap-2 text-gray-300 hover:text-white transition-all duration-300 group px-4 py-2 rounded-lg hover:bg-white/10 backdrop-blur-sm animate-slide-up"
           >
-            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Back to All Teams
+            <span className="font-semibold">Back to All Teams</span>
           </button>
 
           {/* Team Header */}
-          <div className="text-center mb-12">
-            <div className="flex justify-center items-center mb-6">
-              <div className="w-32 h-32 flex items-center justify-center">
-                <img 
-                  src={teamData.logo} 
-                  alt={`${teamData.shortName} logo`}
-                  className="w-full h-full object-contain"
-                />
+          <div className="text-center mb-12 animate-fade-in">
+            {/* Team Logo */}
+            <div className="flex justify-center items-center mb-8">
+              <div className="relative group">
+                <div className="w-40 h-40 sm:w-48 sm:h-48 flex items-center justify-center p-4 rounded-3xl border-2 border-white/20 backdrop-blur-sm bg-white/5 transform group-hover:scale-110 transition-all duration-500 group-hover:rotate-3">
+                  <img 
+                    src={teamData.logo} 
+                    alt={`${teamData.shortName} logo`}
+                    className="w-full h-full object-contain drop-shadow-2xl animate-float"
+                  />
+                </div>
+                {/* Glow effect */}
+                <div className="absolute inset-0 -z-10 blur-2xl opacity-50 group-hover:opacity-75 transition-opacity duration-300 rounded-full"
+                     style={{
+                       background: `radial-gradient(circle, ${teamData.colors.primary}40, ${teamData.colors.secondary}20)`
+                     }} />
               </div>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+
+            {/* Team Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm mb-4 hover:scale-105 transition-transform">
+              <Icon name="team" size={16} />
+              <span className="text-sm font-bold text-white">{teamData.shortName}</span>
+            </div>
+
+            {/* Team Name */}
+            <h1 className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tight hover:scale-105 transition-transform duration-300"
+                style={{
+                  textShadow: `0 0 40px ${teamData.colors.primary}60`
+                }}>
               {teamData.name}
             </h1>
-            <div className="h-1 w-24 bg-gradient-to-r from-ipl-purple to-ipl-gold mx-auto mb-4" />
-            <p className="text-gray-300 text-lg mb-6">
+            
+            {/* Decorative Line */}
+            <div className="h-1 w-32 mx-auto mb-6 rounded-full animate-glow" 
+                 style={{
+                   background: `linear-gradient(to right, ${teamData.colors.primary}, ${teamData.colors.secondary})`
+                 }} />
+            
+            {/* Description */}
+            <p className="text-gray-300 text-lg md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed">
               {teamData.description}
             </p>
             
             {/* Team Colors */}
-            <div className="flex justify-center space-x-4 mb-8">
-              <div className="text-center">
-                <div 
-                  className="w-12 h-12 rounded-full border-2 border-white/30 mx-auto mb-2"
-                  style={{ backgroundColor: teamData.colors.primary }}
-                />
-                <p className="text-gray-400 text-sm">Primary</p>
+            <div className="flex justify-center gap-6 mb-10">
+              <div className="group text-center">
+                <div className="relative">
+                  <div 
+                    className="w-16 h-16 rounded-full border-3 border-white/40 mx-auto mb-2 shadow-lg transform group-hover:scale-110 transition-all duration-300 animate-pulse"
+                    style={{ 
+                      backgroundColor: teamData.colors.primary,
+                      boxShadow: `0 0 30px ${teamData.colors.primary}60`
+                    }}
+                  />
+                </div>
+                <p className="text-gray-300 text-sm font-semibold">Primary</p>
               </div>
-              <div className="text-center">
-                <div 
-                  className="w-12 h-12 rounded-full border-2 border-white/30 mx-auto mb-2"
-                  style={{ backgroundColor: teamData.colors.secondary }}
-                />
-                <p className="text-gray-400 text-sm">Secondary</p>
+              <div className="group text-center">
+                <div className="relative">
+                  <div 
+                    className="w-16 h-16 rounded-full border-3 border-white/40 mx-auto mb-2 shadow-lg transform group-hover:scale-110 transition-all duration-300 animate-pulse"
+                    style={{ 
+                      backgroundColor: teamData.colors.secondary,
+                      boxShadow: `0 0 30px ${teamData.colors.secondary}60`,
+                      animationDelay: '0.5s'
+                    }}
+                  />
+                </div>
+                <p className="text-gray-300 text-sm font-semibold">Secondary</p>
               </div>
             </div>
 
             {/* Team Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto mb-12">
-              <div className="glass-effect rounded-lg p-4">
-                <p className="text-2xl font-bold text-ipl-gold">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto mb-12">
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 p-6 hover:scale-105 transform transition-all duration-300 hover:border-white/40 group">
+                <div className="absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-10 transition-opacity"
+                     style={{ background: `linear-gradient(to bottom right, ${teamData.colors.primary}, ${teamData.colors.secondary})` }} />
+                <p className="text-3xl font-black mb-1" style={{ color: teamData.colors.primary }}>
                   {teamData.players?.length || 0}
                 </p>
-                <p className="text-gray-400 text-sm">Total Players</p>
+                <p className="text-gray-400 text-sm font-semibold">Total Players</p>
               </div>
-              <div className="glass-effect rounded-lg p-4">
-                <p className="text-2xl font-bold text-ipl-gold">
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 p-6 hover:scale-105 transform transition-all duration-300 hover:border-white/40 group">
+                <div className="absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-10 transition-opacity"
+                     style={{ background: `linear-gradient(to bottom right, ${teamData.colors.primary}, ${teamData.colors.secondary})` }} />
+                <p className="text-3xl font-black mb-1" style={{ color: teamData.colors.primary }}>
                   {teamData.players?.filter(p => p.isCaptain).length || 0}
                 </p>
-                <p className="text-gray-400 text-sm">Captains</p>
+                <p className="text-gray-400 text-sm font-semibold">Captains</p>
               </div>
-              <div className="glass-effect rounded-lg p-4">
-                <p className="text-2xl font-bold text-ipl-gold">
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 p-6 hover:scale-105 transform transition-all duration-300 hover:border-white/40 group">
+                <div className="absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-10 transition-opacity"
+                     style={{ background: `linear-gradient(to bottom right, ${teamData.colors.primary}, ${teamData.colors.secondary})` }} />
+                <p className="text-3xl font-black mb-1" style={{ color: teamData.colors.primary }}>
                   {teamData.players?.filter(p => p.nationality !== 'India').length || 0}
                 </p>
-                <p className="text-gray-400 text-sm">Foreign Players</p>
+                <p className="text-gray-400 text-sm font-semibold">Foreign Players</p>
               </div>
-              <div className="glass-effect rounded-lg p-4">
-                <p className="text-2xl font-bold text-ipl-gold">
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/20 p-6 hover:scale-105 transform transition-all duration-300 hover:border-white/40 group">
+                <div className="absolute inset-0 bg-gradient-to-br opacity-0 group-hover:opacity-10 transition-opacity"
+                     style={{ background: `linear-gradient(to bottom right, ${teamData.colors.primary}, ${teamData.colors.secondary})` }} />
+                <p className="text-3xl font-black mb-1" style={{ color: teamData.colors.primary }}>
                   {teamData.players?.filter(p => p.role === 'All-rounder').length || 0}
                 </p>
-                <p className="text-gray-400 text-sm">All-rounders</p>
+                <p className="text-gray-400 text-sm font-semibold">All-rounders</p>
               </div>
             </div>
           </div>
