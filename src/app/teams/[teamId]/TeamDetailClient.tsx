@@ -190,16 +190,16 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               {/* Left: Team Info */}
               <div className="space-y-8 animate-slide-up">
-                {/* Team Badge with IPL Logo */}
-                <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full backdrop-blur-xl border shadow-xl transition-all duration-300 hover:scale-105"
+                {/* Team Badge with IPL Logo - Fixed spacing */}
+                <div className="inline-flex items-center gap-4 px-6 py-3 rounded-full backdrop-blur-xl border shadow-xl transition-all duration-300 hover:scale-105"
                      style={{
                        background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
                        borderColor: primaryColor.medium
                      }}>
-                  <div className="w-6 h-6">
+                  <div className="w-6 h-6 flex-shrink-0">
                     <IPLLogo />
                   </div>
-                  <span className="text-sm font-bold text-white tracking-wider">{teamData.shortName}</span>
+                  <span className="text-sm font-bold text-white tracking-wider whitespace-nowrap">{teamData.shortName}</span>
                 </div>
 
                 {/* Team Name */}
@@ -279,7 +279,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                          background: `conic-gradient(from 0deg, ${primaryColor.solid}, ${secondaryColor.solid}, ${primaryColor.solid})`
                        }} />
                   
-                  <div className="relative w-80 h-80 md:w-96 md:h-96 rounded-full flex items-center justify-center backdrop-blur-xl border-2 shadow-2xl transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 animate-glow-pulse"
+                  <div className="relative w-80 h-80 md:w-96 md:h-96 rounded-full flex items-center justify-center backdrop-blur-xl border-2 shadow-2xl transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 animate-glow-pulse overflow-visible"
                        style={{
                          background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
                          borderColor: primaryColor.medium,
@@ -301,9 +301,9 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                       }}
                     />
                     
-                    {/* IPL Logo Badge with enhanced animation */}
-                    <div className="absolute -bottom-4 -right-4 w-20 h-20 rounded-full backdrop-blur-xl border-2 border-white/30 flex items-center justify-center shadow-xl transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 bg-gradient-to-br from-blue-900/80 to-purple-900/80 animate-bounce-in z-20">
-                      <div className="w-12 h-12">
+                    {/* IPL Logo Badge with enhanced animation - Positioned to avoid overlap with team logo */}
+                    <div className="absolute bottom-1 right-1 md:bottom-2 md:right-2 w-12 h-12 md:w-14 md:h-14 rounded-full backdrop-blur-xl border-2 border-white/30 flex items-center justify-center shadow-xl transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 bg-gradient-to-br from-blue-900/80 to-purple-900/80 z-20">
+                      <div className="w-7 h-7 md:w-8 md:h-8">
                         <IPLLogo />
                       </div>
                     </div>
@@ -357,21 +357,22 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
           </div>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-          <div className="flex justify-center">
+        {/* Tab Navigation - Fixed overlap with proper spacing */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 mt-12">
+          <div className="flex flex-col items-center gap-4">
+            {/* IPL Logo Badge - Moved outside and above the tab container */}
+            <div className="w-12 h-12 rounded-full backdrop-blur-xl border-2 border-white/30 flex items-center justify-center shadow-xl bg-gradient-to-br from-blue-900/80 to-purple-900/80 z-10">
+              <div className="w-7 h-7">
+                <IPLLogo />
+              </div>
+            </div>
+            
+            {/* Tab Container - Removed absolute positioning of logo */}
             <div className="relative inline-flex gap-3 p-2 rounded-2xl backdrop-blur-xl border shadow-xl"
                  style={{
                    background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
                    borderColor: primaryColor.medium
                  }}>
-              {/* IPL Logo Badge */}
-              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-12 h-12 rounded-full backdrop-blur-xl border-2 border-white/30 flex items-center justify-center shadow-xl bg-gradient-to-br from-blue-900/80 to-purple-900/80">
-                <div className="w-7 h-7">
-                  <IPLLogo />
-                </div>
-              </div>
-              
               {[
                 { id: 'squad', label: 'Squad' },
                 { id: 'stats', label: 'Stats' },
@@ -380,7 +381,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 ${
+                  className={`px-8 py-4 rounded-xl font-bold text-lg transition-all duration-300 whitespace-nowrap ${
                     activeTab === tab.id ? 'scale-105 shadow-lg' : 'hover:bg-white/10'
                   }`}
                   style={activeTab === tab.id ? {
