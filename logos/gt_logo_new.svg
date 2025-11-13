@@ -1,23 +1,22 @@
 <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-  <!-- GT Logo -->
+  <!-- KKR Logo -->
   <defs>
-    <linearGradient id="gtGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1B4F72;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#0E4B50;stop-opacity:1" />
+    <linearGradient id="kkrGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B0F75;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5D2488;stop-opacity:1" />
     </linearGradient>
   </defs>
   
   <!-- Background -->
-  <circle cx="100" cy="100" r="85" fill="url(#gtGradient)"/>
+  <circle cx="100" cy="100" r="90" fill="url(#kkrGradient)"/>
   
-  <!-- Giant Symbol -->
-  <rect x="70" y="80" width="60" height="80" rx="15" fill="#00D8FF"/>
-  <circle cx="85" cy="105" r="6" fill="#1B4F72"/>
-  <circle cx="115" cy="105" r="6" fill="#1B4F72"/>
-  <ellipse cx="100" cy="120" rx="10" ry="6" fill="#1B4F72"/>
-  <polygon points="100,130 95,145 105,145" fill="#1B4F72"/>
+  <!-- Knight Helmet -->
+  <path d="M 60 80 Q 100 40 140 80 L 140 130 L 120 140 L 80 140 L 60 130 Z" fill="#FFD700"/>
+  <circle cx="85" cy="105" r="5" fill="#3B0F75"/>
+  <circle cx="115" cy="105" r="5" fill="#3B0F75"/>
+  <path d="M 90 115 Q 100 125 110 115" stroke="#3B0F75" stroke-width="3" fill="none"/>
   
   <!-- Text -->
-  <text x="100" y="185" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#fff">GT</text>
+  <text x="100" y="175" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#fff">KKR</text>
 </svg>
 
