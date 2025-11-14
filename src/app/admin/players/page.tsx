@@ -6,6 +6,7 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
+import { parseDateDDMMYYYY, formatDateDDMMYYYY, calculateAge, isValidDate } from '@/lib/dateUtils';
 
 // Sort icons
 const ChevronUpIcon = ({ className }: { className?: string }) => (
@@ -83,6 +84,7 @@ export default function AdminPlayers() {
     role: 'Batsman' | 'Bowler' | 'All-rounder' | 'Wicket-keeper';
     teamId: string;
     age: string;
+    dateOfBirth: string; // DD/MM/YYYY format for input
     nationality: string;
     jerseyNumber: string;
     isCaptain: boolean;
@@ -108,6 +110,7 @@ export default function AdminPlayers() {
     role: 'Batsman',
     teamId: '',
     age: '',
+    dateOfBirth: '',
     nationality: '',
     jerseyNumber: '',
     isCaptain: false,
@@ -160,6 +163,7 @@ export default function AdminPlayers() {
       role: 'Batsman',
       teamId: '',
       age: '',
+      dateOfBirth: '',
       nationality: '',
       jerseyNumber: '',
       isCaptain: false,
@@ -206,6 +210,7 @@ export default function AdminPlayers() {
       role: player.role,
       teamId: player.teamId,
       age: player.age.toString(),
+      dateOfBirth: player.dateOfBirth ? formatDateDDMMYYYY(player.dateOfBirth) : '',
       nationality: player.nationality,
       jerseyNumber: player.jerseyNumber.toString(),
       isCaptain: player.isCaptain || false,
@@ -234,9 +239,24 @@ export default function AdminPlayers() {
     e.preventDefault();
     
     try {
+      // Parse DOB if provided
+      let calculatedAge = parseInt(formData.age) || 0;
+      let dateOfBirthISO = '';
+      
+      if (formData.dateOfBirth) {
+        if (!isValidDate(formData.dateOfBirth, 'DD/MM/YYYY')) {
+          alert('Invalid date format. Please use DD/MM/YYYY');
+          return;
+        }
+        dateOfBirthISO = parseDateDDMMYYYY(formData.dateOfBirth);
+        // Auto-calculate age from DOB
+        calculatedAge = calculateAge(dateOfBirthISO);
+      }
+      
       const playerData = {
         ...formData,
-        age: parseInt(formData.age),
+        dateOfBirth: dateOfBirthISO || undefined,
+        age: calculatedAge,
         jerseyNumber: parseInt(formData.jerseyNumber),
         isCaptain: formData.isCaptain,
         bowlingStyle: formData.bowlingStyle,
@@ -547,6 +567,9 @@ export default function AdminPlayers() {
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                       Age
                     </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      DOB (DD/MM/YYYY)
+                    </th>
                     <th className="px-6 py-4 text-left">
                       <button
                         onClick={() => handleSort('runs')}
@@ -652,6 +675,9 @@ export default function AdminPlayers() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                           {player.age}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                          {player.dateOfBirth ? formatDateDDMMYYYY(player.dateOfBirth) : '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
                           {player.stats.runs}
@@ -788,6 +814,21 @@ export default function AdminPlayers() {
                           placeholder="Enter age"
                           required
                         />
+                        <p className="text-xs text-gray-500 mt-1">If DOB is provided, age auto-calculates</p>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          Date of Birth (DD/MM/YYYY)
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.dateOfBirth}
+                          onChange={(e) => setFormData({...formData, dateOfBirth: e.target.value})}
+                          className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                          placeholder="DD/MM/YYYY (optional)"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Optional: If provided, age will auto-increment on birthday</p>
                       </div>
 
                       <div>

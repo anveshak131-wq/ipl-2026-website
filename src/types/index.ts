@@ -19,6 +19,7 @@ export interface Player {
   role: 'Batsman' | 'Bowler' | 'All-rounder' | 'Wicket-keeper';
   teamId: string;
   age: number;
+  dateOfBirth?: string; // Format: YYYY-MM-DD, if provided age auto-increments
   nationality: string;
   jerseyNumber: number;
   isCaptain: boolean;
