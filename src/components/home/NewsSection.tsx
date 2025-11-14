@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { News } from '@/types';
 import { api } from '@/lib/data';
 import LoadingSpinner from '../ui/LoadingSpinner';
 
 export default function NewsSection() {
+  const router = useRouter();
   const [news, setNews] = useState<News[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -31,6 +33,13 @@ export default function NewsSection() {
       day: 'numeric',
       year: 'numeric'
     });
+  };
+
+  const getImageSrc = (url?: string) => {
+    if (!url) return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect fill='%23333' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='18' fill='%23999' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E`;
+    const trimmed = url.trim();
+    if (trimmed.startsWith('//')) return window.location.protocol + trimmed;
+    return trimmed;
   };
 
   const getCategoryColor = (category: string) => {
@@ -90,7 +99,7 @@ export default function NewsSection() {
               {/* Image Container */}
               <div className="relative h-48 overflow-hidden bg-gradient-to-br from-slate-700 to-slate-900">
                 <img
-                  src={article.image}
+                  src={getImageSrc(article.image)}
                   alt={article.title}
                   className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-500 group-hover:brightness-110"
                   onError={(e) => {
@@ -148,6 +157,7 @@ export default function NewsSection() {
                       border: '1px solid rgba(124, 58, 237, 0.3)',
                       color: '#A855F7',
                     }}
+                    onClick={() => router.push(`/news/${article.id}`)}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.background = 'linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(147, 51, 234, 0.2))';
                       e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.5)';

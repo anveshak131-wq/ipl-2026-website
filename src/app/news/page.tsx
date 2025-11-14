@@ -1,6 +1,7 @@
-'use client';
+ 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { News } from '@/types';
@@ -10,6 +11,7 @@ import Icon from '@/components/ui/Icon';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 
 export default function NewsPage() {
+  const router = useRouter();
   const [news, setNews] = useState<News[]>([]);
   const [filteredNews, setFilteredNews] = useState<News[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,16 +37,14 @@ export default function NewsPage() {
   useEffect(() => {
     let filtered = news;
 
-    // Filter by category
     if (selectedCategory !== 'all') {
       filtered = filtered.filter(item => item.category === selectedCategory);
     }
 
-    // Filter by search query
     if (searchQuery) {
       filtered = filtered.filter(item =>
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.summary.toLowerCase().includes(searchQuery.toLowerCase())
+        (item.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.summary || '').toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -58,6 +58,13 @@ export default function NewsPage() {
       month: 'long',
       day: 'numeric'
     });
+  };
+
+  const getImageSrc = (url?: string) => {
+    if (!url) return 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"%3E%3Crect fill="%23333" width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" font-size="24" fill="%23999" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E';
+    const trimmed = url.trim();
+    if (trimmed.startsWith('//')) return window.location.protocol + trimmed;
+    return trimmed;
   };
 
   const getCategoryColor = (category: string) => {
@@ -93,14 +100,8 @@ export default function NewsPage() {
 
       <main className="relative py-16 min-h-screen overflow-hidden">
         <AuroraBackground />
-        
-        {/* Floating Animated Orbs */}
-        <div className="absolute top-20 right-10 w-96 h-96 bg-ipl-blue-light/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '0s' }} />
-        <div className="absolute bottom-10 left-20 w-96 h-96 bg-ipl-gold/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-ipl-purple/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '4s' }} />
-        
+
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
           <div className="mb-12 animate-slide-up">
             <div className="inline-flex items-center space-x-2 mb-4">
               <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2 hover:bg-white/15 transition-all duration-300 hover:scale-105 cursor-default">
@@ -115,9 +116,7 @@ export default function NewsPage() {
             </p>
           </div>
 
-          {/* Search and Filter */}
           <div className="mb-12 space-y-6 animate-fade-in">
-            {/* Search Bar */}
             <div className="relative">
               <input
                 type="text"
@@ -141,7 +140,6 @@ export default function NewsPage() {
               </svg>
             </div>
 
-            {/* Category Filter - Premium Design */}
             <div className="flex flex-wrap gap-3">
               {[
                 { key: 'all', label: 'All News', icon: 'stats' as const, color: '#7C3AED' },
@@ -181,11 +179,9 @@ export default function NewsPage() {
                     }
                   }}
                 >
-                  {/* Shimmer effect for active category */}
                   {selectedCategory === category.key && (
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
                   )}
-                  
                   <Icon name={category.icon} size={16} />
                   <span className="relative z-10">{category.label}</span>
                 </button>
@@ -193,93 +189,41 @@ export default function NewsPage() {
             </div>
           </div>
 
-          {/* News Grid */}
           {filteredNews.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredNews.map((item) => (
-                <article
-                  key={item.id}
-                  className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 hover:border-ipl-gold/50 transition-all duration-300 hover:shadow-2xl hover:shadow-ipl-gold/20 transform hover:scale-105 cursor-pointer"
-                >
-                  {/* Animated background on hover */}
+                <article key={item.id} className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 hover:border-ipl-gold/50 transition-all duration-300 hover:shadow-2xl hover:shadow-ipl-gold/20 transform hover:scale-105 cursor-pointer">
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="absolute inset-0 bg-gradient-to-br from-ipl-gold/10 to-ipl-purple/10" />
                   </div>
 
-                  {/* News Image */}
                   <div className="h-48 overflow-hidden relative">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"%3E%3Crect fill="%23333" width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" font-size="24" fill="%23999" text-anchor="middle" dy=".3em"%3EImage not found%3C/text%3E%3C/svg%3E';
-                      }}
-                    />
-                    {/* Overlay gradient */}
+                    <img src={getImageSrc((item as any).image || (item as any).imageUrl)} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" onError={(e) => { (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"%3E%3Crect fill="%23333" width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" font-size="24" fill="%23999" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E'; }} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    {/* Category Badge */}
                     <div className="absolute top-4 right-4 z-10">
-                      <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border ${getCategoryColor(item.category)}`}>
-                        {item.category === 'match' && <Icon name="cricket" size={12} />}
-                        {item.category === 'team' && <Icon name="team" size={12} />}
-                        {item.category === 'player' && <Icon name="trophy" size={12} />}
-                        {item.category === 'general' && <Icon name="news" size={12} />}
-                        {item.category}
+                      <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border ${getCategoryColor((item as any).category)}`}>
+                        {(item as any).category === 'match' && <Icon name="cricket" size={12} />}
+                        {(item as any).category === 'team' && <Icon name="team" size={12} />}
+                        {(item as any).category === 'player' && <Icon name="trophy" size={12} />}
+                        {(item as any).category === 'general' && <Icon name="news" size={12} />}
+                        {(item as any).category}
                       </span>
                     </div>
                   </div>
 
-                  {/* News Content */}
                   <div className="relative p-6 space-y-3">
                     <div className="flex items-center justify-between text-xs">
-                      <time className="text-gray-400 text-sm">
-                        {formatDate(item.publishedAt)}
-                      </time>
+                      <time className="text-gray-400 text-sm">{formatDate(item.publishedAt)}</time>
                     </div>
 
-                    <h3 className="text-lg font-black text-white line-clamp-2 group-hover:text-ipl-gold transition-colors duration-300">
-                      {item.title}
-                    </h3>
+                    <h3 className="text-lg font-black text-white line-clamp-2 group-hover:text-ipl-gold transition-colors duration-300">{item.title}</h3>
 
-                    <p className="text-gray-300 text-sm line-clamp-2 leading-relaxed">
-                      {item.summary}
-                    </p>
+                    <p className="text-gray-300 text-sm line-clamp-2 leading-relaxed">{item.summary}</p>
 
-                    <button className="group/btn inline-flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all duration-500 transform hover:scale-105 relative overflow-hidden"
-                      style={{
-                        background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(147, 51, 234, 0.1))',
-                        border: '1px solid rgba(124, 58, 237, 0.3)',
-                        color: '#A855F7',
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(147, 51, 234, 0.2))';
-                        e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.5)';
-                        e.currentTarget.style.color = '#C084FC';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(147, 51, 234, 0.1))';
-                        e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.3)';
-                        e.currentTarget.style.color = '#A855F7';
-                      }}
-                    >
-                      {/* Shimmer effect */}
+                    <button onClick={() => router.push(`/news/${item.id}`)} className="group/btn inline-flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all duration-500 transform hover:scale-105 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(147, 51, 234, 0.1))', border: '1px solid rgba(124, 58, 237, 0.3)', color: '#A855F7' }} onMouseEnter={(e) => { e.currentTarget.style.background = 'linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(147, 51, 234, 0.2))'; e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.5)'; e.currentTarget.style.color = '#C084FC'; }} onMouseLeave={(e) => { e.currentTarget.style.background = 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(147, 51, 234, 0.1))'; e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.3)'; e.currentTarget.style.color = '#A855F7'; }}>
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform translate-x-[-200%] group-hover/btn:translate-x-[200%] transition-transform duration-1000" />
-                      
                       <span className="relative z-10">Read Story</span>
-                      <svg
-                        className="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform duration-300 relative z-10"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2.5}
-                          d="M13 7l5 5m0 0l-5 5m5-5H6"
-                        />
-                      </svg>
+                      <svg className="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform duration-300 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
                     </button>
                   </div>
                 </article>
@@ -288,69 +232,10 @@ export default function NewsPage() {
           ) : (
             <div className="text-center py-12">
               <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 p-8 max-w-md mx-auto">
-                <svg
-                  className="w-16 h-16 mx-auto mb-4 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-                <p className="text-gray-300 text-lg font-semibold">
-                  No news found
-                </p>
-                <p className="text-gray-400 text-sm mt-2">
-                  Try adjusting your search or filter criteria
-                </p>
+                <svg className="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                <p className="text-gray-300 text-lg font-semibold">No news found</p>
+                <p className="text-gray-400 text-sm mt-2">Try adjusting your search or filter criteria</p>
               </div>
-            </div>
-          )}
-
-          {/* Pagination - Premium Design */}
-          {filteredNews.length > 0 && (
-            <div className="text-center mt-12 animate-fade-in" style={{ animationDelay: '200ms' }}>
-              <button 
-                onClick={() => alert('Loading more news...')} 
-                className="group relative overflow-hidden rounded-xl font-bold text-lg px-10 py-4 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                style={{
-                  background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #A855F7 100%)',
-                  boxShadow: '0 10px 40px rgba(124, 58, 237, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)',
-                  border: '2px solid rgba(124, 58, 237, 0.5)',
-                  color: '#fff',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.boxShadow = '0 20px 60px rgba(124, 58, 237, 0.6), 0 0 80px rgba(147, 51, 234, 0.4)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.boxShadow = '0 10px 40px rgba(124, 58, 237, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)';
-                }}
-              >
-                {/* Shimmer effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-                
-                {/* Glow effect */}
-                <div 
-                  className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10"
-                  style={{
-                    background: 'radial-gradient(circle, rgba(124, 58, 237, 0.6), transparent)',
-                  }}
-                />
-                
-                <span className="relative z-10 flex items-center justify-center gap-2 font-black tracking-tight">
-                  Load More News
-                  <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </span>
-                
-                {/* Pulse animation ring */}
-                <div className="absolute inset-0 rounded-xl border-2 opacity-0 group-hover:opacity-100 animate-ping border-purple-500" />
-              </button>
             </div>
           )}
         </div>
