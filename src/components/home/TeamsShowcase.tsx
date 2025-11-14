@@ -73,7 +73,10 @@ export default function TeamsShowcase() {
               key={team.id}
               onMouseEnter={() => setHoveredTeam(team.id)}
               onMouseLeave={() => setHoveredTeam(null)}
-              onClick={() => router.push(`/teams/${team.id}`)}
+              onClick={() => {
+                const teamRoute = team.id.startsWith('team') ? team.id : `team${team.id}`;
+                router.push(`/teams/${teamRoute}`);
+              }}
               className="group relative overflow-hidden rounded-2xl cursor-pointer transform transition-all duration-500 hover:scale-110 hover:z-10"
               style={{
                 animationDelay: `${index * 50}ms`
