@@ -103,12 +103,12 @@ export default function NewsSection() {
 
                 {/* Category Badge */}
                 <div className="absolute top-4 right-4 z-10">
-                  <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide border ${getCategoryColor(article.category)}`}>
+                  <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide border ${getCategoryColor(article.category || 'general')}`}>
                     {article.category === 'match' && '🏏'}
                     {article.category === 'team' && '👥'}
                     {article.category === 'player' && '⭐'}
                     {article.category === 'general' && '📰'}
-                    {article.category.charAt(0).toUpperCase() + article.category.slice(1)}
+                    {article.category ? article.category.charAt(0).toUpperCase() + article.category.slice(1) : 'General'}
                   </span>
                 </div>
 
