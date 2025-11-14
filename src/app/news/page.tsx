@@ -1,7 +1,6 @@
  'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { News } from '@/types';
@@ -9,14 +8,16 @@ import { api } from '@/lib/data';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Icon from '@/components/ui/Icon';
 import AuroraBackground from '@/components/ui/AuroraBackground';
+import NewsModal from '@/components/news/NewsModal';
 
 export default function NewsPage() {
-  const router = useRouter();
   const [news, setNews] = useState<News[]>([]);
   const [filteredNews, setFilteredNews] = useState<News[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'match' | 'team' | 'player' | 'general'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedNewsId, setSelectedNewsId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -220,7 +221,10 @@ export default function NewsPage() {
 
                     <p className="text-gray-300 text-sm line-clamp-2 leading-relaxed">{item.summary}</p>
 
-                    <button onClick={() => router.push(`/news/${item.id}`)} className="group/btn inline-flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all duration-500 transform hover:scale-105 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(147, 51, 234, 0.1))', border: '1px solid rgba(124, 58, 237, 0.3)', color: '#A855F7' }} onMouseEnter={(e) => { e.currentTarget.style.background = 'linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(147, 51, 234, 0.2))'; e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.5)'; e.currentTarget.style.color = '#C084FC'; }} onMouseLeave={(e) => { e.currentTarget.style.background = 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(147, 51, 234, 0.1))'; e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.3)'; e.currentTarget.style.color = '#A855F7'; }}>
+                    <button onClick={() => {
+                      setSelectedNewsId(item.id);
+                      setIsModalOpen(true);
+                    }} className="group/btn inline-flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all duration-500 transform hover:scale-105 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(147, 51, 234, 0.1))', border: '1px solid rgba(124, 58, 237, 0.3)', color: '#A855F7' }} onMouseEnter={(e) => { e.currentTarget.style.background = 'linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(147, 51, 234, 0.2))'; e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.5)'; e.currentTarget.style.color = '#C084FC'; }} onMouseLeave={(e) => { e.currentTarget.style.background = 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(147, 51, 234, 0.1))'; e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.3)'; e.currentTarget.style.color = '#A855F7'; }}>
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform translate-x-[-200%] group-hover/btn:translate-x-[200%] transition-transform duration-1000" />
                       <span className="relative z-10">Read Story</span>
                       <svg className="w-4 h-4 transform group-hover/btn:translate-x-1 transition-transform duration-300 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
@@ -242,6 +246,16 @@ export default function NewsPage() {
       </main>
 
       <Footer />
+
+      {/* News Modal */}
+      <NewsModal
+        isOpen={isModalOpen}
+        newsId={selectedNewsId || ''}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedNewsId(null);
+        }}
+      />
     </div>
   );
 }

@@ -1,15 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { News } from '@/types';
 import { api } from '@/lib/data';
 import LoadingSpinner from '../ui/LoadingSpinner';
+import NewsModal from '../news/NewsModal';
 
 export default function NewsSection() {
-  const router = useRouter();
   const [news, setNews] = useState<News[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedNewsId, setSelectedNewsId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -151,13 +152,16 @@ export default function NewsSection() {
 
                 {/* Read More Button - Premium Design */}
                 <div className="pt-4 border-t border-white/10">
-                  <button className="group w-full relative overflow-hidden rounded-lg font-bold text-sm py-2.5 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(147, 51, 234, 0.1))',
-                      border: '1px solid rgba(124, 58, 237, 0.3)',
-                      color: '#A855F7',
-                    }}
-                    onClick={() => router.push(`/news/${article.id}`)}
+                <button className="group w-full relative overflow-hidden rounded-lg font-bold text-sm py-2.5 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                   style={{
+                     background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(147, 51, 234, 0.1))',
+                     border: '1px solid rgba(124, 58, 237, 0.3)',
+                     color: '#A855F7',
+                   }}
+                  onClick={() => {
+                    setSelectedNewsId(article.id);
+                    setIsModalOpen(true);
+                  }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.background = 'linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(147, 51, 234, 0.2))';
                       e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.5)';
@@ -231,6 +235,16 @@ export default function NewsSection() {
           </a>
         </div>
       </div>
+
+      {/* News Modal */}
+      <NewsModal
+        isOpen={isModalOpen}
+        newsId={selectedNewsId || ''}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedNewsId(null);
+        }}
+      />
     </section>
   );
 }
