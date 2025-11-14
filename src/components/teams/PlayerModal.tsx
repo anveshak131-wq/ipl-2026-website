@@ -94,6 +94,9 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
     }
   };
 
+  // Helper function to get white text color
+  const getWhiteText = () => '#FFFFFF';
+  
   // Get player initials for avatar
   const getInitials = (name: string) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -211,9 +214,8 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
               {/* Player Info */}
               <div className="flex-1 text-center md:text-left">
                 <h2 
-                  className="text-4xl md:text-5xl font-black mb-4"
+                  className="text-4xl md:text-5xl font-black mb-4 text-white"
                   style={{
-                    color: primaryColor.text,
                     textShadow: `0 2px 20px ${primaryColor.glow}`
                   }}
                 >
@@ -222,11 +224,10 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                 
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mb-4">
                   <span 
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold backdrop-blur-sm border-2"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold backdrop-blur-sm border-2 text-white"
                     style={{
                       background: `${primaryColor.light}`,
                       borderColor: primaryColor.medium,
-                      color: primaryColor.text
                     }}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -235,11 +236,10 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                     {player.role}
                   </span>
                   <span 
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold backdrop-blur-sm border-2"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold backdrop-blur-sm border-2 text-white"
                     style={{
                       background: `${secondaryColor.light}`,
                       borderColor: secondaryColor.medium,
-                      color: secondaryColor.text || '#fff'
                     }}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -248,11 +248,10 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                     {player.age} years
                   </span>
                   <span 
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold backdrop-blur-sm border-2"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold backdrop-blur-sm border-2 text-white"
                     style={{
                       background: `${primaryColor.light}`,
                       borderColor: primaryColor.medium,
-                      color: primaryColor.text
                     }}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -281,7 +280,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
 
           {/* Playing Style Section */}
           <div className="p-8 border-b-2" style={{ borderColor: primaryColor.medium }}>
-            <h3 className="text-2xl font-black mb-6 flex items-center gap-3" style={{ color: primaryColor.textOnLight }}>
+            <h3 className="text-2xl font-black mb-6 flex items-center gap-3 text-white">
               <div 
                 className="w-1 h-8 rounded-full"
                 style={{ background: `linear-gradient(to bottom, ${primaryColor.solid}, ${secondaryColor.solid})` }}
@@ -311,14 +310,12 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                       }}
                     >
                       <p 
-                        className="text-2xl font-black mb-2"
-                        style={{ color: primaryColor.text }}
+                        className="text-2xl font-black mb-2 text-white"
                       >
                         {player.battingStyle || 'N/A'}
                       </p>
                       <p 
-                        className="text-sm font-semibold uppercase tracking-wider"
-                        style={{ color: highlightBatting ? primaryColor.textOnLight : 'rgba(156, 163, 175, 0.6)' }}
+                        className="text-sm font-semibold uppercase tracking-wider text-white"
                       >
                         Batting Style
                       </p>
@@ -356,7 +353,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
           {/* Career Statistics Section */}
           <div className="p-8">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-black flex items-center gap-3" style={{ color: primaryColor.textOnLight }}>
+              <h3 className="text-2xl font-black flex items-center gap-3 text-white">
                 <div 
                   className="w-1 h-8 rounded-full"
                   style={{ background: `linear-gradient(to bottom, ${primaryColor.solid}, ${secondaryColor.solid})` }}
@@ -365,7 +362,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
               </h3>
               {player.jerseyNumber && (
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-semibold" style={{ color: primaryColor.textOnLight }}>Jersey:</span>
+                  <span className="text-sm font-semibold" style={{ color: '#FFFFFF' }}>Jersey:</span>
                   <span 
                     className="inline-flex items-center justify-center w-12 h-12 rounded-full font-black text-lg shadow-lg"
                     style={{
@@ -383,8 +380,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
             {/* Batting Performance - Show for all players */}
             <div className="mb-8">
               <h4 
-                className="text-xl font-black mb-6 flex items-center gap-2"
-                style={{ color: primaryColor.text }}
+                className="text-xl font-black mb-6 flex items-center gap-2 text-white"
               >
                 <div 
                   className="w-8 h-1 rounded-full"
@@ -412,8 +408,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                     }}
                   >
                     <p 
-                      className="text-3xl font-black mb-1"
-                      style={{ color: primaryColor.text }}
+                      className="text-3xl font-black mb-1 text-white"
                     >
                       {stat.value}
                     </p>
@@ -426,8 +421,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
             {/* Bowling Performance - Show for all players */}
             <div className="mb-8">
               <h4 
-                className="text-xl font-black mb-6 flex items-center gap-2"
-                style={{ color: secondaryColor.text || primaryColor.text }}
+                className="text-xl font-black mb-6 flex items-center gap-2 text-white"
               >
                 <div 
                   className="w-8 h-1 rounded-full"
@@ -460,12 +454,11 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                     }}
                   >
                     <p 
-                      className="text-3xl font-black mb-1"
-                      style={{ color: secondaryColor.text || primaryColor.text }}
+                      className="text-3xl font-black mb-1 text-white"
                     >
                       {stat.value}
                     </p>
-                    <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: primaryColor.textOnLight }}>{stat.label}</p>
+                    <p className="text-xs font-semibold uppercase tracking-wider text-white">{stat.label}</p>
                   </div>
                 ))}
               </div>
@@ -474,8 +467,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
             {/* Overall Performance - Role-specific calculation */}
             <div>
               <h4 
-                className="text-xl font-black mb-6 flex items-center gap-2"
-                style={{ color: primaryColor.text }}
+                className="text-xl font-black mb-6 flex items-center gap-2 text-white"
               >
                 <div 
                   className="w-8 h-1 rounded-full"
@@ -501,12 +493,11 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                       }}
                     >
                       <p 
-                        className="text-4xl font-black mb-2"
-                        style={{ color: secondaryColor.text || primaryColor.text }}
+                        className="text-4xl font-black mb-2 text-white"
                       >
                         {stat.value}
                       </p>
-                      <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: primaryColor.textOnLight }}>{stat.label}</p>
+                      <p className="text-sm font-semibold uppercase tracking-wider text-white">{stat.label}</p>
                     </div>
                   ))}
                 </div>
@@ -524,17 +515,16 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                       key={index}
                       className="p-6 rounded-xl backdrop-blur-sm border text-center transform hover:scale-105 transition-all duration-300 hover:shadow-xl"
                       style={{
-                        background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-                        borderColor: primaryColor.medium,
+                        background: `linear-gradient(135deg, ${secondaryColor.light}, ${primaryColor.light})`,
+                        borderColor: secondaryColor.medium || primaryColor.medium,
                       }}
                     >
                       <p 
-                        className="text-4xl font-black mb-2"
-                        style={{ color: primaryColor.text }}
+                        className="text-4xl font-black mb-2 text-white"
                       >
                         {stat.value}
                       </p>
-                      <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: primaryColor.textOnLight }}>{stat.label}</p>
+                      <p className="text-sm font-semibold uppercase tracking-wider text-white">{stat.label}</p>
                     </div>
                   ))}
                 </div>

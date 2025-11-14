@@ -41,8 +41,8 @@ function createColorVariations(hex: string) {
     medium,
     solid: hex,
     glow: `rgba(${r}, ${g}, ${b}, 0.5)`,
-    text: getOptimalTextColor(hex),
-    textOnLight: getOptimalTextColorForGradient(`linear-gradient(135deg, ${light}, ${medium})`),
+    text: '#FFFFFF',
+    textOnLight: '#FFFFFF',
   };
 }
 
@@ -233,7 +233,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                 </div>
                 
                 {/* Description */}
-                <p className="text-xl leading-relaxed max-w-xl" style={{ color: '#E5E7EB' }}>
+                <p className="text-xl leading-relaxed max-w-xl text-white">
                   {teamData.description}
                 </p>
                 
