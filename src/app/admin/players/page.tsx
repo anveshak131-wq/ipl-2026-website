@@ -566,137 +566,157 @@ export default function AdminPlayers() {
 
           {/* Search and Filter Section */}
           <div className="mb-8 space-y-4">
-            {/* Search Bar */}
-            <div className="relative">
-              <svg className="absolute left-4 top-3.5 w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input
-                type="text"
-                placeholder="Search by player name, nationality..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-lg pl-12 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold/50 focus:ring-2 focus:ring-ipl-gold/20 transition-all duration-300"
-              />
-            </div>
+            {/* Search Bar and Team Filter Row */}
+            <div className="flex gap-4 flex-col md:flex-row items-stretch">
+              {/* Search Bar */}
+              <div className="relative flex-1">
+                <svg className="absolute left-4 top-3.5 w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search by player name, nationality..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-lg pl-12 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold/50 focus:ring-2 focus:ring-ipl-gold/20 transition-all duration-300"
+                />
+              </div>
 
-            {/* Results Info */}
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-gray-400">
-                Showing <span className="font-semibold text-white">{searchFilteredPlayers.length}</span> of <span className="font-semibold text-white">{filteredPlayers.length}</span> players
-              </p>
-              {searchQuery && (
+              {/* Team Filter Dropdown */}
+              <div className="relative md:min-w-[320px]">
                 <button
-                  onClick={() => setSearchQuery('')}
-                  className="text-xs text-ipl-gold hover:text-ipl-purple transition-colors"
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="w-full glass-effect px-6 py-3 rounded-lg text-white font-medium flex items-center space-x-3 hover:bg-white/10 transition-all duration-300 group h-full"
                 >
-                  Clear Search
+                  <svg 
+                    className="w-5 h-5 text-ipl-gold flex-shrink-0" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                  </svg>
+                  <span className="flex-1 text-left truncate">
+                    {selectedTeam === 'all' 
+                      ? '🏆 All Teams' 
+                      : `🏏 ${teams.find(t => t.id === selectedTeam)?.shortName || 'Select'}`
+                    }
+                  </span>
+                  <svg 
+                    className={`w-5 h-5 text-gray-400 transition-transform duration-300 flex-shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`}
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
                 </button>
-              )}
-            </div>
-          </div>
 
-          {/* Team Filter Dropdown */}
-          <div className="mb-6 relative hidden">
-            <button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="glass-effect px-6 py-3 rounded-lg text-white font-medium flex items-center space-x-3 min-w-[280px] hover:bg-white/10 transition-all duration-300 group"
-            >
-              <svg 
-                className="w-5 h-5 text-ipl-gold" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-              </svg>
-              <span className="flex-1 text-left">
-                {selectedTeam === 'all' 
-                  ? 'All Teams' 
-                  : teams.find(t => t.id === selectedTeam)?.name || 'Select Team'
-                }
-              </span>
-              <svg 
-                className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`}
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-
-            {/* Dropdown Menu */}
-            <div 
-              className={`absolute left-0 right-0 mt-2 glass-effect rounded-lg shadow-xl overflow-hidden transition-all duration-300 ease-out origin-top z-10 ${
-                isDropdownOpen 
-                  ? 'opacity-100 scale-y-100 max-h-[400px]' 
-                  : 'opacity-0 scale-y-0 max-h-0 pointer-events-none'
-              }`}
-            >
-              <div className="py-2 max-h-[380px] overflow-y-auto scrollbar-thin scrollbar-thumb-ipl-gold/50 scrollbar-track-white/5">
-                {/* All Teams Option */}
-                <button
-                  onClick={() => {
-                    setSelectedTeam('all');
-                    setIsDropdownOpen(false);
-                  }}
-                  className={`w-full px-6 py-3 text-left hover:bg-white/10 transition-colors duration-200 flex items-center space-x-3 ${
-                    selectedTeam === 'all' ? 'bg-ipl-gold/20 text-ipl-gold' : 'text-white'
+                {/* Dropdown Menu */}
+                <div 
+                  className={`absolute left-0 right-0 mt-2 glass-effect rounded-lg shadow-xl overflow-hidden transition-all duration-300 ease-out origin-top z-50 ${
+                    isDropdownOpen 
+                      ? 'opacity-100 scale-y-100 max-h-[500px]' 
+                      : 'opacity-0 scale-y-0 max-h-0 pointer-events-none'
                   }`}
                 >
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-ipl-gold to-ipl-purple">
-                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-semibold">All Teams</div>
-                    <div className="text-xs text-gray-400">{players.length} players</div>
-                  </div>
-                  {selectedTeam === 'all' && (
-                    <svg className="w-5 h-5 text-ipl-gold" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  )}
-                </button>
+                  <div className="py-2 max-h-[480px] overflow-y-auto scrollbar-thin scrollbar-thumb-ipl-gold/50 scrollbar-track-white/5">
+                    {/* All Teams Option */}
+                    <button
+                      onClick={() => {
+                        setSelectedTeam('all');
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`w-full px-6 py-3.5 text-left hover:bg-white/10 transition-all duration-200 flex items-center space-x-3 group ${
+                        selectedTeam === 'all' ? 'bg-ipl-gold/20 text-ipl-gold' : 'text-white'
+                      }`}
+                    >
+                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-ipl-gold to-ipl-purple">
+                        <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-semibold">🏆 All Teams</div>
+                        <div className="text-xs text-gray-400">{players.length} total players</div>
+                      </div>
+                      {selectedTeam === 'all' && (
+                        <svg className="w-5 h-5 text-ipl-gold flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </button>
 
-                {/* Team Options */}
-                <div className="border-t border-white/10 mt-2 pt-2">
-                  {teams.map((team) => {
-                    const teamPlayersCount = players.filter(p => p.teamId === team.id).length;
-                    return (
-                      <button
-                        key={team.id}
-                        onClick={() => {
-                          setSelectedTeam(team.id);
-                          setIsDropdownOpen(false);
-                        }}
-                        className={`w-full px-6 py-3 text-left hover:bg-white/10 transition-all duration-200 flex items-center space-x-3 group ${
-                          selectedTeam === team.id ? 'bg-ipl-gold/20 text-ipl-gold' : 'text-white'
-                        }`}
-                      >
-                        <div 
-                          className="flex items-center justify-center w-10 h-10 rounded-full text-white font-bold text-sm shadow-lg"
-                          style={{ backgroundColor: team.colors.primary }}
+                    {/* Divider */}
+                    {teams.length > 0 && <div className="border-t border-white/10 my-2" />}
+
+                    {/* Team Options */}
+                    {teams.map((team) => {
+                      const teamPlayersCount = players.filter(p => p.teamId === team.id).length;
+                      return (
+                        <button
+                          key={team.id}
+                          onClick={() => {
+                            setSelectedTeam(team.id);
+                            setIsDropdownOpen(false);
+                          }}
+                          className={`w-full px-6 py-3.5 text-left hover:bg-white/10 transition-all duration-200 flex items-center space-x-3 group ${
+                            selectedTeam === team.id ? 'bg-ipl-gold/20 text-ipl-gold' : 'text-white'
+                          }`}
                         >
-                          {team.shortName}
-                        </div>
-                        <div className="flex-1">
-                          <div className="font-semibold">{team.name}</div>
-                          <div className="text-xs text-gray-400">
-                            {teamPlayersCount} player{teamPlayersCount !== 1 ? 's' : ''}
+                          <div 
+                            className="flex items-center justify-center w-10 h-10 rounded-full text-white font-bold text-sm shadow-lg flex-shrink-0"
+                            style={{ backgroundColor: team.colors.primary }}
+                            title={team.name}
+                          >
+                            {team.shortName}
                           </div>
-                        </div>
-                        {selectedTeam === team.id && (
-                          <svg className="w-5 h-5 text-ipl-gold" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        )}
-                      </button>
-                    );
-                  })}
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold truncate">{team.name}</div>
+                            <div className="text-xs text-gray-400">
+                              {teamPlayersCount} player{teamPlayersCount !== 1 ? 's' : ''}
+                            </div>
+                          </div>
+                          {selectedTeam === team.id && (
+                            <svg className="w-5 h-5 text-ipl-gold flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Results Info and Quick Actions */}
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div className="text-sm text-gray-400">
+                <span className="font-semibold text-white">{searchFilteredPlayers.length}</span> of <span className="font-semibold text-white">{filteredPlayers.length}</span> players
+                {selectedTeam !== 'all' && (
+                  <span className="ml-2">
+                    in <span className="text-ipl-gold font-semibold">{teams.find(t => t.id === selectedTeam)?.name}</span>
+                  </span>
+                )}
+              </div>
+              <div className="flex gap-2">
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="text-xs px-3 py-1.5 rounded-lg bg-white/10 text-gray-300 hover:text-white hover:bg-white/20 transition-all"
+                  >
+                    Clear Search
+                  </button>
+                )}
+                {selectedTeam !== 'all' && (
+                  <button
+                    onClick={() => setSelectedTeam('all')}
+                    className="text-xs px-3 py-1.5 rounded-lg bg-white/10 text-gray-300 hover:text-white hover:bg-white/20 transition-all"
+                  >
+                    View All Teams
+                  </button>
+                )}
               </div>
             </div>
           </div>
