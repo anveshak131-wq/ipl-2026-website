@@ -143,7 +143,9 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
   const wicketkeepers = teamData.players?.filter(p => p.role === 'Wicket-keeper') || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
+    <div className="min-h-screen" style={{
+      background: `linear-gradient(135deg, ${primaryColor.solid}15, ${secondaryColor.solid}15)`
+    }}>
       <AuroraBackground />
       <Navbar />
       
@@ -154,21 +156,21 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-gray-800 to-gray-900" />
             
-            {/* Soft gradient orbs with parallax */}
+            {/* Team color gradient orbs */}
             <div 
-              className="absolute w-[800px] h-[800px] rounded-full blur-3xl opacity-20 transition-all duration-700"
+              className="absolute w-[800px] h-[800px] rounded-full blur-3xl opacity-30 transition-all duration-700"
               style={{
                 background: `radial-gradient(circle, ${primaryColor.medium}, transparent)`,
-                top: `${-20 + scrollY * 0.1}%`,
-                right: `${-10 + scrollY * 0.05}%`,
+                top: '-10%',
+                right: '-5%',
               }}
             />
             <div 
-              className="absolute w-[600px] h-[600px] rounded-full blur-3xl opacity-15 transition-all duration-700"
+              className="absolute w-[600px] h-[600px] rounded-full blur-3xl opacity-25 transition-all duration-700"
               style={{
                 background: `radial-gradient(circle, ${secondaryColor.medium}, transparent)`,
-                bottom: `${-15 + scrollY * 0.08}%`,
-                left: `${-5 + scrollY * 0.06}%`,
+                bottom: '-10%',
+                left: '-10%',
               }}
             />
             
@@ -367,7 +369,10 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 mt-12">
           <div className="flex flex-col items-center gap-4">
             {/* IPL Logo Badge - Moved outside and above the tab container */}
-            <div className="w-12 h-12 rounded-full backdrop-blur-xl border-2 border-white/30 flex items-center justify-center shadow-xl bg-gradient-to-br from-blue-900/80 to-purple-900/80 z-10">
+            <div className="w-12 h-12 rounded-full backdrop-blur-xl border-2 border-white/30 flex items-center justify-center shadow-xl z-10" style={{
+              background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
+              borderColor: primaryColor.medium,
+            }}>
               <div className="w-7 h-7">
                 <IPLLogo />
               </div>
@@ -526,10 +531,10 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index }: an
       {/* Jersey Number with enhanced animation */}
       <div className="absolute top-4 right-4 w-14 h-14 rounded-xl flex items-center justify-center font-black text-xl shadow-lg transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 z-10"
            style={{ 
-             background: `linear-gradient(135deg, ${primaryColor.medium}, ${secondaryColor.medium})`,
-             color: getOptimalTextColorForGradient(`linear-gradient(135deg, ${primaryColor.medium}, ${secondaryColor.medium})`),
+             background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
+             color: getOptimalTextColorForGradient(`linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`),
              boxShadow: `0 5px 15px ${primaryColor.glow}`
-           }}>
+           }}>>
         {player.jerseyNumber || '-'}
       </div>
       
@@ -589,7 +594,8 @@ function StatsTab({ teamData, primaryColor, secondaryColor, batsmen, bowlers, al
       <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl animate-fade-in"
            style={{
              background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-             borderColor: primaryColor.medium
+             borderColor: primaryColor.medium,
+             boxShadow: `0 10px 30px ${primaryColor.glow}15`
            }}>
         <div className="flex items-center gap-3 mb-6">
           <CricketBatIcon className="w-8 h-8" color={primaryColor.solid} />
@@ -617,7 +623,8 @@ function StatsTab({ teamData, primaryColor, secondaryColor, batsmen, bowlers, al
            style={{
              background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
              borderColor: primaryColor.medium,
-             animationDelay: '100ms'
+             animationDelay: '100ms',
+             boxShadow: `0 10px 30px ${primaryColor.glow}15`
            }}>
         <div className="flex items-center gap-3 mb-6">
           <GlobeIcon className="w-8 h-8" color={primaryColor.solid} />
@@ -646,7 +653,8 @@ function AboutTab({ teamData, primaryColor, secondaryColor }: any) {
       <div className="rounded-3xl backdrop-blur-xl p-12 border shadow-xl animate-fade-in"
            style={{
              background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-             borderColor: primaryColor.medium
+             borderColor: primaryColor.medium,
+             boxShadow: `0 10px 30px ${primaryColor.glow}15`
            }}>
         <div className="flex items-center gap-3 mb-8">
           <TrophyIcon className="w-10 h-10" color={primaryColor.solid} />
