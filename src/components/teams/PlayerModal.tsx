@@ -291,11 +291,10 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Determine which cards should be highlighted based on role */}
               {(() => {
-                const isBatsman = player.role === 'Batsman' || player.role === 'Wicket-keeper';
                 const isBowler = player.role === 'Bowler';
                 const isAllRounder = player.role === 'All-rounder';
                 
-                const highlightBatting = isBatsman || isAllRounder;
+                const highlightBatting = isAllRounder;
                 const highlightBowling = isBowler || isAllRounder;
                 
                 return (
