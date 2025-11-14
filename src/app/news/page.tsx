@@ -53,7 +53,9 @@ export default function NewsPage() {
   }, [selectedCategory, searchQuery, news]);
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return '';
     const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
@@ -61,10 +63,16 @@ export default function NewsPage() {
     });
   };
 
-  const getImageSrc = (url?: string) => {
+  const getImageSrc = (input?: any) => {
+    let url: string | undefined;
+    if (!input) url = undefined;
+    else if (typeof input === 'string') url = input;
+    else url = input.image || input.imageUrl || input.image_url || input.img;
+
     if (!url) return 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"%3E%3Crect fill="%23333" width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" font-size="24" fill="%23999" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E';
-    const trimmed = url.trim();
+    const trimmed = String(url).trim();
     if (trimmed.startsWith('//')) return window.location.protocol + trimmed;
+    if (trimmed.startsWith('/')) return window.location.origin + trimmed;
     return trimmed;
   };
 

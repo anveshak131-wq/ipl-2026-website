@@ -27,19 +27,30 @@ export default function NewsSection() {
     fetchNews();
   }, []);
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
+    if (isNaN(date.getTime())) return '';
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
       day: 'numeric',
       year: 'numeric'
     });
   };
 
-  const getImageSrc = (url?: string) => {
+  const getImageSrc = (input?: any) => {
+    // Accept either a direct URL string or an object that may contain several possible image fields
+    let url: string | undefined;
+    if (!input) url = undefined;
+    else if (typeof input === 'string') url = input;
+    else url = input.image || input.imageUrl || input.image_url || input.img;
+
     if (!url) return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect fill='%23333' width='400' height='300'/%3E%3Ctext x='50%25' y='50%25' font-size='18' fill='%23999' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E`;
-    const trimmed = url.trim();
+
+    const trimmed = String(url).trim();
     if (trimmed.startsWith('//')) return window.location.protocol + trimmed;
+    // Handle site-root-relative paths
+    if (trimmed.startsWith('/')) return window.location.origin + trimmed;
     return trimmed;
   };
 
@@ -100,7 +111,7 @@ export default function NewsSection() {
               {/* Image Container */}
               <div className="relative h-48 overflow-hidden bg-gradient-to-br from-slate-700 to-slate-900">
                 <img
-                  src={getImageSrc(article.image)}
+                  src={getImageSrc(article)}
                   alt={article.title}
                   className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-500 group-hover:brightness-110"
                   onError={(e) => {
