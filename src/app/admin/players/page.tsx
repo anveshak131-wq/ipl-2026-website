@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
-import AuroraBackground from '@/components/ui/AuroraBackground';
 import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
 import { parseDateDDMMYYYY, formatDateDDMMYYYY, calculateAge, isValidDate } from '@/lib/dateUtils';
@@ -410,7 +409,7 @@ export default function AdminPlayers() {
   };
 
   // Apply search filter
-  let searchFilteredPlayers = filteredPlayers.filter(player =>
+  const searchFilteredPlayers = filteredPlayers.filter(player =>
     player.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     player.nationality.toLowerCase().includes(searchQuery.toLowerCase())
   );
