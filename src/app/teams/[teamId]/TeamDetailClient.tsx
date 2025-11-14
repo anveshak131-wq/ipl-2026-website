@@ -534,7 +534,7 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index }: an
              background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
              color: getOptimalTextColorForGradient(`linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`),
              boxShadow: `0 5px 15px ${primaryColor.glow}`
-           }}>>
+           }}>
         {player.jerseyNumber || '-'}
       </div>
       
