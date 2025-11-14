@@ -2,6 +2,7 @@
 // TODO: Replace with Cloudflare Worker API calls
 
 import { Team, Player, Match, News, Highlight, Content } from '@/types';
+import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 
 export const mockTeams: Team[] = [
   {
@@ -270,11 +271,13 @@ export const api = {
         throw new Error('Failed to fetch players');
       }
       const players = await response.json();
-      return teamId ? players.filter((p: Player) => p.teamId === teamId) : players;
+      const list = teamId ? players.filter((p: Player) => p.teamId === teamId) : players;
+      return teamId ? sortPlayersByRoleAndAge(list) : list;
     } catch (error) {
       console.error('Error fetching players:', error);
       // Fallback to mock data if API fails
-      return teamId ? mockPlayers.filter(p => p.teamId === teamId) : mockPlayers;
+      const fallback = teamId ? mockPlayers.filter(p => p.teamId === teamId) : mockPlayers;
+      return teamId ? sortPlayersByRoleAndAge(fallback) : fallback;
     }
   },
   
