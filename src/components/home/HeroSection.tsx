@@ -9,6 +9,7 @@ export default function HeroSection() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isMounted, setIsMounted] = useState(false);
 
   const highlights = [
     {
@@ -46,6 +47,10 @@ export default function HeroSection() {
   }, []);
 
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
     if (isLoading) return;
     
     const interval = setInterval(() => {
@@ -57,12 +62,18 @@ export default function HeroSection() {
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
+      if (isMounted) {
+        const x = e.clientX / (typeof window !== 'undefined' ? window.innerWidth : 1);
+        const y = e.clientY / (typeof window !== 'undefined' ? window.innerHeight : 1);
+        setMousePosition({ x, y });
+      }
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('mousemove', handleMouseMove);
+      return () => window.removeEventListener('mousemove', handleMouseMove);
+    }
+  }, [isMounted]);
 
   if (isLoading) {
     return (
@@ -92,8 +103,8 @@ export default function HeroSection() {
         className="absolute w-[600px] h-[600px] rounded-full blur-3xl opacity-20 transition-all duration-300 pointer-events-none"
         style={{
           background: `radial-gradient(circle, ${currentHighlight.accentColor}80, transparent)`,
-          top: `${20 + (mousePosition.y / window.innerHeight) * 10}%`,
-          left: `${70 + (mousePosition.x / window.innerWidth) * 10}%`,
+          top: isMounted ? `${20 + mousePosition.y * 10}%` : '20%',
+          left: isMounted ? `${70 + mousePosition.x * 10}%` : '70%',
           transform: 'translate(-50%, -50%)'
         }}
       />
@@ -101,8 +112,8 @@ export default function HeroSection() {
         className="absolute w-[500px] h-[500px] rounded-full blur-3xl opacity-15 transition-all duration-300 pointer-events-none"
         style={{
           background: `radial-gradient(circle, ${currentHighlight.accentColor}60, transparent)`,
-          bottom: `${10 + (mousePosition.y / window.innerHeight) * -10}%`,
-          left: `${20 + (mousePosition.x / window.innerWidth) * -10}%`,
+          bottom: isMounted ? `${10 - mousePosition.y * 10}%` : '10%',
+          left: isMounted ? `${20 - mousePosition.x * 10}%` : '20%',
           transform: 'translate(-50%, 50%)'
         }}
       />
