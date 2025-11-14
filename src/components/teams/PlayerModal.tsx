@@ -113,7 +113,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
       <div 
         className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md transition-opacity duration-300"
         style={{
-          backgroundColor: 'rgba(0, 0, 0, 0.85)',
+          backgroundColor: 'rgba(0, 0, 0, 0.75)',
         }}
         onClick={handleBackdropClick}
       >
@@ -129,7 +129,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
         <div 
           className="relative rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border-2 shadow-2xl transform transition-all duration-500 animate-scale-in"
           style={{
-            background: `linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(10, 10, 20, 0.98))`,
+            background: `linear-gradient(135deg, rgba(20, 20, 30, 0.98), rgba(30, 30, 40, 0.98))`,
             borderColor: primaryColor.medium,
             boxShadow: `0 20px 60px ${primaryColor.glow}40, 0 0 100px ${secondaryColor.glow}20`
           }}
