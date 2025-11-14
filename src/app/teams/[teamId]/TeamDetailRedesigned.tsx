@@ -308,7 +308,7 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
         <Navbar />
         <div className="flex items-center justify-center h-96">
           <LoadingSpinner size="lg" />
@@ -320,7 +320,7 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
 
   if (!teamData) {
     return (
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
         <Navbar />
         <div className="text-center py-20">
           <h1 className="text-2xl font-bold text-white mb-4">Team Not Found</h1>
@@ -338,7 +338,7 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
     : (teamData.players || []).filter(p => p.role.toLowerCase().includes(filterRole.toLowerCase()));
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
       <Navbar />
       
       <main className="relative overflow-hidden">
@@ -347,7 +347,7 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
           {/* Animated Background */}
           <div className="absolute inset-0">
             {/* Dark gradient base */}
-            <div className="absolute inset-0 bg-gradient-to-br from-black via-red-950/30 to-black" />
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-red-950/20 to-gray-900" />
             
             {/* Animated orbs */}
             <div 
@@ -704,7 +704,7 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
 
         {/* SECTION 5: LEGACY MESSAGE */}
         <section className="relative py-32 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-black via-red-950/20 to-black" />
+          <div className="absolute inset-0 bg-gradient-to-b from-gray-950 via-red-950/15 to-gray-900" />
           <FloatingParticles />
           
           <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">

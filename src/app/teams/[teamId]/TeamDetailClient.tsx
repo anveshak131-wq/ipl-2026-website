@@ -100,7 +100,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
         <AuroraBackground />
         <Navbar />
         <div className="flex items-center justify-center h-96">
@@ -113,7 +113,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
 
   if (!teamData) {
     return (
-      <div className="min-h-screen bg-black">
+      <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
         <AuroraBackground />
         <Navbar />
         <div className="text-center py-20">
@@ -143,7 +143,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
   const wicketkeepers = teamData.players?.filter(p => p.role === 'Wicket-keeper') || [];
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
       <AuroraBackground />
       <Navbar />
       
@@ -152,7 +152,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
         <div className="relative min-h-screen flex items-center">
           {/* Animated Background */}
           <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-900 to-black" />
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-gray-800 to-gray-900" />
             
             {/* Soft gradient orbs with parallax */}
             <div 
