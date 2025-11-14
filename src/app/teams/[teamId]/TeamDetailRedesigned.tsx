@@ -7,6 +7,7 @@ import Footer from '@/components/layout/Footer';
 import PlayerModal from '@/components/teams/PlayerModal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Team, Player } from '@/types';
+import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 
 interface TeamDetailRedesignedProps {
   teamId: string;
@@ -287,7 +288,7 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
               const allPlayers = await playersResponse.json();
               const teamWithPlayers = {
                 ...team,
-                players: allPlayers.filter((p: Player) => p.teamId === team.id)
+                players: sortPlayersByRoleAndAge(allPlayers.filter((p: Player) => p.teamId === team.id))
               };
               setTeamData(teamWithPlayers);
             } else {

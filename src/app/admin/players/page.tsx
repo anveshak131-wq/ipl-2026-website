@@ -6,6 +6,7 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
 import { parseDateDDMMYYYY, formatDateDDMMYYYY, calculateAge, isValidDate } from '@/lib/dateUtils';
+import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 
 // Sort icons
 const ChevronUpIcon = ({ className }: { className?: string }) => (
@@ -398,6 +399,9 @@ export default function AdminPlayers() {
       }
     });
   }
+
+  // Apply role-priority + age ordering (batsmen -> wicket-keepers -> all-rounders -> bowlers)
+  filteredPlayers = sortPlayersByRoleAndAge(filteredPlayers);
 
   // Calculate statistics by role
   const stats = {

@@ -20,6 +20,7 @@ import {
   TrophyIcon
 } from '@/components/ui/CustomIcons';
 import { Team, Player } from '@/types';
+import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import { getOptimalTextColor } from '@/lib/colorUtils';
 
@@ -77,7 +78,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
               const allPlayers = await playersResponse.json();
               const teamWithPlayers = {
                 ...team,
-                players: allPlayers.filter((p: Player) => p.teamId === team.id)
+                players: sortPlayersByRoleAndAge(allPlayers.filter((p: Player) => p.teamId === team.id))
               };
               setTeamData(teamWithPlayers);
             } else {
