@@ -400,6 +400,21 @@ export default function AdminPlayers() {
     });
   }
 
+  // Calculate statistics by role
+  const stats = {
+    total: players.length,
+    batsmen: players.filter(p => p.role === 'Batsman').length,
+    bowlers: players.filter(p => p.role === 'Bowler').length,
+    allRounders: players.filter(p => p.role === 'All-rounder').length,
+    wicketkeepers: players.filter(p => p.role === 'Wicket-keeper').length,
+  };
+
+  // Apply search filter
+  let searchFilteredPlayers = filteredPlayers.filter(player =>
+    player.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    player.nationality.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   if (!isAuthenticated) {
     return null;
   }
@@ -421,20 +436,169 @@ export default function AdminPlayers() {
       
       <div className="flex-1">
         <div className="p-8">
-          <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-white">
-              Manage Players
-            </h1>
-            <button 
-              onClick={handleAddPlayer}
-              className="ipl-button"
-            >
-              Add New Player
-            </button>
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h1 className="text-4xl font-bold text-white mb-2">
+                  Player Management
+                </h1>
+                <p className="text-gray-400">Track and manage all IPL players</p>
+              </div>
+              <button 
+                onClick={handleAddPlayer}
+                className="ipl-button flex items-center gap-2 shadow-lg hover:shadow-xl"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Add New Player
+              </button>
+            </div>
+
+            {/* Statistics Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              {/* Total Players */}
+              <div className="glass-effect rounded-xl p-6 border border-white/10 hover:border-ipl-gold/50 transition-all duration-300 transform hover:scale-[1.02]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-sm font-medium mb-2">Total Players</p>
+                    <p className="text-3xl font-bold text-white">{stats.total}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-gradient-to-br from-ipl-gold to-ipl-purple rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center text-xs text-ipl-gold font-semibold">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M12 7a1 1 0 110-2h.01a1 1 0 110 2H12zm-2 2a1 1 0 100-2 1 1 0 000 2zm4 0a1 1 0 100-2 1 1 0 000 2zm2-4a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                  </svg>
+                  All squads combined
+                </div>
+              </div>
+
+              {/* Batsmen */}
+              <div className="glass-effect rounded-xl p-6 border border-white/10 hover:border-green-500/50 transition-all duration-300 transform hover:scale-[1.02]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-sm font-medium mb-2">Batsmen</p>
+                    <p className="text-3xl font-bold text-white">{stats.batsmen}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center text-xs text-green-400 font-semibold">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  {stats.total > 0 ? ((stats.batsmen / stats.total) * 100).toFixed(0) : 0}% of squad
+                </div>
+              </div>
+
+              {/* Bowlers */}
+              <div className="glass-effect rounded-xl p-6 border border-white/10 hover:border-blue-500/50 transition-all duration-300 transform hover:scale-[1.02]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-sm font-medium mb-2">Bowlers</p>
+                    <p className="text-3xl font-bold text-white">{stats.bowlers}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center text-xs text-blue-400 font-semibold">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  {stats.total > 0 ? ((stats.bowlers / stats.total) * 100).toFixed(0) : 0}% of squad
+                </div>
+              </div>
+
+              {/* All-rounders */}
+              <div className="glass-effect rounded-xl p-6 border border-white/10 hover:border-purple-500/50 transition-all duration-300 transform hover:scale-[1.02]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-sm font-medium mb-2">All-rounders</p>
+                    <p className="text-3xl font-bold text-white">{stats.allRounders}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center text-xs text-purple-400 font-semibold">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  {stats.total > 0 ? ((stats.allRounders / stats.total) * 100).toFixed(0) : 0}% of squad
+                </div>
+              </div>
+
+              {/* Wicket-keepers */}
+              <div className="glass-effect rounded-xl p-6 border border-white/10 hover:border-orange-500/50 transition-all duration-300 transform hover:scale-[1.02]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-sm font-medium mb-2">Wicket-keepers</p>
+                    <p className="text-3xl font-bold text-white">{stats.wicketkeepers}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" />
+                    </svg>
+                  </div>
+                </div>
+                <div className="mt-4 flex items-center text-xs text-orange-400 font-semibold">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  {stats.total > 0 ? ((stats.wicketkeepers / stats.total) * 100).toFixed(0) : 0}% of squad
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Search and Filter Section */}
+          <div className="mb-8 space-y-4">
+            {/* Search Bar */}
+            <div className="relative">
+              <svg className="absolute left-4 top-3.5 w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search by player name, nationality..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-lg pl-12 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold/50 focus:ring-2 focus:ring-ipl-gold/20 transition-all duration-300"
+              />
+            </div>
+
+            {/* Results Info */}
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-400">
+                Showing <span className="font-semibold text-white">{searchFilteredPlayers.length}</span> of <span className="font-semibold text-white">{filteredPlayers.length}</span> players
+              </p>
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="text-xs text-ipl-gold hover:text-ipl-purple transition-colors"
+                >
+                  Clear Search
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Team Filter Dropdown */}
-          <div className="mb-6 relative">
+          <div className="mb-6 relative hidden">
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               className="glass-effect px-6 py-3 rounded-lg text-white font-medium flex items-center space-x-3 min-w-[280px] hover:bg-white/10 transition-all duration-300 group"
@@ -631,33 +795,25 @@ export default function AdminPlayers() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/10">
-                  {filteredPlayers.map((player) => {
+                <tbody className="divide-y divide-white/5">
+                  {searchFilteredPlayers.length > 0 ? searchFilteredPlayers.map((player, idx) => {
                     const team = teams.find(t => t.id === player.teamId);
                     return (
                       <tr key={player.id} className="hover:bg-white/5">
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <div className="flex items-center space-x-2">
-                            <span className="text-white font-medium">
-                              {player.name}
-                            </span>
-                            <div className="flex space-x-1">
-                              {player.isCaptain && (
-                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
-                                  ⭐ C
-                                </span>
-                              )}
-                              {player.nationality !== 'India' && (
-                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30">
-                                  🌍 Foreign
-                                </span>
-                              )}
-                              {player.role === 'Wicket-keeper' && (
-                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/30">
-                                  🧤 WK
-                                </span>
-                              )}
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-ipl-gold to-ipl-purple flex items-center justify-center text-white font-bold text-xs">
+                              {idx + 1}
                             </div>
+                            <div>
+                              <div className="text-white font-semibold">{player.name}</div>
+                              <div className="text-xs text-gray-500">{player.nationality}</div>
+                            </div>
+                            {player.isCaptain && (
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30" title="Captain">
+                                ⭐ C
+                              </span>
+                            )}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
@@ -665,27 +821,40 @@ export default function AdminPlayers() {
                             {player.jerseyNumber || '-'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-ipl-purple/20 text-ipl-purple border border-ipl-purple/30">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold border ${
+                            player.role === 'Batsman' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
+                            player.role === 'Bowler' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
+                            player.role === 'All-rounder' ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' :
+                            'bg-orange-500/20 text-orange-400 border-orange-500/30'
+                          }`}>
                             {player.role}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                          {team?.shortName}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <div className="flex items-center gap-2">
+                            <div 
+                              className="w-6 h-6 rounded-full text-white font-bold text-xs flex items-center justify-center"
+                              style={{ backgroundColor: team?.colors.primary }}
+                            >
+                              {team?.shortName}
+                            </div>
+                            <span className="text-gray-300 font-medium">{team?.name}</span>
+                          </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                          {player.age}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-semibold">
+                          {player.age}y
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                           {player.dateOfBirth ? formatDateDDMMYYYY(player.dateOfBirth) : '-'}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-ipl-gold font-bold">
                           {player.stats.runs}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-400 font-bold">
                           {player.stats.wickets}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-purple-400 font-semibold">
                           {player.stats.average.toFixed(2)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
@@ -727,9 +896,46 @@ export default function AdminPlayers() {
                         </td>
                       </tr>
                     );
-                  })}
+                  }) : (
+                    <tr>
+                      <td colSpan={12} className="px-6 py-12 text-center">
+                        <div className="flex flex-col items-center justify-center">
+                          <svg className="w-16 h-16 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <p className="text-gray-400 text-lg font-medium">No players found</p>
+                          <p className="text-gray-500 text-sm mt-1">Try adjusting your search or filters</p>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
+            </div>
+          </div>
+
+          {/* Summary Footer */}
+          <div className="mt-6 glass-effect rounded-xl p-4 border border-white/10 flex justify-between items-center">
+            <div className="text-sm text-gray-400">
+              <span className="font-semibold text-white">{stats.total}</span> total players in <span className="font-semibold text-white">{teams.length}</span> teams
+            </div>
+            <div className="flex gap-6 text-sm">
+              <div>
+                <span className="text-green-400 font-semibold">{stats.batsmen}</span>
+                <span className="text-gray-500 ml-1">Batsmen</span>
+              </div>
+              <div>
+                <span className="text-blue-400 font-semibold">{stats.bowlers}</span>
+                <span className="text-gray-500 ml-1">Bowlers</span>
+              </div>
+              <div>
+                <span className="text-purple-400 font-semibold">{stats.allRounders}</span>
+                <span className="text-gray-500 ml-1">All-rounders</span>
+              </div>
+              <div>
+                <span className="text-orange-400 font-semibold">{stats.wicketkeepers}</span>
+                <span className="text-gray-500 ml-1">Wicket-keepers</span>
+              </div>
             </div>
           </div>
 
