@@ -380,102 +380,98 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
               )}
             </div>
             
-            {/* Show batting performance for Batsman, Wicket-keeper, and All-rounder */}
-            {(player.role === 'Batsman' || player.role === 'Wicket-keeper' || player.role === 'All-rounder') && (
-              <div className="mb-8">
-                <h4 
-                  className="text-xl font-black mb-6 flex items-center gap-2"
-                  style={{ color: primaryColor.text }}
-                >
-                  <div 
-                    className="w-8 h-1 rounded-full"
-                    style={{ background: `linear-gradient(to right, ${primaryColor.solid}, ${secondaryColor.solid})` }}
-                  />
-                  Batting Performance
-                </h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {[
-                    { label: 'Highest Score', value: player.stats.highest },
-                    { label: 'Fours (4s)', value: player.stats.fours },
-                    { label: 'Sixes (6s)', value: player.stats.sixes },
-                    { label: 'Fifties (50s)', value: player.stats.fifties },
-                    { label: 'Hundreds (100s)', value: player.stats.hundreds },
-                    { label: 'Total Runs', value: player.stats.runs },
-                    { label: 'Batting Avg', value: player.stats.average },
-                    { label: 'Strike Rate', value: player.stats.strikeRate },
-                  ].map((stat, index) => (
-                    <div
-                      key={index}
-                      className="p-4 rounded-xl backdrop-blur-sm border text-center transform hover:scale-105 transition-all duration-300 hover:shadow-xl"
-                      style={{
-                        background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-                        borderColor: primaryColor.medium,
-                      }}
+            {/* Batting Performance - Show for all players */}
+            <div className="mb-8">
+              <h4 
+                className="text-xl font-black mb-6 flex items-center gap-2"
+                style={{ color: primaryColor.text }}
+              >
+                <div 
+                  className="w-8 h-1 rounded-full"
+                  style={{ background: `linear-gradient(to right, ${primaryColor.solid}, ${secondaryColor.solid})` }}
+                />
+                Batting Performance
+              </h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { label: 'Highest Score', value: player.stats.highest },
+                  { label: 'Fours (4s)', value: player.stats.fours },
+                  { label: 'Sixes (6s)', value: player.stats.sixes },
+                  { label: 'Fifties (50s)', value: player.stats.fifties },
+                  { label: 'Hundreds (100s)', value: player.stats.hundreds },
+                  { label: 'Total Runs', value: player.stats.runs },
+                  { label: 'Batting Avg', value: player.stats.average },
+                  { label: 'Strike Rate', value: player.stats.strikeRate },
+                ].map((stat, index) => (
+                  <div
+                    key={index}
+                    className="p-4 rounded-xl backdrop-blur-sm border text-center transform hover:scale-105 transition-all duration-300 hover:shadow-xl"
+                    style={{
+                      background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+                      borderColor: primaryColor.medium,
+                    }}
+                  >
+                    <p 
+                      className="text-3xl font-black mb-1"
+                      style={{ color: primaryColor.text }}
                     >
-                      <p 
-                        className="text-3xl font-black mb-1"
-                        style={{ color: primaryColor.text }}
-                      >
-                        {stat.value}
-                      </p>
-                      <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: primaryColor.textOnLight }}>{stat.label}</p>
-                    </div>
-                  ))}
-                </div>
+                      {stat.value}
+                    </p>
+                    <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: primaryColor.textOnLight }}>{stat.label}</p>
+                  </div>
+                ))}
               </div>
-            )}
+            </div>
 
-            {/* Show bowling performance for Bowler and All-rounder */}
-            {(player.role === 'Bowler' || player.role === 'All-rounder') && (
-              <div className="mb-8">
-                <h4 
-                  className="text-xl font-black mb-6 flex items-center gap-2"
-                  style={{ color: secondaryColor.text || primaryColor.text }}
-                >
-                  <div 
-                    className="w-8 h-1 rounded-full"
-                    style={{ background: `linear-gradient(to right, ${secondaryColor.solid || primaryColor.solid}, ${primaryColor.solid})` }}
-                  />
-                  Bowling Performance
-                </h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {[
-                    { label: 'Wickets', value: player.stats.wickets },
-                    { label: 'Economy Rate', value: player.stats.economy },
-                    { 
-                      label: 'Bowling Avg', 
-                      value: (() => {
-                        const bowlingAvg = player.stats.bowlingAverage ?? 
-                          (player.stats.wickets > 0 
-                            ? calculateBowlingAverage(player.stats.economy, player.stats.wickets, player.stats.matches)
-                            : 0);
-                        return bowlingAvg > 0 ? bowlingAvg.toFixed(2) : '-';
-                      })()
-                    },
-                    { label: 'Best Bowling (BBM)', value: player.stats.bestBowling || '-' },
-                  ].map((stat, index) => (
-                    <div
-                      key={index}
-                      className="p-4 rounded-xl backdrop-blur-sm border text-center transform hover:scale-105 transition-all duration-300 hover:shadow-xl"
-                      style={{
-                        background: `linear-gradient(135deg, ${secondaryColor.light}, ${primaryColor.light})`,
-                        borderColor: secondaryColor.medium || primaryColor.medium,
-                      }}
+            {/* Bowling Performance - Show for all players */}
+            <div className="mb-8">
+              <h4 
+                className="text-xl font-black mb-6 flex items-center gap-2"
+                style={{ color: secondaryColor.text || primaryColor.text }}
+              >
+                <div 
+                  className="w-8 h-1 rounded-full"
+                  style={{ background: `linear-gradient(to right, ${secondaryColor.solid || primaryColor.solid}, ${primaryColor.solid})` }}
+                />
+                Bowling Performance
+              </h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { label: 'Wickets', value: player.stats.wickets },
+                  { label: 'Economy Rate', value: player.stats.economy },
+                  { 
+                    label: 'Bowling Avg', 
+                    value: (() => {
+                      const bowlingAvg = player.stats.bowlingAverage ?? 
+                        (player.stats.wickets > 0 
+                          ? calculateBowlingAverage(player.stats.economy, player.stats.wickets, player.stats.matches)
+                          : 0);
+                      return bowlingAvg > 0 ? bowlingAvg.toFixed(2) : '-';
+                    })()
+                  },
+                  { label: 'Best Bowling (BBM)', value: player.stats.bestBowling || '-' },
+                ].map((stat, index) => (
+                  <div
+                    key={index}
+                    className="p-4 rounded-xl backdrop-blur-sm border text-center transform hover:scale-105 transition-all duration-300 hover:shadow-xl"
+                    style={{
+                      background: `linear-gradient(135deg, ${secondaryColor.light}, ${primaryColor.light})`,
+                      borderColor: secondaryColor.medium || primaryColor.medium,
+                    }}
+                  >
+                    <p 
+                      className="text-3xl font-black mb-1"
+                      style={{ color: secondaryColor.text || primaryColor.text }}
                     >
-                      <p 
-                        className="text-3xl font-black mb-1"
-                        style={{ color: secondaryColor.text || primaryColor.text }}
-                      >
-                        {stat.value}
-                      </p>
-                      <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: primaryColor.textOnLight }}>{stat.label}</p>
-                    </div>
-                  ))}
-                </div>
+                      {stat.value}
+                    </p>
+                    <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: primaryColor.textOnLight }}>{stat.label}</p>
+                  </div>
+                ))}
               </div>
-            )}
+            </div>
 
-            {/* Overall Performance */}
+            {/* Overall Performance - Role-specific calculation */}
             <div>
               <h4 
                 className="text-xl font-black mb-6 flex items-center gap-2"
@@ -487,30 +483,90 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                 />
                 Overall Performance
               </h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[
-                  { label: 'Matches Played', value: player.stats.matches },
-                  { label: 'Boundaries/Match', value: boundariesPerMatch },
-                  { label: 'Runs/Match', value: runsPerMatch },
-                ].map((stat, index) => (
-                  <div
-                    key={index}
-                    className="p-6 rounded-xl backdrop-blur-sm border text-center transform hover:scale-105 transition-all duration-300 hover:shadow-xl"
-                    style={{
-                      background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-                      borderColor: primaryColor.medium,
-                    }}
-                  >
-                    <p 
-                      className="text-4xl font-black mb-2"
-                      style={{ color: primaryColor.text }}
+              
+              {/* For Bowlers - Focus on bowling metrics */}
+              {player.role === 'Bowler' && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[
+                    { label: 'Matches Played', value: player.stats.matches },
+                    { label: 'Total Wickets', value: player.stats.wickets },
+                    { label: 'Avg Wickets/Match', value: (player.stats.matches > 0 ? (player.stats.wickets / player.stats.matches).toFixed(2) : 0) },
+                  ].map((stat, index) => (
+                    <div
+                      key={index}
+                      className="p-6 rounded-xl backdrop-blur-sm border text-center transform hover:scale-105 transition-all duration-300 hover:shadow-xl"
+                      style={{
+                        background: `linear-gradient(135deg, ${secondaryColor.light}, ${primaryColor.light})`,
+                        borderColor: secondaryColor.medium || primaryColor.medium,
+                      }}
                     >
-                      {stat.value}
-                    </p>
-                    <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: primaryColor.textOnLight }}>{stat.label}</p>
-                  </div>
-                ))}
-              </div>
+                      <p 
+                        className="text-4xl font-black mb-2"
+                        style={{ color: secondaryColor.text || primaryColor.text }}
+                      >
+                        {stat.value}
+                      </p>
+                      <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: primaryColor.textOnLight }}>{stat.label}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* For All-rounders - Focus on both batting and bowling */}
+              {player.role === 'All-rounder' && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[
+                    { label: 'Matches Played', value: player.stats.matches },
+                    { label: 'Runs/Match', value: runsPerMatch },
+                    { label: 'Wickets/Match', value: (player.stats.matches > 0 ? (player.stats.wickets / player.stats.matches).toFixed(2) : 0) },
+                  ].map((stat, index) => (
+                    <div
+                      key={index}
+                      className="p-6 rounded-xl backdrop-blur-sm border text-center transform hover:scale-105 transition-all duration-300 hover:shadow-xl"
+                      style={{
+                        background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+                        borderColor: primaryColor.medium,
+                      }}
+                    >
+                      <p 
+                        className="text-4xl font-black mb-2"
+                        style={{ color: primaryColor.text }}
+                      >
+                        {stat.value}
+                      </p>
+                      <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: primaryColor.textOnLight }}>{stat.label}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* For Batsmen and Wicket-keepers - Focus on batting metrics */}
+              {(player.role === 'Batsman' || player.role === 'Wicket-keeper') && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {[
+                    { label: 'Matches Played', value: player.stats.matches },
+                    { label: 'Boundaries/Match', value: boundariesPerMatch },
+                    { label: 'Runs/Match', value: runsPerMatch },
+                  ].map((stat, index) => (
+                    <div
+                      key={index}
+                      className="p-6 rounded-xl backdrop-blur-sm border text-center transform hover:scale-105 transition-all duration-300 hover:shadow-xl"
+                      style={{
+                        background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+                        borderColor: primaryColor.medium,
+                      }}
+                    >
+                      <p 
+                        className="text-4xl font-black mb-2"
+                        style={{ color: primaryColor.text }}
+                      >
+                        {stat.value}
+                      </p>
+                      <p className="text-sm font-semibold uppercase tracking-wider" style={{ color: primaryColor.textOnLight }}>{stat.label}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
