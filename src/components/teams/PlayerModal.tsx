@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
-import { getOptimalTextColor, getOptimalTextColorForGradient } from '@/lib/colorUtils';
+import { getOptimalTextColor } from '@/lib/colorUtils';
 
 interface PlayerModalProps {
   player: Player | null;
@@ -31,7 +31,7 @@ function createColorVariations(hex: string) {
     solid: hex,
     glow: `rgba(${r}, ${g}, ${b}, 0.5)`,
     text: getOptimalTextColor(hex),
-    textOnLight: getOptimalTextColorForGradient(`linear-gradient(135deg, ${light}, ${medium})`),
+    textOnLight: '#FFFFFF',
   };
 }
 
@@ -187,9 +187,8 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                 />
                 
                 <span 
-                  className="relative font-black text-3xl md:text-4xl z-10"
+                  className="relative font-black text-3xl md:text-4xl z-10 text-white"
                   style={{
-                    color: getOptimalTextColorForGradient(`linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`),
                     textShadow: `0 2px 10px rgba(0,0,0,0.5)`
                   }}
                 >
@@ -204,7 +203,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                       background: `linear-gradient(135deg, #FFD700, #FFA500)`,
                     }}
                   >
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" style={{ color: getOptimalTextColorForGradient('linear-gradient(135deg, #FFD700, #FFA500)') }}>
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" style={{ color: '#000000' }}>
                       <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                   </div>
@@ -268,7 +267,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                   className="absolute top-6 left-6 md:relative md:top-0 md:left-0 w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center font-black text-2xl md:text-3xl shadow-2xl transform hover:scale-110 transition-transform duration-300"
                   style={{
                     background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
-                    color: getOptimalTextColorForGradient(`linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`),
+                    color: '#FFFFFF',
                     boxShadow: `0 5px 25px ${primaryColor.glow}, 0 0 40px ${secondaryColor.glow}30`
                   }}
                 >
@@ -364,10 +363,9 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-semibold" style={{ color: '#FFFFFF' }}>Jersey:</span>
                   <span 
-                    className="inline-flex items-center justify-center w-12 h-12 rounded-full font-black text-lg shadow-lg"
+                    className="inline-flex items-center justify-center w-12 h-12 rounded-full font-black text-lg shadow-lg text-white"
                     style={{
                       background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
-                      color: getOptimalTextColorForGradient(`linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`),
                       boxShadow: `0 5px 15px ${primaryColor.glow}`
                     }}
                   >

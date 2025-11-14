@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/CustomIcons';
 import { Team, Player } from '@/types';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
-import { getOptimalTextColor, getOptimalTextColorForGradient } from '@/lib/colorUtils';
+import { getOptimalTextColor } from '@/lib/colorUtils';
 
 interface TeamDetailClientProps {
   teamId: string;
@@ -398,7 +398,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                   }`}
                   style={activeTab === tab.id ? {
                     background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
-                    color: getOptimalTextColorForGradient(`linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`),
+                    color: '#FFFFFF',
                     boxShadow: `0 10px 30px ${primaryColor.glow}40, 0 0 40px ${secondaryColor.glow}20`,
                     border: `2px solid ${primaryColor.medium}`,
                   } : {
@@ -529,10 +529,9 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index }: an
       }}
     >
       {/* Jersey Number with enhanced animation */}
-      <div className="absolute top-4 right-4 w-14 h-14 rounded-xl flex items-center justify-center font-black text-xl shadow-lg transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 z-10"
+      <div className="absolute top-4 right-4 w-14 h-14 rounded-xl flex items-center justify-center font-black text-xl shadow-lg transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 z-10 text-white"
            style={{ 
              background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
-             color: getOptimalTextColorForGradient(`linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`),
              boxShadow: `0 5px 15px ${primaryColor.glow}`
            }}>
         {player.jerseyNumber || '-'}

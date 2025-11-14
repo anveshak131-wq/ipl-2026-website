@@ -7,7 +7,6 @@ import Footer from '@/components/layout/Footer';
 import PlayerModal from '@/components/teams/PlayerModal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Team, Player } from '@/types';
-import { getOptimalTextColorForGradient } from '@/lib/colorUtils';
 
 interface TeamDetailRedesignedProps {
   teamId: string;
@@ -121,7 +120,7 @@ function StatsCard({ icon, value, label, delay }: any) {
       </div>
       
       {/* Label */}
-      <div className="relative text-sm font-bold uppercase tracking-wider" style={{ color: getOptimalTextColorForGradient('linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))') }}>
+      <div className="relative text-sm font-bold uppercase tracking-wider text-white">
         {label}
       </div>
 
@@ -190,7 +189,7 @@ function PlayerCard3D({ player, onClick, index }: any) {
                style={{
                  background: 'linear-gradient(135deg, rgba(236,28,36,0.8), rgba(218,165,32,0.8))',
                  boxShadow: '0 4px 20px rgba(236,28,36,0.5)',
-                 color: getOptimalTextColorForGradient('linear-gradient(135deg, rgba(236,28,36,0.8), rgba(218,165,32,0.8))')
+                 color: '#FFFFFF'
                }}>
             <span>{player.jerseyNumber || '-'}</span>
           </div>
@@ -200,18 +199,18 @@ function PlayerCard3D({ player, onClick, index }: any) {
                style={{
                  background: 'linear-gradient(135deg, #EC1C24, #DAA520)',
                  boxShadow: '0 10px 40px rgba(236,28,36,0.4)',
-                 color: getOptimalTextColorForGradient('linear-gradient(135deg, #EC1C24, #DAA520)')
+                 color: '#FFFFFF'
                }}>
             <span>{player.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}</span>
           </div>
 
           {/* Player Name */}
-          <h3 className="text-xl font-bold mb-2 text-center transition-colors" style={{ color: getOptimalTextColorForGradient('linear-gradient(135deg, rgba(236,28,36,0.15), rgba(218,165,32,0.1))') }}>
+          <h3 className="text-xl font-bold mb-2 text-center transition-colors text-white">
             {player.name}
           </h3>
           
           {/* Role */}
-          <p className="text-sm font-semibold mb-4 text-center" style={{ color: getOptimalTextColorForGradient('linear-gradient(135deg, rgba(236,28,36,0.15), rgba(218,165,32,0.1))') }}>{player.role}</p>
+          <p className="text-sm font-semibold mb-4 text-center text-white">{player.role}</p>
 
           {/* Badges */}
           <div className="flex flex-wrap gap-2 mb-4 justify-center">
@@ -231,20 +230,20 @@ function PlayerCard3D({ player, onClick, index }: any) {
           <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/10">
             <div className="text-center">
               <p className="text-3xl font-black" style={{ color: '#EC1C24' }}>{player.stats.matches}</p>
-              <p className="text-xs uppercase mt-1" style={{ color: getOptimalTextColorForGradient('linear-gradient(135deg, rgba(236,28,36,0.15), rgba(218,165,32,0.1))') }}>Matches</p>
+              <p className="text-xs uppercase mt-1 text-white">Matches</p>
             </div>
             <div className="text-center">
               <p className="text-3xl font-black" style={{ color: '#DAA520' }}>{player.stats.runs}</p>
-              <p className="text-xs uppercase mt-1" style={{ color: getOptimalTextColorForGradient('linear-gradient(135deg, rgba(236,28,36,0.15), rgba(218,165,32,0.1))') }}>Runs</p>
+              <p className="text-xs uppercase mt-1 text-white">Runs</p>
             </div>
             <div className="text-center">
               <p className="text-3xl font-black" style={{ color: '#EC1C24' }}>{player.stats.wickets}</p>
-              <p className="text-xs uppercase mt-1" style={{ color: getOptimalTextColorForGradient('linear-gradient(135deg, rgba(236,28,36,0.15), rgba(218,165,32,0.1))') }}>Wickets</p>
+              <p className="text-xs uppercase mt-1 text-white">Wickets</p>
             </div>
           </div>
 
           {/* View Profile Arrow */}
-          <div className="mt-4 flex items-center justify-center gap-2 text-sm font-bold transition-colors" style={{ color: getOptimalTextColorForGradient('linear-gradient(135deg, rgba(236,28,36,0.15), rgba(218,165,32,0.1))') }}>
+          <div className="mt-4 flex items-center justify-center gap-2 text-sm font-bold transition-colors text-white">
             <span>View Profile</span>
             <svg className="w-4 h-4 transform group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -484,9 +483,9 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
                   }`}
                   style={activeTab === tab.id ? {
                     background: 'linear-gradient(135deg, #EC1C24, #DAA520)',
-                    color: getOptimalTextColorForGradient('linear-gradient(135deg, #EC1C24, #DAA520)')
+                    color: '#FFFFFF'
                   } : { 
-                    color: getOptimalTextColorForGradient('linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))')
+                    color: '#FFFFFF'
                   }}
                 >
                   <span>{tab.icon}</span>
@@ -520,10 +519,10 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
                     }`}
                     style={filterRole === filter.id ? {
                       background: 'linear-gradient(135deg, #EC1C24, #DAA520)',
-                      color: getOptimalTextColorForGradient('linear-gradient(135deg, #EC1C24, #DAA520)')
+                      color: '#FFFFFF'
                     } : {
                       background: 'rgba(255,255,255,0.05)',
-                      color: getOptimalTextColorForGradient('linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))')
+                      color: '#FFFFFF'
                     }}
                   >
                     <span>{filter.icon}</span>
@@ -555,7 +554,7 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
 
               {filteredPlayers.length === 0 && (
                 <div className="text-center py-20">
-                  <p className="text-2xl font-bold text-gray-400">No players found in this category</p>
+                  <p className="text-2xl font-bold text-white">No players found in this category</p>
                 </div>
               )}
             </div>
@@ -566,7 +565,7 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
               {/* Squad Composition */}
               <div className="rounded-3xl backdrop-blur-xl p-8 border border-white/10"
                    style={{ background: 'linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))' }}>
-                <h3 className="text-3xl font-black mb-6 flex items-center gap-3" style={{ color: getOptimalTextColorForGradient('linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))') }}>
+                <h3 className="text-3xl font-black mb-6 flex items-center gap-3 text-white">
                   <span>📊</span>
                   Squad Breakdown
                 </h3>
@@ -578,7 +577,7 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
                     { role: 'Wicket-keeper', count: (teamData.players || []).filter(p => p.role === 'Wicket-keeper').length, color: '#DAA520', icon: '🧤' }
                   ].map((item, i) => (
                     <div key={i} className="group flex justify-between items-center p-4 rounded-2xl bg-white/5 hover:bg-white/10 transition-all cursor-pointer">
-                      <span className="font-semibold flex items-center gap-3" style={{ color: getOptimalTextColorForGradient('linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))') }}>
+                      <span className="font-semibold flex items-center gap-3 text-white">
                         <span className="text-2xl">{item.icon}</span>
                         {item.role}
                       </span>
@@ -602,7 +601,7 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
               {/* Player Origin */}
               <div className="rounded-3xl backdrop-blur-xl p-8 border border-white/10"
                    style={{ background: 'linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))' }}>
-                <h3 className="text-3xl font-black mb-6 flex items-center gap-3" style={{ color: getOptimalTextColorForGradient('linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))') }}>
+                <h3 className="text-3xl font-black mb-6 flex items-center gap-3 text-white">
                   <span>🌍</span>
                   Player Origin
                 </h3>
@@ -613,7 +612,7 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
                   ].map((item, i) => (
                     <div key={i} className="group p-6 rounded-2xl bg-white/5 hover:bg-white/10 transition-all">
                       <div className="flex justify-between items-center mb-3">
-                        <span className="font-semibold flex items-center gap-2" style={{ color: getOptimalTextColorForGradient('linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))') }}>
+                        <span className="font-semibold flex items-center gap-2 text-white">
                           <span className="text-3xl">{item.flag}</span>
                           {item.label}
                         </span>
@@ -642,7 +641,7 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
               {/* Trophy Cabinet */}
               <div className="rounded-3xl backdrop-blur-xl p-12 border border-white/10 text-center"
                    style={{ background: 'linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))' }}>
-                <h3 className="text-4xl font-black mb-8 flex items-center justify-center gap-3" style={{ color: getOptimalTextColorForGradient('linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))') }}>
+                <h3 className="text-4xl font-black mb-8 flex items-center justify-center gap-3 text-white">
                   <span>🏆</span>
                   Trophy Cabinet
                   <span>🏆</span>
@@ -659,7 +658,7 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
                         🥈
                       </div>
                       <p className="text-2xl font-black" style={{ color: '#DAA520' }}>{trophy.year}</p>
-                      <p className="text-sm mt-1" style={{ color: getOptimalTextColorForGradient('linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))') }}>{trophy.position}</p>
+                      <p className="text-sm mt-1 text-white">{trophy.position}</p>
                     </div>
                   ))}
                 </div>
@@ -668,14 +667,14 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
                   <p className="text-3xl font-black text-transparent bg-gradient-to-r from-red-500 to-yellow-500 bg-clip-text animate-pulse">
                     "Ee Sala Cup Namde" 🔥
                   </p>
-                  <p className="mt-2 italic" style={{ color: getOptimalTextColorForGradient('linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))') }}>(This Year, The Cup is Ours)</p>
+                  <p className="mt-2 italic text-white">(This Year, The Cup is Ours)</p>
                 </div>
               </div>
 
               {/* Achievements */}
               <div className="rounded-3xl backdrop-blur-xl p-12 border border-white/10"
                    style={{ background: 'linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))' }}>
-                <h3 className="text-3xl font-black mb-8 flex items-center gap-3" style={{ color: getOptimalTextColorForGradient('linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))') }}>
+                <h3 className="text-3xl font-black mb-8 flex items-center gap-3 text-white">
                   <span>⭐</span>
                   Major Achievements
                 </h3>
