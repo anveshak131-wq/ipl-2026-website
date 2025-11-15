@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>RCB Angry Lion (Preview)</title>
+  <style>
+    html,body{height:100%;margin:0}
+    body{display:flex;align-items:center;justify-content:center;background:#ec1c24}
+    canvas{box-shadow:0 10px 30px rgba(0,0,0,0.25);border-radius:8px}
+    .hint{position:fixed;left:12px;bottom:12px;color:white;font-family:Inter,system-ui,Arial;font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="hint">Open this file at <code>/rcb-lion.html</code> (served from `public`)</div>
+
+<script>
+// =========================================
+// ANGRY LION LOGO – JSON CONFIG
+// =========================================
+
+const lionConfig = {
+  canvas: {
+    width: 500,
+    height: 500,
+    background: "#EC1C24" // RCB crimson
+  },
+  lion: {
+    faceColor: "#f2a335",
+    maneColor: "#cc7a00",
+    noseColor: "#000",
+    mouthColor: "#000",
+    crownColor: "#ffd700",
+    glowColor: "rgba(255, 150, 0, 0.25)",
+    size: 85,
+    bounceSpeed: 0.04,
+    bounceHeight: 8,
+    maneWaveSpeed: 0.12,
+    sparkle: true
+  }
+};
+
+// =========================================
+// ANGRY LION CLASS
+// =========================================
+
+class AngryLion {
+  constructor(config = lionConfig) {
+    this.config = config;
+
+    // Create canvas
+    this.canvas = document.createElement("canvas");
+    this.canvas.width = config.canvas.width;
+    this.canvas.height = config.canvas.height;
+    document.body.style.margin = "0";
+    document.body.style.background = config.canvas.background;
+    document.body.style.display = "flex";
+    document.body.style.justifyContent = "center";
+    document.body.style.alignItems = "center";
+    document.body.appendChild(this.canvas);
+
+    this.ctx = this.canvas.getContext("2d");
+    this.t = 0;
+    this.sparkles = [];
+
+    this.animate = this.animate.bind(this);
+    requestAnimationFrame(this.animate);
+  }
+
+  drawGlow(cx, cy) {
+    const ctx = this.ctx;
+    ctx.beginPath();
+    ctx.arc(cx, cy, this.config.lion.size + 80, 0, Math.PI * 2);
+    ctx.fillStyle = this.config.lion.glowColor;
+    // use shadowBlur instead of CSS filter for canvas compatibility
+    ctx.save();
+    ctx.shadowColor = this.config.lion.glowColor;
+    ctx.shadowBlur = 35;
+    ctx.fill();
+    ctx.restore();
+  }
+
+  spawnSparkle(cx, cy) {
+    if (!this.config.lion.sparkle) return;
+    if (Math.random() < 0.06) {
+      this.sparkles.push({
+        x: cx + (Math.random() * 80 - 40),
+        y: cy - 130 + Math.random() * 30,
+        life: 28
+      });
+    }
+  }
+
+  drawSparkles() {
+    const ctx = this.ctx;
+    this.sparkles = this.sparkles.filter(s => s.life-- > 0);
+
+    for (let s of this.sparkles) {
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, 3, 0, Math.PI * 2);
+      ctx.globalAlpha = Math.max(0, s.life / 28);
+      ctx.fillStyle = "#fff";
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  drawLion(yOffset) {
+    const ctx = this.ctx;
+    const L = this.config.lion;
+    const cx = this.canvas.width / 2;
+    const cy = this.canvas.height / 2 + yOffset;
+
+    // clear with transparent so background remains the body color
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // Glow
+    this.drawGlow(cx, cy);
+
+    // Mane with wave motion - draw as stroked circle
+    ctx.beginPath();
+    const maneRadius = L.size + 40 + Math.sin(this.t * L.maneWaveSpeed) * 6;
+    ctx.arc(cx, cy, maneRadius, 0, Math.PI * 2);
+    ctx.lineWidth = 42;
+    ctx.strokeStyle = L.maneColor;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    // Face
+    ctx.beginPath();
+    ctx.arc(cx, cy, L.size, 0, Math.PI * 2);
+    ctx.fillStyle = L.faceColor;
+    ctx.fill();
+
+    // ANGRY Eyebrows
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 10;
+    ctx.lineCap = "round";
+
+    // Left eyebrow
+    ctx.beginPath();
+    ctx.moveTo(cx - 40, cy - 35);
+    ctx.lineTo(cx - 15, cy - 20);
+    ctx.stroke();
+
+    // Right eyebrow
+    ctx.beginPath();
+    ctx.moveTo(cx + 40, cy - 35);
+    ctx.lineTo(cx + 15, cy - 20);
+    ctx.stroke();
+
+    // Eyes (angry narrow shape)
+    ctx.fillStyle = "#000";
+    ctx.beginPath();
+    ctx.ellipse(cx - 25, cy - 10, 12, 8, -0.3, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.ellipse(cx + 25, cy - 10, 12, 8, 0.3, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Nose
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + 10, 14, 10, 0, 0, Math.PI * 2);
+    ctx.fillStyle = L.noseColor;
+    ctx.fill();
+
+    // ANGRY MOUTH (roaring)
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + 50, 28, 35 + Math.sin(this.t * 0.2) * 4, 0, 0, Math.PI * 2);
+    ctx.fillStyle = L.mouthColor;
+    ctx.fill();
+
+    // Crown
+    ctx.fillStyle = L.crownColor;
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 3;
+
+    ctx.beginPath();
+    ctx.moveTo(cx - 50, cy - 80);
+    ctx.lineTo(cx + 50, cy - 80);
+    ctx.lineTo(cx + 30, cy - 140);
+    ctx.lineTo(cx, cy - 110);
+    ctx.lineTo(cx - 30, cy - 140);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Crown jewels (small circles)
+    ctx.fillStyle = '#fff9c9';
+    ctx.beginPath(); ctx.arc(cx, cy-122, 6, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx-32, cy-110, 4, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx+32, cy-110, 4, 0, Math.PI*2); ctx.fill();
+
+    // Sparkles
+    this.spawnSparkle(cx, cy);
+    this.drawSparkles();
+  }
+
+  animate() {
+    const L = this.config.lion;
+    const yOffset = Math.sin(this.t * L.bounceSpeed) * L.bounceHeight;
+    this.drawLion(yOffset);
+    this.t += 1;
+    requestAnimationFrame(this.animate);
+  }
+}
+
+// AUTO-RUN
+new AngryLion();
+</script>
+</body>
+</html>
