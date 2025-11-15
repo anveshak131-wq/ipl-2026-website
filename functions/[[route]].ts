@@ -3,7 +3,7 @@
  * Delegates to static pages (managed by Next.js build)
  */
 
-export const onRequest: PagesFunction = async (context) => {
+export const onRequest = async (context: any) => {
   // This catch-all will only be reached if no other specific route matches
   // All /api/* routes should be handled by /functions/api/
   // All pages should be served from the static build output
