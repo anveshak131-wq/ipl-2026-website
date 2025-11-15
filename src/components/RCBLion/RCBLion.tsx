@@ -54,7 +54,7 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
       ctx.shadowBlur = 18;
       ctx.beginPath();
       ctx.fillStyle = '#FDD08D';
-      ctx.arc(cx, cy + 10, 70, 0, Math.PI * 2);
+      ctx.arc(cx, cy + 10, 64, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
@@ -96,28 +96,43 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
       ctx.fill();
       ctx.restore();
 
-      // Face circle
+      // Face circle (slightly smaller)
       ctx.save();
       ctx.beginPath();
       ctx.fillStyle = '#FDD08D';
-      ctx.arc(cx, cy + 10, 60, 0, Math.PI * 2);
+      ctx.arc(cx, cy + 10, 52, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
-      // Eyes
+      // Eyes - narrow angry slits
       ctx.save();
       ctx.fillStyle = '#1B1B1B';
       ctx.beginPath();
-      ctx.arc(cx - 25, cy - 5, 7, 0, Math.PI * 2);
+      ctx.ellipse(cx - 22, cy - 6, 8, 5, -Math.PI / 12, 0, Math.PI * 2);
       ctx.fill();
       ctx.beginPath();
-      ctx.arc(cx + 25, cy - 5, 7, 0, Math.PI * 2);
+      ctx.ellipse(cx + 22, cy - 6, 8, 5, Math.PI / 12, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
-      // Nose
+      // Eyebrows - slanted for fury
       ctx.save();
-      ctx.fillStyle = '#3B2720';
+      ctx.strokeStyle = '#3B2720';
+      ctx.lineWidth = 6;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cx - 36, cy - 20);
+      ctx.lineTo(cx - 8, cy - 12);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx + 36, cy - 20);
+      ctx.lineTo(cx + 8, cy - 12);
+      ctx.stroke();
+      ctx.restore();
+
+      // Nose (sharper)
+      ctx.save();
+      ctx.fillStyle = '#34221B';
       ctx.beginPath();
       ctx.moveTo(cx - 8, cy + 12);
       ctx.quadraticCurveTo(cx, cy + 22, cx + 8, cy + 12);
@@ -125,13 +140,21 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
       ctx.fill();
       ctx.restore();
 
-      // Mouth
+      // Mouth - snarling / downturned
       ctx.save();
       ctx.strokeStyle = '#3B2720';
       ctx.lineWidth = 3;
+      ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.moveTo(cx - 20, cy + 28);
-      ctx.quadraticCurveTo(cx, cy + 40, cx + 20, cy + 28);
+      ctx.moveTo(cx - 18, cy + 30);
+      ctx.quadraticCurveTo(cx, cy + 36, cx + 18, cy + 30);
+      ctx.stroke();
+      // Small vertical snarl lines (teeth/growl)
+      ctx.beginPath();
+      ctx.moveTo(cx - 6, cy + 28);
+      ctx.lineTo(cx - 6, cy + 34);
+      ctx.moveTo(cx + 6, cy + 28);
+      ctx.lineTo(cx + 6, cy + 34);
       ctx.stroke();
       ctx.restore();
 
