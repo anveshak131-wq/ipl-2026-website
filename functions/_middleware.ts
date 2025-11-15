@@ -3,7 +3,7 @@
  * Ensures all functions receive proper context and request routing
  */
 
-export const onRequest: PagesFunction = async (context) => {
+export const onRequest = async (context: any) => {
   const { request } = context;
   
   // Add logging for debugging
