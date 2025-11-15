@@ -58,15 +58,41 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
       ctx.fill();
       ctx.restore();
 
-      // Mane suggestion (light stroke)
+      // Mane - Outer hair layer (darker)
       ctx.save();
+      ctx.fillStyle = '#D4900F';
       ctx.beginPath();
+      ctx.arc(cx, cy + 10, 85, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Mane - Hair texture with individual strands
+      ctx.save();
+      ctx.strokeStyle = '#C97F0F';
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.6;
+      
+      // Top mane strands
+      for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 12) {
+        const startX = cx + Math.cos(angle) * 70;
+        const startY = cy + 10 + Math.sin(angle) * 70;
+        const endX = cx + Math.cos(angle) * 95;
+        const endY = cy + 10 + Math.sin(angle) * 95;
+        const controlX = cx + Math.cos(angle + 0.3) * 85;
+        const controlY = cy + 10 + Math.sin(angle + 0.3) * 85;
+        
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.quadraticCurveTo(controlX, controlY, endX, endY);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Mane - lighter inner layer
+      ctx.save();
       ctx.fillStyle = '#F8C97E';
-      ctx.moveTo(cx, cy - 90);
-      ctx.bezierCurveTo(cx - 50, cy - 80, cx - 80, cy - 40, cx - 80, cy + 10);
-      ctx.bezierCurveTo(cx - 80, cy + 70, cx - 40, cy + 110, cx, cy + 110);
-      ctx.bezierCurveTo(cx + 40, cy + 110, cx + 80, cy + 70, cx + 80, cy + 10);
-      ctx.bezierCurveTo(cx + 80, cy - 40, cx + 50, cy - 80, cx, cy - 90);
+      ctx.beginPath();
+      ctx.arc(cx, cy + 10, 75, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
