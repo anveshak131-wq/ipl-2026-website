@@ -1,93 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="500" height="500" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RCB lion logo">
+<!-- Redesigned RCB lion static SVG - compact, modern, optimized for UI -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 260" width="240" height="260" role="img" aria-label="RCB lion logo">
   <defs>
-    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="10" result="coloredBlur"/>
+    <radialGradient id="bgGlow" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#FFB3B3" stop-opacity="0.20"/>
+      <stop offset="60%" stop-color="#EC1C24" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#EC1C24" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="rcbGradient" x1="0" x2="1">
+      <stop offset="0%" stop-color="#FF6B35" />
+      <stop offset="100%" stop-color="#EC1C24" />
+    </linearGradient>
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
       <feMerge>
-        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="blur"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
   </defs>
 
-  <!-- Background rounded rectangle in RCB crimson -->
-  <rect x="60" y="40" width="380" height="420" rx="24" fill="#EC1C24" />
+  <!-- Background circle - crimson -->
+  <circle cx="120" cy="80" r="78" fill="url(#rcbGradient)" />
+  <circle cx="120" cy="80" r="96" fill="url(#bgGlow)" />
 
-  <!-- Pulsing background circle (static in SVG) -->
-  <circle cx="250" cy="180" r="110" fill="#EC1C24" opacity="0.12" />
-
-  <!-- Lion mane / face base -->
-  <circle cx="250" cy="200" r="85" fill="#FDD08D" filter="url(#glow)" />
-
-  <!-- Mane stroke to imply mane shape -->
-  <path d="M250 110 C200 120 170 160 170 200 C170 260 210 300 250 300 C290 300 330 260 330 200 C330 160 300 120 250 110 Z" fill="#F8C97E" opacity="0.9" />
-
-  <!-- Eyes -->
-  <circle cx="225" cy="190" r="8" fill="#1B1B1B" />
-  <circle cx="275" cy="190" r="8" fill="#1B1B1B" />
-
-  <!-- Nose -->
-  <path d="M245 210 Q250 220 255 210 Q250 215 245 210 Z" fill="#3B2720" />
-
-  <!-- Mouth -->
-  <path d="M230 225 Q250 240 270 225" stroke="#3B2720" stroke-width="4" fill="none" stroke-linecap="round" />
-
-  <!-- Crown -->
-  <g transform="translate(200,100)">
-    <rect x="30" y="0" width="140" height="18" rx="4" fill="#FFD24D" />
-    <path d="M40 0 L60 -28 L80 0 L100 -20 L120 0 L140 -30 L160 0" fill="#FFD24D" />
-    <circle cx="60" cy="-28" r="6" fill="#EAC24A" />
-    <circle cx="120" cy="-30" r="6" fill="#EAC24A" />
+  <!-- Rotating subtle ring (static for SVG) -->
+  <g opacity="0.08">
+    <path d="M120 8 A72 72 0 1 1 119.9 8" fill="none" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-dasharray="6 8" />
   </g>
 
-  <!-- Small jewel accents -->
-  <circle cx="240" cy="155" r="4" fill="#FF7A7A" />
-  <circle cx="260" cy="155" r="4" fill="#FF7A7A" />
+  <!-- Lion face container -->
+  <g transform="translate(120,100)">
+    <!-- Outer mane silhouette -->
+    <path d="M0,-68 C-44,-62 -72,-36 -72,0 C-72,36 -44,62 0,72 C44,62 72,36 72,0 C72,-36 44,-62 0,-68 Z" fill="#C96A12" filter="url(#softGlow)" />
 
-  <!-- RCB text -->
-  <text x="250" y="380" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" text-anchor="middle" fill="#EC1C24">RCB</text>
-</svg>
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" aria-label="RCB lion logo">
-  <!-- Crimson background circle -->
-  <circle cx="120" cy="80" r="80" fill="#EC1C24" />
+    <!-- Inner mane layer -->
+    <path d="M0,-56 C-34,-50 -56,-30 -56,0 C-56,30 -34,50 0,58 C34,50 56,30 56,0 C56,-30 34,-50 0,-56 Z" fill="#F8C97E" />
 
-  <!-- Subtle glow behind the circle -->
-  <defs>
-    <radialGradient id="glow" cx="50%" cy="35%" r="60%">
-      <stop offset="0%" stop-color="#ff6b6b" stop-opacity="0.20"/>
-      <stop offset="60%" stop-color="#EC1C24" stop-opacity="0.06"/>
-      <stop offset="100%" stop-color="#EC1C24" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <circle cx="120" cy="80" r="96" fill="url(#glow)" />
+    <!-- Face -->
+    <circle cx="0" cy="-6" r="36" fill="#FDD08D" stroke="#CE9A5A" stroke-width="1.5" />
 
-  <!-- Lion face -->
-  <g transform="translate(120,90)">
-    <circle cx="0" cy="-10" r="44" fill="#FDD08D" stroke="#B76E2E" stroke-width="2" />
-
-    <!-- Eyes -->
-    <ellipse cx="-14" cy="-18" rx="6" ry="8" fill="#000" />
-    <ellipse cx="14" cy="-18" rx="6" ry="8" fill="#000" />
-
-    <!-- Nose -->
-    <path d="M -6 0 Q 0 8 6 0 Q 0 4 -6 0 Z" fill="#7a2b1c" />
-
-    <!-- Mouth -->
-    <path d="M -16 12 Q -6 20 0 18 Q 6 20 16 12" fill="none" stroke="#7a2b1c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-
-    <!-- Simple crown -->
-    <g transform="translate(-26,-46)">
-      <path d="M0 32 L13 0 L26 32 L52 32 L52 40 L0 40 Z" fill="#F6C000" stroke="#d49b00" stroke-width="1.5" />
-      <circle cx="13" cy="6" r="3" fill="#9B5B00" />
-      <circle cx="26" cy="6" r="3" fill="#9B5B00" />
-      <circle cx="39" cy="6" r="3" fill="#9B5B00" />
+    <!-- Angry eyes (slits) -->
+    <g fill="#111">
+      <path d="M-18,-18 q6 -6 18 -2" stroke="#111" stroke-width="4" stroke-linecap="round" fill="none" />
+      <path d="M18,-18 q-6 -6 -18 -2" stroke="#111" stroke-width="4" stroke-linecap="round" fill="none" />
     </g>
 
-    <!-- Small jewel on crown center -->
-    <circle cx="0" cy="-46" r="3" fill="#e53935" stroke="#7a2b1c" stroke-width="0.6" />
+    <!-- Eyebrows -->
+    <g stroke="#6b3e26" stroke-width="5" stroke-linecap="round">
+      <path d="M-34,-30 L-12,-18" />
+      <path d="M34,-30 L12,-18" />
+    </g>
+
+    <!-- Nose -->
+    <path d="M -6 2 Q 0 12 6 2 Q 0 8 -6 2 Z" fill="#5A2F25" />
+
+    <!-- Snarl / mouth -->
+    <path d="M -18 20 Q 0 30 18 20" stroke="#5A2F25" stroke-width="3" stroke-linecap="round" fill="none" />
+    <path d="M -6 18 L -6 24 M 6 18 L 6 24" stroke="#5A2F25" stroke-width="2" stroke-linecap="round" />
+
+    <!-- Crown (clean, small) -->
+    <g transform="translate(-22,-64)">
+      <rect x="0" y="28" width="44" height="10" rx="2" fill="#FFD24D" />
+      <path d="M4 28 L12 0 L20 28 L28 6 L36 28" fill="#FFD24D" />
+      <circle cx="12" cy="0" r="3" fill="#D49B00" />
+      <circle cx="28" cy="6" r="2.2" fill="#D49B00" />
+    </g>
   </g>
 
-  <!-- Footer text small (optional) -->
-  <text x="120" y="230" font-size="18" font-family="Arial, Helvetica, sans-serif" font-weight="700" text-anchor="middle" fill="#EC1C24">RCB</text>
+  <!-- Bold RCB label centered -->
+  <text x="120" y="230" font-family="Inter, Arial, Helvetica, sans-serif" font-size="28" font-weight="800" text-anchor="middle" fill="#EC1C24" style="letter-spacing:1.5px">RCB</text>
 </svg>

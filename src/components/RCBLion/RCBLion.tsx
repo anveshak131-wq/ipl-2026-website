@@ -28,164 +28,173 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
       const w = width;
       const h = height;
       tRef.current += 1;
-      const t = tRef.current;
+      const t = tRef.current / 10;
 
       // Clear
       ctx.clearRect(0, 0, w, h);
 
       // Center
       const cx = w / 2;
-      const cy = h / 2 - 20;
+      const cy = h / 2 - Math.round(Math.min(w, h) * 0.05);
 
-      // Pulsing background circle
-      const pulse = 1 + Math.sin(t * 0.06) * 0.06;
+      // Subtle head bob for life
+      const headBob = Math.sin(t * 0.8) * (Math.min(w, h) * 0.004);
+
+      // Pulsing background circle (outer)
+      const pulse = 1 + Math.sin(t * 0.9) * 0.04;
       const bgRadius = Math.min(w, h) * 0.22 * pulse;
       ctx.save();
       ctx.beginPath();
       ctx.fillStyle = '#EC1C24';
       ctx.globalAlpha = 1;
-      ctx.arc(cx, cy - 20, bgRadius, 0, Math.PI * 2);
+      ctx.arc(cx, cy - Math.round(Math.min(w, h) * 0.06), bgRadius, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
-      // Glow behind face
+      // Outer ring glow (soft)
       ctx.save();
-      ctx.shadowColor = 'rgba(0,0,0,0.12)';
-      ctx.shadowBlur = 18;
       ctx.beginPath();
-      ctx.fillStyle = '#FDD08D';
-      ctx.arc(cx, cy + 10, 64, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255,180,180,${0.06 + Math.sin(t * 1.2) * 0.02})`;
+      ctx.arc(cx, cy - Math.round(Math.min(w, h) * 0.06), bgRadius * 1.15, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
-      // Mane - Outer hair layer (darker)
+      // Mane silhouette - animated with subtle radial waves
       ctx.save();
-      ctx.fillStyle = '#D4900F';
+      const maneOuter = Math.min(w, h) * 0.36;
+      const maneInner = maneOuter * 0.78;
+      ctx.fillStyle = '#C96A12';
       ctx.beginPath();
-      ctx.arc(cx, cy + 10, 85, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-
-      // Mane - Hair texture with individual strands
-      ctx.save();
-      ctx.strokeStyle = '#C97F0F';
-      ctx.lineWidth = 2;
-      ctx.globalAlpha = 0.6;
-      
-      // Top mane strands
-      for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 12) {
-        const startX = cx + Math.cos(angle) * 70;
-        const startY = cy + 10 + Math.sin(angle) * 70;
-        const endX = cx + Math.cos(angle) * 95;
-        const endY = cy + 10 + Math.sin(angle) * 95;
-        const controlX = cx + Math.cos(angle + 0.3) * 85;
-        const controlY = cy + 10 + Math.sin(angle + 0.3) * 85;
-        
-        ctx.beginPath();
-        ctx.moveTo(startX, startY);
-        ctx.quadraticCurveTo(controlX, controlY, endX, endY);
-        ctx.stroke();
+      for (let i = 0; i < 36; i++) {
+        const a = (i / 36) * Math.PI * 2;
+        const r = maneOuter + Math.sin(t * 1.2 + i) * (maneOuter * 0.02);
+        const x = cx + Math.cos(a) * r;
+        const y = cy + Math.sin(a) * r + headBob * 8;
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
       }
+      ctx.closePath();
+      ctx.fill();
       ctx.restore();
 
-      // Mane - lighter inner layer
+      // Inner mane
       ctx.save();
       ctx.fillStyle = '#F8C97E';
       ctx.beginPath();
-      ctx.arc(cx, cy + 10, 75, 0, Math.PI * 2);
+      ctx.arc(cx, cy, maneInner, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
-      // Face circle (slightly smaller)
+      // Face (smaller, centered)
       ctx.save();
+      const faceR = Math.min(w, h) * 0.14;
       ctx.beginPath();
       ctx.fillStyle = '#FDD08D';
-      ctx.arc(cx, cy + 10, 52, 0, Math.PI * 2);
+      ctx.arc(cx, cy - headBob * 0.5, faceR, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
-      // Eyes - narrow angry slits
+      // Eyes - angry slits with tiny glint
       ctx.save();
-      ctx.fillStyle = '#1B1B1B';
+      ctx.strokeStyle = '#111';
+      ctx.lineWidth = Math.max(2, Math.round(faceR * 0.12));
+      ctx.lineCap = 'round';
+      const eyeOffsetX = faceR * 0.55;
+      const eyeY = cy - faceR * 0.2 - headBob;
       ctx.beginPath();
-      ctx.ellipse(cx - 22, cy - 6, 8, 5, -Math.PI / 12, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.moveTo(cx - eyeOffsetX - 6, eyeY - 2);
+      ctx.quadraticCurveTo(cx - eyeOffsetX + 2, eyeY - 8, cx - eyeOffsetX + 18, eyeY - 2);
+      ctx.stroke();
       ctx.beginPath();
-      ctx.ellipse(cx + 22, cy - 6, 8, 5, Math.PI / 12, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.moveTo(cx + eyeOffsetX + 6, eyeY - 2);
+      ctx.quadraticCurveTo(cx + eyeOffsetX - 2, eyeY - 8, cx + eyeOffsetX - 18, eyeY - 2);
+      ctx.stroke();
       ctx.restore();
 
-      // Eyebrows - slanted for fury
+      // Eyebrows - slanted intense
       ctx.save();
-      ctx.strokeStyle = '#3B2720';
-      ctx.lineWidth = 6;
+      ctx.strokeStyle = '#6b3e26';
+      ctx.lineWidth = Math.max(3, Math.round(faceR * 0.12));
       ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.moveTo(cx - 36, cy - 20);
-      ctx.lineTo(cx - 8, cy - 12);
+      ctx.moveTo(cx - faceR * 0.95, eyeY - faceR * 0.25);
+      ctx.lineTo(cx - faceR * 0.25, eyeY - faceR * 0.05);
       ctx.stroke();
       ctx.beginPath();
-      ctx.moveTo(cx + 36, cy - 20);
-      ctx.lineTo(cx + 8, cy - 12);
+      ctx.moveTo(cx + faceR * 0.95, eyeY - faceR * 0.25);
+      ctx.lineTo(cx + faceR * 0.25, eyeY - faceR * 0.05);
       ctx.stroke();
       ctx.restore();
 
-      // Nose (sharper)
+      // Nose
       ctx.save();
-      ctx.fillStyle = '#34221B';
+      ctx.fillStyle = '#5A2F25';
       ctx.beginPath();
-      ctx.moveTo(cx - 8, cy + 12);
-      ctx.quadraticCurveTo(cx, cy + 22, cx + 8, cy + 12);
-      ctx.quadraticCurveTo(cx, cy + 18, cx - 8, cy + 12);
+      ctx.moveTo(cx - faceR * 0.16, cy + faceR * 0.05);
+      ctx.quadraticCurveTo(cx, cy + faceR * 0.42, cx + faceR * 0.16, cy + faceR * 0.05);
+      ctx.quadraticCurveTo(cx, cy + faceR * 0.22, cx - faceR * 0.16, cy + faceR * 0.05);
       ctx.fill();
       ctx.restore();
 
-      // Mouth - snarling / downturned
+      // Mouth - snarl + small teeth lines
       ctx.save();
-      ctx.strokeStyle = '#3B2720';
-      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#5A2F25';
+      ctx.lineWidth = Math.max(2, Math.round(faceR * 0.08));
       ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.moveTo(cx - 18, cy + 30);
-      ctx.quadraticCurveTo(cx, cy + 36, cx + 18, cy + 30);
+      ctx.moveTo(cx - faceR * 0.42, cy + faceR * 0.42);
+      ctx.quadraticCurveTo(cx, cy + faceR * 0.58, cx + faceR * 0.42, cy + faceR * 0.42);
       ctx.stroke();
-      // Small vertical snarl lines (teeth/growl)
+      // Snarl lines
       ctx.beginPath();
-      ctx.moveTo(cx - 6, cy + 28);
-      ctx.lineTo(cx - 6, cy + 34);
-      ctx.moveTo(cx + 6, cy + 28);
-      ctx.lineTo(cx + 6, cy + 34);
+      ctx.moveTo(cx - faceR * 0.14, cy + faceR * 0.36);
+      ctx.lineTo(cx - faceR * 0.14, cy + faceR * 0.52);
+      ctx.moveTo(cx + faceR * 0.14, cy + faceR * 0.36);
+      ctx.lineTo(cx + faceR * 0.14, cy + faceR * 0.52);
       ctx.stroke();
       ctx.restore();
 
-      // Crown (simple)
+      // Crown with sparkle - animate small rotating sparkle above crown
       ctx.save();
+      const crownW = faceR * 2.2;
+      const crownX = cx - crownW / 2;
+      const crownY = cy - faceR * 2.2;
       ctx.fillStyle = '#FFD24D';
       ctx.beginPath();
-      const crownW = 120;
-      const crownX = cx - crownW / 2;
-      const crownY = cy - 92;
-      ctx.rect(crownX + 10, crownY + 18, crownW - 20, 12);
+      ctx.rect(crownX + crownW * 0.04, crownY + crownW * 0.12, crownW * 0.92, crownW * 0.12);
       ctx.fill();
+      // crown points
       ctx.beginPath();
-      ctx.moveTo(crownX + 20, crownY + 18);
-      ctx.lineTo(crownX + 40, crownY - 10);
-      ctx.lineTo(crownX + 60, crownY + 18);
-      ctx.lineTo(crownX + 80, crownY - 6);
-      ctx.lineTo(crownX + 100, crownY + 18);
+      for (let i = 0; i < 4; i++) {
+        const px = crownX + 8 + i * (crownW * 0.22);
+        const py = crownY + crownW * -0.12;
+        ctx.moveTo(px, crownY + crownW * 0.12);
+        ctx.lineTo(px + crownW * 0.08, py);
+        ctx.lineTo(px + crownW * 0.16, crownY + crownW * 0.12);
+      }
       ctx.fill();
       ctx.restore();
 
-      // Sparkles
+      // Crown sparkle (rotating)
+      ctx.save();
+      const sparkleA = t * 0.9;
+      const sx = cx + Math.cos(sparkleA) * faceR * 0.9;
+      const sy = crownY + crownW * -0.24 + Math.sin(sparkleA * 1.3) * 2;
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.beginPath();
+      ctx.arc(sx, sy, Math.max(1.6, faceR * 0.06), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Small sparkles around mane
       ctx.save();
       ctx.fillStyle = 'rgba(255,255,255,0.85)';
-      const sparkleCount = 5;
-      for (let i = 0; i < sparkleCount; i++) {
-        const a = (i / sparkleCount) * Math.PI * 2 + (t * 0.02 * (i % 2 ? 1 : -1));
-        const sx = cx + Math.cos(a) * (bgRadius * 0.7);
-        const sy = cy - 40 + Math.sin(a) * (bgRadius * 0.35);
+      for (let i = 0; i < 6; i++) {
+        const a = (i / 6) * Math.PI * 2 + t * 0.4 * (i % 2 ? 1 : -1);
+        const r = maneOuter * (0.72 + (i % 2) * 0.06);
+        const px = cx + Math.cos(a) * r;
+        const py = cy + Math.sin(a) * r * 0.8 + Math.sin(t * 0.6 + i) * 2;
         ctx.beginPath();
-        ctx.arc(sx, sy, 2 + (i % 2), 0, Math.PI * 2);
+        ctx.arc(px, py, Math.max(1, faceR * 0.04), 0, Math.PI * 2);
         ctx.fill();
       }
       ctx.restore();

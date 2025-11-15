@@ -21,8 +21,8 @@ export default function RCBLionLogo({ className, minSize = 40, maxSize = 800 }: 
       const rect = el.getBoundingClientRect();
       const s = Math.min(rect.width, rect.height || rect.width);
       const clamped = Math.max(minSize, Math.min(maxSize, Math.round(s)));
-      // apply a small default scale so the lion canvas leaves room for the label
-      const scaled = Math.round(clamped * 0.78);
+      // apply a default scale so the lion canvas leaves room for the label (slightly smaller)
+      const scaled = Math.round(clamped * 0.68);
       setSize(scaled);
     };
 
@@ -41,8 +41,8 @@ export default function RCBLionLogo({ className, minSize = 40, maxSize = 800 }: 
       <div style={{ width: '100%', height: canvasSize, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <RCBLion width={canvasSize} height={canvasSize} />
       </div>
-      <div style={{ marginTop: 4, textAlign: 'center' }}>
-        <span style={{ fontWeight: 800, fontSize: Math.max(10, Math.round(canvasSize * 0.18)), color: '#EC1C24', letterSpacing: 1 }}>
+      <div style={{ marginTop: 6, textAlign: 'center' }}>
+        <span style={{ fontFamily: 'Inter, system-ui, Arial', fontWeight: 800, fontSize: Math.max(10, Math.round(canvasSize * 0.18)), color: '#EC1C24', letterSpacing: 1.8, textTransform: 'uppercase', textShadow: '0 2px 6px rgba(0,0,0,0.45)' }}>
           RCB
         </span>
       </div>
