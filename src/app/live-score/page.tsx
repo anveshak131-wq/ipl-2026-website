@@ -146,15 +146,13 @@ export default function LiveScorePage() {
     e.preventDefault();
 
     try {
-      const endpoint = authMode === 'signin' ? '/api/auth/signin' : '/api/auth/signup';
-      const body = authMode === 'signin'
-        ? { email: authFormData.email, password: authFormData.password }
-        : authFormData;
-
-      const response = await fetch(endpoint, {
+      // Always POST to /api/auth; the server infers signup vs signin from body fields
+      const response = await fetch('/api/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        body: JSON.stringify(authMode === 'signin'
+          ? { email: authFormData.email, password: authFormData.password }
+          : authFormData),
       });
 
       if (response.ok) {

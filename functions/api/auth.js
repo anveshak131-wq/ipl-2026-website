@@ -15,6 +15,18 @@ export const onRequest = async (context) => {
   const { searchParams } = new URL(request.url);
   const method = request.method;
 
+  // CORS headers
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  };
+
+  // Handle OPTIONS preflight
+  if (method === 'OPTIONS') {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
+
   try {
     // Parse request to determine action
     let action = searchParams.get('action') || 'signin'; // default action
@@ -41,7 +53,7 @@ export const onRequest = async (context) => {
       if (!email || !password || !name) {
         return new Response(
           JSON.stringify({ error: 'Missing required fields' }),
-          { status: 400, headers: { 'Content-Type': 'application/json' } }
+          { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
 
@@ -50,7 +62,7 @@ export const onRequest = async (context) => {
       if (existingUser) {
         return new Response(
           JSON.stringify({ error: 'User already exists' }),
-          { status: 409, headers: { 'Content-Type': 'application/json' } }
+          { status: 409, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
 
@@ -96,6 +108,7 @@ export const onRequest = async (context) => {
           headers: {
             'Content-Type': 'application/json',
             'Set-Cookie': `auth_token=${token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=2592000`,
+            ...corsHeaders,
           },
         }
       );
@@ -108,7 +121,7 @@ export const onRequest = async (context) => {
       if (!email || !password) {
         return new Response(
           JSON.stringify({ error: 'Missing email or password' }),
-          { status: 400, headers: { 'Content-Type': 'application/json' } }
+          { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
 
@@ -116,7 +129,7 @@ export const onRequest = async (context) => {
       if (!userData) {
         return new Response(
           JSON.stringify({ error: 'Invalid credentials' }),
-          { status: 401, headers: { 'Content-Type': 'application/json' } }
+          { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
 
@@ -126,7 +139,7 @@ export const onRequest = async (context) => {
       if (user.isBlocked) {
         return new Response(
           JSON.stringify({ error: 'Your account has been blocked' }),
-          { status: 403, headers: { 'Content-Type': 'application/json' } }
+          { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
 
@@ -135,7 +148,7 @@ export const onRequest = async (context) => {
       if (hashedPassword !== user.hashedPassword) {
         return new Response(
           JSON.stringify({ error: 'Invalid credentials' }),
-          { status: 401, headers: { 'Content-Type': 'application/json' } }
+          { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
 
@@ -164,6 +177,7 @@ export const onRequest = async (context) => {
           headers: {
             'Content-Type': 'application/json',
             'Set-Cookie': `auth_token=${newToken}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=2592000`,
+            ...corsHeaders,
           },
         }
       );
@@ -175,7 +189,7 @@ export const onRequest = async (context) => {
       if (!token) {
         return new Response(
           JSON.stringify({ error: 'No token provided' }),
-          { status: 401, headers: { 'Content-Type': 'application/json' } }
+          { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
 
@@ -183,7 +197,7 @@ export const onRequest = async (context) => {
       if (!email) {
         return new Response(
           JSON.stringify({ error: 'Invalid or expired token' }),
-          { status: 401, headers: { 'Content-Type': 'application/json' } }
+          { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
 
@@ -193,7 +207,7 @@ export const onRequest = async (context) => {
       if (user.isBlocked) {
         return new Response(
           JSON.stringify({ error: 'Account blocked' }),
-          { status: 403, headers: { 'Content-Type': 'application/json' } }
+          { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
 
@@ -202,7 +216,7 @@ export const onRequest = async (context) => {
           success: true,
           user: { id: user.id, email: user.email, name: user.name },
         }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } }
+        { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
       );
     }
 
@@ -219,6 +233,7 @@ export const onRequest = async (context) => {
           headers: {
             'Content-Type': 'application/json',
             'Set-Cookie': 'auth_token=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0',
+            ...corsHeaders,
           },
         }
       );
@@ -226,13 +241,13 @@ export const onRequest = async (context) => {
 
     return new Response(
       JSON.stringify({ error: 'Not found' }),
-      { status: 404, headers: { 'Content-Type': 'application/json' } }
+      { status: 404, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
     );
   } catch (error) {
     console.error('Auth error:', error);
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
     );
   }
 };
