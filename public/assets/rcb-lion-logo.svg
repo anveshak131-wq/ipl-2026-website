@@ -1,38 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Premium RCB Logo - Clean Geometric Shield Design -->
+<!-- RCB Premium Logo - Bold Geometric Crown Badge Design -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 280" width="240" height="280" role="img" aria-label="RCB logo">
   <defs>
-    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FF5722" />
-      <stop offset="40%" stop-color="#EC1C24" />
-      <stop offset="80%" stop-color="#D91F1F" />
-      <stop offset="100%" stop-color="#A31820" />
+    <!-- Premium gradient -->
+    <linearGradient id="rcbMainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF2D2D" />
+      <stop offset="50%" stop-color="#DC143C" />
+      <stop offset="100%" stop-color="#8B0000" />
     </linearGradient>
-    <filter id="shieldShadow">
-      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.2"/>
+    
+    <!-- Gold accent gradient -->
+    <linearGradient id="goldAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE66D" />
+      <stop offset="100%" stop-color="#FFA500" />
+    </linearGradient>
+    
+    <!-- Shadow filter -->
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="3" stdDeviation="5" flood-opacity="0.3"/>
+    </filter>
+    
+    <!-- Glow filter -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
     </filter>
   </defs>
   
-  <!-- Shield body -->
-  <path d="M 120,20 L 170,50 L 180,140 Q 180,160 120,170 Q 60,160 60,140 L 70,50 Z" 
-        fill="url(#shieldGrad)" stroke="rgba(0,0,0,0.15)" stroke-width="1.5" filter="url(#shieldShadow)"/>
+  <!-- Outer decorative ring -->
+  <circle cx="120" cy="130" r="110" fill="none" stroke="#FFD24D" stroke-width="2" opacity="0.3" stroke-dasharray="6,3"/>
   
-  <!-- Shield highlight -->
-  <path d="M 120,20 L 170,50 L 180,140 Q 180,160 120,170 Q 60,160 60,140 L 70,50 Z" 
-        fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+  <!-- Main shield body -->
+  <path d="M 120,15 L 190,60 L 200,150 Q 200,190 120,210 Q 40,190 40,150 L 50,60 Z" 
+        fill="url(#rcbMainGrad)" filter="url(#shadow)" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
   
-  <!-- Center vertical stripe -->
-  <line x1="120" y1="30" x2="120" y2="165" stroke="#FFD24D" stroke-width="12" stroke-linecap="round" opacity="0.65"/>
+  <!-- Shield inner highlight (depth) -->
+  <path d="M 125,25 L 185,65 L 193,150 Q 193,182 120,200 Q 47,182 47,150 L 55,65 Z" 
+        fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
   
-  <!-- Top V accent -->
-  <path d="M 90,60 L 120,85 L 150,60" stroke="#FFE66D" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+  <!-- Central vertical power line -->
+  <line x1="120" y1="30" x2="120" y2="195" stroke="url(#goldAccent)" stroke-width="10" stroke-linecap="round" opacity="0.7" filter="url(#glow)"/>
   
-  <!-- Bottom three dots -->
-  <circle cx="85" cy="130" r="5" fill="#FFD24D" opacity="0.5"/>
-  <circle cx="120" cy="145" r="5" fill="#FFD24D" opacity="0.55"/>
-  <circle cx="155" cy="130" r="5" fill="#FFD24D" opacity="0.5"/>
+  <!-- Top crown peak (bold) -->
+  <path d="M 100,50 L 120,25 L 140,50" stroke="url(#goldAccent)" stroke-width="6" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
   
-  <!-- Outer dashed ring -->
-  <circle cx="120" cy="95" r="75" fill="none" stroke="#FFD24D" stroke-width="1" stroke-dasharray="4,2" opacity="0.35"/>
+  <!-- Upper accent jewels (crown crown) -->
+  <circle cx="85" cy="65" r="4" fill="#FFD24D" opacity="0.7"/>
+  <circle cx="155" cy="65" r="4" fill="#FFD24D" opacity="0.7"/>
+  
+  <!-- Middle geometric accent - lightning bolt effect -->
+  <path d="M 120,90 L 140,110 L 115,125 L 135,145" stroke="url(#goldAccent)" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+  
+  <!-- Bottom accent diamonds (3-point base) -->
+  <g opacity="0.75">
+    <circle cx="90" cy="155" r="3.5" fill="#FFE66D"/>
+    <circle cx="120" cy="170" r="3.5" fill="#FFE66D"/>
+    <circle cx="150" cy="155" r="3.5" fill="#FFE66D"/>
+  </g>
+  
+  <!-- Inner crown arc -->
+  <path d="M 100,80 Q 120,60 140,80" stroke="#FFD24D" stroke-width="3" fill="none" opacity="0.6" stroke-linecap="round"/>
 </svg>
 
