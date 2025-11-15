@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import RCBLottie from '@/components/ui/RCBLottie';
 import RCBLion from '@/components/RCBLion/RCBLion';
+import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { getOptimalTextColorForGradient } from '@/lib/colorUtils';
 import { motion } from 'framer-motion';
 
@@ -63,10 +64,7 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
               </div>
             ) : isRCBStaticExport ? (
               <div className="relative z-10 w-20 h-20 flex items-center justify-center">
-                {/* Render the new client component for an animated effect */}
-                <div className="w-20 h-20">
-                  <RCBLion width={80} height={80} />
-                </div>
+                <RCBLionLogo className="w-full h-full" />
               </div>
             ) : (
               <motion.img

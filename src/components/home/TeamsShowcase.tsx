@@ -8,6 +8,7 @@ import LoadingSpinner from '../ui/LoadingSpinner';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import RCBLottie from '@/components/ui/RCBLottie';
 import RCBLion from '@/components/RCBLion/RCBLion';
+import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { getOptimalTextColorForGradient } from '@/lib/colorUtils';
 import { motion } from 'framer-motion';
 
@@ -126,7 +127,7 @@ export default function TeamsShowcase() {
                     </div>
                   ) : getAnimatedLogoPath(team.id).endsWith('rcb-lion-logo.svg') ? (
                     <div className="relative w-full h-full flex items-center justify-center">
-                      <RCBLion width={96} height={96} />
+                      <RCBLionLogo className="w-full h-full" />
                     </div>
                   ) : (
                     <motion.img 
