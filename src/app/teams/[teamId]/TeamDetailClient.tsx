@@ -139,9 +139,10 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
   const fallbackLogoPath = getLogoPath(teamData.id);
 
   const batsmen = teamData.players?.filter(p => p.role === 'Batsman') || [];
-  const bowlers = teamData.players?.filter(p => p.role === 'Bowler') || [];
-  const allRounders = teamData.players?.filter(p => p.role === 'All-rounder') || [];
   const wicketkeepers = teamData.players?.filter(p => p.role === 'Wicket-keeper') || [];
+  const allRounders = teamData.players?.filter(p => p.role === 'All-rounder') || [];
+  const bowlers = teamData.players?.filter(p => p.role === 'Bowler') || [];
+  
 
   return (
     <div className="min-h-screen" style={{
@@ -448,11 +449,12 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
           {activeTab === 'squad' && (
             <div className="space-y-16">
+              {/* Desired order: Batters, Wicket-keepers, All-rounders, Bowlers */}
               {[
-                { title: 'Batsmen', players: batsmen, Icon: BatsmanIcon },
-                { title: 'Bowlers', players: bowlers, Icon: BowlerIcon },
+                { title: 'Batters', players: batsmen, Icon: BatsmanIcon },
+                { title: 'Wicket-keepers', players: wicketkeepers, Icon: WicketKeeperIcon },
                 { title: 'All-rounders', players: allRounders, Icon: AllRounderIcon },
-                { title: 'Wicket-keepers', players: wicketkeepers, Icon: WicketKeeperIcon }
+                { title: 'Bowlers', players: bowlers, Icon: BowlerIcon }
               ].map((section, sectionIndex) => (
                 section.players.length > 0 && (
                   <div key={sectionIndex} className="animate-fade-in" style={{ animationDelay: `${sectionIndex * 100}ms` }}>

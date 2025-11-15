@@ -337,6 +337,12 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
     ? teamData.players || [] 
     : (teamData.players || []).filter(p => p.role.toLowerCase().includes(filterRole.toLowerCase()));
 
+  // Group players by role in the exact desired order and skip empty groups when rendering
+  const batsmen = filteredPlayers.filter(p => p.role === 'Batsman');
+  const wicketkeepers = filteredPlayers.filter(p => p.role === 'Wicket-keeper');
+  const allRounders = filteredPlayers.filter(p => p.role === 'All-rounder');
+  const bowlers = filteredPlayers.filter(p => p.role === 'Bowler');
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
       <Navbar />
@@ -538,26 +544,45 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
                 ))}
               </div>
 
-              {/* Player Cards Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredPlayers.map((player, index) => (
-                  <PlayerCard3D
-                    key={player.id}
-                    player={player}
-                    index={index}
-                    onClick={() => {
-                      setSelectedPlayer(player);
-                      setIsModalOpen(true);
-                    }}
-                  />
-                ))}
-              </div>
+              {/* Player Cards Sections in fixed order: Batters, Wicket-keepers, All-rounders, Bowlers */}
+              <div className="space-y-12">
+                {[
+                  { title: 'Batters', players: batsmen, icon: '🏏' },
+                  { title: 'Wicket-keepers', players: wicketkeepers, icon: '🧤' },
+                  { title: 'All-rounders', players: allRounders, icon: '🎯' },
+                  { title: 'Bowlers', players: bowlers, icon: '⚡' }
+                ].map((section, sIdx) => (
+                  section.players.length > 0 && (
+                    <div key={sIdx} className="animate-fade-in" style={{ animationDelay: `${sIdx * 80}ms` }}>
+                      <h3 className="text-3xl font-black mb-6 flex items-center gap-4 text-white">
+                        <span className="text-3xl">{section.icon}</span>
+                        {section.title}
+                        <span className="text-lg font-normal text-white/70">({section.players.length})</span>
+                      </h3>
 
-              {filteredPlayers.length === 0 && (
-                <div className="text-center py-20">
-                  <p className="text-2xl font-bold text-white">No players found in this category</p>
-                </div>
-              )}
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {section.players.map((player, index) => (
+                          <PlayerCard3D
+                            key={player.id}
+                            player={player}
+                            index={index}
+                            onClick={() => {
+                              setSelectedPlayer(player);
+                              setIsModalOpen(true);
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )
+                ))}
+
+                {filteredPlayers.length === 0 && (
+                  <div className="text-center py-20">
+                    <p className="text-2xl font-bold text-white">No players found in this category</p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
