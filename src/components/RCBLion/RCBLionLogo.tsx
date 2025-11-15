@@ -21,7 +21,9 @@ export default function RCBLionLogo({ className, minSize = 40, maxSize = 800 }: 
       const rect = el.getBoundingClientRect();
       const s = Math.min(rect.width, rect.height || rect.width);
       const clamped = Math.max(minSize, Math.min(maxSize, Math.round(s)));
-      setSize(clamped);
+      // Scale up to 0.95 of container to fit well within frame
+      const scaled = Math.round(clamped * 0.95);
+      setSize(scaled);
     };
 
     update();
@@ -30,7 +32,7 @@ export default function RCBLionLogo({ className, minSize = 40, maxSize = 800 }: 
     return () => ro.disconnect();
   }, [minSize, maxSize]);
 
-  // canvasSize is the full square pixels for the logo
+  // canvasSize scales to 95% of container for optimal fit
   const canvasSize = Math.max(28, size);
 
   return (
