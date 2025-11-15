@@ -1,73 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Redesigned RCB lion static SVG - compact, modern, optimized for UI -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 260" width="240" height="260" role="img" aria-label="RCB lion logo">
+<!-- Modern Premium RCB Logo - Geometric Shield Design with Integrated Text -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" role="img" aria-label="RCB logo">
   <defs>
-    <radialGradient id="bgGlow" cx="50%" cy="30%" r="70%">
-      <stop offset="0%" stop-color="#FFB3B3" stop-opacity="0.20"/>
-      <stop offset="60%" stop-color="#EC1C24" stop-opacity="0.08"/>
-      <stop offset="100%" stop-color="#EC1C24" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="rcbGradient" x1="0" x2="1">
+    <linearGradient id="rcbGradient" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#FF6B35" />
-      <stop offset="100%" stop-color="#EC1C24" />
+      <stop offset="50%" stop-color="#EC1C24" />
+      <stop offset="100%" stop-color="#CC1818" />
     </linearGradient>
-    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="6" result="blur"/>
+    <linearGradient id="accentGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFD24D" />
+      <stop offset="100%" stop-color="#FFA500" />
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur" />
       <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
+        <feMergeNode in="coloredBlur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
       </feMerge>
     </filter>
   </defs>
 
-  <!-- Background circle - crimson -->
-  <circle cx="120" cy="80" r="78" fill="url(#rcbGradient)" />
-  <circle cx="120" cy="80" r="96" fill="url(#bgGlow)" />
+  <!-- Subtle background glow -->
+  <circle cx="120" cy="120" r="125" fill="url(#rcbGradient)" opacity="0.06" />
 
-  <!-- Rotating subtle ring (static for SVG) -->
-  <g opacity="0.08">
-    <path d="M120 8 A72 72 0 1 1 119.9 8" fill="none" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-dasharray="6 8" />
+  <!-- Main shield/hexagon shape -->
+  <g id="shield">
+    <!-- Outer stroke/border -->
+    <path d="M 120 30 L 180 70 L 200 140 Q 200 180 120 210 Q 40 180 40 140 L 60 70 Z" 
+          fill="url(#rcbGradient)" opacity="0.95" filter="url(#softGlow)" />
+    
+    <!-- Inner highlight edge -->
+    <path d="M 120 42 L 172 78 L 190 140 Q 190 172 120 200 Q 50 172 50 140 L 68 78 Z" 
+          fill="none" stroke="#FFE5E5" stroke-width="2" opacity="0.4" />
   </g>
 
-  <!-- Lion face container -->
-  <g transform="translate(120,100)">
-    <!-- Outer mane silhouette -->
-    <path d="M0,-68 C-44,-62 -72,-36 -72,0 C-72,36 -44,62 0,72 C44,62 72,36 72,0 C72,-36 44,-62 0,-68 Z" fill="#C96A12" filter="url(#softGlow)" />
-
-    <!-- Inner mane layer -->
-    <path d="M0,-56 C-34,-50 -56,-30 -56,0 C-56,30 -34,50 0,58 C34,50 56,30 56,0 C56,-30 34,-50 0,-56 Z" fill="#F8C97E" />
-
-    <!-- Face -->
-    <circle cx="0" cy="-6" r="36" fill="#FDD08D" stroke="#CE9A5A" stroke-width="1.5" />
-
-    <!-- Angry eyes (slits) -->
-    <g fill="#111">
-      <path d="M-18,-18 q6 -6 18 -2" stroke="#111" stroke-width="4" stroke-linecap="round" fill="none" />
-      <path d="M18,-18 q-6 -6 -18 -2" stroke="#111" stroke-width="4" stroke-linecap="round" fill="none" />
-    </g>
-
-    <!-- Eyebrows -->
-    <g stroke="#6b3e26" stroke-width="5" stroke-linecap="round">
-      <path d="M-34,-30 L-12,-18" />
-      <path d="M34,-30 L12,-18" />
-    </g>
-
-    <!-- Nose -->
-    <path d="M -6 2 Q 0 12 6 2 Q 0 8 -6 2 Z" fill="#5A2F25" />
-
-    <!-- Snarl / mouth -->
-    <path d="M -18 20 Q 0 30 18 20" stroke="#5A2F25" stroke-width="3" stroke-linecap="round" fill="none" />
-    <path d="M -6 18 L -6 24 M 6 18 L 6 24" stroke="#5A2F25" stroke-width="2" stroke-linecap="round" />
-
-    <!-- Crown (clean, small) -->
-    <g transform="translate(-22,-64)">
-      <rect x="0" y="28" width="44" height="10" rx="2" fill="#FFD24D" />
-      <path d="M4 28 L12 0 L20 28 L28 6 L36 28" fill="#FFD24D" />
-      <circle cx="12" cy="0" r="3" fill="#D49B00" />
-      <circle cx="28" cy="6" r="2.2" fill="#D49B00" />
-    </g>
+  <!-- Accent chevron/arrow inside -->
+  <g id="accent" opacity="0.9">
+    <path d="M 100 110 L 120 130 L 140 110" 
+          fill="none" stroke="#FFD24D" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
   </g>
 
-  <!-- Bold RCB label centered -->
-  <text x="120" y="230" font-family="Inter, Arial, Helvetica, sans-serif" font-size="28" font-weight="800" text-anchor="middle" fill="#EC1C24" style="letter-spacing:1.5px">RCB</text>
+  <!-- RCB Text - bold, integrated -->
+  <text x="120" y="155" font-family="Inter, Arial, Helvetica, sans-serif" font-size="56" font-weight="900" 
+        text-anchor="middle" fill="white" filter="url(#softGlow)">RCB</text>
+
+  <!-- Decorative accent dots -->
+  <g id="accents" opacity="0.8">
+    <circle cx="65" cy="90" r="3" fill="#FFD24D" />
+    <circle cx="175" cy="90" r="3" fill="#FFD24D" />
+  </g>
+
+  <!-- Optional: subtle rotating frame (for animation reference) -->
+  <circle cx="120" cy="120" r="118" fill="none" stroke="#EC1C24" stroke-width="1.5" opacity="0.15" stroke-dasharray="8 4" />
 </svg>
+
