@@ -14,6 +14,7 @@ export default function Navbar() {
   const navItems = [
     { href: '/', label: 'Home', icon: null },
     { href: '/matches', label: 'Schedule', icon: 'cricket' as const },
+    { href: '/live-score', label: 'Live Score', icon: 'cricket' as const },
     { href: '/teams', label: 'Teams', icon: 'team' as const },
     { href: '/news', label: 'News', icon: 'news' as const },
     { href: '/predictions', label: 'Predictions', icon: 'target' as const },
