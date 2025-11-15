@@ -6,7 +6,7 @@ const nextConfig = {
     domains: ['localhost', 'example.com'], // add your domains as needed
   },
   output: 'export', // Static export for Cloudflare Pages
-  trailingSlash: true, // Creates folder/index.html structure instead of file.html
+  trailingSlash: false, // Do not force trailing slashes (avoid 308 redirects)
 };
 
 module.exports = nextConfig;

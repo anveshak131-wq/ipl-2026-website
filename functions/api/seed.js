@@ -3,8 +3,20 @@
  * Run this once to populate KV with mock data
  */
 
-export async function onRequestGet(context) {
-  const { env } = context;
+export const onRequest = async (context) => {
+  const { request, env } = context;
+
+  // Only allow GET and OPTIONS
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' },
+    });
+  }
+
+  if (request.method !== 'GET') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers: { 'Content-Type': 'application/json' } });
+  }
 
   try {
     // Mock teams data
@@ -210,7 +222,7 @@ export async function onRequestGet(context) {
       playersCount: mockPlayers.length
     }), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
     });
   } catch (error) {
     return new Response(JSON.stringify({
@@ -218,7 +230,7 @@ export async function onRequestGet(context) {
       message: error.message
     }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
     });
   }
-}
+};
