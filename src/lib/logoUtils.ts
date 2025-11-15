@@ -13,7 +13,7 @@
 export function getAnimatedLogoPath(teamId: string): string {
   const logoMap: { [key: string]: string } = {
     // Use Lottie JSON for RCB to allow richer animation
-    '1': 'rcb-lion.json',              // RCB (Lottie)
+    '1': 'rcb-lion.json',              // RCB (Lottie - Professional Premium Design)
     '2': 'mi_logo_animated.svg',       // MI
     '3': 'srh_logo_animated.svg',      // SRH
     '4': 'gt_logo_animated.svg',       // GT
