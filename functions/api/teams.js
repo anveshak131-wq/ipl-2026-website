@@ -20,7 +20,9 @@ const defaultTeams = [
     shortName: 'RCB',
     logo: '/logos/rcb_logo_new.svg',
     description: 'One of the most popular IPL teams known for their aggressive batting',
-    colors: { primary: '#EC1C24', secondary: '#000000' }
+    colors: { primary: '#EC1C24', secondary: '#000000' },
+    trophies: [],
+    homeGrounds: ['M. Chinnaswamy Stadium']
   },
   {
     id: '2',
@@ -28,7 +30,15 @@ const defaultTeams = [
     shortName: 'MI',
     logo: '/logos/mi_logo_new.svg',
     description: 'The most successful IPL team with 5 championship titles',
-    colors: { primary: '#004BA0', secondary: '#FFFFFF' }
+    colors: { primary: '#004BA0', secondary: '#FFFFFF' },
+    trophies: [
+      { year: 2013, name: 'IPL Champions' },
+      { year: 2015, name: 'IPL Champions' },
+      { year: 2017, name: 'IPL Champions' },
+      { year: 2019, name: 'IPL Champions' },
+      { year: 2023, name: 'IPL Champions' }
+    ],
+    homeGrounds: ['Wankhede Stadium']
   },
   {
     id: '3',
@@ -36,7 +46,11 @@ const defaultTeams = [
     shortName: 'SRH',
     logo: '/logos/srh_logo_new.svg',
     description: 'Known for their strong bowling attack and consistent performances',
-    colors: { primary: '#FF822A', secondary: '#000000' }
+    colors: { primary: '#FF822A', secondary: '#000000' },
+    trophies: [
+      { year: 2016, name: 'IPL Champions' }
+    ],
+    homeGrounds: ['Arun Jaitley Stadium', 'Rajiv Gandhi International Stadium']
   },
   {
     id: '4',
@@ -44,7 +58,11 @@ const defaultTeams = [
     shortName: 'GT',
     logo: '/logos/gt_logo_new.svg',
     description: 'The newest powerhouse team that won IPL in their debut season',
-    colors: { primary: '#1B2130', secondary: '#E15454' }
+    colors: { primary: '#1B2130', secondary: '#E15454' },
+    trophies: [
+      { year: 2022, name: 'IPL Champions' }
+    ],
+    homeGrounds: ['Arun Jaitley Stadium', 'Narendra Modi Stadium']
   },
   {
     id: '5',
@@ -52,7 +70,9 @@ const defaultTeams = [
     shortName: 'PBKS',
     logo: '/logos/kxip_logo_new.svg',
     description: 'Known for their explosive batting and never-say-die attitude',
-    colors: { primary: '#ED1D24', secondary: '#FBDD0B' }
+    colors: { primary: '#ED1D24', secondary: '#FBDD0B' },
+    trophies: [],
+    homeGrounds: ['PCA Stadium', 'Arun Jaitley Stadium']
   },
   {
     id: '6',
@@ -60,7 +80,9 @@ const defaultTeams = [
     shortName: 'DC',
     logo: '/logos/dc_logo_new.svg',
     description: 'Young and dynamic team with a perfect blend of experience and youth',
-    colors: { primary: '#0078BC', secondary: '#EF1B26' }
+    colors: { primary: '#0078BC', secondary: '#EF1B26' },
+    trophies: [],
+    homeGrounds: ['Arun Jaitley Stadium']
   },
   {
     id: '7',
@@ -68,7 +90,9 @@ const defaultTeams = [
     shortName: 'LSG',
     logo: '/logos/lsg_logo_new.svg',
     description: 'The newest franchise making waves with their balanced squad',
-    colors: { primary: '#9C2A2C', secondary: '#F7E17D' }
+    colors: { primary: '#9C2A2C', secondary: '#F7E17D' },
+    trophies: [],
+    homeGrounds: ['ARUN JAITLEY STADIUM', 'Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium']
   },
   {
     id: '8',
@@ -76,7 +100,11 @@ const defaultTeams = [
     shortName: 'RR',
     logo: '/logos/rr_logo_new.svg',
     description: 'The inaugural IPL champions known for nurturing young talent',
-    colors: { primary: '#EA1A85', secondary: '#004B8D' }
+    colors: { primary: '#EA1A85', secondary: '#004B8D' },
+    trophies: [
+      { year: 2008, name: 'IPL Champions' }
+    ],
+    homeGrounds: ['Arun Jaitley Stadium', 'Sawai Mansingh Stadium']
   },
   {
     id: '9',
@@ -84,7 +112,12 @@ const defaultTeams = [
     shortName: 'KKR',
     logo: '/logos/kkr_logo_new.svg',
     description: 'Two-time champions with a massive fan following',
-    colors: { primary: '#3A225D', secondary: '#B9975B' }
+    colors: { primary: '#3A225D', secondary: '#B9975B' },
+    trophies: [
+      { year: 2012, name: 'IPL Champions' },
+      { year: 2014, name: 'IPL Champions' }
+    ],
+    homeGrounds: ['Eden Gardens']
   },
   {
     id: '10',
@@ -92,7 +125,14 @@ const defaultTeams = [
     shortName: 'CSK',
     logo: '/logos/csk_logo_new.svg',
     description: 'The Yellow Army led by the legendary MS Dhoni',
-    colors: { primary: '#FFFF00', secondary: '#0081E8' }
+    colors: { primary: '#FFFF00', secondary: '#0081E8' },
+    trophies: [
+      { year: 2010, name: 'IPL Champions' },
+      { year: 2011, name: 'IPL Champions' },
+      { year: 2018, name: 'IPL Champions' },
+      { year: 2021, name: 'IPL Champions' }
+    ],
+    homeGrounds: ['M. A. Chidambaram Stadium']
   }
 ];
 
@@ -139,7 +179,7 @@ async function handlePostRequest(context) {
   
   try {
     const body = await request.json();
-    const { name, shortName, logo, description, colors } = body;
+    const { name, shortName, logo, description, colors, trophies, homeGrounds } = body;
     
     // Validate required fields
     if (!name || !shortName || !logo || !description) {
@@ -162,7 +202,9 @@ async function handlePostRequest(context) {
       shortName,
       logo,
       description,
-      colors: colors || { primary: '#6B46C1', secondary: '#FFD700' }
+      colors: colors || { primary: '#6B46C1', secondary: '#FFD700' },
+      trophies: trophies || [],
+      homeGrounds: homeGrounds || []
     };
     
     // Add to teams array
@@ -198,7 +240,7 @@ async function handlePutRequest(context) {
   
   try {
     const body = await request.json();
-    const { id, name, shortName, logo, description, colors } = body;
+    const { id, name, shortName, logo, description, colors, trophies, homeGrounds } = body;
     
     if (!id) {
       return new Response(JSON.stringify({ error: 'Team ID is required' }), {
@@ -226,7 +268,9 @@ async function handlePutRequest(context) {
       ...(shortName && { shortName }),
       ...(logo && { logo }),
       ...(description && { description }),
-      ...(colors && { colors })
+      ...(colors && { colors }),
+      ...(trophies !== undefined && { trophies }),
+      ...(homeGrounds !== undefined && { homeGrounds })
     };
     
     teams[teamIndex] = updatedTeam;
