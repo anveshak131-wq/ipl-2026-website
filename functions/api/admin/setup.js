@@ -6,7 +6,7 @@
  * Should be secured and disabled after first use.
  */
 
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 export async function onRequest(context) {
   const { request, env } = context;
