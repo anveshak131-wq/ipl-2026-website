@@ -22,13 +22,18 @@ export default function AdminRouter() {
       try {
         const token = localStorage.getItem('adminToken');
         if (!token) {
-          router.push('/admin');
+          // If already on the admin login page, don't push to the same route
+          if (pathname !== '/admin' && pathname !== '/admin/') {
+            router.push('/admin');
+          }
           return;
         }
         setIsAuthenticated(true);
       } catch (error) {
         // localStorage not available, redirect to login
-        router.push('/admin');
+        if (pathname !== '/admin' && pathname !== '/admin/') {
+          router.push('/admin');
+        }
       } finally {
         setIsLoading(false);
       }
