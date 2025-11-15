@@ -114,6 +114,16 @@ class AngryLion {
     // clear with transparent so background remains the body color
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
+    // Pulsing red background circle (behind everything)
+    const pulseScale = 1 + Math.sin(this.t * 0.06) * 0.06; // slow subtle pulse
+    ctx.save();
+    ctx.beginPath();
+    const bgRadius = 140 * pulseScale;
+    ctx.arc(cx, cy, bgRadius, 0, Math.PI * 2);
+    ctx.fillStyle = '#EC1C24';
+    ctx.fill();
+    ctx.restore();
+
     // Glow
     this.drawGlow(cx, cy);
 
