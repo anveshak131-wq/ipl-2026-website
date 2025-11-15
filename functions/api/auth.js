@@ -12,13 +12,31 @@ const generateToken = () => crypto.randomBytes(32).toString('hex');
 
 export const onRequest = async (context) => {
   const { request, env } = context;
-  const { pathname, searchParams } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
   const method = request.method;
 
   try {
+    // Parse request to determine action
+    let action = searchParams.get('action') || 'signin'; // default action
+    let body = {};
+    
+    if (method === 'POST' || method === 'PUT') {
+      try {
+        body = await request.json();
+        // Infer action from presence of required fields
+        if (body.name && body.email && body.password) {
+          action = 'signup';
+        } else if (body.email && body.password && !body.name) {
+          action = 'signin';
+        }
+      } catch (e) {
+        // Body parse error
+      }
+    }
+
     // Sign Up
-    if (pathname === '/api/auth/signup' && method === 'POST') {
-      const { email, password, name } = await request.json();
+    if (action === 'signup' && method === 'POST') {
+      const { email, password, name } = body;
 
       if (!email || !password || !name) {
         return new Response(
@@ -84,8 +102,8 @@ export const onRequest = async (context) => {
     }
 
     // Sign In
-    if (pathname === '/api/auth/signin' && method === 'POST') {
-      const { email, password } = await request.json();
+    if (action === 'signin' && method === 'POST') {
+      const { email, password } = body;
 
       if (!email || !password) {
         return new Response(
@@ -152,7 +170,7 @@ export const onRequest = async (context) => {
     }
 
     // Verify Token
-    if (pathname === '/api/auth/verify' && method === 'GET') {
+    if (action === 'verify' && method === 'GET') {
       const token = searchParams.get('token');
       if (!token) {
         return new Response(
@@ -189,8 +207,8 @@ export const onRequest = async (context) => {
     }
 
     // Sign Out (revoke token)
-    if (pathname === '/api/auth/signout' && method === 'POST') {
-      const { token } = await request.json();
+    if (action === 'signout' && method === 'POST') {
+      const { token } = body;
       if (token) {
         await env.SPORTS_KV.delete(`token:${token}`);
       }

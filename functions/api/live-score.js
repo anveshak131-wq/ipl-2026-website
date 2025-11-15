@@ -1,11 +1,11 @@
 export const onRequest = async (context) => {
   const { request, env } = context;
-  const { pathname, searchParams } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
   const method = request.method;
 
   try {
-    // Get current match live score
-    if (pathname === '/api/live-score' && method === 'GET') {
+    // GET current match live score (public)
+    if (method === 'GET') {
       const matchId = searchParams.get('matchId') || 'current';
       const liveScore = await env.SPORTS_KV.get(`live:${matchId}`);
 
@@ -31,8 +31,8 @@ export const onRequest = async (context) => {
       });
     }
 
-    // Update live score (admin only)
-    if (pathname === '/api/live-score' && method === 'POST') {
+    // POST update live score (admin only)
+    if (method === 'POST') {
       const token = request.headers.get('Authorization')?.replace('Bearer ', '');
       if (!token) {
         return new Response(
