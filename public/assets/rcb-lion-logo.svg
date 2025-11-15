@@ -1,63 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Modern Premium RCB Logo - Geometric Shield Design with Integrated Text -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" role="img" aria-label="RCB logo">
+<!-- Premium RCB Logo - Clean Geometric Shield Design -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 280" width="240" height="280" role="img" aria-label="RCB logo">
   <defs>
-    <linearGradient id="rcbGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FF6B35" />
-      <stop offset="50%" stop-color="#EC1C24" />
-      <stop offset="100%" stop-color="#CC1818" />
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF5722" />
+      <stop offset="40%" stop-color="#EC1C24" />
+      <stop offset="80%" stop-color="#D91F1F" />
+      <stop offset="100%" stop-color="#A31820" />
     </linearGradient>
-    <linearGradient id="accentGradient" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#FFD24D" />
-      <stop offset="100%" stop-color="#FFA500" />
-    </linearGradient>
-    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="8" result="coloredBlur" />
-      <feMerge>
-        <feMergeNode in="coloredBlur" />
-        <feMergeNode in="SourceGraphic" />
-      </feMerge>
-    </filter>
-    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="3" result="blur" />
-      <feMerge>
-        <feMergeNode in="blur" />
-        <feMergeNode in="SourceGraphic" />
-      </feMerge>
+    <filter id="shieldShadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.2"/>
     </filter>
   </defs>
-
-  <!-- Subtle background glow -->
-  <circle cx="120" cy="120" r="125" fill="url(#rcbGradient)" opacity="0.06" />
-
-  <!-- Main shield/hexagon shape -->
-  <g id="shield">
-    <!-- Outer stroke/border -->
-    <path d="M 120 30 L 180 70 L 200 140 Q 200 180 120 210 Q 40 180 40 140 L 60 70 Z" 
-          fill="url(#rcbGradient)" opacity="0.95" filter="url(#softGlow)" />
-    
-    <!-- Inner highlight edge -->
-    <path d="M 120 42 L 172 78 L 190 140 Q 190 172 120 200 Q 50 172 50 140 L 68 78 Z" 
-          fill="none" stroke="#FFE5E5" stroke-width="2" opacity="0.4" />
-  </g>
-
-  <!-- Accent chevron/arrow inside -->
-  <g id="accent" opacity="0.9">
-    <path d="M 100 110 L 120 130 L 140 110" 
-          fill="none" stroke="#FFD24D" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
-  </g>
-
-  <!-- RCB Text - bold, integrated -->
-  <text x="120" y="155" font-family="Inter, Arial, Helvetica, sans-serif" font-size="56" font-weight="900" 
-        text-anchor="middle" fill="white" filter="url(#softGlow)">RCB</text>
-
-  <!-- Decorative accent dots -->
-  <g id="accents" opacity="0.8">
-    <circle cx="65" cy="90" r="3" fill="#FFD24D" />
-    <circle cx="175" cy="90" r="3" fill="#FFD24D" />
-  </g>
-
-  <!-- Optional: subtle rotating frame (for animation reference) -->
-  <circle cx="120" cy="120" r="118" fill="none" stroke="#EC1C24" stroke-width="1.5" opacity="0.15" stroke-dasharray="8 4" />
+  
+  <!-- Shield body -->
+  <path d="M 120,20 L 170,50 L 180,140 Q 180,160 120,170 Q 60,160 60,140 L 70,50 Z" 
+        fill="url(#shieldGrad)" stroke="rgba(0,0,0,0.15)" stroke-width="1.5" filter="url(#shieldShadow)"/>
+  
+  <!-- Shield highlight -->
+  <path d="M 120,20 L 170,50 L 180,140 Q 180,160 120,170 Q 60,160 60,140 L 70,50 Z" 
+        fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+  
+  <!-- Center vertical stripe -->
+  <line x1="120" y1="30" x2="120" y2="165" stroke="#FFD24D" stroke-width="12" stroke-linecap="round" opacity="0.65"/>
+  
+  <!-- Top V accent -->
+  <path d="M 90,60 L 120,85 L 150,60" stroke="#FFE66D" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"/>
+  
+  <!-- Bottom three dots -->
+  <circle cx="85" cy="130" r="5" fill="#FFD24D" opacity="0.5"/>
+  <circle cx="120" cy="145" r="5" fill="#FFD24D" opacity="0.55"/>
+  <circle cx="155" cy="130" r="5" fill="#FFD24D" opacity="0.5"/>
+  
+  <!-- Outer dashed ring -->
+  <circle cx="120" cy="95" r="75" fill="none" stroke="#FFD24D" stroke-width="1" stroke-dasharray="4,2" opacity="0.35"/>
 </svg>
 

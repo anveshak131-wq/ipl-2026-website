@@ -31,33 +31,39 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
       ctx.translate(cx, cy);
       ctx.rotate(rotation);
 
-      // Gradient
-      const grad = ctx.createLinearGradient(-s / 2, -s / 2, s / 2, s / 2);
-      grad.addColorStop(0, '#FF6B35');
-      grad.addColorStop(0.5, '#EC1C24');
-      grad.addColorStop(1, '#CC1818');
+      // Premium gradient shield
+      const gradMain = ctx.createLinearGradient(-s / 2.2, -s / 2.2, s / 2.2, s / 2.2);
+      gradMain.addColorStop(0, '#FF5722');
+      gradMain.addColorStop(0.4, '#EC1C24');
+      gradMain.addColorStop(0.8, '#D91F1F');
+      gradMain.addColorStop(1, '#A31820');
 
-      // Shield path
+      // Shield body - refined pentagonal shape
       const top = -s / 2;
-      const bottom = s / 2;
-      const left = -s / 2.5;
-      const right = s / 2.5;
+      const bottom = s / 2.2;
+      const left = -s / 2.4;
+      const right = s / 2.4;
 
       ctx.beginPath();
       ctx.moveTo(0, top);
-      ctx.lineTo(right, -s / 4.5);
-      ctx.lineTo(right * 1.1, bottom / 2);
-      ctx.quadraticCurveTo(0, bottom + s / 4, -right * 1.1, bottom / 2);
-      ctx.lineTo(left, -s / 4.5);
+      ctx.lineTo(right, -s / 5);
+      ctx.lineTo(right * 1.05, bottom * 0.7);
+      ctx.bezierCurveTo(right * 0.7, bottom + s * 0.08, 0, bottom + s * 0.12, -right * 0.7, bottom + s * 0.08);
+      ctx.lineTo(-right * 1.05, bottom * 0.7);
+      ctx.lineTo(left, -s / 5);
       ctx.closePath();
 
-      ctx.fillStyle = grad;
-      ctx.globalAlpha = 0.95;
+      ctx.fillStyle = gradMain;
       ctx.fill();
 
-      // Inner highlight
-      ctx.strokeStyle = 'rgba(255, 229, 229, 0.4)';
-      ctx.lineWidth = 2;
+      // Inner shadow for depth
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Highlight edge
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+      ctx.lineWidth = 1;
       ctx.stroke();
 
       ctx.restore();
@@ -98,78 +104,62 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
       ctx.restore();
 
       // Main rotating shield
-      const shieldRotation = t * 0.15;
-      const shieldSize = Math.min(w, h) * 0.28;
+      const shieldRotation = t * 0.12;
+      const shieldSize = Math.min(w, h) * 0.32;
       drawShield(ctx, cx, cy, shieldSize, 1, shieldRotation);
 
-      // Accent chevron (animated opacity pulse)
+      // Vertical accent line (center stripe with glow)
       ctx.save();
       ctx.beginPath();
-      const chevronY = cy - shieldSize * 0.15;
-      const chevronW = shieldSize * 0.4;
-      ctx.moveTo(cx - chevronW, chevronY);
-      ctx.lineTo(cx, chevronY + chevronW * 0.6);
-      ctx.lineTo(cx + chevronW, chevronY);
+      ctx.moveTo(cx, cy - shieldSize * 0.5);
+      ctx.lineTo(cx, cy + shieldSize * 0.5);
       ctx.strokeStyle = '#FFD24D';
-      ctx.lineWidth = Math.max(3, shieldSize * 0.12);
+      ctx.lineWidth = shieldSize * 0.08;
+      ctx.globalAlpha = 0.6 + Math.sin(t * 0.8) * 0.2;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+      ctx.restore();
+
+      // Top accent - animated V shape
+      ctx.save();
+      ctx.beginPath();
+      const accentTop = cy - shieldSize * 0.35;
+      const accentW = shieldSize * 0.25;
+      ctx.moveTo(cx - accentW, accentTop);
+      ctx.lineTo(cx, accentTop + accentW * 0.8);
+      ctx.lineTo(cx + accentW, accentTop);
+      ctx.strokeStyle = '#FFE66D';
+      ctx.lineWidth = shieldSize * 0.06;
+      ctx.globalAlpha = 0.5 + Math.sin(t * 1.5) * 0.35;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
-      ctx.globalAlpha = 0.7 + Math.sin(t * 1.2) * 0.2;
       ctx.stroke();
       ctx.restore();
 
-      // RCB Text - animated scale
-      ctx.save();
-      const textScale = 0.9 + Math.sin(t * 0.6) * 0.08;
-      ctx.translate(cx, cy + shieldSize * 0.1);
-      ctx.scale(textScale, textScale);
-      ctx.font = `900 ${shieldSize * 1.4}px Inter, Arial, Helvetica, sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = '#FFFFFF';
-      ctx.globalAlpha = 0.95;
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-      ctx.shadowBlur = 6;
-      ctx.fillText('RCB', 0, 0);
-      ctx.restore();
-
-      // Accent dots (orbiting)
+      // Bottom accent - three dots in arc
       ctx.save();
       ctx.fillStyle = '#FFD24D';
-      for (let i = 0; i < 2; i++) {
-        const a = shieldRotation + (i * Math.PI);
-        const r = shieldSize * 0.75;
-        const dotX = cx + Math.cos(a) * r;
-        const dotY = cy + Math.sin(a) * r;
+      for (let i = 0; i < 3; i++) {
+        const angle = Math.PI * 0.3 + (i * Math.PI * 0.2);
+        const dotR = shieldSize * 0.3;
+        const dotX = cx + Math.cos(angle - Math.PI / 2) * dotR;
+        const dotY = cy + shieldSize * 0.25 + Math.sin(angle - Math.PI / 2) * dotR * 0.5;
         ctx.beginPath();
-        ctx.arc(dotX, dotY, shieldSize * 0.08, 0, Math.PI * 2);
+        ctx.globalAlpha = 0.4 + (Math.sin(t * 1.2 + i) * 0.35);
+        ctx.arc(dotX, dotY, shieldSize * 0.04, 0, Math.PI * 2);
         ctx.fill();
       }
       ctx.restore();
 
-      // Rotating frame (subtle reference circle)
+      // Subtle pulsing outer ring
       ctx.save();
-      ctx.strokeStyle = `rgba(236, 28, 36, ${0.15 * (1 + Math.sin(t * 0.4) * 0.5)})`;
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([8, 4]);
+      const ringPulse = 1 + Math.sin(t * 0.6) * 0.06;
+      ctx.strokeStyle = `rgba(255, 210, 77, ${0.3 * ringPulse})`;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 2]);
       ctx.beginPath();
-      ctx.arc(cx, cy, shieldSize * 1.15, 0, Math.PI * 2);
+      ctx.arc(cx, cy, shieldSize * 1.25 * ringPulse, 0, Math.PI * 2);
       ctx.stroke();
-      ctx.restore();
-
-      // Corner sparkles
-      ctx.save();
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-      for (let i = 0; i < 4; i++) {
-        const angle = (i / 4) * Math.PI * 2 + t * 0.3 * (i % 2 ? 1 : -1);
-        const r = shieldSize * 0.95;
-        const sx = cx + Math.cos(angle) * r;
-        const sy = cy + Math.sin(angle) * r;
-        const sparkleSize = shieldSize * (0.04 + (i % 2) * 0.02);
-        ctx.beginPath();
-        ctx.arc(sx, sy, sparkleSize, 0, Math.PI * 2);
-        ctx.fill();
-      }
       ctx.restore();
 
       ctx.restore();
