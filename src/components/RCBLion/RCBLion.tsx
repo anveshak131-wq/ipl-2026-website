@@ -12,6 +12,7 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
   const tRef = useRef(0);
+  const entranceCompleteRef = useRef(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -29,9 +30,22 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
       const h = height;
       tRef.current += 1;
       const t = tRef.current / 10;
+      
+      // Entrance animation: scale + pop (first 0.6s / 40 frames)
+      let entranceScale = 1;
+      if (tRef.current <= 40) {
+        entranceScale = Math.min(1, (tRef.current / 40) * 1.2);
+        if (tRef.current === 40) entranceCompleteRef.current = true;
+      }
 
       // Clear
       ctx.clearRect(0, 0, w, h);
+
+      // Apply entrance scale to entire canvas
+      ctx.save();
+      ctx.translate(w / 2, h / 2);
+      ctx.scale(entranceScale, entranceScale);
+      ctx.translate(-w / 2, -h / 2);
 
       // Center
       const cx = w / 2;
@@ -197,6 +211,9 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
         ctx.arc(px, py, Math.max(1, faceR * 0.04), 0, Math.PI * 2);
         ctx.fill();
       }
+      ctx.restore();
+
+      // Restore entrance transform
       ctx.restore();
 
       rafRef.current = requestAnimationFrame(draw);
