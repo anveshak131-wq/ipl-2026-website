@@ -651,7 +651,7 @@ function StatsTab({ teamData, primaryColor, secondaryColor, batsmen, bowlers, al
 // About Tab
 function AboutTab({ teamData, primaryColor, secondaryColor }: any) {
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto space-y-8">
       <div className="rounded-3xl backdrop-blur-xl p-12 border shadow-xl animate-fade-in"
            style={{
              background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
@@ -705,6 +705,57 @@ function AboutTab({ teamData, primaryColor, secondaryColor }: any) {
           </div>
         </div>
       </div>
+
+      {/* Trophy Information */}
+      {teamData.trophies && teamData.trophies.length > 0 && (
+        <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl animate-fade-in"
+             style={{
+               background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+               borderColor: primaryColor.medium,
+               boxShadow: `0 10px 30px ${primaryColor.glow}15`
+             }}>
+          <div className="flex items-center gap-3 mb-8">
+            <span className="text-4xl">🏆</span>
+            <h4 className="text-2xl font-black" style={{ color: primaryColor.textOnLight }}>Trophy Cabinet</h4>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {teamData.trophies.map((trophy: any, idx: number) => (
+              <div key={idx} className="group p-6 rounded-2xl bg-white/5 hover:bg-white/10 transition-all border border-white/5 hover:border-white/20">
+                <div className="flex items-center gap-4">
+                  <div className="text-5xl">🥇</div>
+                  <div className="flex-1">
+                    <p className="text-3xl font-black" style={{ color: primaryColor.text }}>{trophy.year}</p>
+                    <p className="text-sm font-semibold mt-1" style={{ color: primaryColor.textOnLight }}>{trophy.name}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Home Grounds Information */}
+      {teamData.homeGrounds && teamData.homeGrounds.length > 0 && (
+        <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl animate-fade-in"
+             style={{
+               background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+               borderColor: primaryColor.medium,
+               boxShadow: `0 10px 30px ${primaryColor.glow}15`
+             }}>
+          <div className="flex items-center gap-3 mb-8">
+            <span className="text-4xl">🏟️</span>
+            <h4 className="text-2xl font-black" style={{ color: primaryColor.textOnLight }}>Home Grounds</h4>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {teamData.homeGrounds.map((ground: string, idx: number) => (
+              <div key={idx} className="group p-6 rounded-2xl bg-white/5 hover:bg-white/10 transition-all border border-white/5 hover:border-white/20 hover:scale-105 transform">
+                <p className="font-bold text-lg" style={{ color: primaryColor.textOnLight }}>{ground}</p>
+                <p className="text-xs mt-2" style={{ color: primaryColor.textOnLight }}>Official Home Ground</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -664,53 +664,80 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
 
           {activeTab === 'achievements' && (
             <div className="max-w-4xl mx-auto space-y-12 animate-fade-in">
-              {/* Trophy Cabinet */}
-              <div className="rounded-3xl backdrop-blur-xl p-12 border border-white/10 text-center"
-                   style={{ background: 'linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))' }}>
-                <h3 className="text-4xl font-black mb-8 flex items-center justify-center gap-3 text-white">
-                  <span>🏆</span>
-                  Trophy Cabinet
-                  <span>🏆</span>
-                </h3>
-                
-                <div className="flex justify-center gap-8 mb-8">
-                  {[
-                    { year: '2009', position: 'Runner-up' },
-                    { year: '2011', position: 'Runner-up' },
-                    { year: '2016', position: 'Runner-up' }
-                  ].map((trophy, i) => (
-                    <div key={i} className="group">
-                      <div className="w-32 h-32 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center text-6xl transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-2xl">
-                        🥈
-                      </div>
-                      <p className="text-2xl font-black" style={{ color: '#DAA520' }}>{trophy.year}</p>
-                      <p className="text-sm mt-1 text-white">{trophy.position}</p>
+              {/* Trophy Cabinet - from Admin Data */}
+              {teamData.trophies && teamData.trophies.length > 0 && (
+                <div className="rounded-3xl backdrop-blur-xl p-12 border border-white/10"
+                     style={{ background: 'linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))' }}>
+                  <h3 className="text-4xl font-black mb-8 flex items-center justify-center gap-3 text-white">
+                    <span>🏆</span>
+                    Trophy Cabinet
+                    <span>🏆</span>
+                  </h3>
+                  
+                  {teamData.trophies.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                      {teamData.trophies.map((trophy: any, i: number) => (
+                        <div key={i} className="group text-center">
+                          <div className="w-32 h-32 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-yellow-600 to-yellow-900 flex items-center justify-center text-6xl transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-2xl">
+                            🥇
+                          </div>
+                          <p className="text-2xl font-black" style={{ color: '#DAA520' }}>{trophy.year}</p>
+                          <p className="text-sm mt-1 text-white">{trophy.name}</p>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  ) : (
+                    <p className="text-center text-gray-400 py-8">No trophies recorded yet</p>
+                  )}
 
-                <div className="py-8 border-t border-white/10">
-                  <p className="text-3xl font-black text-transparent bg-gradient-to-r from-red-500 to-yellow-500 bg-clip-text animate-pulse">
-                    "Ee Sala Cup Namde" 🔥
-                  </p>
-                  <p className="mt-2 italic text-white">(This Year, The Cup is Ours)</p>
+                  <div className="py-8 border-t border-white/10">
+                    <p className="text-3xl font-black text-transparent bg-gradient-to-r from-red-500 to-yellow-500 bg-clip-text animate-pulse">
+                      "Ee Sala Cup Namde" 🔥
+                    </p>
+                    <p className="mt-2 italic text-white">(This Year, The Cup is Ours)</p>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {/* Achievements */}
+              {/* Home Grounds - from Admin Data */}
+              {teamData.homeGrounds && teamData.homeGrounds.length > 0 && (
+                <div className="rounded-3xl backdrop-blur-xl p-12 border border-white/10"
+                     style={{ background: 'linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))' }}>
+                  <h3 className="text-4xl font-black mb-8 flex items-center gap-3 text-white">
+                    <span>🏟️</span>
+                    Home Grounds
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {teamData.homeGrounds.map((ground: string, i: number) => (
+                      <div key={i} className="group p-6 rounded-2xl bg-white/5 hover:bg-white/10 transition-all border border-white/5 hover:border-white/20 hover:scale-105 transform">
+                        <div className="flex items-start gap-4">
+                          <div className="text-5xl">🏟️</div>
+                          <div className="flex-1">
+                            <p className="text-xl font-bold text-white">{ground}</p>
+                            <p className="text-xs mt-2 text-gray-400">Official Home Ground</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Static Achievements Section */}
               <div className="rounded-3xl backdrop-blur-xl p-12 border border-white/10"
                    style={{ background: 'linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))' }}>
                 <h3 className="text-3xl font-black mb-8 flex items-center gap-3 text-white">
                   <span>⭐</span>
-                  Major Achievements
+                  Legacy Highlights
                 </h3>
                 <div className="space-y-4">
                   {[
-                    { icon: '🥈', text: 'IPL Finalists (2009, 2011, 2016)', color: 'from-gray-400 to-gray-600' },
-                    { icon: '🧡', text: '5x Orange Cap Winners (Most Runs)', color: 'from-orange-500 to-red-500' },
-                    { icon: '💜', text: '2x Purple Cap Winners (Most Wickets)', color: 'from-purple-500 to-pink-500' },
-                    { icon: '🚀', text: 'Most Sixes in IPL History', color: 'from-red-500 to-yellow-500' },
-                    { icon: '❤️', text: 'Most Passionate Fanbase', color: 'from-red-600 to-pink-600' }
+                    { icon: '🏏', text: 'Home for iconic cricket moments and legendary performances', color: 'from-red-500 to-yellow-500' },
+                    { icon: '🌟', text: 'Nurturing talent and creating future cricket champions', color: 'from-yellow-500 to-orange-500' },
+                    { icon: '❤️', text: 'Unwavering support from millions of passionate fans', color: 'from-red-600 to-pink-600' },
+                    { icon: '🔥', text: 'Known for bold, fearless cricket and never-give-up spirit', color: 'from-orange-500 to-red-500' },
+                    { icon: '👑', text: 'Consistently competitive in the IPL tournament', color: 'from-purple-500 to-pink-500' }
                   ].map((achievement, i) => (
                     <div key={i} className="group flex items-center gap-4 p-6 rounded-2xl bg-white/5 hover:bg-white/10 transition-all hover:scale-105 cursor-pointer">
                       <div className={`text-5xl transform group-hover:scale-125 group-hover:rotate-12 transition-all duration-300`}>

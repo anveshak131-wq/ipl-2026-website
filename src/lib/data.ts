@@ -12,7 +12,9 @@ export const mockTeams: Team[] = [
     logo: '/logos/rcb_logo_new.svg',
     description: 'One of the most popular IPL teams known for their aggressive batting',
     colors: { primary: '#EC1C24', secondary: '#000000' },
-    players: []
+    players: [],
+    trophies: [],
+    homeGrounds: ['M. Chinnaswamy Stadium']
   },
   {
     id: '2',
@@ -21,7 +23,15 @@ export const mockTeams: Team[] = [
     logo: '/logos/mi_logo_new.svg',
     description: 'The most successful IPL team with 5 championship titles',
     colors: { primary: '#004BA0', secondary: '#FFFFFF' },
-    players: []
+    players: [],
+    trophies: [
+      { year: 2013, name: 'IPL Champions' },
+      { year: 2015, name: 'IPL Champions' },
+      { year: 2017, name: 'IPL Champions' },
+      { year: 2019, name: 'IPL Champions' },
+      { year: 2023, name: 'IPL Champions' }
+    ],
+    homeGrounds: ['Wankhede Stadium']
   },
   {
     id: '3',
@@ -30,7 +40,11 @@ export const mockTeams: Team[] = [
     logo: '/logos/srh_logo_new.svg',
     description: 'Known for their strong bowling attack and consistent performances',
     colors: { primary: '#FF822A', secondary: '#000000' },
-    players: []
+    players: [],
+    trophies: [
+      { year: 2016, name: 'IPL Champions' }
+    ],
+    homeGrounds: ['Arun Jaitley Stadium', 'Rajiv Gandhi International Stadium']
   },
   {
     id: '4',
@@ -39,7 +53,11 @@ export const mockTeams: Team[] = [
     logo: '/logos/gt_logo_new.svg',
     description: 'The newest powerhouse team that won IPL in their debut season',
     colors: { primary: '#1B2130', secondary: '#E15454' },
-    players: []
+    players: [],
+    trophies: [
+      { year: 2022, name: 'IPL Champions' }
+    ],
+    homeGrounds: ['Arun Jaitley Stadium', 'Narendra Modi Stadium']
   },
   {
     id: '5',
@@ -48,7 +66,9 @@ export const mockTeams: Team[] = [
     logo: '/logos/kxip_logo_new.svg',
     description: 'Known for their explosive batting and never-say-die attitude',
     colors: { primary: '#ED1D24', secondary: '#FBDD0B' },
-    players: []
+    players: [],
+    trophies: [],
+    homeGrounds: ['PCA Stadium', 'Arun Jaitley Stadium']
   },
   {
     id: '6',
@@ -57,7 +77,9 @@ export const mockTeams: Team[] = [
     logo: '/logos/dc_logo_new.svg',
     description: 'Young and dynamic team with a perfect blend of experience and youth',
     colors: { primary: '#0078BC', secondary: '#EF1B26' },
-    players: []
+    players: [],
+    trophies: [],
+    homeGrounds: ['Arun Jaitley Stadium']
   },
   {
     id: '7',
@@ -66,7 +88,9 @@ export const mockTeams: Team[] = [
     logo: '/logos/lsg_logo_new.svg',
     description: 'The newest franchise making waves with their balanced squad',
     colors: { primary: '#9C2A2C', secondary: '#F7E17D' },
-    players: []
+    players: [],
+    trophies: [],
+    homeGrounds: ['ARUN JAITLEY STADIUM', 'Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium']
   },
   {
     id: '8',
@@ -75,7 +99,11 @@ export const mockTeams: Team[] = [
     logo: '/logos/rr_logo_new.svg',
     description: 'The inaugural IPL champions known for nurturing young talent',
     colors: { primary: '#EA1A85', secondary: '#004B8D' },
-    players: []
+    players: [],
+    trophies: [
+      { year: 2008, name: 'IPL Champions' }
+    ],
+    homeGrounds: ['Arun Jaitley Stadium', 'Sawai Mansingh Stadium']
   },
   {
     id: '9',
@@ -84,7 +112,12 @@ export const mockTeams: Team[] = [
     logo: '/logos/kkr_logo_new.svg',
     description: 'Two-time champions with a massive fan following',
     colors: { primary: '#3A225D', secondary: '#B9975B' },
-    players: []
+    players: [],
+    trophies: [
+      { year: 2012, name: 'IPL Champions' },
+      { year: 2014, name: 'IPL Champions' }
+    ],
+    homeGrounds: ['Eden Gardens']
   },
   {
     id: '10',
@@ -93,7 +126,14 @@ export const mockTeams: Team[] = [
     logo: '/logos/csk_logo_new.svg',
     description: 'The Yellow Army led by the legendary MS Dhoni',
     colors: { primary: '#FFFF00', secondary: '#0081E8' },
-    players: []
+    players: [],
+    trophies: [
+      { year: 2010, name: 'IPL Champions' },
+      { year: 2011, name: 'IPL Champions' },
+      { year: 2018, name: 'IPL Champions' },
+      { year: 2021, name: 'IPL Champions' }
+    ],
+    homeGrounds: ['M. A. Chidambaram Stadium']
   }
 ];
 

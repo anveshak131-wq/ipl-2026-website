@@ -75,7 +75,9 @@ export default function AdminTeams() {
         colors: {
             primary: '#6B46C1',
             secondary: '#FFD700'
-        }
+        },
+        trophies: [] as { year: number; name: string }[],
+        homeGrounds: [] as string[]
     });
 
     useEffect(() => {
@@ -144,7 +146,9 @@ export default function AdminTeams() {
             colors: {
                 primary: '#6B46C1',
                 secondary: '#FFD700'
-            }
+            },
+            trophies: [],
+            homeGrounds: []
         });
         setShowSlideOver(true);
         setError(null);
@@ -157,7 +161,9 @@ export default function AdminTeams() {
             shortName: team.shortName,
             logo: team.logo,
             description: team.description,
-            colors: team.colors
+            colors: team.colors,
+            trophies: team.trophies || [],
+            homeGrounds: team.homeGrounds || []
         });
         setShowSlideOver(true);
         setSelectedTeams(new Set());
@@ -690,6 +696,104 @@ export default function AdminTeams() {
                                             >
                                                 {formData.shortName || 'TEAM'}
                                             </div>
+                                        </div>
+
+                                        <div className="border-t border-white/10 pt-6">
+                                            <h3 className="text-lg font-semibold text-white mb-4">Trophy Information</h3>
+                                            <div className="space-y-3 mb-4">
+                                                {formData.trophies.map((trophy, index) => (
+                                                    <div key={index} className="flex items-center gap-2 bg-white/5 rounded-lg p-3 border border-white/10">
+                                                        <div className="flex-1 flex items-center gap-2">
+                                                            <input
+                                                                type="number"
+                                                                value={trophy.year}
+                                                                onChange={(e) => {
+                                                                    const newTrophies = [...formData.trophies];
+                                                                    newTrophies[index].year = parseInt(e.target.value) || 0;
+                                                                    setFormData({ ...formData, trophies: newTrophies });
+                                                                }}
+                                                                className="w-24 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-500/50"
+                                                                placeholder="2023"
+                                                                min="2007"
+                                                                max={new Date().getFullYear()}
+                                                            />
+                                                            <input
+                                                                type="text"
+                                                                value={trophy.name}
+                                                                onChange={(e) => {
+                                                                    const newTrophies = [...formData.trophies];
+                                                                    newTrophies[index].name = e.target.value;
+                                                                    setFormData({ ...formData, trophies: newTrophies });
+                                                                }}
+                                                                className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-500/50"
+                                                                placeholder="Trophy name"
+                                                            />
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setFormData({ ...formData, trophies: formData.trophies.filter((_, i) => i !== index) });
+                                                            }}
+                                                            className="p-2 hover:bg-red-500/20 rounded-lg text-red-400 transition-all"
+                                                        >
+                                                            <XMarkIcon className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setFormData({ ...formData, trophies: [...formData.trophies, { year: new Date().getFullYear(), name: '' }] });
+                                                }}
+                                                className="w-full px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white text-sm font-medium transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <PlusIcon className="w-4 h-4" />
+                                                Add Trophy
+                                            </button>
+                                        </div>
+
+                                        <div className="border-t border-white/10 pt-6">
+                                            <h3 className="text-lg font-semibold text-white mb-4">Home Grounds</h3>
+                                            <div className="space-y-3 mb-4">
+                                                {formData.homeGrounds.map((ground, index) => (
+                                                    <div key={index} className="flex items-center gap-2 bg-white/5 rounded-lg p-3 border border-white/10">
+                                                        <input
+                                                            type="text"
+                                                            value={ground}
+                                                            onChange={(e) => {
+                                                                const newGrounds = [...formData.homeGrounds];
+                                                                newGrounds[index] = e.target.value;
+                                                                setFormData({ ...formData, homeGrounds: newGrounds });
+                                                            }}
+                                                            className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-500/50"
+                                                            placeholder="Home ground name"
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                setFormData({ ...formData, homeGrounds: formData.homeGrounds.filter((_, i) => i !== index) });
+                                                            }}
+                                                            className="p-2 hover:bg-red-500/20 rounded-lg text-red-400 transition-all"
+                                                        >
+                                                            <XMarkIcon className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    if (formData.homeGrounds.length < 3) {
+                                                        setFormData({ ...formData, homeGrounds: [...formData.homeGrounds, ''] });
+                                                    }
+                                                }}
+                                                disabled={formData.homeGrounds.length >= 3}
+                                                className="w-full px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white text-sm font-medium transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                <PlusIcon className="w-4 h-4" />
+                                                Add Home Ground (Max 3)
+                                            </button>
                                         </div>
                                     </form>
                                 </div>
