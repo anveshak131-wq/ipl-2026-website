@@ -404,12 +404,13 @@ export default function AdminPlayers() {
   filteredPlayers = sortPlayersByRoleAndAge(filteredPlayers);
 
   // Calculate statistics by role
+  // Use filteredPlayers for stats so counts reflect current team filter
   const stats = {
-    total: players.length,
-    batsmen: players.filter(p => p.role === 'Batsman').length,
-    bowlers: players.filter(p => p.role === 'Bowler').length,
-    allRounders: players.filter(p => p.role === 'All-rounder').length,
-    wicketkeepers: players.filter(p => p.role === 'Wicket-keeper').length,
+    total: filteredPlayers.length,
+    batsmen: filteredPlayers.filter(p => p.role === 'Batsman').length,
+    bowlers: filteredPlayers.filter(p => p.role === 'Bowler').length,
+    allRounders: filteredPlayers.filter(p => p.role === 'All-rounder').length,
+    wicketkeepers: filteredPlayers.filter(p => p.role === 'Wicket-keeper').length,
   };
 
   // Apply search filter
