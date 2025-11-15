@@ -34,7 +34,7 @@ function generateToken(user) {
   return btoa(JSON.stringify(payload));
 }
 
-export async function onRequestPost(context) {
+export const onRequest = async (context) => {
   const { request } = context;
 
   // CORS headers
@@ -43,6 +43,28 @@ export async function onRequestPost(context) {
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
   };
+
+  // Handle OPTIONS preflight
+  if (request.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
+      headers: corsHeaders,
+    });
+  }
+
+  // Handle POST requests
+  if (request.method !== 'POST') {
+    return new Response(
+      JSON.stringify({ error: 'Method not allowed' }),
+      {
+        status: 405,
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders,
+        },
+      }
+    );
+  }
 
   try {
     const body = await request.json();
@@ -111,16 +133,4 @@ export async function onRequestPost(context) {
       }
     );
   }
-}
-
-// Handle OPTIONS for CORS preflight
-export async function onRequestOptions() {
-  return new Response(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  });
-}
+};
