@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import SmartDescription from '@/components/teams/SmartDescription';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -423,10 +424,10 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
                 </div>
               </div>
 
-              {/* Description */}
-              <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
-                One of cricket's most passionate franchises. Home of legends, dreams, and the spirit that never gives up.
-              </p>
+                {/* Description: admin-provided plus AI enrichment (SmartDescription component) */}
+                <div className="max-w-3xl mx-auto w-full">
+                  <SmartDescription text={teamData.description} teamName={teamData.name} primaryColor={teamData.colors?.primary || '#EC1C24'} />
+                </div>
 
               {/* Scroll Indicator */}
               <div className="pt-12 animate-bounce">

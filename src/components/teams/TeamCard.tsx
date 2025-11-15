@@ -4,6 +4,7 @@ import { Team } from '@/types';
 import { useRouter } from 'next/navigation';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import { getOptimalTextColorForGradient } from '@/lib/colorUtils';
+import { motion } from 'framer-motion';
 
 interface TeamCardProps {
   team: Team;
@@ -22,7 +23,14 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 hover:border-ipl-gold/50 transition-all duration-500 hover:shadow-2xl hover:shadow-ipl-gold/30 transform hover:scale-105 hover:-translate-y-2 animate-fade-in">
+    <motion.div
+      className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 hover:border-ipl-gold/50 hover:shadow-2xl hover:shadow-ipl-gold/30"
+      initial={{ opacity: 0, y: 8, scale: 0.995 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ scale: 1.03, y: -4 }}
+    >
       {/* Animated background on hover */}
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
         <div className="absolute inset-0 bg-gradient-to-br from-ipl-gold/10 to-ipl-purple/10 animate-gradient" />
@@ -45,13 +53,16 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
             />
             
             {/* Animated Logo */}
-            <img 
+            <motion.img
               src={animatedLogo}
               alt={`${team.shortName} logo`}
-              className="w-20 h-20 object-contain relative z-10 transform group-hover:scale-110 transition-transform duration-500"
+              className="w-20 h-20 object-contain relative z-10"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = fallbackLogo;
               }}
+              initial={{ scale: 1 }}
+              whileHover={{ scale: 1.12, rotate: 4 }}
+              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
             />
             
             {/* Pulse ring on hover */}
@@ -60,7 +71,7 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
         </div>
 
         {/* Team Name */}
-        <div className="text-center transform group-hover:scale-105 transition-transform duration-300">
+        <div className="text-center">
           <h3 
             className="text-2xl font-black mb-1 transition-all duration-300 group-hover:scale-110"
             style={{
@@ -101,9 +112,9 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
         </div>
 
         {/* Team Description */}
-        <p className="text-sm leading-relaxed text-center line-clamp-2 transition-colors duration-300" style={{ color: '#D1D5DB' }}>
-          {team.description}
-        </p>
+          <p className="text-sm leading-relaxed text-center line-clamp-2" style={{ color: '#D1D5DB' }}>
+            {team.description}
+          </p>
 
         {/* Player Count Badge with animation */}
         <div className="flex justify-center">
@@ -114,9 +125,9 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
         </div>
 
         {/* View Team Button with Premium Design - Using Team Colors */}
-        <button 
+        <motion.button
           onClick={handleViewFullSquad}
-          className="group w-full relative overflow-hidden rounded-xl font-bold text-sm py-3.5 mt-2 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+          className="group w-full relative overflow-hidden rounded-xl font-bold text-sm py-3.5 mt-2 cursor-pointer"
           style={{
             background: `linear-gradient(135deg, ${team.colors.primary}, ${team.colors.secondary})`,
             boxShadow: `0 10px 40px ${team.colors.primary}40, 0 0 60px ${team.colors.secondary}30`,
@@ -124,11 +135,13 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
             color: getOptimalTextColorForGradient(`linear-gradient(135deg, ${team.colors.primary}, ${team.colors.secondary})`),
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.boxShadow = `0 20px 60px ${team.colors.primary}60, 0 0 80px ${team.colors.secondary}40`;
+            /* keep visual micro-interaction handled by motion */
           }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.boxShadow = `0 10px 40px ${team.colors.primary}40, 0 0 60px ${team.colors.secondary}30`;
-          }}
+          onMouseLeave={(e) => {}}
+          initial={{ y: 0 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
         >
           {/* Shimmer effect */}
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
@@ -161,8 +174,8 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
               borderColor: team.colors.primary,
             }}
           />
-        </button>
+        </motion.button>
       </div>
-    </div>
+    </motion.div>
   );
 }

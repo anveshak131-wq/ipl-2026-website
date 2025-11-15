@@ -1,6 +1,7 @@
-'use client';
+ 'use client';
 
 import { useState, useEffect } from 'react';
+import SmartDescription from '@/components/teams/SmartDescription';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -663,7 +664,10 @@ function AboutTab({ teamData, primaryColor, secondaryColor }: any) {
           <h3 className="text-4xl font-black" style={{ color: primaryColor.textOnLight }}>About {teamData.name}</h3>
         </div>
         
-        <p className="text-xl leading-relaxed mb-12" style={{ color: primaryColor.textOnLight }}>{teamData.description}</p>
+        <div className="mb-8">
+          {/* Smart description component: handles wrapping, read more, and AI suggestions */}
+          <SmartDescription text={teamData.description} teamName={teamData.name} primaryColor={primaryColor} />
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div>

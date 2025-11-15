@@ -7,6 +7,7 @@ import { api } from '@/lib/data';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import { getOptimalTextColorForGradient } from '@/lib/colorUtils';
+import { motion } from 'framer-motion';
 
 export default function TeamsShowcase() {
   const router = useRouter();
@@ -67,9 +68,16 @@ export default function TeamsShowcase() {
         </div>
 
         {/* Teams Grid - Modern Bento Style */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-12">
+        <motion.div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-12"
+          variants={{
+            hidden: {},
+            show: { transition: { staggerChildren: 0.06 } }
+          }}
+          initial="hidden"
+          animate="show"
+        >
           {teams.map((team, index) => (
-            <div
+            <motion.div
               key={team.id}
               onMouseEnter={() => setHoveredTeam(team.id)}
               onMouseLeave={() => setHoveredTeam(null)}
@@ -77,10 +85,13 @@ export default function TeamsShowcase() {
                 const teamRoute = team.id.startsWith('team') ? team.id : `team${team.id}`;
                 router.push(`/teams/${teamRoute}`);
               }}
-              className="group relative overflow-hidden rounded-2xl cursor-pointer transform transition-all duration-500 hover:scale-110 hover:z-10"
-              style={{
-                animationDelay: `${index * 50}ms`
+              className="group relative overflow-hidden rounded-2xl cursor-pointer"
+              variants={{
+                hidden: { opacity: 0, y: 8, scale: 0.995 },
+                show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } }
               }}
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.98 }}
             >
               {/* Background Gradient */}
               <div 
@@ -101,20 +112,26 @@ export default function TeamsShowcase() {
               {/* Content */}
               <div className="relative aspect-square p-6 flex flex-col items-center justify-center space-y-4">
                 {/* Team Logo with animated version */}
-                <div className="relative w-20 h-20 md:w-24 md:h-24 transform group-hover:scale-125 group-hover:rotate-12 transition-all duration-500">
-                  <div className="absolute inset-0 bg-white/20 rounded-full blur-md group-hover:blur-xl transition-all duration-500" />
-                  <img 
+                <motion.div className="relative w-20 h-20 md:w-24 md:h-24"
+                  initial={{ scale: 1 }}
+                  whileHover={{ scale: 1.16, rotate: 8 }}
+                  transition={{ duration: 0.45 }}
+                >
+                  <div className="absolute inset-0 bg-white/20 rounded-full blur-md transition-all duration-500" />
+                  <motion.img 
                     src={getAnimatedLogoPath(team.id)} 
                     alt={team.shortName}
                     className="relative w-full h-full object-contain drop-shadow-2xl"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = getLogoPath(team.id);
                     }}
+                    initial={{ scale: 1 }}
+                    transition={{ duration: 0.45 }}
                   />
-                </div>
+                </motion.div>
 
                 {/* Team Name */}
-                <div className="text-center space-y-1 transform group-hover:translate-y-1 transition-transform duration-300">
+                <div className="text-center space-y-1 transition-transform duration-300">
                   <p 
                     className="font-black text-lg md:text-xl tracking-tight"
                     style={{ 
@@ -146,9 +163,9 @@ export default function TeamsShowcase() {
                    style={{
                      boxShadow: `inset 0 0 0 2px ${team.colors.primary}`
                    }} />
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
 
         {/* View All Teams Button - Premium Design */}
         <div className="text-center">
