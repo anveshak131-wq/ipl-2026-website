@@ -23,6 +23,7 @@ import {
 import { Team, Player } from '@/types';
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
+import RCBLottie from '@/components/ui/RCBLottie';
 import { getOptimalTextColor } from '@/lib/colorUtils';
 
 interface TeamDetailClientProps {
@@ -302,15 +303,21 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                            background: `conic-gradient(from 0deg, transparent, ${primaryColor.solid}40, transparent)`
                          }} />
                     
-                    {/* Actual Team Logo from /logos - Animated */}
-                    <img 
-                      src={teamLogoPath}
-                      alt={`${teamData.shortName} logo`}
-                      className="w-3/4 h-3/4 object-contain drop-shadow-2xl animate-float relative z-10 transform group-hover:scale-110 transition-transform duration-500"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = fallbackLogoPath;
-                      }}
-                    />
+                    {/* Actual Team Logo from /logos - Animated or Lottie */}
+                    {teamLogoPath.endsWith('.json') ? (
+                      <div className="w-3/4 h-3/4 relative z-10">
+                        <RCBLottie className="w-full h-full" />
+                      </div>
+                    ) : (
+                      <img 
+                        src={teamLogoPath}
+                        alt={`${teamData.shortName} logo`}
+                        className="w-3/4 h-3/4 object-contain drop-shadow-2xl animate-float relative z-10 transform group-hover:scale-110 transition-transform duration-500"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = fallbackLogoPath;
+                        }}
+                      />
+                    )}
                     
                     {/* IPL Logo Badge with enhanced animation - Positioned to avoid overlap with team logo */}
                     <div className="absolute bottom-1 right-1 md:bottom-2 md:right-2 w-12 h-12 md:w-14 md:h-14 rounded-full backdrop-blur-xl border-2 border-white/30 flex items-center justify-center shadow-xl transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 bg-gradient-to-br from-blue-900/80 to-purple-900/80 z-20">

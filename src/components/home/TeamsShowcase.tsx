@@ -6,6 +6,7 @@ import { Team } from '@/types';
 import { api } from '@/lib/data';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
+import RCBLottie from '@/components/ui/RCBLottie';
 import { getOptimalTextColorForGradient } from '@/lib/colorUtils';
 import { motion } from 'framer-motion';
 
@@ -118,16 +119,22 @@ export default function TeamsShowcase() {
                   transition={{ duration: 0.45 }}
                 >
                   <div className="absolute inset-0 bg-white/20 rounded-full blur-md transition-all duration-500" />
-                  <motion.img 
-                    src={getAnimatedLogoPath(team.id)} 
-                    alt={team.shortName}
-                    className="relative w-full h-full object-contain drop-shadow-2xl"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = getLogoPath(team.id);
-                    }}
-                    initial={{ scale: 1 }}
-                    transition={{ duration: 0.45 }}
-                  />
+                  {getAnimatedLogoPath(team.id).endsWith('.json') ? (
+                    <div className="relative w-full h-full">
+                      <RCBLottie className="w-full h-full" />
+                    </div>
+                  ) : (
+                    <motion.img 
+                      src={getAnimatedLogoPath(team.id)} 
+                      alt={team.shortName}
+                      className="relative w-full h-full object-contain drop-shadow-2xl"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = getLogoPath(team.id);
+                      }}
+                      initial={{ scale: 1 }}
+                      transition={{ duration: 0.45 }}
+                    />
+                  )}
                 </motion.div>
 
                 {/* Team Name */}

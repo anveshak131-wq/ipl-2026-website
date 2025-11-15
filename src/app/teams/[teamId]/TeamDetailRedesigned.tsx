@@ -9,7 +9,7 @@ import PlayerModal from '@/components/teams/PlayerModal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Team, Player } from '@/types';
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
-import RCBAnimatedLogo from '@/components/ui/RCBAnimatedLogo';
+import RCBLottie from '@/components/ui/RCBLottie';
 
 interface TeamDetailRedesignedProps {
   teamId: string;
@@ -388,7 +388,7 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
               <div className="relative inline-block">
                 <div className="absolute inset-0 blur-3xl opacity-50 bg-gradient-to-r from-red-500 to-yellow-500 animate-pulse" />
                 <div className="relative w-64 h-64 mx-auto transform hover:scale-110 hover:rotate-6 transition-all duration-500 animate-float">
-                  <RCBAnimatedLogo />
+                  <RCBLottie className="w-full h-full" />
                 </div>
               </div>
 

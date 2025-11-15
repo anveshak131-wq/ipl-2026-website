@@ -6,6 +6,8 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import { Team } from '@/types';
 import { api } from '@/lib/data';
+import { getAnimatedLogoPath } from '@/lib/logoUtils';
+import RCBLottie from '@/components/ui/RCBLottie';
 
 type SortField = 'name' | 'shortName';
 type SortDirection = 'asc' | 'desc';
@@ -441,11 +443,22 @@ export default function AdminTeams() {
                                                                 className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg"
                                                                 style={{ background: `linear-gradient(135deg, ${team.colors.primary} 0%, ${team.colors.secondary} 100%)` }}
                                                             >
-                                                                {team.logo ? (
-                                                                    <img src={team.logo} alt={team.name} className="w-8 h-8 object-contain" />
-                                                                ) : (
-                                                                    team.shortName.substring(0, 2)
-                                                                )}
+                                                                {(() => {
+                                                                    const anim = getAnimatedLogoPath(team.id);
+                                                                    if (anim.endsWith('.json')) {
+                                                                        return (
+                                                                            <div className="w-8 h-8">
+                                                                                <RCBLottie className="w-8 h-8" />
+                                                                            </div>
+                                                                        );
+                                                                    }
+
+                                                                    return team.logo ? (
+                                                                        <img src={team.logo} alt={team.name} className="w-8 h-8 object-contain" />
+                                                                    ) : (
+                                                                        team.shortName.substring(0, 2)
+                                                                    );
+                                                                })()}
                                                             </div>
                                                             <span className="font-semibold text-white">{team.name}</span>
                                                         </div>
@@ -514,11 +527,22 @@ export default function AdminTeams() {
                                                     className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold shadow-lg flex-shrink-0"
                                                     style={{ background: `linear-gradient(135deg, ${team.colors.primary} 0%, ${team.colors.secondary} 100%)` }}
                                                 >
-                                                    {team.logo ? (
-                                                        <img src={team.logo} alt={team.name} className="w-10 h-10 object-contain" />
-                                                    ) : (
-                                                        team.shortName.substring(0, 2)
-                                                    )}
+                                                    {(() => {
+                                                        const anim = getAnimatedLogoPath(team.id);
+                                                        if (anim.endsWith('.json')) {
+                                                            return (
+                                                                <div className="w-10 h-10">
+                                                                    <RCBLottie className="w-10 h-10" />
+                                                                </div>
+                                                            );
+                                                        }
+
+                                                        return team.logo ? (
+                                                            <img src={team.logo} alt={team.name} className="w-10 h-10 object-contain" />
+                                                        ) : (
+                                                            team.shortName.substring(0, 2)
+                                                        );
+                                                    })()}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <h3 className="font-semibold text-white mb-1">{team.name}</h3>

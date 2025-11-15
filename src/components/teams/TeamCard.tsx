@@ -3,6 +3,7 @@
 import { Team } from '@/types';
 import { useRouter } from 'next/navigation';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
+import RCBLottie from '@/components/ui/RCBLottie';
 import { getOptimalTextColorForGradient } from '@/lib/colorUtils';
 import { motion } from 'framer-motion';
 
@@ -52,18 +53,24 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
               }}
             />
             
-            {/* Animated Logo */}
-            <motion.img
-              src={animatedLogo}
-              alt={`${team.shortName} logo`}
-              className="w-20 h-20 object-contain relative z-10"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = fallbackLogo;
-              }}
-              initial={{ scale: 1 }}
-              whileHover={{ scale: 1.12, rotate: 4 }}
-              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            />
+            {/* Animated Logo: render Lottie if JSON, otherwise image */}
+            {animatedLogo.endsWith('.json') ? (
+              <div className="relative z-10 w-20 h-20">
+                <RCBLottie className="w-full h-full" />
+              </div>
+            ) : (
+              <motion.img
+                src={animatedLogo}
+                alt={`${team.shortName} logo`}
+                className="w-20 h-20 object-contain relative z-10"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = fallbackLogo;
+                }}
+                initial={{ scale: 1 }}
+                whileHover={{ scale: 1.12, rotate: 4 }}
+                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              />
+            )}
             
             {/* Pulse ring on hover */}
             <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-ipl-gold/50 opacity-0 group-hover:opacity-100 transition-all duration-500 animate-pulse" />

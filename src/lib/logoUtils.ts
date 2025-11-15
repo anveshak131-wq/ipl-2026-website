@@ -12,7 +12,8 @@
 // '10' = CSK (Chennai Super Kings)
 export function getAnimatedLogoPath(teamId: string): string {
   const logoMap: { [key: string]: string } = {
-    '1': 'rcb_logo_animated.svg',      // RCB
+    // Use Lottie JSON for RCB to allow richer animation
+    '1': 'rcb-lion.json',              // RCB (Lottie)
     '2': 'mi_logo_animated.svg',       // MI
     '3': 'srh_logo_animated.svg',      // SRH
     '4': 'gt_logo_animated.svg',       // GT
@@ -27,8 +28,15 @@ export function getAnimatedLogoPath(teamId: string): string {
   // Handle both 'team1' and '1' formats
   const numericId = teamId.replace('team', '');
   const logoFile = logoMap[numericId] || 'rcb_logo_animated.svg';
+
+  // If the mapping is a Lottie JSON name, serve from /assets/lottie
+  if (logoFile.endsWith('.json')) {
+    return `/assets/lottie/${logoFile}`;
+  }
+
   return `/logos/${logoFile}`;
 }
+
 
 // Get regular logo path (fallback)
 export function getLogoPath(teamId: string): string {
