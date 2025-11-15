@@ -77,6 +77,23 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
     }
   }, [player?.teamId, teamColors]);
 
+  // Close modal on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' || e.key === 'Esc' || e.keyCode === 27) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen || !player) return null;
 
   // Default colors if team colors are not available

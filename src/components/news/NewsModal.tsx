@@ -35,6 +35,23 @@ export default function NewsModal({ isOpen, newsId, onClose }: NewsModalProps) {
     fetchItem();
   }, [isOpen, newsId]);
 
+  // Close modal on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' || e.key === 'Esc' || e.keyCode === 27) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   const getImageSrc = (url?: string) => {
     if (!url) return '';
     const trimmed = url.trim();
