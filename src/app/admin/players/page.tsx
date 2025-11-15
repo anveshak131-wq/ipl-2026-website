@@ -315,8 +315,11 @@ export default function AdminPlayers() {
     }
   };
 
-  const handleDeletePlayer = async (playerId: string) => {
-    if (confirm('Are you sure you want to delete this player?')) {
+  const handleDeletePlayer = async (playerId: string, playerName?: string) => {
+    const message = playerName 
+      ? `Are you sure you want to delete ${playerName}?`
+      : 'Are you sure you want to delete this player?';
+    if (confirm(message)) {
       try {
         const response = await fetch(`/api/players?id=${playerId}`, {
           method: 'DELETE',
@@ -911,7 +914,7 @@ export default function AdminPlayers() {
                               Edit
                             </button>
                             <button 
-                              onClick={() => handleDeletePlayer(player.id)}
+                              onClick={() => handleDeletePlayer(player.id, player.name)}
                               className="text-red-400 hover:text-red-300 transition-colors"
                             >
                               Delete
