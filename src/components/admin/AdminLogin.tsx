@@ -35,6 +35,13 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
       if (response.ok && data.token) {
         onLogin(data.token);
         localStorage.setItem('adminToken', data.token);
+        // Also set the generic auth token key so admin pages that
+        // expect `auth_token` will recognize the session.
+        try {
+          localStorage.setItem('auth_token', data.token);
+        } catch (e) {
+          // ignore if localStorage isn't available
+        }
         router.push('/admin/dashboard');
       } else {
         setError(data.error || 'Invalid credentials');
