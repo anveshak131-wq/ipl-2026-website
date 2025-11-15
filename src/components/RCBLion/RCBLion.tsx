@@ -24,50 +24,7 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
     canvas.style.height = `${height}px`;
     ctx.scale(devicePixelRatio, devicePixelRatio);
 
-    function drawShield(ctx: CanvasRenderingContext2D, cx: number, cy: number, size: number, rotation: number) {
-      const s = size;
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate(rotation);
-
-      // Main gradient - rich crimsons
-      const grad = ctx.createLinearGradient(-s / 2.2, -s / 2.2, s / 2.2, s / 2.2);
-      grad.addColorStop(0, '#FF2D2D');
-      grad.addColorStop(0.5, '#DC143C');
-      grad.addColorStop(1, '#8B0000');
-
-      // Shield path - pentagonal
-      const top = -s / 2;
-      const bottom = s / 2.2;
-      const left = -s / 2.4;
-      const right = s / 2.4;
-
-      ctx.beginPath();
-      ctx.moveTo(0, top);
-      ctx.lineTo(right, -s / 5);
-      ctx.lineTo(right * 1.05, bottom * 0.7);
-      ctx.bezierCurveTo(right * 0.7, bottom, 0, bottom + s * 0.08, -right * 0.7, bottom);
-      ctx.lineTo(-right * 1.05, bottom * 0.7);
-      ctx.lineTo(left, -s / 5);
-      ctx.closePath();
-
-      ctx.fillStyle = grad;
-      ctx.fill();
-      
-      // Depth shadow
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      
-      // Highlight
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
-      ctx.lineWidth = 1;
-      ctx.stroke();
-
-      ctx.restore();
-    }
-
-    function draw() {
+    function drawAnimatedRCB() {
       const w = width;
       const h = height;
       tRef.current += 1;
@@ -88,122 +45,156 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
 
       const cx = w / 2;
       const cy = h / 2;
-      const shieldSize = Math.min(w, h) * 0.35;
+      const radius = Math.min(w, h) * 0.35;
+      const cornerRadius = radius * 0.25;
 
-      // Outer decorative ring (pulsing)
+      // ===== Background Pulse + Glow =====
       ctx.save();
-      const ringPulse = 1 + Math.sin(t * 0.6) * 0.08;
-      ctx.strokeStyle = `rgba(255, 210, 77, ${0.3 * ringPulse})`;
+      const pulse = 1 + Math.sin(t * 0.9) * 0.08;
+      ctx.globalAlpha = 1 * pulse * 0.95;
+      
+      // Main rounded rectangle background
+      ctx.beginPath();
+      ctx.moveTo(cx - radius, cy - radius + cornerRadius);
+      ctx.lineTo(cx - radius, cy + radius - cornerRadius);
+      ctx.quadraticCurveTo(cx - radius, cy + radius, cx - radius + cornerRadius, cy + radius);
+      ctx.lineTo(cx + radius - cornerRadius, cy + radius);
+      ctx.quadraticCurveTo(cx + radius, cy + radius, cx + radius, cy + radius - cornerRadius);
+      ctx.lineTo(cx + radius, cy - radius + cornerRadius);
+      ctx.quadraticCurveTo(cx + radius, cy - radius, cx + radius - cornerRadius, cy - radius);
+      ctx.lineTo(cx - radius + cornerRadius, cy - radius);
+      ctx.quadraticCurveTo(cx - radius, cy - radius, cx - radius, cy - radius + cornerRadius);
+      ctx.closePath();
+
+      // Gradient fill
+      const grad = ctx.createLinearGradient(cx - radius, cy - radius, cx + radius, cy + radius);
+      grad.addColorStop(0, '#EC1C24');
+      grad.addColorStop(0.5, '#990000');
+      grad.addColorStop(1, '#660000');
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Glow effect
+      ctx.strokeStyle = `rgba(255, 107, 107, ${0.5 * pulse})`;
+      ctx.lineWidth = 8 * pulse;
+      ctx.globalAlpha = 0.3;
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      ctx.restore();
+
+      // ===== Inner Highlight =====
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255, 107, 107, 0.3)';
       ctx.lineWidth = 2;
-      ctx.setLineDash([6, 3]);
       ctx.beginPath();
-      ctx.arc(cx, cy, shieldSize * 1.3 * ringPulse, 0, Math.PI * 2);
+      ctx.moveTo(cx - radius + 2, cy - radius + cornerRadius + 2);
+      ctx.lineTo(cx - radius + 2, cy + radius - cornerRadius - 2);
+      ctx.quadraticCurveTo(cx - radius + 2, cy + radius - 2, cx - radius + cornerRadius + 2, cy + radius - 2);
+      ctx.lineTo(cx + radius - cornerRadius - 2, cy + radius - 2);
+      ctx.quadraticCurveTo(cx + radius - 2, cy + radius - 2, cx + radius - 2, cy + radius - cornerRadius - 2);
+      ctx.lineTo(cx + radius - 2, cy - radius + cornerRadius + 2);
+      ctx.quadraticCurveTo(cx + radius - 2, cy - radius + 2, cx + radius - cornerRadius - 2, cy - radius + 2);
+      ctx.lineTo(cx - radius + cornerRadius + 2, cy - radius + 2);
+      ctx.quadraticCurveTo(cx - radius + 2, cy - radius + 2, cx - radius + 2, cy - radius + cornerRadius + 2);
+      ctx.closePath();
       ctx.stroke();
       ctx.restore();
 
-      // Main shield (rotating)
-      const shieldRotation = t * 0.1;
-      drawShield(ctx, cx, cy, shieldSize, shieldRotation);
-
-      // Central vertical power line (pulsing glow)
-      ctx.save();
-      ctx.globalAlpha = 0.65 + Math.sin(t * 0.8) * 0.2;
-      const gradLine = ctx.createLinearGradient(0, cy - shieldSize * 0.5, 0, cy + shieldSize * 0.5);
-      gradLine.addColorStop(0, '#FFE66D');
-      gradLine.addColorStop(0.5, '#FFD24D');
-      gradLine.addColorStop(1, '#FFE66D');
-      ctx.strokeStyle = gradLine;
-      ctx.lineWidth = shieldSize * 0.12;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(cx, cy - shieldSize * 0.5);
-      ctx.lineTo(cx, cy + shieldSize * 0.5);
-      ctx.stroke();
-      ctx.restore();
-
-      // Top crown peak (animated)
-      ctx.save();
-      const crownBob = Math.sin(t * 0.7) * 2;
-      ctx.beginPath();
-      const crownTop = cy - shieldSize * 0.35;
-      const crownW = shieldSize * 0.3;
-      ctx.moveTo(cx - crownW, crownTop + crownBob);
-      ctx.lineTo(cx, crownTop - shieldSize * 0.25 + crownBob);
-      ctx.lineTo(cx + crownW, crownTop + crownBob);
-      ctx.strokeStyle = '#FFE66D';
-      ctx.lineWidth = shieldSize * 0.08;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.globalAlpha = 0.8 + Math.sin(t * 1.2) * 0.15;
-      ctx.stroke();
-      ctx.restore();
-
-      // Upper jewels (crown accents)
-      ctx.save();
-      ctx.fillStyle = '#FFD24D';
-      for (let i = 0; i < 2; i++) {
-        const offset = i === 0 ? -1 : 1;
-        const jx = cx + offset * shieldSize * 0.3;
-        const jy = cy - shieldSize * 0.18;
-        ctx.globalAlpha = 0.6 + Math.sin(t * 1.5 + i) * 0.2;
-        ctx.beginPath();
-        ctx.arc(jx, jy, shieldSize * 0.06, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.restore();
-
-      // Middle lightning accent (animated rotation)
+      // ===== Rotating Outer Ring =====
       ctx.save();
       ctx.translate(cx, cy);
-      ctx.rotate(Math.sin(t * 0.5) * 0.1);
+      ctx.rotate(t * 0.12);
       ctx.translate(-cx, -cy);
-      ctx.strokeStyle = '#FFE66D';
-      ctx.lineWidth = shieldSize * 0.07;
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      ctx.globalAlpha = 0.6 + Math.sin(t * 1.3) * 0.25;
+      ctx.strokeStyle = `rgba(255, 215, 0, 0.3)`;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([8, 4]);
       ctx.beginPath();
-      ctx.moveTo(cx, cy - shieldSize * 0.1);
-      ctx.lineTo(cx + shieldSize * 0.15, cy + shieldSize * 0.12);
-      ctx.lineTo(cx - shieldSize * 0.1, cy + shieldSize * 0.28);
-      ctx.lineTo(cx + shieldSize * 0.12, cy + shieldSize * 0.42);
+      ctx.arc(cx, cy, radius * 1.35, 0, Math.PI * 2);
       ctx.stroke();
       ctx.restore();
 
-      // Bottom accent diamonds (pulsing)
+      // ===== Crown with Animated Jewels =====
       ctx.save();
-      ctx.fillStyle = '#FFE66D';
-      const positions = [
-        [cx - shieldSize * 0.25, cy + shieldSize * 0.35],
-        [cx, cy + shieldSize * 0.48],
-        [cx + shieldSize * 0.25, cy + shieldSize * 0.35],
+      
+      // Crown body with rotation
+      const crownRotate = Math.sin(t * 0.75) * 0.05;
+      ctx.translate(cx, cy - radius * 0.35);
+      ctx.rotate(crownRotate);
+      ctx.translate(-cx, -(cy - radius * 0.35));
+
+      ctx.beginPath();
+      ctx.moveTo(cx - radius * 0.5, cy - radius * 0.1);
+      ctx.lineTo(cx - radius * 0.3, cy - radius * 0.55);
+      ctx.lineTo(cx - radius * 0.1, cy - radius * 0.2);
+      ctx.lineTo(cx, cy - radius * 0.7);
+      ctx.lineTo(cx + radius * 0.1, cy - radius * 0.2);
+      ctx.lineTo(cx + radius * 0.3, cy - radius * 0.55);
+      ctx.lineTo(cx + radius * 0.5, cy - radius * 0.1);
+      ctx.closePath();
+
+      // Crown gradient
+      const crownGrad = ctx.createLinearGradient(cx - radius * 0.5, cy - radius * 0.7, cx + radius * 0.5, cy - radius * 0.1);
+      crownGrad.addColorStop(0, '#FFE66D');
+      crownGrad.addColorStop(1, '#FFD700');
+      ctx.fillStyle = crownGrad;
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // Crown jewels
+      const jewelPositions = [
+        { x: cx - radius * 0.25, y: cy - radius * 0.35, size: 4 },
+        { x: cx, y: cy - radius * 0.5, size: 5.5 },
+        { x: cx + radius * 0.25, y: cy - radius * 0.35, size: 4 },
       ];
-      positions.forEach((pos, i) => {
-        ctx.globalAlpha = 0.5 + (Math.sin(t * 1.2 + i * 0.5) * 0.3);
+
+      jewelPositions.forEach((jewel, i) => {
+        ctx.globalAlpha = 0.7 + Math.sin(t * 1.5 + i) * 0.3;
+        ctx.fillStyle = '#FFE66D';
         ctx.beginPath();
-        ctx.arc(pos[0], pos[1], shieldSize * 0.06, 0, Math.PI * 2);
+        ctx.arc(jewel.x, jewel.y, jewel.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      ctx.restore();
+
+      // ===== RCB Text with Flicker =====
+      ctx.save();
+      ctx.globalAlpha = 1 + Math.sin(t * 1) * 0.05;
+      ctx.font = `bold ${radius * 0.7}px Arial, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#fff';
+      ctx.shadowColor = `rgba(255, 215, 0, ${0.6 + Math.sin(t * 1) * 0.3})`;
+      ctx.shadowBlur = 10 + Math.sin(t * 1.2) * 5;
+      ctx.fillText('RCB', cx, cy + radius * 0.3);
+      ctx.restore();
+
+      // ===== Corner Sparkles =====
+      ctx.save();
+      ctx.fillStyle = '#FFD700';
+      const sparkles = [
+        { x: cx - radius * 0.6, y: cy - radius * 0.6 },
+        { x: cx + radius * 0.6, y: cy - radius * 0.6 },
+        { x: cx - radius * 0.7, y: cy, },
+        { x: cx + radius * 0.7, y: cy, },
+      ];
+
+      sparkles.forEach((spark, i) => {
+        ctx.globalAlpha = 0.3 + (Math.sin(t * 1.5 + i * 0.5) * 0.4);
+        ctx.beginPath();
+        ctx.arc(spark.x, spark.y, 2 + Math.sin(t * 2 + i) * 1.5, 0, Math.PI * 2);
         ctx.fill();
       });
       ctx.restore();
 
-      // Inner crown arc (subtle animated breathe)
-      ctx.save();
-      const arcScale = 1 + Math.sin(t * 0.5) * 0.08;
-      ctx.strokeStyle = '#FFD24D';
-      ctx.lineWidth = shieldSize * 0.05;
-      ctx.globalAlpha = 0.5 + Math.sin(t * 0.9) * 0.2;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.arc(cx, cy - shieldSize * 0.15, shieldSize * 0.22 * arcScale, 0, Math.PI);
-      ctx.stroke();
       ctx.restore();
 
-      ctx.restore();
-
-      rafRef.current = requestAnimationFrame(draw);
+      rafRef.current = requestAnimationFrame(drawAnimatedRCB);
     }
 
-    rafRef.current = requestAnimationFrame(draw);
+    rafRef.current = requestAnimationFrame(drawAnimatedRCB);
 
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
