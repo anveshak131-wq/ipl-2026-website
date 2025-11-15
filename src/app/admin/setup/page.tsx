@@ -60,7 +60,7 @@ export default function AdminSetup() {
           email,
           password,
           name,
-          setupKey: 'default-setup-key-change-me', // Will be rotated in Cloudflare
+          setupKey: process.env.NEXT_PUBLIC_SETUP_KEY, // Should be set as env var
         }),
       });
 
