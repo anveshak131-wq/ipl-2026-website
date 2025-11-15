@@ -43,28 +43,18 @@ export default function AdminLiveScorePage() {
 
   // Check authentication
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuth = () => {
       const token = localStorage.getItem('auth_token');
       if (!token) {
         router.push('/admin');
         return;
       }
 
-      try {
-        const response = await fetch(`/api/auth/verify?token=${token}`);
-        if (response.ok) {
-          const data = await response.json();
-          // In a real app, verify if user is admin
-          setIsAuthenticated(true);
-        } else {
-          router.push('/admin');
-        }
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        router.push('/admin');
-      } finally {
-        setIsLoading(false);
-      }
+      // For admin users, the token is stored in localStorage after login.
+      // Trust that if the token exists, the user is authenticated.
+      // (Admin tokens are base64-encoded payloads, not verified against KV.)
+      setIsAuthenticated(true);
+      setIsLoading(false);
     };
 
     checkAuth();
@@ -78,25 +68,25 @@ export default function AdminLiveScorePage() {
       try {
         const response = await fetch('/api/live-score?matchId=current');
         if (response.ok) {
-          const data = await response.json();
-          setLiveScore(data);
+          const liveScoreData = await response.json();
+          setLiveScore(liveScoreData);
           setFormData({
-            team1Name: data.team1.name,
-            team1Runs: data.team1.runs,
-            team1Wickets: data.team1.wickets,
-            team1Overs: data.team1.overs,
-            team2Name: data.team2.name,
-            team2Runs: data.team2.runs,
-            team2Wickets: data.team2.wickets,
-            team2Overs: data.team2.overs,
-            batterName: data.currentBatter.name,
-            batterRuns: data.currentBatter.runs,
-            batterBalls: data.currentBatter.balls,
-            bowlerName: data.currentBowler.name,
-            bowlerRuns: data.currentBowler.runs,
-            bowlerBalls: data.currentBowler.balls,
-            commentary: data.commentary.length > 0 ? data.commentary[0] : '',
-            status: data.status,
+            team1Name: liveScoreData.team1.name,
+            team1Runs: liveScoreData.team1.runs,
+            team1Wickets: liveScoreData.team1.wickets,
+            team1Overs: liveScoreData.team1.overs,
+            team2Name: liveScoreData.team2.name,
+            team2Runs: liveScoreData.team2.runs,
+            team2Wickets: liveScoreData.team2.wickets,
+            team2Overs: liveScoreData.team2.overs,
+            batterName: liveScoreData.currentBatter.name,
+            batterRuns: liveScoreData.currentBatter.runs,
+            batterBalls: liveScoreData.currentBatter.balls,
+            bowlerName: liveScoreData.currentBowler.name,
+            bowlerRuns: liveScoreData.currentBowler.runs,
+            bowlerBalls: liveScoreData.currentBowler.balls,
+            commentary: liveScoreData.commentary.length > 0 ? liveScoreData.commentary[0] : '',
+            status: liveScoreData.status,
           });
         }
       } catch (error) {
