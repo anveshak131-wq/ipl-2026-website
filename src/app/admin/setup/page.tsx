@@ -11,19 +11,19 @@ export default function AdminSetup() {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
 
-  const validateEmail = (email) => {
+  const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  const validatePassword = (password) => {
+  const validatePassword = (password: string): boolean => {
     if (password.length < 8) return false;
     if (!/[A-Z]/.test(password)) return false;
     if (!/[0-9]/.test(password)) return false;
     return true;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     // Validate inputs
@@ -83,7 +83,7 @@ export default function AdminSetup() {
         window.location.href = '/admin/login';
       }, 2000);
     } catch (error) {
-      setMessage('Error creating admin account: ' + error.message);
+      setMessage('Error creating admin account: ' + (error instanceof Error ? error.message : String(error)));
       setMessageType('error');
     } finally {
       setIsLoading(false);
