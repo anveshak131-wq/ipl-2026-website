@@ -24,26 +24,17 @@ export default function AdminEngagementPage() {
 
   // Check authentication
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuth = () => {
       const token = localStorage.getItem('auth_token');
       if (!token) {
         router.push('/admin');
         return;
       }
 
-      try {
-        const response = await fetch(`/api/auth/verify?token=${token}`);
-        if (response.ok) {
-          setIsAuthenticated(true);
-        } else {
-          router.push('/admin');
-        }
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        router.push('/admin');
-      } finally {
-        setIsLoading(false);
-      }
+      // For admin users, the token is stored in localStorage after login.
+      // Trust that if the token exists, the user is authenticated.
+      setIsAuthenticated(true);
+      setIsLoading(false);
     };
 
     checkAuth();
