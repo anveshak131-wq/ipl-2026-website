@@ -30,7 +30,7 @@
             {
               "ty": "el",
               "d": 1,
-              "s": {"a": 0, "k": [300, 300], "ix": 2},
+              "s": {"a": 0, "k": [280, 280], "ix": 2},
               "p": {"a": 0, "k": [0, 0], "ix": 3},
               "nm": "Red Background",
               "mn": "ADBE Vector Shape - Ellipse",
