@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="500" height="500" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RCB lion logo">
+  <defs>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="10" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background rounded rectangle in RCB crimson -->
+  <rect x="60" y="40" width="380" height="420" rx="24" fill="#EC1C24" />
+
+  <!-- Pulsing background circle (static in SVG) -->
+  <circle cx="250" cy="180" r="110" fill="#EC1C24" opacity="0.12" />
+
+  <!-- Lion mane / face base -->
+  <circle cx="250" cy="200" r="85" fill="#FDD08D" filter="url(#glow)" />
+
+  <!-- Mane stroke to imply mane shape -->
+  <path d="M250 110 C200 120 170 160 170 200 C170 260 210 300 250 300 C290 300 330 260 330 200 C330 160 300 120 250 110 Z" fill="#F8C97E" opacity="0.9" />
+
+  <!-- Eyes -->
+  <circle cx="225" cy="190" r="8" fill="#1B1B1B" />
+  <circle cx="275" cy="190" r="8" fill="#1B1B1B" />
+
+  <!-- Nose -->
+  <path d="M245 210 Q250 220 255 210 Q250 215 245 210 Z" fill="#3B2720" />
+
+  <!-- Mouth -->
+  <path d="M230 225 Q250 240 270 225" stroke="#3B2720" stroke-width="4" fill="none" stroke-linecap="round" />
+
+  <!-- Crown -->
+  <g transform="translate(200,100)">
+    <rect x="30" y="0" width="140" height="18" rx="4" fill="#FFD24D" />
+    <path d="M40 0 L60 -28 L80 0 L100 -20 L120 0 L140 -30 L160 0" fill="#FFD24D" />
+    <circle cx="60" cy="-28" r="6" fill="#EAC24A" />
+    <circle cx="120" cy="-30" r="6" fill="#EAC24A" />
+  </g>
+
+  <!-- Small jewel accents -->
+  <circle cx="240" cy="155" r="4" fill="#FF7A7A" />
+  <circle cx="260" cy="155" r="4" fill="#FF7A7A" />
+
+  <!-- RCB text -->
+  <text x="250" y="380" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" text-anchor="middle" fill="#EC1C24">RCB</text>
+</svg>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" aria-label="RCB lion logo">
+  <!-- Crimson background circle -->
+  <circle cx="120" cy="80" r="80" fill="#EC1C24" />
+
+  <!-- Subtle glow behind the circle -->
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#ff6b6b" stop-opacity="0.20"/>
+      <stop offset="60%" stop-color="#EC1C24" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#EC1C24" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="120" cy="80" r="96" fill="url(#glow)" />
+
+  <!-- Lion face -->
+  <g transform="translate(120,90)">
+    <circle cx="0" cy="-10" r="44" fill="#FDD08D" stroke="#B76E2E" stroke-width="2" />
+
+    <!-- Eyes -->
+    <ellipse cx="-14" cy="-18" rx="6" ry="8" fill="#000" />
+    <ellipse cx="14" cy="-18" rx="6" ry="8" fill="#000" />
+
+    <!-- Nose -->
+    <path d="M -6 0 Q 0 8 6 0 Q 0 4 -6 0 Z" fill="#7a2b1c" />
+
+    <!-- Mouth -->
+    <path d="M -16 12 Q -6 20 0 18 Q 6 20 16 12" fill="none" stroke="#7a2b1c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+
+    <!-- Simple crown -->
+    <g transform="translate(-26,-46)">
+      <path d="M0 32 L13 0 L26 32 L52 32 L52 40 L0 40 Z" fill="#F6C000" stroke="#d49b00" stroke-width="1.5" />
+      <circle cx="13" cy="6" r="3" fill="#9B5B00" />
+      <circle cx="26" cy="6" r="3" fill="#9B5B00" />
+      <circle cx="39" cy="6" r="3" fill="#9B5B00" />
+    </g>
+
+    <!-- Small jewel on crown center -->
+    <circle cx="0" cy="-46" r="3" fill="#e53935" stroke="#7a2b1c" stroke-width="0.6" />
+  </g>
+
+  <!-- Footer text small (optional) -->
+  <text x="120" y="230" font-size="18" font-family="Arial, Helvetica, sans-serif" font-weight="700" text-anchor="middle" fill="#EC1C24">RCB</text>
+</svg>

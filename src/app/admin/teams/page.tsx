@@ -8,6 +8,7 @@ import { Team } from '@/types';
 import { api } from '@/lib/data';
 import { getAnimatedLogoPath } from '@/lib/logoUtils';
 import RCBLottie from '@/components/ui/RCBLottie';
+import RCBLion from '@/components/RCBLion/RCBLion';
 
 type SortField = 'name' | 'shortName';
 type SortDirection = 'asc' | 'desc';
@@ -453,6 +454,14 @@ export default function AdminTeams() {
                                                                         );
                                                                     }
 
+                                                                    if (anim.endsWith('rcb-lion-logo.svg')) {
+                                                                        return (
+                                                                            <div className="w-8 h-8 flex items-center justify-center">
+                                                                                <RCBLion width={40} height={40} />
+                                                                            </div>
+                                                                        );
+                                                                    }
+
                                                                     return team.logo ? (
                                                                         <img src={team.logo} alt={team.name} className="w-8 h-8 object-contain" />
                                                                     ) : (
@@ -533,6 +542,14 @@ export default function AdminTeams() {
                                                             return (
                                                                 <div className="w-10 h-10">
                                                                     <RCBLottie className="w-10 h-10" />
+                                                                </div>
+                                                            );
+                                                        }
+
+                                                        if (anim.endsWith('rcb-lion-logo.svg')) {
+                                                            return (
+                                                                <div className="w-10 h-10 flex items-center justify-center">
+                                                                    <RCBLion width={44} height={44} />
                                                                 </div>
                                                             );
                                                         }

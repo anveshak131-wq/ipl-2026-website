@@ -4,6 +4,7 @@ import { Team } from '@/types';
 import { useRouter } from 'next/navigation';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import RCBLottie from '@/components/ui/RCBLottie';
+import RCBLion from '@/components/RCBLion/RCBLion';
 import { getOptimalTextColorForGradient } from '@/lib/colorUtils';
 import { motion } from 'framer-motion';
 
@@ -16,6 +17,8 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
   const router = useRouter();
   const animatedLogo = getAnimatedLogoPath(team.id);
   const fallbackLogo = getLogoPath(team.id);
+  // Prefer the new client-side component for RCB (team id 1) when available
+  const isRCBStaticExport = animatedLogo.endsWith('rcb-lion-logo.svg');
 
   const handleViewFullSquad = () => {
     // Ensure team ID has 'team' prefix for the route
@@ -57,6 +60,13 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
             {animatedLogo.endsWith('.json') ? (
               <div className="relative z-10 w-20 h-20">
                 <RCBLottie className="w-full h-full" />
+              </div>
+            ) : isRCBStaticExport ? (
+              <div className="relative z-10 w-20 h-20 flex items-center justify-center">
+                {/* Render the new client component for an animated effect */}
+                <div className="w-20 h-20">
+                  <RCBLion width={80} height={80} />
+                </div>
               </div>
             ) : (
               <motion.img

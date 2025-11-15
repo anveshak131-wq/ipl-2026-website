@@ -24,6 +24,7 @@ import { Team, Player } from '@/types';
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import RCBLottie from '@/components/ui/RCBLottie';
+import RCBLion from '@/components/RCBLion/RCBLion';
 import { getOptimalTextColor } from '@/lib/colorUtils';
 
 interface TeamDetailClientProps {
@@ -307,6 +308,10 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                     {teamLogoPath.endsWith('.json') ? (
                       <div className="w-3/4 h-3/4 relative z-10">
                         <RCBLottie className="w-full h-full" />
+                      </div>
+                    ) : teamLogoPath.endsWith('rcb-lion-logo.svg') ? (
+                      <div className="w-3/4 h-3/4 relative z-10 flex items-center justify-center">
+                        <RCBLion width={300} height={300} />
                       </div>
                     ) : (
                       <img 
