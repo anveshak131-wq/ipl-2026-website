@@ -193,15 +193,35 @@ export const onRequest = async (context) => {
         );
       }
 
-      const email = await env.SPORTS_KV.get(`token:${token}`);
-      if (!email) {
+      const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
+      if (!tokenValue) {
         return new Response(
           JSON.stringify({ error: 'Invalid or expired token' }),
           { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
 
+      // tokenValue may be a plain email (from /api/auth) or JSON (from /api/admin/setup)
+      let email = tokenValue;
+      if (tokenValue.trim().startsWith('{')) {
+        try {
+          const parsed = JSON.parse(tokenValue);
+          if (parsed && typeof parsed.email === 'string') {
+            email = parsed.email;
+          }
+        } catch {
+          // fall back to using tokenValue directly
+        }
+      }
+
       const userData = await env.SPORTS_KV.get(`user:${email}`);
+      if (!userData) {
+        return new Response(
+          JSON.stringify({ error: 'User not found' }),
+          { status: 404, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
+
       const user = JSON.parse(userData);
 
       if (user.isBlocked) {
@@ -214,7 +234,12 @@ export const onRequest = async (context) => {
       return new Response(
         JSON.stringify({
           success: true,
-          user: { id: user.id, email: user.email, name: user.name },
+          user: { 
+            id: user.id, 
+            email: user.email, 
+            name: user.name,
+            role: user.role || 'user' // Include role field
+          },
         }),
         { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
       );
