@@ -15,6 +15,12 @@ interface LiveScoreData {
   commentary: string[];
   status: string;
   lastUpdated: string;
+  innings?: number;
+  battingTeam?: 'team1' | 'team2';
+  toss?: {
+    winner: 'team1' | 'team2';
+    decision: 'bat' | 'bowl';
+  };
 }
 
 interface Message {
@@ -357,6 +363,22 @@ export default function LiveScorePage() {
                             <p className="text-sm text-gray-400">
                               {match.date} · {match.time}
                             </p>
+                            {liveScore && (
+                              <div className="mt-1 space-y-1">
+                                {typeof liveScore.innings === 'number' && (
+                                  <p className="text-xs text-gray-400">
+                                    {liveScore.innings === 1 ? '1st innings' : '2nd innings'} –{' '}
+                                    {liveScore.battingTeam === 'team2' ? liveScore.team2.name : liveScore.team1.name} batting
+                                  </p>
+                                )}
+                                {liveScore.toss && (
+                                  <p className="text-xs text-gray-500">
+                                    Toss: {liveScore.toss.winner === 'team2' ? liveScore.team2.name : liveScore.team1.name}{' '}
+                                    won the toss and chose to {liveScore.toss.decision === 'bat' ? 'bat' : 'bowl'}.
+                                  </p>
+                                )}
+                              </div>
+                            )}
                           </div>
                           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/40">
                             Live Score

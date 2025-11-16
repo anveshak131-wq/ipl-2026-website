@@ -44,6 +44,9 @@ export default function AdminLiveScorePage() {
     commentary: '',
     status: 'Live',
     innings: 1,
+    battingTeam: 'team1' as 'team1' | 'team2',
+    tossWinner: '' as '' | 'team1' | 'team2',
+    tossDecision: '' as '' | 'bat' | 'bowl',
   });
 
   // Check authentication
@@ -116,7 +119,8 @@ export default function AdminLiveScorePage() {
         if (response.ok) {
           const liveScoreData = await response.json();
           setLiveScore(liveScoreData);
-          setFormData({
+          setFormData((prev) => ({
+            ...prev,
             team1Name: selectedMatch.team1.shortName || selectedMatch.team1.name,
             team1Runs: liveScoreData.team1.runs,
             team1Wickets: liveScoreData.team1.wickets,
@@ -133,8 +137,11 @@ export default function AdminLiveScorePage() {
             bowlerBalls: liveScoreData.currentBowler.balls,
             commentary: liveScoreData.commentary.length > 0 ? liveScoreData.commentary[0] : '',
             status: liveScoreData.status,
-            innings: formData.innings,
-          });
+            innings: (liveScoreData as any).innings || prev.innings,
+            battingTeam: ((liveScoreData as any).battingTeam as 'team1' | 'team2') || prev.battingTeam,
+            tossWinner: ((liveScoreData as any).toss?.winner as 'team1' | 'team2') || prev.tossWinner,
+            tossDecision: ((liveScoreData as any).toss?.decision as 'bat' | 'bowl') || prev.tossDecision,
+          }));
         } else {
           // No existing live score yet; initialise from fixture
           setLiveScore(null);
@@ -202,13 +209,18 @@ export default function AdminLiveScorePage() {
     setFormData((prev) => {
       const isWicket = runs === 'W';
       const runValue = typeof runs === 'number' ? runs : 0;
+      const battingKey = prev.battingTeam === 'team1' ? 'team1' : 'team2';
 
-      const currentBalls = oversToBalls(prev.team1Overs);
+      const currentOvers = battingKey === 'team1' ? prev.team1Overs : prev.team2Overs;
+      const currentRuns = battingKey === 'team1' ? prev.team1Runs : prev.team2Runs;
+      const currentWickets = battingKey === 'team1' ? prev.team1Wickets : prev.team2Wickets;
+
+      const currentBalls = oversToBalls(currentOvers);
       const newTeamBalls = currentBalls + 1;
       const newTeamOvers = ballsToOvers(newTeamBalls);
 
-      const newTeamRuns = prev.team1Runs + runValue;
-      const newTeamWickets = isWicket ? prev.team1Wickets + 1 : prev.team1Wickets;
+      const newTeamRuns = currentRuns + runValue;
+      const newTeamWickets = isWicket ? currentWickets + 1 : currentWickets;
 
       const newBatterRuns = prev.batterRuns + runValue;
       const newBatterBalls = prev.batterBalls + 1;
@@ -229,9 +241,12 @@ export default function AdminLiveScorePage() {
 
       return {
         ...prev,
-        team1Runs: newTeamRuns,
-        team1Wickets: newTeamWickets,
-        team1Overs: newTeamOvers,
+        team1Runs: battingKey === 'team1' ? newTeamRuns : prev.team1Runs,
+        team1Wickets: battingKey === 'team1' ? newTeamWickets : prev.team1Wickets,
+        team1Overs: battingKey === 'team1' ? newTeamOvers : prev.team1Overs,
+        team2Runs: battingKey === 'team2' ? newTeamRuns : prev.team2Runs,
+        team2Wickets: battingKey === 'team2' ? newTeamWickets : prev.team2Wickets,
+        team2Overs: battingKey === 'team2' ? newTeamOvers : prev.team2Overs,
         batterRuns: newBatterRuns,
         batterBalls: newBatterBalls,
         bowlerRuns: newBowlerRuns,
@@ -277,6 +292,10 @@ export default function AdminLiveScorePage() {
           : liveScore?.commentary || [],
         status: formData.status,
         innings: formData.innings,
+        battingTeam: formData.battingTeam,
+        toss: formData.tossWinner && formData.tossDecision
+          ? { winner: formData.tossWinner, decision: formData.tossDecision }
+          : undefined,
       };
 
       const response = await fetch('/api/live-score', {
@@ -373,6 +392,45 @@ export default function AdminLiveScorePage() {
                   </select>
                 </div>
 
+                {/* Batting team toggle & Toss */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Batting team</p>
+                    <select
+                      value={formData.battingTeam}
+                      onChange={(e) => setFormData({ ...formData, battingTeam: e.target.value as 'team1' | 'team2' })}
+                      className="w-full px-3 py-2 bg-slate-700 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-ipl-gold"
+                    >
+                      <option value="team1">{formData.team1Name}</option>
+                      <option value="team2">{formData.team2Name}</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Toss winner</p>
+                    <select
+                      value={formData.tossWinner}
+                      onChange={(e) => setFormData({ ...formData, tossWinner: e.target.value as any })}
+                      className="w-full px-3 py-2 bg-slate-700 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-ipl-gold"
+                    >
+                      <option value="">Select...</option>
+                      <option value="team1">{formData.team1Name}</option>
+                      <option value="team2">{formData.team2Name}</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Toss decision</p>
+                    <select
+                      value={formData.tossDecision}
+                      onChange={(e) => setFormData({ ...formData, tossDecision: e.target.value as any })}
+                      className="w-full px-3 py-2 bg-slate-700 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-ipl-gold"
+                    >
+                      <option value="">Select...</option>
+                      <option value="bat">Bat</option>
+                      <option value="bowl">Bowl</option>
+                    </select>
+                  </div>
+                </div>
+
                 {/* Team 1 */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-ipl-gold">Team 1</h3>
@@ -454,7 +512,7 @@ export default function AdminLiveScorePage() {
                     className="w-full px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-ipl-gold"
                   >
                     <option value="">Select batter...</option>
-                    {team1Players.map((p) => (
+                    {(formData.battingTeam === 'team1' ? team1Players : team2Players).map((p) => (
                       <option key={p.id} value={p.name}>
                         {p.name}
                       </option>
@@ -489,7 +547,7 @@ export default function AdminLiveScorePage() {
                     className="w-full px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-ipl-gold"
                   >
                     <option value="">Select bowler...</option>
-                    {team2Players.map((p) => (
+                    {(formData.battingTeam === 'team1' ? team2Players : team1Players).map((p) => (
                       <option key={p.id} value={p.name}>
                         {p.name}
                       </option>
