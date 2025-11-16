@@ -225,134 +225,68 @@ export default function AdminKeyPlayersPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Power hitter */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Power hitter</label>
-                    <select
-                      multiple
-                      value={formData.powerHitterIds || []}
-                      onChange={(e) =>
-                        handleRoleChange(
-                          'powerHitterIds',
-                          Array.from(e.target.selectedOptions).map((opt) => opt.value)
-                        )
-                      }
-                      className="w-full px-4 py-3 bg-slate-700 border border-white/10 rounded-lg text-white focus:outline-none focus:border-ipl-gold text-sm"
-                    >
-                      {teamPlayers.map((player) => (
-                        <option key={player.id} value={player.id}>
-                          {player.name} ({player.role})
-                        </option>
-                      ))}
-                    </select>
+                    <RoleSelector
+                      label="Power hitter"
+                      field="powerHitterIds"
+                      selectedIds={formData.powerHitterIds}
+                      teamPlayers={teamPlayers}
+                      onChange={handleRoleChange}
+                    />
                   </div>
 
                   {/* Anchor */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Anchor</label>
-                    <select
-                      multiple
-                      value={formData.anchorIds || []}
-                      onChange={(e) =>
-                        handleRoleChange(
-                          'anchorIds',
-                          Array.from(e.target.selectedOptions).map((opt) => opt.value)
-                        )
-                      }
-                      className="w-full px-4 py-3 bg-slate-700 border border-white/10 rounded-lg text-white focus:outline-none focus:border-ipl-gold text-sm"
-                    >
-                      {teamPlayers.map((player) => (
-                        <option key={player.id} value={player.id}>
-                          {player.name} ({player.role})
-                        </option>
-                      ))}
-                    </select>
+                    <RoleSelector
+                      label="Anchor"
+                      field="anchorIds"
+                      selectedIds={formData.anchorIds}
+                      teamPlayers={teamPlayers}
+                      onChange={handleRoleChange}
+                    />
                   </div>
 
                   {/* Finisher */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Finisher</label>
-                    <select
-                      multiple
-                      value={formData.finisherIds || []}
-                      onChange={(e) =>
-                        handleRoleChange(
-                          'finisherIds',
-                          Array.from(e.target.selectedOptions).map((opt) => opt.value)
-                        )
-                      }
-                      className="w-full px-4 py-3 bg-slate-700 border border-white/10 rounded-lg text-white focus:outline-none focus:border-ipl-gold text-sm"
-                    >
-                      {teamPlayers.map((player) => (
-                        <option key={player.id} value={player.id}>
-                          {player.name} ({player.role})
-                        </option>
-                      ))}
-                    </select>
+                    <RoleSelector
+                      label="Finisher"
+                      field="finisherIds"
+                      selectedIds={formData.finisherIds}
+                      teamPlayers={teamPlayers}
+                      onChange={handleRoleChange}
+                    />
                   </div>
 
                   {/* Strike bowler */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Strike bowler</label>
-                    <select
-                      multiple
-                      value={formData.strikeBowlerIds || []}
-                      onChange={(e) =>
-                        handleRoleChange(
-                          'strikeBowlerIds',
-                          Array.from(e.target.selectedOptions).map((opt) => opt.value)
-                        )
-                      }
-                      className="w-full px-4 py-3 bg-slate-700 border border-white/10 rounded-lg text-white focus:outline-none focus:border-ipl-gold text-sm"
-                    >
-                      {teamPlayers.map((player) => (
-                        <option key={player.id} value={player.id}>
-                          {player.name} ({player.role})
-                        </option>
-                      ))}
-                    </select>
+                    <RoleSelector
+                      label="Strike bowler"
+                      field="strikeBowlerIds"
+                      selectedIds={formData.strikeBowlerIds}
+                      teamPlayers={teamPlayers}
+                      onChange={handleRoleChange}
+                    />
                   </div>
 
                   {/* Death specialist */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Death specialist</label>
-                    <select
-                      multiple
-                      value={formData.deathSpecialistIds || []}
-                      onChange={(e) =>
-                        handleRoleChange(
-                          'deathSpecialistIds',
-                          Array.from(e.target.selectedOptions).map((opt) => opt.value)
-                        )
-                      }
-                      className="w-full px-4 py-3 bg-slate-700 border border-white/10 rounded-lg text-white focus:outline-none focus:border-ipl-gold text-sm"
-                    >
-                      {teamPlayers.map((player) => (
-                        <option key={player.id} value={player.id}>
-                          {player.name} ({player.role})
-                        </option>
-                      ))}
-                    </select>
+                    <RoleSelector
+                      label="Death specialist"
+                      field="deathSpecialistIds"
+                      selectedIds={formData.deathSpecialistIds}
+                      teamPlayers={teamPlayers}
+                      onChange={handleRoleChange}
+                    />
                   </div>
 
                   {/* X-factor all-rounder */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">X-factor all-rounder</label>
-                    <select
-                      multiple
-                      value={formData.allRoundXFactorIds || []}
-                      onChange={(e) =>
-                        handleRoleChange(
-                          'allRoundXFactorIds',
-                          Array.from(e.target.selectedOptions).map((opt) => opt.value)
-                        )
-                      }
-                      className="w-full px-4 py-3 bg-slate-700 border border-white/10 rounded-lg text-white focus:outline-none focus:border-ipl-gold text-sm"
-                    >
-                      {teamPlayers.map((player) => (
-                        <option key={player.id} value={player.id}>
-                          {player.name} ({player.role})
-                        </option>
-                      ))}
-                    </select>
+                    <RoleSelector
+                      label="X-factor all-rounder"
+                      field="allRoundXFactorIds"
+                      selectedIds={formData.allRoundXFactorIds}
+                      teamPlayers={teamPlayers}
+                      onChange={handleRoleChange}
+                    />
                   </div>
                 </div>
 
@@ -381,6 +315,54 @@ export default function AdminKeyPlayersPage() {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+interface RoleSelectorProps {
+  label: string;
+  field: keyof KeyPlayers;
+  selectedIds?: string[];
+  teamPlayers: Player[];
+  onChange: (field: keyof KeyPlayers, ids: string[]) => void;
+}
+
+function RoleSelector({ label, field, selectedIds = [], teamPlayers, onChange }: RoleSelectorProps) {
+  const togglePlayer = (playerId: string) => {
+    const exists = selectedIds.includes(playerId);
+    const next = exists ? selectedIds.filter((id) => id !== playerId) : [...selectedIds, playerId];
+    onChange(field, next);
+  };
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-300 mb-2">{label}</label>
+      <div className="flex flex-wrap gap-2">
+        {teamPlayers.map((player) => {
+          const active = selectedIds.includes(player.id);
+          return (
+            <button
+              key={player.id}
+              type="button"
+              onClick={() => togglePlayer(player.id)}
+              className={`px-3 py-1.5 rounded-full text-xs border transition-all duration-150 flex items-center gap-1.5 ${
+                active
+                  ? 'bg-ipl-gold text-slate-900 border-ipl-gold shadow-sm'
+                  : 'bg-slate-700/80 text-gray-200 border-white/10 hover:bg-slate-600'
+              }`}
+            >
+              <span className="truncate max-w-[140px]">
+                {player.name} ({player.role})
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      {selectedIds.length > 0 && (
+        <p className="mt-2 text-[11px] text-gray-400">
+          {selectedIds.length} selected
+        </p>
+      )}
     </div>
   );
 }
