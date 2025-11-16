@@ -23,6 +23,13 @@ interface HourlyMessageData {
   count: number;
 }
 
+interface TimeOfDayBuckets {
+  night: number; // 00:00 - 05:59
+  morning: number; // 06:00 - 11:59
+  afternoon: number; // 12:00 - 17:59
+  evening: number; // 18:00 - 23:59
+}
+
 export default function AdminDashboard() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -40,6 +47,12 @@ export default function AdminDashboard() {
     engagementRate: 0,
   });
   const [hourlyMessages, setHourlyMessages] = useState<HourlyMessageData[]>([]);
+  const [timeOfDayBuckets, setTimeOfDayBuckets] = useState<TimeOfDayBuckets>({
+    night: 0,
+    morning: 0,
+    afternoon: 0,
+    evening: 0,
+  });
   const [apiStatus, setApiStatus] = useState<{
     users: 'ok' | 'error' | 'loading';
     messages: 'ok' | 'error' | 'loading';
@@ -149,6 +162,32 @@ export default function AdminDashboard() {
         count,
       }));
       setHourlyMessages(hourlyMessagesArray);
+
+      // Time-of-day buckets for advanced analytics (last 24 hours)
+      const buckets: TimeOfDayBuckets = {
+        night: 0,
+        morning: 0,
+        afternoon: 0,
+        evening: 0,
+      };
+
+      messages.forEach((msg: any) => {
+        const msgTime = new Date(msg.timestamp);
+        if (msgTime.getTime() < last24Hours) return;
+        const hour = msgTime.getHours();
+
+        if (hour < 6) {
+          buckets.night += 1;
+        } else if (hour < 12) {
+          buckets.morning += 1;
+        } else if (hour < 18) {
+          buckets.afternoon += 1;
+        } else {
+          buckets.evening += 1;
+        }
+      });
+
+      setTimeOfDayBuckets(buckets);
 
       // Fetch matches
       let matches: any[] = [];
@@ -523,7 +562,7 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* User Activity */}
+            {/* User Activity & Engagement by Time of Day */}
             <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-white">User Activity</h2>
@@ -565,12 +604,86 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl border border-blue-500/20">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mb-4">
                     <div>
                       <p className="text-sm text-gray-400 mb-1">Engagement Score</p>
                       <p className="text-2xl font-bold text-white">{stats.engagementRate}%</p>
                     </div>
                     <TrendingUp className="w-8 h-8 text-blue-400" />
+                  </div>
+
+                  {/* Engagement by Time of Day */}
+                  <div className="mt-4 space-y-3">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Engagement by time of day</p>
+                      <p className="text-xs text-gray-400">Last 24h</p>
+                    </div>
+
+                    {(() => {
+                      const total =
+                        timeOfDayBuckets.night +
+                        timeOfDayBuckets.morning +
+                        timeOfDayBuckets.afternoon +
+                        timeOfDayBuckets.evening;
+
+                      const segments = [
+                        {
+                          label: 'Night',
+                          range: '00:00 – 05:59',
+                          value: timeOfDayBuckets.night,
+                          color: 'from-slate-500 to-slate-300',
+                        },
+                        {
+                          label: 'Morning',
+                          range: '06:00 – 11:59',
+                          value: timeOfDayBuckets.morning,
+                          color: 'from-sky-500 to-sky-300',
+                        },
+                        {
+                          label: 'Afternoon',
+                          range: '12:00 – 17:59',
+                          value: timeOfDayBuckets.afternoon,
+                          color: 'from-amber-500 to-amber-300',
+                        },
+                        {
+                          label: 'Evening',
+                          range: '18:00 – 23:59',
+                          value: timeOfDayBuckets.evening,
+                          color: 'from-purple-500 to-pink-500',
+                        },
+                      ];
+
+                      if (!total) {
+                        return (
+                          <p className="text-xs text-gray-400 mt-2">Not enough data yet to break down engagement by time of day.</p>
+                        );
+                      }
+
+                      return (
+                        <div className="space-y-2">
+                          {segments.map((segment) => {
+                            const percentage = Math.round((segment.value / total) * 100);
+                            return (
+                              <div key={segment.label} className="space-y-1">
+                                <div className="flex items-center justify-between text-xs">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-gray-200 font-medium">{segment.label}</span>
+                                    <span className="text-gray-500">{segment.range}</span>
+                                  </div>
+                                  <span className="text-gray-300 font-semibold">{percentage}%</span>
+                                </div>
+                                <div className="w-full h-2 rounded-full bg-slate-800/80 overflow-hidden">
+                                  <div
+                                    className={`h-full rounded-full bg-gradient-to-r ${segment.color}`}
+                                    style={{ width: `${Math.max(percentage, 4)}%` }}
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>
