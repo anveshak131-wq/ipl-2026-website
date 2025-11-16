@@ -115,15 +115,7 @@ export default function LiveScorePage() {
     return () => clearInterval(interval);
   }, [user]);
 
-  // Auto-scroll to latest message (only when new message is sent)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [isSendingMessage]);
-
-  // Track user activity for admin engagement page
+  // Handle auth
   const trackUserActivity = async () => {
     if (!user) return;
     
@@ -169,6 +161,10 @@ export default function LiveScorePage() {
         setNewMessage('');
         // Track activity when message is sent
         await trackUserActivity();
+        // Scroll to bottom after message is sent
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
       } else {
         alert('Failed to send message');
       }
