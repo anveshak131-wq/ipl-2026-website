@@ -25,9 +25,9 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// ../.wrangler/tmp/bundle-bvQiNi/checked-fetch.js
+// ../.wrangler/tmp/bundle-bC2Ho0/checked-fetch.js
 var require_checked_fetch = __commonJS({
-  "../.wrangler/tmp/bundle-bvQiNi/checked-fetch.js"() {
+  "../.wrangler/tmp/bundle-bC2Ho0/checked-fetch.js"() {
     "use strict";
     var urls = /* @__PURE__ */ new Set();
     function checkURL(request, init) {
@@ -632,8 +632,112 @@ var onRequest4 = /* @__PURE__ */ __name(async (context) => {
   }
 }, "onRequest");
 
-// api/auth.js
+// api/messages/[id].js
 var import_checked_fetch5 = __toESM(require_checked_fetch());
+var onRequest5 = /* @__PURE__ */ __name(async (context) => {
+  const { request, env, params } = context;
+  const { id } = params || {};
+  const method = request.method;
+  const corsHeaders2 = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization"
+  };
+  if (method === "OPTIONS") {
+    return new Response(null, {
+      status: 200,
+      headers: corsHeaders2
+    });
+  }
+  if (method !== "DELETE") {
+    return new Response(
+      JSON.stringify({ error: "Method not allowed" }),
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
+    );
+  }
+  try {
+    if (!id) {
+      return new Response(
+        JSON.stringify({ error: "Message ID required" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
+      );
+    }
+    const url = new URL(request.url);
+    const matchId = url.searchParams.get("matchId") || "current";
+    const token = request.headers.get("Authorization")?.replace("Bearer ", "");
+    if (!token) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
+      );
+    }
+    if (!env || !env.SPORTS_KV) {
+      return new Response(
+        JSON.stringify({ error: "KV not configured" }),
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
+      );
+    }
+    const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
+    if (!tokenValue) {
+      return new Response(
+        JSON.stringify({ error: "Invalid token" }),
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
+      );
+    }
+    let email = tokenValue;
+    if (tokenValue.trim().startsWith("{")) {
+      try {
+        const parsed = JSON.parse(tokenValue);
+        if (parsed && typeof parsed.email === "string") {
+          email = parsed.email;
+        }
+      } catch {
+      }
+    }
+    const userData = await env.SPORTS_KV.get(`user:${email}`);
+    if (!userData) {
+      return new Response(
+        JSON.stringify({ error: "User not found" }),
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
+      );
+    }
+    const user = JSON.parse(userData);
+    if (user.role !== "admin" && user.role !== "super_admin") {
+      return new Response(
+        JSON.stringify({ error: "Forbidden" }),
+        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
+      );
+    }
+    const messagesKey = `messages:${matchId}`;
+    const messagesData = await env.SPORTS_KV.get(messagesKey);
+    let messages = messagesData ? JSON.parse(messagesData) : [];
+    const beforeLength = messages.length;
+    messages = messages.filter((m) => m.id !== id);
+    if (messages.length === beforeLength) {
+      return new Response(JSON.stringify({ success: true, deleted: false }), {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders2 }
+      });
+    }
+    await env.SPORTS_KV.put(messagesKey, JSON.stringify(messages), {
+      expirationTtl: 604800
+      // 7 days
+    });
+    return new Response(JSON.stringify({ success: true, deleted: true }), {
+      status: 200,
+      headers: { "Content-Type": "application/json", ...corsHeaders2 }
+    });
+  } catch (error) {
+    console.error("Messages delete error:", error);
+    return new Response(
+      JSON.stringify({ error: "Internal server error" }),
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
+    );
+  }
+}, "onRequest");
+
+// api/auth.js
+var import_checked_fetch6 = __toESM(require_checked_fetch());
 import crypto4 from "node:crypto";
 var encryptPassword = /* @__PURE__ */ __name((password, salt) => {
   const hash = crypto4.createHash("sha256");
@@ -642,7 +746,7 @@ var encryptPassword = /* @__PURE__ */ __name((password, salt) => {
 }, "encryptPassword");
 var generateSalt = /* @__PURE__ */ __name(() => crypto4.randomBytes(16).toString("hex"), "generateSalt");
 var generateToken2 = /* @__PURE__ */ __name(() => crypto4.randomBytes(32).toString("hex"), "generateToken");
-var onRequest5 = /* @__PURE__ */ __name(async (context) => {
+var onRequest6 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const method = request.method;
@@ -865,7 +969,7 @@ var onRequest5 = /* @__PURE__ */ __name(async (context) => {
 }, "onRequest");
 
 // api/content.js
-var import_checked_fetch6 = __toESM(require_checked_fetch());
+var import_checked_fetch7 = __toESM(require_checked_fetch());
 async function getBody(request) {
   if (request.method === "GET" || request.method === "HEAD") {
     return null;
@@ -879,7 +983,7 @@ async function getBody(request) {
 __name(getBody, "getBody");
 var kv = globalThis.IPL_CACHE;
 var KV_KEY = "ipl:content";
-var onRequest6 = /* @__PURE__ */ __name(async (context) => {
+var onRequest7 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const kvNamespace = env.IPL_CACHE || kv;
   const corsHeaders2 = {
@@ -1035,8 +1139,8 @@ var onRequest6 = /* @__PURE__ */ __name(async (context) => {
 }, "onRequest");
 
 // api/enrichDescription.js
-var import_checked_fetch7 = __toESM(require_checked_fetch());
-async function onRequest7(context) {
+var import_checked_fetch8 = __toESM(require_checked_fetch());
+async function onRequest8(context) {
   const { request } = context;
   try {
     let teamName = "";
@@ -1071,11 +1175,11 @@ async function onRequest7(context) {
     return new Response(JSON.stringify({ error: "internal error" }), { status: 500, headers: { "Content-Type": "application/json" } });
   }
 }
-__name(onRequest7, "onRequest");
+__name(onRequest8, "onRequest");
 
 // api/live-score.js
-var import_checked_fetch8 = __toESM(require_checked_fetch());
-var onRequest8 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch9 = __toESM(require_checked_fetch());
+var onRequest9 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const method = request.method;
@@ -1163,7 +1267,7 @@ var onRequest8 = /* @__PURE__ */ __name(async (context) => {
 }, "onRequest");
 
 // api/matches.js
-var import_checked_fetch9 = __toESM(require_checked_fetch());
+var import_checked_fetch10 = __toESM(require_checked_fetch());
 var mockTeams = [
   {
     id: "1",
@@ -1446,7 +1550,7 @@ async function handleDeleteRequest(context) {
   }
 }
 __name(handleDeleteRequest, "handleDeleteRequest");
-async function onRequest9(context) {
+async function onRequest10(context) {
   const { request } = context;
   const method = request.method;
   if (method === "OPTIONS") {
@@ -1484,11 +1588,11 @@ async function onRequest9(context) {
   response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
   return response;
 }
-__name(onRequest9, "onRequest");
+__name(onRequest10, "onRequest");
 
 // api/messages.js
-var import_checked_fetch10 = __toESM(require_checked_fetch());
-var onRequest10 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch11 = __toESM(require_checked_fetch());
+var onRequest11 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { pathname, searchParams } = new URL(request.url);
   const method = request.method;
@@ -1657,13 +1761,13 @@ var onRequest10 = /* @__PURE__ */ __name(async (context) => {
 }, "onRequest");
 
 // api/players.js
-var import_checked_fetch11 = __toESM(require_checked_fetch());
+var import_checked_fetch12 = __toESM(require_checked_fetch());
 var corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization"
 };
-var onRequest11 = /* @__PURE__ */ __name(async (context) => {
+var onRequest12 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
@@ -1814,8 +1918,8 @@ var onRequest11 = /* @__PURE__ */ __name(async (context) => {
 }, "onRequest");
 
 // api/seed.js
-var import_checked_fetch12 = __toESM(require_checked_fetch());
-var onRequest12 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch13 = __toESM(require_checked_fetch());
+var onRequest13 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   if (request.method === "OPTIONS") {
     return new Response(null, {
@@ -2030,7 +2134,7 @@ var onRequest12 = /* @__PURE__ */ __name(async (context) => {
 }, "onRequest");
 
 // api/settings.js
-var import_checked_fetch13 = __toESM(require_checked_fetch());
+var import_checked_fetch14 = __toESM(require_checked_fetch());
 function verifyAdminToken2(request) {
   const authHeader = request.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -2105,7 +2209,7 @@ async function handlePutRequest2(context) {
   }
 }
 __name(handlePutRequest2, "handlePutRequest");
-async function onRequest13(context) {
+async function onRequest14(context) {
   const { request } = context;
   const method = request.method;
   if (method === "OPTIONS") {
@@ -2137,10 +2241,10 @@ async function onRequest13(context) {
   response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
   return response;
 }
-__name(onRequest13, "onRequest");
+__name(onRequest14, "onRequest");
 
 // api/teams.js
-var import_checked_fetch14 = __toESM(require_checked_fetch());
+var import_checked_fetch15 = __toESM(require_checked_fetch());
 function verifyAdminToken3(request) {
   const authHeader = request.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -2427,7 +2531,7 @@ async function handleDeleteRequest2(context) {
   }
 }
 __name(handleDeleteRequest2, "handleDeleteRequest");
-async function onRequest14(context) {
+async function onRequest15(context) {
   const { request } = context;
   const method = request.method;
   if (method === "OPTIONS") {
@@ -2465,17 +2569,17 @@ async function onRequest14(context) {
   response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
   return response;
 }
-__name(onRequest14, "onRequest");
+__name(onRequest15, "onRequest");
 
 // [[route]].ts
-var import_checked_fetch15 = __toESM(require_checked_fetch());
-var onRequest15 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch16 = __toESM(require_checked_fetch());
+var onRequest16 = /* @__PURE__ */ __name(async (context) => {
   return context.next();
 }, "onRequest");
 
 // _middleware.ts
-var import_checked_fetch16 = __toESM(require_checked_fetch());
-var onRequest16 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch17 = __toESM(require_checked_fetch());
+var onRequest17 = /* @__PURE__ */ __name(async (context) => {
   const { request } = context;
   console.log(`[Middleware] ${request.method} ${new URL(request.url).pathname}`);
   return context.next();
@@ -2512,102 +2616,109 @@ var routes = [
     modules: [onRequest4]
   },
   {
-    routePath: "/api/auth",
-    mountPath: "/api",
+    routePath: "/api/messages/:id",
+    mountPath: "/api/messages",
     method: "",
     middlewares: [],
     modules: [onRequest5]
   },
   {
-    routePath: "/api/content",
+    routePath: "/api/auth",
     mountPath: "/api",
     method: "",
     middlewares: [],
     modules: [onRequest6]
   },
   {
-    routePath: "/api/enrichDescription",
+    routePath: "/api/content",
     mountPath: "/api",
     method: "",
     middlewares: [],
     modules: [onRequest7]
   },
   {
-    routePath: "/api/live-score",
+    routePath: "/api/enrichDescription",
     mountPath: "/api",
     method: "",
     middlewares: [],
     modules: [onRequest8]
   },
   {
-    routePath: "/api/matches",
+    routePath: "/api/live-score",
     mountPath: "/api",
     method: "",
     middlewares: [],
     modules: [onRequest9]
   },
   {
-    routePath: "/api/messages",
+    routePath: "/api/matches",
     mountPath: "/api",
     method: "",
     middlewares: [],
     modules: [onRequest10]
   },
   {
-    routePath: "/api/players",
+    routePath: "/api/messages",
     mountPath: "/api",
     method: "",
     middlewares: [],
     modules: [onRequest11]
   },
   {
-    routePath: "/api/seed",
+    routePath: "/api/players",
     mountPath: "/api",
     method: "",
     middlewares: [],
     modules: [onRequest12]
   },
   {
-    routePath: "/api/settings",
+    routePath: "/api/seed",
     mountPath: "/api",
     method: "",
     middlewares: [],
     modules: [onRequest13]
   },
   {
-    routePath: "/api/teams",
+    routePath: "/api/settings",
     mountPath: "/api",
     method: "",
     middlewares: [],
     modules: [onRequest14]
   },
   {
-    routePath: "/:route*",
-    mountPath: "/",
+    routePath: "/api/teams",
+    mountPath: "/api",
     method: "",
     middlewares: [],
     modules: [onRequest15]
   },
   {
+    routePath: "/:route*",
+    mountPath: "/",
+    method: "",
+    middlewares: [],
+    modules: [onRequest16]
+  },
+  {
     routePath: "/",
     mountPath: "/",
     method: "",
-    middlewares: [onRequest16],
+    middlewares: [onRequest17],
     modules: []
   }
 ];
 
-// ../.wrangler/tmp/bundle-bvQiNi/middleware-loader.entry.ts
-var import_checked_fetch23 = __toESM(require_checked_fetch());
+// ../.wrangler/tmp/bundle-bC2Ho0/middleware-loader.entry.ts
+var import_checked_fetch24 = __toESM(require_checked_fetch());
 
-// ../.wrangler/tmp/bundle-bvQiNi/middleware-insertion-facade.js
-var import_checked_fetch21 = __toESM(require_checked_fetch());
+// ../.wrangler/tmp/bundle-bC2Ho0/middleware-insertion-facade.js
+var import_checked_fetch22 = __toESM(require_checked_fetch());
 
 // ../../../.npm/_npx/32026684e21afda6/node_modules/wrangler/templates/pages-template-worker.ts
-var import_checked_fetch18 = __toESM(require_checked_fetch());
+var import_checked_fetch19 = __toESM(require_checked_fetch());
 
 // ../../../.npm/_npx/32026684e21afda6/node_modules/path-to-regexp/dist.es2015/index.js
-var import_checked_fetch17 = __toESM(require_checked_fetch());
+var import_checked_fetch18 = __toESM(require_checked_fetch());
 function lexer(str) {
   var tokens = [];
   var i = 0;
@@ -3054,7 +3165,7 @@ var cloneResponse = /* @__PURE__ */ __name((response) => (
 ), "cloneResponse");
 
 // ../../../.npm/_npx/32026684e21afda6/node_modules/wrangler/templates/middleware/middleware-ensure-req-body-drained.ts
-var import_checked_fetch19 = __toESM(require_checked_fetch());
+var import_checked_fetch20 = __toESM(require_checked_fetch());
 var drainBody = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx) => {
   try {
     return await middlewareCtx.next(request, env);
@@ -3073,7 +3184,7 @@ var drainBody = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 var middleware_ensure_req_body_drained_default = drainBody;
 
 // ../../../.npm/_npx/32026684e21afda6/node_modules/wrangler/templates/middleware/middleware-miniflare3-json-error.ts
-var import_checked_fetch20 = __toESM(require_checked_fetch());
+var import_checked_fetch21 = __toESM(require_checked_fetch());
 function reduceError(e) {
   return {
     name: e?.name,
@@ -3096,7 +3207,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// ../.wrangler/tmp/bundle-bvQiNi/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-bC2Ho0/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -3104,7 +3215,7 @@ var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
 var middleware_insertion_facade_default = pages_template_worker_default;
 
 // ../../../.npm/_npx/32026684e21afda6/node_modules/wrangler/templates/middleware/common.ts
-var import_checked_fetch22 = __toESM(require_checked_fetch());
+var import_checked_fetch23 = __toESM(require_checked_fetch());
 var __facade_middleware__ = [];
 function __facade_register__(...args) {
   __facade_middleware__.push(...args.flat());
@@ -3129,7 +3240,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// ../.wrangler/tmp/bundle-bvQiNi/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-bC2Ho0/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

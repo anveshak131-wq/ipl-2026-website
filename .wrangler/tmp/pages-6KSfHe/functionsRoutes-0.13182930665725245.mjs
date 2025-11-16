@@ -2,6 +2,7 @@ import { onRequest as __api_admin_users_activity_js_onRequest } from "/Users/anv
 import { onRequest as __api_admin_login_js_onRequest } from "/Users/anvesh/Downloads/sportsup99/functions/api/admin/login.js"
 import { onRequest as __api_admin_setup_js_onRequest } from "/Users/anvesh/Downloads/sportsup99/functions/api/admin/setup.js"
 import { onRequest as __api_admin_users_js_onRequest } from "/Users/anvesh/Downloads/sportsup99/functions/api/admin/users.js"
+import { onRequest as __api_messages__id__js_onRequest } from "/Users/anvesh/Downloads/sportsup99/functions/api/messages/[id].js"
 import { onRequest as __api_auth_js_onRequest } from "/Users/anvesh/Downloads/sportsup99/functions/api/auth.js"
 import { onRequest as __api_content_js_onRequest } from "/Users/anvesh/Downloads/sportsup99/functions/api/content.js"
 import { onRequest as __api_enrichDescription_js_onRequest } from "/Users/anvesh/Downloads/sportsup99/functions/api/enrichDescription.js"
@@ -43,6 +44,13 @@ export const routes = [
       method: "",
       middlewares: [],
       modules: [__api_admin_users_js_onRequest],
+    },
+  {
+      routePath: "/api/messages/:id",
+      mountPath: "/api/messages",
+      method: "",
+      middlewares: [],
+      modules: [__api_messages__id__js_onRequest],
     },
   {
       routePath: "/api/auth",

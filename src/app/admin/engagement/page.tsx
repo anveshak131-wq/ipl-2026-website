@@ -361,49 +361,102 @@ export default function AdminEngagementPage() {
       {showActionModal && selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => setShowActionModal(false)}
           />
-          <div className="relative z-10 w-full max-w-md mx-4 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-white/10 p-8">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              {actionType === 'block' ? 'Block User' : 'Delete User'}
-            </h2>
+          <div className="relative z-10 w-full max-w-lg mx-4">
+            <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 rounded-2xl shadow-2xl border border-white/10 overflow-hidden">
+              {/* Header */}
+              <div className="px-6 pt-5 pb-4 border-b border-white/10 flex items-start gap-3">
+                <div
+                  className={`mt-1 flex h-9 w-9 items-center justify-center rounded-full border text-sm font-semibold ${
+                    actionType === 'block'
+                      ? 'border-yellow-400/40 bg-yellow-500/10 text-yellow-300'
+                      : 'border-red-400/40 bg-red-500/10 text-red-300'
+                  }`}
+                >
+                  {actionType === 'block' ? '!' : '×'}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h2 className="text-xl font-semibold text-white">
+                      {actionType === 'block' ? 'Block user from chat' : 'Delete user account'}
+                    </h2>
+                    <span
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        actionType === 'block'
+                          ? 'bg-yellow-500/10 text-yellow-300 border border-yellow-400/30'
+                          : 'bg-red-500/10 text-red-300 border border-red-400/30'
+                      }`}
+                    >
+                      {actionType === 'block' ? 'Block action' : 'Danger action'}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-300">
+                    {actionType === 'block'
+                      ? `This will prevent ${selectedUser.name} from sending messages or participating in chat.`
+                      : `This will permanently remove ${selectedUser.name}'s account and related data. This action cannot be undone.`}
+                  </p>
+                </div>
+              </div>
 
-            <p className="text-gray-300 mb-6">
-              {actionType === 'block'
-                ? `Are you sure you want to block ${selectedUser.name}? They won't be able to send messages or chat.`
-                : `Are you sure you want to delete ${selectedUser.name}? This action is permanent.`}
-            </p>
+              {/* Body */}
+              <div className="px-6 py-5 space-y-4">
+                <div className="flex items-center justify-between text-sm">
+                  <div className="text-gray-400">
+                    <span className="text-gray-500">User:</span>{' '}
+                    <span className="text-white font-medium">{selectedUser.name}</span>
+                  </div>
+                  <div className="text-xs text-gray-500 truncate max-w-[220px]">
+                    {selectedUser.email}
+                  </div>
+                </div>
 
-            {actionType === 'block' && (
-              <textarea
-                placeholder="Reason for blocking (optional)..."
-                value={actionReason}
-                onChange={(e) => setActionReason(e.target.value)}
-                maxLength={200}
-                rows={3}
-                className="w-full px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold mb-4 resize-none"
-              />
-            )}
+                {actionType === 'block' && (
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-2">
+                      Reason for blocking <span className="text-gray-500">(optional)</span>
+                    </label>
+                    <textarea
+                      placeholder="Add a short note so other admins understand why this user was blocked..."
+                      value={actionReason}
+                      onChange={(e) => setActionReason(e.target.value)}
+                      maxLength={200}
+                      rows={3}
+                      className="w-full px-4 py-2.5 bg-slate-900/80 border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-ipl-gold/70 focus:border-transparent resize-none"
+                    />
+                    <div className="mt-1 text-xs text-gray-500 flex justify-between">
+                      <span>Keep it short and factual. This is visible only to admins.</span>
+                      <span>{actionReason.length}/200</span>
+                    </div>
+                  </div>
+                )}
+              </div>
 
-            <div className="flex gap-4">
-              <button
-                onClick={() => setShowActionModal(false)}
-                className="flex-1 px-4 py-2 bg-gray-700/50 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmAction}
-                disabled={isProcessing}
-                className={`flex-1 px-4 py-2 font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                  actionType === 'block'
-                    ? 'bg-yellow-600 hover:bg-yellow-700 text-white'
-                    : 'bg-red-600 hover:bg-red-700 text-white'
-                }`}
-              >
-                {isProcessing ? 'Processing...' : actionType === 'block' ? 'Block User' : 'Delete User'}
-              </button>
+              {/* Footer */}
+              <div className="px-6 pb-5 pt-3 border-t border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3">
+                <button
+                  onClick={() => setShowActionModal(false)}
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-white/10 bg-slate-800/60 text-sm font-medium text-gray-200 hover:bg-slate-700/80 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmAction}
+                  disabled={isProcessing}
+                  className={`w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-red-900/40 transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
+                    actionType === 'block'
+                      ? 'bg-yellow-600 hover:bg-yellow-500 text-black'
+                      : 'bg-red-600 hover:bg-red-500 text-white'
+                  }`}
+                >
+                  {isProcessing
+                    ? 'Processing...'
+                    : actionType === 'block'
+                    ? 'Confirm block'
+                    : 'Confirm delete'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
