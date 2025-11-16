@@ -43,6 +43,7 @@ export default function StatsPage() {
   const [publishedStats, setPublishedStats] = useState<PublishedStats | null>(null);
   const [selectedTeam1Id, setSelectedTeam1Id] = useState<string>('');
   const [selectedTeam2Id, setSelectedTeam2Id] = useState<string>('');
+  const [expandedPlayerId, setExpandedPlayerId] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -396,34 +397,70 @@ export default function StatsPage() {
               </div>
 
               <div className="space-y-2">
-                {topRunScorers.map((p, index) => (
-                  <div
-                    key={p.id}
-                    className="flex items-center justify-between rounded-2xl bg-black/20 border border-white/10 px-4 py-3 hover:border-ipl-gold/50 transition-all duration-200"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-ipl-gold/80 to-ipl-purple/80 flex items-center justify-center text-xs font-bold text-white">
-                        #{index + 1}
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold text-white">
-                          {p.name}
+                {topRunScorers.map((p, index) => {
+                  const isLeader = index === 0;
+                  return (
+                    <div
+                      key={p.id}
+                      onClick={() =>
+                        setExpandedPlayerId((prev) => (prev === p.id ? null : p.id))
+                      }
+                      className={`rounded-2xl border px-4 py-3 transition-all duration-200 cursor-pointer ${
+                        isLeader
+                          ? 'bg-gradient-to-r from-ipl-gold/20 via-ipl-purple/20 to-black/40 border-ipl-gold/60 shadow-lg shadow-ipl-gold/20'
+                          : 'bg-black/20 border-white/10 hover:border-ipl-gold/50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`rounded-full flex items-center justify-center text-xs font-bold text-white ${
+                              isLeader
+                                ? 'w-10 h-10 bg-gradient-to-br from-ipl-gold to-ipl-purple'
+                                : 'w-8 h-8 bg-gradient-to-br from-ipl-gold/80 to-ipl-purple/80'
+                            }`}
+                          >
+                            #{index + 1}
+                          </div>
+                          <div>
+                            <div
+                              className={`font-semibold text-white ${
+                                isLeader ? 'text-base' : 'text-sm'
+                              }`}
+                            >
+                              {p.name}
+                            </div>
+                            <div className="text-[11px] text-gray-400">
+                              {p.role} • {p.stats.matches} matches
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-[11px] text-gray-400">
-                          {p.role} • {p.stats.matches} matches
+                        <div className="text-right">
+                          <div
+                            className={`font-bold text-ipl-gold ${
+                              isLeader ? 'text-lg' : 'text-base'
+                            }`}
+                          >
+                            {p.stats.runs} runs
+                          </div>
+                          <div className="text-[11px] text-gray-400">
+                            SR {p.stats.strikeRate.toFixed(1)} • Avg{' '}
+                            {p.stats.average.toFixed(1)}
+                          </div>
                         </div>
                       </div>
+                      {expandedPlayerId === p.id && (
+                        <div className="mt-2 pt-2 border-t border-white/10 text-[11px] text-gray-300 flex flex-wrap gap-x-4 gap-y-1">
+                          <span>Highest: {p.stats.highest}</span>
+                          <span>4s: {p.stats.fours}</span>
+                          <span>6s: {p.stats.sixes}</span>
+                          <span>50s: {p.stats.fifties}</span>
+                          <span>100s: {p.stats.hundreds}</span>
+                        </div>
+                      )}
                     </div>
-                    <div className="text-right">
-                      <div className="text-base font-bold text-ipl-gold">
-                        {p.stats.runs} runs
-                      </div>
-                      <div className="text-[11px] text-gray-400">
-                        SR {p.stats.strikeRate.toFixed(1)} • Avg {p.stats.average.toFixed(1)}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
@@ -444,34 +481,71 @@ export default function StatsPage() {
               </div>
 
               <div className="space-y-2">
-                {topWicketTakers.map((p, index) => (
-                  <div
-                    key={p.id}
-                    className="flex items-center justify-between rounded-2xl bg-black/20 border border-white/10 px-4 py-3 hover:border-emerald-400/50 transition-all duration-200"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-xs font-bold text-white">
-                        #{index + 1}
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold text-white">
-                          {p.name}
+                {topWicketTakers.map((p, index) => {
+                  const isLeader = index === 0;
+                  const bowlingAverage =
+                    p.stats.bowlingAverage !== undefined
+                      ? p.stats.bowlingAverage.toFixed(1)
+                      : '-';
+
+                  return (
+                    <div
+                      key={p.id}
+                      onClick={() =>
+                        setExpandedPlayerId((prev) => (prev === p.id ? null : p.id))
+                      }
+                      className={`rounded-2xl border px-4 py-3 transition-all duration-200 cursor-pointer ${
+                        isLeader
+                          ? 'bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-black/40 border-emerald-400/70 shadow-lg shadow-emerald-400/20'
+                          : 'bg-black/20 border-white/10 hover:border-emerald-400/50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`rounded-full flex items-center justify-center text-xs font-bold text-white ${
+                              isLeader
+                                ? 'w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500'
+                                : 'w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-500'
+                            }`}
+                          >
+                            #{index + 1}
+                          </div>
+                          <div>
+                            <div
+                              className={`font-semibold text-white ${
+                                isLeader ? 'text-base' : 'text-sm'
+                              }`}
+                            >
+                              {p.name}
+                            </div>
+                            <div className="text-[11px] text-gray-400">
+                              {p.role} • {p.stats.matches} matches
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-[11px] text-gray-400">
-                          {p.role} • {p.stats.matches} matches
+                        <div className="text-right">
+                          <div
+                            className={`font-bold text-emerald-300 ${
+                              isLeader ? 'text-lg' : 'text-base'
+                            }`}
+                          >
+                            {p.stats.wickets} wickets
+                          </div>
+                          <div className="text-[11px] text-gray-400">
+                            Eco {p.stats.economy.toFixed(2)} • Best {p.stats.bestBowling}
+                          </div>
                         </div>
                       </div>
+                      {expandedPlayerId === p.id && (
+                        <div className="mt-2 pt-2 border-t border-white/10 text-[11px] text-gray-300 flex flex-wrap gap-x-4 gap-y-1">
+                          <span>Bowling avg: {bowlingAverage}</span>
+                          <span>Matches: {p.stats.matches}</span>
+                        </div>
+                      )}
                     </div>
-                    <div className="text-right">
-                      <div className="text-base font-bold text-emerald-300">
-                        {p.stats.wickets} wickets
-                      </div>
-                      <div className="text-[11px] text-gray-400">
-                        Eco {p.stats.economy.toFixed(2)} • Best {p.stats.bestBowling}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </section>
@@ -491,26 +565,40 @@ export default function StatsPage() {
                 {bestStrikeRates.map((p, index) => (
                   <div
                     key={p.id}
-                    className="flex items-center justify-between rounded-2xl bg-black/20 border border-white/10 px-4 py-3"
+                    onClick={() =>
+                      setExpandedPlayerId((prev) => (prev === p.id ? null : p.id))
+                    }
+                    className="rounded-2xl bg-black/20 border border-white/10 px-4 py-3 cursor-pointer hover:border-ipl-gold/50 transition-all duration-200"
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs text-gray-400 w-6 text-center">
-                        {index + 1}.
-                      </span>
-                      <div>
-                        <div className="text-sm font-semibold text-white">
-                          {p.name}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs text-gray-400 w-6 text-center">
+                          {index + 1}.
+                        </span>
+                        <div>
+                          <div className="text-sm font-semibold text-white">
+                            {p.name}
+                          </div>
+                          <div className="text-[11px] text-gray-400">
+                            {p.stats.runs} runs • {p.stats.matches} matches
+                          </div>
                         </div>
-                        <div className="text-[11px] text-gray-400">
-                          {p.stats.runs} runs • {p.stats.matches} matches
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-bold text-ipl-gold">
+                          SR {p.stats.strikeRate.toFixed(1)}
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-sm font-bold text-ipl-gold">
-                        SR {p.stats.strikeRate.toFixed(1)}
+                    {expandedPlayerId === p.id && (
+                      <div className="mt-2 pt-2 border-t border-white/10 text-[11px] text-gray-300 flex flex-wrap gap-x-4 gap-y-1">
+                        <span>Highest: {p.stats.highest}</span>
+                        <span>4s: {p.stats.fours}</span>
+                        <span>6s: {p.stats.sixes}</span>
+                        <span>50s: {p.stats.fifties}</span>
+                        <span>100s: {p.stats.hundreds}</span>
                       </div>
-                    </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -526,31 +614,49 @@ export default function StatsPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                {bestEconomyRates.map((p, index) => (
-                  <div
-                    key={p.id}
-                    className="flex items-center justify-between rounded-2xl bg-black/20 border border-white/10 px-4 py-3"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs text-gray-400 w-6 text-center">
-                        {index + 1}.
-                      </span>
-                      <div>
-                        <div className="text-sm font-semibold text-white">
-                          {p.name}
+                {bestEconomyRates.map((p, index) => {
+                  const bowlingAverage =
+                    p.stats.bowlingAverage !== undefined
+                      ? p.stats.bowlingAverage.toFixed(1)
+                      : '-';
+
+                  return (
+                    <div
+                      key={p.id}
+                      onClick={() =>
+                        setExpandedPlayerId((prev) => (prev === p.id ? null : p.id))
+                      }
+                      className="rounded-2xl bg-black/20 border border-white/10 px-4 py-3 cursor-pointer hover:border-emerald-400/50 transition-all duration-200"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs text-gray-400 w-6 text-center">
+                            {index + 1}.
+                          </span>
+                          <div>
+                            <div className="text-sm font-semibold text-white">
+                              {p.name}
+                            </div>
+                            <div className="text-[11px] text-gray-400">
+                              {p.stats.wickets} wickets • {p.stats.matches} matches
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-[11px] text-gray-400">
-                          {p.stats.wickets} wickets • {p.stats.matches} matches
+                        <div className="text-right">
+                          <div className="text-sm font-bold text-emerald-300">
+                            Eco {p.stats.economy.toFixed(2)}
+                          </div>
                         </div>
                       </div>
+                      {expandedPlayerId === p.id && (
+                        <div className="mt-2 pt-2 border-t border-white/10 text-[11px] text-gray-300 flex flex-wrap gap-x-4 gap-y-1">
+                          <span>Bowling avg: {bowlingAverage}</span>
+                          <span>Best: {p.stats.bestBowling}</span>
+                        </div>
+                      )}
                     </div>
-                    <div className="text-right">
-                      <div className="text-sm font-bold text-emerald-300">
-                        Eco {p.stats.economy.toFixed(2)}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </section>
