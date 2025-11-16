@@ -37,6 +37,40 @@ export const onRequest = async (context) => {
     const userData = await env.SPORTS_KV.get(`user:${email}`);
     const user = JSON.parse(userData);
 
+    // Track user activity (heartbeat) - allow any authenticated user
+    if (pathname === '/api/admin/users/activity' && method === 'POST') {
+      const { matchId = 'current' } = await request.json();
+      const activeUsersKey = `active-users:${matchId}`;
+      const activeUsersData = await env.SPORTS_KV.get(activeUsersKey);
+      let activeUsers = activeUsersData ? JSON.parse(activeUsersData) : [];
+
+      // Remove duplicate entries for same user
+      activeUsers = activeUsers.filter((u) => u.id !== user.id);
+
+      // Add current user activity
+      activeUsers.push({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        lastActive: new Date().toISOString(),
+      });
+
+      // Keep only last 500 active users
+      if (activeUsers.length > 500) {
+        activeUsers = activeUsers.slice(-500);
+      }
+
+      await env.SPORTS_KV.put(activeUsersKey, JSON.stringify(activeUsers), {
+        expirationTtl: 3600, // 1 hour - auto cleanup
+      });
+
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
+    }
+
+    // Admin-only endpoints below - require admin role
     if (user.role !== 'admin') {
       return new Response(
         JSON.stringify({ error: 'Forbidden' }),
@@ -125,39 +159,6 @@ export const onRequest = async (context) => {
       if (targetUser.token) {
         await env.SPORTS_KV.delete(`token:${targetUser.token}`);
       }
-
-      return new Response(JSON.stringify({ success: true }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
-      });
-    }
-
-    // Track user activity (heartbeat)
-    if (pathname === '/api/admin/users/activity' && method === 'POST') {
-      const { matchId = 'current' } = await request.json();
-      const activeUsersKey = `active-users:${matchId}`;
-      const activeUsersData = await env.SPORTS_KV.get(activeUsersKey);
-      let activeUsers = activeUsersData ? JSON.parse(activeUsersData) : [];
-
-      // Remove duplicate entries for same user
-      activeUsers = activeUsers.filter((u) => u.id !== user.id);
-
-      // Add current user activity
-      activeUsers.push({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        lastActive: new Date().toISOString(),
-      });
-
-      // Keep only last 500 active users
-      if (activeUsers.length > 500) {
-        activeUsers = activeUsers.slice(-500);
-      }
-
-      await env.SPORTS_KV.put(activeUsersKey, JSON.stringify(activeUsers), {
-        expirationTtl: 3600, // 1 hour - auto cleanup
-      });
 
       return new Response(JSON.stringify({ success: true }), {
         status: 200,
