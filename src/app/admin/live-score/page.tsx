@@ -203,15 +203,86 @@ export default function AdminLiveScorePage() {
     return parseFloat(((formData.bowlerRuns / overs)).toFixed(2));
   }, [formData.bowlerRuns, formData.bowlerBalls]);
 
-  // Per-ball quick update handler
-  const handleBallEvent = (runs: number | 'W') => {
+  // Soft validation warnings for admins (non-blocking)
+  const team1Warnings: string[] = useMemo(() => {
+    const warnings: string[] = [];
+    if (formData.team1Wickets > 10) warnings.push('Wickets for Team 1 are more than 10.');
+    if (formData.team1Overs > 20) warnings.push('Overs for Team 1 are more than 20 (T20 match).');
+    if (formData.team1Runs < 0) warnings.push('Runs for Team 1 cannot be negative.');
+    return warnings;
+  }, [formData.team1Runs, formData.team1Wickets, formData.team1Overs]);
+
+  const team2Warnings: string[] = useMemo(() => {
+    const warnings: string[] = [];
+    if (formData.team2Wickets > 10) warnings.push('Wickets for Team 2 are more than 10.');
+    if (formData.team2Overs > 20) warnings.push('Overs for Team 2 are more than 20 (T20 match).');
+    if (formData.team2Runs < 0) warnings.push('Runs for Team 2 cannot be negative.');
+    return warnings;
+  }, [formData.team2Runs, formData.team2Wickets, formData.team2Overs]);
+
+  const batterWarnings: string[] = useMemo(() => {
+    const warnings: string[] = [];
+    if (formData.batterRuns < 0) warnings.push('Batter runs cannot be negative.');
+    if (formData.batterBalls < 0) warnings.push('Batter balls cannot be negative.');
+    if (formData.batterRuns > 0 && formData.batterBalls === 0) warnings.push('Batter has runs but 0 balls faced.');
+    return warnings;
+  }, [formData.batterRuns, formData.batterBalls]);
+
+  const bowlerWarnings: string[] = useMemo(() => {
+    const warnings: string[] = [];
+    if (formData.bowlerRuns < 0) warnings.push('Bowler runs cannot be negative.');
+    if (formData.bowlerBalls < 0) warnings.push('Bowler balls cannot be negative.');
+    if (formData.bowlerRuns > 0 && formData.bowlerBalls === 0) warnings.push('Bowler has runs conceded but 0 balls bowled.');
+    return warnings;
+  }, [formData.bowlerRuns, formData.bowlerBalls]);
+
+  // Per-ball quick update handler (runs, wicket, wides, no-balls, byes, leg-byes, combos)
+  const handleBallEvent = (event: number | 'W' | 'WD' | 'NB' | 'B' | 'LB' | 'NB4' | 'WD2') => {
     if (!selectedMatch) return;
 
     setFormData((prev) => {
       // snapshot state before applying this ball so we can undo once
       setLastBallSnapshot(prev);
-      const isWicket = runs === 'W';
-      const runValue = typeof runs === 'number' ? runs : 0;
+
+      const isWicket = event === 'W';
+      const isWide = event === 'WD' || event === 'WD2';
+      const isNoBall = event === 'NB' || event === 'NB4';
+      const isBye = event === 'B';
+      const isLegBye = event === 'LB';
+      const isRunNumber = typeof event === 'number';
+
+      // Team runs include all runs (off the bat + extras)
+      let teamRunDelta = 0;
+      let batterRunDelta = 0;
+      let bowlerRunDelta = 0;
+
+      if (isRunNumber) {
+        const n = event as number;
+        teamRunDelta = n;
+        batterRunDelta = n;
+        bowlerRunDelta = n;
+      } else if (event === 'WD') {
+        teamRunDelta = 1;
+        bowlerRunDelta = 1;
+      } else if (event === 'WD2') {
+        // Wide with one extra wide run (2 wides total)
+        teamRunDelta = 2;
+        bowlerRunDelta = 2;
+      } else if (event === 'NB') {
+        teamRunDelta = 1;
+        bowlerRunDelta = 1;
+      } else if (event === 'NB4') {
+        // No-ball + boundary four (1 extra + 4 to batter)
+        teamRunDelta = 5;
+        batterRunDelta = 4;
+        bowlerRunDelta = 5;
+      } else if (isBye || isLegBye) {
+        teamRunDelta = 1;
+        // Byes/leg-byes go to extras, not bowler/batter runs
+      } else if (event === 'W') {
+        // Wicket ball with no runs by default
+        teamRunDelta = 0;
+      }
       const battingKey = prev.battingTeam === 'team1' ? 'team1' : 'team2';
 
       const currentOvers = battingKey === 'team1' ? prev.team1Overs : prev.team2Overs;
@@ -219,25 +290,50 @@ export default function AdminLiveScorePage() {
       const currentWickets = battingKey === 'team1' ? prev.team1Wickets : prev.team2Wickets;
 
       const currentBalls = oversToBalls(currentOvers);
-      const newTeamBalls = currentBalls + 1;
+
+      // Wides and no-balls do not count as legal balls
+      const isLegalDelivery = !isWide && !isNoBall;
+      const newTeamBalls = isLegalDelivery ? currentBalls + 1 : currentBalls;
       const newTeamOvers = ballsToOvers(newTeamBalls);
 
-      const newTeamRuns = currentRuns + runValue;
+      const newTeamRuns = currentRuns + teamRunDelta;
       const newTeamWickets = isWicket ? currentWickets + 1 : currentWickets;
 
-      const newBatterRuns = prev.batterRuns + runValue;
-      const newBatterBalls = prev.batterBalls + 1;
+      // Batter stats: runs already in batterRunDelta, balls only for legal deliveries
+      const batterBallDelta = isLegalDelivery ? 1 : 0;
+      const newBatterRuns = prev.batterRuns + batterRunDelta;
+      const newBatterBalls = prev.batterBalls + batterBallDelta;
 
-      const newBowlerRuns = prev.bowlerRuns + runValue;
-      const newBowlerBalls = prev.bowlerBalls + 1;
+      // Bowler stats: wides/no-balls and runs off the bat go against the bowler, byes/leg-byes do not
+      const bowlerBallDelta = isLegalDelivery ? 1 : 0;
+      const newBowlerRuns = prev.bowlerRuns + bowlerRunDelta;
+      const newBowlerBalls = prev.bowlerBalls + bowlerBallDelta;
 
       const ballNumber = newTeamBalls;
       const overNum = Math.floor(ballNumber / 6);
       const ballInOver = ballNumber % 6;
 
-      const ballDesc = isWicket
-        ? `WICKET! ${prev.batterName || 'Batter'} is out, bowled by ${prev.bowlerName || 'Bowler'}.`
-        : `${prev.batterName || 'Batter'} scores ${runValue} run${runValue === 1 ? '' : 's'} off ${prev.bowlerName || 'Bowler'}.`;
+      let ballDesc: string;
+      if (isWicket) {
+        ballDesc = `WICKET! ${prev.batterName || 'Batter'} is out, bowled by ${prev.bowlerName || 'Bowler'}.`;
+      } else if (event === 'WD') {
+        ballDesc = `Wide ball from ${prev.bowlerName || 'Bowler'}, 1 run to extras.`;
+      } else if (event === 'WD2') {
+        ballDesc = `Wide ball from ${prev.bowlerName || 'Bowler'}, 2 wides.`;
+      } else if (event === 'NB') {
+        ballDesc = `No-ball from ${prev.bowlerName || 'Bowler'}, 1 run to extras.`;
+      } else if (event === 'NB4') {
+        ballDesc = `No-ball from ${prev.bowlerName || 'Bowler'}, ${prev.batterName || 'Batter'} hits 4! 5 runs in total.`;
+      } else if (isBye) {
+        ballDesc = `${prev.batterName || 'Batter'} lets it go, 1 bye taken.`;
+      } else if (isLegBye) {
+        ballDesc = `${prev.batterName || 'Batter'} is hit on the pads, 1 leg-bye taken.`;
+      } else if (isRunNumber) {
+        const runValue = event as number;
+        ballDesc = `${prev.batterName || 'Batter'} scores ${runValue} run${runValue === 1 ? '' : 's'} off ${prev.bowlerName || 'Bowler'}.`;
+      } else {
+        ballDesc = 'Delivery update.';
+      }
 
       const prefix = `Over ${overNum}.${ballInOver}: `;
       const newCommentLine = prefix + ballDesc;
@@ -478,6 +574,13 @@ export default function AdminLiveScorePage() {
                       className="px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
                     />
                   </div>
+                  {team1Warnings.length > 0 && (
+                    <ul className="mt-1 space-y-0.5">
+                      {team1Warnings.map((w, idx) => (
+                        <li key={idx} className="text-[11px] text-red-400">{w}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
 
                 {/* Team 2 */}
@@ -503,20 +606,6 @@ export default function AdminLiveScorePage() {
                       type="number"
                       placeholder="Wickets"
                       value={formData.team2Wickets}
-                      onChange={(e) => setFormData({ ...formData, team2Wickets: parseInt(e.target.value) || 0 })}
-                      className="px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Overs"
-                      step="0.1"
-                      value={formData.team2Overs}
-                      onChange={(e) => setFormData({ ...formData, team2Overs: parseFloat(e.target.value) || 0 })}
-                      className="px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                    />
-                  </div>
-                </div>
-
                 {/* Current Players */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-ipl-gold">Current Match</h3>
@@ -609,8 +698,15 @@ export default function AdminLiveScorePage() {
                       >
                         Undo last ball
                       </button>
+                      <button
+                        type="button"
+                        onClick={() => handleBallEvent('NB4')}
+                        className="px-3 py-1.5 rounded-full bg-slate-700 border border-purple-300/60 text-xs text-purple-100 hover:bg-slate-600 transition-colors"
+                      >
+                        NB + 4
+                      </button>
                     </div>
-                    <p className="text-[11px] text-gray-500">Click a button after each ball. It will automatically update the score, batter, bowler and add a short commentary line.</p>
+                    <p className="text-[11px] text-gray-500">Click a button after each ball. It will automatically update the score, batter, bowler and extras (wides, no-balls, byes, leg-byes) and add a short commentary line.</p>
                     <div className="flex flex-wrap gap-2">
                       {[0, 1, 2, 3, 4, 6].map((r) => (
                         <button
@@ -622,6 +718,41 @@ export default function AdminLiveScorePage() {
                           {r} run{r === 1 ? '' : 's'}
                         </button>
                       ))}
+                      <button
+                        type="button"
+                        onClick={() => handleBallEvent('WD')}
+                        className="px-3 py-1.5 rounded-full bg-slate-700 border border-blue-400/60 text-xs text-blue-200 hover:bg-slate-600 transition-colors"
+                      >
+                        Wide
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleBallEvent('WD2')}
+                        className="px-3 py-1.5 rounded-full bg-slate-700 border border-blue-300/60 text-xs text-blue-100 hover:bg-slate-600 transition-colors"
+                      >
+                        Wide × 2
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleBallEvent('NB')}
+                        className="px-3 py-1.5 rounded-full bg-slate-700 border border-purple-400/60 text-xs text-purple-200 hover:bg-slate-600 transition-colors"
+                      >
+                        No-ball
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleBallEvent('B')}
+                        className="px-3 py-1.5 rounded-full bg-slate-700 border border-teal-400/60 text-xs text-teal-200 hover:bg-slate-600 transition-colors"
+                      >
+                        Bye
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleBallEvent('LB')}
+                        className="px-3 py-1.5 rounded-full bg-slate-700 border border-amber-400/60 text-xs text-amber-200 hover:bg-slate-600 transition-colors"
+                      >
+                        Leg-bye
+                      </button>
                       <button
                         type="button"
                         onClick={() => handleBallEvent('W')}
