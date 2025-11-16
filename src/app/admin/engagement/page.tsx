@@ -1,8 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
+
+// Polling configuration
+const POLL_INTERVAL_NORMAL = 5000; // 5 seconds
+const POLL_INTERVAL_BACKOFF = 15000; // 15 seconds
+const MAX_CONSECUTIVE_ERRORS = 3; // Trigger backoff after 3 errors
 
 interface ActiveUser {
   id: string;
@@ -32,6 +37,9 @@ export default function AdminEngagementPage() {
   const [messagesLastUpdated, setMessagesLastUpdated] = useState<string | null>(null);
   const [usersError, setUsersError] = useState<string | null>(null);
   const [messagesError, setMessagesError] = useState<string | null>(null);
+  const [usersConsecutiveErrors, setUsersConsecutiveErrors] = useState(0);
+  const [messagesConsecutiveErrors, setMessagesConsecutiveErrors] = useState(0);
+  const [isTabVisible, setIsTabVisible] = useState(true);
   const [selectedUser, setSelectedUser] = useState<ActiveUser | null>(null);
   const [selectedMessage, setSelectedMessage] = useState<ChatMessage | null>(null);
   const [showActionModal, setShowActionModal] = useState(false);
@@ -39,6 +47,16 @@ export default function AdminEngagementPage() {
   const [actionType, setActionType] = useState<'block' | 'delete'>('block');
   const [actionReason, setActionReason] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Track tab visibility
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      setIsTabVisible(!document.hidden);
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
 
   // Check authentication and verify admin role
   useEffect(() => {
@@ -85,7 +103,7 @@ export default function AdminEngagementPage() {
 
   // Fetch active users
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !isTabVisible) return;
 
     const fetchActiveUsers = async () => {
       try {
@@ -102,25 +120,32 @@ export default function AdminEngagementPage() {
           setUsersStatus('ok');
           setUsersError(null);
           setUsersLastUpdated(new Date().toLocaleTimeString());
+          setUsersConsecutiveErrors(0); // Reset error count on success
         } else {
           setUsersStatus('error');
           setUsersError('Failed to load active users');
+          setUsersConsecutiveErrors((prev) => prev + 1);
         }
       } catch (error) {
         console.error('Error fetching active users:', error);
         setUsersStatus('error');
         setUsersError('Error fetching active users');
+        setUsersConsecutiveErrors((prev) => prev + 1);
       }
     };
 
     fetchActiveUsers();
-    const interval = setInterval(fetchActiveUsers, 5000); // Refresh every 5 seconds
-    return () => clearInterval(interval);
-  }, [isAuthenticated]);
+    // Use backoff interval if too many consecutive errors
+    const interval = usersConsecutiveErrors >= MAX_CONSECUTIVE_ERRORS 
+      ? POLL_INTERVAL_BACKOFF 
+      : POLL_INTERVAL_NORMAL;
+    const intervalId = setInterval(fetchActiveUsers, interval);
+    return () => clearInterval(intervalId);
+  }, [isAuthenticated, isTabVisible, usersConsecutiveErrors]);
 
   // Fetch chat messages
   useEffect(() => {
-    if (!isAuthenticated) return;
+    if (!isAuthenticated || !isTabVisible) return;
 
     const fetchChatMessages = async () => {
       try {
@@ -131,21 +156,28 @@ export default function AdminEngagementPage() {
           setMessagesStatus('ok');
           setMessagesError(null);
           setMessagesLastUpdated(new Date().toLocaleTimeString());
+          setMessagesConsecutiveErrors(0); // Reset error count on success
         } else {
           setMessagesStatus('error');
           setMessagesError('Failed to load chat messages');
+          setMessagesConsecutiveErrors((prev) => prev + 1);
         }
       } catch (error) {
         console.error('Error fetching chat messages:', error);
         setMessagesStatus('error');
         setMessagesError('Error fetching chat messages');
+        setMessagesConsecutiveErrors((prev) => prev + 1);
       }
     };
 
     fetchChatMessages();
-    const interval = setInterval(fetchChatMessages, 5000); // Refresh every 5 seconds
-    return () => clearInterval(interval);
-  }, [isAuthenticated]);
+    // Use backoff interval if too many consecutive errors
+    const interval = messagesConsecutiveErrors >= MAX_CONSECUTIVE_ERRORS 
+      ? POLL_INTERVAL_BACKOFF 
+      : POLL_INTERVAL_NORMAL;
+    const intervalId = setInterval(fetchChatMessages, interval);
+    return () => clearInterval(intervalId);
+  }, [isAuthenticated, isTabVisible, messagesConsecutiveErrors]);
 
   const handleDeleteMessage = async (messageId: string) => {
     const message = chatMessages.find((m) => m.id === messageId) || null;
@@ -274,6 +306,18 @@ export default function AdminEngagementPage() {
             <p className="text-gray-400 mb-3">Monitor active users and manage community engagement</p>
 
             <div className="flex flex-wrap gap-3 text-xs text-gray-400">
+              {!isTabVisible && (
+                <div className="w-full mb-2 flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-300">
+                  <span className="text-sm">⏸️</span>
+                  <span>Polling paused (tab hidden)</span>
+                </div>
+              )}
+              {(usersConsecutiveErrors >= MAX_CONSECUTIVE_ERRORS || messagesConsecutiveErrors >= MAX_CONSECUTIVE_ERRORS) && (
+                <div className="w-full mb-2 flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-500/10 border border-orange-500/30 text-orange-300">
+                  <span className="text-sm">⚠️</span>
+                  <span>Slow polling active due to consecutive errors (15s interval)</span>
+                </div>
+              )}
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/60 border border-white/10">
                 <span className="h-2 w-2 rounded-full" style={{ backgroundColor: usersStatus === 'ok' ? '#22c55e' : usersStatus === 'error' ? '#ef4444' : '#6b7280' }} />
                 <span>
@@ -342,6 +386,7 @@ export default function AdminEngagementPage() {
                           setActiveUsers(data.users);
                           setUsersStatus('ok');
                           setUsersLastUpdated(new Date().toLocaleTimeString());
+                          setUsersConsecutiveErrors(0);
                         } else {
                           setUsersStatus('error');
                           setUsersError('Failed to load active users');
@@ -426,6 +471,7 @@ export default function AdminEngagementPage() {
                           setChatMessages(data);
                           setMessagesStatus('ok');
                           setMessagesLastUpdated(new Date().toLocaleTimeString());
+                          setMessagesConsecutiveErrors(0);
                         } else {
                           setMessagesStatus('error');
                           setMessagesError('Failed to load chat messages');
