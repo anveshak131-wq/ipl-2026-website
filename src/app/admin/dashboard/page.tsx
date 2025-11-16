@@ -3,428 +3,418 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
-import AuroraBackground from '@/components/ui/AuroraBackground';
-import { api } from '@/lib/data';
+import { TrendingUp, Users, MessageSquare, Activity, Calendar, Eye, BarChart3, Zap, ArrowUpRight, Clock } from 'lucide-react';
 
-const IconUserGroup = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-    </svg>
-);
-
-const IconTrophy = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-    </svg>
-);
-
-const IconChart = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-    </svg>
-);
-
-const IconPlay = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-);
-
-const IconPlusCircle = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-);
-
-const IconNewspaper = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-    </svg>
-);
-
-const IconCog = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-    </svg>
-);
-
-const ArrowTrendingUpIcon = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
-    </svg>
-);
-
-const ClockIcon = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-);
-
-interface Stats {
-    teamsCount: number;
-    matchesCount: number;
-    playersCount: number;
-    liveMatches: number;
-}
-
-interface Activity {
-    id: string;
-    type: 'match' | 'team' | 'player' | 'content';
-    title: string;
-    time: string;
-    icon: string;
+interface DashboardStats {
+  totalUsers: number;
+  activeUsers: number;
+  totalMatches: number;
+  upcomingMatches: number;
+  totalMessages: number;
+  messagesToday: number;
+  pageViews: number;
+  engagementRate: number;
 }
 
 export default function AdminDashboard() {
-    const router = useRouter();
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
-    const [authLoading, setAuthLoading] = useState(true);
-    const [stats, setStats] = useState<Stats>({
-        teamsCount: 0,
-        matchesCount: 0,
-        playersCount: 0,
-        liveMatches: 0
-    });
-    const [recentActivities] = useState<Activity[]>([
-        { id: '1', type: 'match', title: 'Match scheduled: RCB vs MI', time: '2 hours ago', icon: '🏏' },
-        { id: '2', type: 'team', title: 'Team updated: Gujarat Titans', time: '5 hours ago', icon: '👥' },
-        { id: '3', type: 'player', title: 'New player added: Virat Kohli', time: '1 day ago', icon: '⭐' },
-        { id: '4', type: 'content', title: 'News published: IPL 2026 Schedule', time: '2 days ago', icon: '📰' }
-    ]);
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState<DashboardStats>({
+    totalUsers: 0,
+    activeUsers: 0,
+    totalMatches: 0,
+    upcomingMatches: 0,
+    totalMessages: 0,
+    messagesToday: 0,
+    pageViews: 0,
+    engagementRate: 0,
+  });
 
-    useEffect(() => {
-        const checkAuth = () => {
-            try {
-                const token = localStorage.getItem('adminToken');
-                if (!token) {
-                    router.push('/admin');
-                    return;
-                }
-                setIsAuthenticated(true);
-                fetchStats();
-            } catch (error) {
-                router.push('/admin');
-            } finally {
-                setAuthLoading(false);
-            }
-        };
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('auth_token') || localStorage.getItem('adminToken');
+      if (!token) {
+        router.push('/admin');
+        return;
+      }
 
-        checkAuth();
-    }, [router]);
+      try {
+        const response = await fetch(`/api/auth?action=verify&token=${token}`);
+        const data = await response.json();
 
-    const fetchStats = async () => {
-        try {
-            const [teams, matches, players] = await Promise.all([
-                api.getTeams(),
-                api.getMatches(),
-                fetch('/api/players').then(res => res.json())
-            ]);
-
-            const liveMatches = matches.filter(m => m.status === 'live').length;
-
-            setStats({
-                teamsCount: teams.length,
-                matchesCount: matches.length,
-                playersCount: Array.isArray(players) ? players.length : 0,
-                liveMatches
-            });
-        } catch (error) {
-            console.error('Failed to fetch stats:', error);
-        } finally {
-            setIsLoading(false);
+        if (!response.ok || !data.success) {
+          localStorage.removeItem('adminToken');
+          localStorage.removeItem('auth_token');
+          router.push('/admin');
+          return;
         }
+
+        const userRole = data.user?.role;
+        if (userRole !== 'admin' && userRole !== 'super_admin') {
+          alert('Access denied. Admin privileges required.');
+          router.push('/');
+          return;
+        }
+
+        setIsAuthenticated(true);
+        await fetchStats();
+      } catch (error) {
+        console.error('Auth error:', error);
+        router.push('/admin');
+      }
     };
 
-    if (authLoading) {
-        return (
-            <div className="flex min-h-screen bg-[#0B0F13]">
-                <AuroraBackground />
-                <div className="flex-1 flex items-center justify-center">
-                    <div className="text-white">Loading...</div>
-                </div>
-            </div>
-        );
+    checkAuth();
+  }, [router]);
+
+  const fetchStats = async () => {
+    try {
+      const token = localStorage.getItem('auth_token');
+
+      // Fetch active users
+      const usersRes = await fetch('/api/admin/users?matchId=current', {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      const usersData = await usersRes.ok ? await usersRes.json() : { users: [] };
+
+      // Fetch messages
+      const messagesRes = await fetch('/api/messages?matchId=current&limit=1000');
+      const messages = await messagesRes.ok ? await messagesRes.json() : [];
+
+      // Calculate messages today
+      const today = new Date().setHours(0, 0, 0, 0);
+      const messagesToday = messages.filter((msg: any) => 
+        new Date(msg.timestamp).getTime() >= today
+      ).length;
+
+      // Fetch matches
+      const matchesRes = await fetch('/api/matches');
+      const matches = await matchesRes.ok ? await matchesRes.json() : [];
+      
+      const now = new Date();
+      const upcomingMatches = matches.filter((m: any) => 
+        new Date(m.date) > now
+      ).length;
+
+      setStats({
+        totalUsers: usersData.users?.length || 0,
+        activeUsers: usersData.users?.length || 0,
+        totalMatches: matches.length || 0,
+        upcomingMatches,
+        totalMessages: messages.length || 0,
+        messagesToday,
+        pageViews: Math.floor(Math.random() * 10000) + 5000, // Mock data
+        engagementRate: usersData.users?.length > 0 ? 78 : 0, // Mock calculation
+      });
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    if (!isAuthenticated) {
-        return null;
-    }
-
-    const kpiCards = [
-        {
-            id: 'teams',
-            title: 'Total Teams',
-            value: stats.teamsCount,
-            icon: IconUserGroup,
-            trend: '+0%',
-            trendUp: true,
-            gradient: 'from-blue-500/20 to-purple-500/20',
-            accentColor: '#2F6FED',
-            iconBg: 'bg-blue-500/10',
-            iconColor: 'text-blue-400'
-        },
-        {
-            id: 'matches',
-            title: 'Total Matches',
-            value: stats.matchesCount,
-            icon: IconTrophy,
-            trend: '+12%',
-            trendUp: true,
-            gradient: 'from-green-500/20 to-emerald-500/20',
-            accentColor: '#10B981',
-            iconBg: 'bg-green-500/10',
-            iconColor: 'text-green-400'
-        },
-        {
-            id: 'players',
-            title: 'Total Players',
-            value: stats.playersCount,
-            icon: IconChart,
-            trend: '+8%',
-            trendUp: true,
-            gradient: 'from-purple-500/20 to-pink-500/20',
-            accentColor: '#A855F7',
-            iconBg: 'bg-purple-500/10',
-            iconColor: 'text-purple-400'
-        },
-        {
-            id: 'live',
-            title: 'Live Matches',
-            value: stats.liveMatches,
-            icon: IconPlay,
-            trend: stats.liveMatches > 0 ? 'LIVE' : 'None',
-            trendUp: stats.liveMatches > 0,
-            gradient: 'from-red-500/20 to-orange-500/20',
-            accentColor: '#EF4444',
-            iconBg: 'bg-red-500/10',
-            iconColor: 'text-red-400'
-        }
-    ];
-
-    const quickActions = [
-        {
-            id: 'add-match',
-            title: 'Add Match',
-            description: 'Schedule new match',
-            icon: IconPlusCircle,
-            path: '/admin/matches',
-            gradient: 'from-blue-500/10 to-blue-600/5',
-            iconColor: 'text-blue-400'
-        },
-        {
-            id: 'manage-teams',
-            title: 'Manage Teams',
-            description: 'Add or edit teams',
-            icon: IconUserGroup,
-            path: '/admin/teams',
-            gradient: 'from-purple-500/10 to-purple-600/5',
-            iconColor: 'text-purple-400'
-        },
-        {
-            id: 'add-content',
-            title: 'Add Content',
-            description: 'Manage banners & news',
-            icon: IconNewspaper,
-            path: '/admin/content',
-            gradient: 'from-green-500/10 to-green-600/5',
-            iconColor: 'text-green-400'
-        },
-        {
-            id: 'settings',
-            title: 'Settings',
-            description: 'Configure system',
-            icon: IconCog,
-            path: '/admin/settings',
-            gradient: 'from-gray-500/10 to-gray-600/5',
-            iconColor: 'text-gray-400'
-        }
-    ];
-
+  if (!isAuthenticated || isLoading) {
     return (
-        <div className="flex min-h-screen bg-[#0B0F13]">
-            <AuroraBackground />
-            <AdminSidebar currentPage="/admin/dashboard" />
-
-            <div className="flex-1 relative z-10">
-                <div className="p-8 max-w-[1600px] mx-auto">
-                    {/* Header */}
-                    <div className="mb-8">
-                        <h1 className="text-4xl font-bold text-white mb-2">
-                            Dashboard
-                        </h1>
-                        <p className="text-gray-400">Welcome back! Here's what's happening with your IPL platform.</p>
-                    </div>
-
-                    {/* KPI Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        {kpiCards.map((card) => (
-                            <div
-                                key={card.id}
-                                className="group relative bg-gradient-to-br from-[#12171D] to-[#0B0F13] rounded-2xl p-6 border border-white/5 hover:border-white/10 transition-all duration-300 overflow-hidden"
-                            >
-                                {/* Gradient background on hover */}
-                                <div
-                                    className={`absolute inset-0 bg-gradient-to-br ${card.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}
-                                />
-
-                                {/* Content */}
-                                <div className="relative z-10">
-                                    {/* Icon and Trend */}
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className={`${card.iconBg} p-3 rounded-xl`}>
-                                            <card.icon className={`w-6 h-6 ${card.iconColor}`} />
-                                        </div>
-                                        <div className={`flex items-center space-x-1 text-xs font-semibold px-2.5 py-1 rounded-full ${card.trendUp
-                                                ? 'bg-green-500/10 text-green-400'
-                                                : 'bg-red-500/10 text-red-400'
-                                            }`}>
-                                            {card.trendUp && <ArrowTrendingUpIcon className="w-3 h-3" />}
-                                            <span>{card.trend}</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Value */}
-                                    <div className="mb-1">
-                                        <h3 className="text-4xl font-bold text-white">
-                                            {isLoading ? (
-                                                <span className="inline-block w-16 h-10 bg-white/5 rounded animate-pulse" />
-                                            ) : (
-                                                card.value
-                                            )}
-                                        </h3>
-                                    </div>
-
-                                    {/* Label */}
-                                    <p className="text-gray-400 text-sm font-medium">{card.title}</p>
-                                </div>
-
-                                {/* Accent border bottom */}
-                                <div
-                                    className="absolute bottom-0 left-0 right-0 h-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                    style={{ backgroundColor: card.accentColor }}
-                                />
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Quick Actions Section */}
-                    <div className="bg-gradient-to-br from-[#12171D] to-[#0B0F13] rounded-2xl p-6 border border-white/5 mb-8">
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-2xl font-semibold text-white">Quick Actions</h2>
-                            <div className="w-12 h-1 bg-gradient-to-r from-[#2F6FED] to-purple-500 rounded-full" />
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            {quickActions.map((action) => (
-                                <button
-                                    key={action.id}
-                                    onClick={() => router.push(action.path)}
-                                    className={`group relative bg-gradient-to-br ${action.gradient} hover:from-white/10 hover:to-white/5 rounded-xl p-5 border border-white/5 hover:border-white/10 transition-all duration-300 text-left`}
-                                >
-                                    <div className="flex items-start space-x-4">
-                                        <div className="flex-shrink-0">
-                                            <action.icon className={`w-8 h-8 ${action.iconColor} group-hover:scale-110 transition-transform duration-300`} />
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <h3 className="text-white font-semibold mb-1 group-hover:text-[#2F6FED] transition-colors">
-                                                {action.title}
-                                            </h3>
-                                            <p className="text-gray-400 text-sm">{action.description}</p>
-                                        </div>
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        {/* Recent Activity Timeline */}
-                        <div className="bg-gradient-to-br from-[#12171D] to-[#0B0F13] rounded-2xl p-6 border border-white/5">
-                            <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-2xl font-semibold text-white">Recent Activity</h2>
-                                <ClockIcon className="w-6 h-6 text-gray-400" />
-                            </div>
-
-                            <div className="space-y-4">
-                                {recentActivities.map((activity, index) => (
-                                    <div
-                                        key={activity.id}
-                                        className="group relative flex items-start space-x-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 border border-transparent hover:border-white/10"
-                                    >
-                                        {/* Timeline dot */}
-                                        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-[#2F6FED]/20 to-purple-500/20 flex items-center justify-center border border-white/10">
-                                            <span className="text-lg">{activity.icon}</span>
-                                        </div>
-
-                                        {/* Content */}
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-white font-medium mb-1">{activity.title}</p>
-                                            <p className="text-gray-400 text-sm">{activity.time}</p>
-                                        </div>
-
-                                        {/* Type badge */}
-                                        <div className="flex-shrink-0">
-                                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-white/5 text-gray-300 capitalize">
-                                                {activity.type}
-                                            </span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* System Status */}
-                        <div className="bg-gradient-to-br from-[#12171D] to-[#0B0F13] rounded-2xl p-6 border border-white/5">
-                            <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-2xl font-semibold text-white">System Status</h2>
-                                <div className="flex items-center space-x-2">
-                                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                                    <span className="text-green-400 text-sm font-medium">All Systems Operational</span>
-                                </div>
-                            </div>
-
-                            <div className="space-y-3">
-                                {['Teams API', 'Matches API', 'Players API', 'Content API', 'Settings API'].map((service) => (
-                                    <div
-                                        key={service}
-                                        className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5 hover:border-white/10 transition-all duration-300"
-                                    >
-                                        <div className="flex items-center space-x-3">
-                                            <div className="w-3 h-3 bg-green-500 rounded-full shadow-lg shadow-green-500/50" />
-                                            <span className="text-white font-medium">{service}</span>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <span className="text-green-400 text-sm font-medium">Operational</span>
-                                            <div className="text-gray-400 text-xs">99.9%</div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Performance metrics */}
-                            <div className="mt-6 pt-6 border-t border-white/5">
-                                <div className="grid grid-cols-3 gap-4">
-                                    <div className="text-center">
-                                        <div className="text-2xl font-bold text-white mb-1">0.8s</div>
-                                        <div className="text-gray-400 text-xs">Avg Response</div>
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="text-2xl font-bold text-white mb-1">99.9%</div>
-                                        <div className="text-gray-400 text-xs">Uptime</div>
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="text-2xl font-bold text-white mb-1">{stats.matchesCount + stats.playersCount}</div>
-                                        <div className="text-gray-400 text-xs">Total Records</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <div className="flex min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
+            <p className="text-gray-400 text-lg">Loading Dashboard...</p>
+          </div>
         </div>
+      </div>
     );
+  }
+
+  const statCards = [
+    {
+      title: 'Total Active Users',
+      value: stats.activeUsers,
+      change: '+12.5%',
+      trend: 'up',
+      icon: Users,
+      gradient: 'from-blue-500 to-cyan-500',
+      bgGradient: 'from-blue-500/10 to-cyan-500/10',
+    },
+    {
+      title: 'Live Matches',
+      value: stats.upcomingMatches,
+      change: '+3',
+      trend: 'up',
+      icon: Activity,
+      gradient: 'from-green-500 to-emerald-500',
+      bgGradient: 'from-green-500/10 to-emerald-500/10',
+    },
+    {
+      title: 'Messages Today',
+      value: stats.messagesToday,
+      change: `${stats.totalMessages} total`,
+      trend: 'neutral',
+      icon: MessageSquare,
+      gradient: 'from-purple-500 to-pink-500',
+      bgGradient: 'from-purple-500/10 to-pink-500/10',
+    },
+    {
+      title: 'Engagement Rate',
+      value: `${stats.engagementRate}%`,
+      change: '+5.2%',
+      trend: 'up',
+      icon: TrendingUp,
+      gradient: 'from-orange-500 to-red-500',
+      bgGradient: 'from-orange-500/10 to-red-500/10',
+    },
+  ];
+
+  const quickActions = [
+    {
+      title: 'User Engagement',
+      description: 'Monitor live chat & active users',
+      icon: Users,
+      path: '/admin/engagement',
+      color: 'blue',
+      gradient: 'from-blue-500/20 to-blue-600/5',
+    },
+    {
+      title: 'Live Score',
+      description: 'Update match scores',
+      icon: Activity,
+      path: '/admin/live-score',
+      color: 'green',
+      gradient: 'from-green-500/20 to-green-600/5',
+    },
+    {
+      title: 'Manage Matches',
+      description: 'Schedule & configure matches',
+      icon: Calendar,
+      path: '/admin/matches',
+      color: 'purple',
+      gradient: 'from-purple-500/20 to-purple-600/5',
+    },
+    {
+      title: 'Content',
+      description: 'Publish news & updates',
+      icon: BarChart3,
+      path: '/admin/content',
+      color: 'orange',
+      gradient: 'from-orange-500/20 to-orange-600/5',
+    },
+  ];
+
+  return (
+    <div className="flex min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      <AdminSidebar currentPage="/admin/dashboard" />
+
+      <main className="flex-1 overflow-auto">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-4xl font-bold text-white mb-2">
+                  Welcome back! 👋
+                </h1>
+                <p className="text-gray-400 text-lg">
+                  Here's what's happening with your IPL platform today
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/20 rounded-xl">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-green-400 text-sm font-medium">System Online</span>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-xl">
+                  <Clock className="w-4 h-4 text-gray-400" />
+                  <span className="text-gray-300 text-sm font-medium">
+                    {new Date().toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric',
+                      year: 'numeric' 
+                    })}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {statCards.map((card, index) => (
+              <div
+                key={index}
+                className="group relative bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-slate-600 transition-all duration-300 overflow-hidden"
+              >
+                {/* Background gradient */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${card.bgGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></div>
+
+                <div className="relative z-10">
+                  {/* Icon */}
+                  <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${card.gradient} mb-4`}>
+                    <card.icon className="w-6 h-6 text-white" />
+                  </div>
+
+                  {/* Value */}
+                  <div className="mb-2">
+                    <h3 className="text-3xl font-bold text-white">
+                      {isLoading ? (
+                        <div className="w-20 h-8 bg-slate-700/50 rounded animate-pulse"></div>
+                      ) : (
+                        card.value
+                      )}
+                    </h3>
+                  </div>
+
+                  {/* Title and Change */}
+                  <div className="flex items-center justify-between">
+                    <p className="text-gray-400 text-sm font-medium">{card.title}</p>
+                    {card.trend === 'up' && (
+                      <div className="flex items-center gap-1 text-green-400 text-xs font-semibold">
+                        <ArrowUpRight className="w-3 h-3" />
+                        {card.change}
+                      </div>
+                    )}
+                    {card.trend === 'neutral' && (
+                      <div className="text-gray-400 text-xs font-semibold">
+                        {card.change}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Accent line */}
+                <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${card.gradient} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300`}></div>
+              </div>
+            ))}
+          </div>
+
+          {/* Quick Actions */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white">Quick Actions</h2>
+              <div className="flex items-center gap-2 text-sm text-gray-400">
+                <Zap className="w-4 h-4" />
+                <span>Frequently used</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {quickActions.map((action, index) => (
+                <button
+                  key={index}
+                  onClick={() => router.push(action.path)}
+                  className={`group relative bg-gradient-to-br ${action.gradient} hover:from-white/10 hover:to-white/5 rounded-xl p-6 border border-slate-700/50 hover:border-slate-600 transition-all duration-300 text-left overflow-hidden`}
+                >
+                  <div className="relative z-10">
+                    <action.icon className="w-8 h-8 text-white mb-4 group-hover:scale-110 transition-transform duration-300" />
+                    <h3 className="text-white font-semibold mb-1 group-hover:text-blue-400 transition-colors">
+                      {action.title}
+                    </h3>
+                    <p className="text-gray-400 text-sm">{action.description}</p>
+                  </div>
+
+                  {/* Hover arrow */}
+                  <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <ArrowUpRight className="w-5 h-5 text-white" />
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Analytics Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Platform Overview */}
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-white">Platform Overview</h2>
+                <Eye className="w-5 h-5 text-gray-400" />
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-slate-800/50 rounded-xl border border-slate-700/30">
+                  <div>
+                    <p className="text-gray-400 text-sm mb-1">Total Matches</p>
+                    <p className="text-2xl font-bold text-white">{stats.totalMatches}</p>
+                  </div>
+                  <div className="p-3 bg-blue-500/10 rounded-xl">
+                    <Calendar className="w-6 h-6 text-blue-400" />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-slate-800/50 rounded-xl border border-slate-700/30">
+                  <div>
+                    <p className="text-gray-400 text-sm mb-1">Chat Messages</p>
+                    <p className="text-2xl font-bold text-white">{stats.totalMessages}</p>
+                  </div>
+                  <div className="p-3 bg-purple-500/10 rounded-xl">
+                    <MessageSquare className="w-6 h-6 text-purple-400" />
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-slate-800/50 rounded-xl border border-slate-700/30">
+                  <div>
+                    <p className="text-gray-400 text-sm mb-1">Page Views</p>
+                    <p className="text-2xl font-bold text-white">{stats.pageViews.toLocaleString()}</p>
+                  </div>
+                  <div className="p-3 bg-green-500/10 rounded-xl">
+                    <Eye className="w-6 h-6 text-green-400" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* User Activity */}
+            <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-white">User Activity</h2>
+                <BarChart3 className="w-5 h-5 text-gray-400" />
+              </div>
+
+              <div className="space-y-4">
+                <div className="p-4 bg-slate-800/50 rounded-xl border border-slate-700/30">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-gray-400 text-sm">Active Now</span>
+                    <span className="text-green-400 text-sm font-semibold flex items-center gap-1">
+                      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                      Live
+                    </span>
+                  </div>
+                  <div className="text-3xl font-bold text-white mb-2">{stats.activeUsers}</div>
+                  <div className="w-full bg-slate-700/30 rounded-full h-2">
+                    <div 
+                      className="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min(stats.activeUsers * 10, 100)}%` }}
+                    ></div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-slate-800/50 rounded-xl border border-slate-700/30 text-center">
+                    <p className="text-gray-400 text-xs mb-2">Upcoming</p>
+                    <p className="text-2xl font-bold text-white">{stats.upcomingMatches}</p>
+                    <p className="text-gray-500 text-xs mt-1">Matches</p>
+                  </div>
+                  <div className="p-4 bg-slate-800/50 rounded-xl border border-slate-700/30 text-center">
+                    <p className="text-gray-400 text-xs mb-2">Today</p>
+                    <p className="text-2xl font-bold text-white">{stats.messagesToday}</p>
+                    <p className="text-gray-500 text-xs mt-1">Messages</p>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl border border-blue-500/20">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-gray-400 mb-1">Engagement Score</p>
+                      <p className="text-2xl font-bold text-white">{stats.engagementRate}%</p>
+                    </div>
+                    <TrendingUp className="w-8 h-8 text-blue-400" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
 }
