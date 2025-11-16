@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -42,6 +42,25 @@ export default function LiveScorePage() {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [authFormData, setAuthFormData] = useState({ email: '', password: '', name: '' });
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Track user activity for admin engagement page
+  const trackUserActivity = useCallback(async () => {
+    if (!user) return;
+    
+    try {
+      const token = localStorage.getItem('auth_token');
+      await fetch('/api/admin/users/activity', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ matchId: 'current' }),
+      });
+    } catch (error) {
+      console.error('Error tracking activity:', error);
+    }
+  }, [user]);
 
   // Load user from localStorage
   useEffect(() => {
@@ -113,26 +132,7 @@ export default function LiveScorePage() {
     }, 30000);
 
     return () => clearInterval(interval);
-  }, [user]);
-
-  // Handle auth
-  const trackUserActivity = async () => {
-    if (!user) return;
-    
-    try {
-      const token = localStorage.getItem('auth_token');
-      await fetch('/api/admin/users/activity', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ matchId: 'current' }),
-      });
-    } catch (error) {
-      console.error('Error tracking activity:', error);
-    }
-  };
+  }, [user, trackUserActivity]);
 
   // Send message
   const handleSendMessage = async (e: React.FormEvent) => {
