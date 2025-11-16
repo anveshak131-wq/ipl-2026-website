@@ -6,6 +6,7 @@ import { onRequest as __api_messages__id__js_onRequest } from "/Users/anvesh/Dow
 import { onRequest as __api_auth_js_onRequest } from "/Users/anvesh/Downloads/sportsup99/functions/api/auth.js"
 import { onRequest as __api_content_js_onRequest } from "/Users/anvesh/Downloads/sportsup99/functions/api/content.js"
 import { onRequest as __api_enrichDescription_js_onRequest } from "/Users/anvesh/Downloads/sportsup99/functions/api/enrichDescription.js"
+import { onRequest as __api_legal_js_onRequest } from "/Users/anvesh/Downloads/sportsup99/functions/api/legal.js"
 import { onRequest as __api_live_score_js_onRequest } from "/Users/anvesh/Downloads/sportsup99/functions/api/live-score.js"
 import { onRequest as __api_matches_js_onRequest } from "/Users/anvesh/Downloads/sportsup99/functions/api/matches.js"
 import { onRequest as __api_messages_js_onRequest } from "/Users/anvesh/Downloads/sportsup99/functions/api/messages.js"
@@ -72,6 +73,13 @@ export const routes = [
       method: "",
       middlewares: [],
       modules: [__api_enrichDescription_js_onRequest],
+    },
+  {
+      routePath: "/api/legal",
+      mountPath: "/api",
+      method: "",
+      middlewares: [],
+      modules: [__api_legal_js_onRequest],
     },
   {
       routePath: "/api/live-score",

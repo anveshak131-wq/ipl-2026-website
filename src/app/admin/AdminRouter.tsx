@@ -9,6 +9,7 @@ import AdminTeams from './teams/page';
 import AdminPlayers from './players/page';
 import AdminContent from './content/page';
 import AdminSettings from './settings/page';
+import AdminLegalPage from './legal/page';
 
 export default function AdminRouter() {
   const router = useRouter();
@@ -105,6 +106,8 @@ export default function AdminRouter() {
       return <AdminContent />;
     } else if (pathname === '/admin/settings') {
       return <AdminSettings />;
+    } else if (pathname === '/admin/legal') {
+      return <AdminLegalPage />;
     }
     return <AdminDashboard />;
   };

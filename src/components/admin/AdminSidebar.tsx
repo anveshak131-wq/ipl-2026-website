@@ -120,6 +120,21 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         ),
         group: 'Settings',
       },
+      {
+        href: '/admin/legal',
+        label: 'Legal Pages',
+        icon: (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 7h8M8 11h6m-6 4h4M6 5a2 2 0 00-2 2v10.5A1.5 1.5 0 005.5 19H18a1 1 0 001-1V7a2 2 0 00-2-2H6z"
+            />
+          </svg>
+        ),
+        group: 'Settings',
+      },
     ],
   };
 

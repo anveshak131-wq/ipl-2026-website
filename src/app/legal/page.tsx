@@ -1,8 +1,27 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function LegalPage() {
+  const [customContent, setCustomContent] = useState<string | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch("/api/legal?page=legal");
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data?.content && typeof data.content === "string") {
+          setCustomContent(data.content);
+        }
+      } catch (e) {
+        console.error("Failed to load legal content", e);
+      }
+    };
+    load();
+  }, []);
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
       <div className="max-w-5xl mx-auto px-6 py-12 md:py-16">
@@ -28,62 +47,75 @@ export default function LegalPage() {
           </Link>
         </header>
 
-        <section className="grid gap-6 md:grid-cols-2 mb-10">
-          <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 shadow-lg shadow-black/40">
-            <h2 className="text-lg font-semibold mb-3">Publisher / Operator</h2>
-            <p className="text-sm text-gray-300 leading-relaxed">
-              This IPL 2026 experience platform is a fan-focused project created for
-              showcasing product design, engineering, and live sports UX patterns.
-              It is not an official product of the BCCI, IPL, or any franchise.
-            </p>
-            <p className="mt-4 text-sm text-gray-400">
-              All team names, logos, and trademarks belong to their respective owners
-              and are used here strictly for illustrative and educational purposes.
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 shadow-lg shadow-black/40">
-            <h2 className="text-lg font-semibold mb-3">Contact</h2>
-            <p className="text-sm text-gray-300 leading-relaxed">
-              For questions about this project, data handling, or to request removal of
-              content, please reach out via email. We aim to respond within 3–5
-              business days.
-            </p>
-            <div className="mt-4 text-sm text-gray-200">
-              <p className="font-medium">Project Contact</p>
-              <p className="text-gray-300">anvesh (project owner)</p>
-              <a
-                href="mailto:contact@example.com"
-                className="text-ipl-gold hover:text-ipl-gold/80 underline underline-offset-4"
-              >
-                contact@example.com
-              </a>
+        {customContent ? (
+          <section className="mb-12">
+            <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 shadow-lg shadow-black/40">
+              <h2 className="text-lg font-semibold mb-3">Legal notice</h2>
+              <div className="space-y-3 text-sm text-gray-300 leading-relaxed whitespace-pre-line">
+                {customContent}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        ) : (
+          <>
+            <section className="grid gap-6 md:grid-cols-2 mb-10">
+              <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 shadow-lg shadow-black/40">
+                <h2 className="text-lg font-semibold mb-3">Publisher / Operator</h2>
+                <p className="text-sm text-gray-300 leading-relaxed">
+                  This IPL 2026 experience platform is a fan-focused project created for
+                  showcasing product design, engineering, and live sports UX patterns.
+                  It is not an official product of the BCCI, IPL, or any franchise.
+                </p>
+                <p className="mt-4 text-sm text-gray-400">
+                  All team names, logos, and trademarks belong to their respective owners
+                  and are used here strictly for illustrative and educational purposes.
+                </p>
+              </div>
 
-        <section className="space-y-6 mb-12">
-          <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
-            <h2 className="text-lg font-semibold mb-3">Disclaimer</h2>
-            <p className="text-sm text-gray-300 leading-relaxed">
-              All match data, scores, analytics, and engagement components displayed on
-              this site are for demonstration and entertainment only. They must not be
-              used for betting or gambling of any kind. No guarantees are made regarding
-              the accuracy, completeness, or real-time nature of the information
-              presented.
-            </p>
-          </div>
+              <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 shadow-lg shadow-black/40">
+                <h2 className="text-lg font-semibold mb-3">Contact</h2>
+                <p className="text-sm text-gray-300 leading-relaxed">
+                  For questions about this project, data handling, or to request removal of
+                  content, please reach out via email. We aim to respond within 3–5
+                  business days.
+                </p>
+                <div className="mt-4 text-sm text-gray-200">
+                  <p className="font-medium">Project Contact</p>
+                  <p className="text-gray-300">anvesh (project owner)</p>
+                  <a
+                    href="mailto:contact@example.com"
+                    className="text-ipl-gold hover:text-ipl-gold/80 underline underline-offset-4"
+                  >
+                    contact@example.com
+                  </a>
+                </div>
+              </div>
+            </section>
 
-          <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
-            <h2 className="text-lg font-semibold mb-3">Intellectual Property</h2>
-            <p className="text-sm text-gray-300 leading-relaxed">
-              The UI, UX flows, and underlying code for this IPL 2026 platform are
-              original work by the project owner. Team brands, league marks, and
-              player likenesses, if shown, are used as fictional placeholders to
-              illustrate sports technology concepts.
-            </p>
-          </div>
-        </section>
+            <section className="space-y-6 mb-12">
+              <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
+                <h2 className="text-lg font-semibold mb-3">Disclaimer</h2>
+                <p className="text-sm text-gray-300 leading-relaxed">
+                  All match data, scores, analytics, and engagement components displayed on
+                  this site are for demonstration and entertainment only. They must not be
+                  used for betting or gambling of any kind. No guarantees are made regarding
+                  the accuracy, completeness, or real-time nature of the information
+                  presented.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
+                <h2 className="text-lg font-semibold mb-3">Intellectual Property</h2>
+                <p className="text-sm text-gray-300 leading-relaxed">
+                  The UI, UX flows, and underlying code for this IPL 2026 platform are
+                  original work by the project owner. Team brands, league marks, and
+                  player likenesses, if shown, are used as fictional placeholders to
+                  illustrate sports technology concepts.
+                </p>
+              </div>
+            </section>
+          </>
+        )}
 
         <footer className="border-t border-white/10 pt-6 mt-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs text-gray-500">
           <p>
