@@ -233,7 +233,17 @@ export default function LiveScorePage() {
             <div className="bg-slate-800/50 rounded-2xl border border-white/10 p-8">
               <h1 className="text-3xl font-bold text-white mb-8">Live Score</h1>
 
-              {liveScore ? (
+              {isLoading ? (
+                <div className="space-y-8 animate-pulse">
+                  {/* Loading skeleton */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-slate-700/30 rounded-lg p-6 h-32"></div>
+                    <div className="bg-slate-700/30 rounded-lg p-6 h-32"></div>
+                  </div>
+                  <div className="bg-slate-700/30 rounded-lg p-6 h-24"></div>
+                  <div className="bg-slate-700/30 rounded-lg p-6 h-40"></div>
+                </div>
+              ) : liveScore ? (
                 <div className="space-y-8">
                   {/* Score Cards */}
                   <div className="grid grid-cols-2 gap-4">
@@ -294,7 +304,26 @@ export default function LiveScorePage() {
                   </div>
                 </div>
               ) : (
-                <div className="text-center text-gray-400">Loading live score...</div>
+                <div className="text-center py-16">
+                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-700/30 border border-white/10 mb-6">
+                    <svg className="w-10 h-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">No Live Match</h3>
+                  <p className="text-gray-400 mb-6 max-w-md mx-auto">
+                    There are currently no live matches. Check back soon or view upcoming matches in the schedule.
+                  </p>
+                  <a
+                    href="/matches"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-ipl-gold hover:bg-ipl-gold/90 text-slate-900 font-bold rounded-lg transition-colors"
+                  >
+                    View Schedule
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </a>
+                </div>
               )}
             </div>
           </div>
