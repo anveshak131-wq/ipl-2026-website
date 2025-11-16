@@ -633,15 +633,36 @@ export default function AdminLiveScorePage() {
                   <div className="grid grid-cols-3 gap-3">
                     <input
                       type="number"
-                      placeholder="Runs"
+                      placeholder="Runs (e.g. 160)"
                       value={formData.team2Runs}
                       onChange={(e) => setFormData({ ...formData, team2Runs: parseInt(e.target.value) || 0 })}
                       className="px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
                     />
                     <input
                       type="number"
-                      placeholder="Wickets"
+                      placeholder="Wickets (e.g. 5)"
                       value={formData.team2Wickets}
+                      onChange={(e) => setFormData({ ...formData, team2Wickets: parseInt(e.target.value) || 0 })}
+                      className="px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Overs (e.g. 8.4)"
+                      step="0.1"
+                      value={formData.team2Overs}
+                      onChange={(e) => setFormData({ ...formData, team2Overs: parseFloat(e.target.value) || 0 })}
+                      className="px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                    />
+                  </div>
+                  {team2Warnings.length > 0 && (
+                    <ul className="mt-1 space-y-0.5">
+                      {team2Warnings.map((w, idx) => (
+                        <li key={idx} className="text-[11px] text-red-400">{w}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
                 {/* Current Players */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-ipl-gold">Current Match</h3>
