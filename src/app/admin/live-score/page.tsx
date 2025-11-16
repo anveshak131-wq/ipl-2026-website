@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
+import type { Match, Player } from '@/types';
 
 interface LiveScoreData {
   matchId: string;
@@ -21,6 +22,9 @@ export default function AdminLiveScorePage() {
   const [liveScore, setLiveScore] = useState<LiveScoreData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [selectedMatchId, setSelectedMatchId] = useState<string>('');
 
   const [formData, setFormData] = useState({
     team1Name: 'RCB',
@@ -39,6 +43,7 @@ export default function AdminLiveScorePage() {
     bowlerBalls: 0,
     commentary: '',
     status: 'Live',
+    innings: 1,
   });
 
   // Check authentication
@@ -60,22 +65,63 @@ export default function AdminLiveScorePage() {
     checkAuth();
   }, [router]);
 
-  // Fetch current live score
+  // Load fixtures and players once authenticated
   useEffect(() => {
     if (!isAuthenticated) return;
 
+    const loadData = async () => {
+      try {
+        const [matchesRes, playersRes] = await Promise.all([
+          fetch('/api/matches'),
+          fetch('/api/players'),
+        ]);
+
+        if (matchesRes.ok) {
+          const matchesData: Match[] = await matchesRes.json();
+          setMatches(matchesData);
+          // Pre-select the first upcoming or live match if none selected yet
+          if (!selectedMatchId && matchesData.length > 0) {
+            const preferred =
+              matchesData.find((m) => m.status === 'live') ||
+              matchesData.find((m) => m.status === 'upcoming') ||
+              matchesData[0];
+            setSelectedMatchId(preferred.id);
+          }
+        }
+
+        if (playersRes.ok) {
+          const playersData: Player[] = await playersRes.json();
+          setPlayers(playersData);
+        }
+      } catch (err) {
+        console.error('Error loading fixtures/players for admin live score:', err);
+      }
+    };
+
+    loadData();
+  }, [isAuthenticated, selectedMatchId]);
+
+  const selectedMatch = useMemo(
+    () => matches.find((m) => m.id === selectedMatchId) || null,
+    [matches, selectedMatchId]
+  );
+
+  // Fetch live score for the selected match
+  useEffect(() => {
+    if (!isAuthenticated || !selectedMatch) return;
+
     const fetchLiveScore = async () => {
       try {
-        const response = await fetch('/api/live-score?matchId=current');
+        const response = await fetch(`/api/live-score?matchId=${encodeURIComponent(selectedMatch.id)}`);
         if (response.ok) {
           const liveScoreData = await response.json();
           setLiveScore(liveScoreData);
           setFormData({
-            team1Name: liveScoreData.team1.name,
+            team1Name: selectedMatch.team1.shortName || selectedMatch.team1.name,
             team1Runs: liveScoreData.team1.runs,
             team1Wickets: liveScoreData.team1.wickets,
             team1Overs: liveScoreData.team1.overs,
-            team2Name: liveScoreData.team2.name,
+            team2Name: selectedMatch.team2.shortName || selectedMatch.team2.name,
             team2Runs: liveScoreData.team2.runs,
             team2Wickets: liveScoreData.team2.wickets,
             team2Overs: liveScoreData.team2.overs,
@@ -87,7 +133,23 @@ export default function AdminLiveScorePage() {
             bowlerBalls: liveScoreData.currentBowler.balls,
             commentary: liveScoreData.commentary.length > 0 ? liveScoreData.commentary[0] : '',
             status: liveScoreData.status,
+            innings: formData.innings,
           });
+        } else {
+          // No existing live score yet; initialise from fixture
+          setLiveScore(null);
+          setFormData((prev) => ({
+            ...prev,
+            team1Name: selectedMatch.team1.shortName || selectedMatch.team1.name,
+            team1Runs: 0,
+            team1Wickets: 0,
+            team1Overs: 0,
+            team2Name: selectedMatch.team2.shortName || selectedMatch.team2.name,
+            team2Runs: 0,
+            team2Wickets: 0,
+            team2Overs: 0,
+            status: selectedMatch.status === 'upcoming' ? 'Scheduled' : 'Live',
+          }));
         }
       } catch (error) {
         console.error('Error fetching live score:', error);
@@ -95,12 +157,98 @@ export default function AdminLiveScorePage() {
     };
 
     fetchLiveScore();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, selectedMatch]);
+
+  const team1Players = useMemo(() => {
+    if (!selectedMatch) return [] as Player[];
+    return players.filter((p) => p.teamId === selectedMatch.team1.id);
+  }, [players, selectedMatch]);
+
+  const team2Players = useMemo(() => {
+    if (!selectedMatch) return [] as Player[];
+    return players.filter((p) => p.teamId === selectedMatch.team2.id);
+  }, [players, selectedMatch]);
+
+  // Helpers for overs/balls conversion
+  const oversToBalls = (overs: number) => {
+    const whole = Math.floor(overs);
+    const fraction = Math.round((overs - whole) * 10); // .0 - .5
+    return whole * 6 + fraction;
+  };
+
+  const ballsToOvers = (balls: number) => {
+    const whole = Math.floor(balls / 6);
+    const rem = balls % 6;
+    return parseFloat(`${whole}.${rem}`);
+  };
+
+  // Derived strike rate and economy
+  const batterStrikeRate = useMemo(() => {
+    if (!formData.batterBalls) return 0;
+    return parseFloat(((formData.batterRuns * 100) / formData.batterBalls).toFixed(1));
+  }, [formData.batterRuns, formData.batterBalls]);
+
+  const bowlerEconomy = useMemo(() => {
+    const balls = formData.bowlerBalls;
+    if (!balls) return 0;
+    const overs = balls / 6;
+    return parseFloat(((formData.bowlerRuns / overs)).toFixed(2));
+  }, [formData.bowlerRuns, formData.bowlerBalls]);
+
+  // Per-ball quick update handler
+  const handleBallEvent = (runs: number | 'W') => {
+    if (!selectedMatch) return;
+
+    setFormData((prev) => {
+      const isWicket = runs === 'W';
+      const runValue = typeof runs === 'number' ? runs : 0;
+
+      const currentBalls = oversToBalls(prev.team1Overs);
+      const newTeamBalls = currentBalls + 1;
+      const newTeamOvers = ballsToOvers(newTeamBalls);
+
+      const newTeamRuns = prev.team1Runs + runValue;
+      const newTeamWickets = isWicket ? prev.team1Wickets + 1 : prev.team1Wickets;
+
+      const newBatterRuns = prev.batterRuns + runValue;
+      const newBatterBalls = prev.batterBalls + 1;
+
+      const newBowlerRuns = prev.bowlerRuns + runValue;
+      const newBowlerBalls = prev.bowlerBalls + 1;
+
+      const ballNumber = newTeamBalls;
+      const overNum = Math.floor(ballNumber / 6);
+      const ballInOver = ballNumber % 6;
+
+      const ballDesc = isWicket
+        ? `WICKET! ${prev.batterName || 'Batter'} is out, bowled by ${prev.bowlerName || 'Bowler'}.`
+        : `${prev.batterName || 'Batter'} scores ${runValue} run${runValue === 1 ? '' : 's'} off ${prev.bowlerName || 'Bowler'}.`;
+
+      const prefix = `Over ${overNum}.${ballInOver}: `;
+      const newCommentLine = prefix + ballDesc;
+
+      return {
+        ...prev,
+        team1Runs: newTeamRuns,
+        team1Wickets: newTeamWickets,
+        team1Overs: newTeamOvers,
+        batterRuns: newBatterRuns,
+        batterBalls: newBatterBalls,
+        bowlerRuns: newBowlerRuns,
+        bowlerBalls: newBowlerBalls,
+        commentary: newCommentLine,
+      };
+    });
+  };
 
   const handleSaveScore = async () => {
     setIsSaving(true);
     try {
       const token = localStorage.getItem('auth_token');
+      if (!selectedMatch) {
+        alert('Please select a match first');
+        return;
+      }
       const scoreUpdate = {
         team1: {
           name: formData.team1Name,
@@ -128,6 +276,7 @@ export default function AdminLiveScorePage() {
           ? [formData.commentary, ...(liveScore?.commentary || []).slice(0, 49)]
           : liveScore?.commentary || [],
         status: formData.status,
+        innings: formData.innings,
       };
 
       const response = await fetch('/api/live-score', {
@@ -137,7 +286,7 @@ export default function AdminLiveScorePage() {
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          matchId: 'current',
+          matchId: selectedMatch.id,
           scoreUpdate,
         }),
       });
@@ -178,12 +327,52 @@ export default function AdminLiveScorePage() {
         <div className="max-w-6xl mx-auto px-6 py-8">
           <h1 className="text-4xl font-bold text-white mb-8">Live Score Management</h1>
 
+          {/* Match Selector */}
+          <div className="mb-6 bg-slate-800/60 border border-white/10 rounded-2xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">Select Match</p>
+              <p className="text-sm text-gray-300 max-w-xl">
+                Choose a fixture to manage its live score. All updates will immediately reflect on the public live score page.
+              </p>
+            </div>
+            <div className="flex flex-col md:flex-row md:items-center gap-3 w-full md:w-auto">
+              <select
+                value={selectedMatchId}
+                onChange={(e) => setSelectedMatchId(e.target.value)}
+                className="w-full md:w-72 px-3 py-2 bg-slate-900 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-ipl-gold"
+              >
+                <option value="">Select a match...</option>
+                {matches.map((match) => (
+                  <option key={match.id} value={match.id}>
+                    {match.team1.shortName} vs {match.team2.shortName} · {match.date} {match.time}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Score Update Form */}
             <div className="bg-slate-800/50 rounded-2xl border border-white/10 p-8">
               <h2 className="text-2xl font-bold text-white mb-6">Update Score</h2>
 
               <form className="space-y-6">
+                {/* Inning indicator */}
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">Innings</p>
+                    <p className="text-xs text-gray-500">This helps you track which innings you are updating.</p>
+                  </div>
+                  <select
+                    value={formData.innings}
+                    onChange={(e) => setFormData({ ...formData, innings: parseInt(e.target.value) || 1 })}
+                    className="w-full md:w-48 px-3 py-2 bg-slate-700 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-ipl-gold"
+                  >
+                    <option value={1}>1st Innings</option>
+                    <option value={2}>2nd Innings</option>
+                  </select>
+                </div>
+
                 {/* Team 1 */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-ipl-gold">Team 1</h3>
@@ -191,8 +380,8 @@ export default function AdminLiveScorePage() {
                     type="text"
                     placeholder="Team Name"
                     value={formData.team1Name}
-                    onChange={(e) => setFormData({ ...formData, team1Name: e.target.value })}
-                    className="w-full px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                    disabled
+                    className="w-full px-4 py-2 bg-slate-900 border border-white/10 rounded-lg text-white placeholder-gray-500 opacity-80 cursor-not-allowed"
                   />
                   <div className="grid grid-cols-3 gap-3">
                     <input
@@ -227,8 +416,8 @@ export default function AdminLiveScorePage() {
                     type="text"
                     placeholder="Team Name"
                     value={formData.team2Name}
-                    onChange={(e) => setFormData({ ...formData, team2Name: e.target.value })}
-                    className="w-full px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                    disabled
+                    className="w-full px-4 py-2 bg-slate-900 border border-white/10 rounded-lg text-white placeholder-gray-500 opacity-80 cursor-not-allowed"
                   />
                   <div className="grid grid-cols-3 gap-3">
                     <input
@@ -259,13 +448,18 @@ export default function AdminLiveScorePage() {
                 {/* Current Players */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-ipl-gold">Current Match</h3>
-                  <input
-                    type="text"
-                    placeholder="Batter Name"
+                  <select
                     value={formData.batterName}
                     onChange={(e) => setFormData({ ...formData, batterName: e.target.value })}
-                    className="w-full px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                  />
+                    className="w-full px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-ipl-gold"
+                  >
+                    <option value="">Select batter...</option>
+                    {team1Players.map((p) => (
+                      <option key={p.id} value={p.name}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </select>
                   <div className="grid grid-cols-2 gap-3">
                     <input
                       type="number"
@@ -283,13 +477,24 @@ export default function AdminLiveScorePage() {
                     />
                   </div>
 
-                  <input
-                    type="text"
-                    placeholder="Bowler Name"
+                  {/* Batter strike rate */}
+                  <p className="text-xs text-gray-400">
+                    Strike rate:{' '}
+                    <span className="text-ipl-gold font-semibold">{batterStrikeRate.toFixed(1)}</span>
+                  </p>
+
+                  <select
                     value={formData.bowlerName}
                     onChange={(e) => setFormData({ ...formData, bowlerName: e.target.value })}
-                    className="w-full px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                  />
+                    className="w-full px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-ipl-gold"
+                  >
+                    <option value="">Select bowler...</option>
+                    {team2Players.map((p) => (
+                      <option key={p.id} value={p.name}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </select>
                   <div className="grid grid-cols-2 gap-3">
                     <input
                       type="number"
@@ -305,6 +510,36 @@ export default function AdminLiveScorePage() {
                       onChange={(e) => setFormData({ ...formData, bowlerBalls: parseInt(e.target.value) || 0 })}
                       className="px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
                     />
+                  </div>
+
+                  {/* Bowler economy */}
+                  <p className="text-xs text-gray-400">
+                    Economy:{' '}
+                    <span className="text-ipl-gold font-semibold">{bowlerEconomy.toFixed(2)}</span>
+                  </p>
+
+                  {/* Quick ball controls */}
+                  <div className="mt-4 space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Quick ball update</p>
+                    <div className="flex flex-wrap gap-2">
+                      {[0, 1, 2, 3, 4, 6].map((r) => (
+                        <button
+                          key={r}
+                          type="button"
+                          onClick={() => handleBallEvent(r as number)}
+                          className="px-3 py-1.5 rounded-full bg-slate-700 border border-white/10 text-xs text-white hover:bg-slate-600 transition-colors"
+                        >
+                          {r} run{r === 1 ? '' : 's'}
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => handleBallEvent('W')}
+                        className="px-3 py-1.5 rounded-full bg-red-600/20 border border-red-500/40 text-xs text-red-300 hover:bg-red-600/30 transition-colors"
+                      >
+                        Wicket
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -334,7 +569,7 @@ export default function AdminLiveScorePage() {
                 <button
                   type="button"
                   onClick={handleSaveScore}
-                  disabled={isSaving}
+                  disabled={isSaving || !selectedMatch}
                   className="w-full px-6 py-3 bg-ipl-gold hover:bg-ipl-gold/90 text-black font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSaving ? 'Saving...' : 'Update Live Score'}
