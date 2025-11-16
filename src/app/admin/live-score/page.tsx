@@ -16,6 +16,15 @@ interface LiveScoreData {
   lastUpdated: string;
 }
 
+const DISMISSAL_MODES = [
+  { key: 'bowled', label: 'Bowled' },
+  { key: 'caught', label: 'Caught' },
+  { key: 'lbw', label: 'LBW' },
+  { key: 'run_out', label: 'Run out' },
+  { key: 'stumped', label: 'Stumped' },
+  { key: 'hit_wicket', label: 'Hit wicket' },
+] as const;
+
 export default function AdminLiveScorePage() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -47,6 +56,8 @@ export default function AdminLiveScorePage() {
     battingTeam: 'team1' as 'team1' | 'team2',
     tossWinner: '' as '' | 'team1' | 'team2',
     tossDecision: '' as '' | 'bat' | 'bowl',
+    dismissalType: '',
+    fielderName: '',
   });
   const [lastBallSnapshot, setLastBallSnapshot] = useState<any | null>(null);
 
@@ -142,6 +153,8 @@ export default function AdminLiveScorePage() {
             battingTeam: ((liveScoreData as any).battingTeam as 'team1' | 'team2') || prev.battingTeam,
             tossWinner: ((liveScoreData as any).toss?.winner as 'team1' | 'team2') || prev.tossWinner,
             tossDecision: ((liveScoreData as any).toss?.decision as 'bat' | 'bowl') || prev.tossDecision,
+            dismissalType: (liveScoreData as any).dismissalType || prev.dismissalType,
+            fielderName: (liveScoreData as any).fielderName || prev.fielderName,
           }));
         } else {
           // No existing live score yet; initialise from fixture
@@ -315,7 +328,30 @@ export default function AdminLiveScorePage() {
 
       let ballDesc: string;
       if (isWicket) {
-        ballDesc = `WICKET! ${prev.batterName || 'Batter'} is out, bowled by ${prev.bowlerName || 'Bowler'}.`;
+        const baseName = prev.batterName || 'Batter';
+        const bowlerName = prev.bowlerName || 'Bowler';
+        const mode = prev.dismissalType || 'bowled';
+        const fielder = prev.fielderName || '';
+        // Simple phrasing based on dismissal type
+        if (mode === 'caught') {
+          ballDesc = fielder
+            ? `WICKET! ${baseName} is out, caught by ${fielder} off ${bowlerName}.`
+            : `WICKET! ${baseName} is out, caught off ${bowlerName}.`;
+        } else if (mode === 'lbw') {
+          ballDesc = `WICKET! ${baseName} is out, lbw to ${bowlerName}.`;
+        } else if (mode === 'run_out') {
+          ballDesc = fielder
+            ? `WICKET! ${baseName} is run out by ${fielder}.`
+            : `WICKET! ${baseName} is run out.`;
+        } else if (mode === 'stumped') {
+          ballDesc = fielder
+            ? `WICKET! ${baseName} is stumped by ${fielder} off ${bowlerName}.`
+            : `WICKET! ${baseName} is stumped off ${bowlerName}.`;
+        } else if (mode === 'hit_wicket') {
+          ballDesc = `WICKET! ${baseName} is hit wicket.`;
+        } else {
+          ballDesc = `WICKET! ${baseName} is out, bowled by ${bowlerName}.`;
+        }
       } else if (event === 'WD') {
         ballDesc = `Wide ball from ${prev.bowlerName || 'Bowler'}, 1 run to extras.`;
       } else if (event === 'WD2') {
@@ -698,13 +734,6 @@ export default function AdminLiveScorePage() {
                       >
                         Undo last ball
                       </button>
-                      <button
-                        type="button"
-                        onClick={() => handleBallEvent('NB4')}
-                        className="px-3 py-1.5 rounded-full bg-slate-700 border border-purple-300/60 text-xs text-purple-100 hover:bg-slate-600 transition-colors"
-                      >
-                        NB + 4
-                      </button>
                     </div>
                     <p className="text-[11px] text-gray-500">Click a button after each ball. It will automatically update the score, batter, bowler and extras (wides, no-balls, byes, leg-byes) and add a short commentary line.</p>
                     <div className="flex flex-wrap gap-2">
@@ -741,6 +770,13 @@ export default function AdminLiveScorePage() {
                       </button>
                       <button
                         type="button"
+                        onClick={() => handleBallEvent('NB4')}
+                        className="px-3 py-1.5 rounded-full bg-slate-700 border border-purple-300/60 text-xs text-purple-100 hover:bg-slate-600 transition-colors"
+                      >
+                        NB + 4
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => handleBallEvent('B')}
                         className="px-3 py-1.5 rounded-full bg-slate-700 border border-teal-400/60 text-xs text-teal-200 hover:bg-slate-600 transition-colors"
                       >
@@ -760,6 +796,36 @@ export default function AdminLiveScorePage() {
                       >
                         Wicket
                       </button>
+                    </div>
+                    {/* Dismissal type selector */}
+                    <div className="pt-2 border-t border-white/5 mt-2 space-y-1">
+                      <p className="text-[11px] text-gray-400">How did the batter get out? (optional)</p>
+                      <div className="flex flex-wrap gap-2">
+                        {DISMISSAL_MODES.map((mode) => (
+                          <button
+                            key={mode.key}
+                            type="button"
+                            onClick={() => setFormData({ ...formData, dismissalType: mode.key })}
+                            className={`px-3 py-1.5 rounded-full border text-xs transition-colors ${
+                              formData.dismissalType === mode.key
+                                ? 'bg-red-600/30 border-red-400 text-red-100'
+                                : 'bg-slate-700 border-white/15 text-gray-200 hover:bg-slate-600'
+                            }`}
+                          >
+                            {mode.label}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="mt-2 grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2 items-center">
+                        <p className="text-[11px] text-gray-500">Optional fielder name (for caught / run out / stumped):</p>
+                        <input
+                          type="text"
+                          value={formData.fielderName}
+                          onChange={(e) => setFormData({ ...formData, fielderName: e.target.value })}
+                          placeholder="e.g. Jadeja at deep mid-wicket"
+                          className="px-3 py-1.5 bg-slate-700 border border-white/10 rounded-lg text-xs text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
