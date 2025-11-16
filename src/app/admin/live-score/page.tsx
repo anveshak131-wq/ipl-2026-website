@@ -14,6 +14,7 @@ interface LiveScoreData {
   commentary: string[];
   status: string;
   lastUpdated: string;
+  resultText?: string;
 }
 
 const DISMISSAL_MODES = [
@@ -58,6 +59,7 @@ export default function AdminLiveScorePage() {
     tossDecision: '' as '' | 'bat' | 'bowl',
     dismissalType: '',
     fielderName: '',
+    resultText: '',
   });
   const [lastBallSnapshot, setLastBallSnapshot] = useState<any | null>(null);
 
@@ -155,6 +157,7 @@ export default function AdminLiveScorePage() {
             tossDecision: ((liveScoreData as any).toss?.decision as 'bat' | 'bowl') || prev.tossDecision,
             dismissalType: (liveScoreData as any).dismissalType || prev.dismissalType,
             fielderName: (liveScoreData as any).fielderName || prev.fielderName,
+            resultText: (liveScoreData as any).resultText || prev.resultText,
           }));
         } else {
           // No existing live score yet; initialise from fixture
@@ -437,6 +440,9 @@ export default function AdminLiveScorePage() {
         toss: formData.tossWinner && formData.tossDecision
           ? { winner: formData.tossWinner, decision: formData.tossDecision }
           : undefined,
+        resultText: formData.status === 'Completed'
+          ? formData.resultText
+          : liveScore?.resultText || '',
       };
 
       const response = await fetch('/api/live-score', {
@@ -863,6 +869,17 @@ export default function AdminLiveScorePage() {
                     rows={4}
                     className="w-full px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold resize-none"
                   />
+                  {/* Final result text (used when match is completed) */}
+                  <div className="space-y-1">
+                    <p className="text-[11px] text-gray-400">Final result text (shown when match is completed)</p>
+                    <input
+                      type="text"
+                      value={formData.resultText}
+                      onChange={(e) => setFormData({ ...formData, resultText: e.target.value })}
+                      placeholder="Example: RCB won by 15 runs."
+                      className="w-full px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-xs text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                    />
+                  </div>
                   <select
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value })}

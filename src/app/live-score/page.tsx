@@ -21,6 +21,7 @@ interface LiveScoreData {
     winner: 'team1' | 'team2';
     decision: 'bat' | 'bowl';
   };
+  resultText?: string;
 }
 
 interface Message {
@@ -381,12 +382,20 @@ export default function LiveScorePage() {
                             )}
                           </div>
                           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/40">
-                            Live Score
+                            {liveScore?.status === 'Completed' ? 'Match Result' : 'Live Score'}
                           </span>
                         </div>
 
                         {liveScore ? (
                           <div className="space-y-6">
+                            {/* Result banner when match is completed */}
+                            {liveScore.status === 'Completed' && liveScore.resultText && (
+                              <div className="bg-emerald-900/30 border border-emerald-500/50 rounded-lg p-3">
+                                <p className="text-xs font-semibold text-emerald-300 uppercase tracking-wide mb-1">Result</p>
+                                <p className="text-sm text-emerald-100 font-medium">{liveScore.resultText}</p>
+                              </div>
+                            )}
+
                             {/* Score Cards */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               {/* Team 1 */}
