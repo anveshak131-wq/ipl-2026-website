@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import { Content, Team, Match, Player } from '@/types';
@@ -57,8 +57,17 @@ const IconNewspaper = ({ className }: { className?: string }) => (
   </svg>
 );
 
-export default function AdminContent() {
+interface AdminContentProps {
+  initialType?: 'news' | 'banner' | 'highlight';
+  restrictToType?: 'news' | 'banner' | 'highlight';
+}
+
+export default function AdminContent({
+  initialType = 'news',
+  restrictToType,
+}: AdminContentProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [content, setContent] = useState<Content[]>([]);
   const [filteredContent, setFilteredContent] = useState<Content[]>([]);
@@ -73,7 +82,8 @@ export default function AdminContent() {
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
-  const [categoryFilter, setCategoryFilter] = useState<'all' | 'banner' | 'highlight' | 'news'>('all');
+  const [activeContentType, setActiveContentType] = useState<'news' | 'banner' | 'highlight'>(initialType);
+  const [newsCategoryFilter, setNewsCategoryFilter] = useState<'all' | 'match' | 'team' | 'player' | 'general'>('all');
   const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
   
   const [formData, setFormData] = useState<{
@@ -101,6 +111,17 @@ export default function AdminContent() {
     linkedMatchId: '',
     linkedPlayerIds: [],
   });
+
+  const currentType: 'news' | 'banner' | 'highlight' = restrictToType || activeContentType;
+  const currentTypeLabel =
+    currentType === 'news' ? 'News' : currentType === 'banner' ? 'Banners' : 'Highlights';
+
+  const breadcrumbLeafLabel = pathname?.startsWith('/admin/news') ? 'News' : 'Content Hub';
+
+  const itemsOfCurrentType = content.filter((c) => c.type === currentType);
+  const totalCurrent = itemsOfCurrentType.length;
+  const publishedCurrent = itemsOfCurrentType.filter((c) => c.isActive).length;
+  const draftCurrent = itemsOfCurrentType.filter((c) => !c.isActive).length;
 
   useEffect(() => {
     const checkAuth = () => {
@@ -142,6 +163,12 @@ export default function AdminContent() {
     // Apply filters
     let filtered = [...content];
 
+    filtered = filtered.filter(item => item.type === currentType);
+
+    if (currentType === 'news' && newsCategoryFilter !== 'all') {
+      filtered = filtered.filter(item => (item.category as any) === newsCategoryFilter);
+    }
+
     // Search filter
     if (searchQuery) {
       filtered = filtered.filter(item =>
@@ -157,13 +184,16 @@ export default function AdminContent() {
       );
     }
 
-    // Category filter
-    if (categoryFilter !== 'all') {
-      filtered = filtered.filter(item => item.type === categoryFilter);
-    }
-
     setFilteredContent(filtered);
-  }, [content, searchQuery, statusFilter, categoryFilter, dateFilter]);
+  }, [
+    content,
+    searchQuery,
+    statusFilter,
+    dateFilter,
+    activeContentType,
+    newsCategoryFilter,
+    currentType,
+  ]);
 
   const fetchContent = async () => {
     try {
@@ -180,7 +210,7 @@ export default function AdminContent() {
   const handleAddContent = () => {
     setEditingContent(null);
     setFormData({
-      type: 'news',
+      type: currentType,
       title: '',
       summary: '',
       content: '',
@@ -305,19 +335,63 @@ export default function AdminContent() {
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
             <div>
+              <div className="mb-2 text-xs text-gray-400 flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => router.push('/admin/dashboard')}
+                  className="hover:text-ipl-gold transition-colors"
+                >
+                  Admin
+                </button>
+                <span className="text-gray-600">/</span>
+                <button
+                  type="button"
+                  onClick={() => router.push('/admin/content')}
+                  className="hover:text-ipl-gold transition-colors"
+                >
+                  Content
+                </button>
+                <span className="text-gray-600">/</span>
+                <span className="text-gray-300">{breadcrumbLeafLabel}</span>
+              </div>
               <h1 className="text-3xl font-bold text-white mb-2">
                 Content Management
               </h1>
               <p className="text-gray-400">
                 Manage news articles, banners, and highlights
               </p>
+              {!restrictToType && (
+                <div className="mt-4 inline-flex rounded-xl bg-black/40 border border-white/10 p-1">
+                  {[{ key: 'news', label: 'News' }, { key: 'banner', label: 'Banners' }, { key: 'highlight', label: 'Highlights' }].map((tab) => {
+                    const isActive = currentType === tab.key;
+                    return (
+                      <button
+                        key={tab.key}
+                        type="button"
+                        onClick={() => setActiveContentType(tab.key as 'news' | 'banner' | 'highlight')}
+                        className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                          isActive
+                            ? 'bg-gradient-to-r from-ipl-gold to-ipl-purple text-black shadow-md'
+                            : 'text-gray-300 hover:bg-white/5'
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
             <button 
               onClick={handleAddContent}
               className="flex items-center gap-2 bg-gradient-to-r from-ipl-gold to-ipl-purple px-6 py-3 rounded-xl font-semibold text-white hover:shadow-xl hover:scale-105 transition-all duration-200"
             >
               <IconPlus className="w-5 h-5" />
-              Create News
+              {currentType === 'news'
+                ? 'Create News'
+                : currentType === 'banner'
+                ? 'Create Banner'
+                : 'Create Highlight'}
             </button>
           </div>
 
@@ -351,23 +425,29 @@ export default function AdminContent() {
                 </select>
               </div>
 
-              {/* Category Filter */}
               <div>
-                <select
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value as any)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ipl-gold transition-all appearance-none cursor-pointer"
-                >
-                  <option value="all">All Categories</option>
-                  <option value="news">News</option>
-                  <option value="banner">Banner</option>
-                  <option value="highlight">Highlight</option>
-                </select>
+                {currentType === 'news' ? (
+                  <select
+                    value={newsCategoryFilter}
+                    onChange={(e) => setNewsCategoryFilter(e.target.value as any)}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ipl-gold transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="all">All News Categories</option>
+                    <option value="match">Match</option>
+                    <option value="team">Team</option>
+                    <option value="player">Player</option>
+                    <option value="general">General</option>
+                  </select>
+                ) : (
+                  <div className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-xs text-gray-400 flex items-center">
+                    {activeContentType === 'banner' ? 'Viewing: Banners' : 'Viewing: Highlights'}
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Active Filters Display */}
-            {(searchQuery || statusFilter !== 'all' || categoryFilter !== 'all') && (
+            {(searchQuery || statusFilter !== 'all' || (currentType === 'news' && newsCategoryFilter !== 'all')) && (
               <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-white/10">
                 <span className="text-sm text-gray-400">Active filters:</span>
                 {searchQuery && (
@@ -380,16 +460,16 @@ export default function AdminContent() {
                     Status: {statusFilter}
                   </span>
                 )}
-                {categoryFilter !== 'all' && (
+                {currentType === 'news' && newsCategoryFilter !== 'all' && (
                   <span className="px-3 py-1 rounded-full bg-purple-500/20 text-purple-400 text-sm border border-purple-500/30">
-                    Category: {categoryFilter}
+                    News category: {newsCategoryFilter}
                   </span>
                 )}
                 <button
                   onClick={() => {
                     setSearchQuery('');
                     setStatusFilter('all');
-                    setCategoryFilter('all');
+                    setNewsCategoryFilter('all');
                     setDateFilter('all');
                   }}
                   className="px-3 py-1 rounded-full bg-red-500/20 text-red-400 text-sm border border-red-500/30 hover:bg-red-500/30 transition-all"
@@ -403,25 +483,25 @@ export default function AdminContent() {
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
             <div className="glass-effect rounded-xl p-4">
-              <div className="text-gray-400 text-sm mb-1">Total Items</div>
-              <div className="text-2xl font-bold text-white">{content.length}</div>
+              <div className="text-gray-400 text-sm mb-1">{`Total ${currentTypeLabel}`}</div>
+              <div className="text-2xl font-bold text-white">{totalCurrent}</div>
             </div>
             <div className="glass-effect rounded-xl p-4">
               <div className="text-gray-400 text-sm mb-1">Published</div>
               <div className="text-2xl font-bold text-green-400">
-                {content.filter(c => c.isActive).length}
+                {publishedCurrent}
               </div>
             </div>
             <div className="glass-effect rounded-xl p-4">
               <div className="text-gray-400 text-sm mb-1">Drafts</div>
               <div className="text-2xl font-bold text-gray-400">
-                {content.filter(c => !c.isActive).length}
+                {draftCurrent}
               </div>
             </div>
             <div className="glass-effect rounded-xl p-4">
-              <div className="text-gray-400 text-sm mb-1">News Articles</div>
+              <div className="text-gray-400 text-sm mb-1">All Content Items</div>
               <div className="text-2xl font-bold text-blue-400">
-                {content.filter(c => c.type === 'news').length}
+                {content.length}
               </div>
             </div>
           </div>
