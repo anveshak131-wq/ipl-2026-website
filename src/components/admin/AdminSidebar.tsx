@@ -18,6 +18,8 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [adminName, setAdminName] = useState('Admin User');
+  const [adminEmail, setAdminEmail] = useState('admin@ipl2026.com');
 
   useEffect(() => {
     const handleResize = () => {
@@ -27,6 +29,31 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Load admin details for avatar and user block
+  useEffect(() => {
+    const loadAdmin = async () => {
+      try {
+        const token = localStorage.getItem('auth_token') || localStorage.getItem('adminToken');
+        if (!token) return;
+
+        const res = await fetch(`/api/auth?action=verify&token=${token}`);
+        const data = await res.json();
+        if (!res.ok || !data.success || !data.user) return;
+
+        const user = data.user;
+        const name = user.name || user.username || 'Admin';
+        const email = user.email || adminEmail;
+
+        setAdminName(name);
+        setAdminEmail(email);
+      } catch (err) {
+        console.error('Error loading admin details for sidebar:', err);
+      }
+    };
+
+    loadAdmin();
   }, []);
 
   const menuGroups: { [key: string]: MenuItem[] } = {
@@ -143,6 +170,13 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
     router.push('/admin');
   };
 
+  const adminInitials = adminName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() || '')
+    .join('') || 'AD';
+
   const handleNavigation = (href: string) => {
     router.push(href);
     if (window.innerWidth < 768) {
@@ -232,12 +266,12 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         <div className={`${collapsed ? 'px-3' : 'px-3'} py-3 rounded-lg bg-[#141A22] backdrop-blur-xl border border-[#2A3440]`}>
           <div className={`flex items-center ${collapsed ? 'justify-center' : 'space-x-3'}`}>
             <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#2F6FED] to-[#7B61FF] flex items-center justify-center text-white font-semibold text-sm shadow-lg">
-              AD
+              {adminInitials}
             </div>
             {!collapsed && (
               <div className="flex-1 min-w-0">
-                <div className="text-[#E6EDF3] font-medium text-sm truncate">Admin User</div>
-                <div className="text-[#AEBAC7] text-xs truncate">admin@ipl2026.com</div>
+                <div className="text-[#E6EDF3] font-medium text-sm truncate">{adminName}</div>
+                <div className="text-[#AEBAC7] text-xs truncate">{adminEmail}</div>
               </div>
             )}
           </div>

@@ -61,6 +61,15 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
   const [scrollY, setScrollY] = useState(0);
   const [nationalityFilter, setNationalityFilter] = useState<'all' | 'indian' | 'overseas'>('all');
   const [battingStyleFilter, setBattingStyleFilter] = useState<'any' | 'right' | 'left'>('any');
+  const [seasonStats, setSeasonStats] = useState<{
+    matchesPlayed: number;
+    wins: number;
+    losses: number;
+    noResult: number;
+    winPercentage: number;
+  } | null>(null);
+  const [lastMatch, setLastMatch] = useState<any | null>(null);
+  const [nextMatch, setNextMatch] = useState<any | null>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -104,6 +113,67 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
 
     fetchTeamData();
   }, [teamId]);
+
+  // Fetch matches and compute season snapshot once team data is available
+  useEffect(() => {
+    if (!teamData) return;
+
+    const loadMatches = async () => {
+      try {
+        const res = await fetch('/api/matches');
+        if (!res.ok) return;
+
+        const matches = await res.json();
+        const teamMatches = matches.filter((m: any) => m.team1?.id === teamData.id || m.team2?.id === teamData.id);
+
+        const completed = teamMatches.filter((m: any) => m.status === 'completed');
+        const upcoming = teamMatches.filter((m: any) => m.status === 'upcoming');
+
+        let wins = 0;
+        let losses = 0;
+        let noResult = 0;
+
+        completed.forEach((m: any) => {
+          if (!m.result) {
+            noResult += 1;
+            return;
+          }
+          const resultText = (m.result as string).toLowerCase();
+          const isThisTeam = m.team1?.id === teamData.id ? m.team1 : m.team2;
+          const oppTeam = m.team1?.id === teamData.id ? m.team2 : m.team1;
+
+          if (resultText.includes(isThisTeam.shortName.toLowerCase()) || resultText.includes(isThisTeam.name.toLowerCase())) {
+            wins += 1;
+          } else if (oppTeam && (resultText.includes(oppTeam.shortName.toLowerCase()) || resultText.includes(oppTeam.name.toLowerCase()))) {
+            losses += 1;
+          } else if (resultText.includes('no result') || resultText.includes('abandoned')) {
+            noResult += 1;
+          }
+        });
+
+        const matchesPlayed = completed.length;
+        const winPercentage = matchesPlayed > 0 ? Math.round((wins / matchesPlayed) * 100) : 0;
+
+        setSeasonStats({ matchesPlayed, wins, losses, noResult, winPercentage });
+
+        // Last completed match (by date)
+        if (completed.length > 0) {
+          const sortedCompleted = [...completed].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+          setLastMatch(sortedCompleted[0]);
+        }
+
+        // Next upcoming match (by date)
+        if (upcoming.length > 0) {
+          const sortedUpcoming = [...upcoming].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+          setNextMatch(sortedUpcoming[0]);
+        }
+      } catch (err) {
+        console.error('Error loading matches for team snapshot:', err);
+      }
+    };
+
+    loadMatches();
+  }, [teamData]);
 
   if (isLoading) {
     return (
@@ -363,7 +433,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
 
         {/* Stats Section with Custom Icons */}
         <div className="relative z-20 -mt-20 mb-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {[
                 { label: 'Squad Size', value: teamData.players?.length || 0, Icon: UsersIcon },
@@ -399,6 +469,127 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                 </div>
               ))}
             </div>
+
+            {/* Match & Season Snapshot */}
+            {seasonStats && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
+                {/* Season summary */}
+                <div
+                  className="rounded-3xl backdrop-blur-xl p-6 border shadow-xl flex flex-col justify-between"
+                  style={{
+                    background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+                    borderColor: primaryColor.medium,
+                    boxShadow: `0 10px 30px ${primaryColor.glow}15`,
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: primaryColor.textOnLight }}>
+                        Season snapshot
+                      </p>
+                      <h3 className="text-2xl font-black" style={{ color: primaryColor.text }}>
+                        {teamData.shortName} 2026
+                      </h3>
+                    </div>
+                    <div className="w-8 h-8 opacity-20">
+                      <TrophyIcon className="w-full h-full" color={primaryColor.solid} />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+                    <div>
+                      <p className="text-gray-400">Matches</p>
+                      <p className="text-xl font-bold text-white">{seasonStats.matchesPlayed}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400">Win %</p>
+                      <p className="text-xl font-bold text-ipl-gold">{seasonStats.winPercentage}%</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400">Wins</p>
+                      <p className="text-lg font-semibold text-green-400">{seasonStats.wins}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-400">Losses</p>
+                      <p className="text-lg font-semibold text-red-400">{seasonStats.losses}</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-2">
+                    <div className="flex items-center justify-between mb-1 text-xs text-gray-400">
+                      <span>Season progress</span>
+                      <span>
+                        {seasonStats.matchesPlayed} matches · {seasonStats.noResult} NR
+                      </span>
+                    </div>
+                    <div className="w-full h-2 rounded-full bg-black/30 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-green-500 via-ipl-gold to-red-500"
+                        style={{ width: `${Math.max(seasonStats.winPercentage, 4)}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Last match */}
+                <div
+                  className="rounded-3xl backdrop-blur-xl p-6 border shadow-xl flex flex-col"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(15,23,42,0.85), rgba(15,23,42,0.95))',
+                    borderColor: 'rgba(148,163,184,0.6)',
+                  }}
+                >
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Last match</p>
+                  {lastMatch ? (
+                    <>
+                      <p className="text-sm text-gray-400 mb-1">
+                        {new Date(lastMatch.date).toLocaleDateString('en-IN', {
+                          day: 'numeric',
+                          month: 'short',
+                        })}{' '}
+                        · {lastMatch.venue}
+                      </p>
+                      <p className="text-lg font-semibold text-white mb-1">
+                        {lastMatch.team1.shortName} vs {lastMatch.team2.shortName}
+                      </p>
+                      <p className="text-sm text-gray-300 mb-3">{lastMatch.result || 'Result not available'}</p>
+                      <p className="text-xs text-gray-500">Status: {lastMatch.status}</p>
+                    </>
+                  ) : (
+                    <p className="text-sm text-gray-400">No completed matches yet this season.</p>
+                  )}
+                </div>
+
+                {/* Next match */}
+                <div
+                  className="rounded-3xl backdrop-blur-xl p-6 border shadow-xl flex flex-col"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(15,23,42,0.9), rgba(15,23,42,0.98))',
+                    borderColor: 'rgba(59,130,246,0.6)',
+                  }}
+                >
+                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Next match</p>
+                  {nextMatch ? (
+                    <>
+                      <p className="text-sm text-gray-400 mb-1">
+                        {new Date(nextMatch.date).toLocaleDateString('en-IN', {
+                          day: 'numeric',
+                          month: 'short',
+                        })}{' '}
+                        · {nextMatch.venue}
+                      </p>
+                      <p className="text-lg font-semibold text-white mb-1">
+                        {nextMatch.team1.shortName} vs {nextMatch.team2.shortName}
+                      </p>
+                      <p className="text-sm text-gray-300 mb-3">Starts at {nextMatch.time}</p>
+                      <p className="text-xs text-blue-400 font-semibold">Tap to view in schedule</p>
+                    </>
+                  ) : (
+                    <p className="text-sm text-gray-400">No upcoming matches scheduled yet.</p>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
