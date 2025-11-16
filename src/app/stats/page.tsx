@@ -359,9 +359,8 @@ export default function StatsPage() {
               </span>
             </h1>
             <p className="text-gray-300 text-base md:text-lg max-w-2xl">
-              Explore Orange Cap and Purple Cap races, best strike rates and
-              bowling economies, plus smart comparisons between your favourite
-              teams.
+              Explore Orange Cap and Purple Cap races, plus the best strike
+              rates and bowling economies across the league.
             </p>
             {publishedStats?.lastUpdated && (
               <p className="text-xs text-gray-400">
@@ -553,50 +552,6 @@ export default function StatsPage() {
                   </div>
                 ))}
               </div>
-            </div>
-          </section>
-
-          {/* Team comparison */}
-          <section className="rounded-3xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 p-6 md:p-8 backdrop-blur-lg">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-white mb-1">Team Comparison</h2>
-                <p className="text-sm text-gray-300 max-w-xl">
-                  Pick any two teams to compare their squad strength based on total
-                  runs, wickets and average strike rates.
-                </p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <select
-                  value={selectedTeam1Id}
-                  onChange={(e) => setSelectedTeam1Id(e.target.value)}
-                  className="bg-black/40 border border-white/20 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-ipl-gold/40"
-                >
-                  <option value="">Select Team 1</option>
-                  {teams.map((team) => (
-                    <option key={team.id} value={team.id}>
-                      {team.shortName}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={selectedTeam2Id}
-                  onChange={(e) => setSelectedTeam2Id(e.target.value)}
-                  className="bg-black/40 border border-white/20 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-ipl-gold/40"
-                >
-                  <option value="">Select Team 2</option>
-                  {teams.map((team) => (
-                    <option key={team.id} value={team.id}>
-                      {team.shortName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <TeamComparisonCard aggregate={selectedTeam1Agg} label="Team 1" />
-              <TeamComparisonCard aggregate={selectedTeam2Agg} label="Team 2" />
             </div>
           </section>
 

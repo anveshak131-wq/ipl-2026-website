@@ -482,48 +482,6 @@ export default function AdminStatsPage() {
                 />
               </div>
             </div>
-
-            <div className="glass-effect rounded-xl p-6">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
-                <div>
-                  <h2 className="text-lg font-semibold text-white mb-1">Default team comparison</h2>
-                  <p className="text-xs text-gray-400">
-                    Choose which two teams should be pre-selected on the public comparison widget.
-                  </p>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-3 text-xs">
-                  <select
-                    value={selectedTeam1Id}
-                    onChange={(e) => setSelectedTeam1Id(e.target.value)}
-                    className="bg-black/40 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-ipl-gold/40"
-                  >
-                    <option value="">Select Team 1</option>
-                    {teams.map((team) => (
-                      <option key={team.id} value={team.id}>
-                        {team.shortName}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={selectedTeam2Id}
-                    onChange={(e) => setSelectedTeam2Id(e.target.value)}
-                    className="bg-black/40 border border-white/20 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-ipl-gold/40"
-                  >
-                    <option value="">Select Team 2</option>
-                    {teams.map((team) => (
-                      <option key={team.id} value={team.id}>
-                        {team.shortName}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                <TeamAggregateCard aggregate={selectedTeam1Agg} label="Team 1" />
-                <TeamAggregateCard aggregate={selectedTeam2Agg} label="Team 2" />
-              </div>
-            </div>
           </section>
 
           <section className="space-y-4">
@@ -755,57 +713,6 @@ function LeaderboardEditor({
             </div>
           </div>
         )}
-      </div>
-    </div>
-  );
-}
-
-function TeamAggregateCard({
-  aggregate,
-  label,
-}: {
-  aggregate: TeamAggregate | null;
-  label: string;
-}) {
-  if (!aggregate || !aggregate.team) {
-    return (
-      <div className="rounded-lg bg-black/40 border border-white/10 p-4 text-xs text-gray-400 flex items-center justify-center">
-        Select {label} to preview comparison.
-      </div>
-    );
-  }
-
-  const { team, totalRuns, totalWickets, totalMatches, avgRunsPerMatch, avgStrikeRate } =
-    aggregate;
-
-  return (
-    <div className="rounded-lg bg-black/40 border border-white/10 p-4 space-y-3 text-xs">
-      <div>
-        <div className="text-[10px] uppercase tracking-wide text-gray-400">{label}</div>
-        <div className="text-sm font-semibold text-white flex items-center gap-2">
-          <span>{team.shortName}</span>
-        </div>
-        <div className="text-[11px] text-gray-400">{team.name}</div>
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        <div className="rounded-md bg-white/5 border border-white/10 p-2">
-          <div className="text-[10px] text-gray-400 mb-1">Squad runs</div>
-          <div className="text-sm font-bold text-ipl-gold">{totalRuns}</div>
-          <div className="text-[10px] text-gray-400">across {totalMatches} matches</div>
-        </div>
-        <div className="rounded-md bg-white/5 border border-white/10 p-2">
-          <div className="text-[10px] text-gray-400 mb-1">Squad wickets</div>
-          <div className="text-sm font-bold text-emerald-300">{totalWickets}</div>
-          <div className="text-[10px] text-gray-400">all bowlers combined</div>
-        </div>
-        <div className="rounded-md bg-white/5 border border-white/10 p-2">
-          <div className="text-[10px] text-gray-400 mb-1">Avg runs / match</div>
-          <div className="text-sm font-bold text-white">{avgRunsPerMatch.toFixed(1)}</div>
-        </div>
-        <div className="rounded-md bg-white/5 border border-white/10 p-2">
-          <div className="text-[10px] text-gray-400 mb-1">Avg strike rate</div>
-          <div className="text-sm font-bold text-white">{avgStrikeRate.toFixed(1)}</div>
-        </div>
       </div>
     </div>
   );
