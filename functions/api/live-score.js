@@ -41,19 +41,39 @@ export const onRequest = async (context) => {
         );
       }
 
-      const email = await env.SPORTS_KV.get(`token:${token}`);
-      if (!email) {
+      const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
+      if (!tokenValue) {
         return new Response(
           JSON.stringify({ error: 'Invalid token' }),
           { status: 401, headers: { 'Content-Type': 'application/json' } }
         );
       }
 
+      // tokenValue may be a plain email (from /api/auth) or JSON (from /api/admin/setup)
+      let email = tokenValue;
+      if (tokenValue.trim().startsWith('{')) {
+        try {
+          const parsed = JSON.parse(tokenValue);
+          if (parsed && typeof parsed.email === 'string') {
+            email = parsed.email;
+          }
+        } catch {
+          // fall back to using tokenValue directly
+        }
+      }
+
       const userData = await env.SPORTS_KV.get(`user:${email}`);
+      if (!userData) {
+        return new Response(
+          JSON.stringify({ error: 'User not found' }),
+          { status: 401, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
       const user = JSON.parse(userData);
 
-      // Check if user is admin
-      if (user.role !== 'admin') {
+      // Check if user is admin or super_admin
+      if (user.role !== 'admin' && user.role !== 'super_admin') {
         return new Response(
           JSON.stringify({ error: 'Forbidden' }),
           { status: 403, headers: { 'Content-Type': 'application/json' } }

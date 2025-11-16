@@ -25,9 +25,9 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// ../.wrangler/tmp/bundle-tgtqVp/checked-fetch.js
+// ../.wrangler/tmp/bundle-z7li2H/checked-fetch.js
 var require_checked_fetch = __commonJS({
-  "../.wrangler/tmp/bundle-tgtqVp/checked-fetch.js"() {
+  "../.wrangler/tmp/bundle-z7li2H/checked-fetch.js"() {
     "use strict";
     var urls = /* @__PURE__ */ new Set();
     function checkURL(request, init) {
@@ -1320,16 +1320,32 @@ var onRequest10 = /* @__PURE__ */ __name(async (context) => {
           { status: 401, headers: { "Content-Type": "application/json" } }
         );
       }
-      const email = await env.SPORTS_KV.get(`token:${token}`);
-      if (!email) {
+      const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
+      if (!tokenValue) {
         return new Response(
           JSON.stringify({ error: "Invalid token" }),
           { status: 401, headers: { "Content-Type": "application/json" } }
         );
       }
+      let email = tokenValue;
+      if (tokenValue.trim().startsWith("{")) {
+        try {
+          const parsed = JSON.parse(tokenValue);
+          if (parsed && typeof parsed.email === "string") {
+            email = parsed.email;
+          }
+        } catch {
+        }
+      }
       const userData = await env.SPORTS_KV.get(`user:${email}`);
+      if (!userData) {
+        return new Response(
+          JSON.stringify({ error: "User not found" }),
+          { status: 401, headers: { "Content-Type": "application/json" } }
+        );
+      }
       const user = JSON.parse(userData);
-      if (user.role !== "admin") {
+      if (user.role !== "admin" && user.role !== "super_admin") {
         return new Response(
           JSON.stringify({ error: "Forbidden" }),
           { status: 403, headers: { "Content-Type": "application/json" } }
@@ -2820,10 +2836,10 @@ var routes = [
   }
 ];
 
-// ../.wrangler/tmp/bundle-tgtqVp/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-z7li2H/middleware-loader.entry.ts
 var import_checked_fetch25 = __toESM(require_checked_fetch());
 
-// ../.wrangler/tmp/bundle-tgtqVp/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-z7li2H/middleware-insertion-facade.js
 var import_checked_fetch23 = __toESM(require_checked_fetch());
 
 // ../../../.npm/_npx/32026684e21afda6/node_modules/wrangler/templates/pages-template-worker.ts
@@ -3319,7 +3335,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// ../.wrangler/tmp/bundle-tgtqVp/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-z7li2H/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -3352,7 +3368,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// ../.wrangler/tmp/bundle-tgtqVp/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-z7li2H/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
