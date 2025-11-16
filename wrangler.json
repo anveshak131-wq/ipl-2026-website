@@ -9,6 +9,11 @@
       "binding": "IPL_CACHE",
       "id": "5c1beb13cd564dd5892612ac9d2e04c4",
       "preview_id": "de6a22c437444d2eba9e63240f6e1f9b"
+    },
+    {
+      "binding": "SPORTS_KV",
+      "id": "5c1beb13cd564dd5892612ac9d2e04c4",
+      "preview_id": "de6a22c437444d2eba9e63240f6e1f9b"
     }
   ],
   "pages_build_config": {

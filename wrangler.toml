@@ -2,3 +2,8 @@
 name = "ipl-2026-website"
 pages_build_command = "npm run build"
 pages_build_output_dir = "out"
+
+[[kv_namespaces]]
+binding = "SPORTS_KV"
+id = "local-sports-kv"
+preview_id = "local-sports-kv-preview"

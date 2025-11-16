@@ -26,6 +26,13 @@ export const onRequest = async (context) => {
       );
     }
 
+    if (!env || !env.SPORTS_KV) {
+      return new Response(
+        JSON.stringify({ error: 'KV not configured' }),
+        { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
+
     const email = await env.SPORTS_KV.get(`token:${token}`);
     if (!email) {
       return new Response(
@@ -35,6 +42,13 @@ export const onRequest = async (context) => {
     }
 
     const userData = await env.SPORTS_KV.get(`user:${email}`);
+    if (!userData) {
+      return new Response(
+        JSON.stringify({ error: 'User not found' }),
+        { status: 404, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
+
     const user = JSON.parse(userData);
 
     // Track user activity (heartbeat) - allow any authenticated user
