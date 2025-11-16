@@ -48,6 +48,7 @@ export default function AdminLiveScorePage() {
     tossWinner: '' as '' | 'team1' | 'team2',
     tossDecision: '' as '' | 'bat' | 'bowl',
   });
+  const [lastBallSnapshot, setLastBallSnapshot] = useState<any | null>(null);
 
   // Check authentication
   useEffect(() => {
@@ -207,6 +208,8 @@ export default function AdminLiveScorePage() {
     if (!selectedMatch) return;
 
     setFormData((prev) => {
+      // snapshot state before applying this ball so we can undo once
+      setLastBallSnapshot(prev);
       const isWicket = runs === 'W';
       const runValue = typeof runs === 'number' ? runs : 0;
       const battingKey = prev.battingTeam === 'team1' ? 'team1' : 'team2';
@@ -254,6 +257,12 @@ export default function AdminLiveScorePage() {
         commentary: newCommentLine,
       };
     });
+  };
+
+  const handleUndoLastBall = () => {
+    if (!lastBallSnapshot) return;
+    setFormData(lastBallSnapshot);
+    setLastBallSnapshot(null);
   };
 
   const handleSaveScore = async () => {
@@ -448,21 +457,21 @@ export default function AdminLiveScorePage() {
                   <div className="grid grid-cols-3 gap-3">
                     <input
                       type="number"
-                      placeholder="Runs"
+                      placeholder="Runs (e.g. 145)"
                       value={formData.team1Runs}
                       onChange={(e) => setFormData({ ...formData, team1Runs: parseInt(e.target.value) || 0 })}
                       className="px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
                     />
                     <input
                       type="number"
-                      placeholder="Wickets"
+                      placeholder="Wickets (e.g. 3)"
                       value={formData.team1Wickets}
                       onChange={(e) => setFormData({ ...formData, team1Wickets: parseInt(e.target.value) || 0 })}
                       className="px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
                     />
                     <input
                       type="number"
-                      placeholder="Overs"
+                      placeholder="Overs (e.g. 10.2)"
                       step="0.1"
                       value={formData.team1Overs}
                       onChange={(e) => setFormData({ ...formData, team1Overs: parseFloat(e.target.value) || 0 })}
@@ -527,14 +536,14 @@ export default function AdminLiveScorePage() {
                   <div className="grid grid-cols-2 gap-3">
                     <input
                       type="number"
-                      placeholder="Batter Runs"
+                      placeholder="Batter Runs (e.g. 35)"
                       value={formData.batterRuns}
                       onChange={(e) => setFormData({ ...formData, batterRuns: parseInt(e.target.value) || 0 })}
                       className="px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
                     />
                     <input
                       type="number"
-                      placeholder="Batter Balls"
+                      placeholder="Batter Balls (e.g. 22)"
                       value={formData.batterBalls}
                       onChange={(e) => setFormData({ ...formData, batterBalls: parseInt(e.target.value) || 0 })}
                       className="px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
@@ -562,14 +571,14 @@ export default function AdminLiveScorePage() {
                   <div className="grid grid-cols-2 gap-3">
                     <input
                       type="number"
-                      placeholder="Bowler Runs"
+                      placeholder="Bowler Runs (e.g. 24)"
                       value={formData.bowlerRuns}
                       onChange={(e) => setFormData({ ...formData, bowlerRuns: parseInt(e.target.value) || 0 })}
                       className="px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
                     />
                     <input
                       type="number"
-                      placeholder="Bowler Balls"
+                      placeholder="Bowler Balls (e.g. 18)"
                       value={formData.bowlerBalls}
                       onChange={(e) => setFormData({ ...formData, bowlerBalls: parseInt(e.target.value) || 0 })}
                       className="px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
@@ -584,7 +593,23 @@ export default function AdminLiveScorePage() {
 
                   {/* Quick ball controls */}
                   <div className="mt-4 space-y-2">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Quick ball update</p>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Quick ball update</p>
+                        <p className="text-[11px] text-gray-500">
+                          Editing: {formData.innings === 1 ? '1st' : '2nd'} innings –{' '}
+                          {formData.battingTeam === 'team2' ? formData.team2Name : formData.team1Name} batting
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleUndoLastBall}
+                        disabled={!lastBallSnapshot}
+                        className="text-[11px] px-3 py-1 rounded-full border border-white/15 text-gray-300 hover:bg-slate-700/70 disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        Undo last ball
+                      </button>
+                    </div>
                     <p className="text-[11px] text-gray-500">Click a button after each ball. It will automatically update the score, batter, bowler and add a short commentary line.</p>
                     <div className="flex flex-wrap gap-2">
                       {[0, 1, 2, 3, 4, 6].map((r) => (
@@ -613,7 +638,7 @@ export default function AdminLiveScorePage() {
                   <h3 className="text-lg font-semibold text-ipl-gold">Add Commentary</h3>
                   <p className="text-[11px] text-gray-500">Optional: type extra details about the last ball or over. This text appears on the public live score page.</p>
                   <textarea
-                    placeholder="Add ball-by-ball commentary..."
+                    placeholder="Example: Kohli drives through cover for four."
                     value={formData.commentary}
                     onChange={(e) => setFormData({ ...formData, commentary: e.target.value })}
                     maxLength={500}
