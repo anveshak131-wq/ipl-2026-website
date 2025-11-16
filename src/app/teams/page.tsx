@@ -13,6 +13,7 @@ import AuroraBackground from '@/components/ui/AuroraBackground';
 
 export default function TeamsPage() {
   const [teams, setTeams] = useState<Team[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,6 +63,25 @@ export default function TeamsPage() {
     );
   }
 
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const filteredTeams = normalizedSearch
+    ? teams.filter((team) =>
+        team.name.toLowerCase().includes(normalizedSearch) ||
+        team.shortName.toLowerCase().includes(normalizedSearch)
+      )
+    : teams;
+
+  const totalTeams = teams.length;
+  const totalPlayers = teams.reduce((sum, team) => sum + (team.players?.length || 0), 0);
+  const totalOverseas = teams.reduce(
+    (sum, team) => sum + (team.players?.filter((p) => p.nationality !== 'India').length || 0),
+    0
+  );
+  const totalCaptains = teams.reduce(
+    (sum, team) => sum + (team.players?.filter((p) => p.isCaptain).length || 0),
+    0
+  );
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -88,25 +108,54 @@ export default function TeamsPage() {
             <p className="text-gray-300 text-lg max-w-2xl">
               Discover the 10 elite teams competing for the IPL 2026 championship with their squads and iconic colors
             </p>
+
+            {/* Search + quick stats */}
+            <div className="mt-8 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              {/* Search input */}
+              <div className="w-full lg:max-w-md">
+                <label className="block text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">
+                  Search teams
+                </label>
+                <div className="relative">
+                  <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-400">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M11 5a6 6 0 100 12 6 6 0 000-12z" />
+                    </svg>
+                  </span>
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search by team name or short name (e.g. RCB)"
+                    className="w-full pl-9 pr-3 py-2.5 rounded-lg bg-slate-900/60 border border-white/15 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold focus:ring-1 focus:ring-ipl-gold/60"
+                  />
+                </div>
+              </div>
+
+              {/* Summary stats */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                <div className="rounded-xl bg-slate-900/60 border border-white/10 px-3 py-2.5 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:shadow-ipl-gold/20">
+                  <p className="text-[10px] uppercase tracking-wide text-gray-400">Teams</p>
+                  <p className="text-lg font-bold text-white">{totalTeams}</p>
+                </div>
+                <div className="rounded-xl bg-slate-900/60 border border-white/10 px-3 py-2.5 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:shadow-ipl-gold/20">
+                  <p className="text-[10px] uppercase tracking-wide text-gray-400">Players</p>
+                  <p className="text-lg font-bold text-white">{totalPlayers}</p>
+                </div>
+                <div className="rounded-xl bg-slate-900/60 border border-white/10 px-3 py-2.5 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:shadow-ipl-gold/20">
+                  <p className="text-[10px] uppercase tracking-wide text-gray-400">Overseas</p>
+                  <p className="text-lg font-bold text-white">{totalOverseas}</p>
+                </div>
+                <div className="rounded-xl bg-slate-900/60 border border-white/10 px-3 py-2.5 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:shadow-ipl-gold/20">
+                  <p className="text-[10px] uppercase tracking-wide text-gray-400">Captains</p>
+                  <p className="text-lg font-bold text-white">{totalCaptains}</p>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Teams Grid with staggered animations */}
-          {teams.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {teams.map((team, index) => (
-                <div
-                  key={team.id}
-                  className="animate-fade-in"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <TeamCard
-                    team={team}
-                    onPlayerClick={handlePlayerClick}
-                  />
-                </div>
-              ))}
-            </div>
-          ) : (
+          {teams.length === 0 ? (
             <div className="text-center py-20 animate-fade-in">
               <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-slate-800/50 border-2 border-white/10 mb-6">
                 <Icon name="team" size={48} />
@@ -124,6 +173,38 @@ export default function TeamsPage() {
                 </svg>
                 Back to Home
               </a>
+            </div>
+          ) : filteredTeams.length === 0 ? (
+            <div className="text-center py-16 animate-fade-in">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-800/60 border border-white/10 mb-4">
+                <Icon name="team" size={32} />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">No teams match your search</h3>
+              <p className="text-gray-400 max-w-md mx-auto mb-4 text-sm">
+                Try a different team name or clear the search box to see all IPL 2026 teams.
+              </p>
+              <button
+                type="button"
+                onClick={() => setSearchTerm('')}
+                className="px-4 py-2 text-sm rounded-lg bg-slate-800 hover:bg-slate-700 text-white border border-white/15 transition-colors"
+              >
+                Clear search
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {filteredTeams.map((team, index) => (
+                <div
+                  key={team.id}
+                  className="animate-fade-in transform transition-transform duration-300 hover:-translate-y-2 hover:scale-[1.02]"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <TeamCard
+                    team={team}
+                    onPlayerClick={handlePlayerClick}
+                  />
+                </div>
+              ))}
             </div>
           )}
 
