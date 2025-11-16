@@ -22,19 +22,44 @@ export default function AdminEngagementPage() {
   const [actionReason, setActionReason] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // Check authentication
+  // Check authentication and verify admin role
   useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem('auth_token');
+    const checkAuth = async () => {
+      const token = localStorage.getItem('auth_token') || localStorage.getItem('adminToken');
       if (!token) {
         router.push('/admin');
         return;
       }
 
-      // For admin users, the token is stored in localStorage after login.
-      // Trust that if the token exists, the user is authenticated.
-      setIsAuthenticated(true);
-      setIsLoading(false);
+      try {
+        // Verify token and check user role
+        const response = await fetch(`/api/auth?action=verify&token=${token}`);
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          // Invalid token, redirect to login
+          localStorage.removeItem('adminToken');
+          localStorage.removeItem('auth_token');
+          router.push('/admin');
+          return;
+        }
+
+        // Check if user has admin or super_admin role
+        const userRole = data.user?.role;
+        if (userRole !== 'admin' && userRole !== 'super_admin') {
+          // Not an admin, redirect to home
+          alert('Access denied. Admin privileges required.');
+          router.push('/');
+          return;
+        }
+
+        // User is authenticated and has admin role
+        setIsAuthenticated(true);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Auth verification error:', error);
+        router.push('/admin');
+      }
     };
 
     checkAuth();

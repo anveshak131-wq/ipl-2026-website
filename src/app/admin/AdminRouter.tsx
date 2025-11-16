@@ -17,21 +17,56 @@ export default function AdminRouter() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check authentication on client side only
-    const checkAuth = () => {
+    // Check authentication and verify admin role
+    const checkAuth = async () => {
       try {
-        const token = localStorage.getItem('adminToken');
+        const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
         if (!token) {
           // If already on the admin login page, don't push to the same route
-          if (pathname !== '/admin' && pathname !== '/admin/') {
+          if (pathname !== '/admin' && pathname !== '/admin/' && pathname !== '/admin/setup') {
             router.push('/admin');
           }
+          setIsLoading(false);
           return;
         }
-        setIsAuthenticated(true);
+
+        // Verify token and check user role
+        try {
+          const response = await fetch(`/api/auth?action=verify&token=${token}`);
+          const data = await response.json();
+
+          if (!response.ok || !data.success) {
+            // Invalid token, redirect to login
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('auth_token');
+            if (pathname !== '/admin' && pathname !== '/admin/' && pathname !== '/admin/setup') {
+              router.push('/admin');
+            }
+            setIsLoading(false);
+            return;
+          }
+
+          // Check if user has admin or super_admin role
+          const userRole = data.user?.role;
+          if (userRole !== 'admin' && userRole !== 'super_admin') {
+            // Not an admin, redirect to home
+            alert('Access denied. Admin privileges required.');
+            router.push('/');
+            setIsLoading(false);
+            return;
+          }
+
+          // User is authenticated and has admin role
+          setIsAuthenticated(true);
+        } catch (error) {
+          console.error('Auth verification error:', error);
+          if (pathname !== '/admin' && pathname !== '/admin/' && pathname !== '/admin/setup') {
+            router.push('/admin');
+          }
+        }
       } catch (error) {
         // localStorage not available, redirect to login
-        if (pathname !== '/admin' && pathname !== '/admin/') {
+        if (pathname !== '/admin' && pathname !== '/admin/' && pathname !== '/admin/setup') {
           router.push('/admin');
         }
       } finally {
@@ -40,7 +75,7 @@ export default function AdminRouter() {
     };
 
     checkAuth();
-  }, [router]);
+  }, [router, pathname]);
 
   if (isLoading) {
     return (
