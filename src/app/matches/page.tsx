@@ -145,8 +145,8 @@ export default function MatchesPage() {
           {/* Matches Grid */}
           {filteredMatches.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredMatches.map((match) => (
-                <MatchCard key={match.id} match={match} />
+              {filteredMatches.map((match, index) => (
+                <MatchCard key={match.id} match={match} index={index} />
               ))}
             </div>
           ) : (

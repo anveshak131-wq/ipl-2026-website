@@ -4,9 +4,10 @@ import { Match } from '@/types';
 
 interface MatchCardProps {
   match: Match;
+  index?: number;
 }
 
-export default function MatchCard({ match }: MatchCardProps) {
+export default function MatchCard({ match, index = 0 }: MatchCardProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
@@ -31,16 +32,19 @@ export default function MatchCard({ match }: MatchCardProps) {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'live':
-        return '🔴 LIVE';
+        return ' LIVE';
       case 'completed':
-        return '✅ Completed';
+        return ' Completed';
       default:
-        return '📅 Upcoming';
+        return ' Upcoming';
     }
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 hover:border-ipl-gold/50 transition-all duration-300 hover:shadow-2xl hover:shadow-ipl-gold/20 transform hover:scale-105">
+    <div
+      className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 hover:border-ipl-gold/50 transition-all duration-300 hover:shadow-2xl hover:shadow-ipl-gold/20 transform hover:scale-105 animate-scale-in"
+      style={{ animationDelay: `${index * 80}ms` }}
+    >
       {/* Animated background on hover */}
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         <div className="absolute inset-0 bg-gradient-to-br from-ipl-gold/10 to-ipl-purple/10" />
