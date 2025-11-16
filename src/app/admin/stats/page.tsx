@@ -345,6 +345,27 @@ export default function AdminStatsPage() {
     leagueBattingSummary.avgStrikeRate,
   ]);
 
+  const leaderboardsWithEntries = useMemo(
+    () =>
+      [
+        topRunScorers,
+        topWicketTakers,
+        bestStrikeRates,
+        bestEconomyRates,
+      ].filter((list) => list.length > 0).length,
+    [topRunScorers, topWicketTakers, bestStrikeRates, bestEconomyRates]
+  );
+
+  const checklist = useMemo(
+    () => ({
+      hasPlayers: players.length > 0,
+      hasTeams: teams.length >= 2,
+      leaderboardsComplete: leaderboardsWithEntries === 4,
+      hasInsights: suggestedInsights.length > 0,
+    }),
+    [players.length, teams.length, leaderboardsWithEntries, suggestedInsights.length]
+  );
+
   const handlePublish = async () => {
     if (!players.length || !teams.length) return;
     setIsPublishing(true);
@@ -497,6 +518,65 @@ export default function AdminStatsPage() {
             >
               {isPublishing ? 'Publishing…' : 'Publish snapshot to /stats'}
             </button>
+            <div className="text-[11px] bg-black/40 border border-white/10 rounded-lg px-3 py-2 space-y-1">
+              <p className="text-gray-200 font-medium">
+                Pre-publish checks
+              </p>
+              <p
+                className={`flex items-center gap-1 ${
+                  checklist.hasPlayers
+                    ? 'text-emerald-300'
+                    : 'text-red-300'
+                }`}
+              >
+                <span>{checklist.hasPlayers ? '✓' : '•'}</span>
+                <span>
+                  {players.length
+                    ? `${players.length} players loaded`
+                    : 'No players loaded'}
+                </span>
+              </p>
+              <p
+                className={`flex items-center gap-1 ${
+                  checklist.hasTeams
+                    ? 'text-emerald-300'
+                    : 'text-amber-200'
+                }`}
+              >
+                <span>{checklist.hasTeams ? '✓' : '•'}</span>
+                <span>
+                  {teams.length >= 2
+                    ? `${teams.length} teams available`
+                    : 'Less than 2 teams available'}
+                </span>
+              </p>
+              <p
+                className={`flex items-center gap-1 ${
+                  checklist.leaderboardsComplete
+                    ? 'text-emerald-300'
+                    : 'text-amber-200'
+                }`}
+              >
+                <span>{checklist.leaderboardsComplete ? '✓' : '•'}</span>
+                <span>
+                  {`${leaderboardsWithEntries}/4 leaderboards have at least one player`}
+                </span>
+              </p>
+              <p
+                className={`flex items-center gap-1 ${
+                  checklist.hasInsights
+                    ? 'text-emerald-300'
+                    : 'text-gray-300'
+                }`}
+              >
+                <span>{checklist.hasInsights ? '✓' : '•'}</span>
+                <span>
+                  {checklist.hasInsights
+                    ? `${suggestedInsights.length} insight line(s) ready`
+                    : 'Insights will appear once enough data is available'}
+                </span>
+              </p>
+            </div>
             <a
               href="/stats"
               target="_blank"
@@ -574,6 +654,55 @@ export default function AdminStatsPage() {
                 rows={4}
                 placeholder="Example: IPL 2026 has been dominated by top-order aggression and death-over specialists. Here are the standout performers so far."
               />
+            </div>
+
+            <div className="glass-effect rounded-xl p-6">
+              <h2 className="text-lg font-semibold text-white mb-2">Insight focus teams</h2>
+              <p className="text-xs text-gray-400 mb-3">
+                Choose two teams to anchor comparison-based insights that appear on the public stats page.
+              </p>
+              {teams.length ? (
+                <div className="grid grid-cols-1 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-medium text-gray-300 mb-1">
+                      Focus team A
+                    </label>
+                    <select
+                      value={selectedTeam1Id}
+                      onChange={(e) => setSelectedTeam1Id(e.target.value)}
+                      className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-ipl-gold/40"
+                    >
+                      <option value="">Auto-select first team</option>
+                      {teams.map((team) => (
+                        <option key={team.id} value={team.id}>
+                          {team.name} ({team.shortName})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-gray-300 mb-1">
+                      Focus team B
+                    </label>
+                    <select
+                      value={selectedTeam2Id}
+                      onChange={(e) => setSelectedTeam2Id(e.target.value)}
+                      className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-ipl-gold/40"
+                    >
+                      <option value="">Auto-select second team</option>
+                      {teams.map((team) => (
+                        <option key={team.id} value={team.id}>
+                          {team.name} ({team.shortName})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-gray-500">
+                  Add teams in the admin Teams section to enable insight focus controls.
+                </p>
+              )}
             </div>
 
             <div className="glass-effect rounded-xl p-6">
