@@ -32,6 +32,22 @@ interface PublishedStats {
   lastUpdated?: string;
 }
 
+function sortByRunsDesc(players: Player[]): Player[] {
+  return [...players].sort((a, b) => b.stats.runs - a.stats.runs);
+}
+
+function sortByWicketsDesc(players: Player[]): Player[] {
+  return [...players].sort((a, b) => b.stats.wickets - a.stats.wickets);
+}
+
+function sortByStrikeRateDesc(players: Player[]): Player[] {
+  return [...players].sort((a, b) => b.stats.strikeRate - a.stats.strikeRate);
+}
+
+function sortByEconomyAsc(players: Player[]): Player[] {
+  return [...players].sort((a, b) => a.stats.economy - b.stats.economy);
+}
+
 function getSnapshotFreshness(
   timestamp?: string
 ): { label: string; variant: 'fresh' | 'recent' | 'stale' } | null {
@@ -86,6 +102,22 @@ export default function AdminStatsPage() {
         : null,
     [publishedStats?.lastUpdated]
   );
+
+  const updateTopRunScorers = (entries: Player[]) => {
+    setTopRunScorers(sortByRunsDesc(entries));
+  };
+
+  const updateTopWicketTakers = (entries: Player[]) => {
+    setTopWicketTakers(sortByWicketsDesc(entries));
+  };
+
+  const updateBestStrikeRates = (entries: Player[]) => {
+    setBestStrikeRates(sortByStrikeRateDesc(entries));
+  };
+
+  const updateBestEconomyRates = (entries: Player[]) => {
+    setBestEconomyRates(sortByEconomyAsc(entries));
+  };
 
   useEffect(() => {
     const checkAuth = () => {
@@ -197,16 +229,16 @@ export default function AdminStatsPage() {
     const initialBestStrike = mapPublishedPlayers(publishedLeaders?.bestStrikeRates);
     const initialBestEconomy = mapPublishedPlayers(publishedLeaders?.bestEconomyRates);
 
-    setTopRunScorers(
+    updateTopRunScorers(
       initialTopRuns.length ? initialTopRuns : suggestedTopRunScorers
     );
-    setTopWicketTakers(
+    updateTopWicketTakers(
       initialTopWickets.length ? initialTopWickets : suggestedTopWicketTakers
     );
-    setBestStrikeRates(
+    updateBestStrikeRates(
       initialBestStrike.length ? initialBestStrike : suggestedBestStrikeRates
     );
-    setBestEconomyRates(
+    updateBestEconomyRates(
       initialBestEconomy.length ? initialBestEconomy : suggestedBestEconomyRates
     );
 
@@ -377,21 +409,26 @@ export default function AdminStatsPage() {
         computeTeamAggregate(team.id)
       );
 
+      const finalTopRunScorers = sortByRunsDesc(
+        topRunScorers.length ? topRunScorers : suggestedTopRunScorers
+      );
+      const finalTopWicketTakers = sortByWicketsDesc(
+        topWicketTakers.length ? topWicketTakers : suggestedTopWicketTakers
+      );
+      const finalBestStrikeRates = sortByStrikeRateDesc(
+        bestStrikeRates.length ? bestStrikeRates : suggestedBestStrikeRates
+      );
+      const finalBestEconomyRates = sortByEconomyAsc(
+        bestEconomyRates.length ? bestEconomyRates : suggestedBestEconomyRates
+      );
+
       const snapshot: PublishedStats = {
         description: description || undefined,
         leaders: {
-          topRunScorers: topRunScorers.length
-            ? topRunScorers
-            : suggestedTopRunScorers,
-          topWicketTakers: topWicketTakers.length
-            ? topWicketTakers
-            : suggestedTopWicketTakers,
-          bestStrikeRates: bestStrikeRates.length
-            ? bestStrikeRates
-            : suggestedBestStrikeRates,
-          bestEconomyRates: bestEconomyRates.length
-            ? bestEconomyRates
-            : suggestedBestEconomyRates,
+          topRunScorers: finalTopRunScorers,
+          topWicketTakers: finalTopWicketTakers,
+          bestStrikeRates: finalBestStrikeRates,
+          bestEconomyRates: finalBestEconomyRates,
         },
         teamAggregates,
         defaultTeams: {
@@ -598,7 +635,7 @@ export default function AdminStatsPage() {
                   titleClassName="text-ipl-gold"
                   valueClassName="text-ipl-gold"
                   entries={topRunScorers}
-                  setEntries={setTopRunScorers}
+                  setEntries={updateTopRunScorers}
                   allPlayers={players}
                   suggestedEntries={suggestedTopRunScorers}
                   formatValue={(player) => `${player.stats.runs}`}
@@ -608,7 +645,7 @@ export default function AdminStatsPage() {
                   titleClassName="text-emerald-300"
                   valueClassName="text-emerald-300"
                   entries={topWicketTakers}
-                  setEntries={setTopWicketTakers}
+                  setEntries={updateTopWicketTakers}
                   allPlayers={players}
                   suggestedEntries={suggestedTopWicketTakers}
                   formatValue={(player) => `${player.stats.wickets}`}
@@ -618,7 +655,7 @@ export default function AdminStatsPage() {
                   titleClassName="text-white"
                   valueClassName="text-ipl-gold"
                   entries={bestStrikeRates}
-                  setEntries={setBestStrikeRates}
+                  setEntries={updateBestStrikeRates}
                   allPlayers={players}
                   suggestedEntries={suggestedBestStrikeRates}
                   formatValue={(player) =>
@@ -630,7 +667,7 @@ export default function AdminStatsPage() {
                   titleClassName="text-white"
                   valueClassName="text-emerald-300"
                   entries={bestEconomyRates}
-                  setEntries={setBestEconomyRates}
+                  setEntries={updateBestEconomyRates}
                   allPlayers={players}
                   suggestedEntries={suggestedBestEconomyRates}
                   formatValue={(player) =>

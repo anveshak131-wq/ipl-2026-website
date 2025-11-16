@@ -35,6 +35,22 @@ interface PublishedStats {
   lastUpdated?: string;
 }
 
+function sortByRunsDesc(players: Player[]): Player[] {
+  return [...players].sort((a, b) => b.stats.runs - a.stats.runs);
+}
+
+function sortByWicketsDesc(players: Player[]): Player[] {
+  return [...players].sort((a, b) => b.stats.wickets - a.stats.wickets);
+}
+
+function sortByStrikeRateDesc(players: Player[]): Player[] {
+  return [...players].sort((a, b) => b.stats.strikeRate - a.stats.strikeRate);
+}
+
+function sortByEconomyAsc(players: Player[]): Player[] {
+  return [...players].sort((a, b) => a.stats.economy - b.stats.economy);
+}
+
 export default function StatsPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -121,37 +137,33 @@ export default function StatsPage() {
       .slice(0, 5);
   }, [players]);
 
-  const topRunScorers = useMemo(
-    () =>
-      publishedStats?.leaders?.topRunScorers?.length
-        ? publishedStats.leaders.topRunScorers
-        : computedTopRunScorers,
-    [publishedStats, computedTopRunScorers]
-  );
+  const topRunScorers = useMemo(() => {
+    const base = publishedStats?.leaders?.topRunScorers?.length
+      ? publishedStats.leaders.topRunScorers
+      : computedTopRunScorers;
+    return sortByRunsDesc(base);
+  }, [publishedStats?.leaders?.topRunScorers, computedTopRunScorers]);
 
-  const topWicketTakers = useMemo(
-    () =>
-      publishedStats?.leaders?.topWicketTakers?.length
-        ? publishedStats.leaders.topWicketTakers
-        : computedTopWicketTakers,
-    [publishedStats, computedTopWicketTakers]
-  );
+  const topWicketTakers = useMemo(() => {
+    const base = publishedStats?.leaders?.topWicketTakers?.length
+      ? publishedStats.leaders.topWicketTakers
+      : computedTopWicketTakers;
+    return sortByWicketsDesc(base);
+  }, [publishedStats?.leaders?.topWicketTakers, computedTopWicketTakers]);
 
-  const bestStrikeRates = useMemo(
-    () =>
-      publishedStats?.leaders?.bestStrikeRates?.length
-        ? publishedStats.leaders.bestStrikeRates
-        : computedBestStrikeRates,
-    [publishedStats, computedBestStrikeRates]
-  );
+  const bestStrikeRates = useMemo(() => {
+    const base = publishedStats?.leaders?.bestStrikeRates?.length
+      ? publishedStats.leaders.bestStrikeRates
+      : computedBestStrikeRates;
+    return sortByStrikeRateDesc(base);
+  }, [publishedStats?.leaders?.bestStrikeRates, computedBestStrikeRates]);
 
-  const bestEconomyRates = useMemo(
-    () =>
-      publishedStats?.leaders?.bestEconomyRates?.length
-        ? publishedStats.leaders.bestEconomyRates
-        : computedBestEconomyRates,
-    [publishedStats, computedBestEconomyRates]
-  );
+  const bestEconomyRates = useMemo(() => {
+    const base = publishedStats?.leaders?.bestEconomyRates?.length
+      ? publishedStats.leaders.bestEconomyRates
+      : computedBestEconomyRates;
+    return sortByEconomyAsc(base);
+  }, [publishedStats?.leaders?.bestEconomyRates, computedBestEconomyRates]);
 
   const computeTeamAggregate = (teamId: string): TeamAggregate => {
     const team = teams.find((t) => t.id === teamId) || null;

@@ -172,6 +172,15 @@ export default function AdminMatches() {
         return Object.entries(grouped).sort((a, b) => a[0].localeCompare(b[0]));
     }, [filteredMatches]);
 
+    const statusCounts = useMemo(() => {
+        const total = matches.length;
+        const upcoming = matches.filter(m => m.status === 'upcoming').length;
+        const live = matches.filter(m => m.status === 'live').length;
+        const completed = matches.filter(m => m.status === 'completed').length;
+
+        return { total, upcoming, live, completed };
+    }, [matches]);
+
     const resetForm = () => {
         setFormData({
             date: '',
@@ -347,6 +356,25 @@ export default function AdminMatches() {
 
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
                         <div>
+                            <div className="mb-2 text-xs text-gray-400 flex items-center gap-1">
+                                <button
+                                    type="button"
+                                    onClick={() => router.push('/admin/dashboard')}
+                                    className="hover:text-ipl-gold transition-colors"
+                                >
+                                    Admin
+                                </button>
+                                <span className="text-gray-600">/</span>
+                                <button
+                                    type="button"
+                                    onClick={() => router.push('/admin/teams')}
+                                    className="hover:text-ipl-gold transition-colors"
+                                >
+                                    Competition
+                                </button>
+                                <span className="text-gray-600">/</span>
+                                <span className="text-gray-300">Matches</span>
+                            </div>
                             <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent mb-2">
                                 Manage Matches
                             </h1>
@@ -392,6 +420,34 @@ export default function AdminMatches() {
                                 <IconPlus className="w-5 h-5" />
                                 Create Match
                             </button>
+                            <a
+                                href="/matches"
+                                target="_blank"
+                                rel="noreferrer"
+                                className="glass-effect px-3 py-2 rounded-lg text-[11px] text-gray-200 hover:bg-white/10 border border-white/15"
+                            >
+                                View public /matches
+                            </a>
+                        </div>
+                    </div>
+
+                    {/* Global status summary */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div className="glass-effect rounded-xl p-4">
+                            <div className="text-xs text-gray-400 mb-1">Total matches</div>
+                            <div className="text-2xl font-bold text-white">{statusCounts.total}</div>
+                        </div>
+                        <div className="glass-effect rounded-xl p-4">
+                            <div className="text-xs text-gray-400 mb-1">Upcoming</div>
+                            <div className="text-2xl font-bold text-blue-400">{statusCounts.upcoming}</div>
+                        </div>
+                        <div className="glass-effect rounded-xl p-4">
+                            <div className="text-xs text-gray-400 mb-1">Live</div>
+                            <div className="text-2xl font-bold text-ipl-accent">{statusCounts.live}</div>
+                        </div>
+                        <div className="glass-effect rounded-xl p-4">
+                            <div className="text-xs text-gray-400 mb-1">Completed</div>
+                            <div className="text-2xl font-bold text-green-400">{statusCounts.completed}</div>
                         </div>
                     </div>
 
