@@ -380,7 +380,7 @@ export default function AdminLiveScorePage() {
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">Innings</p>
-                    <p className="text-xs text-gray-500">This helps you track which innings you are updating.</p>
+                    <p className="text-xs text-gray-500">Select whether you are updating the 1st or 2nd innings of this match.</p>
                   </div>
                   <select
                     value={formData.innings}
@@ -396,6 +396,7 @@ export default function AdminLiveScorePage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-1">
                     <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Batting team</p>
+                    <p className="text-[11px] text-gray-500">Which team is currently batting. Quick buttons and batter stats will apply to this team.</p>
                     <select
                       value={formData.battingTeam}
                       onChange={(e) => setFormData({ ...formData, battingTeam: e.target.value as 'team1' | 'team2' })}
@@ -407,6 +408,7 @@ export default function AdminLiveScorePage() {
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Toss winner</p>
+                    <p className="text-[11px] text-gray-500">Who won the toss at the start of the match.</p>
                     <select
                       value={formData.tossWinner}
                       onChange={(e) => setFormData({ ...formData, tossWinner: e.target.value as any })}
@@ -419,6 +421,7 @@ export default function AdminLiveScorePage() {
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Toss decision</p>
+                    <p className="text-[11px] text-gray-500">What the toss winner chose to do – bat first or bowl first.</p>
                     <select
                       value={formData.tossDecision}
                       onChange={(e) => setFormData({ ...formData, tossDecision: e.target.value as any })}
@@ -434,6 +437,7 @@ export default function AdminLiveScorePage() {
                 {/* Team 1 */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-ipl-gold">Team 1</h3>
+                  <p className="text-[11px] text-gray-500">This is the first team in the fixture (usually the home side). Update their total runs, wickets, and overs here.</p>
                   <input
                     type="text"
                     placeholder="Team Name"
@@ -470,6 +474,7 @@ export default function AdminLiveScorePage() {
                 {/* Team 2 */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-ipl-gold">Team 2</h3>
+                  <p className="text-[11px] text-gray-500">This is the second team in the fixture. Update their total runs, wickets, and overs here.</p>
                   <input
                     type="text"
                     placeholder="Team Name"
@@ -506,6 +511,7 @@ export default function AdminLiveScorePage() {
                 {/* Current Players */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-ipl-gold">Current Match</h3>
+                  <p className="text-[11px] text-gray-500">Pick the striker (batter) and current bowler, then use quick buttons or manual inputs to keep their stats up to date.</p>
                   <select
                     value={formData.batterName}
                     onChange={(e) => setFormData({ ...formData, batterName: e.target.value })}
@@ -579,6 +585,7 @@ export default function AdminLiveScorePage() {
                   {/* Quick ball controls */}
                   <div className="mt-4 space-y-2">
                     <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Quick ball update</p>
+                    <p className="text-[11px] text-gray-500">Click a button after each ball. It will automatically update the score, batter, bowler and add a short commentary line.</p>
                     <div className="flex flex-wrap gap-2">
                       {[0, 1, 2, 3, 4, 6].map((r) => (
                         <button
@@ -604,6 +611,7 @@ export default function AdminLiveScorePage() {
                 {/* Commentary */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-ipl-gold">Add Commentary</h3>
+                  <p className="text-[11px] text-gray-500">Optional: type extra details about the last ball or over. This text appears on the public live score page.</p>
                   <textarea
                     placeholder="Add ball-by-ball commentary..."
                     value={formData.commentary}
@@ -617,6 +625,7 @@ export default function AdminLiveScorePage() {
                     onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                     className="w-full px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white focus:outline-none focus:border-ipl-gold"
                   >
+                    {/* Match status used to show if the game is live, scheduled or finished */}
                     <option>Live</option>
                     <option>Scheduled</option>
                     <option>Completed</option>
