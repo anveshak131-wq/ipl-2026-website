@@ -611,37 +611,84 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
   );
 }
 
-// Player Card Component with enhanced animations
+// Player Card Component with enhanced animations and role tags
 function PlayerCard({ player, primaryColor, secondaryColor, onClick, index }: any) {
+  const stats = player.stats || {};
+
+  // Derive role tags
+  const tags: string[] = [];
+
+  if (player.role === 'Batsman' || player.role === 'All-rounder') {
+    if (stats.strikeRate >= 140 || stats.sixes >= 30) {
+      tags.push('Power Hitter');
+    }
+    if (stats.runs >= 400) {
+      tags.push('Top-order');
+    }
+    if (stats.highest >= 75) {
+      tags.push('Finisher');
+    }
+  }
+
+  if (player.role === 'Bowler' || player.role === 'All-rounder') {
+    if (stats.economy <= 7) {
+      tags.push('Powerplay bowler');
+    }
+    if (stats.wickets >= 20) {
+      tags.push('Strike bowler');
+    }
+    if (stats.economy <= 8 && stats.wickets >= 15) {
+      tags.push('Death bowler');
+    }
+  }
+
+  if (player.role === 'All-rounder') {
+    tags.push('All-round impact');
+  }
+
+  // Key player highlight: high impact with bat or ball
+  const isKeyPlayer =
+    stats.runs >= 400 ||
+    stats.wickets >= 18 ||
+    (stats.fifties || 0) + (stats.hundreds || 0) >= 5;
+
   return (
     <div
       onClick={onClick}
       className="group relative overflow-hidden rounded-2xl backdrop-blur-xl p-6 border cursor-pointer transform hover:scale-105 hover:-translate-y-2 transition-all duration-500 shadow-xl hover:shadow-2xl animate-slide-up"
       style={{
         background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-        borderColor: primaryColor.medium,
+        borderColor: isKeyPlayer ? '#facc15' : primaryColor.medium,
         animationDelay: `${index * 50}ms`,
-        boxShadow: `0 10px 25px ${primaryColor.glow}20`
+        boxShadow: isKeyPlayer
+          ? `0 0 25px rgba(250, 204, 21, 0.6), 0 10px 30px ${primaryColor.glow}20`
+          : `0 10px 25px ${primaryColor.glow}20`,
       }}
     >
       {/* Jersey Number with enhanced animation */}
-      <div className="absolute top-4 right-4 w-14 h-14 rounded-xl flex items-center justify-center font-black text-xl shadow-lg transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 z-10 text-white"
-           style={{ 
-             background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
-             boxShadow: `0 5px 15px ${primaryColor.glow}`
-           }}>
+      <div
+        className="absolute top-4 right-4 w-14 h-14 rounded-xl flex items-center justify-center font-black text-xl shadow-lg transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 z-10 text-white"
+        style={{
+          background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
+          boxShadow: `0 5px 15px ${primaryColor.glow}`,
+        }}
+      >
         {player.jerseyNumber || '-'}
       </div>
-      
+
       {/* Hover shimmer effect */}
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer" />
 
       {/* Player Name */}
-      <h3 className="text-xl font-bold mb-2 pr-16" style={{ color: primaryColor.textOnLight }}>{player.name}</h3>
-      <p className="text-sm font-semibold mb-4" style={{ color: primaryColor.textOnLight }}>{player.role}</p>
+      <h3 className="text-xl font-bold mb-2 pr-16" style={{ color: primaryColor.textOnLight }}>
+        {player.name}
+      </h3>
+      <p className="text-sm font-semibold mb-4" style={{ color: primaryColor.textOnLight }}>
+        {player.role}
+      </p>
 
       {/* Badges with Custom Icons */}
-      <div className="flex flex-wrap gap-2 mb-4">
+      <div className="flex flex-wrap gap-2 mb-3">
         {player.isCaptain && (
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
             <StarIcon className="w-3 h-3" color="#FCD34D" filled />
@@ -654,21 +701,53 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index }: an
             Foreign
           </span>
         )}
+        {isKeyPlayer && (
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-400/20 text-amber-200 border border-amber-400/40">
+            <StarIcon className="w-3 h-3" color="#FBBF24" filled />
+            Key Player
+          </span>
+        )}
       </div>
+
+      {/* Derived role tags */}
+      {tags.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {tags.slice(0, 4).map((tag: string) => (
+            <span
+              key={tag}
+              className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-black/20 border border-white/10 text-gray-100"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 pt-4 border-t" style={{ borderColor: primaryColor.medium }}>
         <div className="text-center">
-          <p className="text-2xl font-black" style={{ color: primaryColor.text }}>{player.stats.matches}</p>
-          <p className="text-xs uppercase" style={{ color: primaryColor.textOnLight }}>Matches</p>
+          <p className="text-2xl font-black" style={{ color: primaryColor.text }}>
+            {stats.matches}
+          </p>
+          <p className="text-xs uppercase" style={{ color: primaryColor.textOnLight }}>
+            Matches
+          </p>
         </div>
         <div className="text-center">
-          <p className="text-2xl font-black" style={{ color: primaryColor.text }}>{player.stats.runs}</p>
-          <p className="text-xs uppercase" style={{ color: primaryColor.textOnLight }}>Runs</p>
+          <p className="text-2xl font-black" style={{ color: primaryColor.text }}>
+            {stats.runs}
+          </p>
+          <p className="text-xs uppercase" style={{ color: primaryColor.textOnLight }}>
+            Runs
+          </p>
         </div>
         <div className="text-center">
-          <p className="text-2xl font-black" style={{ color: primaryColor.text }}>{player.stats.wickets}</p>
-          <p className="text-xs uppercase" style={{ color: primaryColor.textOnLight }}>Wickets</p>
+          <p className="text-2xl font-black" style={{ color: primaryColor.text }}>
+            {stats.wickets}
+          </p>
+          <p className="text-xs uppercase" style={{ color: primaryColor.textOnLight }}>
+            Wickets
+          </p>
         </div>
       </div>
 
