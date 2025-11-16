@@ -67,6 +67,15 @@ export const onRequest = async (context) => {
     // Track user activity (heartbeat) - allow any authenticated user
     if (pathname === '/api/admin/users/activity' && method === 'POST') {
       const { matchId = 'current' } = await request.json();
+      
+      // Skip tracking for admin/super_admin users
+      if (user.role === 'admin' || user.role === 'super_admin') {
+        return new Response(JSON.stringify({ success: true, skipped: true }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+
       const activeUsersKey = `active-users:${matchId}`;
       const activeUsersData = await env.SPORTS_KV.get(activeUsersKey);
       let activeUsers = activeUsersData ? JSON.parse(activeUsersData) : [];
