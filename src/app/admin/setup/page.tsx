@@ -7,9 +7,11 @@ export default function AdminSetup() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [setupKey, setSetupKey] = useState('default-setup-key-change-me');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
+  const [adminToken, setAdminToken] = useState('');
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -60,7 +62,7 @@ export default function AdminSetup() {
           email,
           password,
           name,
-          setupKey: process.env.NEXT_PUBLIC_SETUP_KEY, // Should be set as env var
+          setupKey,
         }),
       });
 
@@ -74,14 +76,12 @@ export default function AdminSetup() {
 
       setMessage('Admin account created successfully!');
       setMessageType('success');
-      setEmail('');
-      setPassword('');
-      setName('');
-
-      // Redirect to login after 2 seconds
-      setTimeout(() => {
-        window.location.href = '/admin/login';
-      }, 2000);
+      setAdminToken(data.user?.token || '');
+      
+      // Store token in localStorage
+      if (data.user?.token) {
+        localStorage.setItem('auth_token', data.user.token);
+      }
     } catch (error) {
       setMessage('Error creating admin account: ' + (error instanceof Error ? error.message : String(error)));
       setMessageType('error');
@@ -179,6 +179,24 @@ export default function AdminSetup() {
               </p>
             </div>
 
+            {/* Setup Key Field */}
+            <div>
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Setup Key
+              </label>
+              <input
+                type="text"
+                value={setupKey}
+                onChange={(e) => setSetupKey(e.target.value)}
+                placeholder="default-setup-key-change-me"
+                className="w-full px-4 py-2.5 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition"
+                disabled={isLoading}
+              />
+              <p className="text-xs text-slate-400 mt-2">
+                Use: default-setup-key-change-me
+              </p>
+            </div>
+
             {/* Submit Button */}
             <button
               type="submit"
@@ -199,18 +217,46 @@ export default function AdminSetup() {
             </button>
           </form>
 
+          {/* Admin Token Display */}
+          {adminToken && (
+            <div className="mt-6 p-4 bg-emerald-950 rounded-lg border border-emerald-700">
+              <p className="text-sm text-emerald-200 mb-2 font-semibold">
+                ✅ Admin Account Created!
+              </p>
+              <p className="text-xs text-emerald-300 mb-2">
+                Token saved to localStorage. You can now:
+              </p>
+              <div className="flex gap-2 mt-3">
+                <a
+                  href="/admin"
+                  className="flex-1 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg transition text-center"
+                >
+                  Go to Admin Login
+                </a>
+                <a
+                  href="/admin/engagement"
+                  className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition text-center"
+                >
+                  Go to Dashboard
+                </a>
+              </div>
+            </div>
+          )}
+
           {/* Info Box */}
-          <div className="mt-6 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
-            <p className="text-xs text-slate-300 mb-2 font-semibold">
-              ⚙️ Setup Instructions:
-            </p>
-            <ul className="text-xs text-slate-400 space-y-1">
-              <li>✓ Enter your admin credentials above</li>
-              <li>✓ This creates your first admin account</li>
-              <li>✓ Change password after first login</li>
-              <li>✓ Keep credentials secure</li>
-            </ul>
-          </div>
+          {!adminToken && (
+            <div className="mt-6 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
+              <p className="text-xs text-slate-300 mb-2 font-semibold">
+                ⚙️ Setup Instructions:
+              </p>
+              <ul className="text-xs text-slate-400 space-y-1">
+                <li>✓ Enter your admin credentials above</li>
+                <li>✓ This creates your first admin account</li>
+                <li>✓ Change password after first login</li>
+                <li>✓ Keep credentials secure</li>
+              </ul>
+            </div>
+          )}
         </div>
 
         {/* Footer Note */}
