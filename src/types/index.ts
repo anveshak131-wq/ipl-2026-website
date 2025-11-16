@@ -120,3 +120,13 @@ export interface CoachingStaff {
   physiotherapist?: string;
   teamManager?: string;
 }
+
+export interface KeyPlayers {
+  teamId: string;
+  powerHitterId?: string;
+  anchorId?: string;
+  finisherId?: string;
+  strikeBowlerId?: string;
+  deathSpecialistId?: string;
+  allRoundXFactorId?: string;
+}

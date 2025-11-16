@@ -5,6 +5,8 @@ import { onRequest as __api_admin_users_js_onRequest } from "/Users/anvesh/Downl
 import { onRequest as __api_messages__id__js_onRequest } from "/Users/anvesh/Downloads/sportsup99/functions/api/messages/[id].js"
 import { onRequestGet as __api_coaches_js_onRequestGet } from "/Users/anvesh/Downloads/sportsup99/functions/api/coaches.js"
 import { onRequestPost as __api_coaches_js_onRequestPost } from "/Users/anvesh/Downloads/sportsup99/functions/api/coaches.js"
+import { onRequestGet as __api_key_players_js_onRequestGet } from "/Users/anvesh/Downloads/sportsup99/functions/api/key-players.js"
+import { onRequestPost as __api_key_players_js_onRequestPost } from "/Users/anvesh/Downloads/sportsup99/functions/api/key-players.js"
 import { onRequest as __api_auth_js_onRequest } from "/Users/anvesh/Downloads/sportsup99/functions/api/auth.js"
 import { onRequest as __api_content_js_onRequest } from "/Users/anvesh/Downloads/sportsup99/functions/api/content.js"
 import { onRequest as __api_enrichDescription_js_onRequest } from "/Users/anvesh/Downloads/sportsup99/functions/api/enrichDescription.js"
@@ -68,6 +70,20 @@ export const routes = [
       method: "POST",
       middlewares: [],
       modules: [__api_coaches_js_onRequestPost],
+    },
+  {
+      routePath: "/api/key-players",
+      mountPath: "/api",
+      method: "GET",
+      middlewares: [],
+      modules: [__api_key_players_js_onRequestGet],
+    },
+  {
+      routePath: "/api/key-players",
+      mountPath: "/api",
+      method: "POST",
+      middlewares: [],
+      modules: [__api_key_players_js_onRequestPost],
     },
   {
       routePath: "/api/auth",

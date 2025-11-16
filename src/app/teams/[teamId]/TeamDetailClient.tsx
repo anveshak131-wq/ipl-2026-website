@@ -20,7 +20,7 @@ import {
   CricketBatIcon,
   TrophyIcon
 } from '@/components/ui/CustomIcons';
-import { Team, Player, CoachingStaff } from '@/types';
+import { Team, Player, CoachingStaff, KeyPlayers } from '@/types';
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import RCBLottie from '@/components/ui/RCBLottie';
@@ -71,6 +71,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
   const [lastMatch, setLastMatch] = useState<any | null>(null);
   const [nextMatch, setNextMatch] = useState<any | null>(null);
   const [coachingStaff, setCoachingStaff] = useState<CoachingStaff | null>(null);
+  const [keyPlayers, setKeyPlayers] = useState<KeyPlayers | null>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -110,6 +111,17 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
               }
             } catch (err) {
               console.error('Error fetching coaching staff:', err);
+            }
+
+            // Fetch key players for this team
+            try {
+              const keyPlayersResponse = await fetch(`/api/key-players?teamId=${team.id}`);
+              if (keyPlayersResponse.ok) {
+                const data = await keyPlayersResponse.json();
+                setKeyPlayers(data);
+              }
+            } catch (err) {
+              console.error('Error fetching key players:', err);
             }
           } else {
             setTeamData(null);
@@ -780,15 +792,23 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
           )}
 
           {activeTab === 'stats' && (
-            <StatsTab 
-              teamData={teamData} 
-              primaryColor={primaryColor} 
-              secondaryColor={secondaryColor}
-              batsmen={batsmen}
-              bowlers={bowlers}
-              allRounders={allRounders}
-              wicketkeepers={wicketkeepers}
-            />
+            <div className="space-y-10">
+              <KeyPlayersSection
+                teamData={teamData}
+                keyPlayers={keyPlayers}
+                primaryColor={primaryColor}
+                secondaryColor={secondaryColor}
+              />
+              <StatsTab 
+                teamData={teamData} 
+                primaryColor={primaryColor} 
+                secondaryColor={secondaryColor}
+                batsmen={batsmen}
+                bowlers={bowlers}
+                allRounders={allRounders}
+                wicketkeepers={wicketkeepers}
+              />
+            </div>
           )}
 
           {activeTab === 'about' && (
@@ -958,6 +978,79 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index }: an
         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
+      </div>
+    </div>
+  );
+}
+
+// Key Players Section (admin-managed)
+function KeyPlayersSection({ teamData, keyPlayers, primaryColor, secondaryColor }: any) {
+  if (!teamData || !teamData.players || !keyPlayers) {
+    return null;
+  }
+
+  const findPlayerById = (id?: string) => {
+    if (!id) return null;
+    return (teamData.players as Player[]).find((p) => p.id === id) || null;
+  };
+
+  const roles: { label: string; player: Player | null }[] = [
+    { label: 'Power hitter', player: findPlayerById(keyPlayers.powerHitterId) },
+    { label: 'Anchor', player: findPlayerById(keyPlayers.anchorId) },
+    { label: 'Finisher', player: findPlayerById(keyPlayers.finisherId) },
+    { label: 'Strike bowler', player: findPlayerById(keyPlayers.strikeBowlerId) },
+    { label: 'Death specialist', player: findPlayerById(keyPlayers.deathSpecialistId) },
+    { label: 'X-factor all-rounder', player: findPlayerById(keyPlayers.allRoundXFactorId) },
+  ];
+
+  const activeRoles = roles.filter((r) => r.player);
+  if (activeRoles.length === 0) {
+    return null;
+  }
+
+  return (
+    <div
+      className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl animate-fade-in"
+      style={{
+        background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+        borderColor: primaryColor.medium,
+        boxShadow: `0 10px 30px ${primaryColor.glow}15`,
+      }}
+    >
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <StarIcon className="w-7 h-7" color={primaryColor.solid} filled />
+          <h3 className="text-2xl font-black" style={{ color: primaryColor.textOnLight }}>
+            Key Players
+          </h3>
+        </div>
+        <p className="text-xs uppercase tracking-wide text-gray-200/80">
+          Selected by admin
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {activeRoles.map(({ label, player }) => (
+          <div
+            key={label}
+            className="group rounded-2xl bg-black/10 border border-white/10 p-4 hover:bg-black/20 transition-all duration-300 flex flex-col justify-between"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-200/90">
+                {label}
+              </span>
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-ipl-gold/15 text-ipl-gold border border-ipl-gold/40">
+                Admin pick
+              </span>
+            </div>
+            <p className="text-sm font-semibold text-white mb-1 truncate">{player?.name}</p>
+            <p className="text-xs text-gray-300 mb-2">{player?.role}</p>
+            <div className="flex items-center justify-between text-[11px] text-gray-300">
+              <span>Runs: <span className="font-semibold text-white">{player?.stats.runs}</span></span>
+              <span>Wkts: <span className="font-semibold text-white">{player?.stats.wickets}</span></span>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
