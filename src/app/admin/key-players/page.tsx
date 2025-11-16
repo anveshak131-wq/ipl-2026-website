@@ -15,12 +15,12 @@ export default function AdminKeyPlayersPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [formData, setFormData] = useState<KeyPlayers>({
     teamId: '',
-    powerHitterId: undefined,
-    anchorId: undefined,
-    finisherId: undefined,
-    strikeBowlerId: undefined,
-    deathSpecialistId: undefined,
-    allRoundXFactorId: undefined,
+    powerHitterIds: [],
+    anchorIds: [],
+    finisherIds: [],
+    strikeBowlerIds: [],
+    deathSpecialistIds: [],
+    allRoundXFactorIds: [],
   });
 
   // Check authentication
@@ -79,18 +79,27 @@ export default function AdminKeyPlayersPage() {
       try {
         const res = await fetch(`/api/key-players?teamId=${selectedTeamId}`);
         if (res.ok) {
-          const data = await res.json();
-          if (data) {
-            setFormData(data);
+          const raw: any = await res.json();
+          if (raw) {
+            const normalized: KeyPlayers = {
+              teamId: raw.teamId || selectedTeamId,
+              powerHitterIds: raw.powerHitterIds || (raw.powerHitterId ? [raw.powerHitterId] : []),
+              anchorIds: raw.anchorIds || (raw.anchorId ? [raw.anchorId] : []),
+              finisherIds: raw.finisherIds || (raw.finisherId ? [raw.finisherId] : []),
+              strikeBowlerIds: raw.strikeBowlerIds || (raw.strikeBowlerId ? [raw.strikeBowlerId] : []),
+              deathSpecialistIds: raw.deathSpecialistIds || (raw.deathSpecialistId ? [raw.deathSpecialistId] : []),
+              allRoundXFactorIds: raw.allRoundXFactorIds || (raw.allRoundXFactorId ? [raw.allRoundXFactorId] : []),
+            };
+            setFormData(normalized);
           } else {
             setFormData({
               teamId: selectedTeamId,
-              powerHitterId: undefined,
-              anchorId: undefined,
-              finisherId: undefined,
-              strikeBowlerId: undefined,
-              deathSpecialistId: undefined,
-              allRoundXFactorId: undefined,
+              powerHitterIds: [],
+              anchorIds: [],
+              finisherIds: [],
+              strikeBowlerIds: [],
+              deathSpecialistIds: [],
+              allRoundXFactorIds: [],
             });
           }
         }
@@ -107,10 +116,10 @@ export default function AdminKeyPlayersPage() {
     setMessage(null);
   };
 
-  const handleRoleChange = (field: keyof KeyPlayers, value: string) => {
+  const handleRoleChange = (field: keyof KeyPlayers, values: string[]) => {
     setFormData((prev) => ({
       ...prev,
-      [field]: value || undefined,
+      [field]: values.length ? values : [],
     }));
   };
 
@@ -128,12 +137,12 @@ export default function AdminKeyPlayersPage() {
       const token = localStorage.getItem('auth_token');
       const payload: KeyPlayers = {
         teamId: selectedTeamId,
-        powerHitterId: formData.powerHitterId || undefined,
-        anchorId: formData.anchorId || undefined,
-        finisherId: formData.finisherId || undefined,
-        strikeBowlerId: formData.strikeBowlerId || undefined,
-        deathSpecialistId: formData.deathSpecialistId || undefined,
-        allRoundXFactorId: formData.allRoundXFactorId || undefined,
+        powerHitterIds: formData.powerHitterIds && formData.powerHitterIds.length ? formData.powerHitterIds : undefined,
+        anchorIds: formData.anchorIds && formData.anchorIds.length ? formData.anchorIds : undefined,
+        finisherIds: formData.finisherIds && formData.finisherIds.length ? formData.finisherIds : undefined,
+        strikeBowlerIds: formData.strikeBowlerIds && formData.strikeBowlerIds.length ? formData.strikeBowlerIds : undefined,
+        deathSpecialistIds: formData.deathSpecialistIds && formData.deathSpecialistIds.length ? formData.deathSpecialistIds : undefined,
+        allRoundXFactorIds: formData.allRoundXFactorIds && formData.allRoundXFactorIds.length ? formData.allRoundXFactorIds : undefined,
       };
 
       const res = await fetch('/api/key-players', {
@@ -218,11 +227,16 @@ export default function AdminKeyPlayersPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">Power hitter</label>
                     <select
-                      value={formData.powerHitterId || ''}
-                      onChange={(e) => handleRoleChange('powerHitterId', e.target.value)}
+                      multiple
+                      value={formData.powerHitterIds || []}
+                      onChange={(e) =>
+                        handleRoleChange(
+                          'powerHitterIds',
+                          Array.from(e.target.selectedOptions).map((opt) => opt.value)
+                        )
+                      }
                       className="w-full px-4 py-3 bg-slate-700 border border-white/10 rounded-lg text-white focus:outline-none focus:border-ipl-gold text-sm"
                     >
-                      <option value="">-- Select power hitter --</option>
                       {teamPlayers.map((player) => (
                         <option key={player.id} value={player.id}>
                           {player.name} ({player.role})
@@ -235,11 +249,16 @@ export default function AdminKeyPlayersPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">Anchor</label>
                     <select
-                      value={formData.anchorId || ''}
-                      onChange={(e) => handleRoleChange('anchorId', e.target.value)}
+                      multiple
+                      value={formData.anchorIds || []}
+                      onChange={(e) =>
+                        handleRoleChange(
+                          'anchorIds',
+                          Array.from(e.target.selectedOptions).map((opt) => opt.value)
+                        )
+                      }
                       className="w-full px-4 py-3 bg-slate-700 border border-white/10 rounded-lg text-white focus:outline-none focus:border-ipl-gold text-sm"
                     >
-                      <option value="">-- Select anchor --</option>
                       {teamPlayers.map((player) => (
                         <option key={player.id} value={player.id}>
                           {player.name} ({player.role})
@@ -252,11 +271,16 @@ export default function AdminKeyPlayersPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">Finisher</label>
                     <select
-                      value={formData.finisherId || ''}
-                      onChange={(e) => handleRoleChange('finisherId', e.target.value)}
+                      multiple
+                      value={formData.finisherIds || []}
+                      onChange={(e) =>
+                        handleRoleChange(
+                          'finisherIds',
+                          Array.from(e.target.selectedOptions).map((opt) => opt.value)
+                        )
+                      }
                       className="w-full px-4 py-3 bg-slate-700 border border-white/10 rounded-lg text-white focus:outline-none focus:border-ipl-gold text-sm"
                     >
-                      <option value="">-- Select finisher --</option>
                       {teamPlayers.map((player) => (
                         <option key={player.id} value={player.id}>
                           {player.name} ({player.role})
@@ -269,11 +293,16 @@ export default function AdminKeyPlayersPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">Strike bowler</label>
                     <select
-                      value={formData.strikeBowlerId || ''}
-                      onChange={(e) => handleRoleChange('strikeBowlerId', e.target.value)}
+                      multiple
+                      value={formData.strikeBowlerIds || []}
+                      onChange={(e) =>
+                        handleRoleChange(
+                          'strikeBowlerIds',
+                          Array.from(e.target.selectedOptions).map((opt) => opt.value)
+                        )
+                      }
                       className="w-full px-4 py-3 bg-slate-700 border border-white/10 rounded-lg text-white focus:outline-none focus:border-ipl-gold text-sm"
                     >
-                      <option value="">-- Select strike bowler --</option>
                       {teamPlayers.map((player) => (
                         <option key={player.id} value={player.id}>
                           {player.name} ({player.role})
@@ -286,11 +315,16 @@ export default function AdminKeyPlayersPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">Death specialist</label>
                     <select
-                      value={formData.deathSpecialistId || ''}
-                      onChange={(e) => handleRoleChange('deathSpecialistId', e.target.value)}
+                      multiple
+                      value={formData.deathSpecialistIds || []}
+                      onChange={(e) =>
+                        handleRoleChange(
+                          'deathSpecialistIds',
+                          Array.from(e.target.selectedOptions).map((opt) => opt.value)
+                        )
+                      }
                       className="w-full px-4 py-3 bg-slate-700 border border-white/10 rounded-lg text-white focus:outline-none focus:border-ipl-gold text-sm"
                     >
-                      <option value="">-- Select death over bowler --</option>
                       {teamPlayers.map((player) => (
                         <option key={player.id} value={player.id}>
                           {player.name} ({player.role})
@@ -303,11 +337,16 @@ export default function AdminKeyPlayersPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-300 mb-2">X-factor all-rounder</label>
                     <select
-                      value={formData.allRoundXFactorId || ''}
-                      onChange={(e) => handleRoleChange('allRoundXFactorId', e.target.value)}
+                      multiple
+                      value={formData.allRoundXFactorIds || []}
+                      onChange={(e) =>
+                        handleRoleChange(
+                          'allRoundXFactorIds',
+                          Array.from(e.target.selectedOptions).map((opt) => opt.value)
+                        )
+                      }
                       className="w-full px-4 py-3 bg-slate-700 border border-white/10 rounded-lg text-white focus:outline-none focus:border-ipl-gold text-sm"
                     >
-                      <option value="">-- Select all-rounder --</option>
                       {teamPlayers.map((player) => (
                         <option key={player.id} value={player.id}>
                           {player.name} ({player.role})

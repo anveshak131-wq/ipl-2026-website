@@ -123,10 +123,10 @@ export interface CoachingStaff {
 
 export interface KeyPlayers {
   teamId: string;
-  powerHitterId?: string;
-  anchorId?: string;
-  finisherId?: string;
-  strikeBowlerId?: string;
-  deathSpecialistId?: string;
-  allRoundXFactorId?: string;
+  powerHitterIds?: string[];
+  anchorIds?: string[];
+  finisherIds?: string[];
+  strikeBowlerIds?: string[];
+  deathSpecialistIds?: string[];
+  allRoundXFactorIds?: string[];
 }

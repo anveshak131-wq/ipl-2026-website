@@ -117,8 +117,21 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
             try {
               const keyPlayersResponse = await fetch(`/api/key-players?teamId=${team.id}`);
               if (keyPlayersResponse.ok) {
-                const data = await keyPlayersResponse.json();
-                setKeyPlayers(data);
+                const raw: any = await keyPlayersResponse.json();
+                if (raw) {
+                  const normalized: KeyPlayers = {
+                    teamId: raw.teamId || team.id,
+                    powerHitterIds: raw.powerHitterIds || (raw.powerHitterId ? [raw.powerHitterId] : []),
+                    anchorIds: raw.anchorIds || (raw.anchorId ? [raw.anchorId] : []),
+                    finisherIds: raw.finisherIds || (raw.finisherId ? [raw.finisherId] : []),
+                    strikeBowlerIds: raw.strikeBowlerIds || (raw.strikeBowlerId ? [raw.strikeBowlerId] : []),
+                    deathSpecialistIds: raw.deathSpecialistIds || (raw.deathSpecialistId ? [raw.deathSpecialistId] : []),
+                    allRoundXFactorIds: raw.allRoundXFactorIds || (raw.allRoundXFactorId ? [raw.allRoundXFactorId] : []),
+                  };
+                  setKeyPlayers(normalized);
+                } else {
+                  setKeyPlayers(null);
+                }
               }
             } catch (err) {
               console.error('Error fetching key players:', err);
@@ -842,22 +855,22 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
   const tags: string[] = [];
 
   if (keyPlayers) {
-    if (keyPlayers.powerHitterId === player.id) {
+    if (keyPlayers.powerHitterIds?.includes(player.id)) {
       tags.push('Power hitter');
     }
-    if (keyPlayers.anchorId === player.id) {
+    if (keyPlayers.anchorIds?.includes(player.id)) {
       tags.push('Anchor');
     }
-    if (keyPlayers.finisherId === player.id) {
+    if (keyPlayers.finisherIds?.includes(player.id)) {
       tags.push('Finisher');
     }
-    if (keyPlayers.strikeBowlerId === player.id) {
+    if (keyPlayers.strikeBowlerIds?.includes(player.id)) {
       tags.push('Strike bowler');
     }
-    if (keyPlayers.deathSpecialistId === player.id) {
+    if (keyPlayers.deathSpecialistIds?.includes(player.id)) {
       tags.push('Death specialist');
     }
-    if (keyPlayers.allRoundXFactorId === player.id) {
+    if (keyPlayers.allRoundXFactorIds?.includes(player.id)) {
       tags.push('X-factor all-rounder');
     }
   }
@@ -866,12 +879,12 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
   const isKeyPlayer =
     !!keyPlayers &&
     (
-      keyPlayers.powerHitterId === player.id ||
-      keyPlayers.anchorId === player.id ||
-      keyPlayers.finisherId === player.id ||
-      keyPlayers.strikeBowlerId === player.id ||
-      keyPlayers.deathSpecialistId === player.id ||
-      keyPlayers.allRoundXFactorId === player.id
+      keyPlayers.powerHitterIds?.includes(player.id) ||
+      keyPlayers.anchorIds?.includes(player.id) ||
+      keyPlayers.finisherIds?.includes(player.id) ||
+      keyPlayers.strikeBowlerIds?.includes(player.id) ||
+      keyPlayers.deathSpecialistIds?.includes(player.id) ||
+      keyPlayers.allRoundXFactorIds?.includes(player.id)
     );
 
   return (
@@ -994,16 +1007,23 @@ function KeyPlayersSection({ teamData, keyPlayers, primaryColor, secondaryColor 
     return (teamData.players as Player[]).find((p) => p.id === id) || null;
   };
 
-  const roles: { label: string; player: Player | null }[] = [
-    { label: 'Power hitter', player: findPlayerById(keyPlayers.powerHitterId) },
-    { label: 'Anchor', player: findPlayerById(keyPlayers.anchorId) },
-    { label: 'Finisher', player: findPlayerById(keyPlayers.finisherId) },
-    { label: 'Strike bowler', player: findPlayerById(keyPlayers.strikeBowlerId) },
-    { label: 'Death specialist', player: findPlayerById(keyPlayers.deathSpecialistId) },
-    { label: 'X-factor all-rounder', player: findPlayerById(keyPlayers.allRoundXFactorId) },
+  const getPlayersByIds = (ids?: string[]) => {
+    if (!ids || !ids.length) return [];
+    return ids
+      .map((id) => findPlayerById(id))
+      .filter((p): p is Player => Boolean(p));
+  };
+
+  const roles: { label: string; players: Player[] }[] = [
+    { label: 'Power hitter', players: getPlayersByIds(keyPlayers.powerHitterIds) },
+    { label: 'Anchor', players: getPlayersByIds(keyPlayers.anchorIds) },
+    { label: 'Finisher', players: getPlayersByIds(keyPlayers.finisherIds) },
+    { label: 'Strike bowler', players: getPlayersByIds(keyPlayers.strikeBowlerIds) },
+    { label: 'Death specialist', players: getPlayersByIds(keyPlayers.deathSpecialistIds) },
+    { label: 'X-factor all-rounder', players: getPlayersByIds(keyPlayers.allRoundXFactorIds) },
   ];
 
-  const activeRoles = roles.filter((r) => r.player);
+  const activeRoles = roles.filter((r) => r.players.length > 0);
   if (activeRoles.length === 0) {
     return null;
   }
@@ -1030,7 +1050,7 @@ function KeyPlayersSection({ teamData, keyPlayers, primaryColor, secondaryColor 
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {activeRoles.map(({ label, player }) => (
+        {activeRoles.map(({ label, players }) => (
           <div
             key={label}
             className="group rounded-2xl bg-black/10 border border-white/10 p-4 hover:bg-black/20 transition-all duration-300 flex flex-col justify-between"
@@ -1043,11 +1063,18 @@ function KeyPlayersSection({ teamData, keyPlayers, primaryColor, secondaryColor 
                 Admin pick
               </span>
             </div>
-            <p className="text-sm font-semibold text-white mb-1 truncate">{player?.name}</p>
-            <p className="text-xs text-gray-300 mb-2">{player?.role}</p>
-            <div className="flex items-center justify-between text-[11px] text-gray-300">
-              <span>Runs: <span className="font-semibold text-white">{player?.stats.runs}</span></span>
-              <span>Wkts: <span className="font-semibold text-white">{player?.stats.wickets}</span></span>
+
+            <div className="space-y-3">
+              {players.map((player) => (
+                <div key={player.id} className="border-t border-white/5 pt-2 first:border-t-0 first:pt-0">
+                  <p className="text-sm font-semibold text-white mb-1 truncate">{player.name}</p>
+                  <p className="text-xs text-gray-300 mb-2">{player.role}</p>
+                  <div className="flex items-center justify-between text-[11px] text-gray-300">
+                    <span>Runs: <span className="font-semibold text-white">{player.stats.runs}</span></span>
+                    <span>Wkts: <span className="font-semibold text-white">{player.stats.wickets}</span></span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         ))}
