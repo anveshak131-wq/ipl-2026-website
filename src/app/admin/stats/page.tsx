@@ -32,6 +32,29 @@ interface PublishedStats {
   lastUpdated?: string;
 }
 
+function getSnapshotFreshness(
+  timestamp?: string
+): { label: string; variant: 'fresh' | 'recent' | 'stale' } | null {
+  if (!timestamp) return null;
+
+  const updated = new Date(timestamp);
+  if (Number.isNaN(updated.getTime())) return null;
+
+  const now = new Date();
+  const diffMs = now.getTime() - updated.getTime();
+  const diffDays = diffMs / (1000 * 60 * 60 * 24);
+
+  if (diffDays < 1) {
+    return { label: 'Fresh (last 24 hours)', variant: 'fresh' };
+  }
+
+  if (diffDays < 7) {
+    return { label: 'Recent (last 7 days)', variant: 'recent' };
+  }
+
+  return { label: 'Stale (over 7 days old)', variant: 'stale' };
+}
+
 export default function AdminStatsPage() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -55,6 +78,14 @@ export default function AdminStatsPage() {
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishSuccess, setPublishSuccess] = useState<string | null>(null);
   const [publishError, setPublishError] = useState<string | null>(null);
+
+  const snapshotFreshness = useMemo(
+    () =>
+      publishedStats?.lastUpdated
+        ? getSnapshotFreshness(publishedStats.lastUpdated)
+        : null,
+    [publishedStats?.lastUpdated]
+  );
 
   useEffect(() => {
     const checkAuth = () => {
@@ -394,21 +425,55 @@ export default function AdminStatsPage() {
       <div className="flex-1 p-8 space-y-6 overflow-y-auto">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
+            <div className="mb-2 text-xs text-gray-400 flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => router.push('/admin/dashboard')}
+                className="hover:text-ipl-gold transition-colors"
+              >
+                Admin
+              </button>
+              <span className="text-gray-600">/</span>
+              <button
+                type="button"
+                onClick={() => router.push('/admin/stats')}
+                className="hover:text-ipl-gold transition-colors"
+              >
+                Stats
+              </button>
+              <span className="text-gray-600">/</span>
+              <span className="text-gray-300">Stats Hub</span>
+            </div>
             <h1 className="text-3xl font-bold text-white mb-1">Stats & Records Hub</h1>
             <p className="text-sm text-gray-300 max-w-xl">
               Control what fans see on the public <span className="font-semibold">/stats</span> page.
               Review auto-computed leaderboards, then publish a snapshot when you are ready.
             </p>
             {publishedStats?.lastUpdated && (
-              <p className="text-xs text-gray-400 mt-1">
-                Last published snapshot:{' '}
-                {new Date(publishedStats.lastUpdated).toLocaleString('en-US', {
-                  day: '2-digit',
-                  month: 'short',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
+              <p className="text-xs text-gray-400 mt-1 flex items-center gap-2">
+                <span>
+                  Last published snapshot:{' '}
+                  {new Date(publishedStats.lastUpdated).toLocaleString('en-US', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </span>
+                {snapshotFreshness && (
+                  <span
+                    className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[10px] font-medium ${
+                      snapshotFreshness.variant === 'fresh'
+                        ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40'
+                        : snapshotFreshness.variant === 'recent'
+                        ? 'bg-amber-500/15 text-amber-200 border-amber-500/40'
+                        : 'bg-gray-500/20 text-gray-300 border-gray-500/50'
+                    }`}
+                  >
+                    {snapshotFreshness.label}
+                  </span>
+                )}
               </p>
             )}
           </div>
@@ -432,6 +497,14 @@ export default function AdminStatsPage() {
             >
               {isPublishing ? 'Publishing…' : 'Publish snapshot to /stats'}
             </button>
+            <a
+              href="/stats"
+              target="_blank"
+              rel="noreferrer"
+              className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-white/5 text-[11px] text-gray-200 hover:bg-white/10 border border-white/15"
+            >
+              View public /stats page
+            </a>
           </div>
         </div>
 
@@ -447,6 +520,7 @@ export default function AdminStatsPage() {
                   entries={topRunScorers}
                   setEntries={setTopRunScorers}
                   allPlayers={players}
+                  suggestedEntries={suggestedTopRunScorers}
                   formatValue={(player) => `${player.stats.runs}`}
                 />
                 <LeaderboardEditor
@@ -456,6 +530,7 @@ export default function AdminStatsPage() {
                   entries={topWicketTakers}
                   setEntries={setTopWicketTakers}
                   allPlayers={players}
+                  suggestedEntries={suggestedTopWicketTakers}
                   formatValue={(player) => `${player.stats.wickets}`}
                 />
                 <LeaderboardEditor
@@ -465,6 +540,7 @@ export default function AdminStatsPage() {
                   entries={bestStrikeRates}
                   setEntries={setBestStrikeRates}
                   allPlayers={players}
+                  suggestedEntries={suggestedBestStrikeRates}
                   formatValue={(player) =>
                     `SR ${player.stats.strikeRate.toFixed(1)}`
                   }
@@ -476,6 +552,7 @@ export default function AdminStatsPage() {
                   entries={bestEconomyRates}
                   setEntries={setBestEconomyRates}
                   allPlayers={players}
+                  suggestedEntries={suggestedBestEconomyRates}
                   formatValue={(player) =>
                     `Eco ${player.stats.economy.toFixed(2)}`
                   }
@@ -556,6 +633,7 @@ interface LeaderboardEditorProps {
   setEntries: (entries: Player[]) => void;
   allPlayers: Player[];
   formatValue: (player: Player) => string;
+  suggestedEntries?: Player[];
 }
 
 function LeaderboardEditor({
@@ -566,9 +644,20 @@ function LeaderboardEditor({
   setEntries,
   allPlayers,
   formatValue,
+  suggestedEntries,
 }: LeaderboardEditorProps) {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [selectedPlayerId, setSelectedPlayerId] = useState('');
+
+  const matchesSuggestions = useMemo(() => {
+    if (!suggestedEntries || !suggestedEntries.length || !entries.length) {
+      return false;
+    }
+
+    if (suggestedEntries.length !== entries.length) return false;
+
+    return suggestedEntries.every((p, idx) => entries[idx]?.id === p.id);
+  }, [suggestedEntries, entries]);
 
   const startEdit = (index: number) => {
     setEditingIndex(index);
@@ -629,12 +718,19 @@ function LeaderboardEditor({
   return (
     <div className="space-y-2">
       <h3
-        className={`font-semibold mb-2 ${
+        className={`font-semibold ${
           titleClassName ? titleClassName : 'text-white'
         }`}
       >
         {title}
       </h3>
+      {suggestedEntries && suggestedEntries.length > 0 && (
+        <p className="text-[10px] text-gray-400">
+          {matchesSuggestions
+            ? `Using auto suggestions (${entries.length}/${suggestedEntries.length} slots)`
+            : `Using custom selection (${entries.length}/${suggestedEntries.length} slots)`}
+        </p>
+      )}
       <div className="space-y-1.5">
         {entries.map((player, index) => (
           <div
