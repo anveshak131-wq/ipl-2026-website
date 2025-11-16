@@ -52,7 +52,7 @@ export default function NewsPage() {
     setFilteredNews(filtered);
   }, [selectedCategory, searchQuery, news]);
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString?: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return '';
