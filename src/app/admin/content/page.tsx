@@ -57,15 +57,21 @@ const IconNewspaper = ({ className }: { className?: string }) => (
   </svg>
 );
 
-interface AdminContentProps {
+interface ContentManagerProps {
   initialType?: 'news' | 'banner' | 'highlight';
   restrictToType?: 'news' | 'banner' | 'highlight';
+  currentPagePath: string;
 }
 
-export default function AdminContent({
+export default function AdminContentPage() {
+  return <ContentManager initialType="news" currentPagePath="/admin/content" />;
+}
+
+export function ContentManager({
   initialType = 'news',
   restrictToType,
-}: AdminContentProps) {
+  currentPagePath,
+}: ContentManagerProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -317,7 +323,7 @@ export default function AdminContent({
     return (
       <div className="flex min-h-screen bg-ipl-dark relative overflow-hidden">
         <AuroraBackground />
-        <AdminSidebar currentPage="/admin/content" />
+        <AdminSidebar currentPage={currentPagePath} />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-white">Loading content...</div>
         </div>
@@ -328,7 +334,7 @@ export default function AdminContent({
   return (
     <div className="flex min-h-screen bg-ipl-dark relative overflow-hidden">
       <AuroraBackground />
-      <AdminSidebar currentPage="/admin/content" />
+      <AdminSidebar currentPage={currentPagePath} />
       
       <div className="flex-1 relative z-10">
         <div className="p-8">

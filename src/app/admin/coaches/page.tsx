@@ -134,6 +134,25 @@ export default function AdminCoachesPage() {
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="mb-8">
+            <div className="mb-2 text-xs text-gray-400 flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => router.push('/admin/dashboard')}
+                className="hover:text-ipl-gold transition-colors"
+              >
+                Admin
+              </button>
+              <span className="text-gray-600">/</span>
+              <button
+                type="button"
+                onClick={() => router.push('/admin/teams')}
+                className="hover:text-ipl-gold transition-colors"
+              >
+                Competition
+              </button>
+              <span className="text-gray-600">/</span>
+              <span className="text-gray-300">Coaching Staff</span>
+            </div>
             <h1 className="text-4xl font-bold text-white mb-2">Coaching Staff Management</h1>
             <p className="text-gray-400">Manage coaching staff for each team. All fields are optional.</p>
           </div>
