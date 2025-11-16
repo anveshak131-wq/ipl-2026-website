@@ -25,9 +25,9 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// ../.wrangler/tmp/bundle-SWUY5y/checked-fetch.js
+// ../.wrangler/tmp/bundle-NKslTY/checked-fetch.js
 var require_checked_fetch = __commonJS({
-  "../.wrangler/tmp/bundle-SWUY5y/checked-fetch.js"() {
+  "../.wrangler/tmp/bundle-NKslTY/checked-fetch.js"() {
     "use strict";
     var urls = /* @__PURE__ */ new Set();
     function checkURL(request, init) {
@@ -86,12 +86,22 @@ var onRequest = /* @__PURE__ */ __name(async (context) => {
         { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
       );
     }
-    const email = await env.SPORTS_KV.get(`token:${token}`);
-    if (!email) {
+    const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
+    if (!tokenValue) {
       return new Response(
         JSON.stringify({ error: "Invalid token" }),
         { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
       );
+    }
+    let email = tokenValue;
+    if (tokenValue.trim().startsWith("{")) {
+      try {
+        const parsed = JSON.parse(tokenValue);
+        if (parsed && typeof parsed.email === "string") {
+          email = parsed.email;
+        }
+      } catch {
+      }
     }
     const userData = await env.SPORTS_KV.get(`user:${email}`);
     if (!userData) {
@@ -475,12 +485,22 @@ var onRequest4 = /* @__PURE__ */ __name(async (context) => {
         { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
       );
     }
-    const email = await env.SPORTS_KV.get(`token:${token}`);
-    if (!email) {
+    const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
+    if (!tokenValue) {
       return new Response(
         JSON.stringify({ error: "Invalid token" }),
         { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
       );
+    }
+    let email = tokenValue;
+    if (tokenValue.trim().startsWith("{")) {
+      try {
+        const parsed = JSON.parse(tokenValue);
+        if (parsed && typeof parsed.email === "string") {
+          email = parsed.email;
+        }
+      } catch {
+      }
     }
     const userData = await env.SPORTS_KV.get(`user:${email}`);
     if (!userData) {
@@ -514,7 +534,7 @@ var onRequest4 = /* @__PURE__ */ __name(async (context) => {
         headers: { "Content-Type": "application/json", ...corsHeaders2 }
       });
     }
-    if (user.role !== "admin") {
+    if (user.role !== "admin" && user.role !== "super_admin") {
       return new Response(
         JSON.stringify({ error: "Forbidden" }),
         { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
@@ -2523,10 +2543,10 @@ var routes = [
   }
 ];
 
-// ../.wrangler/tmp/bundle-SWUY5y/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-NKslTY/middleware-loader.entry.ts
 var import_checked_fetch23 = __toESM(require_checked_fetch());
 
-// ../.wrangler/tmp/bundle-SWUY5y/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-NKslTY/middleware-insertion-facade.js
 var import_checked_fetch21 = __toESM(require_checked_fetch());
 
 // ../../../.npm/_npx/32026684e21afda6/node_modules/wrangler/templates/pages-template-worker.ts
@@ -3022,7 +3042,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// ../.wrangler/tmp/bundle-SWUY5y/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-NKslTY/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -3055,7 +3075,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// ../.wrangler/tmp/bundle-SWUY5y/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-NKslTY/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

@@ -97,7 +97,7 @@ var __toESM2 = /* @__PURE__ */ __name((mod, isNodeMode, target) => (target = mod
   mod
 )), "__toESM");
 var require_checked_fetch2 = __commonJS2({
-  "../.wrangler/tmp/bundle-SWUY5y/checked-fetch.js"() {
+  "../.wrangler/tmp/bundle-NKslTY/checked-fetch.js"() {
     "use strict";
     var urls = /* @__PURE__ */ new Set();
     function checkURL(request, init) {
@@ -155,12 +155,22 @@ var onRequest = /* @__PURE__ */ __name2(async (context) => {
         { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
       );
     }
-    const email = await env.SPORTS_KV.get(`token:${token}`);
-    if (!email) {
+    const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
+    if (!tokenValue) {
       return new Response(
         JSON.stringify({ error: "Invalid token" }),
         { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
       );
+    }
+    let email = tokenValue;
+    if (tokenValue.trim().startsWith("{")) {
+      try {
+        const parsed = JSON.parse(tokenValue);
+        if (parsed && typeof parsed.email === "string") {
+          email = parsed.email;
+        }
+      } catch {
+      }
     }
     const userData = await env.SPORTS_KV.get(`user:${email}`);
     if (!userData) {
@@ -538,12 +548,22 @@ var onRequest4 = /* @__PURE__ */ __name2(async (context) => {
         { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
       );
     }
-    const email = await env.SPORTS_KV.get(`token:${token}`);
-    if (!email) {
+    const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
+    if (!tokenValue) {
       return new Response(
         JSON.stringify({ error: "Invalid token" }),
         { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
       );
+    }
+    let email = tokenValue;
+    if (tokenValue.trim().startsWith("{")) {
+      try {
+        const parsed = JSON.parse(tokenValue);
+        if (parsed && typeof parsed.email === "string") {
+          email = parsed.email;
+        }
+      } catch {
+      }
     }
     const userData = await env.SPORTS_KV.get(`user:${email}`);
     if (!userData) {
@@ -577,7 +597,7 @@ var onRequest4 = /* @__PURE__ */ __name2(async (context) => {
         headers: { "Content-Type": "application/json", ...corsHeaders2 }
       });
     }
-    if (user.role !== "admin") {
+    if (user.role !== "admin" && user.role !== "super_admin") {
       return new Response(
         JSON.stringify({ error: "Forbidden" }),
         { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders2 } }

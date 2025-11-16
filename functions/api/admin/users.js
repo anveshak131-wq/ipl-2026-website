@@ -97,8 +97,8 @@ export const onRequest = async (context) => {
       });
     }
 
-    // Admin-only endpoints below - require admin role
-    if (user.role !== 'admin') {
+    // Admin-only endpoints below - require admin or super_admin role
+    if (user.role !== 'admin' && user.role !== 'super_admin') {
       return new Response(
         JSON.stringify({ error: 'Forbidden' }),
         { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
