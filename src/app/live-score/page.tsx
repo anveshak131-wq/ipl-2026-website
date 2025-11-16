@@ -52,6 +52,7 @@ export default function LiveScorePage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [authFormData, setAuthFormData] = useState({ email: '', password: '', name: '' });
+  const [expandedCommentary, setExpandedCommentary] = useState<Record<string, boolean>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Track user activity for admin engagement page
@@ -445,20 +446,38 @@ export default function LiveScorePage() {
                             {/* Commentary */}
                             <div className="bg-slate-700/30 rounded-lg p-6 border border-white/5">
                               <h3 className="text-lg font-bold text-white mb-4">Commentary</h3>
-                              <div className="space-y-2 max-h-48 overflow-y-auto">
-                                {liveScore.commentary && liveScore.commentary.length > 0 ? (
-                                  liveScore.commentary.map((comment, idx) => (
+                              {liveScore.commentary && liveScore.commentary.length > 0 ? (
+                                <div className="space-y-2 max-h-64 overflow-y-auto">
+                                  {(expandedCommentary[match.id]
+                                    ? liveScore.commentary
+                                    : liveScore.commentary.slice(0, 8)
+                                  ).map((comment, idx) => (
                                     <div
                                       key={idx}
                                       className="text-gray-300 text-sm border-l-2 border-ipl-gold pl-3 py-1"
                                     >
                                       {comment}
                                     </div>
-                                  ))
-                                ) : (
-                                  <p className="text-gray-400">No commentary yet</p>
-                                )}
-                              </div>
+                                  ))}
+
+                                  {liveScore.commentary.length > 8 && (
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        setExpandedCommentary((prev) => ({
+                                          ...prev,
+                                          [match.id]: !prev[match.id],
+                                        }))
+                                      }
+                                      className="mt-2 text-xs font-semibold text-ipl-gold hover:text-ipl-gold/80"
+                                    >
+                                      {expandedCommentary[match.id] ? 'Show less' : 'Show more'}
+                                    </button>
+                                  )}
+                                </div>
+                              ) : (
+                                <p className="text-gray-400">No commentary yet</p>
+                              )}
                             </div>
                           </div>
                         ) : (
