@@ -11,10 +11,20 @@ interface ActiveUser {
   lastActive: string;
 }
 
+interface ChatMessage {
+  id: string;
+  userId: string;
+  userName: string;
+  text: string;
+  timestamp: string;
+  matchId: string;
+}
+
 export default function AdminEngagementPage() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([]);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<ActiveUser | null>(null);
   const [showActionModal, setShowActionModal] = useState(false);
@@ -91,6 +101,51 @@ export default function AdminEngagementPage() {
     const interval = setInterval(fetchActiveUsers, 5000); // Refresh every 5 seconds
     return () => clearInterval(interval);
   }, [isAuthenticated]);
+
+  // Fetch chat messages
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const fetchChatMessages = async () => {
+      try {
+        const response = await fetch('/api/messages?matchId=current&limit=100');
+        if (response.ok) {
+          const data = await response.json();
+          setChatMessages(data);
+        }
+      } catch (error) {
+        console.error('Error fetching chat messages:', error);
+      }
+    };
+
+    fetchChatMessages();
+    const interval = setInterval(fetchChatMessages, 5000); // Refresh every 5 seconds
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
+
+  const handleDeleteMessage = async (messageId: string) => {
+    if (!confirm('Are you sure you want to delete this message?')) return;
+
+    try {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`/api/messages/${messageId}?matchId=current`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        // Remove message from local state
+        setChatMessages((prev) => prev.filter((msg) => msg.id !== messageId));
+      } else {
+        alert('Failed to delete message');
+      }
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      alert('Error deleting message');
+    }
+  };
 
   const handleBlockUser = async (user: ActiveUser) => {
     setSelectedUser(user);
@@ -246,6 +301,44 @@ export default function AdminEngagementPage() {
             ) : (
               <div className="text-center py-12">
                 <p className="text-gray-400 text-lg">No active users in chat currently</p>
+              </div>
+            )}
+          </div>
+
+          {/* Chat Messages */}
+          <div className="mt-8 bg-slate-800/50 rounded-2xl border border-white/10 p-8">
+            <h2 className="text-2xl font-bold text-white mb-6">Live Chat Messages</h2>
+
+            {chatMessages.length > 0 ? (
+              <div className="space-y-3 max-h-[500px] overflow-y-auto">
+                {chatMessages.map((message) => (
+                  <div
+                    key={message.id}
+                    className="bg-slate-700/30 rounded-lg p-4 border border-white/5 hover:border-white/10 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="font-semibold text-white">{message.userName}</span>
+                          <span className="text-xs text-gray-400">
+                            {new Date(message.timestamp).toLocaleString()}
+                          </span>
+                        </div>
+                        <p className="text-gray-300 text-sm">{message.text}</p>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteMessage(message.id)}
+                        className="px-3 py-1.5 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg text-sm transition-colors flex-shrink-0"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-400 text-lg">No chat messages yet</p>
               </div>
             )}
           </div>
