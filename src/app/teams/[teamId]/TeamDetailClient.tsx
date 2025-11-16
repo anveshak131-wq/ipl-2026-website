@@ -782,6 +782,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                             setIsModalOpen(true);
                           }}
                           index={playerIndex}
+                          keyPlayers={keyPlayers}
                         />
                       ))}
                     </div>
@@ -834,45 +835,44 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
 }
 
 // Player Card Component with enhanced animations and role tags
-function PlayerCard({ player, primaryColor, secondaryColor, onClick, index }: any) {
+function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyPlayers }: any) {
   const stats = player.stats || {};
 
   // Derive role tags
   const tags: string[] = [];
 
-  if (player.role === 'Batsman' || player.role === 'All-rounder') {
-    if (stats.strikeRate >= 140 || stats.sixes >= 30) {
-      tags.push('Power Hitter');
+  if (keyPlayers) {
+    if (keyPlayers.powerHitterId === player.id) {
+      tags.push('Power hitter');
     }
-    if (stats.runs >= 400) {
-      tags.push('Top-order');
+    if (keyPlayers.anchorId === player.id) {
+      tags.push('Anchor');
     }
-    if (stats.highest >= 75) {
+    if (keyPlayers.finisherId === player.id) {
       tags.push('Finisher');
     }
-  }
-
-  if (player.role === 'Bowler' || player.role === 'All-rounder') {
-    if (stats.economy <= 7) {
-      tags.push('Powerplay bowler');
-    }
-    if (stats.wickets >= 20) {
+    if (keyPlayers.strikeBowlerId === player.id) {
       tags.push('Strike bowler');
     }
-    if (stats.economy <= 8 && stats.wickets >= 15) {
-      tags.push('Death bowler');
+    if (keyPlayers.deathSpecialistId === player.id) {
+      tags.push('Death specialist');
     }
-  }
-
-  if (player.role === 'All-rounder') {
-    tags.push('All-round impact');
+    if (keyPlayers.allRoundXFactorId === player.id) {
+      tags.push('X-factor all-rounder');
+    }
   }
 
   // Key player highlight: high impact with bat or ball
   const isKeyPlayer =
-    stats.runs >= 400 ||
-    stats.wickets >= 18 ||
-    (stats.fifties || 0) + (stats.hundreds || 0) >= 5;
+    !!keyPlayers &&
+    (
+      keyPlayers.powerHitterId === player.id ||
+      keyPlayers.anchorId === player.id ||
+      keyPlayers.finisherId === player.id ||
+      keyPlayers.strikeBowlerId === player.id ||
+      keyPlayers.deathSpecialistId === player.id ||
+      keyPlayers.allRoundXFactorId === player.id
+    );
 
   return (
     <div
