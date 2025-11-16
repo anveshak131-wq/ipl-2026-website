@@ -25,9 +25,9 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// ../.wrangler/tmp/bundle-MoVsqh/checked-fetch.js
+// ../.wrangler/tmp/bundle-MG5Pbl/checked-fetch.js
 var require_checked_fetch = __commonJS({
-  "../.wrangler/tmp/bundle-MoVsqh/checked-fetch.js"() {
+  "../.wrangler/tmp/bundle-MG5Pbl/checked-fetch.js"() {
     "use strict";
     var urls = /* @__PURE__ */ new Set();
     function checkURL(request, init) {
@@ -113,6 +113,12 @@ var onRequest = /* @__PURE__ */ __name(async (context) => {
     const user = JSON.parse(userData);
     if (method === "POST") {
       const { matchId = "current" } = await request.json();
+      if (user.role === "admin" || user.role === "super_admin") {
+        return new Response(JSON.stringify({ success: true, skipped: true }), {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders2 }
+        });
+      }
       const activeUsersKey = `active-users:${matchId}`;
       const activeUsersData = await env.SPORTS_KV.get(activeUsersKey);
       let activeUsers = activeUsersData ? JSON.parse(activeUsersData) : [];
@@ -512,6 +518,12 @@ var onRequest4 = /* @__PURE__ */ __name(async (context) => {
     const user = JSON.parse(userData);
     if (pathname === "/api/admin/users/activity" && method === "POST") {
       const { matchId = "current" } = await request.json();
+      if (user.role === "admin" || user.role === "super_admin") {
+        return new Response(JSON.stringify({ success: true, skipped: true }), {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders2 }
+        });
+      }
       const activeUsersKey = `active-users:${matchId}`;
       const activeUsersData = await env.SPORTS_KV.get(activeUsersKey);
       let activeUsers = activeUsersData ? JSON.parse(activeUsersData) : [];
@@ -777,14 +789,30 @@ var onRequest5 = /* @__PURE__ */ __name(async (context) => {
           { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
         );
       }
-      const email = await env.SPORTS_KV.get(`token:${token}`);
-      if (!email) {
+      const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
+      if (!tokenValue) {
         return new Response(
           JSON.stringify({ error: "Invalid or expired token" }),
           { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
         );
       }
+      let email = tokenValue;
+      if (tokenValue.trim().startsWith("{")) {
+        try {
+          const parsed = JSON.parse(tokenValue);
+          if (parsed && typeof parsed.email === "string") {
+            email = parsed.email;
+          }
+        } catch {
+        }
+      }
       const userData = await env.SPORTS_KV.get(`user:${email}`);
+      if (!userData) {
+        return new Response(
+          JSON.stringify({ error: "User not found" }),
+          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
+        );
+      }
       const user = JSON.parse(userData);
       if (user.isBlocked) {
         return new Response(
@@ -795,7 +823,13 @@ var onRequest5 = /* @__PURE__ */ __name(async (context) => {
       return new Response(
         JSON.stringify({
           success: true,
-          user: { id: user.id, email: user.email, name: user.name }
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role || "user"
+            // Include role field
+          }
         }),
         { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
       );
@@ -1500,12 +1534,22 @@ var onRequest10 = /* @__PURE__ */ __name(async (context) => {
           { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
         );
       }
-      const email = await env.SPORTS_KV.get(`token:${token}`);
-      if (!email) {
+      const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
+      if (!tokenValue) {
         return new Response(
           JSON.stringify({ error: "Invalid token" }),
           { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
         );
+      }
+      let email = tokenValue;
+      if (tokenValue.trim().startsWith("{")) {
+        try {
+          const parsed = JSON.parse(tokenValue);
+          if (parsed && typeof parsed.email === "string") {
+            email = parsed.email;
+          }
+        } catch {
+        }
       }
       const userData = await env.SPORTS_KV.get(`user:${email}`);
       const user = JSON.parse(userData);
@@ -1561,16 +1605,26 @@ var onRequest10 = /* @__PURE__ */ __name(async (context) => {
           { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
         );
       }
-      const email = await env.SPORTS_KV.get(`token:${token}`);
-      if (!email) {
+      const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
+      if (!tokenValue) {
         return new Response(
           JSON.stringify({ error: "Invalid token" }),
           { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
         );
       }
+      let email = tokenValue;
+      if (tokenValue.trim().startsWith("{")) {
+        try {
+          const parsed = JSON.parse(tokenValue);
+          if (parsed && typeof parsed.email === "string") {
+            email = parsed.email;
+          }
+        } catch {
+        }
+      }
       const userData = await env.SPORTS_KV.get(`user:${email}`);
       const user = JSON.parse(userData);
-      if (user.role !== "admin") {
+      if (user.role !== "admin" && user.role !== "super_admin") {
         return new Response(
           JSON.stringify({ error: "Forbidden" }),
           { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
@@ -2543,10 +2597,10 @@ var routes = [
   }
 ];
 
-// ../.wrangler/tmp/bundle-MoVsqh/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-MG5Pbl/middleware-loader.entry.ts
 var import_checked_fetch23 = __toESM(require_checked_fetch());
 
-// ../.wrangler/tmp/bundle-MoVsqh/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-MG5Pbl/middleware-insertion-facade.js
 var import_checked_fetch21 = __toESM(require_checked_fetch());
 
 // ../../../../../opt/homebrew/lib/node_modules/wrangler/templates/pages-template-worker.ts
@@ -3042,7 +3096,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// ../.wrangler/tmp/bundle-MoVsqh/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-MG5Pbl/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -3075,7 +3129,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// ../.wrangler/tmp/bundle-MoVsqh/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-MG5Pbl/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

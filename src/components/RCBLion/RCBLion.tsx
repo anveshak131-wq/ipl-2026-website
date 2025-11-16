@@ -94,9 +94,9 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
 
       ctx.clearRect(0, 0, w, h);
 
-      if (tRef.current % 15 === 0) {
-        createParticles(w * 0.25, h * 0.5, 3, '#FFE66D');
-        createParticles(w * 0.75, h * 0.5, 3, '#FF6B6B');
+      if (tRef.current % 25 === 0) {
+        createParticles(w * 0.25, h * 0.5, 2, '#FFE66D');
+        createParticles(w * 0.75, h * 0.5, 2, '#FF6B6B');
       }
 
       updateParticles();
@@ -111,12 +111,12 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
       const radius = Math.min(w, h) * 0.35;
       const cornerRadius = radius * 0.25;
 
-      // MULTI-LAYER GLOW
+      // MULTI-LAYER GLOW (softened)
       ctx.save();
-      const pulse1 = 1 + Math.sin(t * 0.7) * 0.12;
-      const pulse2 = 1 + Math.sin(t * 1.1) * 0.08;
+      const pulse1 = 1 + Math.sin(t * 0.6) * 0.06;
+      const pulse2 = 1 + Math.sin(t * 0.9) * 0.05;
       
-      ctx.globalAlpha = 0.3 * pulse1;
+      ctx.globalAlpha = 0.16 * pulse1;
       ctx.fillStyle = '#8B0000';
       ctx.beginPath();
       ctx.moveTo(cx - radius * 1.2, cy - radius * 0.8 + cornerRadius);
@@ -131,7 +131,7 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
       ctx.closePath();
       ctx.fill();
 
-      ctx.globalAlpha = 0.5 * pulse2;
+      ctx.globalAlpha = 0.22 * pulse2;
       ctx.fillStyle = '#EC1C24';
       ctx.beginPath();
       ctx.moveTo(cx - radius * 1.05, cy - radius * 0.7 + cornerRadius);
@@ -149,10 +149,10 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
       ctx.globalAlpha = 1;
       ctx.restore();
 
-      // ANIMATED BACKGROUND
+      // ANIMATED BACKGROUND (reduced motion)
       ctx.save();
-      const bgPulse = 1 + Math.sin(t * 1.2) * 0.06;
-      const bgScale = 1 + Math.sin(t * 0.8) * 0.04;
+      const bgPulse = 1 + Math.sin(t * 0.9) * 0.04;
+      const bgScale = 1 + Math.sin(t * 0.6) * 0.025;
       ctx.translate(cx, cy);
       ctx.scale(bgScale * bgPulse, bgScale * bgPulse);
       ctx.translate(-cx, -cy);
@@ -171,22 +171,22 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
 
       const grad = ctx.createLinearGradient(cx - radius, cy - radius, cx + radius, cy + radius);
       const gradShift = Math.sin(t * 0.5) * 0.1;
-      grad.addColorStop(Math.max(0, 0.1 + gradShift), '#EC1C24');
+      grad.addColorStop(Math.max(0, 0.12 + gradShift), '#EC1C24');
       grad.addColorStop(0.5, '#990000');
-      grad.addColorStop(Math.min(1, 0.9 - gradShift), '#660000');
+      grad.addColorStop(Math.min(1, 0.88 - gradShift), '#660000');
       ctx.fillStyle = grad;
       ctx.fill();
 
-      ctx.strokeStyle = `rgba(255, 107, 107, ${0.4 + Math.sin(t * 1.5) * 0.3})`;
-      ctx.lineWidth = 3 + Math.sin(t * 0.9) * 1.5;
+      ctx.strokeStyle = `rgba(255, 107, 107, ${0.22 + Math.sin(t * 1.2) * 0.18})`;
+      ctx.lineWidth = 2.2 + Math.sin(t * 0.7) * 1.0;
       ctx.stroke();
 
       ctx.restore();
 
-      // INNER SHIMMER
+      // INNER SHIMMER (subtle)
       ctx.save();
-      ctx.strokeStyle = `rgba(255, 200, 200, ${0.2 + Math.sin(t * 2) * 0.2})`;
-      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = `rgba(255, 200, 200, ${0.12 + Math.sin(t * 1.6) * 0.12})`;
+      ctx.lineWidth = 1.8;
       ctx.beginPath();
       ctx.moveTo(cx - radius + 3, cy - radius + cornerRadius + 3);
       ctx.lineTo(cx - radius + 3, cy + radius - cornerRadius - 3);
@@ -201,13 +201,13 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
       ctx.stroke();
       ctx.restore();
 
-      // ROTATING RINGS
+      // ROTATING RINGS (reduced brightness)
       ctx.save();
       ctx.translate(cx, cy);
       ctx.rotate(t * 0.25);
       ctx.translate(-cx, -cy);
-      ctx.strokeStyle = `rgba(255, 215, 0, ${0.25 + Math.sin(t * 1.8) * 0.15})`;
-      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = `rgba(255, 215, 0, ${0.14 + Math.sin(t * 1.6) * 0.08})`;
+      ctx.lineWidth = 1.2;
       ctx.setLineDash([6, 4]);
       ctx.beginPath();
       ctx.arc(cx, cy, radius * 1.35, 0, Math.PI * 2);
@@ -218,7 +218,7 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
       ctx.translate(cx, cy);
       ctx.rotate(-t * 0.12);
       ctx.translate(-cx, -cy);
-      ctx.strokeStyle = `rgba(255, 215, 0, ${0.15 + Math.sin(t * 1.3 + Math.PI / 2) * 0.1})`;
+      ctx.strokeStyle = `rgba(255, 215, 0, ${0.09 + Math.sin(t * 1.1 + Math.PI / 2) * 0.06})`;
       ctx.lineWidth = 1;
       ctx.setLineDash([4, 6]);
       ctx.beginPath();
@@ -230,9 +230,9 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
       ctx.translate(cx, cy);
       ctx.rotate(t * 0.08);
       ctx.translate(-cx, -cy);
-      const ringPulse = 1 + Math.sin(t * 0.6) * 0.1;
-      ctx.strokeStyle = `rgba(255, 107, 107, ${0.2 * ringPulse})`;
-      ctx.lineWidth = 2;
+      const ringPulse = 1 + Math.sin(t * 0.5) * 0.08;
+      ctx.strokeStyle = `rgba(255, 107, 107, ${0.12 * ringPulse})`;
+      ctx.lineWidth = 1.6;
       ctx.beginPath();
       ctx.arc(cx, cy, radius * 1.1 * ringPulse, 0, Math.PI * 2);
       ctx.stroke();
@@ -247,7 +247,7 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
       ctx.translate(-cx, -(cy - radius * 0.35));
 
       ctx.save();
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
       ctx.beginPath();
       ctx.moveTo(cx - radius * 0.5, cy - radius * 0.08);
       ctx.lineTo(cx - radius * 0.3, cy - radius * 0.53);
@@ -279,14 +279,14 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
       ctx.fillStyle = crownGrad;
       ctx.fill();
 
-      ctx.strokeStyle = `rgba(255, 255, 255, ${0.6 + Math.sin(t * 1.4) * 0.4})`;
-      ctx.lineWidth = 3.5;
+      ctx.strokeStyle = `rgba(255, 255, 255, ${0.38 + Math.sin(t * 1.2) * 0.26})`;
+      ctx.lineWidth = 2.6;
       ctx.lineJoin = 'round';
       ctx.lineCap = 'round';
       ctx.stroke();
 
-      ctx.strokeStyle = `rgba(255, 255, 255, ${0.3 + Math.sin(t * 2.2) * 0.4})`;
-      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = `rgba(255, 255, 255, ${0.2 + Math.sin(t * 2.0) * 0.24})`;
+      ctx.lineWidth = 1.1;
       ctx.stroke();
 
       const jewelPositions = [
@@ -321,9 +321,9 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
 
       // TEXT
       ctx.save();
-      ctx.globalAlpha = 1 + Math.sin(t * 1.2) * 0.08;
+      ctx.globalAlpha = 1 + Math.sin(t * 0.9) * 0.05;
       
-      const textScale = 1 + Math.sin(t * 0.8) * 0.04;
+      const textScale = 1 + Math.sin(t * 0.6) * 0.025;
       ctx.translate(cx, cy + radius * 0.35);
       ctx.scale(textScale, textScale);
       ctx.translate(-cx, -(cy + radius * 0.35));
@@ -332,48 +332,46 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
 
-      ctx.fillStyle = `rgba(255, 215, 0, ${0.3 + Math.sin(t * 1.6) * 0.2})`;
-      ctx.globalAlpha = 0.4;
+      ctx.fillStyle = `rgba(255, 215, 0, ${0.2 + Math.sin(t * 1.3) * 0.16})`;
+      ctx.globalAlpha = 0.28;
       ctx.fillText('RCB', cx, cy + radius * 0.35);
 
-      ctx.fillStyle = `rgba(255, 200, 0, ${0.5 + Math.sin(t * 1.3) * 0.3})`;
-      ctx.globalAlpha = 0.6;
+      ctx.fillStyle = `rgba(255, 200, 0, ${0.38 + Math.sin(t * 1.1) * 0.24})`;
+      ctx.globalAlpha = 0.46;
       ctx.fillText('RCB', cx, cy + radius * 0.35);
 
       ctx.fillStyle = '#fff';
       ctx.globalAlpha = 1;
-      ctx.shadowColor = `rgba(255, 215, 0, ${0.7 + Math.sin(t * 1.4) * 0.3})`;
-      ctx.shadowBlur = 15 + Math.sin(t * 1.2) * 8;
+      ctx.shadowColor = `rgba(255, 215, 0, ${0.45 + Math.sin(t * 1.2) * 0.22})`;
+      ctx.shadowBlur = 9 + Math.sin(t * 1.0) * 5;
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 0;
       ctx.fillText('RCB', cx, cy + radius * 0.35);
 
       ctx.shadowColor = 'transparent';
       ctx.fillStyle = '#FFFFFF';
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 2; i++) {
         const sparkleOffset = Math.sin(t * 2 + i) * 8;
-        ctx.globalAlpha = 0.3 + Math.sin(t * 2.5 + i * 0.7) * 0.4;
+        ctx.globalAlpha = 0.22 + Math.sin(t * 2.0 + i * 0.7) * 0.28;
         ctx.fillText('RCB', cx + sparkleOffset, cy + radius * 0.35);
       }
 
       ctx.restore();
 
-      // GLOW POINTS
+      // GLOW POINTS (reduced count & intensity)
       ctx.save();
       ctx.fillStyle = '#FFD700';
       const glowPoints = [
         { x: cx - radius * 0.6, y: cy - radius * 0.6 },
         { x: cx + radius * 0.6, y: cy - radius * 0.6 },
-        { x: cx - radius * 0.7, y: cy },
-        { x: cx + radius * 0.7, y: cy },
         { x: cx, y: cy + radius * 0.65 },
       ];
 
       glowPoints.forEach((point, i) => {
-        const pointPulse = 0.4 + Math.sin(t * 2 + i * 0.6) * 0.5;
-        ctx.globalAlpha = pointPulse;
+        const pointPulse = 0.3 + Math.sin(t * 1.8 + i * 0.6) * 0.35;
+        ctx.globalAlpha = pointPulse * 0.8;
         
-        ctx.fillStyle = `rgba(255, 215, 0, ${0.3 * pointPulse})`;
+        ctx.fillStyle = `rgba(255, 215, 0, ${0.2 * pointPulse})`;
         ctx.beginPath();
         ctx.arc(point.x, point.y, 4 + Math.sin(t * 1.8 + i) * 3, 0, Math.PI * 2);
         ctx.fill();
