@@ -20,7 +20,7 @@ import {
   CricketBatIcon,
   TrophyIcon
 } from '@/components/ui/CustomIcons';
-import { Team, Player } from '@/types';
+import { Team, Player, CoachingStaff } from '@/types';
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import RCBLottie from '@/components/ui/RCBLottie';
@@ -70,6 +70,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
   } | null>(null);
   const [lastMatch, setLastMatch] = useState<any | null>(null);
   const [nextMatch, setNextMatch] = useState<any | null>(null);
+  const [coachingStaff, setCoachingStaff] = useState<CoachingStaff | null>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -99,13 +100,23 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
             } else {
               setTeamData(team);
             }
+            
+            // Fetch coaching staff for this team
+            try {
+              const coachesResponse = await fetch(`/api/coaches?teamId=${team.id}`);
+              if (coachesResponse.ok) {
+                const coaches = await coachesResponse.json();
+                setCoachingStaff(coaches);
+              }
+            } catch (err) {
+              console.error('Error fetching coaching staff:', err);
+            }
           } else {
             setTeamData(null);
           }
         }
       } catch (error) {
         console.error('Error fetching team data:', error);
-        setTeamData(null);
       } finally {
         setIsLoading(false);
       }
@@ -781,7 +792,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
           )}
 
           {activeTab === 'about' && (
-            <AboutTab teamData={teamData} primaryColor={primaryColor} secondaryColor={secondaryColor} />
+            <AboutTab teamData={teamData} primaryColor={primaryColor} secondaryColor={secondaryColor} coachingStaff={coachingStaff} />
           )}
         </div>
       </main>
@@ -1012,7 +1023,17 @@ function StatsTab({ teamData, primaryColor, secondaryColor, batsmen, bowlers, al
 }
 
 // About Tab
-function AboutTab({ teamData, primaryColor, secondaryColor }: any) {
+function AboutTab({ teamData, primaryColor, secondaryColor, coachingStaff }: any) {
+  const hasCoachingStaff = coachingStaff && (
+    coachingStaff.headCoach ||
+    coachingStaff.mentor ||
+    coachingStaff.battingCoach ||
+    coachingStaff.bowlingCoach ||
+    coachingStaff.fieldingCoach ||
+    coachingStaff.physiotherapist ||
+    coachingStaff.teamManager
+  );
+
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div className="rounded-3xl backdrop-blur-xl p-12 border shadow-xl animate-fade-in"
@@ -1071,6 +1092,65 @@ function AboutTab({ teamData, primaryColor, secondaryColor }: any) {
           </div>
         </div>
       </div>
+
+      {/* Coaching Staff Information (only show filled roles) */}
+      {hasCoachingStaff && (
+        <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl animate-fade-in"
+             style={{
+               background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+               borderColor: primaryColor.medium,
+               boxShadow: `0 10px 30px ${primaryColor.glow}15`
+             }}>
+          <div className="flex items-center gap-3 mb-6">
+            <span className="text-3xl">🎯</span>
+            <h4 className="text-2xl font-black" style={{ color: primaryColor.textOnLight }}>Coaching Staff</h4>
+          </div>
+          <dl className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm" style={{ color: primaryColor.textOnLight }}>
+            {coachingStaff.headCoach && (
+              <div>
+                <dt className="font-semibold text-xs uppercase tracking-wide opacity-80">Head Coach</dt>
+                <dd className="text-base">{coachingStaff.headCoach}</dd>
+              </div>
+            )}
+            {coachingStaff.mentor && (
+              <div>
+                <dt className="font-semibold text-xs uppercase tracking-wide opacity-80">Mentor</dt>
+                <dd className="text-base">{coachingStaff.mentor}</dd>
+              </div>
+            )}
+            {coachingStaff.battingCoach && (
+              <div>
+                <dt className="font-semibold text-xs uppercase tracking-wide opacity-80">Batting Coach</dt>
+                <dd className="text-base">{coachingStaff.battingCoach}</dd>
+              </div>
+            )}
+            {coachingStaff.bowlingCoach && (
+              <div>
+                <dt className="font-semibold text-xs uppercase tracking-wide opacity-80">Bowling Coach</dt>
+                <dd className="text-base">{coachingStaff.bowlingCoach}</dd>
+              </div>
+            )}
+            {coachingStaff.fieldingCoach && (
+              <div>
+                <dt className="font-semibold text-xs uppercase tracking-wide opacity-80">Fielding Coach</dt>
+                <dd className="text-base">{coachingStaff.fieldingCoach}</dd>
+              </div>
+            )}
+            {coachingStaff.physiotherapist && (
+              <div>
+                <dt className="font-semibold text-xs uppercase tracking-wide opacity-80">Physiotherapist</dt>
+                <dd className="text-base">{coachingStaff.physiotherapist}</dd>
+              </div>
+            )}
+            {coachingStaff.teamManager && (
+              <div>
+                <dt className="font-semibold text-xs uppercase tracking-wide opacity-80">Team Manager</dt>
+                <dd className="text-base">{coachingStaff.teamManager}</dd>
+              </div>
+            )}
+          </dl>
+        </div>
+      )}
 
       {/* Trophy Information */}
       {teamData.trophies && teamData.trophies.length > 0 && (

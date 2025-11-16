@@ -57,13 +57,13 @@ var require_checked_fetch = __commonJS({
 });
 
 // .wrangler/tmp/bundle-F82vzG/middleware-loader.entry.ts
-var import_checked_fetch30 = __toESM(require_checked_fetch());
+var import_checked_fetch31 = __toESM(require_checked_fetch());
 
 // wrangler-modules-watch:wrangler:modules-watch
 var import_checked_fetch = __toESM(require_checked_fetch());
 
 // .wrangler/tmp/bundle-F82vzG/middleware-insertion-facade.js
-var import_checked_fetch28 = __toESM(require_checked_fetch());
+var import_checked_fetch29 = __toESM(require_checked_fetch());
 
 // .wrangler/tmp/pages-EkwiVo/functionsWorker-0.4471677604617973.mjs
 var import_checked_fetch2 = __toESM(require_checked_fetch(), 1);
@@ -97,7 +97,7 @@ var __toESM2 = /* @__PURE__ */ __name((mod, isNodeMode, target) => (target = mod
   mod
 )), "__toESM");
 var require_checked_fetch2 = __commonJS2({
-  "../.wrangler/tmp/bundle-R7y8ox/checked-fetch.js"() {
+  "../.wrangler/tmp/bundle-2Hk26C/checked-fetch.js"() {
     "use strict";
     var urls = /* @__PURE__ */ new Set();
     function checkURL(request, init) {
@@ -797,6 +797,111 @@ var onRequest5 = /* @__PURE__ */ __name2(async (context) => {
   }
 }, "onRequest");
 var import_checked_fetch6 = __toESM2(require_checked_fetch2());
+async function onRequestGet(context) {
+  try {
+    const { searchParams } = new URL(context.request.url);
+    const teamId = searchParams.get("teamId");
+    if (teamId) {
+      const coachingStaff = await context.env.IPL_CACHE.get(`coaches:${teamId}`, "json");
+      return new Response(JSON.stringify(coachingStaff || null), {
+        headers: { "Content-Type": "application/json" }
+      });
+    } else {
+      const allTeams = await context.env.IPL_CACHE.get("teams", "json") || [];
+      const allCoaches = [];
+      for (const team of allTeams) {
+        const staff = await context.env.IPL_CACHE.get(`coaches:${team.id}`, "json");
+        if (staff) {
+          allCoaches.push(staff);
+        }
+      }
+      return new Response(JSON.stringify(allCoaches), {
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+  } catch (error) {
+    console.error("Error fetching coaches:", error);
+    return new Response(JSON.stringify({ error: "Failed to fetch coaching staff" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+}
+__name(onRequestGet, "onRequestGet");
+__name2(onRequestGet, "onRequestGet");
+async function onRequestPost(context) {
+  try {
+    const authHeader = context.request.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+    const token = authHeader.replace("Bearer ", "");
+    const userToken = await context.env.SPORTS_KV.get(`token:${token}`);
+    if (!userToken) {
+      return new Response(JSON.stringify({ error: "Invalid token" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+    let tokenData;
+    try {
+      tokenData = JSON.parse(userToken);
+    } catch {
+      tokenData = { email: userToken, role: "admin" };
+    }
+    if (tokenData.role !== "admin" && tokenData.role !== "super_admin") {
+      return new Response(JSON.stringify({ error: "Forbidden: Admin access required" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+    const coachingStaff = await context.request.json();
+    if (!coachingStaff.teamId) {
+      return new Response(JSON.stringify({ error: "teamId is required" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+    await context.env.IPL_CACHE.put(
+      `coaches:${coachingStaff.teamId}`,
+      JSON.stringify(coachingStaff)
+    );
+    try {
+      await fetch(`${new URL(context.request.url).origin}/api/admin/users/activity`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": authHeader
+        },
+        body: JSON.stringify({
+          action: "update_coaching_staff",
+          details: `Updated coaching staff for team ${coachingStaff.teamId}`
+        })
+      });
+    } catch (err) {
+      console.error("Failed to track activity:", err);
+    }
+    return new Response(JSON.stringify({
+      success: true,
+      message: "Coaching staff updated successfully",
+      data: coachingStaff
+    }), {
+      headers: { "Content-Type": "application/json" }
+    });
+  } catch (error) {
+    console.error("Error updating coaches:", error);
+    return new Response(JSON.stringify({ error: "Failed to update coaching staff" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+}
+__name(onRequestPost, "onRequestPost");
+__name2(onRequestPost, "onRequestPost");
+var import_checked_fetch7 = __toESM2(require_checked_fetch2());
 var encryptPassword = /* @__PURE__ */ __name2((password, salt) => {
   const hash = crypto4.createHash("sha256");
   hash.update(password + salt);
@@ -1025,7 +1130,7 @@ var onRequest6 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch7 = __toESM2(require_checked_fetch2());
+var import_checked_fetch8 = __toESM2(require_checked_fetch2());
 async function getBody(request) {
   if (request.method === "GET" || request.method === "HEAD") {
     return null;
@@ -1194,7 +1299,7 @@ var onRequest7 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch8 = __toESM2(require_checked_fetch2());
+var import_checked_fetch9 = __toESM2(require_checked_fetch2());
 async function onRequest8(context) {
   const { request } = context;
   try {
@@ -1232,7 +1337,7 @@ async function onRequest8(context) {
 }
 __name(onRequest8, "onRequest8");
 __name2(onRequest8, "onRequest");
-var import_checked_fetch9 = __toESM2(require_checked_fetch2());
+var import_checked_fetch10 = __toESM2(require_checked_fetch2());
 var onRequest9 = /* @__PURE__ */ __name2(async (context) => {
   const { request, env } = context;
   const method = request.method;
@@ -1335,7 +1440,7 @@ var onRequest9 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch10 = __toESM2(require_checked_fetch2());
+var import_checked_fetch11 = __toESM2(require_checked_fetch2());
 var onRequest10 = /* @__PURE__ */ __name2(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
@@ -1438,7 +1543,7 @@ var onRequest10 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch11 = __toESM2(require_checked_fetch2());
+var import_checked_fetch12 = __toESM2(require_checked_fetch2());
 var mockTeams = [
   {
     id: "1",
@@ -1768,7 +1873,7 @@ async function onRequest11(context) {
 }
 __name(onRequest11, "onRequest11");
 __name2(onRequest11, "onRequest");
-var import_checked_fetch12 = __toESM2(require_checked_fetch2());
+var import_checked_fetch13 = __toESM2(require_checked_fetch2());
 var onRequest12 = /* @__PURE__ */ __name2(async (context) => {
   const { request, env } = context;
   const { pathname, searchParams } = new URL(request.url);
@@ -1936,7 +2041,7 @@ var onRequest12 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch13 = __toESM2(require_checked_fetch2());
+var import_checked_fetch14 = __toESM2(require_checked_fetch2());
 var corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
@@ -2091,7 +2196,7 @@ var onRequest13 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch14 = __toESM2(require_checked_fetch2());
+var import_checked_fetch15 = __toESM2(require_checked_fetch2());
 var onRequest14 = /* @__PURE__ */ __name2(async (context) => {
   const { request, env } = context;
   if (request.method === "OPTIONS") {
@@ -2305,7 +2410,7 @@ var onRequest14 = /* @__PURE__ */ __name2(async (context) => {
     });
   }
 }, "onRequest");
-var import_checked_fetch15 = __toESM2(require_checked_fetch2());
+var import_checked_fetch16 = __toESM2(require_checked_fetch2());
 function verifyAdminToken2(request) {
   const authHeader = request.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -2417,7 +2522,7 @@ async function onRequest15(context) {
 }
 __name(onRequest15, "onRequest15");
 __name2(onRequest15, "onRequest");
-var import_checked_fetch16 = __toESM2(require_checked_fetch2());
+var import_checked_fetch17 = __toESM2(require_checked_fetch2());
 function verifyAdminToken3(request) {
   const authHeader = request.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -2749,11 +2854,11 @@ async function onRequest16(context) {
 }
 __name(onRequest16, "onRequest16");
 __name2(onRequest16, "onRequest");
-var import_checked_fetch17 = __toESM2(require_checked_fetch2());
+var import_checked_fetch18 = __toESM2(require_checked_fetch2());
 var onRequest17 = /* @__PURE__ */ __name2(async (context) => {
   return context.next();
 }, "onRequest");
-var import_checked_fetch18 = __toESM2(require_checked_fetch2());
+var import_checked_fetch19 = __toESM2(require_checked_fetch2());
 var onRequest18 = /* @__PURE__ */ __name2(async (context) => {
   const { request } = context;
   console.log(`[Middleware] ${request.method} ${new URL(request.url).pathname}`);
@@ -2794,6 +2899,20 @@ var routes = [
     method: "",
     middlewares: [],
     modules: [onRequest5]
+  },
+  {
+    routePath: "/api/coaches",
+    mountPath: "/api",
+    method: "GET",
+    middlewares: [],
+    modules: [onRequestGet]
+  },
+  {
+    routePath: "/api/coaches",
+    mountPath: "/api",
+    method: "POST",
+    middlewares: [],
+    modules: [onRequestPost]
   },
   {
     routePath: "/api/auth",
@@ -2887,10 +3006,10 @@ var routes = [
     modules: []
   }
 ];
-var import_checked_fetch25 = __toESM2(require_checked_fetch2());
-var import_checked_fetch23 = __toESM2(require_checked_fetch2());
+var import_checked_fetch26 = __toESM2(require_checked_fetch2());
+var import_checked_fetch24 = __toESM2(require_checked_fetch2());
+var import_checked_fetch21 = __toESM2(require_checked_fetch2());
 var import_checked_fetch20 = __toESM2(require_checked_fetch2());
-var import_checked_fetch19 = __toESM2(require_checked_fetch2());
 function lexer(str) {
   var tokens = [];
   var i = 0;
@@ -3345,7 +3464,7 @@ var cloneResponse = /* @__PURE__ */ __name2((response) => (
     response
   )
 ), "cloneResponse");
-var import_checked_fetch21 = __toESM2(require_checked_fetch2());
+var import_checked_fetch222 = __toESM2(require_checked_fetch2());
 var drainBody = /* @__PURE__ */ __name2(async (request, env, _ctx, middlewareCtx) => {
   try {
     return await middlewareCtx.next(request, env);
@@ -3362,7 +3481,7 @@ var drainBody = /* @__PURE__ */ __name2(async (request, env, _ctx, middlewareCtx
   }
 }, "drainBody");
 var middleware_ensure_req_body_drained_default = drainBody;
-var import_checked_fetch222 = __toESM2(require_checked_fetch2());
+var import_checked_fetch23 = __toESM2(require_checked_fetch2());
 function reduceError(e) {
   return {
     name: e?.name,
@@ -3390,7 +3509,7 @@ var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_miniflare3_json_error_default
 ];
 var middleware_insertion_facade_default = pages_template_worker_default;
-var import_checked_fetch24 = __toESM2(require_checked_fetch2());
+var import_checked_fetch25 = __toESM2(require_checked_fetch2());
 var __facade_middleware__ = [];
 function __facade_register__(...args) {
   __facade_middleware__.push(...args.flat());
@@ -3519,7 +3638,7 @@ if (typeof middleware_insertion_facade_default === "object") {
 var middleware_loader_entry_default = WRAPPED_ENTRY;
 
 // ../../../../opt/homebrew/lib/node_modules/wrangler/templates/middleware/middleware-ensure-req-body-drained.ts
-var import_checked_fetch26 = __toESM(require_checked_fetch());
+var import_checked_fetch27 = __toESM(require_checked_fetch());
 var drainBody2 = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx) => {
   try {
     return await middlewareCtx.next(request, env);
@@ -3538,7 +3657,7 @@ var drainBody2 = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx
 var middleware_ensure_req_body_drained_default2 = drainBody2;
 
 // ../../../../opt/homebrew/lib/node_modules/wrangler/templates/middleware/middleware-miniflare3-json-error.ts
-var import_checked_fetch27 = __toESM(require_checked_fetch());
+var import_checked_fetch28 = __toESM(require_checked_fetch());
 function reduceError2(e) {
   return {
     name: e?.name,
@@ -3569,7 +3688,7 @@ var __INTERNAL_WRANGLER_MIDDLEWARE__2 = [
 var middleware_insertion_facade_default2 = middleware_loader_entry_default;
 
 // ../../../../opt/homebrew/lib/node_modules/wrangler/templates/middleware/common.ts
-var import_checked_fetch29 = __toESM(require_checked_fetch());
+var import_checked_fetch30 = __toESM(require_checked_fetch());
 var __facade_middleware__2 = [];
 function __facade_register__2(...args) {
   __facade_middleware__2.push(...args.flat());

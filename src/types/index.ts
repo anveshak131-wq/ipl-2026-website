@@ -109,3 +109,14 @@ export interface Content {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface CoachingStaff {
+  teamId: string;
+  headCoach?: string;
+  mentor?: string;
+  battingCoach?: string;
+  bowlingCoach?: string;
+  fieldingCoach?: string;
+  physiotherapist?: string;
+  teamManager?: string;
+}
