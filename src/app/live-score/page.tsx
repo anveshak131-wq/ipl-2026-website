@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import type { Match } from '@/types';
 
 interface LiveScoreData {
   matchId: string;
@@ -33,10 +34,13 @@ interface User {
 export default function LiveScorePage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
-  const [liveScore, setLiveScore] = useState<LiveScoreData | null>(null);
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [activeMatches, setActiveMatches] = useState<Match[]>([]);
+  const [liveScoresByMatch, setLiveScoresByMatch] = useState<Record<string, LiveScoreData>>({});
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [isLiveLoading, setIsLiveLoading] = useState(true);
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
@@ -79,23 +83,111 @@ export default function LiveScorePage() {
     setIsLoading(false);
   }, []);
 
-  // Fetch live score
+  // Fetch matches and live scores, and determine which matches should show live panels
   useEffect(() => {
-    const fetchLiveScore = async () => {
+    let isCancelled = false;
+
+    const getMatchDateTime = (match: Match) => {
+      // Combine date and time; assume IST (UTC+5:30) for IPL fixtures
+      // Example date: '2026-03-23', time: '19:30'
       try {
-        const response = await fetch('/api/live-score?matchId=current');
-        if (response.ok) {
-          const data = await response.json();
-          setLiveScore(data);
-        }
-      } catch (error) {
-        console.error('Error fetching live score:', error);
+        return new Date(`${match.date}T${match.time}:00+05:30`);
+      } catch {
+        return new Date(match.date);
       }
     };
 
-    fetchLiveScore();
-    const interval = setInterval(fetchLiveScore, 5000); // Update every 5 seconds
-    return () => clearInterval(interval);
+    const isInLiveWindow = (match: Match) => {
+      const start = getMatchDateTime(match);
+      const now = new Date();
+
+      // Start showing 60 minutes before scheduled time
+      const preWindow = new Date(start.getTime() - 60 * 60 * 1000);
+      // Keep visible for 4 hours after start to cover the match
+      const postWindow = new Date(start.getTime() + 4 * 60 * 60 * 1000);
+
+      // Always show if backend marks it as live
+      if (match.status === 'live') return true;
+
+      return now >= preWindow && now <= postWindow;
+    };
+
+    const fetchMatchesAndScores = async () => {
+      try {
+        const matchesRes = await fetch('/api/matches');
+        if (!matchesRes.ok) {
+          throw new Error('Failed to load fixtures');
+        }
+        const allMatches: Match[] = await matchesRes.json();
+        if (isCancelled) return;
+
+        setMatches(allMatches);
+
+        // Filter matches that should be visible on live score page
+        const eligible = allMatches.filter((m) => isInLiveWindow(m));
+        setActiveMatches(eligible);
+
+        if (eligible.length === 0) {
+          setIsLiveLoading(false);
+          return;
+        }
+
+        // Fetch live score for each eligible match by its ID
+        const scoreEntries: [string, LiveScoreData][] = [];
+
+        await Promise.all(
+          eligible.map(async (match) => {
+            try {
+              const res = await fetch(`/api/live-score?matchId=${encodeURIComponent(match.id)}`);
+              if (!res.ok) return;
+              const score: LiveScoreData = await res.json();
+
+              // Override team names from fixtures so they always match schedule
+              const mergedScore: LiveScoreData = {
+                ...score,
+                matchId: match.id,
+                team1: {
+                  ...score.team1,
+                  name: match.team1.shortName || match.team1.name,
+                },
+                team2: {
+                  ...score.team2,
+                  name: match.team2.shortName || match.team2.name,
+                },
+              };
+
+              scoreEntries.push([match.id, mergedScore]);
+            } catch (err) {
+              console.error('Error fetching live score for match', match.id, err);
+            }
+          })
+        );
+
+        if (isCancelled) return;
+
+        setLiveScoresByMatch((prev) => {
+          const next: Record<string, LiveScoreData> = { ...prev };
+          for (const [id, score] of scoreEntries) {
+            next[id] = score;
+          }
+          return next;
+        });
+      } catch (error) {
+        console.error('Error loading live fixtures/scores:', error);
+      } finally {
+        if (!isCancelled) {
+          setIsLiveLoading(false);
+        }
+      }
+    };
+
+    fetchMatchesAndScores();
+    const interval = setInterval(fetchMatchesAndScores, 5000); // keep in sync with admin updates
+
+    return () => {
+      isCancelled = true;
+      clearInterval(interval);
+    };
   }, []);
 
   // Fetch messages (only if user is logged in)
@@ -233,7 +325,7 @@ export default function LiveScorePage() {
             <div className="bg-slate-800/50 rounded-2xl border border-white/10 p-8">
               <h1 className="text-3xl font-bold text-white mb-8">Live Score</h1>
 
-              {isLoading ? (
+              {isLiveLoading ? (
                 <div className="space-y-8 animate-pulse">
                   {/* Loading skeleton */}
                   <div className="grid grid-cols-2 gap-4">
@@ -243,65 +335,107 @@ export default function LiveScorePage() {
                   <div className="bg-slate-700/30 rounded-lg p-6 h-24"></div>
                   <div className="bg-slate-700/30 rounded-lg p-6 h-40"></div>
                 </div>
-              ) : liveScore ? (
-                <div className="space-y-8">
-                  {/* Score Cards */}
-                  <div className="grid grid-cols-2 gap-4">
-                    {/* Team 1 */}
-                    <div className="bg-gradient-to-br from-red-900/20 to-red-600/20 border border-red-500/30 rounded-lg p-6">
-                      <h3 className="text-xl font-bold text-white mb-4">{liveScore.team1.name}</h3>
-                      <div className="space-y-2">
-                        <div className="text-4xl font-bold text-ipl-gold">
-                          {liveScore.team1.runs}/{liveScore.team1.wickets}
-                        </div>
-                        <div className="text-gray-300">Overs: {liveScore.team1.overs}</div>
-                      </div>
-                    </div>
+              ) : activeMatches.length > 0 ? (
+                <div className="space-y-10">
+                  {activeMatches.map((match) => {
+                    const liveScore = liveScoresByMatch[match.id];
 
-                    {/* Team 2 */}
-                    <div className="bg-gradient-to-br from-yellow-900/20 to-yellow-600/20 border border-yellow-500/30 rounded-lg p-6">
-                      <h3 className="text-xl font-bold text-white mb-4">{liveScore.team2.name}</h3>
-                      <div className="space-y-2">
-                        <div className="text-4xl font-bold text-ipl-gold">
-                          {liveScore.team2.runs}/{liveScore.team2.wickets}
-                        </div>
-                        <div className="text-gray-300">Overs: {liveScore.team2.overs}</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Current Players */}
-                  <div className="bg-slate-700/30 rounded-lg p-6 border border-white/5">
-                    <h3 className="text-lg font-bold text-white mb-4">Current Match</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-gray-400 text-sm">Batter</p>
-                        <p className="text-white font-semibold">{liveScore.currentBatter.name || '-'}</p>
-                        <p className="text-ipl-gold text-sm">{liveScore.currentBatter.runs} ({liveScore.currentBatter.balls})</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-400 text-sm">Bowler</p>
-                        <p className="text-white font-semibold">{liveScore.currentBowler.name || '-'}</p>
-                        <p className="text-ipl-gold text-sm">{liveScore.currentBowler.runs} ({liveScore.currentBowler.balls})</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Commentary */}
-                  <div className="bg-slate-700/30 rounded-lg p-6 border border-white/5">
-                    <h3 className="text-lg font-bold text-white mb-4">Commentary</h3>
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {liveScore.commentary && liveScore.commentary.length > 0 ? (
-                        liveScore.commentary.map((comment, idx) => (
-                          <div key={idx} className="text-gray-300 text-sm border-l-2 border-ipl-gold pl-3 py-1">
-                            {comment}
+                    return (
+                      <div
+                        key={match.id}
+                        className="space-y-6 border border-white/5 rounded-2xl p-6 bg-slate-900/40"
+                      >
+                        {/* Match header from fixtures */}
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                          <div>
+                            <p className="text-sm text-gray-400">
+                              {match.venue}
+                            </p>
+                            <h2 className="text-xl font-bold text-white">
+                              {match.team1.shortName} vs {match.team2.shortName}
+                            </h2>
+                            <p className="text-sm text-gray-400">
+                              {match.date} · {match.time}
+                            </p>
                           </div>
-                        ))
-                      ) : (
-                        <p className="text-gray-400">No commentary yet</p>
-                      )}
-                    </div>
-                  </div>
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/40">
+                            Live Score
+                          </span>
+                        </div>
+
+                        {liveScore ? (
+                          <div className="space-y-6">
+                            {/* Score Cards */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {/* Team 1 */}
+                              <div className="bg-gradient-to-br from-red-900/20 to-red-600/20 border border-red-500/30 rounded-lg p-6">
+                                <h3 className="text-xl font-bold text-white mb-4">{liveScore.team1.name}</h3>
+                                <div className="space-y-2">
+                                  <div className="text-4xl font-bold text-ipl-gold">
+                                    {liveScore.team1.runs}/{liveScore.team1.wickets}
+                                  </div>
+                                  <div className="text-gray-300">Overs: {liveScore.team1.overs}</div>
+                                </div>
+                              </div>
+
+                              {/* Team 2 */}
+                              <div className="bg-gradient-to-br from-yellow-900/20 to-yellow-600/20 border border-yellow-500/30 rounded-lg p-6">
+                                <h3 className="text-xl font-bold text-white mb-4">{liveScore.team2.name}</h3>
+                                <div className="space-y-2">
+                                  <div className="text-4xl font-bold text-ipl-gold">
+                                    {liveScore.team2.runs}/{liveScore.team2.wickets}
+                                  </div>
+                                  <div className="text-gray-300">Overs: {liveScore.team2.overs}</div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Current Players */}
+                            <div className="bg-slate-700/30 rounded-lg p-6 border border-white/5">
+                              <h3 className="text-lg font-bold text-white mb-4">Current Match</h3>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <p className="text-gray-400 text-sm">Batter</p>
+                                  <p className="text-white font-semibold">{liveScore.currentBatter.name || '-'}</p>
+                                  <p className="text-ipl-gold text-sm">
+                                    {liveScore.currentBatter.runs} ({liveScore.currentBatter.balls})
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-gray-400 text-sm">Bowler</p>
+                                  <p className="text-white font-semibold">{liveScore.currentBowler.name || '-'}</p>
+                                  <p className="text-ipl-gold text-sm">
+                                    {liveScore.currentBowler.runs} ({liveScore.currentBowler.balls})
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Commentary */}
+                            <div className="bg-slate-700/30 rounded-lg p-6 border border-white/5">
+                              <h3 className="text-lg font-bold text-white mb-4">Commentary</h3>
+                              <div className="space-y-2 max-h-48 overflow-y-auto">
+                                {liveScore.commentary && liveScore.commentary.length > 0 ? (
+                                  liveScore.commentary.map((comment, idx) => (
+                                    <div
+                                      key={idx}
+                                      className="text-gray-300 text-sm border-l-2 border-ipl-gold pl-3 py-1"
+                                    >
+                                      {comment}
+                                    </div>
+                                  ))
+                                ) : (
+                                  <p className="text-gray-400">No commentary yet</p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="text-gray-400 text-sm">Live score data is not available yet for this match.</p>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-16">
