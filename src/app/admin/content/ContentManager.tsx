@@ -63,11 +63,7 @@ interface ContentManagerProps {
   currentPagePath: string;
 }
 
-export default function AdminContentPage() {
-  return <ContentManager initialType="news" currentPagePath="/admin/content" />;
-}
-
-function ContentManager({
+export default function ContentManager({
   initialType = 'news',
   restrictToType,
   currentPagePath,
@@ -84,14 +80,14 @@ function ContentManager({
   const [teams, setTeams] = useState<Team[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
-  
+
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [activeContentType, setActiveContentType] = useState<'news' | 'banner' | 'highlight'>(initialType);
   const [newsCategoryFilter, setNewsCategoryFilter] = useState<'all' | 'match' | 'team' | 'player' | 'general'>('all');
   const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
-  
+
   const [formData, setFormData] = useState<{
     type: 'banner' | 'highlight' | 'news';
     title: string;
@@ -278,7 +274,7 @@ function ContentManager({
   const handleToggleActive = async (contentId: string) => {
     const item = content.find(c => c.id === contentId);
     if (!item) return;
-    
+
     try {
       const updated = await api.updateContent(contentId, { isActive: !item.isActive });
       setContent(content.map(c => c.id === contentId ? updated : c));
@@ -335,7 +331,7 @@ function ContentManager({
     <div className="flex min-h-screen bg-ipl-dark relative overflow-hidden">
       <AuroraBackground />
       <AdminSidebar currentPage={currentPagePath} />
-      
+
       <div className="flex-1 relative z-10">
         <div className="p-8">
           {/* Header */}
@@ -744,7 +740,8 @@ function ContentManager({
                               <option value="">No match linked</option>
                               {matches.map((match) => (
                                 <option key={match.id} value={match.id}>
-                                  {match.team1.shortName} vs {match.team2.shortName}  b7 {match.date} {match.time}
+                                  {match.team1.shortName} vs {match.team2.shortName} 
+                                  {match.date} {match.time}
                                 </option>
                               ))}
                             </select>

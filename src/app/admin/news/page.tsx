@@ -1,6 +1,6 @@
 'use client';
 
-import { ContentManager } from '@/app/admin/content/page';
+import ContentManager from '@/app/admin/content/ContentManager';
 
 export default function AdminNewsPage() {
   return (
