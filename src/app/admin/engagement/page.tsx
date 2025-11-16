@@ -27,7 +27,9 @@ export default function AdminEngagementPage() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<ActiveUser | null>(null);
+  const [selectedMessage, setSelectedMessage] = useState<ChatMessage | null>(null);
   const [showActionModal, setShowActionModal] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
   const [actionType, setActionType] = useState<'block' | 'delete'>('block');
   const [actionReason, setActionReason] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -124,27 +126,11 @@ export default function AdminEngagementPage() {
   }, [isAuthenticated]);
 
   const handleDeleteMessage = async (messageId: string) => {
-    if (!confirm('Are you sure you want to delete this message?')) return;
+    const message = chatMessages.find((m) => m.id === messageId) || null;
+    if (!message) return;
 
-    try {
-      const token = localStorage.getItem('auth_token');
-      const response = await fetch(`/api/messages/${messageId}?matchId=current`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        // Remove message from local state
-        setChatMessages((prev) => prev.filter((msg) => msg.id !== messageId));
-      } else {
-        alert('Failed to delete message');
-      }
-    } catch (error) {
-      console.error('Error deleting message:', error);
-      alert('Error deleting message');
-    }
+    setSelectedMessage(message);
+    setShowMessageModal(true);
   };
 
   const handleBlockUser = async (user: ActiveUser) => {
@@ -210,6 +196,34 @@ export default function AdminEngagementPage() {
     } catch (error) {
       console.error('Error performing action:', error);
       alert('Error performing action');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const confirmDeleteMessage = async () => {
+    if (!selectedMessage) return;
+
+    setIsProcessing(true);
+    try {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`/api/messages/${selectedMessage.id}?matchId=current`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        setChatMessages((prev) => prev.filter((msg) => msg.id !== selectedMessage.id));
+        setShowMessageModal(false);
+        setSelectedMessage(null);
+      } else {
+        alert('Failed to delete message');
+      }
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      alert('Error deleting message');
     } finally {
       setIsProcessing(false);
     }
@@ -455,6 +469,79 @@ export default function AdminEngagementPage() {
                     : actionType === 'block'
                     ? 'Confirm block'
                     : 'Confirm delete'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Message Delete Modal */}
+      {showMessageModal && selectedMessage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => {
+              if (isProcessing) return;
+              setShowMessageModal(false);
+              setSelectedMessage(null);
+            }}
+          />
+          <div className="relative z-10 w-full max-w-lg mx-4">
+            <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 rounded-2xl shadow-2xl border border-white/10 overflow-hidden">
+              {/* Header */}
+              <div className="px-6 pt-5 pb-4 border-b border-white/10 flex items-start gap-3">
+                <div className="mt-1 flex h-9 w-9 items-center justify-center rounded-full border border-red-400/40 bg-red-500/10 text-red-300 text-sm font-semibold">
+                  !
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h2 className="text-xl font-semibold text-white">Delete chat message</h2>
+                    <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-red-500/10 text-red-300 border border-red-400/30">
+                      Danger action
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-300">
+                    This will permanently remove this message from the live chat history. This action cannot be undone.
+                  </p>
+                </div>
+              </div>
+
+              {/* Body */}
+              <div className="px-6 py-5 space-y-4">
+                <div className="text-xs uppercase tracking-wide text-gray-500">Message preview</div>
+                <div className="rounded-xl border border-white/10 bg-slate-900/70 p-4">
+                  <div className="flex items-center justify-between mb-2 gap-3">
+                    <div className="text-sm text-gray-300">
+                      <span className="text-gray-500">From:</span>{' '}
+                      <span className="text-white font-medium">{selectedMessage.userName}</span>
+                    </div>
+                    <div className="text-[11px] text-gray-500 whitespace-nowrap">
+                      {new Date(selectedMessage.timestamp).toLocaleString()}
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-200 line-clamp-3">{selectedMessage.text}</p>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="px-6 pb-5 pt-3 border-t border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3">
+                <button
+                  onClick={() => {
+                    if (isProcessing) return;
+                    setShowMessageModal(false);
+                    setSelectedMessage(null);
+                  }}
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-white/10 bg-slate-800/60 text-sm font-medium text-gray-200 hover:bg-slate-700/80 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDeleteMessage}
+                  disabled={isProcessing}
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-red-900/40 bg-red-600 hover:bg-red-500 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {isProcessing ? 'Deleting…' : 'Delete message'}
                 </button>
               </div>
             </div>
