@@ -3,6 +3,8 @@
  * Handles admin authentication
  */
 
+import crypto from 'node:crypto';
+
 // Mock admin users - matches src/lib/auth.ts
 const ADMIN_USERS = {
   admin: {
@@ -21,6 +23,13 @@ const ADMIN_USERS = {
   }
 };
 
+// Password verification for KV users
+const verifyPassword = (password, salt, hashedPassword) => {
+  const hash = crypto.createHash('sha256');
+  hash.update(password + salt);
+  return hash.digest('hex') === hashedPassword;
+};
+
 // Simple token generation (in production, use proper JWT)
 function generateToken(user) {
   const payload = {
@@ -35,7 +44,7 @@ function generateToken(user) {
 }
 
 export const onRequest = async (context) => {
-  const { request } = context;
+  const { request, env } = context;
 
   // CORS headers
   const corsHeaders = {
@@ -83,13 +92,23 @@ export const onRequest = async (context) => {
       );
     }
 
-    // Check credentials
-    const user = ADMIN_USERS[username];
-    if (!user || user.password !== password) {
+    // First check hardcoded admin users
+    const hardcodedUser = ADMIN_USERS[username];
+    if (hardcodedUser && hardcodedUser.password === password) {
+      const token = generateToken(hardcodedUser);
       return new Response(
-        JSON.stringify({ error: 'Invalid username or password' }),
+        JSON.stringify({
+          success: true,
+          token,
+          user: {
+            id: hardcodedUser.id,
+            username: hardcodedUser.username,
+            email: hardcodedUser.email,
+            role: hardcodedUser.role
+          }
+        }),
         {
-          status: 401,
+          status: 200,
           headers: {
             'Content-Type': 'application/json',
             ...corsHeaders,
@@ -98,29 +117,53 @@ export const onRequest = async (context) => {
       );
     }
 
-    // Generate token
-    const token = generateToken(user);
-
-    // Return success with token
-    return new Response(
-      JSON.stringify({
-        success: true,
-        token,
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          role: user.role
+    // Then check KV database (for email/password login from /admin/setup)
+    if (env && env.SPORTS_KV) {
+      // Treat username as email for KV lookup
+      const userData = await env.SPORTS_KV.get(`user:${username}`);
+      if (userData) {
+        const user = JSON.parse(userData);
+        
+        // Only allow admin role users
+        if (user.role === 'admin' && verifyPassword(password, user.salt, user.hashedPassword)) {
+          // Use the existing token from KV
+          const token = user.token;
+          
+          return new Response(
+            JSON.stringify({
+              success: true,
+              token,
+              user: {
+                id: user.id,
+                username: user.email,
+                email: user.email,
+                role: user.role
+              }
+            }),
+            {
+              status: 200,
+              headers: {
+                'Content-Type': 'application/json',
+                ...corsHeaders,
+              },
+            }
+          );
         }
-      }),
+      }
+    }
+
+    // No match found
+    return new Response(
+      JSON.stringify({ error: 'Invalid username or password' }),
       {
-        status: 200,
+        status: 401,
         headers: {
           'Content-Type': 'application/json',
           ...corsHeaders,
         },
       }
     );
+
   } catch (error) {
     return new Response(
       JSON.stringify({ error: 'Internal server error', message: error.message }),
