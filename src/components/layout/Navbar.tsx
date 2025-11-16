@@ -16,6 +16,7 @@ export default function Navbar() {
     { href: '/matches', label: 'Schedule', icon: 'cricket' as const },
     { href: '/live-score', label: 'Live Score', icon: 'cricket' as const },
     { href: '/teams', label: 'Teams', icon: 'team' as const },
+    { href: '/stats', label: 'Stats', icon: 'stats' as const },
     { href: '/news', label: 'News', icon: 'news' as const },
     { href: '/predictions', label: 'Predictions', icon: 'target' as const },
   ];
