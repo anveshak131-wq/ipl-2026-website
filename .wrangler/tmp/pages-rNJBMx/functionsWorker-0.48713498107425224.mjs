@@ -25,9 +25,9 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// ../.wrangler/tmp/bundle-nPsHjK/checked-fetch.js
+// ../.wrangler/tmp/bundle-SWUY5y/checked-fetch.js
 var require_checked_fetch = __commonJS({
-  "../.wrangler/tmp/bundle-nPsHjK/checked-fetch.js"() {
+  "../.wrangler/tmp/bundle-SWUY5y/checked-fetch.js"() {
     "use strict";
     var urls = /* @__PURE__ */ new Set();
     function checkURL(request, init) {
@@ -140,6 +140,7 @@ var onRequest = /* @__PURE__ */ __name(async (context) => {
 
 // api/admin/login.js
 var import_checked_fetch2 = __toESM(require_checked_fetch());
+import crypto2 from "node:crypto";
 var ADMIN_USERS = {
   admin: {
     id: "1",
@@ -156,6 +157,11 @@ var ADMIN_USERS = {
     password: "manager123"
   }
 };
+var verifyPassword = /* @__PURE__ */ __name((password, salt, hashedPassword) => {
+  const hash = crypto2.createHash("sha256");
+  hash.update(password + salt);
+  return hash.digest("hex") === hashedPassword;
+}, "verifyPassword");
 function generateToken(user) {
   const payload = {
     id: user.id,
@@ -169,7 +175,7 @@ function generateToken(user) {
 }
 __name(generateToken, "generateToken");
 var onRequest2 = /* @__PURE__ */ __name(async (context) => {
-  const { request } = context;
+  const { request, env } = context;
   const corsHeaders2 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -208,12 +214,22 @@ var onRequest2 = /* @__PURE__ */ __name(async (context) => {
         }
       );
     }
-    const user = ADMIN_USERS[username];
-    if (!user || user.password !== password) {
+    const hardcodedUser = ADMIN_USERS[username];
+    if (hardcodedUser && hardcodedUser.password === password) {
+      const token = generateToken(hardcodedUser);
       return new Response(
-        JSON.stringify({ error: "Invalid username or password" }),
+        JSON.stringify({
+          success: true,
+          token,
+          user: {
+            id: hardcodedUser.id,
+            username: hardcodedUser.username,
+            email: hardcodedUser.email,
+            role: hardcodedUser.role
+          }
+        }),
         {
-          status: 401,
+          status: 200,
           headers: {
             "Content-Type": "application/json",
             ...corsHeaders2
@@ -221,20 +237,38 @@ var onRequest2 = /* @__PURE__ */ __name(async (context) => {
         }
       );
     }
-    const token = generateToken(user);
-    return new Response(
-      JSON.stringify({
-        success: true,
-        token,
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          role: user.role
+    if (env && env.SPORTS_KV) {
+      const userData = await env.SPORTS_KV.get(`user:${username}`);
+      if (userData) {
+        const user = JSON.parse(userData);
+        if (user.role === "admin" && verifyPassword(password, user.salt, user.hashedPassword)) {
+          const token = user.token;
+          return new Response(
+            JSON.stringify({
+              success: true,
+              token,
+              user: {
+                id: user.id,
+                username: user.email,
+                email: user.email,
+                role: user.role
+              }
+            }),
+            {
+              status: 200,
+              headers: {
+                "Content-Type": "application/json",
+                ...corsHeaders2
+              }
+            }
+          );
         }
-      }),
+      }
+    }
+    return new Response(
+      JSON.stringify({ error: "Invalid username or password" }),
       {
-        status: 200,
+        status: 401,
         headers: {
           "Content-Type": "application/json",
           ...corsHeaders2
@@ -257,7 +291,7 @@ var onRequest2 = /* @__PURE__ */ __name(async (context) => {
 
 // api/admin/setup.js
 var import_checked_fetch3 = __toESM(require_checked_fetch());
-import crypto2 from "node:crypto";
+import crypto3 from "node:crypto";
 async function onRequest3(context) {
   const { request, env } = context;
   if (request.method !== "POST") {
@@ -335,15 +369,15 @@ async function onRequest3(context) {
         }
       );
     }
-    const salt = crypto2.getRandomValues(new Uint8Array(16));
+    const salt = crypto3.getRandomValues(new Uint8Array(16));
     const saltHex = Array.from(salt).map((b) => b.toString(16).padStart(2, "0")).join("");
     const encoder = new TextEncoder();
     const data_to_hash = encoder.encode(password + saltHex);
-    const hashBuffer = await crypto2.subtle.digest("SHA-256", data_to_hash);
+    const hashBuffer = await crypto3.subtle.digest("SHA-256", data_to_hash);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hashedPassword = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
     const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const tokenBuffer = crypto2.getRandomValues(new Uint8Array(32));
+    const tokenBuffer = crypto3.getRandomValues(new Uint8Array(32));
     const token = Array.from(tokenBuffer).map((b) => b.toString(16).padStart(2, "0")).join("");
     const adminUser = {
       id: userId,
@@ -568,14 +602,14 @@ var onRequest4 = /* @__PURE__ */ __name(async (context) => {
 
 // api/auth.js
 var import_checked_fetch5 = __toESM(require_checked_fetch());
-import crypto3 from "node:crypto";
+import crypto4 from "node:crypto";
 var encryptPassword = /* @__PURE__ */ __name((password, salt) => {
-  const hash = crypto3.createHash("sha256");
+  const hash = crypto4.createHash("sha256");
   hash.update(password + salt);
   return hash.digest("hex");
 }, "encryptPassword");
-var generateSalt = /* @__PURE__ */ __name(() => crypto3.randomBytes(16).toString("hex"), "generateSalt");
-var generateToken2 = /* @__PURE__ */ __name(() => crypto3.randomBytes(32).toString("hex"), "generateToken");
+var generateSalt = /* @__PURE__ */ __name(() => crypto4.randomBytes(16).toString("hex"), "generateSalt");
+var generateToken2 = /* @__PURE__ */ __name(() => crypto4.randomBytes(32).toString("hex"), "generateToken");
 var onRequest5 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
@@ -619,7 +653,7 @@ var onRequest5 = /* @__PURE__ */ __name(async (context) => {
       }
       const salt = generateSalt();
       const hashedPassword = encryptPassword(password, salt);
-      const userId = crypto3.randomUUID();
+      const userId = crypto4.randomUUID();
       const token = generateToken2();
       const createdAt = (/* @__PURE__ */ new Date()).toISOString();
       const userData = {
@@ -2489,10 +2523,10 @@ var routes = [
   }
 ];
 
-// ../.wrangler/tmp/bundle-nPsHjK/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-SWUY5y/middleware-loader.entry.ts
 var import_checked_fetch23 = __toESM(require_checked_fetch());
 
-// ../.wrangler/tmp/bundle-nPsHjK/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-SWUY5y/middleware-insertion-facade.js
 var import_checked_fetch21 = __toESM(require_checked_fetch());
 
 // ../../../.npm/_npx/32026684e21afda6/node_modules/wrangler/templates/pages-template-worker.ts
@@ -2988,7 +3022,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// ../.wrangler/tmp/bundle-nPsHjK/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-SWUY5y/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -3021,7 +3055,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// ../.wrangler/tmp/bundle-nPsHjK/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-SWUY5y/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
