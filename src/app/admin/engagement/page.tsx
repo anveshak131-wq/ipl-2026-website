@@ -26,6 +26,12 @@ export default function AdminEngagementPage() {
   const [activeUsers, setActiveUsers] = useState<ActiveUser[]>([]);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [usersStatus, setUsersStatus] = useState<'idle' | 'ok' | 'error'>('idle');
+  const [messagesStatus, setMessagesStatus] = useState<'idle' | 'ok' | 'error'>('idle');
+  const [usersLastUpdated, setUsersLastUpdated] = useState<string | null>(null);
+  const [messagesLastUpdated, setMessagesLastUpdated] = useState<string | null>(null);
+  const [usersError, setUsersError] = useState<string | null>(null);
+  const [messagesError, setMessagesError] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<ActiveUser | null>(null);
   const [selectedMessage, setSelectedMessage] = useState<ChatMessage | null>(null);
   const [showActionModal, setShowActionModal] = useState(false);
@@ -93,9 +99,17 @@ export default function AdminEngagementPage() {
         if (response.ok) {
           const data = await response.json();
           setActiveUsers(data.users);
+          setUsersStatus('ok');
+          setUsersError(null);
+          setUsersLastUpdated(new Date().toLocaleTimeString());
+        } else {
+          setUsersStatus('error');
+          setUsersError('Failed to load active users');
         }
       } catch (error) {
         console.error('Error fetching active users:', error);
+        setUsersStatus('error');
+        setUsersError('Error fetching active users');
       }
     };
 
@@ -114,9 +128,17 @@ export default function AdminEngagementPage() {
         if (response.ok) {
           const data = await response.json();
           setChatMessages(data);
+          setMessagesStatus('ok');
+          setMessagesError(null);
+          setMessagesLastUpdated(new Date().toLocaleTimeString());
+        } else {
+          setMessagesStatus('error');
+          setMessagesError('Failed to load chat messages');
         }
       } catch (error) {
         console.error('Error fetching chat messages:', error);
+        setMessagesStatus('error');
+        setMessagesError('Error fetching chat messages');
       }
     };
 
@@ -249,7 +271,34 @@ export default function AdminEngagementPage() {
         <div className="max-w-6xl mx-auto px-6 py-8">
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-white mb-2">User Engagement Management</h1>
-            <p className="text-gray-400">Monitor active users and manage community engagement</p>
+            <p className="text-gray-400 mb-3">Monitor active users and manage community engagement</p>
+
+            <div className="flex flex-wrap gap-3 text-xs text-gray-400">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/60 border border-white/10">
+                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: usersStatus === 'ok' ? '#22c55e' : usersStatus === 'error' ? '#ef4444' : '#6b7280' }} />
+                <span>
+                  Active users:{' '}
+                  <span className={usersStatus === 'error' ? 'text-red-400' : 'text-gray-200'}>
+                    {usersStatus === 'ok' ? 'OK' : usersStatus === 'error' ? 'Error' : 'Loading...'}
+                  </span>
+                  {usersLastUpdated && (
+                    <span className="text-gray-500"> · Updated {usersLastUpdated}</span>
+                  )}
+                </span>
+              </div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/60 border border-white/10">
+                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: messagesStatus === 'ok' ? '#22c55e' : messagesStatus === 'error' ? '#ef4444' : '#6b7280' }} />
+                <span>
+                  Chat messages:{' '}
+                  <span className={messagesStatus === 'error' ? 'text-red-400' : 'text-gray-200'}>
+                    {messagesStatus === 'ok' ? 'OK' : messagesStatus === 'error' ? 'Error' : 'Loading...'}
+                  </span>
+                  {messagesLastUpdated && (
+                    <span className="text-gray-500"> · Updated {messagesLastUpdated}</span>
+                  )}
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Stats */}
@@ -271,6 +320,45 @@ export default function AdminEngagementPage() {
           {/* Active Users Table */}
           <div className="bg-slate-800/50 rounded-2xl border border-white/10 p-8">
             <h2 className="text-2xl font-bold text-white mb-6">Active Users in Chat</h2>
+
+            {usersError && (
+              <div className="mb-4 flex items-center justify-between rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-2 text-xs text-red-200">
+                <span>{usersError}</span>
+                <button
+                  onClick={() => {
+                    setUsersError(null);
+                    setUsersStatus('idle');
+                    // trigger a one-off refresh
+                    (async () => {
+                      try {
+                        const token = localStorage.getItem('auth_token');
+                        const response = await fetch('/api/admin/users?matchId=current', {
+                          headers: {
+                            'Authorization': `Bearer ${token}`,
+                          },
+                        });
+                        if (response.ok) {
+                          const data = await response.json();
+                          setActiveUsers(data.users);
+                          setUsersStatus('ok');
+                          setUsersLastUpdated(new Date().toLocaleTimeString());
+                        } else {
+                          setUsersStatus('error');
+                          setUsersError('Failed to load active users');
+                        }
+                      } catch (err) {
+                        console.error('Retry users error:', err);
+                        setUsersStatus('error');
+                        setUsersError('Error fetching active users');
+                      }
+                    })();
+                  }}
+                  className="rounded-md bg-red-500/20 px-3 py-1 text-[11px] font-medium hover:bg-red-500/30"
+                >
+                  Retry
+                </button>
+              </div>
+            )}
 
             {activeUsers.length > 0 ? (
               <div className="overflow-x-auto">
@@ -322,6 +410,39 @@ export default function AdminEngagementPage() {
           {/* Chat Messages */}
           <div className="mt-8 bg-slate-800/50 rounded-2xl border border-white/10 p-8">
             <h2 className="text-2xl font-bold text-white mb-6">Live Chat Messages</h2>
+
+            {messagesError && (
+              <div className="mb-4 flex items-center justify-between rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-2 text-xs text-red-200">
+                <span>{messagesError}</span>
+                <button
+                  onClick={() => {
+                    setMessagesError(null);
+                    setMessagesStatus('idle');
+                    (async () => {
+                      try {
+                        const response = await fetch('/api/messages?matchId=current&limit=100');
+                        if (response.ok) {
+                          const data = await response.json();
+                          setChatMessages(data);
+                          setMessagesStatus('ok');
+                          setMessagesLastUpdated(new Date().toLocaleTimeString());
+                        } else {
+                          setMessagesStatus('error');
+                          setMessagesError('Failed to load chat messages');
+                        }
+                      } catch (err) {
+                        console.error('Retry messages error:', err);
+                        setMessagesStatus('error');
+                        setMessagesError('Error fetching chat messages');
+                      }
+                    })();
+                  }}
+                  className="rounded-md bg-red-500/20 px-3 py-1 text-[11px] font-medium hover:bg-red-500/30"
+                >
+                  Retry
+                </button>
+              </div>
+            )}
 
             {chatMessages.length > 0 ? (
               <div className="space-y-3 max-h-[500px] overflow-y-auto">
