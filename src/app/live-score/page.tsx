@@ -100,10 +100,13 @@ export default function LiveScorePage() {
     return () => clearInterval(interval);
   }, [user]);
 
-  // Auto-scroll to latest message
+  // Auto-scroll to latest message (only when new message is sent)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    const timer = setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [isSendingMessage]);
 
   // Send message
   const handleSendMessage = async (e: React.FormEvent) => {

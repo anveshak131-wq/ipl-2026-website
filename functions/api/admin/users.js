@@ -3,12 +3,26 @@ export const onRequest = async (context) => {
   const { pathname, searchParams } = new URL(request.url);
   const method = request.method;
 
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, PUT, DELETE, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  };
+
+  // Handle CORS preflight
+  if (method === 'OPTIONS') {
+    return new Response(null, {
+      status: 200,
+      headers: corsHeaders,
+    });
+  }
+
   try {
     const token = request.headers.get('Authorization')?.replace('Bearer ', '');
     if (!token) {
       return new Response(
         JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
+        { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
       );
     }
 
@@ -16,7 +30,7 @@ export const onRequest = async (context) => {
     if (!email) {
       return new Response(
         JSON.stringify({ error: 'Invalid token' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } }
+        { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
       );
     }
 
@@ -26,7 +40,7 @@ export const onRequest = async (context) => {
     if (user.role !== 'admin') {
       return new Response(
         JSON.stringify({ error: 'Forbidden' }),
-        { status: 403, headers: { 'Content-Type': 'application/json' } }
+        { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
       );
     }
 
@@ -39,7 +53,7 @@ export const onRequest = async (context) => {
 
       return new Response(JSON.stringify({ users: activeUsers }), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
     }
 
@@ -50,7 +64,7 @@ export const onRequest = async (context) => {
       if (!userId) {
         return new Response(
           JSON.stringify({ error: 'Missing userId' }),
-          { status: 400, headers: { 'Content-Type': 'application/json' } }
+          { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
 
@@ -59,7 +73,7 @@ export const onRequest = async (context) => {
       if (!userEmail) {
         return new Response(
           JSON.stringify({ error: 'User not found' }),
-          { status: 404, headers: { 'Content-Type': 'application/json' } }
+          { status: 404, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
 
@@ -78,7 +92,7 @@ export const onRequest = async (context) => {
 
       return new Response(
         JSON.stringify({ success: true, user: targetUser }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } }
+        { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
       );
     }
 
@@ -89,7 +103,7 @@ export const onRequest = async (context) => {
       if (!userId) {
         return new Response(
           JSON.stringify({ error: 'Missing userId' }),
-          { status: 400, headers: { 'Content-Type': 'application/json' } }
+          { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
 
@@ -98,7 +112,7 @@ export const onRequest = async (context) => {
       if (!userEmail) {
         return new Response(
           JSON.stringify({ error: 'User not found' }),
-          { status: 404, headers: { 'Content-Type': 'application/json' } }
+          { status: 404, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
 
@@ -114,7 +128,7 @@ export const onRequest = async (context) => {
 
       return new Response(JSON.stringify({ success: true }), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
     }
 
@@ -147,19 +161,19 @@ export const onRequest = async (context) => {
 
       return new Response(JSON.stringify({ success: true }), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
     }
 
     return new Response(
       JSON.stringify({ error: 'Not found' }),
-      { status: 404, headers: { 'Content-Type': 'application/json' } }
+      { status: 404, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
     );
   } catch (error) {
     console.error('Admin users error:', error);
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
     );
   }
 };
