@@ -132,6 +132,21 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         ),
         group: 'Content',
       },
+      {
+        href: '/admin/stats',
+        label: 'Stats Hub',
+        icon: (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 10h10M4 14h6m-2 4h12"
+            />
+          </svg>
+        ),
+        group: 'Content',
+      },
     ],
     Live: [
       {

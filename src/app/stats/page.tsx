@@ -18,11 +18,29 @@ interface TeamAggregate {
   avgStrikeRate: number;
 }
 
+interface PublishedStats {
+  description?: string;
+  leaders?: {
+    topRunScorers?: Player[];
+    topWicketTakers?: Player[];
+    bestStrikeRates?: Player[];
+    bestEconomyRates?: Player[];
+  };
+  teamAggregates?: TeamAggregate[];
+  defaultTeams?: {
+    team1Id?: string;
+    team2Id?: string;
+  };
+  insights?: string[];
+  lastUpdated?: string;
+}
+
 export default function StatsPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [publishedStats, setPublishedStats] = useState<PublishedStats | null>(null);
   const [selectedTeam1Id, setSelectedTeam1Id] = useState<string>('');
   const [selectedTeam2Id, setSelectedTeam2Id] = useState<string>('');
 
@@ -31,19 +49,39 @@ export default function StatsPage() {
       setIsLoading(true);
       setError(null);
       try {
-        const [playersData, teamsData] = await Promise.all([
+        const [playersData, teamsData, settingsData] = await Promise.all([
           api.getPlayers(),
           api.getTeams(),
+          api.getSettings().catch(() => null),
         ]);
         setPlayers(playersData || []);
         setTeams(teamsData || []);
 
+        let team1Id = '';
+        let team2Id = '';
+
         if (teamsData && teamsData.length >= 2) {
-          setSelectedTeam1Id(teamsData[0].id);
-          setSelectedTeam2Id(teamsData[1].id);
+          team1Id = teamsData[0].id;
+          team2Id = teamsData[1].id;
         } else if (teamsData && teamsData.length === 1) {
-          setSelectedTeam1Id(teamsData[0].id);
+          team1Id = teamsData[0].id;
         }
+
+        if (settingsData && (settingsData as any).publishedStats) {
+          const published = (settingsData as any).publishedStats as PublishedStats;
+          setPublishedStats(published);
+          if (published.defaultTeams) {
+            if (published.defaultTeams.team1Id) {
+              team1Id = published.defaultTeams.team1Id;
+            }
+            if (published.defaultTeams.team2Id) {
+              team2Id = published.defaultTeams.team2Id;
+            }
+          }
+        }
+
+        if (team1Id) setSelectedTeam1Id(team1Id);
+        if (team2Id) setSelectedTeam2Id(team2Id);
       } catch (err) {
         console.error('Failed to load stats data:', err);
         setError('Failed to load stats. Please try again later.');
@@ -55,32 +93,64 @@ export default function StatsPage() {
     fetchData();
   }, []);
 
-  const topRunScorers = useMemo(() => {
+  const computedTopRunScorers = useMemo(() => {
     return [...players]
       .sort((a, b) => b.stats.runs - a.stats.runs)
       .slice(0, 5);
   }, [players]);
 
-  const topWicketTakers = useMemo(() => {
+  const computedTopWicketTakers = useMemo(() => {
     return [...players]
       .filter((p) => p.stats.wickets > 0)
       .sort((a, b) => b.stats.wickets - a.stats.wickets)
       .slice(0, 5);
   }, [players]);
 
-  const bestStrikeRates = useMemo(() => {
+  const computedBestStrikeRates = useMemo(() => {
     return [...players]
       .filter((p) => p.stats.runs >= 300)
       .sort((a, b) => b.stats.strikeRate - a.stats.strikeRate)
       .slice(0, 5);
   }, [players]);
 
-  const bestEconomyRates = useMemo(() => {
+  const computedBestEconomyRates = useMemo(() => {
     return [...players]
       .filter((p) => p.stats.wickets >= 20 && p.stats.economy > 0)
       .sort((a, b) => a.stats.economy - b.stats.economy)
       .slice(0, 5);
   }, [players]);
+
+  const topRunScorers = useMemo(
+    () =>
+      publishedStats?.leaders?.topRunScorers?.length
+        ? publishedStats.leaders.topRunScorers
+        : computedTopRunScorers,
+    [publishedStats, computedTopRunScorers]
+  );
+
+  const topWicketTakers = useMemo(
+    () =>
+      publishedStats?.leaders?.topWicketTakers?.length
+        ? publishedStats.leaders.topWicketTakers
+        : computedTopWicketTakers,
+    [publishedStats, computedTopWicketTakers]
+  );
+
+  const bestStrikeRates = useMemo(
+    () =>
+      publishedStats?.leaders?.bestStrikeRates?.length
+        ? publishedStats.leaders.bestStrikeRates
+        : computedBestStrikeRates,
+    [publishedStats, computedBestStrikeRates]
+  );
+
+  const bestEconomyRates = useMemo(
+    () =>
+      publishedStats?.leaders?.bestEconomyRates?.length
+        ? publishedStats.leaders.bestEconomyRates
+        : computedBestEconomyRates,
+    [publishedStats, computedBestEconomyRates]
+  );
 
   const computeTeamAggregate = (teamId: string): TeamAggregate => {
     const team = teams.find((t) => t.id === teamId) || null;
@@ -140,14 +210,34 @@ export default function StatsPage() {
     };
   }, [players]);
 
+  const findPublishedTeamAggregate = (teamId: string): TeamAggregate | null => {
+    if (!publishedStats?.teamAggregates || !publishedStats.teamAggregates.length) {
+      return null;
+    }
+    const found = publishedStats.teamAggregates.find(
+      (agg) => agg.team && agg.team.id === teamId
+    );
+    return found || null;
+  };
+
   const selectedTeam1Agg = useMemo(
-    () => (selectedTeam1Id ? computeTeamAggregate(selectedTeam1Id) : null),
-    [selectedTeam1Id, players, teams]
+    () => {
+      if (!selectedTeam1Id) return null;
+      const publishedAgg = findPublishedTeamAggregate(selectedTeam1Id);
+      if (publishedAgg) return publishedAgg;
+      return computeTeamAggregate(selectedTeam1Id);
+    },
+    [selectedTeam1Id, publishedStats, players, teams]
   );
 
   const selectedTeam2Agg = useMemo(
-    () => (selectedTeam2Id ? computeTeamAggregate(selectedTeam2Id) : null),
-    [selectedTeam2Id, players, teams]
+    () => {
+      if (!selectedTeam2Id) return null;
+      const publishedAgg = findPublishedTeamAggregate(selectedTeam2Id);
+      if (publishedAgg) return publishedAgg;
+      return computeTeamAggregate(selectedTeam2Id);
+    },
+    [selectedTeam2Id, publishedStats, players, teams]
   );
 
   const insights = useMemo(() => {
@@ -209,6 +299,13 @@ export default function StatsPage() {
     leagueBattingSummary.avgStrikeRate,
   ]);
 
+  const displayInsights = useMemo(() => {
+    if (publishedStats?.insights && publishedStats.insights.length) {
+      return publishedStats.insights;
+    }
+    return insights;
+  }, [publishedStats, insights]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -266,6 +363,19 @@ export default function StatsPage() {
               bowling economies, plus smart comparisons between your favourite
               teams.
             </p>
+            {publishedStats?.lastUpdated && (
+              <p className="text-xs text-gray-400">
+                Snapshot published by admin on{' '}
+                {new Date(publishedStats.lastUpdated).toLocaleString('en-US', {
+                  day: '2-digit',
+                  month: 'short',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+                .
+              </p>
+            )}
           </section>
 
           {/* Season Leaders */}
@@ -505,9 +615,9 @@ export default function StatsPage() {
               </div>
             </div>
 
-            {insights.length ? (
+            {displayInsights.length ? (
               <ul className="space-y-2 list-disc list-inside text-sm text-gray-200">
-                {insights.map((line, idx) => (
+                {displayInsights.map((line, idx) => (
                   <li key={idx}>{line}</li>
                 ))}
               </ul>
