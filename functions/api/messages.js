@@ -3,6 +3,20 @@ export const onRequest = async (context) => {
   const { pathname, searchParams } = new URL(request.url);
   const method = request.method;
 
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  };
+
+  // Handle CORS preflight
+  if (method === 'OPTIONS') {
+    return new Response(null, {
+      status: 200,
+      headers: corsHeaders,
+    });
+  }
+
   try {
     // Get messages for a match
     if (pathname === '/api/messages' && method === 'GET') {
@@ -16,7 +30,7 @@ export const onRequest = async (context) => {
       if (!messagesData) {
         return new Response(JSON.stringify([]), {
           status: 200,
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
         });
       }
 
@@ -28,7 +42,7 @@ export const onRequest = async (context) => {
 
       return new Response(JSON.stringify(messages), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
     }
 
@@ -38,7 +52,7 @@ export const onRequest = async (context) => {
       if (!token) {
         return new Response(
           JSON.stringify({ error: 'Unauthorized' }),
-          { status: 401, headers: { 'Content-Type': 'application/json' } }
+          { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
 
@@ -46,7 +60,7 @@ export const onRequest = async (context) => {
       if (!email) {
         return new Response(
           JSON.stringify({ error: 'Invalid token' }),
-          { status: 401, headers: { 'Content-Type': 'application/json' } }
+          { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
 
@@ -56,7 +70,7 @@ export const onRequest = async (context) => {
       if (user.isBlocked) {
         return new Response(
           JSON.stringify({ error: 'Your account is blocked' }),
-          { status: 403, headers: { 'Content-Type': 'application/json' } }
+          { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
 
@@ -65,7 +79,7 @@ export const onRequest = async (context) => {
       if (!text || text.trim().length === 0) {
         return new Response(
           JSON.stringify({ error: 'Message cannot be empty' }),
-          { status: 400, headers: { 'Content-Type': 'application/json' } }
+          { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
 
@@ -73,7 +87,7 @@ export const onRequest = async (context) => {
       if (text.length > 500) {
         return new Response(
           JSON.stringify({ error: 'Message too long (max 500 chars)' }),
-          { status: 400, headers: { 'Content-Type': 'application/json' } }
+          { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
 
@@ -103,7 +117,7 @@ export const onRequest = async (context) => {
 
       return new Response(JSON.stringify({ success: true, message }), {
         status: 201,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
     }
 
@@ -115,7 +129,7 @@ export const onRequest = async (context) => {
       if (!token) {
         return new Response(
           JSON.stringify({ error: 'Unauthorized' }),
-          { status: 401, headers: { 'Content-Type': 'application/json' } }
+          { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
 
@@ -123,7 +137,7 @@ export const onRequest = async (context) => {
       if (!email) {
         return new Response(
           JSON.stringify({ error: 'Invalid token' }),
-          { status: 401, headers: { 'Content-Type': 'application/json' } }
+          { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
 
@@ -133,7 +147,7 @@ export const onRequest = async (context) => {
       if (user.role !== 'admin') {
         return new Response(
           JSON.stringify({ error: 'Forbidden' }),
-          { status: 403, headers: { 'Content-Type': 'application/json' } }
+          { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
 
@@ -150,19 +164,19 @@ export const onRequest = async (context) => {
 
       return new Response(JSON.stringify({ success: true }), {
         status: 200,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
     }
 
     return new Response(
       JSON.stringify({ error: 'Not found' }),
-      { status: 404, headers: { 'Content-Type': 'application/json' } }
+      { status: 404, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
     );
   } catch (error) {
     console.error('Messages error:', error);
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
     );
   }
 };

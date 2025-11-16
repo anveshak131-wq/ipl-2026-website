@@ -100,6 +100,21 @@ export default function LiveScorePage() {
     return () => clearInterval(interval);
   }, [user]);
 
+  // Track user activity periodically when logged in
+  useEffect(() => {
+    if (!user) return;
+
+    // Track activity immediately on login
+    trackUserActivity();
+
+    // Then track every 30 seconds while on the page
+    const interval = setInterval(() => {
+      trackUserActivity();
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [user]);
+
   // Auto-scroll to latest message (only when new message is sent)
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -107,6 +122,25 @@ export default function LiveScorePage() {
     }, 100);
     return () => clearTimeout(timer);
   }, [isSendingMessage]);
+
+  // Track user activity for admin engagement page
+  const trackUserActivity = async () => {
+    if (!user) return;
+    
+    try {
+      const token = localStorage.getItem('auth_token');
+      await fetch('/api/admin/users/activity', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ matchId: 'current' }),
+      });
+    } catch (error) {
+      console.error('Error tracking activity:', error);
+    }
+  };
 
   // Send message
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -133,6 +167,8 @@ export default function LiveScorePage() {
 
       if (response.ok) {
         setNewMessage('');
+        // Track activity when message is sent
+        await trackUserActivity();
       } else {
         alert('Failed to send message');
       }
