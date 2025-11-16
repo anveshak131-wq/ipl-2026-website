@@ -59,6 +59,8 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'squad' | 'stats' | 'about'>('squad');
   const [scrollY, setScrollY] = useState(0);
+  const [nationalityFilter, setNationalityFilter] = useState<'all' | 'indian' | 'overseas'>('all');
+  const [battingStyleFilter, setBattingStyleFilter] = useState<'any' | 'right' | 'left'>('any');
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -142,10 +144,29 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
   const teamLogoPath = getAnimatedLogoPath(teamData.id);
   const fallbackLogoPath = getLogoPath(teamData.id);
 
-  const batsmen = teamData.players?.filter(p => p.role === 'Batsman') || [];
-  const wicketkeepers = teamData.players?.filter(p => p.role === 'Wicket-keeper') || [];
-  const allRounders = teamData.players?.filter(p => p.role === 'All-rounder') || [];
-  const bowlers = teamData.players?.filter(p => p.role === 'Bowler') || [];
+  // Apply squad filters
+  const filteredPlayers = (teamData.players || []).filter((p) => {
+    let nationalityOk = true;
+    if (nationalityFilter === 'indian') {
+      nationalityOk = p.nationality === 'India';
+    } else if (nationalityFilter === 'overseas') {
+      nationalityOk = p.nationality !== 'India';
+    }
+
+    let battingOk = true;
+    if (battingStyleFilter === 'right') {
+      battingOk = p.battingStyle.toLowerCase().includes('right');
+    } else if (battingStyleFilter === 'left') {
+      battingOk = p.battingStyle.toLowerCase().includes('left');
+    }
+
+    return nationalityOk && battingOk;
+  });
+
+  const batsmen = filteredPlayers.filter(p => p.role === 'Batsman');
+  const wicketkeepers = filteredPlayers.filter(p => p.role === 'Wicket-keeper');
+  const allRounders = filteredPlayers.filter(p => p.role === 'All-rounder');
+  const bowlers = filteredPlayers.filter(p => p.role === 'Bowler');
   
 
   return (
@@ -463,6 +484,64 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
           {activeTab === 'squad' && (
             <div className="space-y-16">
+              {/* Squad Filters */}
+              <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-fade-in">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">Filter squad</span>
+                  <div className="w-12 h-px bg-white/10" />
+                </div>
+
+                <div className="flex flex-wrap gap-4">
+                  {/* Nationality filter */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-400 uppercase tracking-wide">Nationality</span>
+                    <div className="inline-flex rounded-xl bg-white/5 p-1 border border-white/10">
+                      {[
+                        { id: 'all', label: 'All' },
+                        { id: 'indian', label: 'Indian' },
+                        { id: 'overseas', label: 'Overseas' },
+                      ].map((option) => (
+                        <button
+                          key={option.id}
+                          onClick={() => setNationalityFilter(option.id as any)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                            nationalityFilter === option.id
+                              ? 'bg-white text-slate-900 shadow-md'
+                              : 'text-gray-300 hover:bg-white/10'
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Batting style filter */}
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-400 uppercase tracking-wide">Batting</span>
+                    <div className="inline-flex rounded-xl bg-white/5 p-1 border border-white/10">
+                      {[
+                        { id: 'any', label: 'Any' },
+                        { id: 'right', label: 'Right-hand' },
+                        { id: 'left', label: 'Left-hand' },
+                      ].map((option) => (
+                        <button
+                          key={option.id}
+                          onClick={() => setBattingStyleFilter(option.id as any)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                            battingStyleFilter === option.id
+                              ? 'bg-white text-slate-900 shadow-md'
+                              : 'text-gray-300 hover:bg-white/10'
+                          }`}
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Desired order: Batters, Wicket-keepers, All-rounders, Bowlers */}
               {[
                 { title: 'Batters', players: batsmen, Icon: BatsmanIcon },
