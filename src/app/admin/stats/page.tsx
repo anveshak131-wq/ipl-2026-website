@@ -42,6 +42,12 @@ export default function AdminStatsPage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [publishedStats, setPublishedStats] = useState<PublishedStats | null>(null);
 
+  const [topRunScorers, setTopRunScorers] = useState<Player[]>([]);
+  const [topWicketTakers, setTopWicketTakers] = useState<Player[]>([]);
+  const [bestStrikeRates, setBestStrikeRates] = useState<Player[]>([]);
+  const [bestEconomyRates, setBestEconomyRates] = useState<Player[]>([]);
+  const [hasInitializedLeaders, setHasInitializedLeaders] = useState(false);
+
   const [description, setDescription] = useState('');
   const [selectedTeam1Id, setSelectedTeam1Id] = useState('');
   const [selectedTeam2Id, setSelectedTeam2Id] = useState('');
@@ -140,6 +146,50 @@ export default function AdminStatsPage() {
       .slice(0, 5);
   }, [players]);
 
+  useEffect(() => {
+    if (!players.length || hasInitializedLeaders) {
+      return;
+    }
+
+    const publishedLeaders = publishedStats?.leaders;
+
+    const mapPublishedPlayers = (publishedList?: Player[]): Player[] => {
+      if (!publishedList || !publishedList.length) return [];
+      const playerMap = new Map(players.map((p) => [p.id, p] as const));
+      return publishedList
+        .map((pub) => playerMap.get(pub.id))
+        .filter((p): p is Player => Boolean(p));
+    };
+
+    const initialTopRuns = mapPublishedPlayers(publishedLeaders?.topRunScorers);
+    const initialTopWickets = mapPublishedPlayers(publishedLeaders?.topWicketTakers);
+    const initialBestStrike = mapPublishedPlayers(publishedLeaders?.bestStrikeRates);
+    const initialBestEconomy = mapPublishedPlayers(publishedLeaders?.bestEconomyRates);
+
+    setTopRunScorers(
+      initialTopRuns.length ? initialTopRuns : suggestedTopRunScorers
+    );
+    setTopWicketTakers(
+      initialTopWickets.length ? initialTopWickets : suggestedTopWicketTakers
+    );
+    setBestStrikeRates(
+      initialBestStrike.length ? initialBestStrike : suggestedBestStrikeRates
+    );
+    setBestEconomyRates(
+      initialBestEconomy.length ? initialBestEconomy : suggestedBestEconomyRates
+    );
+
+    setHasInitializedLeaders(true);
+  }, [
+    players,
+    publishedStats,
+    suggestedTopRunScorers,
+    suggestedTopWicketTakers,
+    suggestedBestStrikeRates,
+    suggestedBestEconomyRates,
+    hasInitializedLeaders,
+  ]);
+
   const computeTeamAggregate = (teamId: string): TeamAggregate => {
     const team = teams.find((t) => t.id === teamId) || null;
     const teamPlayers = players.filter((p) => p.teamId === teamId);
@@ -203,9 +253,13 @@ export default function AdminStatsPage() {
   const suggestedInsights = useMemo(() => {
     const points: string[] = [];
 
-    if (suggestedTopRunScorers.length > 1) {
-      const leader = suggestedTopRunScorers[0];
-      const runnerUp = suggestedTopRunScorers[1];
+    const runLeaders = topRunScorers.length
+      ? topRunScorers
+      : suggestedTopRunScorers;
+
+    if (runLeaders.length > 1) {
+      const leader = runLeaders[0];
+      const runnerUp = runLeaders[1];
       const diff = leader.stats.runs - runnerUp.stats.runs;
       const percent = runnerUp.stats.runs
         ? (diff / runnerUp.stats.runs) * 100
@@ -254,6 +308,7 @@ export default function AdminStatsPage() {
     return points;
   }, [
     suggestedTopRunScorers,
+    topRunScorers,
     selectedTeam1Agg,
     selectedTeam2Agg,
     leagueBattingSummary.avgStrikeRate,
@@ -273,10 +328,18 @@ export default function AdminStatsPage() {
       const snapshot: PublishedStats = {
         description: description || undefined,
         leaders: {
-          topRunScorers: suggestedTopRunScorers,
-          topWicketTakers: suggestedTopWicketTakers,
-          bestStrikeRates: suggestedBestStrikeRates,
-          bestEconomyRates: suggestedBestEconomyRates,
+          topRunScorers: topRunScorers.length
+            ? topRunScorers
+            : suggestedTopRunScorers,
+          topWicketTakers: topWicketTakers.length
+            ? topWicketTakers
+            : suggestedTopWicketTakers,
+          bestStrikeRates: bestStrikeRates.length
+            ? bestStrikeRates
+            : suggestedBestStrikeRates,
+          bestEconomyRates: bestEconomyRates.length
+            ? bestEconomyRates
+            : suggestedBestEconomyRates,
         },
         teamAggregates,
         defaultTeams: {
@@ -377,58 +440,46 @@ export default function AdminStatsPage() {
             <div className="glass-effect rounded-xl p-6">
               <h2 className="text-lg font-semibold text-white mb-3">Auto-computed season leaders</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                <div>
-                  <h3 className="font-semibold text-ipl-gold mb-2">Orange Cap (Runs)</h3>
-                  <div className="space-y-1.5">
-                    {suggestedTopRunScorers.map((p, index) => (
-                      <div key={p.id} className="flex justify-between bg-white/5 border border-white/10 rounded-lg px-3 py-2">
-                        <span className="text-gray-300">
-                          {index + 1}. {p.name}
-                        </span>
-                        <span className="text-ipl-gold font-semibold">{p.stats.runs}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-emerald-300 mb-2">Purple Cap (Wickets)</h3>
-                  <div className="space-y-1.5">
-                    {suggestedTopWicketTakers.map((p, index) => (
-                      <div key={p.id} className="flex justify-between bg-white/5 border border-white/10 rounded-lg px-3 py-2">
-                        <span className="text-gray-300">
-                          {index + 1}. {p.name}
-                        </span>
-                        <span className="text-emerald-300 font-semibold">{p.stats.wickets}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-white mb-2">Best Strike Rates</h3>
-                  <div className="space-y-1.5">
-                    {suggestedBestStrikeRates.map((p, index) => (
-                      <div key={p.id} className="flex justify-between bg-white/5 border border-white/10 rounded-lg px-3 py-2">
-                        <span className="text-gray-300">
-                          {index + 1}. {p.name}
-                        </span>
-                        <span className="text-ipl-gold font-semibold">SR {p.stats.strikeRate.toFixed(1)}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-white mb-2">Best Economy</h3>
-                  <div className="space-y-1.5">
-                    {suggestedBestEconomyRates.map((p, index) => (
-                      <div key={p.id} className="flex justify-between bg-white/5 border border-white/10 rounded-lg px-3 py-2">
-                        <span className="text-gray-300">
-                          {index + 1}. {p.name}
-                        </span>
-                        <span className="text-emerald-300 font-semibold">Eco {p.stats.economy.toFixed(2)}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <LeaderboardEditor
+                  title="Orange Cap (Runs)"
+                  titleClassName="text-ipl-gold"
+                  valueClassName="text-ipl-gold"
+                  entries={topRunScorers}
+                  setEntries={setTopRunScorers}
+                  allPlayers={players}
+                  formatValue={(player) => `${player.stats.runs}`}
+                />
+                <LeaderboardEditor
+                  title="Purple Cap (Wickets)"
+                  titleClassName="text-emerald-300"
+                  valueClassName="text-emerald-300"
+                  entries={topWicketTakers}
+                  setEntries={setTopWicketTakers}
+                  allPlayers={players}
+                  formatValue={(player) => `${player.stats.wickets}`}
+                />
+                <LeaderboardEditor
+                  title="Best Strike Rates"
+                  titleClassName="text-white"
+                  valueClassName="text-ipl-gold"
+                  entries={bestStrikeRates}
+                  setEntries={setBestStrikeRates}
+                  allPlayers={players}
+                  formatValue={(player) =>
+                    `SR ${player.stats.strikeRate.toFixed(1)}`
+                  }
+                />
+                <LeaderboardEditor
+                  title="Best Economy"
+                  titleClassName="text-white"
+                  valueClassName="text-emerald-300"
+                  entries={bestEconomyRates}
+                  setEntries={setBestEconomyRates}
+                  allPlayers={players}
+                  formatValue={(player) =>
+                    `Eco ${player.stats.economy.toFixed(2)}`
+                  }
+                />
               </div>
             </div>
 
@@ -534,6 +585,176 @@ export default function AdminStatsPage() {
             )}
           </section>
         </div>
+      </div>
+    </div>
+  );
+}
+
+interface LeaderboardEditorProps {
+  title: string;
+  titleClassName?: string;
+  valueClassName: string;
+  entries: Player[];
+  setEntries: (entries: Player[]) => void;
+  allPlayers: Player[];
+  formatValue: (player: Player) => string;
+}
+
+function LeaderboardEditor({
+  title,
+  titleClassName,
+  valueClassName,
+  entries,
+  setEntries,
+  allPlayers,
+  formatValue,
+}: LeaderboardEditorProps) {
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [selectedPlayerId, setSelectedPlayerId] = useState('');
+
+  const startEdit = (index: number) => {
+    setEditingIndex(index);
+    setSelectedPlayerId(entries[index]?.id ?? '');
+  };
+
+  const startAdd = () => {
+    setEditingIndex(entries.length);
+    setSelectedPlayerId('');
+  };
+
+  const handleDelete = (index: number) => {
+    const next = entries.filter((_, i) => i !== index);
+    setEntries(next);
+    setEditingIndex(null);
+  };
+
+  const handleSave = () => {
+    if (editingIndex === null || !selectedPlayerId) {
+      setEditingIndex(null);
+      return;
+    }
+
+    const player = allPlayers.find((p) => p.id === selectedPlayerId);
+    if (!player) {
+      setEditingIndex(null);
+      return;
+    }
+
+    const duplicateIndex = entries.findIndex((p) => p.id === player.id);
+    if (duplicateIndex !== -1 && duplicateIndex !== editingIndex) {
+      const updated = entries.filter((_, idx) => idx !== duplicateIndex);
+      const next =
+        editingIndex >= updated.length
+          ? [...updated, player]
+          : updated.map((existing, idx) =>
+              idx === editingIndex ? player : existing
+            );
+      setEntries(next);
+    } else {
+      const next =
+        editingIndex >= entries.length
+          ? [...entries, player]
+          : entries.map((existing, idx) =>
+              idx === editingIndex ? player : existing
+            );
+      setEntries(next);
+    }
+
+    setEditingIndex(null);
+  };
+
+  const handleCancel = () => {
+    setEditingIndex(null);
+    setSelectedPlayerId('');
+  };
+
+  return (
+    <div className="space-y-2">
+      <h3
+        className={`font-semibold mb-2 ${
+          titleClassName ? titleClassName : 'text-white'
+        }`}
+      >
+        {title}
+      </h3>
+      <div className="space-y-1.5">
+        {entries.map((player, index) => (
+          <div
+            key={player.id}
+            className="flex items-center justify-between bg-white/5 border border-white/10 rounded-lg px-3 py-2"
+          >
+            <div className="flex items-center gap-2 text-gray-300">
+              <span>{index + 1}.</span>
+              <span>{player.name}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className={`${valueClassName} font-semibold`}>
+                {formatValue(player)}
+              </span>
+              <button
+                type="button"
+                onClick={() => startEdit(index)}
+                className="px-2 py-0.5 rounded-md bg-white/10 text-[11px] text-gray-100 hover:bg-white/20 transition"
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDelete(index)}
+                className="px-2 py-0.5 rounded-md bg-red-500/20 text-[11px] text-red-200 hover:bg-red-500/30 transition"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+        {!entries.length && (
+          <div className="text-xs text-gray-400">
+            No players selected for this leaderboard yet.
+          </div>
+        )}
+      </div>
+      <div className="flex flex-col sm:flex-row gap-2 mt-2">
+        <button
+          type="button"
+          onClick={startAdd}
+          className="inline-flex items-center justify-center px-3 py-1.5 rounded-md bg-black/40 border border-white/15 text-[11px] text-gray-200 hover:bg-white/5 transition"
+        >
+          + Add player
+        </button>
+        {editingIndex !== null && (
+          <div className="flex-1 flex flex-col sm:flex-row gap-2">
+            <select
+              value={selectedPlayerId}
+              onChange={(e) => setSelectedPlayerId(e.target.value)}
+              className="flex-1 bg-black/60 border border-white/20 rounded-md px-3 py-1.5 text-[11px] text-white focus:outline-none focus:ring-2 focus:ring-ipl-gold/40"
+            >
+              <option value="">Select player</option>
+              {allPlayers.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={!selectedPlayerId}
+                className="px-3 py-1.5 rounded-md bg-ipl-gold text-[11px] font-semibold text-black hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="px-3 py-1.5 rounded-md bg-white/10 text-[11px] text-gray-100 hover:bg-white/20 transition"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
