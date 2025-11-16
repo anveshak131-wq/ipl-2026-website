@@ -75,11 +75,16 @@ export interface Match {
 export interface News {
   id: string;
   title: string;
-  summary: string;
+  summary?: string;
   content: string;
-  image: string;
-  publishedAt: string;
-  category: 'match' | 'team' | 'player' | 'general';
+  image?: string;
+  imageUrl?: string;
+  publishedAt?: string;
+  createdAt?: string;
+  category?: 'match' | 'team' | 'player' | 'general';
+  linkedTeamIds?: string[];
+  linkedMatchId?: string;
+  linkedPlayerIds?: string[];
 }
 
 export interface Highlight {
@@ -108,6 +113,12 @@ export interface Content {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  // Optional structured news fields
+  summary?: string;
+  category?: 'match' | 'team' | 'player' | 'general';
+  linkedTeamIds?: string[];
+  linkedMatchId?: string;
+  linkedPlayerIds?: string[];
 }
 
 export interface CoachingStaff {

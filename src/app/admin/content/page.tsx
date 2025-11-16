@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AuroraBackground from '@/components/ui/AuroraBackground';
-import { Content } from '@/types';
+import { Content, Team, Match, Player } from '@/types';
 import { api } from '@/lib/data';
 
 // Icons
@@ -66,6 +66,9 @@ export default function AdminContent() {
   const [authLoading, setAuthLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingContent, setEditingContent] = useState<Content | null>(null);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
   
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -76,17 +79,27 @@ export default function AdminContent() {
   const [formData, setFormData] = useState<{
     type: 'banner' | 'highlight' | 'news';
     title: string;
+    summary: string;
     content: string;
     imageUrl: string;
     videoUrl: string;
     isActive: boolean;
+    category: 'match' | 'team' | 'player' | 'general';
+    linkedTeamIds: string[];
+    linkedMatchId: string;
+    linkedPlayerIds: string[];
   }>({
     type: 'news',
     title: '',
+    summary: '',
     content: '',
     imageUrl: '',
     videoUrl: '',
-    isActive: true
+    isActive: true,
+    category: 'general',
+    linkedTeamIds: [],
+    linkedMatchId: '',
+    linkedPlayerIds: [],
   });
 
   useEffect(() => {
@@ -99,6 +112,7 @@ export default function AdminContent() {
         }
         setIsAuthenticated(true);
         fetchContent();
+        fetchContext();
       } catch (error) {
         router.push('/admin');
       } finally {
@@ -108,6 +122,21 @@ export default function AdminContent() {
 
     checkAuth();
   }, [router]);
+
+  const fetchContext = async () => {
+    try {
+      const [teamsData, matchesData, playersData] = await Promise.all([
+        api.getTeams(),
+        api.getMatches(),
+        api.getPlayers(),
+      ]);
+      setTeams(teamsData);
+      setMatches(matchesData);
+      setPlayers(playersData);
+    } catch (error) {
+      console.error('Failed to fetch context data for news links:', error);
+    }
+  };
 
   useEffect(() => {
     // Apply filters
@@ -153,10 +182,15 @@ export default function AdminContent() {
     setFormData({
       type: 'news',
       title: '',
+      summary: '',
       content: '',
       imageUrl: '',
       videoUrl: '',
-      isActive: true
+      isActive: true,
+      category: 'general',
+      linkedTeamIds: [],
+      linkedMatchId: '',
+      linkedPlayerIds: [],
     });
     setShowForm(true);
   };
@@ -166,10 +200,15 @@ export default function AdminContent() {
     setFormData({
       type: item.type as 'banner' | 'highlight' | 'news',
       title: item.title,
+      summary: item.summary || '',
       content: item.content,
       imageUrl: item.imageUrl || '',
       videoUrl: item.videoUrl || '',
-      isActive: item.isActive
+      isActive: item.isActive,
+      category: (item.category as any) || 'general',
+      linkedTeamIds: item.linkedTeamIds || [],
+      linkedMatchId: item.linkedMatchId || '',
+      linkedPlayerIds: item.linkedPlayerIds || [],
     });
     setShowForm(true);
   };
@@ -574,6 +613,105 @@ export default function AdminContent() {
                         required
                       />
                     </div>
+
+                    {formData.type === 'news' && (
+                      <>
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-300 mb-2">
+                            Short Summary
+                          </label>
+                          <textarea
+                            value={formData.summary}
+                            onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
+                            className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold focus:ring-2 focus:ring-ipl-gold/20 transition-all"
+                            placeholder="One or two lines that will appear in news lists and cards"
+                            rows={3}
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-300 mb-2">
+                              News Category
+                            </label>
+                            <select
+                              value={formData.category}
+                              onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+                              className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-ipl-gold focus:ring-2 focus:ring-ipl-gold/20 transition-all"
+                            >
+                              <option value="match">Match</option>
+                              <option value="team">Team</option>
+                              <option value="player">Player</option>
+                              <option value="general">General</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-300 mb-2">
+                              Linked Match (optional)
+                            </label>
+                            <select
+                              value={formData.linkedMatchId}
+                              onChange={(e) => setFormData({ ...formData, linkedMatchId: e.target.value })}
+                              className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-ipl-gold focus:ring-2 focus:ring-ipl-gold/20 transition-all"
+                            >
+                              <option value="">No match linked</option>
+                              {matches.map((match) => (
+                                <option key={match.id} value={match.id}>
+                                  {match.team1.shortName} vs {match.team2.shortName}  b7 {match.date} {match.time}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-300 mb-2">
+                              Linked Teams (for team news)
+                            </label>
+                            <select
+                              multiple
+                              value={formData.linkedTeamIds}
+                              onChange={(e) => {
+                                const ids = Array.from(e.target.selectedOptions).map((opt) => opt.value);
+                                setFormData({ ...formData, linkedTeamIds: ids });
+                              }}
+                              className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-ipl-gold focus:ring-2 focus:ring-ipl-gold/20 transition-all h-32"
+                            >
+                              {teams.map((team) => (
+                                <option key={team.id} value={team.id}>
+                                  {team.name} ({team.shortName})
+                                </option>
+                              ))}
+                            </select>
+                            <p className="mt-1 text-xs text-gray-400">Hold Ctrl/Cmd to select multiple teams.</p>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-300 mb-2">
+                              Linked Players (for player stories)
+                            </label>
+                            <select
+                              multiple
+                              value={formData.linkedPlayerIds}
+                              onChange={(e) => {
+                                const ids = Array.from(e.target.selectedOptions).map((opt) => opt.value);
+                                setFormData({ ...formData, linkedPlayerIds: ids });
+                              }}
+                              className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-ipl-gold focus:ring-2 focus:ring-ipl-gold/20 transition-all h-32"
+                            >
+                              {players.map((player) => (
+                                <option key={player.id} value={player.id}>
+                                  {player.name} ({player.role})
+                                </option>
+                              ))}
+                            </select>
+                            <p className="mt-1 text-xs text-gray-400">Optional: used to show this article in player news panels.</p>
+                          </div>
+                        </div>
+                      </>
+                    )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
