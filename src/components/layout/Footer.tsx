@@ -9,7 +9,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-3 mb-4">
-              <IPLLogo size="sm" />
+              <IPLLogo size="sm" animated />
               <div className="flex flex-col">
                 <span className="text-white font-black text-xl leading-none">SportsUP18</span>
                 <span className="text-ipl-gold text-sm font-bold">IPL 2026</span>

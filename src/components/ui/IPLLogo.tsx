@@ -17,10 +17,10 @@ export default function IPLLogo({ size = 'md', className = '', animated = false 
   const sizeClass = sizes[size];
 
   return (
-    <div className="relative group">
+    <div className={`relative group ${animated ? 'float-animation' : ''}`}>
       <svg
         viewBox="0 0 160 160"
-        className={`${sizeClass} ${className} drop-shadow-2xl ${animated ? 'animate-pulse' : ''}`}
+        className={`${sizeClass} ${className} drop-shadow-2xl ${animated ? 'animate-scale-in' : ''}`}
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
@@ -92,7 +92,7 @@ export default function IPLLogo({ size = 'md', className = '', animated = false 
           UP
         </text>
 
-        {/* 99 badge */}
+        {/* 18 badge */}
         <g transform="translate(112, 52)">
           <circle
             cx="0"
@@ -110,7 +110,7 @@ export default function IPLLogo({ size = 'md', className = '', animated = false 
             fontWeight="800"
             fill="#0B1120"
           >
-            99
+            18
           </text>
         </g>
 
@@ -181,7 +181,7 @@ export default function IPLLogo({ size = 'md', className = '', animated = false 
 
       {/* Outer glow */}
       <div className="absolute inset-0 -z-10 blur-xl opacity-60 group-hover:opacity-90 transition-opacity duration-300">
-        <div className={`${sizeClass} bg-gradient-to-br from-ipl-blue-light via-ipl-gold to-ipl-purple rounded-full`} />
+        <div className={`${sizeClass} bg-gradient-to-br from-ipl-blue-light via-ipl-gold to-ipl-purple rounded-full ${animated ? 'pulse-glow' : ''}`} />
       </div>
     </div>
   );

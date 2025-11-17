@@ -45,7 +45,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group relative">
             <div className="flex items-center justify-center transform group-hover:scale-110 transition-all duration-300">
-              <IPLLogo size="md" animated={false} />
+              <IPLLogo size="md" animated />
             </div>
             <div className="flex flex-col -ml-1">
               <span className="text-white font-black text-2xl leading-none tracking-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-ipl-blue-light group-hover:via-ipl-gold group-hover:to-ipl-blue-light transition-all duration-300">

@@ -338,7 +338,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                        borderColor: primaryColor.medium
                      }}>
                   <div className="w-6 h-6 flex-shrink-0">
-                    <IPLLogo />
+                    <IPLLogo animated />
                   </div>
                   <span className="text-sm font-bold tracking-wider whitespace-nowrap" style={{ color: primaryColor.textOnLight }}>{teamData.shortName}</span>
                 </div>
@@ -455,7 +455,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                     {/* IPL Logo Badge with enhanced animation - Positioned to avoid overlap with team logo */}
                     <div className="absolute bottom-1 right-1 md:bottom-2 md:right-2 w-12 h-12 md:w-14 md:h-14 rounded-full backdrop-blur-xl border-2 border-white/30 flex items-center justify-center shadow-xl transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 bg-gradient-to-br from-blue-900/80 to-purple-900/80 z-20">
                       <div className="w-7 h-7 md:w-8 md:h-8">
-                        <IPLLogo />
+                        <IPLLogo animated />
                       </div>
                     </div>
                   </div>
@@ -489,7 +489,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                 >
                   {/* IPL Logo Watermark */}
                   <div className="absolute top-3 right-3 w-8 h-8 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <IPLLogo />
+                    <IPLLogo animated />
                   </div>
                   
                   <div className="mb-4 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
@@ -638,7 +638,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
               borderColor: primaryColor.medium,
             }}>
               <div className="w-7 h-7">
-                <IPLLogo />
+                <IPLLogo animated />
               </div>
             </div>
             
