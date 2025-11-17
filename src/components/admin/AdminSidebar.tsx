@@ -245,7 +245,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
           </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="text-[#E6EDF3] font-bold text-lg leading-tight">IPL 2026</span>
+              <span className="text-[#E6EDF3] font-bold text-lg leading-tight">SportsUP18</span>
               <span className="text-[#AEBAC7] text-xs">Admin Panel</span>
             </div>
           )}

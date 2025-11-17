@@ -25,9 +25,9 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// ../.wrangler/tmp/bundle-gnzGtO/checked-fetch.js
+// ../.wrangler/tmp/bundle-1fUH6M/checked-fetch.js
 var require_checked_fetch = __commonJS({
-  "../.wrangler/tmp/bundle-gnzGtO/checked-fetch.js"() {
+  "../.wrangler/tmp/bundle-1fUH6M/checked-fetch.js"() {
     "use strict";
     var urls = /* @__PURE__ */ new Set();
     function checkURL(request, init) {
@@ -2644,7 +2644,7 @@ function verifyAdminToken4(request) {
 }
 __name(verifyAdminToken4, "verifyAdminToken");
 var defaultSettings = {
-  siteName: "IPL 2026",
+  siteName: "SportsUP18",
   siteDescription: "The biggest cricket tournament in the world",
   maintenanceMode: false,
   aiPredictionsEnabled: false,
@@ -3243,10 +3243,10 @@ var routes = [
   }
 ];
 
-// ../.wrangler/tmp/bundle-gnzGtO/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-1fUH6M/middleware-loader.entry.ts
 var import_checked_fetch27 = __toESM(require_checked_fetch());
 
-// ../.wrangler/tmp/bundle-gnzGtO/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-1fUH6M/middleware-insertion-facade.js
 var import_checked_fetch25 = __toESM(require_checked_fetch());
 
 // ../../../.npm/_npx/32026684e21afda6/node_modules/wrangler/templates/pages-template-worker.ts
@@ -3742,7 +3742,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// ../.wrangler/tmp/bundle-gnzGtO/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-1fUH6M/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -3775,7 +3775,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// ../.wrangler/tmp/bundle-gnzGtO/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-1fUH6M/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

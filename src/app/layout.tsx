@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "IPL 2026 - Official Website",
-  description: "Experience the excitement of IPL 2026 - The world's premier T20 cricket league. Get live scores, match schedules, team information, player stats, and latest news.",
-  keywords: "IPL 2026, cricket, T20, Indian Premier League, live scores, teams, players, schedule",
-  authors: [{ name: "IPL 2026" }],
+  title: "SportsUP18 - Official Website",
+  description: "SportsUP18 is your IPL 2026 experience platform. Get live scores, match schedules, team information, player stats, and latest news.",
+  keywords: "SportsUP18, IPL 2026, cricket, T20, Indian Premier League, live scores, teams, players, schedule",
+  authors: [{ name: "SportsUP18" }],
   openGraph: {
-    title: "IPL 2026 - Official Website",
-    description: "Experience the excitement of IPL 2026 - The world's premier T20 cricket league",
+    title: "SportsUP18 - Official Website",
+    description: "SportsUP18 is your IPL 2026 experience platform.",
     type: "website",
     locale: "en_US",
   },

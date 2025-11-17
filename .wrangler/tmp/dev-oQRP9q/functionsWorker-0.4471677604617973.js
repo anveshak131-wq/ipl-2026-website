@@ -97,7 +97,7 @@ var __toESM2 = /* @__PURE__ */ __name((mod, isNodeMode, target) => (target = mod
   mod
 )), "__toESM");
 var require_checked_fetch2 = __commonJS2({
-  "../.wrangler/tmp/bundle-wSKc5O/checked-fetch.js"() {
+  "../.wrangler/tmp/bundle-doySr3/checked-fetch.js"() {
     "use strict";
     var urls = /* @__PURE__ */ new Set();
     function checkURL(request, init) {
@@ -2697,7 +2697,7 @@ function verifyAdminToken4(request) {
 __name(verifyAdminToken4, "verifyAdminToken4");
 __name2(verifyAdminToken4, "verifyAdminToken");
 var defaultSettings = {
-  siteName: "IPL 2026",
+  siteName: "SportsUP18",
   siteDescription: "The biggest cricket tournament in the world",
   maintenanceMode: false,
   aiPredictionsEnabled: false,

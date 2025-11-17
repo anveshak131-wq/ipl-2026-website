@@ -14,7 +14,7 @@ function verifyAdminToken(request) {
 
 // Default settings
 const defaultSettings = {
-  siteName: 'IPL 2026',
+  siteName: 'SportsUP18',
   siteDescription: 'The biggest cricket tournament in the world',
   maintenanceMode: false,
   aiPredictionsEnabled: false,

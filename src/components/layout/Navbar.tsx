@@ -49,9 +49,9 @@ export default function Navbar() {
             </div>
             <div className="flex flex-col -ml-1">
               <span className="text-white font-black text-2xl leading-none tracking-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-ipl-blue-light group-hover:via-ipl-gold group-hover:to-ipl-blue-light transition-all duration-300">
-                IPL
+                SportsUP18
               </span>
-              <span className="text-ipl-gold text-sm font-bold tracking-widest">2026</span>
+              <span className="text-ipl-gold text-sm font-bold tracking-widest">IPL 2026</span>
             </div>
           </Link>
 

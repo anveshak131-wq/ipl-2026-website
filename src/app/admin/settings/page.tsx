@@ -28,7 +28,7 @@ export default function AdminSettings() {
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [settings, setSettings] = useState<Settings>({
-    siteName: 'IPL 2026',
+    siteName: 'SportsUP18',
     siteDescription: 'The biggest cricket tournament in the world',
     maintenanceMode: false,
     aiPredictionsEnabled: false,

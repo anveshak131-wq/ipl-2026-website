@@ -11,12 +11,12 @@ export default function Footer() {
             <div className="flex items-center space-x-3 mb-4">
               <IPLLogo size="sm" />
               <div className="flex flex-col">
-                <span className="text-white font-black text-xl leading-none">IPL</span>
-                <span className="text-ipl-gold text-sm font-bold">2026</span>
+                <span className="text-white font-black text-xl leading-none">SportsUP18</span>
+                <span className="text-ipl-gold text-sm font-bold">IPL 2026</span>
               </div>
             </div>
             <p className="text-gray-300 text-sm leading-relaxed">
-              The official website for IPL 2026. Experience the excitement of the world's premier T20 cricket league.
+              SportsUP18 is your IPL 2026 experience platform. Experience the excitement of the world's premier T20 cricket league.
             </p>
           </div>
 
@@ -68,7 +68,7 @@ export default function Footer() {
         <div className="mt-8 pt-8 border-t border-white/10">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-300 text-sm">
-              © 2026 IPL. All rights reserved.
+              &copy; {new Date().getFullYear()} SportsUP18. All rights reserved.
             </p>
             <div className="flex space-x-4 mt-4 md:mt-0">
               <a href="#" className="text-gray-300 hover:text-white transition-colors">
