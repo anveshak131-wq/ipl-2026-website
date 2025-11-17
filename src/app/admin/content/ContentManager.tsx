@@ -201,6 +201,15 @@ export default function ContentManager({
       );
     }
 
+    // Sort news newest-first for admin news view
+    if (currentType === 'news') {
+      filtered.sort((a, b) => {
+        const dateA = new Date((a as any).publishedAt || a.createdAt || '').getTime() || 0;
+        const dateB = new Date((b as any).publishedAt || b.createdAt || '').getTime() || 0;
+        return dateB - dateA;
+      });
+    }
+
     setFilteredContent(filtered);
   }, [
     content,

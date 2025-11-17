@@ -203,7 +203,7 @@ export default function NewsPage() {
             </div>
           </div>
 
-          {/* Featured important news block */}
+          {/* Featured news block (driven by isImportant, but not labeled as such for end users) */}
           {featuredImportant && (
             <section className="mt-6 animate-fade-in" style={{ animationDelay: '80ms' }}>
               <article
@@ -224,16 +224,13 @@ export default function NewsPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
-                  <div className="absolute top-5 left-5 flex flex-wrap gap-2">
-                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-500/80 text-white shadow-lg">
-                      IMPORTANT
-                    </span>
-                    {featuredImportant.category && (
+                  {featuredImportant.category && (
+                    <div className="absolute top-5 left-5 flex flex-wrap gap-2">
                       <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-black/60 text-gray-100 border border-white/20">
                         {featuredImportant.category.toUpperCase()}
                       </span>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="absolute inset-x-0 bottom-0 p-6 md:p-8 space-y-3">

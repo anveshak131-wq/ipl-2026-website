@@ -109,7 +109,7 @@ export default function NewsSection() {
         {news.length > 0 ? (
           featuredImportant ? (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-              {/* Featured important story - large card */}
+              {/* Featured story - chosen via isImportant, but not labeled explicitly for end users */}
               <article
                 className="lg:col-span-2 group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-sm border border-ipl-gold/40 hover:border-ipl-gold/60 transition-all duration-500 hover:shadow-2xl hover:shadow-ipl-gold/30 cursor-pointer flex flex-col h-full"
                 onClick={() => {
@@ -129,9 +129,6 @@ export default function NewsSection() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
 
                   <div className="absolute top-4 left-4 flex flex-wrap gap-2">
-                    <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-red-500/90 text-white shadow-lg">
-                      IMPORTANT
-                    </span>
                     <span className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wide border ${getCategoryColor(featuredImportant.category || 'general')}`}>
                       {featuredImportant.category === 'match' && '🏏'}
                       {featuredImportant.category === 'team' && '👥'}
