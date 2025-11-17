@@ -62,18 +62,18 @@ export default function LegalPage() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
       <div className="max-w-5xl mx-auto px-6 py-12 md:py-16">
-        <header className="mb-10 flex items-center justify-between gap-4">
+        <header className="mb-6 md:mb-8 flex items-center justify-between gap-4">
           <div>
             <p className="text-xs font-semibold tracking-[0.25em] text-ipl-gold/80 uppercase mb-2">
-              Legal
+              Legal &amp; Info
             </p>
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-              SportsUp99 Legal Information
+              Legal Information
             </h1>
             <p className="mt-3 text-sm md:text-base text-gray-400 max-w-2xl">
-              Transparency, compliance, and user trust are core to how we operate. This
-              page outlines the legal details and contact information for the SportsUp99
-              IPL 2026 experience platform.
+              Transparency, fair use of IPL references, and user trust are important here.
+              This page explains how SportsUP18 presents legal notices and ownership
+              information in a clear, human-friendly way.
             </p>
           </div>
           <Link
@@ -83,6 +83,28 @@ export default function LegalPage() {
             <span>Back to Home</span>
           </Link>
         </header>
+
+        {/* Legal navigation pills */}
+        <nav className="mb-10 flex flex-wrap gap-3 text-xs md:text-sm">
+          <Link
+            href="/legal"
+            className="px-4 py-2 rounded-full border border-ipl-gold/70 bg-ipl-gold/10 text-ipl-gold font-semibold tracking-wide shadow-sm shadow-yellow-900/40"
+          >
+            Legal Information
+          </Link>
+          <Link
+            href="/privacy"
+            className="px-4 py-2 rounded-full border border-white/15 bg-white/5 text-gray-200 hover:bg-white/10 transition-colors"
+          >
+            Privacy Policy
+          </Link>
+          <Link
+            href="/terms"
+            className="px-4 py-2 rounded-full border border-white/15 bg-white/5 text-gray-200 hover:bg-white/10 transition-colors"
+          >
+            Terms of Service
+          </Link>
+        </nav>
 
         {panels && panels.length > 0 ? (
           <section className="space-y-6 mb-12">
@@ -168,6 +190,30 @@ export default function LegalPage() {
             </section>
           </>
         )}
+
+        {/* Contact highlight */}
+        <section className="mt-4 mb-8">
+          <div className="rounded-2xl border border-ipl-gold/40 bg-gradient-to-r from-ipl-gold/10 via-amber-500/10 to-sky-500/10 px-6 py-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-lg shadow-black/40">
+            <div>
+              <p className="text-xs font-semibold tracking-[0.25em] uppercase text-ipl-gold/80 mb-1">
+                Contact &amp; support
+              </p>
+              <p className="text-sm md:text-base text-gray-200 max-w-xl">
+                Have a legal or rights question about anything shown on SportsUP18? Reach out by
+                email and we will review your request as quickly as possible.
+              </p>
+            </div>
+            <a
+              href="mailto:sportsup99.info@gmail.com"
+              className="inline-flex items-center gap-2 rounded-full bg-ipl-gold text-slate-900 px-4 py-2 text-xs md:text-sm font-semibold shadow-md shadow-yellow-900/40 hover:bg-yellow-300 transition-colors"
+            >
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-black/10">
+                @
+              </span>
+              <span className="whitespace-nowrap">sportsup99.info@gmail.com</span>
+            </a>
+          </div>
+        </section>
 
         <footer className="border-t border-white/10 pt-6 mt-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs text-gray-500">
           <p>
