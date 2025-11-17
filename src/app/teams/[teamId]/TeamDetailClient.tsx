@@ -337,9 +337,6 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                        background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
                        borderColor: primaryColor.medium
                      }}>
-                  <div className="w-6 h-6 flex-shrink-0">
-                    <IPLLogo animated />
-                  </div>
                   <span className="text-sm font-bold tracking-wider whitespace-nowrap" style={{ color: primaryColor.textOnLight }}>{teamData.shortName}</span>
                 </div>
 
