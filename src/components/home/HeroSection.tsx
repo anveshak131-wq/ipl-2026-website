@@ -397,7 +397,7 @@ export default function HeroSection() {
                   />
                   <div className="relative w-72 h-72 md:w-96 md:h-96 bg-gradient-to-br from-slate-950/90 via-slate-900/80 to-slate-950/90 backdrop-blur-2xl rounded-full border border-white/20 flex items-center justify-center shadow-[0_40px_120px_rgba(15,23,42,0.9)] transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-700 animate-glow-pulse">
                     <div className="flex flex-col items-center gap-4 animate-scale-in">
-                      <div className="w-24 h-24 md:w-28 md:h-28 drop-shadow-2xl">
+                      <div className="w-28 h-28 md:w-40 md:h-40 drop-shadow-2xl">
                         <IPLLogo size="lg" animated />
                       </div>
                       <div className="text-center space-y-1">

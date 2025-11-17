@@ -6,6 +6,12 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 
 type LegalPageKey = 'legal' | 'privacy' | 'terms';
 
+interface LegalPanel {
+  id: string;
+  title: string;
+  body: string;
+}
+
 interface LegalContentState {
   legal: string;
   privacy: string;
@@ -30,6 +36,29 @@ export default function AdminLegalPage() {
   const [savingKey, setSavingKey] = useState<LegalPageKey | null>(null);
   const [activeTab, setActiveTab] = useState<LegalPageKey>('legal');
   const [content, setContent] = useState<LegalContentState>(defaultTemplates);
+  const [panels, setPanels] = useState<Record<LegalPageKey, LegalPanel[]>>({
+    legal: [
+      {
+        id: 'legal-default-1',
+        title: 'Legal notice',
+        body: defaultTemplates.legal,
+      },
+    ],
+    privacy: [
+      {
+        id: 'privacy-default-1',
+        title: 'Privacy Policy',
+        body: defaultTemplates.privacy,
+      },
+    ],
+    terms: [
+      {
+        id: 'terms-default-1',
+        title: 'Terms of Service',
+        body: defaultTemplates.terms,
+      },
+    ],
+  });
 
   // Auth check (same style as other admin pages)
   useEffect(() => {
@@ -74,8 +103,57 @@ export default function AdminLegalPage() {
         const res = await fetch(`/api/legal?page=${key}`);
         if (!res.ok) return;
         const data = await res.json();
-        if (data?.content) {
-          setContent((prev) => ({ ...prev, [key]: data.content }));
+        if (data?.content && typeof data.content === 'string') {
+          const raw = data.content as string;
+          setContent((prev) => ({ ...prev, [key]: raw }));
+
+          let parsedPanels: LegalPanel[] | null = null;
+          try {
+            const maybeJson = JSON.parse(raw);
+            if (Array.isArray(maybeJson)) {
+              parsedPanels = maybeJson
+                .map((item: any, index: number) => {
+                  if (!item) return null;
+                  const title =
+                    typeof item.title === 'string' && item.title.trim()
+                      ? item.title
+                      : `Panel ${index + 1}`;
+                  const body = typeof item.body === 'string' ? item.body : '';
+                  const id =
+                    typeof item.id === 'string' && item.id.trim()
+                      ? item.id
+                      : `${key}-${index + 1}`;
+                  if (!body.trim()) return null;
+                  return { id, title, body };
+                })
+                .filter((panel): panel is LegalPanel => panel !== null);
+            }
+          } catch {
+          }
+
+          if (!parsedPanels || parsedPanels.length === 0) {
+            if (raw.trim().length > 0) {
+              parsedPanels = [
+                {
+                  id: `${key}-1`,
+                  title:
+                    key === 'legal'
+                      ? 'Legal notice'
+                      : key === 'privacy'
+                      ? 'Privacy Policy'
+                      : 'Terms of Service',
+                  body: raw,
+                },
+              ];
+            }
+          }
+
+          if (parsedPanels && parsedPanels.length > 0) {
+            setPanels((prev) => ({
+              ...prev,
+              [key]: parsedPanels as LegalPanel[],
+            }));
+          }
         }
       } catch (err) {
         console.error('Failed to load legal page', key, err);
@@ -96,18 +174,21 @@ export default function AdminLegalPage() {
         router.push('/admin');
         return;
       }
+      const payloadContent =
+        content[key] === '' ? '' : JSON.stringify(panels[key] || []);
       const res = await fetch(`/api/legal?page=${key}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ content: content[key] }),
+        body: JSON.stringify({ content: payloadContent }),
       });
       if (!res.ok) {
         alert('Failed to save content');
         return;
       }
+      setContent((prev) => ({ ...prev, [key]: payloadContent }));
       alert('Content saved successfully.');
     } catch (err) {
       console.error('Failed to save legal content', err);
@@ -124,6 +205,21 @@ export default function AdminLegalPage() {
       ...prev,
       [key]: defaultTemplates[key],
     }));
+    setPanels((prev) => ({
+      ...prev,
+      [key]: [
+        {
+          id: `${key}-default-1`,
+          title:
+            key === 'legal'
+              ? 'Legal notice'
+              : key === 'privacy'
+              ? 'Privacy Policy'
+              : 'Terms of Service',
+          body: defaultTemplates[key],
+        },
+      ],
+    }));
   };
 
   const handleClearCustom = (key: LegalPageKey) => {
@@ -136,6 +232,55 @@ export default function AdminLegalPage() {
     setContent((prev) => ({
       ...prev,
       [key]: '',
+    }));
+    setPanels((prev) => ({
+      ...prev,
+      [key]: [],
+    }));
+  };
+
+  const handleAddPanel = (key: LegalPageKey) => {
+    setPanels((prev) => {
+      const existing = prev[key] || [];
+      const nextIndex = existing.length + 1;
+      const title =
+        key === 'legal'
+          ? `Legal panel ${nextIndex}`
+          : key === 'privacy'
+          ? `Privacy panel ${nextIndex}`
+          : `Terms panel ${nextIndex}`;
+      return {
+        ...prev,
+        [key]: [
+          ...existing,
+          {
+            id: `${key}-${Date.now()}-${nextIndex}`,
+            title,
+            body: '',
+          },
+        ],
+      };
+    });
+  };
+
+  const handleUpdatePanel = (
+    key: LegalPageKey,
+    panelId: string,
+    field: 'title' | 'body',
+    value: string,
+  ) => {
+    setPanels((prev) => ({
+      ...prev,
+      [key]: (prev[key] || []).map((panel) =>
+        panel.id === panelId ? { ...panel, [field]: value } : panel,
+      ),
+    }));
+  };
+
+  const handleRemovePanel = (key: LegalPageKey, panelId: string) => {
+    setPanels((prev) => ({
+      ...prev,
+      [key]: (prev[key] || []).filter((panel) => panel.id !== panelId),
     }));
   };
 
@@ -212,25 +357,76 @@ export default function AdminLegalPage() {
                     <h2 className="text-xl font-semibold text-white mb-1">{tab.label}</h2>
                     <p className="text-sm text-gray-400">{tab.description}</p>
                   </div>
-                  <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-2">
-                      Page content
-                    </label>
-                    <textarea
-                      rows={12}
-                      value={content[tab.key]}
-                      onChange={(e) =>
-                        setContent((prev) => ({
-                          ...prev,
-                          [tab.key]: e.target.value,
-                        }))
-                      }
-                      className="w-full rounded-xl bg-slate-950/80 border border-white/10 px-4 py-3 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-ipl-gold/70 focus:border-transparent resize-vertical min-h-[260px]"
-                      placeholder="Write the content for this page here..."
-                    />
-                    <p className="mt-2 text-xs text-gray-500">
-                      Plain text is recommended. Simple line breaks are preserved on the public page. If you leave this empty,
-                      the public page will fall back to its built-in default sections.
+                  <div className="space-y-4">
+                    {panels[tab.key] && panels[tab.key].length > 0 ? (
+                      panels[tab.key].map((panel, index) => (
+                        <div
+                          key={panel.id}
+                          className="rounded-xl border border-white/15 bg-slate-950/60 p-4 space-y-3"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div>
+                              <p className="text-xs font-semibold text-gray-400 uppercase tracking-[0.15em]">
+                                Panel {index + 1}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                This card will appear as a separate block on the public page.
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleRemovePanel(tab.key, panel.id)}
+                              className="text-xs px-2 py-1 rounded-lg border border-red-500/40 text-red-300 hover:bg-red-500/10 transition-colors"
+                            >
+                              Delete panel
+                            </button>
+                          </div>
+                          <div className="space-y-2">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-400 mb-1">
+                                Title
+                              </label>
+                              <input
+                                type="text"
+                                value={panel.title}
+                                onChange={(e) =>
+                                  handleUpdatePanel(tab.key, panel.id, 'title', e.target.value)
+                                }
+                                className="w-full rounded-lg bg-slate-950/80 border border-white/10 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-ipl-gold/70 focus:border-transparent"
+                                placeholder="Panel title..."
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-400 mb-1">
+                                Body
+                              </label>
+                              <textarea
+                                rows={5}
+                                value={panel.body}
+                                onChange={(e) =>
+                                  handleUpdatePanel(tab.key, panel.id, 'body', e.target.value)
+                                }
+                                className="w-full rounded-lg bg-slate-950/80 border border-white/10 px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-ipl-gold/70 focus:border-transparent resize-vertical"
+                                placeholder="Write the content for this panel..."
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-500">
+                        No custom panels yet. Add one below to override the default public content for this page.
+                      </p>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleAddPanel(tab.key)}
+                      className="inline-flex items-center px-3 py-2 rounded-lg border border-dashed border-ipl-gold/60 text-xs font-semibold text-ipl-gold hover:bg-ipl-gold/10 transition-colors"
+                    >
+                      + Add panel
+                    </button>
+                    <p className="mt-1 text-xs text-gray-500">
+                      Panels are rendered in the order shown above. Each panel becomes one card on the end-user page.
                     </p>
                   </div>
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pt-2 border-t border-white/10 mt-4">

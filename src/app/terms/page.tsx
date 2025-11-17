@@ -5,6 +5,9 @@ import Link from "next/link";
 
 export default function TermsPage() {
   const [customContent, setCustomContent] = useState<string | null>(null);
+  const [panels, setPanels] = useState<
+    { id: string; title: string; body: string }[] | null
+  >(null);
 
   useEffect(() => {
     const load = async () => {
@@ -13,7 +16,41 @@ export default function TermsPage() {
         if (!res.ok) return;
         const data = await res.json();
         if (data?.content && typeof data.content === "string") {
-          setCustomContent(data.content);
+          const raw = data.content as string;
+          setCustomContent(raw);
+
+          try {
+            const maybeJson = JSON.parse(raw);
+            if (Array.isArray(maybeJson)) {
+              const parsed = maybeJson
+                .map((item: any, index: number) => {
+                  if (!item) return null;
+                  const title =
+                    typeof item.title === "string" && item.title.trim()
+                      ? item.title
+                      : `Panel ${index + 1}`;
+                  const body =
+                    typeof item.body === "string" ? item.body : "";
+                  const id =
+                    typeof item.id === "string" && item.id.trim()
+                      ? item.id
+                      : `terms-${index + 1}`;
+                  if (!body.trim()) return null;
+                  return { id, title, body };
+                })
+                .filter(
+                  (
+                    panel,
+                  ): panel is { id: string; title: string; body: string } =>
+                    panel !== null,
+                );
+              if (parsed.length > 0) {
+                setPanels(parsed);
+              }
+            }
+          } catch {
+            // Treat as legacy single-string content
+          }
         }
       } catch (e) {
         console.error("Failed to load terms content", e);
@@ -46,7 +83,21 @@ export default function TermsPage() {
           </Link>
         </header>
 
-        {customContent ? (
+        {panels && panels.length > 0 ? (
+          <section className="space-y-6 mb-10">
+            {panels.map((panel) => (
+              <div
+                key={panel.id}
+                className="rounded-2xl border border-white/10 bg-slate-900/60 p-6"
+              >
+                <h2 className="text-lg font-semibold mb-3">{panel.title}</h2>
+                <div className="text-sm text-gray-300 leading-relaxed whitespace-pre-line">
+                  {panel.body}
+                </div>
+              </div>
+            ))}
+          </section>
+        ) : customContent ? (
           <section className="space-y-6 mb-10">
             <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
               <h2 className="text-lg font-semibold mb-3">Terms of Service</h2>
