@@ -51,15 +51,10 @@ export default function HeroSection() {
     setIsMounted(true);
   }, []);
 
+  // Auto-rotation is disabled so the IPL 2026 hero stays constant.
   useEffect(() => {
     if (isLoading) return;
-    
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % highlights.length);
-    }, 7000);
-
-    return () => clearInterval(interval);
-  }, [highlights.length, isLoading]);
+  }, [isLoading]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -84,7 +79,7 @@ export default function HeroSection() {
     );
   }
 
-  const currentHighlight = highlights[currentSlide];
+  const currentHighlight = highlights[0];
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-black">
@@ -304,24 +299,23 @@ export default function HeroSection() {
             </div>
           </div>
 
-          {/* Slide Navigation Dots */}
+          {/* Slide Navigation Dots (visual only, IPL 2026 stays constant) */}
           <div className="flex justify-center gap-3 mt-16">
             {highlights.map((_, index) => (
-              <button
+              <div
                 key={index}
-                onClick={() => setCurrentSlide(index)}
                 className={`transition-all duration-300 rounded-full ${
-                  currentSlide === index 
-                    ? 'w-12 h-3' 
-                    : 'w-3 h-3 hover:scale-150'
+                  index === 0 ? 'w-12 h-3' : 'w-3 h-3'
                 }`}
                 style={{
-                  background: currentSlide === index 
-                    ? `linear-gradient(to right, ${currentHighlight.accentColor}, ${currentHighlight.accentColor}80)` 
-                    : 'rgba(255, 255, 255, 0.3)',
-                  boxShadow: currentSlide === index 
-                    ? `0 0 20px ${currentHighlight.accentColor}80` 
-                    : 'none'
+                  background:
+                    index === 0
+                      ? `linear-gradient(to right, ${currentHighlight.accentColor}, ${currentHighlight.accentColor}80)`
+                      : 'rgba(255, 255, 255, 0.3)',
+                  boxShadow:
+                    index === 0
+                      ? `0 0 20px ${currentHighlight.accentColor}80`
+                      : 'none',
                 }}
               />
             ))}
