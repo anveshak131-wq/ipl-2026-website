@@ -869,7 +869,7 @@ export default function AdminPlayers() {
                   {searchFilteredPlayers.length > 0 ? searchFilteredPlayers.map((player, idx) => {
                     const team = teams.find(t => t.id === player.teamId);
                     return (
-                      <tr key={player.id} className="hover:bg-white/5">
+                      <tr key={`${player.id}-${player.teamId}-${player.jerseyNumber}`} className="hover:bg-white/5">
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <div className="flex items-center space-x-3">
                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-ipl-gold to-ipl-purple flex items-center justify-center text-white font-bold text-xs">
