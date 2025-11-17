@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import LoadingSpinner from '../ui/LoadingSpinner';
+import IPLLogo from '../ui/IPLLogo';
 
 export default function HeroSection() {
   const router = useRouter();
@@ -134,6 +135,17 @@ export default function HeroSection() {
                 <span className="text-sm font-bold text-white tracking-wider">SEASON 2026 • LIVE</span>
               </div>
 
+              {/* Highlight Media Panel */}
+              <div className="relative mt-6">
+                <div className="h-48 sm:h-56 md:h-64 w-full rounded-3xl bg-gradient-to-br from-sky-500/30 via-indigo-500/40 to-purple-600/30 backdrop-blur-2xl border border-white/15 shadow-[0_40px_120px_rgba(15,23,42,0.9)] overflow-hidden animate-scale-in">
+                  <div className="absolute inset-0 opacity-60 bg-[radial-gradient(circle_at_0%_0%,rgba(255,255,255,0.35),transparent_55%),radial-gradient(circle_at_100%_100%,rgba(56,189,248,0.3),transparent_55%)]" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent animate-shimmer" />
+                </div>
+                <div className="absolute -top-3 left-6 px-4 py-1.5 rounded-full bg-black/40 border border-white/10 backdrop-blur-xl text-[10px] sm:text-[11px] font-semibold tracking-[0.2em] text-gray-200 uppercase">
+                  SportsUP18 • Season 2026
+                </div>
+              </div>
+
               {/* Main Headline - Ultra Bold Typography */}
               <div className="space-y-4">
                 <h1 className="text-7xl md:text-8xl lg:text-9xl font-black text-white leading-none tracking-tighter animate-slide-up"
@@ -254,7 +266,7 @@ export default function HeroSection() {
               </div>
             </div>
 
-            {/* Right Visual - 3D Cricket Stadium Illustration */}
+            {/* Right Visual - SportsUP18 Orbital Logo Panel */}
             <div className="relative h-[500px] lg:h-[600px] flex items-center justify-center animate-fade-in" style={{ animationDelay: '200ms' }}>
               {/* Glow Effects */}
               <div className="absolute inset-0 rounded-full blur-3xl opacity-30 animate-pulse"
@@ -267,24 +279,24 @@ export default function HeroSection() {
                   <div className="absolute inset-0 rounded-full border-2 border-dashed border-white/20" />
                 </div>
                 
-                {/* Center Badge - IPL Logo Style */}
+                {/* Center Badge - SportsUP18 Logo */}
                 <div className="relative group">
-                  <div className="absolute inset-0 bg-gradient-to-br rounded-full blur-2xl opacity-50 group-hover:opacity-75 transition-opacity duration-500"
-                       style={{ background: `linear-gradient(135deg, ${currentHighlight.accentColor}, transparent)` }} />
-                  <div className="relative w-72 h-72 md:w-96 md:h-96 bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-xl rounded-full border-4 border-white/30 flex items-center justify-center shadow-2xl transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">
-                    <div className="text-center space-y-4">
-                      <div className="text-8xl md:text-9xl font-black"
-                           style={{
-                             background: `linear-gradient(135deg, #fff, ${currentHighlight.accentColor})`,
-                             WebkitBackgroundClip: 'text',
-                             WebkitTextFillColor: 'transparent',
-                             backgroundClip: 'text'
-                           }}>
-                        IPL
+                  <div
+                    className="absolute inset-0 bg-gradient-to-br rounded-full blur-3xl opacity-60 group-hover:opacity-90 transition-opacity duration-700"
+                    style={{
+                      background: `conic-gradient(from 0deg, ${currentHighlight.accentColor}, transparent, ${currentHighlight.accentColor})`,
+                    }}
+                  />
+                  <div className="relative w-72 h-72 md:w-96 md:h-96 bg-gradient-to-br from-slate-950/90 via-slate-900/80 to-slate-950/90 backdrop-blur-2xl rounded-full border border-white/20 flex items-center justify-center shadow-[0_40px_120px_rgba(15,23,42,0.9)] transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-700 animate-glow-pulse">
+                    <div className="flex flex-col items-center gap-4 animate-scale-in">
+                      <div className="w-24 h-24 md:w-28 md:h-28 drop-shadow-2xl">
+                        <IPLLogo size="lg" animated />
                       </div>
-                      <div className="text-4xl font-black text-white tracking-wider">2026</div>
-                      <div className="h-1 w-24 mx-auto rounded-full"
-                           style={{ background: `linear-gradient(to right, ${currentHighlight.accentColor}, transparent)` }} />
+                      <div className="text-center space-y-1">
+                        <p className="text-[11px] font-semibold tracking-[0.25em] uppercase text-gray-400">Season</p>
+                        <p className="text-4xl md:text-5xl font-black text-white tracking-tight">2026</p>
+                      </div>
+                      <div className="h-1 w-24 mx-auto rounded-full bg-gradient-to-r from-sky-400 via-ipl-gold to-purple-500" />
                     </div>
                   </div>
                 </div>
