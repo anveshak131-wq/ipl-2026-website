@@ -64,9 +64,53 @@ export const onRequest = async (context) => {
     const user = JSON.parse(userData);
 
     if (method === 'POST') {
-      const { matchId = 'current' } = await request.json();
-      
-      // Skip tracking for admin/super_admin users
+      let body = {};
+      try {
+        body = await request.json();
+      } catch {
+        body = {};
+      }
+
+      if (body.action) {
+        if (user.role !== 'admin' && user.role !== 'super_admin') {
+          return new Response(
+            JSON.stringify({ error: 'Forbidden' }),
+            { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
+          );
+        }
+
+        const dateKey = new Date().toISOString().slice(0, 10);
+        const auditKey = `admin:audit:${dateKey}`;
+        const existingLogs = await env.SPORTS_KV.get(auditKey);
+        let logs = existingLogs ? JSON.parse(existingLogs) : [];
+
+        logs.push({
+          timestamp: new Date().toISOString(),
+          adminId: user.id,
+          adminEmail: user.email,
+          adminRole: user.role,
+          action: body.action,
+          details: body.details || '',
+          entityType: body.entityType || null,
+          entityId: body.entityId || null,
+        });
+
+        if (logs.length > 500) {
+          logs = logs.slice(-500);
+        }
+
+        await env.SPORTS_KV.put(auditKey, JSON.stringify(logs), {
+          expirationTtl: 60 * 60 * 24 * 30,
+        });
+
+        return new Response(
+          JSON.stringify({ success: true }),
+          { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
+        );
+      }
+
+      const matchId = body.matchId || 'current';
+
       if (user.role === 'admin' || user.role === 'super_admin') {
         return new Response(JSON.stringify({ success: true, skipped: true }), {
           status: 200,
@@ -78,10 +122,8 @@ export const onRequest = async (context) => {
       const activeUsersData = await env.SPORTS_KV.get(activeUsersKey);
       let activeUsers = activeUsersData ? JSON.parse(activeUsersData) : [];
 
-      // Remove duplicate entries for same user
       activeUsers = activeUsers.filter((u) => u.id !== user.id);
 
-      // Add current user activity
       activeUsers.push({
         id: user.id,
         name: user.name,
@@ -89,13 +131,12 @@ export const onRequest = async (context) => {
         lastActive: new Date().toISOString(),
       });
 
-      // Keep only last 500 active users
       if (activeUsers.length > 500) {
         activeUsers = activeUsers.slice(-500);
       }
 
       await env.SPORTS_KV.put(activeUsersKey, JSON.stringify(activeUsers), {
-        expirationTtl: 3600, // 1 hour - auto cleanup
+        expirationTtl: 3600,
       });
 
       return new Response(JSON.stringify({ success: true }), {

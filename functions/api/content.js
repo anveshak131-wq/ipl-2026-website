@@ -113,6 +113,27 @@ export const onRequest = async (context) => {
       content.push(newContent);
       await kvNamespace.put(KV_KEY, JSON.stringify(content));
 
+      // Best-effort admin audit log
+      try {
+        const origin = new URL(request.url).origin;
+        const authHeader = request.headers.get('authorization') || '';
+        await fetch(`${origin}/api/admin/users/activity`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: authHeader,
+          },
+          body: JSON.stringify({
+            action: 'create_content',
+            details: `Created ${newContent.type} \"${newContent.title}\"`,
+            entityType: newContent.type,
+            entityId: newContent.id,
+          }),
+        });
+      } catch (err) {
+        console.error('Failed to write admin audit log (create_content):', err);
+      }
+
       return new Response(
         JSON.stringify({
           message: 'Content created successfully',
@@ -169,6 +190,30 @@ export const onRequest = async (context) => {
 
       await kvNamespace.put(KV_KEY, JSON.stringify(updated));
 
+      // Best-effort admin audit log
+      try {
+        const origin = new URL(request.url).origin;
+        const authHeader = request.headers.get('authorization') || '';
+        const updatedItem = updated.find(c => c.id === body.id) || null;
+        await fetch(`${origin}/api/admin/users/activity`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: authHeader,
+          },
+          body: JSON.stringify({
+            action: 'update_content',
+            details: updatedItem
+              ? `Updated ${updatedItem.type} \"${updatedItem.title}\"`
+              : `Updated content ${body.id}`,
+            entityType: updatedItem?.type || null,
+            entityId: body.id,
+          }),
+        });
+      } catch (err) {
+        console.error('Failed to write admin audit log (update_content):', err);
+      }
+
       return new Response(
         JSON.stringify({
           message: 'Content updated successfully',
@@ -218,8 +263,32 @@ export const onRequest = async (context) => {
       const existing = await kvNamespace.get(KV_KEY);
       const content = existing ? JSON.parse(existing) : [];
 
+      const toDelete = content.find(c => c.id === id) || null;
       const updated = content.filter(c => c.id !== id);
       await kvNamespace.put(KV_KEY, JSON.stringify(updated));
+
+      // Best-effort admin audit log
+      try {
+        const origin = new URL(request.url).origin;
+        const authHeader = request.headers.get('authorization') || '';
+        await fetch(`${origin}/api/admin/users/activity`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: authHeader,
+          },
+          body: JSON.stringify({
+            action: 'delete_content',
+            details: toDelete
+              ? `Deleted ${toDelete.type} \"${toDelete.title}\"`
+              : `Deleted content ${id}`,
+            entityType: toDelete?.type || null,
+            entityId: id,
+          }),
+        });
+      } catch (err) {
+        console.error('Failed to write admin audit log (delete_content):', err);
+      }
 
       return new Response(
         JSON.stringify({ message: 'Content deleted successfully' }),

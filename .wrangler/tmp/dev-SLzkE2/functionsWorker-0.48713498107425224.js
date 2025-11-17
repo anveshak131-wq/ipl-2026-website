@@ -97,7 +97,7 @@ var __toESM2 = /* @__PURE__ */ __name((mod, isNodeMode, target) => (target = mod
   mod
 )), "__toESM");
 var require_checked_fetch2 = __commonJS2({
-  "../.wrangler/tmp/bundle-kWztHy/checked-fetch.js"() {
+  "../.wrangler/tmp/bundle-D5Unyp/checked-fetch.js"() {
     "use strict";
     var urls = /* @__PURE__ */ new Set();
     function checkURL(request, init) {
@@ -181,7 +181,45 @@ var onRequest = /* @__PURE__ */ __name2(async (context) => {
     }
     const user = JSON.parse(userData);
     if (method === "POST") {
-      const { matchId = "current" } = await request.json();
+      let body = {};
+      try {
+        body = await request.json();
+      } catch {
+        body = {};
+      }
+      if (body.action) {
+        if (user.role !== "admin" && user.role !== "super_admin") {
+          return new Response(
+            JSON.stringify({ error: "Forbidden" }),
+            { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
+          );
+        }
+        const dateKey = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
+        const auditKey = `admin:audit:${dateKey}`;
+        const existingLogs = await env.SPORTS_KV.get(auditKey);
+        let logs = existingLogs ? JSON.parse(existingLogs) : [];
+        logs.push({
+          timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+          adminId: user.id,
+          adminEmail: user.email,
+          adminRole: user.role,
+          action: body.action,
+          details: body.details || "",
+          entityType: body.entityType || null,
+          entityId: body.entityId || null
+        });
+        if (logs.length > 500) {
+          logs = logs.slice(-500);
+        }
+        await env.SPORTS_KV.put(auditKey, JSON.stringify(logs), {
+          expirationTtl: 60 * 60 * 24 * 30
+        });
+        return new Response(
+          JSON.stringify({ success: true }),
+          { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
+        );
+      }
+      const matchId = body.matchId || "current";
       if (user.role === "admin" || user.role === "super_admin") {
         return new Response(JSON.stringify({ success: true, skipped: true }), {
           status: 200,
@@ -203,7 +241,6 @@ var onRequest = /* @__PURE__ */ __name2(async (context) => {
       }
       await env.SPORTS_KV.put(activeUsersKey, JSON.stringify(activeUsers), {
         expirationTtl: 3600
-        // 1 hour - auto cleanup
       });
       return new Response(JSON.stringify({ success: true }), {
         status: 200,
@@ -1329,6 +1366,25 @@ var onRequest7 = /* @__PURE__ */ __name2(async (context) => {
       };
       content.push(newContent);
       await kvNamespace.put(KV_KEY, JSON.stringify(content));
+      try {
+        const origin = new URL(request.url).origin;
+        const authHeader = request.headers.get("authorization") || "";
+        await fetch(`${origin}/api/admin/users/activity`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: authHeader
+          },
+          body: JSON.stringify({
+            action: "create_content",
+            details: `Created ${newContent.type} "${newContent.title}"`,
+            entityType: newContent.type,
+            entityId: newContent.id
+          })
+        });
+      } catch (err) {
+        console.error("Failed to write admin audit log (create_content):", err);
+      }
       return new Response(
         JSON.stringify({
           message: "Content created successfully",
@@ -1375,6 +1431,26 @@ var onRequest7 = /* @__PURE__ */ __name2(async (context) => {
         (c) => c.id === body.id ? { ...c, ...body, updatedAt: (/* @__PURE__ */ new Date()).toISOString() } : c
       );
       await kvNamespace.put(KV_KEY, JSON.stringify(updated));
+      try {
+        const origin = new URL(request.url).origin;
+        const authHeader = request.headers.get("authorization") || "";
+        const updatedItem = updated.find((c) => c.id === body.id) || null;
+        await fetch(`${origin}/api/admin/users/activity`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: authHeader
+          },
+          body: JSON.stringify({
+            action: "update_content",
+            details: updatedItem ? `Updated ${updatedItem.type} "${updatedItem.title}"` : `Updated content ${body.id}`,
+            entityType: updatedItem?.type || null,
+            entityId: body.id
+          })
+        });
+      } catch (err) {
+        console.error("Failed to write admin audit log (update_content):", err);
+      }
       return new Response(
         JSON.stringify({
           message: "Content updated successfully",
@@ -1418,8 +1494,28 @@ var onRequest7 = /* @__PURE__ */ __name2(async (context) => {
       }
       const existing = await kvNamespace.get(KV_KEY);
       const content = existing ? JSON.parse(existing) : [];
+      const toDelete = content.find((c) => c.id === id) || null;
       const updated = content.filter((c) => c.id !== id);
       await kvNamespace.put(KV_KEY, JSON.stringify(updated));
+      try {
+        const origin = new URL(request.url).origin;
+        const authHeader = request.headers.get("authorization") || "";
+        await fetch(`${origin}/api/admin/users/activity`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: authHeader
+          },
+          body: JSON.stringify({
+            action: "delete_content",
+            details: toDelete ? `Deleted ${toDelete.type} "${toDelete.title}"` : `Deleted content ${id}`,
+            entityType: toDelete?.type || null,
+            entityId: id
+          })
+        });
+      } catch (err) {
+        console.error("Failed to write admin audit log (delete_content):", err);
+      }
       return new Response(
         JSON.stringify({ message: "Content deleted successfully" }),
         {

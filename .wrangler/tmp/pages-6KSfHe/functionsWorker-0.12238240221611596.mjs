@@ -25,9 +25,9 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// ../.wrangler/tmp/bundle-f8yNwN/checked-fetch.js
+// ../.wrangler/tmp/bundle-gnzGtO/checked-fetch.js
 var require_checked_fetch = __commonJS({
-  "../.wrangler/tmp/bundle-f8yNwN/checked-fetch.js"() {
+  "../.wrangler/tmp/bundle-gnzGtO/checked-fetch.js"() {
     "use strict";
     var urls = /* @__PURE__ */ new Set();
     function checkURL(request, init) {
@@ -112,7 +112,45 @@ var onRequest = /* @__PURE__ */ __name(async (context) => {
     }
     const user = JSON.parse(userData);
     if (method === "POST") {
-      const { matchId = "current" } = await request.json();
+      let body = {};
+      try {
+        body = await request.json();
+      } catch {
+        body = {};
+      }
+      if (body.action) {
+        if (user.role !== "admin" && user.role !== "super_admin") {
+          return new Response(
+            JSON.stringify({ error: "Forbidden" }),
+            { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
+          );
+        }
+        const dateKey = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
+        const auditKey = `admin:audit:${dateKey}`;
+        const existingLogs = await env.SPORTS_KV.get(auditKey);
+        let logs = existingLogs ? JSON.parse(existingLogs) : [];
+        logs.push({
+          timestamp: (/* @__PURE__ */ new Date()).toISOString(),
+          adminId: user.id,
+          adminEmail: user.email,
+          adminRole: user.role,
+          action: body.action,
+          details: body.details || "",
+          entityType: body.entityType || null,
+          entityId: body.entityId || null
+        });
+        if (logs.length > 500) {
+          logs = logs.slice(-500);
+        }
+        await env.SPORTS_KV.put(auditKey, JSON.stringify(logs), {
+          expirationTtl: 60 * 60 * 24 * 30
+        });
+        return new Response(
+          JSON.stringify({ success: true }),
+          { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders2 } }
+        );
+      }
+      const matchId = body.matchId || "current";
       if (user.role === "admin" || user.role === "super_admin") {
         return new Response(JSON.stringify({ success: true, skipped: true }), {
           status: 200,
@@ -134,7 +172,6 @@ var onRequest = /* @__PURE__ */ __name(async (context) => {
       }
       await env.SPORTS_KV.put(activeUsersKey, JSON.stringify(activeUsers), {
         expirationTtl: 3600
-        // 1 hour - auto cleanup
       });
       return new Response(JSON.stringify({ success: true }), {
         status: 200,
@@ -1271,6 +1308,25 @@ var onRequest7 = /* @__PURE__ */ __name(async (context) => {
       };
       content.push(newContent);
       await kvNamespace.put(KV_KEY, JSON.stringify(content));
+      try {
+        const origin = new URL(request.url).origin;
+        const authHeader = request.headers.get("authorization") || "";
+        await fetch(`${origin}/api/admin/users/activity`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: authHeader
+          },
+          body: JSON.stringify({
+            action: "create_content",
+            details: `Created ${newContent.type} "${newContent.title}"`,
+            entityType: newContent.type,
+            entityId: newContent.id
+          })
+        });
+      } catch (err) {
+        console.error("Failed to write admin audit log (create_content):", err);
+      }
       return new Response(
         JSON.stringify({
           message: "Content created successfully",
@@ -1317,6 +1373,26 @@ var onRequest7 = /* @__PURE__ */ __name(async (context) => {
         (c) => c.id === body.id ? { ...c, ...body, updatedAt: (/* @__PURE__ */ new Date()).toISOString() } : c
       );
       await kvNamespace.put(KV_KEY, JSON.stringify(updated));
+      try {
+        const origin = new URL(request.url).origin;
+        const authHeader = request.headers.get("authorization") || "";
+        const updatedItem = updated.find((c) => c.id === body.id) || null;
+        await fetch(`${origin}/api/admin/users/activity`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: authHeader
+          },
+          body: JSON.stringify({
+            action: "update_content",
+            details: updatedItem ? `Updated ${updatedItem.type} "${updatedItem.title}"` : `Updated content ${body.id}`,
+            entityType: updatedItem?.type || null,
+            entityId: body.id
+          })
+        });
+      } catch (err) {
+        console.error("Failed to write admin audit log (update_content):", err);
+      }
       return new Response(
         JSON.stringify({
           message: "Content updated successfully",
@@ -1360,8 +1436,28 @@ var onRequest7 = /* @__PURE__ */ __name(async (context) => {
       }
       const existing = await kvNamespace.get(KV_KEY);
       const content = existing ? JSON.parse(existing) : [];
+      const toDelete = content.find((c) => c.id === id) || null;
       const updated = content.filter((c) => c.id !== id);
       await kvNamespace.put(KV_KEY, JSON.stringify(updated));
+      try {
+        const origin = new URL(request.url).origin;
+        const authHeader = request.headers.get("authorization") || "";
+        await fetch(`${origin}/api/admin/users/activity`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: authHeader
+          },
+          body: JSON.stringify({
+            action: "delete_content",
+            details: toDelete ? `Deleted ${toDelete.type} "${toDelete.title}"` : `Deleted content ${id}`,
+            entityType: toDelete?.type || null,
+            entityId: id
+          })
+        });
+      } catch (err) {
+        console.error("Failed to write admin audit log (delete_content):", err);
+      }
       return new Response(
         JSON.stringify({ message: "Content deleted successfully" }),
         {
@@ -3147,10 +3243,10 @@ var routes = [
   }
 ];
 
-// ../.wrangler/tmp/bundle-f8yNwN/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-gnzGtO/middleware-loader.entry.ts
 var import_checked_fetch27 = __toESM(require_checked_fetch());
 
-// ../.wrangler/tmp/bundle-f8yNwN/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-gnzGtO/middleware-insertion-facade.js
 var import_checked_fetch25 = __toESM(require_checked_fetch());
 
 // ../../../.npm/_npx/32026684e21afda6/node_modules/wrangler/templates/pages-template-worker.ts
@@ -3646,7 +3742,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// ../.wrangler/tmp/bundle-f8yNwN/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-gnzGtO/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -3679,7 +3775,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// ../.wrangler/tmp/bundle-f8yNwN/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-gnzGtO/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
