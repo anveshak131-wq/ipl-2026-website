@@ -140,7 +140,7 @@ export default function HeroSection() {
                 <button
                   type="button"
                   onClick={() => router.push('/matches')}
-                  className="group relative h-48 sm:h-56 md:h-64 w-full rounded-3xl bg-gradient-to-br from-sky-500/30 via-indigo-500/40 to-purple-600/30 backdrop-blur-2xl border border-white/15 shadow-[0_40px_120px_rgba(15,23,42,0.9)] overflow-hidden animate-scale-in focus:outline-none focus-visible:ring-2 focus-visible:ring-ipl-gold focus-visible:ring-offset-2 focus-visible:ring-offset-black transition-transform duration-500 transform hover:-translate-y-1 hover:shadow-[0_45px_140px_rgba(15,23,42,0.95)]"
+                  className="group relative h-48 sm:h-56 md:h-64 w-full rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 backdrop-blur-2xl border border-white/15 shadow-[0_40px_120px_rgba(15,23,42,0.9)] overflow-hidden animate-scale-in focus:outline-none focus-visible:ring-2 focus-visible:ring-ipl-gold focus-visible:ring-offset-2 focus-visible:ring-offset-black transition-transform duration-500 transform hover:-translate-y-1 hover:shadow-[0_45px_140px_rgba(15,23,42,0.95)]"
                 >
                   <div className="absolute inset-0 opacity-60 bg-[radial-gradient(circle_at_0%_0%,rgba(255,255,255,0.35),transparent_55%),radial-gradient(circle_at_100%_100%,rgba(56,189,248,0.3),transparent_55%)]" />
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent animate-shimmer" />
@@ -197,34 +197,34 @@ export default function HeroSection() {
                 <button
                   type="button"
                   onClick={() => router.push('/teams')}
-                  className="group relative h-48 sm:h-56 md:h-64 w-full rounded-3xl bg-gradient-to-br from-sky-400/50 via-sky-500/70 to-blue-600/80 backdrop-blur-2xl border border-white/30 shadow-[0_40px_120px_rgba(15,23,42,0.9)] overflow-hidden animate-scale-in focus:outline-none focus-visible:ring-2 focus-visible:ring-ipl-gold focus-visible:ring-offset-2 focus-visible:ring-offset-black transition-transform duration-500 transform hover:-translate-y-1 hover:shadow-[0_45px_140px_rgba(15,23,42,0.95)]"
+                  className="group relative h-48 sm:h-56 md:h-64 w-full rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-sky-950 backdrop-blur-2xl border border-white/30 shadow-[0_40px_120px_rgba(15,23,42,0.9)] overflow-hidden animate-scale-in focus:outline-none focus-visible:ring-2 focus-visible:ring-ipl-gold focus-visible:ring-offset-2 focus-visible:ring-offset-black transition-transform duration-500 transform hover:-translate-y-1 hover:shadow-[0_45px_140px_rgba(15,23,42,0.95)]"
                 >
                   <div className="absolute inset-0 opacity-80 bg-[radial-gradient(circle_at_10%_0%,rgba(255,255,255,0.7),transparent_55%),radial-gradient(circle_at_90%_100%,rgba(59,130,246,0.8),transparent_55%)]" />
                   <div className="absolute inset-0 bg-gradient-to-tr from-white/15 via-transparent to-white/25 mix-blend-screen" />
                   <div className="relative z-10 flex h-full items-center justify-between px-6 sm:px-8">
                     <div className="space-y-2 text-left animate-fade-in" style={{ animationDelay: '150ms' }}>
-                      <div className="inline-flex items-center gap-2 rounded-full bg-white/30 border border-white/60 px-3 py-1 shadow-lg backdrop-blur-xl">
-                        <span className="h-1.5 w-1.5 rounded-full bg-sky-500 animate-pulse" />
-                        <span className="text-[10px] sm:text-xs font-semibold tracking-[0.3em] uppercase text-sky-950/80">
+                      <div className="inline-flex items-center gap-2 rounded-full bg-slate-900/70 border border-sky-400/60 px-3 py-1 shadow-lg backdrop-blur-xl">
+                        <span className="h-1.5 w-1.5 rounded-full bg-sky-300 animate-pulse" />
+                        <span className="text-[10px] sm:text-xs font-semibold tracking-[0.3em] uppercase text-sky-100">
                           Squads
                         </span>
                       </div>
-                      <p className="text-[10px] sm:text-xs font-semibold tracking-[0.3em] uppercase text-slate-900/80">
+                      <p className="text-[10px] sm:text-xs font-semibold tracking-[0.3em] uppercase text-sky-100/90">
                         Discover
                       </p>
                       <p className="text-2xl sm:text-3xl md:text-4xl font-black leading-tight tracking-tight">
-                        <span className="bg-gradient-to-r from-slate-900 via-blue-900 to-sky-700 bg-clip-text text-transparent">
+                        <span className="bg-gradient-to-r from-sky-50 via-cyan-200 to-sky-300 bg-clip-text text-transparent">
                           Teams &amp; Squads
                         </span>
                       </p>
-                      <p className="hidden sm:block text-xs sm:text-sm text-slate-900/80 max-w-sm">
+                      <p className="hidden sm:block text-xs sm:text-sm text-sky-100/80 max-w-sm">
                         Tap to browse all franchises, squads and key players for IPL 2026.
                       </p>
                       <div className="mt-2 flex flex-wrap gap-2">
-                        <span className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] px-2 py-1 rounded-full bg-white/40 text-slate-900/80">
+                        <span className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] px-2 py-1 rounded-full bg-slate-900/80 text-sky-100">
                           10 Teams
                         </span>
-                        <span className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] px-2 py-1 rounded-full bg-white/30 text-slate-900/80">
+                        <span className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] px-2 py-1 rounded-full bg-slate-900/70 text-sky-100">
                           200+ Players
                         </span>
                       </div>
@@ -233,8 +233,8 @@ export default function HeroSection() {
                       className="relative hidden sm:flex items-center justify-center animate-float"
                       style={{ animationDelay: '200ms' }}
                     >
-                      <div className="absolute -inset-4 rounded-2xl bg-gradient-to-tr from-sky-200/60 via-white/60 to-cyan-200/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl" />
-                      <div className="relative w-11 h-11 rounded-2xl bg-slate-900/10 border border-white/60 text-slate-900 flex items-center justify-center shadow-lg transition-all duration-300 transform group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:bg-slate-900 group-hover:text-white">
+                      <div className="absolute -inset-4 rounded-2xl bg-gradient-to-tr from-sky-200/40 via-white/40 to-cyan-300/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl" />
+                      <div className="relative w-11 h-11 rounded-2xl bg-white/15 border border-white/70 text-white flex items-center justify-center shadow-lg transition-all duration-300 transform group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:bg-white group-hover:text-slate-900">
                         <svg
                           className="w-5 h-5"
                           fill="none"
