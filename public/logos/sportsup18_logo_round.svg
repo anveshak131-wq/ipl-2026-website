@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">SportsUP18 Logo</title>
+  <desc id="desc">Circular badge logo for SportsUP18 with SPORTS UP text and 18 badge.</desc>
+
+  <!-- Outer ring -->
+  <circle
+    cx="80"
+    cy="80"
+    r="74"
+    fill="none"
+    stroke="url(#su-ring-gradient)"
+    stroke-width="3"
+    opacity="0.85"
+  />
+
+  <!-- Main badge -->
+  <circle
+    cx="80"
+    cy="80"
+    r="66"
+    fill="url(#su-bg-gradient)"
+    stroke="url(#su-ring-gradient)"
+    stroke-width="2.5"
+  />
+
+  <!-- Inner subtle ring -->
+  <circle
+    cx="80"
+    cy="80"
+    r="56"
+    fill="none"
+    stroke="url(#su-inner-ring)"
+    stroke-width="1.5"
+    opacity="0.4"
+  />
+
+  <!-- Cricket arc at bottom -->
+  <path
+    d="M32 110 C 48 130 112 130 128 110"
+    stroke="url(#su-arc-gradient)"
+    stroke-width="4"
+    stroke-linecap="round"
+    fill="none"
+    opacity="0.7"
+  />
+
+  <!-- Text: SPORTS -->
+  <text
+    x="80"
+    y="74"
+    text-anchor="middle"
+    font-size="20"
+    font-weight="700"
+    letter-spacing="0.14em"
+    fill="url(#su-text-gradient)"
+  >
+    SPORTS
+  </text>
+
+  <!-- Text: UP -->
+  <text
+    x="80"
+    y="96"
+    text-anchor="middle"
+    font-size="20"
+    font-weight="700"
+    letter-spacing="0.14em"
+    fill="url(#su-text-gradient)"
+  >
+    UP
+  </text>
+
+  <!-- 18 badge -->
+  <g transform="translate(112, 52)">
+    <circle
+      cx="0"
+      cy="0"
+      r="14"
+      fill="url(#su-18-bg)"
+      stroke="rgba(15,23,42,0.8)"
+      stroke-width="1.5"
+    />
+    <text
+      x="0"
+      y="6"
+      text-anchor="middle"
+      font-size="14"
+      font-weight="800"
+      fill="#0B1120"
+    >
+      18
+    </text>
+  </g>
+
+  <!-- Subtle cricket ball on the left -->
+  <g transform="translate(46, 40) scale(0.9)">
+    <circle cx="0" cy="0" r="8" fill="#F97316" stroke="#FDBA74" stroke-width="1.5" />
+    <path d="M -5 -2 Q 0 0 5 2" stroke="#FDBA74" stroke-width="1.2" fill="none" />
+    <path d="M -5 2 Q 0 0 5 -2" stroke="#FDBA74" stroke-width="1.2" fill="none" />
+  </g>
+
+  <!-- Subtle bat at bottom center -->
+  <g transform="translate(80, 112) scale(0.9)">
+    <rect x="-8" y="-8" width="16" height="12" rx="2" fill="url(#su-bat-blade)" stroke="#4B5563" stroke-width="1" />
+    <rect x="-2" y="4" width="4" height="9" rx="1" fill="#0F172A" stroke="#020617" stroke-width="1" />
+    <rect x="-2.5" y="9" width="5" height="3" fill="#22C55E" />
+  </g>
+
+  <!-- Tiny accent stars / dots -->
+  <g opacity="0.8">
+    <circle cx="42" cy="58" r="2.1" fill="#FACC15" />
+    <circle cx="116" cy="90" r="1.8" fill="#38BDF8" />
+    <circle cx="54" cy="110" r="1.8" fill="#FACC15" />
+  </g>
+
+  <!-- Gradients and definitions -->
+  <defs>
+    <linearGradient id="su-ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="45%" stop-color="#22C55E" />
+      <stop offset="80%" stop-color="#FACC15" />
+      <stop offset="100%" stop-color="#F97316" />
+    </linearGradient>
+
+    <radialGradient id="su-bg-gradient" cx="50%" cy="40%" r="70%">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="60%" stop-color="#020617" />
+      <stop offset="100%" stop-color="#020617" />
+    </radialGradient>
+
+    <linearGradient id="su-inner-ring" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4B5563" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#9CA3AF" stop-opacity="0.5" />
+    </linearGradient>
+
+    <linearGradient id="su-arc-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#22C55E" />
+      <stop offset="50%" stop-color="#FACC15" />
+      <stop offset="100%" stop-color="#F97316" />
+    </linearGradient>
+
+    <linearGradient id="su-text-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#E5E7EB" />
+      <stop offset="40%" stop-color="#38BDF8" />
+      <stop offset="80%" stop-color="#FACC15" />
+      <stop offset="100%" stop-color="#FFFFFF" />
+    </linearGradient>
+
+    <radialGradient id="su-18-bg" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#FACC15" />
+      <stop offset="100%" stop-color="#F97316" />
+    </radialGradient>
+
+    <linearGradient id="su-bat-blade" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#E5E7EB" />
+      <stop offset="100%" stop-color="#9CA3AF" />
+    </linearGradient>
+  </defs>
+</svg>

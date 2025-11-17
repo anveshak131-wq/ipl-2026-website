@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import IPLLogo from '../ui/IPLLogo';
 
 interface AdminSidebarProps {
   currentPage?: string;
@@ -238,10 +239,8 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
     <>
       <div className={`p-6 border-b border-[#2A3440] ${collapsed ? 'px-4' : ''}`}>
         <div className={`flex items-center ${collapsed ? 'justify-center' : 'space-x-3'} transition-all duration-300`}>
-          <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-[#2F6FED] to-[#1E4FBD] flex items-center justify-center shadow-lg shadow-blue-500/20">
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
+          <div className="relative flex items-center justify-center">
+            <IPLLogo size="sm" animated />
           </div>
           {!collapsed && (
             <div className="flex flex-col">
