@@ -1,5 +1,3 @@
-'use client';
-
 import PlayerDetailClient from './PlayerDetailClient';
 
 // Provide static params for a few known demo players so static export works.

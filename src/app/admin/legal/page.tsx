@@ -16,11 +16,11 @@ interface LegalContentState {
 // These mirror the public fallback content but can be tuned over time.
 const defaultTemplates: LegalContentState = {
   legal:
-    'This IPL 2026 experience platform is a fan-focused project created for showcasing product design, engineering, and live sports UX patterns. It is not an official product of the BCCI, IPL, or any franchise. All team names, logos, and trademarks belong to their respective owners and are used here strictly for illustrative and educational purposes.',
+    'SportsUp99 is an independent IPL 2026 experience platform created for fans to explore match data, team information, and modern sports product design. It is not an official product of the BCCI, IPL, or any franchise. All team names, logos, and trademarks belong to their respective owners and are used here strictly for illustrative and educational purposes.',
   privacy:
-    'This IPL 2026 experience is a demo platform. It stores only the minimum information required to support features like authentication, live chat, and engagement analytics. No data is sold or shared with third parties for advertising or profiling.',
+    'SportsUp99 is a demo IPL 2026 experience platform. We store only the minimum information required to support features such as authentication, live chat, and engagement analytics. No personal data is sold or shared with third parties for advertising or profiling.',
   terms:
-    'This platform is a fan-built demo experience for exploring IPL-style product flows, not an official IPL or BCCI property. All content is provided on an "as-is" basis for experimentation, learning, and entertainment only.',
+    'SportsUp99 is a fan-built demo experience for exploring IPL-style product flows, not an official IPL or BCCI property. All content is provided on an "as-is" basis for experimentation, learning, and entertainment only.',
 };
 
 export default function AdminLegalPage() {
@@ -155,17 +155,17 @@ export default function AdminLegalPage() {
     {
       key: 'legal',
       label: 'Legal',
-      description: 'Imprint / legal notice and project ownership.',
+      description: 'Imprint / legal notice and ownership details for the SportsUp99 IPL 2026 experience platform.',
     },
     {
       key: 'privacy',
       label: 'Privacy Policy',
-      description: 'Explain how user data is handled on the platform.',
+      description: 'Explain how SportsUp99 handles user data and analytics for the IPL 2026 experience.',
     },
     {
       key: 'terms',
       label: 'Terms of Service',
-      description: 'Rules for using the demo IPL 2026 platform.',
+      description: 'Rules for using the SportsUp99 IPL 2026 demo platform.',
     },
   ];
 

@@ -31,12 +31,12 @@ export default function LegalPage() {
               Legal
             </p>
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-              IPL 2026 Platform Legal Information
+              SportsUp99 Legal Information
             </h1>
             <p className="mt-3 text-sm md:text-base text-gray-400 max-w-2xl">
               Transparency, compliance, and user trust are core to how we operate. This
-              page outlines the legal details and contact information for the IPL 2026
-              experience platform.
+              page outlines the legal details and contact information for the SportsUp99
+              IPL 2026 experience platform.
             </p>
           </div>
           <Link
@@ -62,9 +62,10 @@ export default function LegalPage() {
               <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6 shadow-lg shadow-black/40">
                 <h2 className="text-lg font-semibold mb-3">Publisher / Operator</h2>
                 <p className="text-sm text-gray-300 leading-relaxed">
-                  This IPL 2026 experience platform is a fan-focused project created for
-                  showcasing product design, engineering, and live sports UX patterns.
-                  It is not an official product of the BCCI, IPL, or any franchise.
+                  SportsUp99 is an independent IPL 2026 experience platform created for
+                  fans to explore match data, team information, and modern sports product
+                  design. It is not an official product of the BCCI, IPL, or any
+                  franchise.
                 </p>
                 <p className="mt-4 text-sm text-gray-400">
                   All team names, logos, and trademarks belong to their respective owners
@@ -119,8 +120,8 @@ export default function LegalPage() {
 
         <footer className="border-t border-white/10 pt-6 mt-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs text-gray-500">
           <p>
-            &copy; {new Date().getFullYear()} IPL 2026 Experience Project. All rights
-            reserved.
+            &copy; {new Date().getFullYear()} SportsUp99 IPL 2026 Experience Platform.
+            All rights reserved.
           </p>
           <div className="flex flex-wrap gap-4">
             <Link href="/privacy" className="hover:text-ipl-gold transition-colors">

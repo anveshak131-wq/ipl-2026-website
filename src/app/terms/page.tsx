@@ -31,11 +31,11 @@ export default function TermsPage() {
               Terms of Service
             </p>
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-              Terms for using the IPL 2026 experience platform
+              Terms for using the SportsUp99 IPL 2026 experience platform
             </h1>
             <p className="mt-3 text-sm md:text-base text-gray-400 max-w-2xl">
               Please read these terms carefully. By using this site, you agree to these
-              conditions of use for this demo IPL 2026 platform.
+              conditions of use for the SportsUp99 IPL 2026 demo platform.
             </p>
           </div>
           <Link
@@ -60,10 +60,10 @@ export default function TermsPage() {
             <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-6">
               <h2 className="text-lg font-semibold mb-3">1. Nature of the service</h2>
               <p className="text-sm text-gray-300 leading-relaxed">
-                This platform is a fan-built demo experience for exploring IPL-style
-                product flows, not an official IPL or BCCI property. All content is
-                provided on an "as-is" basis for experimentation, learning, and
-                entertainment only.
+                SportsUp99 is a fan-built demo experience for exploring IPL-style product
+                flows for the IPL 2026 season. It is not an official IPL or BCCI property.
+                All content is provided on an "as-is" basis for experimentation, learning,
+                and entertainment only.
               </p>
             </div>
 
@@ -133,7 +133,7 @@ export default function TermsPage() {
         )}
 
         <footer className="border-t border-white/10 pt-6 mt-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs text-gray-500">
-          <p>&copy; {new Date().getFullYear()} IPL 2026 Experience Project.</p>
+          <p>&copy; {new Date().getFullYear()} SportsUp99 IPL 2026 Experience Platform.</p>
           <div className="flex flex-wrap gap-4">
             <Link href="/legal" className="hover:text-ipl-gold transition-colors">
               Legal
