@@ -401,9 +401,18 @@ export const api = {
       if (!response.ok) {
         throw new Error('Failed to fetch news');
       }
-      const allContent = await response.json();
-      // Filter for news type content
-      return allContent.filter((item: Content) => item.type === 'news');
+      const allContent = (await response.json()) as Content[];
+
+      // Only include active news items and sort newest-first
+      const newsItems = allContent
+        .filter((item) => item.type === 'news' && item.isActive)
+        .sort((a, b) => {
+          const dateA = new Date(a.publishedAt || a.createdAt || '').getTime() || 0;
+          const dateB = new Date(b.publishedAt || b.createdAt || '').getTime() || 0;
+          return dateB - dateA;
+        });
+
+      return newsItems as unknown as News[];
     } catch (error) {
       console.error('Error fetching news:', error);
       // Fallback to mock data if API fails

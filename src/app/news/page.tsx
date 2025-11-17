@@ -52,6 +52,11 @@ export default function NewsPage() {
     setFilteredNews(filtered);
   }, [selectedCategory, searchQuery, news]);
 
+  const featuredImportant = filteredNews.find((item) => item.isImportant);
+  const remainingNews = featuredImportant
+    ? filteredNews.filter((item) => item.id !== featuredImportant.id)
+    : filteredNews;
+
   const formatDate = (dateString?: string) => {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -198,9 +203,75 @@ export default function NewsPage() {
             </div>
           </div>
 
+          {/* Featured important news block */}
+          {featuredImportant && (
+            <section className="mt-6 animate-fade-in" style={{ animationDelay: '80ms' }}>
+              <article
+                className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-sm border border-ipl-gold/40 hover:border-ipl-gold/60 transition-all duration-500 hover:shadow-2xl hover:shadow-ipl-gold/30 cursor-pointer"
+                onClick={() => {
+                  setSelectedNewsId(featuredImportant.id);
+                  setIsModalOpen(true);
+                }}
+              >
+                <div className="h-64 md:h-80 lg:h-96 relative">
+                  <img
+                    src={getImageSrc((featuredImportant as any).image || (featuredImportant as any).imageUrl)}
+                    alt={featuredImportant.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400"%3E%3Crect fill="%23333" width="800" height="400"/%3E%3Ctext x="50%25" y="50%25" font-size="32" fill="%23999" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E';
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+
+                  <div className="absolute top-5 left-5 flex flex-wrap gap-2">
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-red-500/80 text-white shadow-lg">
+                      IMPORTANT
+                    </span>
+                    {featuredImportant.category && (
+                      <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-black/60 text-gray-100 border border-white/20">
+                        {featuredImportant.category.toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="absolute inset-x-0 bottom-0 p-6 md:p-8 space-y-3">
+                  <time className="text-xs text-gray-300 uppercase tracking-wide">
+                    {formatDate(featuredImportant.publishedAt || featuredImportant.createdAt)}
+                  </time>
+                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-white leading-tight line-clamp-2 group-hover:text-ipl-gold transition-colors duration-300">
+                    {featuredImportant.title}
+                  </h2>
+                  <p className="hidden md:block text-sm md:text-base text-gray-200 max-w-2xl line-clamp-2">
+                    {featuredImportant.summary || featuredImportant.content}
+                  </p>
+                  <button
+                    className="mt-3 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-bold bg-gradient-to-r from-ipl-blue-light to-ipl-purple text-white shadow-lg group-hover:shadow-xl transition-all"
+                  >
+                    Read featured story
+                    <svg
+                      className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2.5}
+                        d="M13 7l5 5m0 0l-5 5m5-5H6"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </article>
+            </section>
+          )}
+
           {filteredNews.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredNews.map((item) => (
+              {remainingNews.map((item) => (
                 <article key={item.id} className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 hover:border-ipl-gold/50 transition-all duration-300 hover:shadow-2xl hover:shadow-ipl-gold/20 transform hover:scale-105 cursor-pointer">
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <div className="absolute inset-0 bg-gradient-to-br from-ipl-gold/10 to-ipl-purple/10" />

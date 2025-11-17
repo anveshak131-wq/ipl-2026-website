@@ -96,6 +96,7 @@ export default function ContentManager({
     imageUrl: string;
     videoUrl: string;
     isActive: boolean;
+    isImportant: boolean;
     category: 'match' | 'team' | 'player' | 'general';
     linkedTeamIds: string[];
     linkedMatchId: string;
@@ -108,6 +109,7 @@ export default function ContentManager({
     imageUrl: '',
     videoUrl: '',
     isActive: true,
+    isImportant: false,
     category: 'general',
     linkedTeamIds: [],
     linkedMatchId: '',
@@ -219,6 +221,7 @@ export default function ContentManager({
       imageUrl: '',
       videoUrl: '',
       isActive: true,
+      isImportant: false,
       category: 'general',
       linkedTeamIds: [],
       linkedMatchId: '',
@@ -237,6 +240,7 @@ export default function ContentManager({
       imageUrl: item.imageUrl || '',
       videoUrl: item.videoUrl || '',
       isActive: item.isActive,
+      isImportant: item.isImportant ?? false,
       category: (item.category as any) || 'general',
       linkedTeamIds: item.linkedTeamIds || [],
       linkedMatchId: item.linkedMatchId || '',
@@ -545,9 +549,16 @@ export default function ContentManager({
                   <div className="p-5">
                     {/* Category Badge */}
                     <div className="flex items-center justify-between mb-3">
-                      <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getCategoryBadgeColor(item.type)}`}>
-                        {item.type.toUpperCase()}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getCategoryBadgeColor(item.type)}`}>
+                          {item.type.toUpperCase()}
+                        </span>
+                        {item.type === 'news' && item.isImportant && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-500/20 text-red-300 border border-red-500/40">
+                            IMPORTANT
+                          </span>
+                        )}
+                      </div>
                       <div className="flex items-center gap-1 text-xs text-gray-400">
                         <IconCalendar className="w-4 h-4" />
                         {new Date().toLocaleDateString()}
@@ -665,6 +676,22 @@ export default function ContentManager({
                           <option value="active">Published</option>
                           <option value="inactive">Draft</option>
                         </select>
+                        {formData.type === 'news' && (
+                          <div className="mt-3 flex items-center gap-2">
+                            <input
+                              id="isImportant"
+                              type="checkbox"
+                              checked={formData.isImportant}
+                              onChange={(e) =>
+                                setFormData({ ...formData, isImportant: e.target.checked })
+                              }
+                              className="w-4 h-4 rounded border-white/40 bg-white/10 text-ipl-gold focus:ring-ipl-gold/60"
+                            />
+                            <label htmlFor="isImportant" className="text-sm text-gray-300">
+                              Mark as important (reserve featured block on news pages)
+                            </label>
+                          </div>
+                        )}
                       </div>
                     </div>
 

@@ -81,6 +81,7 @@ export interface News {
   imageUrl?: string;
   publishedAt?: string;
   createdAt?: string;
+  isImportant?: boolean;
   category?: 'match' | 'team' | 'player' | 'general';
   linkedTeamIds?: string[];
   linkedMatchId?: string;
@@ -113,6 +114,8 @@ export interface Content {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+   publishedAt?: string;
+   isImportant?: boolean;
   // Optional structured news fields
   summary?: string;
   category?: 'match' | 'team' | 'player' | 'general';

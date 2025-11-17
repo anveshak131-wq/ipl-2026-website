@@ -16,7 +16,7 @@ export default function NewsSection() {
     const fetchNews = async () => {
       try {
         const newsData = await api.getNews();
-        setNews(newsData.slice(0, 3)); // Show latest 3 news items
+        setNews(newsData.slice(0, 3)); // api.getNews already returns newest-first
       } catch (error) {
         console.error('Failed to fetch news:', error);
       } finally {
@@ -79,6 +79,12 @@ export default function NewsSection() {
     );
   }
 
+  const featuredImportant = news.find((item) => item.isImportant);
+  const remainingNews = featuredImportant
+    ? news.filter((item) => item.id !== featuredImportant.id)
+    : news;
+  const secondaryNews = remainingNews.slice(0, 2);
+
   return (
     <section className="relative py-20 section-news-bg">
       {/* Decorative Elements */}
@@ -101,104 +107,251 @@ export default function NewsSection() {
         </div>
 
         {news.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-          {news.map((article, index) => (
-            <article
-              key={article.id}
-              className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 hover:border-ipl-purple/50 transition-all duration-300 hover:shadow-2xl hover:shadow-ipl-purple/20 transform hover:scale-105 cursor-pointer flex flex-col h-full"
-              style={{animationDelay: `${index * 100}ms`}}
-            >
-              {/* Image Container */}
-              <div className="relative h-48 overflow-hidden bg-gradient-to-br from-slate-700 to-slate-900">
-                <img
-                  src={getImageSrc(article)}
-                  alt={article.title}
-                  className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-500 group-hover:brightness-110"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = `https://via.placeholder.com/400x300?text=${article.title.substring(0, 20)}`;
-                  }}
-                />
-                
-                {/* Overlay Gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-
-                {/* Category Badge */}
-                <div className="absolute top-4 right-4 z-10">
-                  <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide border ${getCategoryColor(article.category || 'general')}`}>
-                    {article.category === 'match' && '🏏'}
-                    {article.category === 'team' && '👥'}
-                    {article.category === 'player' && '⭐'}
-                    {article.category === 'general' && '📰'}
-                    {article.category ? article.category.charAt(0).toUpperCase() + article.category.slice(1) : 'General'}
-                  </span>
-                </div>
-
-                {/* Read Time */}
-                <div className="absolute bottom-4 left-4 text-xs text-white/80 font-medium">
-                  ⏱️ 5 min read
-                </div>
-              </div>
-
-              {/* Content Section */}
-              <div className="relative p-6 flex-1 flex flex-col space-y-4">
-                {/* Date */}
-                <div className="flex items-center text-sm text-gray-400">
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <span>{formatDate(article.publishedAt)}</span>
-                </div>
-
-                {/* Title */}
-                <div>
-                  <h3 className="text-lg font-bold text-white group-hover:text-ipl-gold transition-colors duration-300 line-clamp-2">
-                    {article.title}
-                  </h3>
-                </div>
-
-                {/* Summary */}
-                <p className="text-sm text-gray-400 line-clamp-2 flex-1">
-                  {article.summary || article.content.substring(0, 100)}...
-                </p>
-
-                {/* Read More Button - Premium Design */}
-                <div className="pt-4 border-t border-white/10">
-                <button className="group w-full relative overflow-hidden rounded-lg font-bold text-sm py-2.5 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                   style={{
-                     background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(147, 51, 234, 0.1))',
-                     border: '1px solid rgba(124, 58, 237, 0.3)',
-                     color: '#A855F7',
-                   }}
-                  onClick={() => {
-                    setSelectedNewsId(article.id);
-                    setIsModalOpen(true);
-                  }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(147, 51, 234, 0.2))';
-                      e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.5)';
-                      e.currentTarget.style.color = '#C084FC';
+          featuredImportant ? (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+              {/* Featured important story - large card */}
+              <article
+                className="lg:col-span-2 group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-sm border border-ipl-gold/40 hover:border-ipl-gold/60 transition-all duration-500 hover:shadow-2xl hover:shadow-ipl-gold/30 cursor-pointer flex flex-col h-full"
+                onClick={() => {
+                  setSelectedNewsId(featuredImportant.id);
+                  setIsModalOpen(true);
+                }}
+              >
+                <div className="relative h-56 md:h-64 lg:h-72 overflow-hidden bg-gradient-to-br from-slate-700 to-slate-900">
+                  <img
+                    src={getImageSrc(featuredImportant)}
+                    alt={featuredImportant.title}
+                    className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-500 group-hover:brightness-110"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = `https://via.placeholder.com/800x400?text=${featuredImportant.title.substring(0, 20)}`;
                     }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(147, 51, 234, 0.1))';
-                      e.currentTarget.style.borderColor = 'rgba(124, 58, 237, 0.3)';
-                      e.currentTarget.style.color = '#A855F7';
-                    }}
-                  >
-                    {/* Shimmer effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-                    
-                    <span className="relative z-10 flex items-center justify-center gap-2 font-bold">
-                      Read Full Story
-                      <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+
+                  <div className="absolute top-4 left-4 flex flex-wrap gap-2">
+                    <span className="px-3 py-1.5 rounded-full text-xs font-bold bg-red-500/90 text-white shadow-lg">
+                      IMPORTANT
                     </span>
-                  </button>
+                    <span className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wide border ${getCategoryColor(featuredImportant.category || 'general')}`}>
+                      {featuredImportant.category === 'match' && '🏏'}
+                      {featuredImportant.category === 'team' && '👥'}
+                      {featuredImportant.category === 'player' && '⭐'}
+                      {featuredImportant.category === 'general' && '📰'}
+                      {featuredImportant.category
+                        ? ' ' + featuredImportant.category.charAt(0).toUpperCase() + featuredImportant.category.slice(1)
+                        : ' General'}
+                    </span>
+                  </div>
                 </div>
+
+                <div className="relative p-6 md:p-7 flex-1 flex flex-col space-y-4">
+                  <div className="flex items-center text-sm text-gray-300">
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>{formatDate(featuredImportant.publishedAt)}</span>
+                  </div>
+
+                  <h3 className="text-2xl md:text-3xl font-black text-white group-hover:text-ipl-gold transition-colors duration-300 line-clamp-2">
+                    {featuredImportant.title}
+                  </h3>
+
+                  <p className="text-sm md:text-base text-gray-200 line-clamp-3 flex-1">
+                    {featuredImportant.summary || featuredImportant.content.substring(0, 180)}
+                  </p>
+
+                  <div className="pt-4 border-t border-white/10">
+                    <button
+                      className="group w-full relative overflow-hidden rounded-lg font-bold text-sm py-2.5 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(124, 58, 237, 0.3))',
+                        border: '1px solid rgba(251, 191, 36, 0.6)',
+                        color: '#FDE68A',
+                      }}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                      <span className="relative z-10 flex items-center justify-center gap-2 font-bold">
+                        Read Featured Story
+                        <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </article>
+
+              {/* Secondary latest stories */}
+              <div className="grid grid-cols-1 gap-6 lg:gap-8">
+                {secondaryNews.map((article, index) => (
+                  <article
+                    key={article.id}
+                    className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 hover:border-ipl-purple/50 transition-all duration-300 hover:shadow-2xl hover:shadow-ipl-purple/20 transform hover:scale-105 cursor-pointer flex flex-col h-full"
+                    style={{ animationDelay: `${index * 80}ms` }}
+                  >
+                    <div className="relative h-40 overflow-hidden bg-gradient-to-br from-slate-700 to-slate-900">
+                      <img
+                        src={getImageSrc(article)}
+                        alt={article.title}
+                        className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-500 group-hover:brightness-110"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = `https://via.placeholder.com/400x300?text=${article.title.substring(0, 20)}`;
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                      <div className="absolute top-3 right-3 z-10">
+                        <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide border ${getCategoryColor(article.category || 'general')}`}>
+                          {article.category === 'match' && '🏏'}
+                          {article.category === 'team' && '👥'}
+                          {article.category === 'player' && '⭐'}
+                          {article.category === 'general' && '📰'}
+                          {article.category ? article.category.charAt(0).toUpperCase() + article.category.slice(1) : 'General'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="relative p-5 flex-1 flex flex-col space-y-3">
+                      <div className="flex items-center text-xs text-gray-400">
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span>{formatDate(article.publishedAt)}</span>
+                      </div>
+
+                      <h3 className="text-base font-bold text-white group-hover:text-ipl-gold transition-colors duration-300 line-clamp-2">
+                        {article.title}
+                      </h3>
+
+                      <p className="text-sm text-gray-400 line-clamp-2 flex-1">
+                        {article.summary || article.content.substring(0, 100)}...
+                      </p>
+
+                      <div className="pt-3 border-t border-white/10">
+                        <button
+                          className="group w-full relative overflow-hidden rounded-lg font-bold text-xs py-2 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                          style={{
+                            background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(147, 51, 234, 0.1))',
+                            border: '1px solid rgba(124, 58, 237, 0.3)',
+                            color: '#A855F7',
+                          }}
+                          onClick={() => {
+                            setSelectedNewsId(article.id);
+                            setIsModalOpen(true);
+                          }}
+                        >
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                          <span className="relative z-10 flex items-center justify-center gap-2 font-bold">
+                            Read Story
+                            <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                ))}
               </div>
-            </article>
-          ))}
-        </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+              {news.map((article, index) => (
+                <article
+                  key={article.id}
+                  className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 hover:border-ipl-purple/50 transition-all duration-300 hover:shadow-2xl hover:shadow-ipl-purple/20 transform hover:scale-105 cursor-pointer flex flex-col h-full"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  {/* Image Container */}
+                  <div className="relative h-48 overflow-hidden bg-gradient-to-br from-slate-700 to-slate-900">
+                    <img
+                      src={getImageSrc(article)}
+                      alt={article.title}
+                      className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-500 group-hover:brightness-110"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = `https://via.placeholder.com/400x300?text=${article.title.substring(0, 20)}`;
+                      }}
+                    />
+
+                    {/* Overlay Gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+                    {/* Category Badge */}
+                    <div className="absolute top-4 right-4 z-10">
+                      <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide border ${getCategoryColor(article.category || 'general')}`}>
+                        {article.category === 'match' && '🏏'}
+                        {article.category === 'team' && '👥'}
+                        {article.category === 'player' && '⭐'}
+                        {article.category === 'general' && '📰'}
+                        {article.category
+                          ? article.category.charAt(0).toUpperCase() + article.category.slice(1)
+                          : 'General'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Content Section */}
+                  <div className="relative p-6 flex-1 flex flex-col space-y-4">
+                    {/* Date */}
+                    <div className="flex items-center text-sm text-gray-400">
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span>{formatDate(article.publishedAt)}</span>
+                    </div>
+
+                    {/* Title */}
+                    <div>
+                      <h3 className="text-lg font-bold text-white group-hover:text-ipl-gold transition-colors duration-300 line-clamp-2">
+                        {article.title}
+                      </h3>
+                    </div>
+
+                    {/* Summary */}
+                    <p className="text-sm text-gray-400 line-clamp-2 flex-1">
+                      {article.summary || article.content.substring(0, 100)}...
+                    </p>
+
+                    {/* Read More Button - Premium Design */}
+                    <div className="pt-4 border-t border-white/10">
+                      <button
+                        className="group w-full relative overflow-hidden rounded-lg font-bold text-sm py-2.5 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                        style={{
+                          background:
+                            'linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(147, 51, 234, 0.1))',
+                          border: '1px solid rgba(124, 58, 237, 0.3)',
+                          color: '#A855F7',
+                        }}
+                        onClick={() => {
+                          setSelectedNewsId(article.id);
+                          setIsModalOpen(true);
+                        }}
+                      >
+                        {/* Shimmer effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+
+                        <span className="relative z-10 flex items-center justify-center gap-2 font-bold">
+                          Read Full Story
+                          <svg
+                            className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2.5}
+                              d="M13 7l5 5m0 0l-5 5m5-5H6"
+                            />
+                          </svg>
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )
         ) : (
           <div className="text-center py-12">
             <p className="text-gray-400 text-lg">No news articles available yet.</p>
