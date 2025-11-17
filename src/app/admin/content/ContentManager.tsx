@@ -163,6 +163,19 @@ export default function ContentManager({
     }
   };
 
+  const handlePreview = (item: Content) => {
+    // For news items, open the public-facing article detail page in a new tab
+    if (item.type === 'news') {
+      if (typeof window !== 'undefined') {
+        window.open(`/news/${item.id}`, '_blank', 'noopener,noreferrer');
+      }
+      return;
+    }
+
+    // For other content types, you can extend preview behavior later
+    alert('Preview is currently available for news articles only.');
+  };
+
   useEffect(() => {
     // Apply filters
     let filtered = [...content];
@@ -587,7 +600,7 @@ export default function ContentManager({
                       </button>
                       
                       <button 
-                        onClick={() => alert('Preview functionality')}
+                        onClick={() => handlePreview(item)}
                         className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-green-500/10 text-green-400 hover:bg-green-500/20 border border-green-500/30 transition-all group/btn"
                         title="Preview"
                       >
