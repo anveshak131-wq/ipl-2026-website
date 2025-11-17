@@ -173,7 +173,7 @@ export default function PlayerDetailClient({ playerId }: PlayerDetailClientProps
                     </span>
                   )}
                   <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-black/40 text-gray-100">
-                    <span>#{player.jerseyNumber}</span>
+                    <span>{player.jerseyNumber > 0 ? `#${player.jerseyNumber}` : 'N/A'}</span>
                     <span className="text-xs uppercase tracking-wide">Jersey</span>
                   </span>
                 </div>
