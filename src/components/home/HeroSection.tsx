@@ -135,15 +135,87 @@ export default function HeroSection() {
                 <span className="text-sm font-bold text-white tracking-wider">SEASON 2026 • LIVE</span>
               </div>
 
-              {/* Highlight Media Panel */}
+              {/* Highlight Media Panel - Explore Matches */}
               <div className="relative mt-6">
-                <div className="h-48 sm:h-56 md:h-64 w-full rounded-3xl bg-gradient-to-br from-sky-500/30 via-indigo-500/40 to-purple-600/30 backdrop-blur-2xl border border-white/15 shadow-[0_40px_120px_rgba(15,23,42,0.9)] overflow-hidden animate-scale-in">
+                <button
+                  type="button"
+                  onClick={() => router.push('/matches')}
+                  className="group relative h-48 sm:h-56 md:h-64 w-full rounded-3xl bg-gradient-to-br from-sky-500/30 via-indigo-500/40 to-purple-600/30 backdrop-blur-2xl border border-white/15 shadow-[0_40px_120px_rgba(15,23,42,0.9)] overflow-hidden animate-scale-in focus:outline-none focus-visible:ring-2 focus-visible:ring-ipl-gold focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                >
                   <div className="absolute inset-0 opacity-60 bg-[radial-gradient(circle_at_0%_0%,rgba(255,255,255,0.35),transparent_55%),radial-gradient(circle_at_100%_100%,rgba(56,189,248,0.3),transparent_55%)]" />
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent animate-shimmer" />
-                </div>
+                  <div className="relative z-10 flex h-full items-center justify-between px-6 sm:px-8">
+                    <div className="space-y-1 text-left">
+                      <p className="text-[10px] sm:text-xs font-semibold tracking-[0.25em] uppercase text-gray-200">
+                        Explore
+                      </p>
+                      <p className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white">
+                        Matches & Schedule
+                      </p>
+                      <p className="hidden sm:block text-xs sm:text-sm text-gray-200/80 max-w-xs">
+                        Tap to jump into the full SportsUP18 IPL 2026 fixture list.
+                      </p>
+                    </div>
+                    <div className="hidden sm:flex items-center justify-center w-11 h-11 rounded-full bg-white/15 border border-white/40 text-white group-hover:bg-white group-hover:text-slate-900 transition-all duration-300 shadow-lg">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2.2}
+                          d="M13 7l5 5m0 0l-5 5m5-5H6"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </button>
                 <div className="absolute -top-3 left-6 px-4 py-1.5 rounded-full bg-black/40 border border-white/10 backdrop-blur-xl text-[10px] sm:text-[11px] font-semibold tracking-[0.2em] text-gray-200 uppercase">
                   SportsUP18 • Season 2026
                 </div>
+              </div>
+
+              {/* Secondary Media Panel - View Teams */}
+              <div className="relative mt-6">
+                <button
+                  type="button"
+                  onClick={() => router.push('/teams')}
+                  className="group relative h-48 sm:h-56 md:h-64 w-full rounded-3xl bg-gradient-to-br from-sky-400/50 via-sky-500/70 to-blue-600/80 backdrop-blur-2xl border border-white/30 shadow-[0_40px_120px_rgba(15,23,42,0.9)] overflow-hidden animate-scale-in focus:outline-none focus-visible:ring-2 focus-visible:ring-ipl-gold focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                >
+                  <div className="absolute inset-0 opacity-80 bg-[radial-gradient(circle_at_10%_0%,rgba(255,255,255,0.7),transparent_55%),radial-gradient(circle_at_90%_100%,rgba(59,130,246,0.8),transparent_55%)]" />
+                  <div className="absolute inset-0 bg-gradient-to-tr from-white/15 via-transparent to-white/25 mix-blend-screen" />
+                  <div className="relative z-10 flex h-full items-center justify-between px-6 sm:px-8">
+                    <div className="space-y-1 text-left">
+                      <p className="text-[10px] sm:text-xs font-semibold tracking-[0.25em] uppercase text-slate-900/80">
+                        Discover
+                      </p>
+                      <p className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900">
+                        Teams & Squads
+                      </p>
+                      <p className="hidden sm:block text-xs sm:text-sm text-slate-900/80 max-w-xs">
+                        Tap to browse all franchises, squads and key players for IPL 2026.
+                      </p>
+                    </div>
+                    <div className="hidden sm:flex items-center justify-center w-11 h-11 rounded-full bg-slate-900/10 border border-white/50 text-slate-900 group-hover:bg-slate-900 group-hover:text-white transition-all duration-300 shadow-lg">
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2.2}
+                          d="M13 7l5 5m0 0l-5 5m5-5H6"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </button>
               </div>
 
               {/* Main Headline - Ultra Bold Typography */}
