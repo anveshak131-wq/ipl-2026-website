@@ -242,6 +242,17 @@ export default function AdminPlayers() {
     e.preventDefault();
     
     try {
+      const token =
+        typeof window !== 'undefined'
+          ? localStorage.getItem('adminToken') || localStorage.getItem('auth_token')
+          : null;
+
+      if (!token) {
+        alert('Admin session expired. Please log in again.');
+        router.push('/admin');
+        return;
+      }
+
       // Parse DOB if provided
       let calculatedAge = parseInt(formData.age) || 0;
       let dateOfBirthISO = '';
@@ -287,6 +298,7 @@ export default function AdminPlayers() {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ ...playerData, id: editingPlayer.id }),
         });
@@ -300,6 +312,7 @@ export default function AdminPlayers() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(playerData),
         });
@@ -328,8 +341,23 @@ export default function AdminPlayers() {
     
     setIsDeleting(true);
     try {
+      const token =
+        typeof window !== 'undefined'
+          ? localStorage.getItem('adminToken') || localStorage.getItem('auth_token')
+          : null;
+
+      if (!token) {
+        alert('Admin session expired. Please log in again.');
+        setIsDeleting(false);
+        setShowDeleteModal(false);
+        return;
+      }
+
       const response = await fetch(`/api/players?id=${deleteTarget.id}`, {
         method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!response.ok) {
