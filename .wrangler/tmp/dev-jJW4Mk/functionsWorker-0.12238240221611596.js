@@ -97,7 +97,7 @@ var __toESM2 = /* @__PURE__ */ __name((mod, isNodeMode, target) => (target = mod
   mod
 )), "__toESM");
 var require_checked_fetch2 = __commonJS2({
-  "../.wrangler/tmp/bundle-n93ark/checked-fetch.js"() {
+  "../.wrangler/tmp/bundle-f8yNwN/checked-fetch.js"() {
     "use strict";
     var urls = /* @__PURE__ */ new Set();
     function checkURL(request, init) {
@@ -1251,6 +1251,15 @@ async function getBody(request) {
 }
 __name(getBody, "getBody");
 __name2(getBody, "getBody");
+function verifyAdminToken(request) {
+  const authHeader = request.headers.get("authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return false;
+  }
+  return true;
+}
+__name(verifyAdminToken, "verifyAdminToken");
+__name2(verifyAdminToken, "verifyAdminToken");
 var kv = globalThis.IPL_CACHE;
 var KV_KEY = "ipl:content";
 var onRequest7 = /* @__PURE__ */ __name2(async (context) => {
@@ -1285,6 +1294,18 @@ var onRequest7 = /* @__PURE__ */ __name2(async (context) => {
       });
     }
     if (request.method === "POST") {
+      if (!verifyAdminToken(request)) {
+        return new Response(
+          JSON.stringify({ error: "Unauthorized" }),
+          {
+            status: 401,
+            headers: {
+              "Content-Type": "application/json",
+              ...corsHeaders2
+            }
+          }
+        );
+      }
       const body = await getBody(request);
       if (!body || !body.title || !body.type) {
         return new Response(
@@ -1323,6 +1344,18 @@ var onRequest7 = /* @__PURE__ */ __name2(async (context) => {
       );
     }
     if (request.method === "PUT") {
+      if (!verifyAdminToken(request)) {
+        return new Response(
+          JSON.stringify({ error: "Unauthorized" }),
+          {
+            status: 401,
+            headers: {
+              "Content-Type": "application/json",
+              ...corsHeaders2
+            }
+          }
+        );
+      }
       const body = await getBody(request);
       if (!body || !body.id) {
         return new Response(
@@ -1357,6 +1390,18 @@ var onRequest7 = /* @__PURE__ */ __name2(async (context) => {
       );
     }
     if (request.method === "DELETE") {
+      if (!verifyAdminToken(request)) {
+        return new Response(
+          JSON.stringify({ error: "Unauthorized" }),
+          {
+            status: 401,
+            headers: {
+              "Content-Type": "application/json",
+              ...corsHeaders2
+            }
+          }
+        );
+      }
       const url = new URL(request.url);
       const id = url.searchParams.get("id");
       if (!id) {
@@ -1753,15 +1798,15 @@ var defaultMatches = [
     status: "upcoming"
   }
 ];
-function verifyAdminToken(request) {
+function verifyAdminToken2(request) {
   const authHeader = request.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return false;
   }
   return true;
 }
-__name(verifyAdminToken, "verifyAdminToken");
-__name2(verifyAdminToken, "verifyAdminToken");
+__name(verifyAdminToken2, "verifyAdminToken2");
+__name2(verifyAdminToken2, "verifyAdminToken");
 function getTeamById(teamId) {
   return mockTeams.find((t) => t.id === teamId);
 }
@@ -1809,7 +1854,7 @@ __name(handleGetRequest, "handleGetRequest");
 __name2(handleGetRequest, "handleGetRequest");
 async function handlePostRequest(context) {
   const { env, request } = context;
-  if (!verifyAdminToken(request)) {
+  if (!verifyAdminToken2(request)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" }
@@ -1853,7 +1898,7 @@ __name(handlePostRequest, "handlePostRequest");
 __name2(handlePostRequest, "handlePostRequest");
 async function handlePutRequest(context) {
   const { env, request } = context;
-  if (!verifyAdminToken(request)) {
+  if (!verifyAdminToken2(request)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" }
@@ -1903,7 +1948,7 @@ __name(handlePutRequest, "handlePutRequest");
 __name2(handlePutRequest, "handlePutRequest");
 async function handleDeleteRequest(context) {
   const { env, request } = context;
-  if (!verifyAdminToken(request)) {
+  if (!verifyAdminToken2(request)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" }
@@ -2155,6 +2200,15 @@ var corsHeaders = {
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization"
 };
+function verifyAdminToken3(request) {
+  const authHeader = request.headers.get("authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return false;
+  }
+  return true;
+}
+__name(verifyAdminToken3, "verifyAdminToken3");
+__name2(verifyAdminToken3, "verifyAdminToken");
 var onRequest13 = /* @__PURE__ */ __name2(async (context) => {
   const { request, env } = context;
   if (request.method === "OPTIONS") {
@@ -2170,6 +2224,12 @@ var onRequest13 = /* @__PURE__ */ __name2(async (context) => {
       });
     }
     if (request.method === "POST") {
+      if (!verifyAdminToken3(request)) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json", ...corsHeaders }
+        });
+      }
       const newPlayer = await request.json();
       if (!newPlayer.name || !newPlayer.role || !newPlayer.teamId) {
         return new Response(JSON.stringify({ error: "Missing required fields: name, role, teamId" }), {
@@ -2216,6 +2276,12 @@ var onRequest13 = /* @__PURE__ */ __name2(async (context) => {
       });
     }
     if (request.method === "PUT") {
+      if (!verifyAdminToken3(request)) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json", ...corsHeaders }
+        });
+      }
       const updatedPlayer = await request.json();
       if (!updatedPlayer.id) {
         return new Response(JSON.stringify({ error: "Player ID is required" }), {
@@ -2267,6 +2333,12 @@ var onRequest13 = /* @__PURE__ */ __name2(async (context) => {
       });
     }
     if (request.method === "DELETE") {
+      if (!verifyAdminToken3(request)) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json", ...corsHeaders }
+        });
+      }
       const url = new URL(request.url);
       const playerId = url.searchParams.get("id");
       if (!playerId) {
@@ -2519,15 +2591,15 @@ var onRequest14 = /* @__PURE__ */ __name2(async (context) => {
   }
 }, "onRequest");
 var import_checked_fetch17 = __toESM2(require_checked_fetch2());
-function verifyAdminToken2(request) {
+function verifyAdminToken4(request) {
   const authHeader = request.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return false;
   }
   return true;
 }
-__name(verifyAdminToken2, "verifyAdminToken2");
-__name2(verifyAdminToken2, "verifyAdminToken");
+__name(verifyAdminToken4, "verifyAdminToken4");
+__name2(verifyAdminToken4, "verifyAdminToken");
 var defaultSettings = {
   siteName: "IPL 2026",
   siteDescription: "The biggest cricket tournament in the world",
@@ -2564,7 +2636,7 @@ __name(handleGetRequest2, "handleGetRequest2");
 __name2(handleGetRequest2, "handleGetRequest");
 async function handlePutRequest2(context) {
   const { env, request } = context;
-  if (!verifyAdminToken2(request)) {
+  if (!verifyAdminToken4(request)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" }
@@ -2631,15 +2703,15 @@ async function onRequest15(context) {
 __name(onRequest15, "onRequest15");
 __name2(onRequest15, "onRequest");
 var import_checked_fetch18 = __toESM2(require_checked_fetch2());
-function verifyAdminToken3(request) {
+function verifyAdminToken5(request) {
   const authHeader = request.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return false;
   }
   return true;
 }
-__name(verifyAdminToken3, "verifyAdminToken3");
-__name2(verifyAdminToken3, "verifyAdminToken");
+__name(verifyAdminToken5, "verifyAdminToken5");
+__name2(verifyAdminToken5, "verifyAdminToken");
 var defaultTeams = [
   {
     id: "1",
@@ -2788,7 +2860,7 @@ __name(handleGetRequest3, "handleGetRequest3");
 __name2(handleGetRequest3, "handleGetRequest");
 async function handlePostRequest2(context) {
   const { env, request } = context;
-  if (!verifyAdminToken3(request)) {
+  if (!verifyAdminToken5(request)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" }
@@ -2833,7 +2905,7 @@ __name(handlePostRequest2, "handlePostRequest2");
 __name2(handlePostRequest2, "handlePostRequest");
 async function handlePutRequest3(context) {
   const { env, request } = context;
-  if (!verifyAdminToken3(request)) {
+  if (!verifyAdminToken5(request)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" }
@@ -2884,7 +2956,7 @@ __name(handlePutRequest3, "handlePutRequest3");
 __name2(handlePutRequest3, "handlePutRequest");
 async function handleDeleteRequest2(context) {
   const { env, request } = context;
-  if (!verifyAdminToken3(request)) {
+  if (!verifyAdminToken5(request)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" }

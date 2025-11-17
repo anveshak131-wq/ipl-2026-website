@@ -25,9 +25,9 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// ../.wrangler/tmp/bundle-n93ark/checked-fetch.js
+// ../.wrangler/tmp/bundle-f8yNwN/checked-fetch.js
 var require_checked_fetch = __commonJS({
-  "../.wrangler/tmp/bundle-n93ark/checked-fetch.js"() {
+  "../.wrangler/tmp/bundle-f8yNwN/checked-fetch.js"() {
     "use strict";
     var urls = /* @__PURE__ */ new Set();
     function checkURL(request, init) {
@@ -1194,6 +1194,14 @@ async function getBody(request) {
   }
 }
 __name(getBody, "getBody");
+function verifyAdminToken(request) {
+  const authHeader = request.headers.get("authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return false;
+  }
+  return true;
+}
+__name(verifyAdminToken, "verifyAdminToken");
 var kv = globalThis.IPL_CACHE;
 var KV_KEY = "ipl:content";
 var onRequest7 = /* @__PURE__ */ __name(async (context) => {
@@ -1228,6 +1236,18 @@ var onRequest7 = /* @__PURE__ */ __name(async (context) => {
       });
     }
     if (request.method === "POST") {
+      if (!verifyAdminToken(request)) {
+        return new Response(
+          JSON.stringify({ error: "Unauthorized" }),
+          {
+            status: 401,
+            headers: {
+              "Content-Type": "application/json",
+              ...corsHeaders2
+            }
+          }
+        );
+      }
       const body = await getBody(request);
       if (!body || !body.title || !body.type) {
         return new Response(
@@ -1266,6 +1286,18 @@ var onRequest7 = /* @__PURE__ */ __name(async (context) => {
       );
     }
     if (request.method === "PUT") {
+      if (!verifyAdminToken(request)) {
+        return new Response(
+          JSON.stringify({ error: "Unauthorized" }),
+          {
+            status: 401,
+            headers: {
+              "Content-Type": "application/json",
+              ...corsHeaders2
+            }
+          }
+        );
+      }
       const body = await getBody(request);
       if (!body || !body.id) {
         return new Response(
@@ -1300,6 +1332,18 @@ var onRequest7 = /* @__PURE__ */ __name(async (context) => {
       );
     }
     if (request.method === "DELETE") {
+      if (!verifyAdminToken(request)) {
+        return new Response(
+          JSON.stringify({ error: "Unauthorized" }),
+          {
+            status: 401,
+            headers: {
+              "Content-Type": "application/json",
+              ...corsHeaders2
+            }
+          }
+        );
+      }
       const url = new URL(request.url);
       const id = url.searchParams.get("id");
       if (!id) {
@@ -1703,14 +1747,14 @@ var defaultMatches = [
     status: "upcoming"
   }
 ];
-function verifyAdminToken(request) {
+function verifyAdminToken2(request) {
   const authHeader = request.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return false;
   }
   return true;
 }
-__name(verifyAdminToken, "verifyAdminToken");
+__name(verifyAdminToken2, "verifyAdminToken");
 function getTeamById(teamId) {
   return mockTeams.find((t) => t.id === teamId);
 }
@@ -1755,7 +1799,7 @@ async function handleGetRequest(context) {
 __name(handleGetRequest, "handleGetRequest");
 async function handlePostRequest(context) {
   const { env, request } = context;
-  if (!verifyAdminToken(request)) {
+  if (!verifyAdminToken2(request)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" }
@@ -1798,7 +1842,7 @@ async function handlePostRequest(context) {
 __name(handlePostRequest, "handlePostRequest");
 async function handlePutRequest(context) {
   const { env, request } = context;
-  if (!verifyAdminToken(request)) {
+  if (!verifyAdminToken2(request)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" }
@@ -1847,7 +1891,7 @@ async function handlePutRequest(context) {
 __name(handlePutRequest, "handlePutRequest");
 async function handleDeleteRequest(context) {
   const { env, request } = context;
-  if (!verifyAdminToken(request)) {
+  if (!verifyAdminToken2(request)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" }
@@ -2101,6 +2145,14 @@ var corsHeaders = {
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization"
 };
+function verifyAdminToken3(request) {
+  const authHeader = request.headers.get("authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return false;
+  }
+  return true;
+}
+__name(verifyAdminToken3, "verifyAdminToken");
 var onRequest13 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   if (request.method === "OPTIONS") {
@@ -2116,6 +2168,12 @@ var onRequest13 = /* @__PURE__ */ __name(async (context) => {
       });
     }
     if (request.method === "POST") {
+      if (!verifyAdminToken3(request)) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json", ...corsHeaders }
+        });
+      }
       const newPlayer = await request.json();
       if (!newPlayer.name || !newPlayer.role || !newPlayer.teamId) {
         return new Response(JSON.stringify({ error: "Missing required fields: name, role, teamId" }), {
@@ -2162,6 +2220,12 @@ var onRequest13 = /* @__PURE__ */ __name(async (context) => {
       });
     }
     if (request.method === "PUT") {
+      if (!verifyAdminToken3(request)) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json", ...corsHeaders }
+        });
+      }
       const updatedPlayer = await request.json();
       if (!updatedPlayer.id) {
         return new Response(JSON.stringify({ error: "Player ID is required" }), {
@@ -2213,6 +2277,12 @@ var onRequest13 = /* @__PURE__ */ __name(async (context) => {
       });
     }
     if (request.method === "DELETE") {
+      if (!verifyAdminToken3(request)) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json", ...corsHeaders }
+        });
+      }
       const url = new URL(request.url);
       const playerId = url.searchParams.get("id");
       if (!playerId) {
@@ -2469,14 +2539,14 @@ var onRequest14 = /* @__PURE__ */ __name(async (context) => {
 
 // api/settings.js
 var import_checked_fetch17 = __toESM(require_checked_fetch());
-function verifyAdminToken2(request) {
+function verifyAdminToken4(request) {
   const authHeader = request.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return false;
   }
   return true;
 }
-__name(verifyAdminToken2, "verifyAdminToken");
+__name(verifyAdminToken4, "verifyAdminToken");
 var defaultSettings = {
   siteName: "IPL 2026",
   siteDescription: "The biggest cricket tournament in the world",
@@ -2512,7 +2582,7 @@ async function handleGetRequest2(context) {
 __name(handleGetRequest2, "handleGetRequest");
 async function handlePutRequest2(context) {
   const { env, request } = context;
-  if (!verifyAdminToken2(request)) {
+  if (!verifyAdminToken4(request)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" }
@@ -2579,14 +2649,14 @@ __name(onRequest15, "onRequest");
 
 // api/teams.js
 var import_checked_fetch18 = __toESM(require_checked_fetch());
-function verifyAdminToken3(request) {
+function verifyAdminToken5(request) {
   const authHeader = request.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return false;
   }
   return true;
 }
-__name(verifyAdminToken3, "verifyAdminToken");
+__name(verifyAdminToken5, "verifyAdminToken");
 var defaultTeams = [
   {
     id: "1",
@@ -2734,7 +2804,7 @@ async function handleGetRequest3(context) {
 __name(handleGetRequest3, "handleGetRequest");
 async function handlePostRequest2(context) {
   const { env, request } = context;
-  if (!verifyAdminToken3(request)) {
+  if (!verifyAdminToken5(request)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" }
@@ -2778,7 +2848,7 @@ async function handlePostRequest2(context) {
 __name(handlePostRequest2, "handlePostRequest");
 async function handlePutRequest3(context) {
   const { env, request } = context;
-  if (!verifyAdminToken3(request)) {
+  if (!verifyAdminToken5(request)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" }
@@ -2828,7 +2898,7 @@ async function handlePutRequest3(context) {
 __name(handlePutRequest3, "handlePutRequest");
 async function handleDeleteRequest2(context) {
   const { env, request } = context;
-  if (!verifyAdminToken3(request)) {
+  if (!verifyAdminToken5(request)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" }
@@ -3077,10 +3147,10 @@ var routes = [
   }
 ];
 
-// ../.wrangler/tmp/bundle-n93ark/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-f8yNwN/middleware-loader.entry.ts
 var import_checked_fetch27 = __toESM(require_checked_fetch());
 
-// ../.wrangler/tmp/bundle-n93ark/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-f8yNwN/middleware-insertion-facade.js
 var import_checked_fetch25 = __toESM(require_checked_fetch());
 
 // ../../../.npm/_npx/32026684e21afda6/node_modules/wrangler/templates/pages-template-worker.ts
@@ -3576,7 +3646,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// ../.wrangler/tmp/bundle-n93ark/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-f8yNwN/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -3609,7 +3679,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// ../.wrangler/tmp/bundle-n93ark/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-f8yNwN/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;

@@ -10,6 +10,15 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
+// Helper: basic admin token check (presence of Bearer token)
+function verifyAdminToken(request) {
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return false;
+  }
+  return true;
+}
+
 export const onRequest = async (context) => {
   const { request, env } = context;
 
@@ -29,6 +38,13 @@ export const onRequest = async (context) => {
     }
 
     if (request.method === 'POST') {
+      if (!verifyAdminToken(request)) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+
       const newPlayer = await request.json();
 
       if (!newPlayer.name || !newPlayer.role || !newPlayer.teamId) {
@@ -80,6 +96,13 @@ export const onRequest = async (context) => {
     }
 
     if (request.method === 'PUT') {
+      if (!verifyAdminToken(request)) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+
       const updatedPlayer = await request.json();
       if (!updatedPlayer.id) {
         return new Response(JSON.stringify({ error: 'Player ID is required' }), {
@@ -136,6 +159,13 @@ export const onRequest = async (context) => {
     }
 
     if (request.method === 'DELETE') {
+      if (!verifyAdminToken(request)) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+
       const url = new URL(request.url);
       const playerId = url.searchParams.get('id');
       if (!playerId) {

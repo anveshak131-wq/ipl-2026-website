@@ -3,7 +3,7 @@
  * Handles GET, POST, PUT, DELETE for content management
  */
 
-// Helper to parse JSON body
+// Helper: parse JSON body
 async function getBody(request) {
   if (request.method === 'GET' || request.method === 'HEAD') {
     return null;
@@ -13,6 +13,15 @@ async function getBody(request) {
   } catch {
     return null;
   }
+}
+
+// Helper: basic admin token check (presence of Bearer token)
+function verifyAdminToken(request) {
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return false;
+  }
+  return true;
 }
 
 // KV namespace (bound by wrangler.toml)
@@ -61,8 +70,21 @@ export const onRequest = async (context) => {
       });
     }
 
-    // POST - create new content
+    // POST - create new content (admin only)
     if (request.method === 'POST') {
+      if (!verifyAdminToken(request)) {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized' }),
+          {
+            status: 401,
+            headers: {
+              'Content-Type': 'application/json',
+              ...corsHeaders,
+            },
+          }
+        );
+      }
+
       const body = await getBody(request);
 
       if (!body || !body.title || !body.type) {
@@ -106,8 +128,21 @@ export const onRequest = async (context) => {
       );
     }
 
-    // PUT - update content
+    // PUT - update content (admin only)
     if (request.method === 'PUT') {
+      if (!verifyAdminToken(request)) {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized' }),
+          {
+            status: 401,
+            headers: {
+              'Content-Type': 'application/json',
+              ...corsHeaders,
+            },
+          }
+        );
+      }
+
       const body = await getBody(request);
 
       if (!body || !body.id) {
@@ -149,8 +184,21 @@ export const onRequest = async (context) => {
       );
     }
 
-    // DELETE - remove content
+    // DELETE - remove content (admin only)
     if (request.method === 'DELETE') {
+      if (!verifyAdminToken(request)) {
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized' }),
+          {
+            status: 401,
+            headers: {
+              'Content-Type': 'application/json',
+              ...corsHeaders,
+            },
+          }
+        );
+      }
+
       const url = new URL(request.url);
       const id = url.searchParams.get('id');
 
