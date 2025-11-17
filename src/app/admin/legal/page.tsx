@@ -12,20 +12,24 @@ interface LegalContentState {
   terms: string;
 }
 
+// Default templates used when there is no custom content in KV.
+// These mirror the public fallback content but can be tuned over time.
+const defaultTemplates: LegalContentState = {
+  legal:
+    'This IPL 2026 experience platform is a fan-focused project created for showcasing product design, engineering, and live sports UX patterns. It is not an official product of the BCCI, IPL, or any franchise. All team names, logos, and trademarks belong to their respective owners and are used here strictly for illustrative and educational purposes.',
+  privacy:
+    'This IPL 2026 experience is a demo platform. It stores only the minimum information required to support features like authentication, live chat, and engagement analytics. No data is sold or shared with third parties for advertising or profiling.',
+  terms:
+    'This platform is a fan-built demo experience for exploring IPL-style product flows, not an official IPL or BCCI property. All content is provided on an "as-is" basis for experimentation, learning, and entertainment only.',
+};
+
 export default function AdminLegalPage() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [savingKey, setSavingKey] = useState<LegalPageKey | null>(null);
   const [activeTab, setActiveTab] = useState<LegalPageKey>('legal');
-  const [content, setContent] = useState<LegalContentState>({
-    legal:
-      'This IPL 2026 experience platform is a fan-focused project created for showcasing product design, engineering, and live sports UX patterns. It is not an official product of the BCCI, IPL, or any franchise. All team names, logos, and trademarks belong to their respective owners and are used here strictly for illustrative and educational purposes.',
-    privacy:
-      'This IPL 2026 experience is a demo platform. It stores only the minimum information required to support features like authentication, live chat, and engagement analytics. No data is sold or shared with third parties for advertising or profiling.',
-    terms:
-      'This platform is a fan-built demo experience for exploring IPL-style product flows, not an official IPL or BCCI property. All content is provided on an "as-is" basis for experimentation, learning, and entertainment only.',
-  });
+  const [content, setContent] = useState<LegalContentState>(defaultTemplates);
 
   // Auth check (same style as other admin pages)
   useEffect(() => {
@@ -111,6 +115,28 @@ export default function AdminLegalPage() {
     } finally {
       setSavingKey(null);
     }
+  };
+
+  const handleResetToDefault = (key: LegalPageKey) => {
+    // Restore the recommended template for this page in the editor;
+    // admin still needs to click Save to persist it to KV.
+    setContent((prev) => ({
+      ...prev,
+      [key]: defaultTemplates[key],
+    }));
+  };
+
+  const handleClearCustom = (key: LegalPageKey) => {
+    // Clear custom content so the public page falls back to the built-in default.
+    // An empty string means the public page will ignore KV and render its own sections.
+    const confirmed = window.confirm(
+      'Clear this page content and use the default public layout instead? You can always add new content later.',
+    );
+    if (!confirmed) return;
+    setContent((prev) => ({
+      ...prev,
+      [key]: '',
+    }));
   };
 
   if (isLoading) {
@@ -203,10 +229,27 @@ export default function AdminLegalPage() {
                       placeholder="Write the content for this page here..."
                     />
                     <p className="mt-2 text-xs text-gray-500">
-                      Plain text is recommended. Simple line breaks are preserved on the public page.
+                      Plain text is recommended. Simple line breaks are preserved on the public page. If you leave this empty,
+                      the public page will fall back to its built-in default sections.
                     </p>
                   </div>
-                  <div className="flex justify-end gap-3 pt-2 border-t border-white/10 mt-4">
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 pt-2 border-t border-white/10 mt-4">
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => handleResetToDefault(tab.key)}
+                        className="px-3 py-1.5 rounded-lg border border-white/15 bg-white/5 text-gray-200 hover:bg-white/10 transition-colors"
+                      >
+                        Reset to default template
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleClearCustom(tab.key)}
+                        className="px-3 py-1.5 rounded-lg border border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/20 transition-colors"
+                      >
+                        Clear custom content
+                      </button>
+                    </div>
                     <button
                       type="button"
                       onClick={() => handleSave(tab.key)}

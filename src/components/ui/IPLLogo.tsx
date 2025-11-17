@@ -19,123 +19,168 @@ export default function IPLLogo({ size = 'md', className = '', animated = false 
   return (
     <div className="relative group">
       <svg
-        viewBox="0 0 120 120"
+        viewBox="0 0 160 160"
         className={`${sizeClass} ${className} drop-shadow-2xl ${animated ? 'animate-pulse' : ''}`}
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        {/* Outer Glow Circle */}
-        <circle 
-          cx="60" 
-          cy="60" 
-          r="56" 
-          fill="none" 
-          stroke="url(#ipl-gradient-bright)" 
+        {/* Outer ring */}
+        <circle
+          cx="80"
+          cy="80"
+          r="74"
+          fill="none"
+          stroke="url(#su-ring-gradient)"
           strokeWidth="3"
-          className="animate-pulse"
-          opacity="0.6"
+          className={animated ? 'animate-spin-slow' : ''}
+          opacity="0.85"
         />
-        
-        {/* Main Circle */}
-        <circle 
-          cx="60" 
-          cy="60" 
-          r="52" 
-          fill="url(#ipl-bg-gradient)" 
-          stroke="url(#ipl-gradient-bright)" 
+
+        {/* Main badge */}
+        <circle
+          cx="80"
+          cy="80"
+          r="66"
+          fill="url(#su-bg-gradient)"
+          stroke="url(#su-ring-gradient)"
           strokeWidth="2.5"
         />
 
-        {/* Inner Circle Decoration */}
-        <circle 
-          cx="60" 
-          cy="60" 
-          r="45" 
-          fill="none" 
-          stroke="url(#ipl-gradient-bright)" 
-          strokeWidth="1" 
-          opacity="0.3"
+        {/* Inner subtle ring */}
+        <circle
+          cx="80"
+          cy="80"
+          r="56"
+          fill="none"
+          stroke="url(#su-inner-ring)"
+          strokeWidth="1.5"
+          opacity="0.4"
         />
 
-        {/* IPL Text - Custom SVG Letters (No Copyright) */}
-        <g transform="translate(60, 60)">
-          {/* Letter I */}
-          <path d="M -28 -18 L -28 -10 L -22 -10 L -22 10 L -28 10 L -28 18 L -12 18 L -12 10 L -18 10 L -18 -10 L -12 -10 L -12 -18 Z" 
-                fill="url(#ipl-text-gradient)" 
-                stroke="url(#ipl-text-gradient)" 
-                strokeWidth="0.5" />
-          
-          {/* Letter P */}
-          <path d="M -6 -18 L -6 18 L 2 18 L 2 2 L 8 2 Q 14 2 16 -2 Q 18 -6 18 -10 Q 18 -14 16 -16 Q 14 -18 8 -18 Z M 2 -10 L 2 -10 L 8 -10 Q 10 -10 10 -8 Q 10 -6 8 -6 L 2 -6 Z" 
-                fill="url(#ipl-text-gradient)" 
-                stroke="url(#ipl-text-gradient)" 
-                strokeWidth="0.5" />
-          
-          {/* Letter L */}
-          <path d="M 22 -18 L 22 10 L 22 10 L 22 18 L 38 18 L 38 10 L 30 10 L 30 -18 Z" 
-                fill="url(#ipl-text-gradient)" 
-                stroke="url(#ipl-text-gradient)" 
-                strokeWidth="0.5" />
+        {/* Animated cricket arc */}
+        <path
+          d="M32 110 C 48 130 112 130 128 110"
+          stroke="url(#su-arc-gradient)"
+          strokeWidth="4"
+          strokeLinecap="round"
+          fill="none"
+          className={animated ? 'animate-pulse' : ''}
+          opacity="0.7"
+        />
+
+        {/* Text: SportsUp */}
+        <text
+          x="80"
+          y="74"
+          textAnchor="middle"
+          fontSize="20"
+          fontWeight="700"
+          letterSpacing="0.14em"
+          fill="url(#su-text-gradient)"
+        >
+          SPORTS
+        </text>
+        <text
+          x="80"
+          y="96"
+          textAnchor="middle"
+          fontSize="20"
+          fontWeight="700"
+          letterSpacing="0.14em"
+          fill="url(#su-text-gradient)"
+        >
+          UP
+        </text>
+
+        {/* 99 badge */}
+        <g transform="translate(112, 52)">
+          <circle
+            cx="0"
+            cy="0"
+            r="14"
+            fill="url(#su-99-bg)"
+            stroke="rgba(15,23,42,0.8)"
+            strokeWidth="1.5"
+          />
+          <text
+            x="0"
+            y="6"
+            textAnchor="middle"
+            fontSize="14"
+            fontWeight="800"
+            fill="#0B1120"
+          >
+            99
+          </text>
         </g>
 
-        {/* Cricket Ball - Top Right */}
-        <g transform="translate(82, 30)">
-          <circle cx="0" cy="0" r="8" fill="#FF4444" stroke="#CC0000" strokeWidth="1.5" />
-          <path d="M -6 -2 Q 0 0 6 2" stroke="#CC0000" strokeWidth="1.5" fill="none" />
-          <path d="M -6 2 Q 0 0 6 -2" stroke="#CC0000" strokeWidth="1.5" fill="none" />
+        {/* Subtle cricket ball */}
+        <g transform="translate(46, 40) scale(0.9)">
+          <circle cx="0" cy="0" r="8" fill="#F97316" stroke="#FDBA74" strokeWidth="1.5" />
+          <path d="M -5 -2 Q 0 0 5 2" stroke="#FDBA74" strokeWidth="1.2" fill="none" />
+          <path d="M -5 2 Q 0 0 5 -2" stroke="#FDBA74" strokeWidth="1.2" fill="none" />
         </g>
 
-        {/* Cricket Bat - Bottom */}
-        <g transform="translate(60, 78)">
-          {/* Bat blade */}
-          <rect x="-8" y="-8" width="16" height="12" rx="2" fill="url(#bat-gradient)" stroke="#8B4513" strokeWidth="1" />
-          {/* Bat handle */}
-          <rect x="-2" y="4" width="4" height="10" rx="1" fill="#654321" stroke="#4A2511" strokeWidth="1" />
-          {/* Grip */}
-          <rect x="-2.5" y="10" width="5" height="3" fill="#1D3D8D" />
+        {/* Subtle bat at bottom */}
+        <g transform="translate(80, 112) scale(0.9)">
+          <rect x="-8" y="-8" width="16" height="12" rx="2" fill="url(#su-bat-blade)" stroke="#4B5563" strokeWidth="1" />
+          <rect x="-2" y="4" width="4" height="9" rx="1" fill="#0F172A" stroke="#020617" strokeWidth="1" />
+          <rect x="-2.5" y="9" width="5" height="3" fill="#22C55E" />
         </g>
 
-        {/* Decorative Stars */}
-        <g className="animate-pulse">
-          <circle cx="30" cy="35" r="2.5" fill="#FFD700" opacity="0.8" />
-          <circle cx="90" cy="55" r="2" fill="#5091CD" opacity="0.8" />
-          <circle cx="35" cy="85" r="2" fill="#FFD700" opacity="0.8" />
+        {/* Tiny accent stars */}
+        <g className="opacity-80">
+          <circle cx="42" cy="58" r="2.1" fill="#FACC15" />
+          <circle cx="116" cy="90" r="1.8" fill="#38BDF8" />
+          <circle cx="54" cy="110" r="1.8" fill="#FACC15" />
         </g>
 
-        {/* Gradient Definitions */}
         <defs>
-          {/* Bright gradient for borders and text */}
-          <linearGradient id="ipl-gradient-bright" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#2E5FBD" stopOpacity="1" />
-            <stop offset="40%" stopColor="#6BB3FF" stopOpacity="1" />
-            <stop offset="70%" stopColor="#FFE14D" stopOpacity="1" />
-            <stop offset="100%" stopColor="#FFD700" stopOpacity="1" />
+          <linearGradient id="su-ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#38BDF8" />
+            <stop offset="45%" stopColor="#22C55E" />
+            <stop offset="80%" stopColor="#FACC15" />
+            <stop offset="100%" stopColor="#F97316" />
           </linearGradient>
 
-          {/* Text gradient - vibrant */}
-          <linearGradient id="ipl-text-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#FFFFFF" />
-            <stop offset="30%" stopColor="#6BB3FF" />
-            <stop offset="70%" stopColor="#FFE14D" />
+          <radialGradient id="su-bg-gradient" cx="50%" cy="40%" r="70%">
+            <stop offset="0%" stopColor="#0F172A" />
+            <stop offset="60%" stopColor="#020617" />
+            <stop offset="100%" stopColor="#020617" />
+          </radialGradient>
+
+          <linearGradient id="su-inner-ring" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#4B5563" stopOpacity="0.4" />
+            <stop offset="100%" stopColor="#9CA3AF" stopOpacity="0.5" />
+          </linearGradient>
+
+          <linearGradient id="su-arc-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#22C55E" />
+            <stop offset="50%" stopColor="#FACC15" />
+            <stop offset="100%" stopColor="#F97316" />
+          </linearGradient>
+
+          <linearGradient id="su-text-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#E5E7EB" />
+            <stop offset="40%" stopColor="#38BDF8" />
+            <stop offset="80%" stopColor="#FACC15" />
             <stop offset="100%" stopColor="#FFFFFF" />
           </linearGradient>
 
-          {/* Background gradient */}
-          <radialGradient id="ipl-bg-gradient" cx="50%" cy="50%">
-            <stop offset="0%" stopColor="#1D3D8D" stopOpacity="0.95" />
-            <stop offset="100%" stopColor="#0F1F4D" stopOpacity="1" />
+          <radialGradient id="su-99-bg" cx="50%" cy="50%" r="60%">
+            <stop offset="0%" stopColor="#FACC15" />
+            <stop offset="100%" stopColor="#F97316" />
           </radialGradient>
 
-          {/* Bat gradient */}
-          <linearGradient id="bat-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#D2B48C" />
-            <stop offset="100%" stopColor="#8B7355" />
+          <linearGradient id="su-bat-blade" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor="#E5E7EB" />
+            <stop offset="100%" stopColor="#9CA3AF" />
           </linearGradient>
         </defs>
       </svg>
-      
-      {/* Glow effect */}
-      <div className="absolute inset-0 -z-10 blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-300">
+
+      {/* Outer glow */}
+      <div className="absolute inset-0 -z-10 blur-xl opacity-60 group-hover:opacity-90 transition-opacity duration-300">
         <div className={`${sizeClass} bg-gradient-to-br from-ipl-blue-light via-ipl-gold to-ipl-purple rounded-full`} />
       </div>
     </div>
