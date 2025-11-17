@@ -215,7 +215,7 @@ export default function AdminPlayers() {
       age: player.age.toString(),
       dateOfBirth: player.dateOfBirth ? formatDateDDMMYYYY(player.dateOfBirth) : '',
       nationality: player.nationality,
-      jerseyNumber: player.jerseyNumber.toString(),
+      jerseyNumber: player.jerseyNumber ? player.jerseyNumber.toString() : '',
       isCaptain: player.isCaptain || false,
       bowlingStyle: player.bowlingStyle || 'N/A (Batsman)',
       battingStyle: player.battingStyle || 'Right-handed bat',
@@ -1113,12 +1113,12 @@ export default function AdminPlayers() {
                         </label>
                         <select
                           value={formData.nationality}
-                          onChange={(e) => setFormData({...formData, nationality: e.target.value})}
+                          onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
                           className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-ipl-gold"
                           required
                         >
                           <option value="">Select nationality</option>
-                          {CRICKET_COUNTRIES.map(country => (
+                          {CRICKET_COUNTRIES.map((country) => (
                             <option key={country} value={country}>
                               {country}
                             </option>
@@ -1130,14 +1130,23 @@ export default function AdminPlayers() {
                         <label className="block text-sm font-medium text-gray-300 mb-2">
                           Jersey Number
                         </label>
-                        <input
-                          type="number"
-                          value={formData.jerseyNumber}
-                          onChange={(e) => setFormData({...formData, jerseyNumber: e.target.value})}
-                          className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                          placeholder="Enter jersey number"
-                          required
-                        />
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="number"
+                            value={formData.jerseyNumber}
+                            onChange={(e) => setFormData({ ...formData, jerseyNumber: e.target.value })}
+                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                            placeholder="Enter jersey number or leave blank"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setFormData({ ...formData, jerseyNumber: '' })}
+                            className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-white/20 text-gray-200 hover:bg-white/10 transition-colors"
+                          >
+                            N/A
+                          </button>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">Use N/A if a jersey number is not assigned yet.</p>
                       </div>
 
                       <div>
@@ -1146,10 +1155,10 @@ export default function AdminPlayers() {
                         </label>
                         <select
                           value={formData.bowlingStyle}
-                          onChange={(e) => setFormData({...formData, bowlingStyle: e.target.value})}
+                          onChange={(e) => setFormData({ ...formData, bowlingStyle: e.target.value })}
                           className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-ipl-gold"
                         >
-                          {BOWLING_STYLES.map(style => (
+                          {BOWLING_STYLES.map((style) => (
                             <option key={style} value={style}>
                               {style}
                             </option>
@@ -1163,10 +1172,10 @@ export default function AdminPlayers() {
                         </label>
                         <select
                           value={formData.battingStyle}
-                          onChange={(e) => setFormData({...formData, battingStyle: e.target.value})}
+                          onChange={(e) => setFormData({ ...formData, battingStyle: e.target.value })}
                           className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-ipl-gold"
                         >
-                          {BATTING_STYLES.map(style => (
+                          {BATTING_STYLES.map((style) => (
                             <option key={style} value={style}>
                               {style}
                             </option>
@@ -1179,7 +1188,7 @@ export default function AdminPlayers() {
                           type="checkbox"
                           id="isCaptain"
                           checked={formData.isCaptain}
-                          onChange={(e) => setFormData({...formData, isCaptain: e.target.checked})}
+                          onChange={(e) => setFormData({ ...formData, isCaptain: e.target.checked })}
                           className="w-4 h-4 bg-white/10 border border-white/20 rounded text-ipl-gold focus:outline-none focus:border-ipl-gold"
                         />
                         <label htmlFor="isCaptain" className="ml-2 text-sm font-medium text-gray-300">
@@ -1187,7 +1196,7 @@ export default function AdminPlayers() {
                         </label>
                       </div>
 
-                      </div>
+                    </div>
 
                     {/* Stats */}
                     <div>
