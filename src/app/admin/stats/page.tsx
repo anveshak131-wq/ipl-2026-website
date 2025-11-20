@@ -116,10 +116,9 @@ export default function AdminStatsPage() {
   };
 
   const updateBestEconomyRates = (entries: Player[]) => {
-    const eligible = entries.filter(
-      (p) => p.stats.wickets >= 20 && p.stats.economy > 0
-    );
-    setBestEconomyRates(sortByEconomyAsc(eligible));
+    // Let admins freely choose any bowlers here; qualification filters
+    // are enforced on the public /stats page, not in the editor state.
+    setBestEconomyRates(sortByEconomyAsc(entries));
   };
 
   useEffect(() => {
