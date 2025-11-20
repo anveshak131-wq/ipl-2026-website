@@ -176,11 +176,19 @@ export default function RCBLionLogo({ className, minSize = 40, maxSize = 800 }: 
       className={className}
       style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
     >
-      <div className="w-full h-full flex items-center justify-center animate-float hover:scale-105 transition-transform duration-700">
-        <canvas
-          ref={canvasRef}
-          style={{ width: canvasSize, height: canvasSize, display: 'block' }}
-        />
+      <div className="w-full h-full flex items-center justify-center animate-float">
+        <div
+          className="rcb-press-shell flex items-center justify-center transition-transform duration-300"
+          style={{ width: canvasSize, height: canvasSize }}
+        >
+          <div className="rcb-tilt-shell relative w-full h-full">
+            <canvas
+              ref={canvasRef}
+              style={{ width: '100%', height: '100%', display: 'block' }}
+            />
+            <div className="rcb-logo-highlight pointer-events-none absolute inset-0 rounded-3xl" />
+          </div>
+        </div>
       </div>
     </div>
   );

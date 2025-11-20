@@ -391,6 +391,65 @@
     background-size: 1000px 100%;
     animation: shimmer 2s infinite;
   }
+
+  /* RCB logo micro-tilt and press shell */
+  .rcb-press-shell {
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+    border-radius: 1.25rem;
+  }
+
+  .rcb-press-shell:hover {
+    transform: scale(0.97) translateY(2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+  }
+
+  @keyframes rcb-tilt {
+    0%, 100% {
+      transform: rotate(-1deg);
+    }
+    50% {
+      transform: rotate(1deg);
+    }
+  }
+
+  .rcb-tilt-shell {
+    transform-origin: center;
+    animation: rcb-tilt 9s ease-in-out infinite;
+  }
+
+  @keyframes rcb-highlight-sweep {
+    0% {
+      transform: translateX(-130%) rotate(18deg);
+      opacity: 0;
+    }
+    20% {
+      opacity: 0.12;
+    }
+    50% {
+      transform: translateX(0%) rotate(18deg);
+      opacity: 0.2;
+    }
+    80% {
+      opacity: 0.12;
+    }
+    100% {
+      transform: translateX(130%) rotate(18deg);
+      opacity: 0;
+    }
+  }
+
+  .rcb-logo-highlight {
+    background: linear-gradient(
+      120deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.18) 45%,
+      rgba(255, 255, 255, 0.24) 50%,
+      rgba(255, 255, 255, 0.18) 55%,
+      transparent 100%
+    );
+    animation: rcb-highlight-sweep 7s ease-in-out infinite;
+    mix-blend-mode: screen;
+  }
 }
 
 @layer utilities {
