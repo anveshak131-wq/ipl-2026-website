@@ -100,13 +100,13 @@ export default function AdminDashboard() {
             try {
                 const token = localStorage.getItem('adminToken');
                 if (!token) {
-                    router.push('/admin');
+                    router.push('/ipl-admin-2026');
                     return;
                 }
                 setIsAuthenticated(true);
                 fetchStats();
             } catch (error) {
-                router.push('/admin');
+                router.push('/ipl-admin-2026');
             } finally {
                 setAuthLoading(false);
             }
@@ -210,7 +210,7 @@ export default function AdminDashboard() {
             title: 'Add Match',
             description: 'Schedule new match',
             icon: IconPlusCircle,
-            path: '/admin/matches',
+            path: '/ipl-admin-2026/matches',
             gradient: 'from-blue-500/10 to-blue-600/5',
             iconColor: 'text-blue-400'
         },
@@ -219,7 +219,7 @@ export default function AdminDashboard() {
             title: 'Manage Teams',
             description: 'Add or edit teams',
             icon: IconUserGroup,
-            path: '/admin/teams',
+            path: '/ipl-admin-2026/teams',
             gradient: 'from-purple-500/10 to-purple-600/5',
             iconColor: 'text-purple-400'
         },
@@ -228,7 +228,7 @@ export default function AdminDashboard() {
             title: 'Add Content',
             description: 'Manage banners & news',
             icon: IconNewspaper,
-            path: '/admin/content',
+            path: '/ipl-admin-2026/content',
             gradient: 'from-green-500/10 to-green-600/5',
             iconColor: 'text-green-400'
         },
@@ -237,7 +237,7 @@ export default function AdminDashboard() {
             title: 'Settings',
             description: 'Configure system',
             icon: IconCog,
-            path: '/admin/settings',
+            path: '/ipl-admin-2026/settings',
             gradient: 'from-gray-500/10 to-gray-600/5',
             iconColor: 'text-gray-400'
         }
@@ -246,7 +246,7 @@ export default function AdminDashboard() {
     return (
         <div className="flex min-h-screen bg-[#0B0F13]">
             <AuroraBackground />
-            <AdminSidebar currentPage="/admin/dashboard" />
+            <AdminSidebar currentPage="/ipl-admin-2026/dashboard" />
 
             <div className="flex-1 relative z-10">
                 <div className="p-8 max-w-[1600px] mx-auto">

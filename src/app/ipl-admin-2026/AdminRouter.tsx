@@ -24,8 +24,12 @@ export default function AdminRouter() {
         const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
         if (!token) {
           // If already on the admin login page, don't push to the same route
-          if (pathname !== '/admin' && pathname !== '/admin/' && pathname !== '/admin/setup') {
-            router.push('/admin');
+          if (
+            pathname !== '/ipl-admin-2026' &&
+            pathname !== '/ipl-admin-2026/' &&
+            pathname !== '/ipl-admin-2026/setup'
+          ) {
+            router.push('/ipl-admin-2026');
           }
           setIsLoading(false);
           return;
@@ -40,8 +44,12 @@ export default function AdminRouter() {
             // Invalid token, redirect to login
             localStorage.removeItem('adminToken');
             localStorage.removeItem('auth_token');
-            if (pathname !== '/admin' && pathname !== '/admin/' && pathname !== '/admin/setup') {
-              router.push('/admin');
+            if (
+              pathname !== '/ipl-admin-2026' &&
+              pathname !== '/ipl-admin-2026/' &&
+              pathname !== '/ipl-admin-2026/setup'
+            ) {
+              router.push('/ipl-admin-2026');
             }
             setIsLoading(false);
             return;
@@ -61,14 +69,22 @@ export default function AdminRouter() {
           setIsAuthenticated(true);
         } catch (error) {
           console.error('Auth verification error:', error);
-          if (pathname !== '/admin' && pathname !== '/admin/' && pathname !== '/admin/setup') {
-            router.push('/admin');
+          if (
+            pathname !== '/ipl-admin-2026' &&
+            pathname !== '/ipl-admin-2026/' &&
+            pathname !== '/ipl-admin-2026/setup'
+          ) {
+            router.push('/ipl-admin-2026');
           }
         }
       } catch (error) {
         // localStorage not available, redirect to login
-        if (pathname !== '/admin' && pathname !== '/admin/' && pathname !== '/admin/setup') {
-          router.push('/admin');
+        if (
+          pathname !== '/ipl-admin-2026' &&
+          pathname !== '/ipl-admin-2026/' &&
+          pathname !== '/ipl-admin-2026/setup'
+        ) {
+          router.push('/ipl-admin-2026');
         }
       } finally {
         setIsLoading(false);
@@ -94,19 +110,23 @@ export default function AdminRouter() {
 
   // Render the appropriate component based on pathname
   const renderPage = () => {
-    if (pathname === '/admin/dashboard' || pathname === '/admin/') {
+    if (
+      pathname === '/ipl-admin-2026/dashboard' ||
+      pathname === '/ipl-admin-2026/' ||
+      pathname === '/ipl-admin-2026'
+    ) {
       return <AdminDashboard />;
-    } else if (pathname === '/admin/matches') {
+    } else if (pathname === '/ipl-admin-2026/matches') {
       return <AdminMatches />;
-    } else if (pathname === '/admin/teams') {
+    } else if (pathname === '/ipl-admin-2026/teams') {
       return <AdminTeams />;
-    } else if (pathname === '/admin/players') {
+    } else if (pathname === '/ipl-admin-2026/players') {
       return <AdminPlayers />;
-    } else if (pathname === '/admin/content') {
+    } else if (pathname === '/ipl-admin-2026/content') {
       return <AdminContent />;
-    } else if (pathname === '/admin/settings') {
+    } else if (pathname === '/ipl-admin-2026/settings') {
       return <AdminSettings />;
-    } else if (pathname === '/admin/legal') {
+    } else if (pathname === '/ipl-admin-2026/legal') {
       return <AdminLegalPage />;
     }
     return <AdminDashboard />;

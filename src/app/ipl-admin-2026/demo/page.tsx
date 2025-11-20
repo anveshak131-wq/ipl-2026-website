@@ -25,7 +25,7 @@ export default function AdminDemoLogin() {
       if (res.ok && data.token) {
         // Store token in localStorage and redirect to dashboard
         localStorage.setItem("adminToken", data.token);
-        router.push("/admin/dashboard");
+        router.push("/ipl-admin-2026/dashboard");
       } else {
         setError(data.error || "Login failed");
       }

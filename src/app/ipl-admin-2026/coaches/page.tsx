@@ -27,7 +27,7 @@ export default function AdminCoachesPage() {
     const checkAuth = () => {
       const token = localStorage.getItem('auth_token');
       if (!token) {
-        router.push('/admin');
+        router.push('/ipl-admin-2026');
         return;
       }
     };
@@ -128,7 +128,7 @@ export default function AdminCoachesPage() {
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      <AdminSidebar currentPage="/admin/coaches" />
+      <AdminSidebar currentPage="/ipl-admin-2026/coaches" />
       
       <div className="flex-1 p-8">
         <div className="max-w-4xl mx-auto">
@@ -137,7 +137,7 @@ export default function AdminCoachesPage() {
             <div className="mb-2 text-xs text-gray-400 flex items-center gap-1">
               <button
                 type="button"
-                onClick={() => router.push('/admin/dashboard')}
+                onClick={() => router.push('/ipl-admin-2026/dashboard')}
                 className="hover:text-ipl-gold transition-colors"
               >
                 Admin
@@ -145,7 +145,7 @@ export default function AdminCoachesPage() {
               <span className="text-gray-600">/</span>
               <button
                 type="button"
-                onClick={() => router.push('/admin/teams')}
+                onClick={() => router.push('/ipl-admin-2026/teams')}
                 className="hover:text-ipl-gold transition-colors"
               >
                 Competition

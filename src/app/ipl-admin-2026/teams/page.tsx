@@ -88,13 +88,13 @@ export default function AdminTeams() {
             try {
                 const token = localStorage.getItem('adminToken');
                 if (!token) {
-                    router.push('/admin');
+                    router.push('/ipl-admin-2026');
                     return;
                 }
                 setIsAuthenticated(true);
                 fetchTeams();
             } catch (error) {
-                router.push('/admin');
+                router.push('/ipl-admin-2026');
             } finally {
                 setAuthLoading(false);
             }
@@ -281,7 +281,7 @@ export default function AdminTeams() {
     return (
         <div className="flex min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
             <AuroraBackground />
-            <AdminSidebar currentPage="/admin/teams" />
+            <AdminSidebar currentPage="/ipl-admin-2026/teams" />
 
             <div className="flex-1 relative z-10">
                 <div className="p-6 lg:p-8">

@@ -228,13 +228,13 @@ export default function AdminSetup() {
               </p>
               <div className="flex gap-2 mt-3">
                 <a
-                  href="/admin"
+                  href="/ipl-admin-2026"
                   className="flex-1 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg transition text-center"
                 >
                   Go to Admin Login
                 </a>
                 <a
-                  href="/admin/engagement"
+                  href="/ipl-admin-2026/engagement"
                   className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition text-center"
                 >
                   Go to Dashboard

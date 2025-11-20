@@ -44,14 +44,14 @@ export default function AdminSettings() {
       try {
         const token = localStorage.getItem('adminToken');
         if (!token) {
-          router.push('/admin');
+          router.push('/ipl-admin-2026');
           return;
         }
         setIsAuthenticated(true);
         fetchSettings();
       } catch (error) {
         // localStorage not available, redirect to login
-        router.push('/admin');
+        router.push('/ipl-admin-2026');
       } finally {
         setAuthLoading(false);
       }
@@ -108,7 +108,7 @@ export default function AdminSettings() {
   if (isLoading) {
     return (
       <div className="flex min-h-screen bg-ipl-dark">
-        <AdminSidebar currentPage="/admin/settings" />
+        <AdminSidebar currentPage="/ipl-admin-2026/settings" />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-white">Loading settings...</div>
         </div>
@@ -118,7 +118,7 @@ export default function AdminSettings() {
 
   return (
     <div className="flex min-h-screen bg-ipl-dark">
-      <AdminSidebar currentPage="/admin/settings" />
+      <AdminSidebar currentPage="/ipl-admin-2026/settings" />
       
       <div className="flex-1">
         <div className="p-8">
@@ -324,7 +324,7 @@ export default function AdminSettings() {
               </button>
               <button
                 type="button"
-                onClick={() => router.push('/admin/dashboard')}
+                onClick={() => router.push('/ipl-admin-2026/dashboard')}
                 className="flex-1 glass-effect text-white font-semibold py-3 px-6 rounded-lg hover:bg-white/20 transition-all duration-200"
               >
                 Cancel

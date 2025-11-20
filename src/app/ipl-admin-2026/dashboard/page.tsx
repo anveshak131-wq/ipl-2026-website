@@ -67,7 +67,7 @@ export default function AdminDashboard() {
     const checkAuth = async () => {
       const token = localStorage.getItem('auth_token') || localStorage.getItem('adminToken');
       if (!token) {
-        router.push('/admin');
+        router.push('/ipl-admin-2026');
         return;
       }
 
@@ -78,7 +78,7 @@ export default function AdminDashboard() {
         if (!response.ok || !data.success) {
           localStorage.removeItem('adminToken');
           localStorage.removeItem('auth_token');
-          router.push('/admin');
+          router.push('/ipl-admin-2026');
           return;
         }
 
@@ -93,7 +93,7 @@ export default function AdminDashboard() {
         await fetchStats();
       } catch (error) {
         console.error('Auth error:', error);
-        router.push('/admin');
+        router.push('/ipl-admin-2026');
       }
     };
 
@@ -283,7 +283,7 @@ export default function AdminDashboard() {
       title: 'User Engagement',
       description: 'Monitor live chat & active users',
       icon: Users,
-      path: '/admin/engagement',
+      path: '/ipl-admin-2026/engagement',
       color: 'blue',
       gradient: 'from-blue-500/20 to-blue-600/5',
     },
@@ -291,7 +291,7 @@ export default function AdminDashboard() {
       title: 'Live Score',
       description: 'Update match scores',
       icon: Activity,
-      path: '/admin/live-score',
+      path: '/ipl-admin-2026/live-score',
       color: 'green',
       gradient: 'from-green-500/20 to-green-600/5',
     },
@@ -299,7 +299,7 @@ export default function AdminDashboard() {
       title: 'Manage Matches',
       description: 'Schedule & configure matches',
       icon: Calendar,
-      path: '/admin/matches',
+      path: '/ipl-admin-2026/matches',
       color: 'purple',
       gradient: 'from-purple-500/20 to-purple-600/5',
     },
@@ -307,7 +307,7 @@ export default function AdminDashboard() {
       title: 'Content',
       description: 'Publish news & updates',
       icon: BarChart3,
-      path: '/admin/content',
+      path: '/ipl-admin-2026/content',
       color: 'orange',
       gradient: 'from-orange-500/20 to-orange-600/5',
     },
@@ -315,7 +315,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      <AdminSidebar currentPage="/admin/dashboard" />
+      <AdminSidebar currentPage="/ipl-admin-2026/dashboard" />
 
       <main className="flex-1 overflow-auto">
         <div className="max-w-7xl mx-auto px-6 py-8">

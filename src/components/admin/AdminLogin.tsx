@@ -43,7 +43,7 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
         } catch (e) {
           // ignore if localStorage isn't available
         }
-        router.push('/admin/dashboard');
+        router.push('/ipl-admin-2026/dashboard');
       } else {
         setError(data.error || 'Invalid credentials');
       }

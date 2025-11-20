@@ -136,13 +136,13 @@ export default function AdminStatsPage() {
       try {
         const token = localStorage.getItem('adminToken');
         if (!token) {
-          router.push('/admin');
+          router.push('/ipl-admin-2026');
           return;
         }
         setIsAuthenticated(true);
         fetchData();
       } catch {
-        router.push('/admin');
+        router.push('/ipl-admin-2026');
       } finally {
         setAuthLoading(false);
       }
@@ -480,7 +480,7 @@ export default function AdminStatsPage() {
   if (isLoading) {
     return (
       <div className="flex min-h-screen bg-ipl-dark">
-        <AdminSidebar currentPage="/admin/stats" />
+        <AdminSidebar currentPage="/ipl-admin-2026/stats" />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-white">Loading stats overview...</div>
         </div>
@@ -490,7 +490,7 @@ export default function AdminStatsPage() {
 
   return (
     <div className="flex min-h-screen bg-ipl-dark">
-      <AdminSidebar currentPage="/admin/stats" />
+      <AdminSidebar currentPage="/ipl-admin-2026/stats" />
 
       <div className="flex-1 p-8 space-y-6 overflow-y-auto">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -498,7 +498,7 @@ export default function AdminStatsPage() {
             <div className="mb-2 text-xs text-gray-400 flex items-center gap-1">
               <button
                 type="button"
-                onClick={() => router.push('/admin/dashboard')}
+                onClick={() => router.push('/ipl-admin-2026/dashboard')}
                 className="hover:text-ipl-gold transition-colors"
               >
                 Admin
@@ -506,7 +506,7 @@ export default function AdminStatsPage() {
               <span className="text-gray-600">/</span>
               <button
                 type="button"
-                onClick={() => router.push('/admin/stats')}
+                onClick={() => router.push('/ipl-admin-2026/stats')}
                 className="hover:text-ipl-gold transition-colors"
               >
                 Stats

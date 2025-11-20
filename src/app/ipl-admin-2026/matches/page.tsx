@@ -327,7 +327,7 @@ export default function AdminMatches() {
         return (
             <div className="flex min-h-screen bg-[#0B0F13]">
                 <AuroraBackground />
-                <AdminSidebar currentPage="/admin/matches" />
+                <AdminSidebar currentPage="/ipl-admin-2026/matches" />
                 <div className="flex-1 flex items-center justify-center">
                     <div className="text-white">Loading matches...</div>
                 </div>
@@ -338,7 +338,7 @@ export default function AdminMatches() {
     return (
         <div className="flex min-h-screen bg-[#0B0F13]">
             <AuroraBackground />
-            <AdminSidebar currentPage="/admin/matches" />
+            <AdminSidebar currentPage="/ipl-admin-2026/matches" />
 
             <div className="flex-1 relative z-10">
                 <div className="p-8">

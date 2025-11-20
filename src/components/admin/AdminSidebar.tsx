@@ -60,7 +60,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
   const menuGroups: { [key: string]: MenuItem[] } = {
     Dashboard: [
       {
-        href: '/admin/dashboard',
+        href: '/ipl-admin-2026/dashboard',
         label: 'Dashboard',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,7 +72,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
     ],
     Management: [
       {
-        href: '/admin/teams',
+        href: '/ipl-admin-2026/teams',
         label: 'Teams',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -82,7 +82,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         group: 'Management',
       },
       {
-        href: '/admin/matches',
+        href: '/ipl-admin-2026/matches',
         label: 'Matches',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,7 +92,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         group: 'Management',
       },
       {
-        href: '/admin/players',
+        href: '/ipl-admin-2026/players',
         label: 'Players',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,7 +102,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         group: 'Management',
       },
       {
-        href: '/admin/coaches',
+        href: '/ipl-admin-2026/coaches',
         label: 'Coaching Staff',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -112,7 +112,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         group: 'Management',
       },
       {
-        href: '/admin/key-players',
+        href: '/ipl-admin-2026/key-players',
         label: 'Key Players',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,7 +124,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
     ],
     Content: [
       {
-        href: '/admin/news',
+        href: '/ipl-admin-2026/news',
         label: 'News',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -134,7 +134,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         group: 'Content',
       },
       {
-        href: '/admin/content',
+        href: '/ipl-admin-2026/content',
         label: 'Content Hub',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -149,7 +149,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         group: 'Content',
       },
       {
-        href: '/admin/stats',
+        href: '/ipl-admin-2026/stats',
         label: 'Stats Hub',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -166,7 +166,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
     ],
     Live: [
       {
-        href: '/admin/live-score',
+        href: '/ipl-admin-2026/live-score',
         label: 'Live Score',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -176,7 +176,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         group: 'Live',
       },
       {
-        href: '/admin/engagement',
+        href: '/ipl-admin-2026/engagement',
         label: 'Engagement',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -188,7 +188,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
     ],
     Settings: [
       {
-        href: '/admin/settings',
+        href: '/ipl-admin-2026/settings',
         label: 'Settings',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -199,7 +199,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         group: 'Settings',
       },
       {
-        href: '/admin/legal',
+        href: '/ipl-admin-2026/legal',
         label: 'Legal Pages',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -218,7 +218,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
 
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
-    router.push('/admin');
+    router.push('/ipl-admin-2026');
   };
 
   const adminInitials = adminName

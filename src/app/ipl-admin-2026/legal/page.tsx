@@ -65,7 +65,7 @@ export default function AdminLegalPage() {
     const checkAuth = async () => {
       const token = localStorage.getItem('auth_token') || localStorage.getItem('adminToken');
       if (!token) {
-        router.push('/admin');
+        router.push('/ipl-admin-2026');
         return;
       }
       try {
@@ -74,7 +74,7 @@ export default function AdminLegalPage() {
         if (!res.ok || !data.success) {
           localStorage.removeItem('adminToken');
           localStorage.removeItem('auth_token');
-          router.push('/admin');
+          router.push('/ipl-admin-2026');
           return;
         }
         const role = data.user?.role;
@@ -86,7 +86,7 @@ export default function AdminLegalPage() {
         setIsAuthenticated(true);
       } catch (err) {
         console.error('Auth error:', err);
-        router.push('/admin');
+        router.push('/ipl-admin-2026');
       } finally {
         setIsLoading(false);
       }
@@ -171,7 +171,7 @@ export default function AdminLegalPage() {
       const token = localStorage.getItem('auth_token') || localStorage.getItem('adminToken');
       if (!token) {
         alert('Missing admin token. Please log in again.');
-        router.push('/admin');
+        router.push('/ipl-admin-2026');
         return;
       }
       const payloadContent =
@@ -316,7 +316,7 @@ export default function AdminLegalPage() {
 
   return (
     <div className="flex min-h-screen bg-slate-900">
-      <AdminSidebar currentPage="/admin/legal" />
+      <AdminSidebar currentPage="/ipl-admin-2026/legal" />
       <main className="flex-grow">
         <div className="max-w-5xl mx-auto px-6 py-8">
           <header className="mb-8">

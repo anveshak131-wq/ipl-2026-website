@@ -63,7 +63,7 @@ export default function AdminEngagementPage() {
     const checkAuth = async () => {
       const token = localStorage.getItem('auth_token') || localStorage.getItem('adminToken');
       if (!token) {
-        router.push('/admin');
+        router.push('/ipl-admin-2026');
         return;
       }
 
@@ -76,7 +76,7 @@ export default function AdminEngagementPage() {
           // Invalid token, redirect to login
           localStorage.removeItem('adminToken');
           localStorage.removeItem('auth_token');
-          router.push('/admin');
+          router.push('/ipl-admin-2026');
           return;
         }
 
@@ -94,7 +94,7 @@ export default function AdminEngagementPage() {
         setIsLoading(false);
       } catch (error) {
         console.error('Auth verification error:', error);
-        router.push('/admin');
+        router.push('/ipl-admin-2026');
       }
     };
 

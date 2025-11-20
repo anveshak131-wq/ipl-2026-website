@@ -1,13 +1,13 @@
 'use client';
 
-import ContentManager from '@/app/admin/content/ContentManager';
+import ContentManager from '@/app/ipl-admin-2026/content/ContentManager';
 
 export default function AdminNewsPage() {
   return (
     <ContentManager
       initialType="news"
       restrictToType="news"
-      currentPagePath="/admin/news"
+      currentPagePath="/ipl-admin-2026/news"
     />
   );
 }

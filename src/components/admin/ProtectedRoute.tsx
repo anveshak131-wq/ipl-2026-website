@@ -18,7 +18,7 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
     if (!token) {
-      router.push('/admin');
+      router.push('/ipl-admin-2026');
     }
   }, [router]);
 
