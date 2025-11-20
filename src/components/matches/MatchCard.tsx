@@ -52,7 +52,7 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
     }
 
     if (animatedPath.endsWith('rcb_inferno_lion.svg')) {
-      return <RCBLionLogo className="w-10 h-10" />;
+      return <RCBLionLogo className="w-12 h-12" />;
     }
 
     return (
