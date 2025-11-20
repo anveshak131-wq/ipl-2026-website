@@ -62,7 +62,7 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
                 <RCBLottie className="w-full h-full" />
               </div>
             ) : isRCBStaticExport ? (
-              <div className="relative z-10 w-24 h-24 flex items-center justify-center">
+              <div className="relative z-10 w-20 h-20 flex items-center justify-center">
                 <RCBLionLogo className="w-full h-full" />
               </div>
             ) : (
