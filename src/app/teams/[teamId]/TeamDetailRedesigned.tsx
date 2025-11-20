@@ -196,7 +196,7 @@ function PlayerCard3D({ player, onClick, index }: any) {
                  boxShadow: '0 4px 20px rgba(236,28,36,0.5)',
                  color: '#FFFFFF'
                }}>
-            <span>{player.jerseyNumber || '-'}</span>
+            <span>{player.jerseyNumber > 0 ? player.jerseyNumber : 'N/A'}</span>
           </div>
 
           {/* Player Avatar Placeholder (Circle with Initials) */}

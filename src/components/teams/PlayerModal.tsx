@@ -281,18 +281,16 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
               </div>
 
               {/* Jersey Number Badge */}
-              {player.jerseyNumber && (
-                <div 
-                  className="absolute top-6 left-6 md:relative md:top-0 md:left-0 w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center font-black text-2xl md:text-3xl shadow-2xl transform hover:scale-110 transition-transform duration-300"
-                  style={{
-                    background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
-                    color: '#FFFFFF',
-                    boxShadow: `0 5px 25px ${primaryColor.glow}, 0 0 40px ${secondaryColor.glow}30`
-                  }}
-                >
-                  {player.jerseyNumber}
-                </div>
-              )}
+              <div 
+                className="absolute top-6 left-6 md:relative md:top-0 md:left-0 w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center font-black text-2xl md:text-3xl shadow-2xl transform hover:scale-110 transition-transform duration-300"
+                style={{
+                  background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
+                  color: '#FFFFFF',
+                  boxShadow: `0 5px 25px ${primaryColor.glow}, 0 0 40px ${secondaryColor.glow}30`
+                }}
+              >
+                {player.jerseyNumber > 0 ? player.jerseyNumber : 'N/A'}
+              </div>
             </div>
           </div>
 
@@ -378,20 +376,18 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                 />
                 Career Statistics
               </h3>
-              {player.jerseyNumber && (
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-semibold" style={{ color: '#FFFFFF' }}>Jersey:</span>
-                  <span 
-                    className="inline-flex items-center justify-center w-12 h-12 rounded-full font-black text-lg shadow-lg text-white"
-                    style={{
-                      background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
-                      boxShadow: `0 5px 15px ${primaryColor.glow}`
-                    }}
-                  >
-                    {player.jerseyNumber}
-                  </span>
-                </div>
-              )}
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-semibold" style={{ color: '#FFFFFF' }}>Jersey:</span>
+                <span 
+                  className="inline-flex items-center justify-center w-12 h-12 rounded-full font-black text-lg shadow-lg text-white"
+                  style={{
+                    background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
+                    boxShadow: `0 5px 15px ${primaryColor.glow}`
+                  }}
+                >
+                  {player.jerseyNumber > 0 ? player.jerseyNumber : 'N/A'}
+                </span>
+              </div>
             </div>
             
             {/* Batting Performance - Show for all players */}

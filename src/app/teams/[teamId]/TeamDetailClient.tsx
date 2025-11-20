@@ -905,7 +905,7 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
           boxShadow: `0 5px 15px ${primaryColor.glow}`,
         }}
       >
-        {player.jerseyNumber || '-'}
+        {player.jerseyNumber > 0 ? player.jerseyNumber : 'N/A'}
       </div>
 
       {/* Hover shimmer effect */}

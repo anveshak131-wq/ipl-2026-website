@@ -162,7 +162,12 @@ export default function StatsPage() {
     const base = publishedStats?.leaders?.bestEconomyRates?.length
       ? publishedStats.leaders.bestEconomyRates
       : computedBestEconomyRates;
-    return sortByEconomyAsc(base);
+
+    const eligible = base.filter(
+      (p) => p.stats.wickets >= 20 && p.stats.economy > 0
+    );
+
+    return sortByEconomyAsc(eligible).slice(0, 5);
   }, [publishedStats?.leaders?.bestEconomyRates, computedBestEconomyRates]);
 
   const computeTeamAggregate = (teamId: string): TeamAggregate => {

@@ -116,7 +116,10 @@ export default function AdminStatsPage() {
   };
 
   const updateBestEconomyRates = (entries: Player[]) => {
-    setBestEconomyRates(sortByEconomyAsc(entries));
+    const eligible = entries.filter(
+      (p) => p.stats.wickets >= 20 && p.stats.economy > 0
+    );
+    setBestEconomyRates(sortByEconomyAsc(eligible));
   };
 
   useEffect(() => {
