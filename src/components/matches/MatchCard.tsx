@@ -1,6 +1,9 @@
-'use client';
+"use client";
 
 import { Match } from '@/types';
+import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
+import RCBLottie from '@/components/ui/RCBLottie';
+import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 
 interface MatchCardProps {
   match: Match;
@@ -40,6 +43,30 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
     }
   };
 
+  const renderTeamLogo = (team: Match['team1']) => {
+    const animatedPath = getAnimatedLogoPath(team.id);
+    const fallbackPath = team.logo || getLogoPath(team.id);
+
+    if (animatedPath.endsWith('.json')) {
+      return <RCBLottie className="w-10 h-10" />;
+    }
+
+    if (animatedPath.endsWith('rcb-lion-logo.svg')) {
+      return <RCBLionLogo className="w-10 h-10" />;
+    }
+
+    return (
+      <img
+        src={animatedPath}
+        alt={`${team.shortName} logo`}
+        className="w-10 h-10 object-contain"
+        onError={(e) => {
+          (e.target as HTMLImageElement).src = fallbackPath;
+        }}
+      />
+    );
+  };
+
   return (
     <div
       className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 hover:border-ipl-gold/50 transition-all duration-300 hover:shadow-2xl hover:shadow-ipl-gold/20 transform hover:scale-105 animate-scale-in"
@@ -75,10 +102,8 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
         <div className="space-y-4">
           {/* Team 1 */}
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-ipl-purple to-ipl-gold flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-bold text-xs">
-                {match.team1.shortName}
-              </span>
+            <div className="w-12 h-12 rounded-full bg-black/30 border border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+              {renderTeamLogo(match.team1)}
             </div>
             <div className="flex-1">
               <p className="text-white font-semibold text-sm">
@@ -109,10 +134,8 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
 
           {/* Team 2 */}
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-ipl-purple to-ipl-gold flex items-center justify-center flex-shrink-0">
-              <span className="text-white font-bold text-xs">
-                {match.team2.shortName}
-              </span>
+            <div className="w-12 h-12 rounded-full bg-black/30 border border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+              {renderTeamLogo(match.team2)}
             </div>
             <div className="flex-1">
               <p className="text-white font-semibold text-sm">

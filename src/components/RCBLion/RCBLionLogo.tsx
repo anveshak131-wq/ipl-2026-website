@@ -160,12 +160,51 @@ export default function RCBLionLogo({ className, minSize = 40, maxSize = 800 }: 
 
     ctx.restore();
 
-    // RCB text below lion
-    ctx.font = `900 ${radius * 0.6}px Arial, sans-serif`;
+    // RCB letters (slightly above the bottom ribbon)
+    ctx.font = `900 ${radius * 0.5}px Arial, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#FFD700';
-    ctx.fillText('RCB', cx, cy + radius * 0.6);
+    ctx.fillText('RCB', cx, cy + radius * 0.2);
+
+    // Bottom ribbon with full team name
+    const ribbonHeight = radius * 0.26;
+    const ribbonWidth = radius * 1.7;
+    const ribbonY = cy + radius * 0.6;
+    const rx = cx - ribbonWidth / 2;
+    const ry = ribbonY - ribbonHeight / 2;
+    const rRadius = ribbonHeight * 0.4;
+
+    ctx.beginPath();
+    ctx.moveTo(rx + rRadius, ry);
+    ctx.lineTo(rx + ribbonWidth - rRadius, ry);
+    ctx.quadraticCurveTo(rx + ribbonWidth, ry, rx + ribbonWidth, ry + rRadius);
+    ctx.lineTo(rx + ribbonWidth, ry + ribbonHeight - rRadius);
+    ctx.quadraticCurveTo(rx + ribbonWidth, ry + ribbonHeight, rx + ribbonWidth - rRadius, ry + ribbonHeight);
+    ctx.lineTo(rx + rRadius, ry + ribbonHeight);
+    ctx.quadraticCurveTo(rx, ry + ribbonHeight, rx, ry + ribbonHeight - rRadius);
+    ctx.lineTo(rx, ry + rRadius);
+    ctx.quadraticCurveTo(rx, ry, rx + rRadius, ry);
+    ctx.closePath();
+
+    const ribbonGrad = ctx.createLinearGradient(rx, ry, rx + ribbonWidth, ry + ribbonHeight);
+    ribbonGrad.addColorStop(0, '#C8921C');
+    ribbonGrad.addColorStop(0.5, '#FFD700');
+    ribbonGrad.addColorStop(1, '#C8921C');
+    ctx.fillStyle = ribbonGrad;
+    ctx.fill();
+
+    ctx.strokeStyle = 'rgba(0,0,0,0.45)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Ribbon text: full team name
+    ctx.font = `600 ${radius * 0.18}px Arial, sans-serif`;
+    ctx.fillStyle = '#111111';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const ribbonText = 'Royal Challengers Bengaluru';
+    ctx.fillText(ribbonText, cx, ribbonY);
   }, [size]);
 
   const canvasSize = Math.max(28, size);
