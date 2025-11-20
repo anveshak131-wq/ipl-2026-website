@@ -11,6 +11,7 @@ import { Team, Player } from '@/types';
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import RCBLottie from '@/components/ui/RCBLottie';
 import RCBLion from '@/components/RCBLion/RCBLion';
+import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { getAnimatedLogoPath } from '@/lib/logoUtils';
 
 interface TeamDetailRedesignedProps {
@@ -391,7 +392,7 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
                 <div className="absolute inset-0 blur-3xl opacity-50 bg-gradient-to-r from-red-500 to-yellow-500 animate-pulse" />
                 <div className="relative w-64 h-64 mx-auto transform hover:scale-110 hover:rotate-6 transition-all duration-500 animate-float">
                   {teamData?.id === '1' ? (
-                    <RCBLion width={256} height={256} />
+                    <RCBLionLogo className="w-full h-full" />
                   ) : (
                     <RCBLottie className="w-full h-full" />
                   )}

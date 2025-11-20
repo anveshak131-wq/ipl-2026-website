@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AuroraBackground from '@/components/ui/AuroraBackground';
-import RCBLion from '@/components/RCBLion/RCBLion';
+import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { Match, Team } from '@/types';
 import { api } from '@/lib/data';
 
@@ -917,7 +917,7 @@ export default function AdminMatches() {
                                                         <div className="flex items-center gap-2">
                                                             {match.team1.id === '1' ? (
                                                               <div className="w-8 h-8 flex items-center justify-center">
-                                                                <RCBLion width={32} height={32} />
+                                                                <RCBLionLogo className="w-8 h-8" />
                                                               </div>
                                                             ) : (
                                                               <img src={match.team1.logo} alt={match.team1.shortName} className="w-8 h-8 object-contain" />
@@ -928,7 +928,7 @@ export default function AdminMatches() {
                                                         <div className="flex items-center gap-2">
                                                             {match.team2.id === '1' ? (
                                                               <div className="w-8 h-8 flex items-center justify-center">
-                                                                <RCBLion width={32} height={32} />
+                                                                <RCBLionLogo className="w-8 h-8" />
                                                               </div>
                                                             ) : (
                                                               <img src={match.team2.logo} alt={match.team2.shortName} className="w-8 h-8 object-contain" />
@@ -1001,7 +1001,7 @@ export default function AdminMatches() {
                                                             <div className="flex items-center gap-2">
                                                                 {match.team1.id === '1' ? (
                                                                   <div className="w-10 h-10 flex items-center justify-center">
-                                                                    <RCBLion width={40} height={40} />
+                                                                    <RCBLionLogo className="w-10 h-10" />
                                                                   </div>
                                                                 ) : (
                                                                   <img src={match.team1.logo} alt={match.team1.shortName} className="w-10 h-10 object-contain" />
@@ -1012,7 +1012,7 @@ export default function AdminMatches() {
                                                             <div className="flex items-center gap-2">
                                                                 {match.team2.id === '1' ? (
                                                                   <div className="w-10 h-10 flex items-center justify-center">
-                                                                    <RCBLion width={40} height={40} />
+                                                                    <RCBLionLogo className="w-10 h-10" />
                                                                   </div>
                                                                 ) : (
                                                                   <img src={match.team2.logo} alt={match.team2.shortName} className="w-10 h-10 object-contain" />

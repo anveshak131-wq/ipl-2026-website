@@ -8,7 +8,6 @@ import { Team } from '@/types';
 import { api } from '@/lib/data';
 import { getAnimatedLogoPath } from '@/lib/logoUtils';
 import RCBLottie from '@/components/ui/RCBLottie';
-import RCBLion from '@/components/RCBLion/RCBLion';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 
 type SortField = 'name' | 'shortName';

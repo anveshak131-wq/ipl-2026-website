@@ -4,7 +4,6 @@ import { Team } from '@/types';
 import { useRouter } from 'next/navigation';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import RCBLottie from '@/components/ui/RCBLottie';
-import RCBLion from '@/components/RCBLion/RCBLion';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { getOptimalTextColorForGradient } from '@/lib/colorUtils';
 import { motion } from 'framer-motion';

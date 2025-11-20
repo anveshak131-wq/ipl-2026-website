@@ -1,4 +1,3 @@
-import RCBLion from '@/components/RCBLion/RCBLion';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 
 export const metadata = {
@@ -13,9 +12,6 @@ export default function Page() {
         <p className="text-sm text-gray-600 mb-6">Client-side canvas animation with pulsing red background.</p>
         <div className="mx-auto" style={{ width: 420, height: 420 }}>
           <RCBLionLogo className="mx-auto w-[420px] h-[420px]" />
-        </div>
-        <div className="mt-6">
-          <img src="/assets/rcb-lion-logo.svg" alt="RCB logo static" style={{ width: 180, height: 'auto', margin: '0 auto' }} />
         </div>
       </div>
     </main>
