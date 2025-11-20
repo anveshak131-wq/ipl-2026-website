@@ -121,6 +121,16 @@ export default function AdminStatsPage() {
     setBestEconomyRates(sortByEconomyAsc(entries));
   };
 
+  const rebuildLeaderboardsFromStats = () => {
+    // Rebuild all four leaderboards purely from current player stats.
+    // This is useful right after adding/editing players so the rankings
+    // reflect the latest wickets, runs, strike rates, and economies.
+    updateTopRunScorers(suggestedTopRunScorers);
+    updateTopWicketTakers(suggestedTopWicketTakers);
+    updateBestStrikeRates(suggestedBestStrikeRates);
+    updateBestEconomyRates(suggestedBestEconomyRates);
+  };
+
   useEffect(() => {
     const checkAuth = () => {
       try {
@@ -630,7 +640,16 @@ export default function AdminStatsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-[1.5fr,1fr] gap-6">
           <section className="space-y-4">
             <div className="glass-effect rounded-xl p-6">
-              <h2 className="text-lg font-semibold text-white mb-3">Auto-computed season leaders</h2>
+              <div className="flex items-center justify-between mb-3 gap-3">
+                <h2 className="text-lg font-semibold text-white">Auto-computed season leaders</h2>
+                <button
+                  type="button"
+                  onClick={rebuildLeaderboardsFromStats}
+                  className="text-[11px] px-3 py-1 rounded-full border border-white/20 text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+                >
+                  Rebuild from latest stats
+                </button>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                 <LeaderboardEditor
                   title="Orange Cap (Runs)"
