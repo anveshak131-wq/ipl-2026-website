@@ -10,7 +10,8 @@ interface AdminLoginProps {
 export default function AdminLogin({ onLogin }: AdminLoginProps) {
   const [credentials, setCredentials] = useState({
     username: '',
-    password: ''
+    password: '',
+    totp: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -106,6 +107,24 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
                 onChange={handleChange}
                 className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ipl-gold focus:border-transparent transition-all duration-200"
                 placeholder="Enter your password"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="totp" className="block text-sm font-medium text-gray-300 mb-2">
+                2FA Code
+              </label>
+              <input
+                id="totp"
+                name="totp"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]{6}"
+                maxLength={6}
+                value={credentials.totp}
+                onChange={handleChange}
+                className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ipl-gold focus:border-transparent transition-all duration-200"
+                placeholder="Enter 6-digit code from your authenticator"
               />
             </div>
           </div>

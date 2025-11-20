@@ -5,6 +5,90 @@
 
 import crypto from 'node:crypto';
 
+// --- Optional TOTP-based 2FA helpers ---
+// Uses an environment-provided Base32 secret (ADMIN_TOTP_SECRET_BASE32)
+// and Web Crypto (globalThis.crypto.subtle) to verify a 6-digit TOTP.
+
+// Simple Base32 decoder for RFC 4648 alphabet (A-Z2-7)
+function base32ToBytes(base32) {
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+  const clean = base32.toUpperCase().replace(/[^A-Z2-7]/g, '');
+  let bits = '';
+  for (const c of clean) {
+    const val = alphabet.indexOf(c);
+    if (val === -1) continue;
+    bits += val.toString(2).padStart(5, '0');
+  }
+  const bytes = [];
+  for (let i = 0; i + 8 <= bits.length; i += 8) {
+    bytes.push(parseInt(bits.slice(i, i + 8), 2));
+  }
+  return new Uint8Array(bytes);
+}
+
+async function generateTotpCode(secretBase32, timeStep = 30, digits = 6) {
+  const webCrypto = globalThis.crypto;
+  const keyBytes = base32ToBytes(secretBase32);
+  if (!keyBytes.length) return null;
+
+  const epochSeconds = Math.floor(Date.now() / 1000);
+  const counter = Math.floor(epochSeconds / timeStep);
+
+  const buf = new ArrayBuffer(8);
+  const view = new DataView(buf);
+  // high 4 bytes remain 0, set low 4 bytes
+  view.setUint32(4, counter, false);
+  const counterBytes = new Uint8Array(buf);
+
+  const cryptoKey = await webCrypto.subtle.importKey(
+    'raw',
+    keyBytes,
+    { name: 'HMAC', hash: 'SHA-1' },
+    false,
+    ['sign']
+  );
+
+  const hmac = new Uint8Array(
+    await webCrypto.subtle.sign('HMAC', cryptoKey, counterBytes)
+  );
+
+  const offset = hmac[hmac.length - 1] & 0x0f;
+  const binary = ((hmac[offset] & 0x7f) << 24) |
+    (hmac[offset + 1] << 16) |
+    (hmac[offset + 2] << 8) |
+    (hmac[offset + 3]);
+
+  const otp = binary % 10 ** digits;
+  return otp.toString().padStart(digits, '0');
+}
+
+async function verifyTotpCode(secretBase32, code, window = 1) {
+  if (!secretBase32) return true; // 2FA disabled if no secret configured
+  const cleaned = String(code || '').replace(/\s+/g, '');
+  if (!cleaned) return false;
+
+  const epochSeconds = Math.floor(Date.now() / 1000);
+  const timeStep = 30;
+  const baseCounter = Math.floor(epochSeconds / timeStep);
+
+  for (let offset = -window; offset <= window; offset++) {
+    const testTime = (baseCounter + offset) * timeStep * 1000;
+    const simulatedNow = Date.now;
+    // Temporarily override Date.now for generateTotpCode
+    try {
+      Date.now = () => testTime;
+      const expected = await generateTotpCode(secretBase32, timeStep);
+      if (expected === cleaned) {
+        return true;
+      }
+    } finally {
+      Date.now = simulatedNow;
+    }
+  }
+
+  return false;
+}
+
 // Mock admin users - matches src/lib/auth.ts
 const ADMIN_USERS = {
   admin: {
@@ -77,7 +161,7 @@ export const onRequest = async (context) => {
 
   try {
     const body = await request.json();
-    const { username, password } = body;
+    const { username, password, totp } = body;
 
     if (!username || !password) {
       return new Response(
@@ -92,9 +176,28 @@ export const onRequest = async (context) => {
       );
     }
 
+    const totpSecret = env && env.ADMIN_TOTP_SECRET_BASE32;
+
     // First check hardcoded admin users
     const hardcodedUser = ADMIN_USERS[username];
     if (hardcodedUser && hardcodedUser.password === password) {
+      // If TOTP is configured, require a valid 6-digit code
+      if (totpSecret) {
+        const ok2fa = await verifyTotpCode(totpSecret, totp);
+        if (!ok2fa) {
+          return new Response(
+            JSON.stringify({ error: 'Invalid 2FA code' }),
+            {
+              status: 401,
+              headers: {
+                'Content-Type': 'application/json',
+                ...corsHeaders,
+              },
+            }
+          );
+        }
+      }
+
       const token = generateToken(hardcodedUser);
       return new Response(
         JSON.stringify({
@@ -126,6 +229,23 @@ export const onRequest = async (context) => {
         
         // Only allow admin role users
         if (user.role === 'admin' && verifyPassword(password, user.salt, user.hashedPassword)) {
+          // If TOTP is configured, require a valid 6-digit code
+          if (totpSecret) {
+            const ok2fa = await verifyTotpCode(totpSecret, totp);
+            if (!ok2fa) {
+              return new Response(
+                JSON.stringify({ error: 'Invalid 2FA code' }),
+                {
+                  status: 401,
+                  headers: {
+                    'Content-Type': 'application/json',
+                    ...corsHeaders,
+                  },
+                }
+              );
+            }
+          }
+
           // Use the existing token from KV
           const token = user.token;
           
