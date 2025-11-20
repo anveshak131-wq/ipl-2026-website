@@ -56,6 +56,8 @@
     </line>
   </g>
 
+  <!-- Core logo (crest + lion + text) scaled up inside viewBox -->
+  <g id="core-logo" transform="scale(1.16)">
   <!-- Jagged geometric crest -->
   <g id="crest" transform="translate(0, 6)">
     <!-- Outer jagged frame -->
@@ -298,5 +300,6 @@
       RCB
       <animate attributeName="fill" values="#F4362B;#FFC745;#F4362B" dur="2.4s" repeatCount="indefinite"/>
     </text>
+  </g>
   </g>
 </svg>
