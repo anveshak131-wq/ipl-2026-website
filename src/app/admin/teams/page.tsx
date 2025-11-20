@@ -454,7 +454,7 @@ export default function AdminTeams() {
                                                                         );
                                                                     }
 
-                                                                    if (anim.endsWith('rcb-lion-logo.svg')) {
+                                                                    if (anim.endsWith('rcb_inferno_lion.svg')) {
                                                                         return (
                                                                             <div className="w-8 h-8 flex items-center justify-center">
                                                                                 <RCBLionLogo className="w-full h-full" />
@@ -546,7 +546,7 @@ export default function AdminTeams() {
                                                             );
                                                         }
 
-                                                        if (anim.endsWith('rcb-lion-logo.svg')) {
+                                                        if (anim.endsWith('rcb_inferno_lion.svg')) {
                                                             return (
                                                                 <div className="w-10 h-10 flex items-center justify-center">
                                                                     <RCBLionLogo className="w-full h-full" />

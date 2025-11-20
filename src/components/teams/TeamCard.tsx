@@ -18,7 +18,7 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
   const animatedLogo = getAnimatedLogoPath(team.id);
   const fallbackLogo = getLogoPath(team.id);
   // Prefer the new client-side component for RCB (team id 1) when available
-  const isRCBStaticExport = animatedLogo.endsWith('rcb-lion-logo.svg');
+  const isRCBStaticExport = animatedLogo.endsWith('rcb_inferno_lion.svg');
 
   const handleViewFullSquad = () => {
     // Ensure team ID has 'team' prefix for the route

@@ -433,7 +433,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                       <div className="w-3/4 h-3/4 relative z-10">
                         <RCBLottie className="w-full h-full" />
                       </div>
-                    ) : teamLogoPath.endsWith('rcb-lion-logo.svg') ? (
+                    ) : teamLogoPath.endsWith('rcb_inferno_lion.svg') ? (
                       <div className="w-3/4 h-3/4 relative z-10 flex items-center justify-center">
                         <RCBLionLogo className="w-full h-full" />
                       </div>

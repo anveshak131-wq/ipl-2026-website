@@ -51,7 +51,7 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
       return <RCBLottie className="w-10 h-10" />;
     }
 
-    if (animatedPath.endsWith('rcb-lion-logo.svg')) {
+    if (animatedPath.endsWith('rcb_inferno_lion.svg')) {
       return <RCBLionLogo className="w-10 h-10" />;
     }
 

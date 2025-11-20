@@ -1,0 +1,260 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 512 512"
+  role="img"
+  aria-label="Ultra-aggressive original lion crest logo for a cricket team"
+>
+  <defs>
+    <!-- Core palette -->
+    <linearGradient id="crestFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F4362B"/>
+      <stop offset="50%" stop-color="#8A1118"/>
+      <stop offset="100%" stop-color="#050509"/>
+    </linearGradient>
+
+    <linearGradient id="metalEdge" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFC745"/>
+      <stop offset="40%" stop-color="#F7B52F"/>
+      <stop offset="100%" stop-color="#945C16"/>
+    </linearGradient>
+
+    <linearGradient id="maneEnergy" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F4362B"/>
+      <stop offset="100%" stop-color="#FFC745"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background flames / energy -->
+  <g id="flames" fill="#F4362B" opacity="0.25">
+    <path d="M80 360 C120 320 130 260 120 220 C110 190 130 150 170 140 C150 190 170 220 180 260 C190 300 180 340 150 380 Z">
+      <animate attributeName="opacity" values="0.1;0.5;0.1" dur="1.6s" repeatCount="indefinite"/>
+    </path>
+    <path d="M420 360 C380 320 370 260 380 220 C390 190 370 150 330 140 C350 190 330 220 322 258 C314 296 326 340 356 380 Z">
+      <animate attributeName="opacity" values="0.2;0.6;0.2" dur="1.9s" repeatCount="indefinite" begin="0.3s"/>
+    </path>
+    <path d="M256 380 C240 350 230 320 234 290 C238 260 250 230 246 210 C242 190 220 170 220 150 C250 165 268 192 276 216 C284 240 284 270 282 298 C280 326 286 350 300 380 Z">
+      <animate attributeName="opacity" values="0.0;0.25;0.0" dur="2.1s" repeatCount="indefinite" begin="0.6s"/>
+    </path>
+  </g>
+
+  <!-- Motion streaks behind crest -->
+  <g id="motion-streaks" stroke="#F4362B" stroke-width="4" stroke-linecap="round" opacity="0.6">
+    <line x1="40" y1="210" x2="140" y2="195">
+      <animateTransform attributeName="transform" type="translate"
+        from="-40 0" to="40 0" dur="0.7s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0;0.8;0" dur="0.7s" repeatCount="indefinite"/>
+    </line>
+    <line x1="60" y1="250" x2="170" y2="240">
+      <animateTransform attributeName="transform" type="translate"
+        from="-60 0" to="20 0" dur="0.9s" repeatCount="indefinite" begin="0.15s"/>
+      <animate attributeName="opacity" values="0;0.7;0" dur="0.9s" repeatCount="indefinite" begin="0.15s"/>
+    </line>
+    <line x1="70" y1="290" x2="160" y2="285">
+      <animateTransform attributeName="transform" type="translate"
+        from="-50 0" to="30 0" dur="1.1s" repeatCount="indefinite" begin="0.3s"/>
+      <animate attributeName="opacity" values="0;0.6;0" dur="1.1s" repeatCount="indefinite" begin="0.3s"/>
+    </line>
+  </g>
+
+  <!-- Jagged geometric crest -->
+  <g id="crest" transform="translate(0, 6)">
+    <!-- Outer jagged frame -->
+    <path
+      d="
+        M256 40
+        L350 70
+        L390 130
+        L378 210
+        L390 290
+        L350 350
+        L256 390
+        L162 350
+        L122 290
+        L134 210
+        L122 130
+        L162 70
+        Z
+      "
+      fill="none"
+      stroke="url(#metalEdge)"
+      stroke-width="10"
+      stroke-linejoin="round"
+    />
+    <!-- Inner shield -->
+    <path
+      d="
+        M256 60
+        L335 86
+        L366 134
+        L356 210
+        L366 286
+        L335 334
+        L256 366
+        L177 334
+        L146 286
+        L156 210
+        L146 134
+        L177 86
+        Z
+      "
+      fill="url(#crestFill)"
+      stroke="#050509"
+      stroke-width="2"
+    />
+    <!-- Battle damage notches -->
+    <path d="M160 110 L178 100 L170 120 Z" fill="#050509" opacity="0.8"/>
+    <path d="M344 310 L328 320 L338 300 Z" fill="#050509" opacity="0.8"/>
+  </g>
+
+  <!-- Lion head and mane -->
+  <g id="lion" transform="translate(-24, 6)">
+    <!-- Main head silhouette -->
+    <path
+      id="lion-head-shape"
+      d="
+        M232 150
+        C248 138 268 132 286 134
+        C308 136 330 150 344 172
+        C354 188 360 208 358 226
+        C356 248 343 270 326 284
+        C310 296 290 302 270 300
+        C246 298 224 286 212 268
+        C200 250 198 226 206 206
+        C212 192 220 168 232 150
+        Z
+      "
+      fill="#050509"
+      stroke="#FFC745"
+      stroke-width="3"
+      stroke-linejoin="round"
+    />
+
+    <!-- Jaw and fangs -->
+    <path
+      d="
+        M246 214
+        C262 210 282 212 296 222
+        C304 228 310 236 312 246
+        C314 258 308 270 298 278
+        C286 288 270 292 258 290
+        C246 288 236 280 230 270
+        C224 260 224 246 230 236
+        C236 228 238 216 246 214
+        Z
+      "
+      fill="#050509"
+      stroke="#F4362B"
+      stroke-width="3"
+    />
+    <!-- Fangs -->
+    <path d="M262 250 L270 274 L254 272 Z" fill="#F4362B" stroke="#FFC745" stroke-width="2"/>
+    <path d="M284 248 L292 270 L278 272 Z" fill="#F4362B" stroke="#FFC745" stroke-width="2"/>
+
+    <!-- Eye socket -->
+    <path
+      d="M270 180 C282 176 296 178 306 186 C296 190 286 192 276 196 Z"
+      fill="#050509"
+    />
+    <!-- Glowing eye -->
+    <ellipse
+      id="lion-eye"
+      cx="288"
+      cy="188"
+      rx="9"
+      ry="6"
+      fill="#FFC745"
+    >
+      <animate attributeName="fill" values="#FFC745;#FFFFFF;#FFC745" dur="1.4s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.8;1;0.7;1;0.8" dur="1.4s" repeatCount="indefinite"/>
+    </ellipse>
+
+    <!-- Brow ridge -->
+    <path
+      d="M262 174 C276 170 292 170 306 176"
+      stroke="#F4362B"
+      stroke-width="4"
+      stroke-linecap="round"
+    />
+
+    <!-- Mane energy streaks -->
+    <g id="mane-energy" fill="none" stroke-linecap="round">
+      <path
+        d="M308 192 C332 184 356 188 380 204"
+        stroke="url(#maneEnergy)"
+        stroke-width="6"
+        opacity="0.9"
+      >
+        <animate attributeName="stroke-width" values="6;9;6" dur="1.2s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="0.7;1;0.7" dur="1.2s" repeatCount="indefinite"/>
+      </path>
+      <path
+        d="M304 210 C332 206 360 214 384 234"
+        stroke="url(#maneEnergy)"
+        stroke-width="5"
+        opacity="0.8"
+      >
+        <animate attributeName="stroke-width" values="5;8;5" dur="1.4s" repeatCount="indefinite" begin="0.2s"/>
+        <animate attributeName="opacity" values="0.5;0.9;0.5" dur="1.4s" repeatCount="indefinite" begin="0.2s"/>
+      </path>
+      <path
+        d="M298 228 C326 228 354 240 378 262"
+        stroke="url(#maneEnergy)"
+        stroke-width="4"
+        opacity="0.7"
+      >
+        <animate attributeName="stroke-width" values="4;7;4" dur="1.6s" repeatCount="indefinite" begin="0.4s"/>
+        <animate attributeName="opacity" values="0.4;0.8;0.4" dur="1.6s" repeatCount="indefinite" begin="0.4s"/>
+      </path>
+    </g>
+
+    <!-- Neon outline around head (pulsing) -->
+    <path
+      d="
+        M232 150
+        C248 138 268 132 286 134
+        C308 136 330 150 344 172
+        C354 188 360 208 358 226
+        C356 248 343 270 326 284
+        C310 296 290 302 270 300
+        C246 298 224 286 212 268
+        C200 250 198 226 206 206
+        C212 192 220 168 232 150
+        Z
+      "
+      fill="none"
+      stroke="#F4362B"
+      stroke-width="2"
+      opacity="0.7"
+    >
+      <animate attributeName="stroke-width" values="2;4;2" dur="1.8s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.4;1;0.4" dur="1.8s" repeatCount="indefinite"/>
+    </path>
+  </g>
+
+  <!-- Team acronym at bottom -->
+  <g id="team-text" transform="translate(0, 6)">
+    <rect
+      x="186"
+      y="322"
+      width="140"
+      height="44"
+      rx="10"
+      fill="#050509"
+      stroke="#FFC745"
+      stroke-width="2"
+      opacity="0.95"
+    />
+    <text
+      x="256"
+      y="351"
+      text-anchor="middle"
+      font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+      font-weight="900"
+      font-size="26"
+      fill="#F4362B"
+    >
+      RCB
+      <animate attributeName="fill" values="#F4362B;#FFC745;#F4362B" dur="2.4s" repeatCount="indefinite"/>
+    </text>
+  </g>
+</svg>

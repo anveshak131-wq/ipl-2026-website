@@ -124,7 +124,7 @@ export default function TeamsShowcase() {
                     <div className="relative w-full h-full">
                       <RCBLottie className="w-full h-full" />
                     </div>
-                  ) : getAnimatedLogoPath(team.id).endsWith('rcb-lion-logo.svg') ? (
+                  ) : getAnimatedLogoPath(team.id).endsWith('rcb_inferno_lion.svg') ? (
                     <div className="relative w-full h-full flex items-center justify-center">
                       <RCBLionLogo className="w-full h-full" />
                     </div>
