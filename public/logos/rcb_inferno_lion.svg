@@ -56,8 +56,8 @@
     </line>
   </g>
 
-  <!-- Core logo (crest + lion + text) scaled up inside viewBox -->
-  <g id="core-logo" transform="scale(1.16)">
+  <!-- Core logo (crest + lion + text) scaled up around center of viewBox -->
+  <g id="core-logo" transform="translate(256 256) scale(1.35) translate(-256 -256)">
   <!-- Jagged geometric crest -->
   <g id="crest" transform="translate(0, 6)">
     <!-- Outer jagged frame -->

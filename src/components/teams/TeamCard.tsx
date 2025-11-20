@@ -58,18 +58,18 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
             
             {/* Animated Logo: render Lottie if JSON, otherwise image */}
             {animatedLogo.endsWith('.json') ? (
-              <div className="relative z-10 w-20 h-20">
+              <div className="relative z-10 w-24 h-24">
                 <RCBLottie className="w-full h-full" />
               </div>
             ) : isRCBStaticExport ? (
-              <div className="relative z-10 w-20 h-20 flex items-center justify-center">
+              <div className="relative z-10 w-24 h-24 flex items-center justify-center">
                 <RCBLionLogo className="w-full h-full" />
               </div>
             ) : (
               <motion.img
                 src={animatedLogo}
                 alt={`${team.shortName} logo`}
-                className="w-20 h-20 object-contain relative z-10"
+                className="w-24 h-24 object-contain relative z-10"
                 onError={(e) => {
                   (e.target as HTMLImageElement).src = fallbackLogo;
                 }}
