@@ -24,7 +24,6 @@ import { Team, Player, CoachingStaff, KeyPlayers } from '@/types';
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import RCBLottie from '@/components/ui/RCBLottie';
-import RCBLion from '@/components/RCBLion/RCBLion';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { getOptimalTextColor } from '@/lib/colorUtils';
 

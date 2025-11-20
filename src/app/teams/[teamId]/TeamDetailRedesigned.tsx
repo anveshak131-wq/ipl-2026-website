@@ -10,7 +10,6 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Team, Player } from '@/types';
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import RCBLottie from '@/components/ui/RCBLottie';
-import RCBLion from '@/components/RCBLion/RCBLion';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { getAnimatedLogoPath } from '@/lib/logoUtils';
 
