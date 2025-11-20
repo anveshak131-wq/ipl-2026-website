@@ -112,7 +112,6 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
               backgroundColor: team.colors.primary,
               boxShadow: `0 0 20px ${team.colors.primary}40`
             }}
-            title="Primary color"
           />
           <div 
             className="w-12 h-12 rounded-full border-2 border-white/30 hover:border-white/60 transition-all duration-300 shadow-lg transform hover:scale-125 hover:rotate-12 cursor-pointer group-hover:animate-bounce-in"
@@ -121,7 +120,6 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
               boxShadow: `0 0 20px ${team.colors.secondary}40`,
               animationDelay: '0.1s'
             }}
-            title="Secondary color"
           />
         </div>
 
