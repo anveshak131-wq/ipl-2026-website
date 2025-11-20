@@ -22,7 +22,7 @@ export default function RCBLionLogo({ className, minSize = 40, maxSize = 800 }: 
       const rect = el.getBoundingClientRect();
       const s = Math.min(rect.width, rect.height || rect.width || minSize);
       const clamped = Math.max(minSize, Math.min(maxSize, Math.round(s)));
-      const scaled = Math.round(clamped * 0.95);
+      const scaled = clamped; // fill the container for a slightly larger logo
       setSize(scaled);
     };
 
@@ -160,51 +160,12 @@ export default function RCBLionLogo({ className, minSize = 40, maxSize = 800 }: 
 
     ctx.restore();
 
-    // RCB letters (slightly above the bottom ribbon)
-    ctx.font = `900 ${radius * 0.5}px Arial, sans-serif`;
+    // RCB letters near the bottom of the crest
+    ctx.font = `900 ${radius * 0.6}px Arial, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#FFD700';
-    ctx.fillText('RCB', cx, cy + radius * 0.2);
-
-    // Bottom ribbon with full team name
-    const ribbonHeight = radius * 0.26;
-    const ribbonWidth = radius * 1.7;
-    const ribbonY = cy + radius * 0.6;
-    const rx = cx - ribbonWidth / 2;
-    const ry = ribbonY - ribbonHeight / 2;
-    const rRadius = ribbonHeight * 0.4;
-
-    ctx.beginPath();
-    ctx.moveTo(rx + rRadius, ry);
-    ctx.lineTo(rx + ribbonWidth - rRadius, ry);
-    ctx.quadraticCurveTo(rx + ribbonWidth, ry, rx + ribbonWidth, ry + rRadius);
-    ctx.lineTo(rx + ribbonWidth, ry + ribbonHeight - rRadius);
-    ctx.quadraticCurveTo(rx + ribbonWidth, ry + ribbonHeight, rx + ribbonWidth - rRadius, ry + ribbonHeight);
-    ctx.lineTo(rx + rRadius, ry + ribbonHeight);
-    ctx.quadraticCurveTo(rx, ry + ribbonHeight, rx, ry + ribbonHeight - rRadius);
-    ctx.lineTo(rx, ry + rRadius);
-    ctx.quadraticCurveTo(rx, ry, rx + rRadius, ry);
-    ctx.closePath();
-
-    const ribbonGrad = ctx.createLinearGradient(rx, ry, rx + ribbonWidth, ry + ribbonHeight);
-    ribbonGrad.addColorStop(0, '#C8921C');
-    ribbonGrad.addColorStop(0.5, '#FFD700');
-    ribbonGrad.addColorStop(1, '#C8921C');
-    ctx.fillStyle = ribbonGrad;
-    ctx.fill();
-
-    ctx.strokeStyle = 'rgba(0,0,0,0.45)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    // Ribbon text: full team name
-    ctx.font = `600 ${radius * 0.18}px Arial, sans-serif`;
-    ctx.fillStyle = '#111111';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    const ribbonText = 'Royal Challengers Bengaluru';
-    ctx.fillText(ribbonText, cx, ribbonY);
+    ctx.fillText('RCB', cx, cy + radius * 0.5);
   }, [size]);
 
   const canvasSize = Math.max(28, size);
@@ -215,10 +176,12 @@ export default function RCBLionLogo({ className, minSize = 40, maxSize = 800 }: 
       className={className}
       style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
     >
-      <canvas
-        ref={canvasRef}
-        style={{ width: canvasSize, height: canvasSize, display: 'block' }}
-      />
+      <div className="w-full h-full flex items-center justify-center animate-float hover:scale-105 transition-transform duration-700">
+        <canvas
+          ref={canvasRef}
+          style={{ width: canvasSize, height: canvasSize, display: 'block' }}
+        />
+      </div>
     </div>
   );
 }
