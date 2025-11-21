@@ -21,7 +21,15 @@ const defaultSettings = {
   aiModel: 'gpt-4',
   maxUploadSize: 50,
   emailNotifications: true,
-  analyticsEnabled: true
+  analyticsEnabled: true,
+  // Controls which sections appear on the public /stats page
+  statsConfig: {
+    showTopRunScorers: true,
+    showTopWicketTakers: true,
+    showBestStrikeRates: true,
+    showBestEconomyRates: true,
+    showInsights: true,
+  },
 };
 
 // GET - Retrieve settings
@@ -32,9 +40,12 @@ async function handleGetRequest(context) {
     // Try to get settings from KV storage
     let settings = await env.IPL_CACHE.get('settings', 'json');
     
-    // Fallback to default settings if KV storage is empty
+    // Fallback to default settings if KV storage is empty, otherwise
+    // merge stored settings on top of defaults so new fields get defaults.
     if (!settings) {
       settings = defaultSettings;
+    } else {
+      settings = { ...defaultSettings, ...settings };
     }
     
     return new Response(JSON.stringify(settings), {

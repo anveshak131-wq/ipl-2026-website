@@ -95,6 +95,16 @@ export default function AdminStatsPage() {
   const [publishSuccess, setPublishSuccess] = useState<string | null>(null);
   const [publishError, setPublishError] = useState<string | null>(null);
 
+  const [statsConfig, setStatsConfig] = useState({
+    showTopRunScorers: true,
+    showTopWicketTakers: true,
+    showBestStrikeRates: true,
+    showBestEconomyRates: true,
+    showInsights: true,
+  });
+  const [isSavingStatsConfig, setIsSavingStatsConfig] = useState(false);
+  const [statsConfigMessage, setStatsConfigMessage] = useState<string | null>(null);
+
   const snapshotFreshness = useMemo(
     () =>
       publishedStats?.lastUpdated
@@ -170,15 +180,27 @@ export default function AdminStatsPage() {
           team1Id = teamsData[0].id;
         }
 
-        if (settingsData && (settingsData as any).publishedStats) {
-          const published = (settingsData as any).publishedStats as PublishedStats;
-          setPublishedStats(published);
-          if (published.description) {
-            setDescription(published.description);
+        if (settingsData) {
+          if ((settingsData as any).publishedStats) {
+            const published = (settingsData as any).publishedStats as PublishedStats;
+            setPublishedStats(published);
+            if (published.description) {
+              setDescription(published.description);
+            }
+            if (published.defaultTeams) {
+              if (published.defaultTeams.team1Id)
+                team1Id = published.defaultTeams.team1Id;
+              if (published.defaultTeams.team2Id)
+                team2Id = published.defaultTeams.team2Id;
+            }
           }
-          if (published.defaultTeams) {
-            if (published.defaultTeams.team1Id) team1Id = published.defaultTeams.team1Id;
-            if (published.defaultTeams.team2Id) team2Id = published.defaultTeams.team2Id;
+
+          if ((settingsData as any).statsConfig) {
+            const cfg = (settingsData as any).statsConfig as Partial<typeof statsConfig>;
+            setStatsConfig((prev) => ({
+              ...prev,
+              ...cfg,
+            }));
           }
         }
 
@@ -451,20 +473,23 @@ export default function AdminStatsPage() {
         lastUpdated: new Date().toISOString(),
       };
 
-      await api.updateSettings({ publishedStats: snapshot });
-      setPublishedStats(snapshot);
-      setPublishSuccess('Stats snapshot published to public /stats page.');
-      setTimeout(() => setPublishSuccess(null), 4000);
-    } catch (error) {
-      console.error('Failed to publish stats snapshot:', error);
-      setPublishError('Failed to publish stats. Please try again.');
-    } finally {
-      setIsPublishing(false);
-    }
-  };
+        try {
+          const teamAggregates: TeamAggregate[] = teams.map((team) =>
+            computeTeamAggregate(team.id)
+          );
 
-  if (authLoading) {
-    return (
+          const finalTopRunScorers = sortByRunsDesc(
+            topRunScorers.length ? topRunScorers : suggestedTopRunScorers
+          );
+          const finalTopWicketTakers = sortByWicketsDesc(
+            topWicketTakers.length ? topWicketTakers : suggestedTopWicketTakers
+          );
+          const finalBestStrikeRates = sortByStrikeRateDesc(
+            bestStrikeRates.length ? bestStrikeRates : suggestedBestStrikeRates
+          );
+          const finalBestEconomyRates = sortByEconomyAsc(
+            bestEconomyRates.length ? bestEconomyRates : suggestedBestEconomyRates
+          );
       <div className="flex min-h-screen bg-ipl-dark">
         <div className="flex-1 flex items-center justify-center">
           <div className="text-white">Loading...</div>
@@ -712,6 +737,97 @@ export default function AdminStatsPage() {
                 rows={4}
                 placeholder="Example: IPL 2026 has been dominated by top-order aggression and death-over specialists. Here are the standout performers so far."
               />
+            </div>
+
+            <div className="glass-effect rounded-xl p-6">
+              <h2 className="text-lg font-semibold text-white mb-2">Stats display toggles</h2>
+              <p className="text-xs text-gray-400 mb-3">
+                Choose which leaderboards and insights appear on the public{' '}
+                <span className="font-semibold">/stats</span> page.
+              </p>
+              {statsConfigMessage && (
+                <p className="text-[11px] mb-2 text-emerald-300">{statsConfigMessage}</p>
+              )}
+              <div className="space-y-2 text-xs text-gray-200">
+                <label className="flex items-center justify-between gap-3">
+                  <span>Show Orange Cap (runs)</span>
+                  <input
+                    type="checkbox"
+                    checked={statsConfig.showTopRunScorers}
+                    onChange={(e) =>
+                      setStatsConfig((prev) => ({
+                        ...prev,
+                        showTopRunScorers: e.target.checked,
+                      }))
+                    }
+                    className="h-4 w-4 accent-ipl-gold"
+                  />
+                </label>
+                <label className="flex items-center justify-between gap-3">
+                  <span>Show Purple Cap (wickets)</span>
+                  <input
+                    type="checkbox"
+                    checked={statsConfig.showTopWicketTakers}
+                    onChange={(e) =>
+                      setStatsConfig((prev) => ({
+                        ...prev,
+                        showTopWicketTakers: e.target.checked,
+                      }))
+                    }
+                    className="h-4 w-4 accent-emerald-400"
+                  />
+                </label>
+                <label className="flex items-center justify-between gap-3">
+                  <span>Show best strike rates</span>
+                  <input
+                    type="checkbox"
+                    checked={statsConfig.showBestStrikeRates}
+                    onChange={(e) =>
+                      setStatsConfig((prev) => ({
+                        ...prev,
+                        showBestStrikeRates: e.target.checked,
+                      }))
+                    }
+                    className="h-4 w-4 accent-ipl-gold"
+                  />
+                </label>
+                <label className="flex items-center justify-between gap-3">
+                  <span>Show best economy</span>
+                  <input
+                    type="checkbox"
+                    checked={statsConfig.showBestEconomyRates}
+                    onChange={(e) =>
+                      setStatsConfig((prev) => ({
+                        ...prev,
+                        showBestEconomyRates: e.target.checked,
+                      }))
+                    }
+                    className="h-4 w-4 accent-emerald-400"
+                  />
+                </label>
+                <label className="flex items-center justify-between gap-3">
+                  <span>Show insights section</span>
+                  <input
+                    type="checkbox"
+                    checked={statsConfig.showInsights}
+                    onChange={(e) =>
+                      setStatsConfig((prev) => ({
+                        ...prev,
+                        showInsights: e.target.checked,
+                      }))
+                    }
+                    className="h-4 w-4 accent-ipl-gold"
+                  />
+                </label>
+              </div>
+              <button
+                type="button"
+                onClick={handleSaveStatsConfig}
+                disabled={isSavingStatsConfig}
+                className="mt-3 inline-flex items-center justify-center px-3 py-1.5 rounded-md bg-white/10 hover:bg-white/20 text-[11px] text-white disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {isSavingStatsConfig ? 'Saving…' : 'Save display settings'}
+              </button>
             </div>
 
             <div className="glass-effect rounded-xl p-6">

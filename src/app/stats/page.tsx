@@ -60,6 +60,13 @@ export default function StatsPage() {
   const [selectedTeam1Id, setSelectedTeam1Id] = useState<string>('');
   const [selectedTeam2Id, setSelectedTeam2Id] = useState<string>('');
   const [expandedPlayerId, setExpandedPlayerId] = useState<string | null>(null);
+  const [statsConfig, setStatsConfig] = useState({
+    showTopRunScorers: true,
+    showTopWicketTakers: true,
+    showBestStrikeRates: true,
+    showBestEconomyRates: true,
+    showInsights: true,
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -84,16 +91,26 @@ export default function StatsPage() {
           team1Id = teamsData[0].id;
         }
 
-        if (settingsData && (settingsData as any).publishedStats) {
-          const published = (settingsData as any).publishedStats as PublishedStats;
-          setPublishedStats(published);
-          if (published.defaultTeams) {
-            if (published.defaultTeams.team1Id) {
-              team1Id = published.defaultTeams.team1Id;
+        if (settingsData) {
+          if ((settingsData as any).publishedStats) {
+            const published = (settingsData as any).publishedStats as PublishedStats;
+            setPublishedStats(published);
+            if (published.defaultTeams) {
+              if (published.defaultTeams.team1Id) {
+                team1Id = published.defaultTeams.team1Id;
+              }
+              if (published.defaultTeams.team2Id) {
+                team2Id = published.defaultTeams.team2Id;
+              }
             }
-            if (published.defaultTeams.team2Id) {
-              team2Id = published.defaultTeams.team2Id;
-            }
+          }
+
+          if ((settingsData as any).statsConfig) {
+            const cfg = (settingsData as any).statsConfig as Partial<typeof statsConfig>;
+            setStatsConfig((prev) => ({
+              ...prev,
+              ...cfg,
+            }));
           }
         }
 
@@ -396,9 +413,11 @@ export default function StatsPage() {
           </section>
 
           {/* Season Leaders */}
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Batting leaders */}
-            <div className="rounded-3xl bg-white/5 border border-white/10 p-6 backdrop-blur-md shadow-xl">
+          {(statsConfig.showTopRunScorers || statsConfig.showTopWicketTakers) && (
+            <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Batting leaders */}
+              {statsConfig.showTopRunScorers && (
+                <div className="rounded-3xl bg-white/5 border border-white/10 p-6 backdrop-blur-md shadow-xl">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-ipl-gold to-ipl-purple flex items-center justify-center">
@@ -568,8 +587,10 @@ export default function StatsPage() {
           </section>
 
           {/* Strike rate & economy tables */}
-          <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="rounded-3xl bg-white/5 border border-white/10 p-6 backdrop-blur-md">
+          {(statsConfig.showBestStrikeRates || statsConfig.showBestEconomyRates) && (
+            <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {statsConfig.showBestStrikeRates && (
+                <div className="rounded-3xl bg-white/5 border border-white/10 p-6 backdrop-blur-md">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h2 className="text-lg font-bold text-white">Best Strike Rates</h2>
@@ -679,7 +700,8 @@ export default function StatsPage() {
           </section>
 
           {/* AI-style insights */}
-          <section className="rounded-3xl bg-white/5 border border-white/10 p-6 md:p-8 backdrop-blur-md">
+          {statsConfig.showInsights && (
+            <section className="rounded-3xl bg-white/5 border border-white/10 p-6 md:p-8 backdrop-blur-md">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-ipl-blue-light to-ipl-purple flex items-center justify-center">
                 <Icon name="news" size={18} />
