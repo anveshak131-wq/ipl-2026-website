@@ -418,90 +418,92 @@ export default function StatsPage() {
               {/* Batting leaders */}
               {statsConfig.showTopRunScorers && (
                 <div className="rounded-3xl bg-white/5 border border-white/10 p-6 backdrop-blur-md shadow-xl">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-ipl-gold to-ipl-purple flex items-center justify-center">
-                    <Icon name="trophy" size={20} />
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-ipl-gold to-ipl-purple flex items-center justify-center">
+                        <Icon name="trophy" size={20} />
+                      </div>
+                      <div>
+                        <h2 className="text-xl font-bold text-white">Orange Cap Race</h2>
+                        <p className="text-xs text-gray-400">
+                          Top run scorers in the tournament
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-white">Orange Cap Race</h2>
-                    <p className="text-xs text-gray-400">
-                      Top run scorers in the tournament
-                    </p>
+
+                  <div className="space-y-2">
+                    {topRunScorers.map((p, index) => {
+                      const isLeader = index === 0;
+                      return (
+                        <div
+                          key={p.id}
+                          onClick={() =>
+                            setExpandedPlayerId((prev) => (prev === p.id ? null : p.id))
+                          }
+                          className={`rounded-2xl border px-4 py-3 transition-all duration-200 cursor-pointer ${
+                            isLeader
+                              ? 'bg-gradient-to-r from-ipl-gold/20 via-ipl-purple/20 to-black/40 border-ipl-gold/60 shadow-lg shadow-ipl-gold/20'
+                              : 'bg-black/20 border-white/10 hover:border-ipl-gold/50'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`rounded-full flex items-center justify-center text-xs font-bold text-white ${
+                                  isLeader
+                                    ? 'w-10 h-10 bg-gradient-to-br from-ipl-gold to-ipl-purple'
+                                    : 'w-8 h-8 bg-gradient-to-br from-ipl-gold/80 to-ipl-purple/80'
+                                }`}
+                              >
+                                #{index + 1}
+                              </div>
+                              <div>
+                                <div
+                                  className={`font-semibold text-white ${
+                                    isLeader ? 'text-base' : 'text-sm'
+                                  }`}
+                                >
+                                  {p.name}
+                                </div>
+                                <div className="text-[11px] text-gray-400">
+                                  {p.role} • {p.stats.matches} matches
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div
+                                className={`font-bold text-ipl-gold ${
+                                  isLeader ? 'text-lg' : 'text-base'
+                                }`}
+                              >
+                                {p.stats.runs} runs
+                              </div>
+                              <div className="text-[11px] text-gray-400">
+                                SR {p.stats.strikeRate.toFixed(1)} • Avg{' '}
+                                {p.stats.average.toFixed(1)}
+                              </div>
+                            </div>
+                          </div>
+                          {expandedPlayerId === p.id && (
+                            <div className="mt-2 pt-2 border-t border-white/10 text-[11px] text-gray-300 flex flex-wrap gap-x-4 gap-y-1">
+                              <span>Highest: {p.stats.highest}</span>
+                              <span>4s: {p.stats.fours}</span>
+                              <span>6s: {p.stats.sixes}</span>
+                              <span>50s: {p.stats.fifties}</span>
+                              <span>100s: {p.stats.hundreds}</span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
-              </div>
+              )}
 
-              <div className="space-y-2">
-                {topRunScorers.map((p, index) => {
-                  const isLeader = index === 0;
-                  return (
-                    <div
-                      key={p.id}
-                      onClick={() =>
-                        setExpandedPlayerId((prev) => (prev === p.id ? null : p.id))
-                      }
-                      className={`rounded-2xl border px-4 py-3 transition-all duration-200 cursor-pointer ${
-                        isLeader
-                          ? 'bg-gradient-to-r from-ipl-gold/20 via-ipl-purple/20 to-black/40 border-ipl-gold/60 shadow-lg shadow-ipl-gold/20'
-                          : 'bg-black/20 border-white/10 hover:border-ipl-gold/50'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`rounded-full flex items-center justify-center text-xs font-bold text-white ${
-                              isLeader
-                                ? 'w-10 h-10 bg-gradient-to-br from-ipl-gold to-ipl-purple'
-                                : 'w-8 h-8 bg-gradient-to-br from-ipl-gold/80 to-ipl-purple/80'
-                            }`}
-                          >
-                            #{index + 1}
-                          </div>
-                          <div>
-                            <div
-                              className={`font-semibold text-white ${
-                                isLeader ? 'text-base' : 'text-sm'
-                              }`}
-                            >
-                              {p.name}
-                            </div>
-                            <div className="text-[11px] text-gray-400">
-                              {p.role} • {p.stats.matches} matches
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div
-                            className={`font-bold text-ipl-gold ${
-                              isLeader ? 'text-lg' : 'text-base'
-                            }`}
-                          >
-                            {p.stats.runs} runs
-                          </div>
-                          <div className="text-[11px] text-gray-400">
-                            SR {p.stats.strikeRate.toFixed(1)} • Avg{' '}
-                            {p.stats.average.toFixed(1)}
-                          </div>
-                        </div>
-                      </div>
-                      {expandedPlayerId === p.id && (
-                        <div className="mt-2 pt-2 border-t border-white/10 text-[11px] text-gray-300 flex flex-wrap gap-x-4 gap-y-1">
-                          <span>Highest: {p.stats.highest}</span>
-                          <span>4s: {p.stats.fours}</span>
-                          <span>6s: {p.stats.sixes}</span>
-                          <span>50s: {p.stats.fifties}</span>
-                          <span>100s: {p.stats.hundreds}</span>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Bowling leaders */}
-            <div className="rounded-3xl bg-white/5 border border-white/10 p-6 backdrop-blur-md shadow-xl">
+              {/* Bowling leaders */}
+              {statsConfig.showTopWicketTakers && (
+                <div className="rounded-3xl bg-white/5 border border-white/10 p-6 backdrop-blur-md shadow-xl">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
@@ -582,153 +584,160 @@ export default function StatsPage() {
                     </div>
                   );
                 })}
-              </div>
-            </div>
-          </section>
+                  </div>
+                </div>
+              )}
+            </section>
+          )}
 
           {/* Strike rate & economy tables */}
           {(statsConfig.showBestStrikeRates || statsConfig.showBestEconomyRates) && (
             <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {statsConfig.showBestStrikeRates && (
                 <div className="rounded-3xl bg-white/5 border border-white/10 p-6 backdrop-blur-md">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h2 className="text-lg font-bold text-white">Best Strike Rates</h2>
-                  <p className="text-xs text-gray-400">
-                    Minimum 300 runs in the tournament
-                  </p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                {bestStrikeRates.map((p, index) => (
-                  <div
-                    key={p.id}
-                    onClick={() =>
-                      setExpandedPlayerId((prev) => (prev === p.id ? null : p.id))
-                    }
-                    className="rounded-2xl bg-black/20 border border-white/10 px-4 py-3 cursor-pointer hover:border-ipl-gold/50 transition-all duration-200"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className="text-xs text-gray-400 w-6 text-center">
-                          {index + 1}.
-                        </span>
-                        <div>
-                          <div className="text-sm font-semibold text-white">
-                            {p.name}
-                          </div>
-                          <div className="text-[11px] text-gray-400">
-                            {p.stats.runs} runs • {p.stats.matches} matches
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-bold text-ipl-gold">
-                          SR {p.stats.strikeRate.toFixed(1)}
-                        </div>
-                      </div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h2 className="text-lg font-bold text-white">Best Strike Rates</h2>
+                      <p className="text-xs text-gray-400">
+                        Minimum 300 runs in the tournament
+                      </p>
                     </div>
-                    {expandedPlayerId === p.id && (
-                      <div className="mt-2 pt-2 border-t border-white/10 text-[11px] text-gray-300 flex flex-wrap gap-x-4 gap-y-1">
-                        <span>Highest: {p.stats.highest}</span>
-                        <span>4s: {p.stats.fours}</span>
-                        <span>6s: {p.stats.sixes}</span>
-                        <span>50s: {p.stats.fifties}</span>
-                        <span>100s: {p.stats.hundreds}</span>
-                      </div>
-                    )}
                   </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-3xl bg-white/5 border border-white/10 p-6 backdrop-blur-md">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h2 className="text-lg font-bold text-white">Best Economy (Qualifiers)</h2>
-                  <p className="text-xs text-gray-400">
-                    Minimum 20 wickets in the tournament
-                  </p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                {bestEconomyRates.map((p, index) => {
-                  const bowlingAverage =
-                    p.stats.bowlingAverage !== undefined
-                      ? p.stats.bowlingAverage.toFixed(1)
-                      : '-';
-
-                  return (
-                    <div
-                      key={p.id}
-                      onClick={() =>
-                        setExpandedPlayerId((prev) => (prev === p.id ? null : p.id))
-                      }
-                      className="rounded-2xl bg-black/20 border border-white/10 px-4 py-3 cursor-pointer hover:border-emerald-400/50 transition-all duration-200"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <span className="text-xs text-gray-400 w-6 text-center">
-                            {index + 1}.
-                          </span>
-                          <div>
-                            <div className="text-sm font-semibold text-white">
-                              {p.name}
+                  <div className="space-y-2">
+                    {bestStrikeRates.map((p, index) => (
+                      <div
+                        key={p.id}
+                        onClick={() =>
+                          setExpandedPlayerId((prev) => (prev === p.id ? null : p.id))
+                        }
+                        className="rounded-2xl bg-black/20 border border-white/10 px-4 py-3 cursor-pointer hover:border-ipl-gold/50 transition-all duration-200"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <span className="text-xs text-gray-400 w-6 text-center">
+                              {index + 1}.
+                            </span>
+                            <div>
+                              <div className="text-sm font-semibold text-white">
+                                {p.name}
+                              </div>
+                              <div className="text-[11px] text-gray-400">
+                                {p.stats.runs} runs • {p.stats.matches} matches
+                              </div>
                             </div>
-                            <div className="text-[11px] text-gray-400">
-                              {p.stats.wickets} wickets • {p.stats.matches} matches
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm font-bold text-ipl-gold">
+                              SR {p.stats.strikeRate.toFixed(1)}
                             </div>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="text-sm font-bold text-emerald-300">
-                            Eco {p.stats.economy.toFixed(2)}
+                        {expandedPlayerId === p.id && (
+                          <div className="mt-2 pt-2 border-t border-white/10 text-[11px] text-gray-300 flex flex-wrap gap-x-4 gap-y-1">
+                            <span>Highest: {p.stats.highest}</span>
+                            <span>4s: {p.stats.fours}</span>
+                            <span>6s: {p.stats.sixes}</span>
+                            <span>50s: {p.stats.fifties}</span>
+                            <span>100s: {p.stats.hundreds}</span>
                           </div>
-                        </div>
+                        )}
                       </div>
-                      {expandedPlayerId === p.id && (
-                        <div className="mt-2 pt-2 border-t border-white/10 text-[11px] text-gray-300 flex flex-wrap gap-x-4 gap-y-1">
-                          <span>Bowling avg: {bowlingAverage}</span>
-                          <span>Best: {p.stats.bestBowling}</span>
-                        </div>
-                      )}
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {statsConfig.showBestEconomyRates && (
+                <div className="rounded-3xl bg-white/5 border border-white/10 p-6 backdrop-blur-md">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h2 className="text-lg font-bold text-white">Best Economy (Qualifiers)</h2>
+                      <p className="text-xs text-gray-400">
+                        Minimum 20 wickets in the tournament
+                      </p>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          </section>
+                  </div>
+                  <div className="space-y-2">
+                    {bestEconomyRates.map((p, index) => {
+                      const bowlingAverage =
+                        p.stats.bowlingAverage !== undefined
+                          ? p.stats.bowlingAverage.toFixed(1)
+                          : '-';
+
+                      return (
+                        <div
+                          key={p.id}
+                          onClick={() =>
+                            setExpandedPlayerId((prev) => (prev === p.id ? null : p.id))
+                          }
+                          className="rounded-2xl bg-black/20 border border-white/10 px-4 py-3 cursor-pointer hover:border-emerald-400/50 transition-all duration-200"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <span className="text-xs text-gray-400 w-6 text-center">
+                                {index + 1}.
+                              </span>
+                              <div>
+                                <div className="text-sm font-semibold text-white">
+                                  {p.name}
+                                </div>
+                                <div className="text-[11px] text-gray-400">
+                                  {p.stats.wickets} wickets • {p.stats.matches} matches
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-sm font-bold text-emerald-300">
+                                Eco {p.stats.economy.toFixed(2)}
+                              </div>
+                            </div>
+                          </div>
+                          {expandedPlayerId === p.id && (
+                            <div className="mt-2 pt-2 border-t border-white/10 text-[11px] text-gray-300 flex flex-wrap gap-x-4 gap-y-1">
+                              <span>Bowling avg: {bowlingAverage}</span>
+                              <span>Best: {p.stats.bestBowling}</span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </section>
+          )}
 
           {/* AI-style insights */}
           {statsConfig.showInsights && (
             <section className="rounded-3xl bg-white/5 border border-white/10 p-6 md:p-8 backdrop-blur-md">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-ipl-blue-light to-ipl-purple flex items-center justify-center">
-                <Icon name="news" size={18} />
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-ipl-blue-light to-ipl-purple flex items-center justify-center">
+                  <Icon name="news" size={18} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-white">Insights from the numbers</h2>
+                  <p className="text-xs text-gray-400">
+                    Light-weight AI-style summaries generated from current squad
+                    statistics.
+                  </p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl font-bold text-white">Insights from the numbers</h2>
-                <p className="text-xs text-gray-400">
-                  Light-weight AI-style summaries generated from current squad
-                  statistics.
-                </p>
-              </div>
-            </div>
 
-            {displayInsights.length ? (
-              <ul className="space-y-2 list-disc list-inside text-sm text-gray-200">
-                {displayInsights.map((line, idx) => (
-                  <li key={idx}>{line}</li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-gray-400 text-sm">
-                Not enough data yet to generate meaningful insights. Once more
-                players and stats are available, this section will light up with
-                stories.
-              </p>
-            )}
-          </section>
+              {displayInsights.length ? (
+                <ul className="space-y-2 list-disc list-inside text-sm text-gray-200">
+                  {displayInsights.map((line, idx) => (
+                    <li key={idx}>{line}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-400 text-sm">
+                  Not enough data yet to generate meaningful insights. Once more
+                  players and stats are available, this section will light up with
+                  stories.
+                </p>
+              )}
+            </section>
+          )}
         </div>
       </main>
 
