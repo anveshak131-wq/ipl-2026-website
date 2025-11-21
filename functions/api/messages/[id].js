@@ -17,7 +17,7 @@ export const onRequest = async (context) => {
     });
   }
 
-  if (method !== 'DELETE') {
+  if (method !== 'DELETE' && method !== 'POST') {
     return new Response(
       JSON.stringify({ error: 'Method not allowed' }),
       { status: 405, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
@@ -81,37 +81,78 @@ export const onRequest = async (context) => {
 
     const user = JSON.parse(userData);
 
-    // Only admin / super_admin can delete messages
-    if (user.role !== 'admin' && user.role !== 'super_admin') {
-      return new Response(
-        JSON.stringify({ error: 'Forbidden' }),
-        { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
-      );
-    }
+    if (method === 'DELETE') {
+      if (user.role !== 'admin' && user.role !== 'super_admin') {
+        return new Response(
+          JSON.stringify({ error: 'Forbidden' }),
+          { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
+        );
+      }
 
-    const messagesKey = `messages:${matchId}`;
-    const messagesData = await env.SPORTS_KV.get(messagesKey);
-    let messages = messagesData ? JSON.parse(messagesData) : [];
+      const messagesKey = `messages:${matchId}`;
+      const messagesData = await env.SPORTS_KV.get(messagesKey);
+      let messages = messagesData ? JSON.parse(messagesData) : [];
 
-    const beforeLength = messages.length;
-    messages = messages.filter((m) => m.id !== id);
+      const beforeLength = messages.length;
+      messages = messages.filter((m) => m.id !== id);
 
-    if (messages.length === beforeLength) {
-      // Nothing deleted, but treat as success from admin UX perspective
-      return new Response(JSON.stringify({ success: true, deleted: false }), {
+      if (messages.length === beforeLength) {
+        return new Response(JSON.stringify({ success: true, deleted: false }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+
+      await env.SPORTS_KV.put(messagesKey, JSON.stringify(messages), {
+        expirationTtl: 604800,
+      });
+
+      return new Response(JSON.stringify({ success: true, deleted: true }), {
         status: 200,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
       });
     }
 
-    await env.SPORTS_KV.put(messagesKey, JSON.stringify(messages), {
-      expirationTtl: 604800, // 7 days
-    });
+    if (method === 'POST') {
+      let body = {};
+      try {
+        body = await request.json();
+      } catch {
+        body = {};
+      }
 
-    return new Response(JSON.stringify({ success: true, deleted: true }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json', ...corsHeaders },
-    });
+      const messagesKey = `messages:${matchId}`;
+      const messagesData = await env.SPORTS_KV.get(messagesKey);
+      let messages = messagesData ? JSON.parse(messagesData) : [];
+
+      const index = messages.findIndex((m) => m && m.id === id);
+      if (index === -1) {
+        return new Response(JSON.stringify({ success: false, notFound: true }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+
+      const existing = messages[index] || {};
+
+      messages[index] = {
+        ...existing,
+        isFlagged: true,
+        flagReason: 'manual_report',
+        flagStatus: 'pending',
+        flaggedAt: existing.flaggedAt || new Date().toISOString(),
+        flagDetails: body.details || body.reason || existing.flagDetails || null,
+      };
+
+      await env.SPORTS_KV.put(messagesKey, JSON.stringify(messages), {
+        expirationTtl: 604800,
+      });
+
+      return new Response(JSON.stringify({ success: true, reported: true }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
+    }
   } catch (error) {
     console.error('Messages delete error:', error);
     return new Response(

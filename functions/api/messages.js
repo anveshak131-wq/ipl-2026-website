@@ -1,3 +1,29 @@
+function getModerationFlagsForText(text) {
+  const normalized = text.trim().toLowerCase();
+  const badWords = ['idiot', 'stupid', 'hate'];
+
+  let isFlagged = false;
+  let flagReason = null;
+
+  if (badWords.some((word) => normalized.includes(word))) {
+    isFlagged = true;
+    flagReason = 'bad_language';
+  } else if (
+    normalized.includes('http://') ||
+    normalized.includes('https://') ||
+    normalized.includes('www.')
+  ) {
+    isFlagged = true;
+    flagReason = 'spam';
+  }
+
+  const flagStatus = isFlagged ? 'pending' : null;
+  const flaggedAt = isFlagged ? new Date().toISOString() : null;
+  const flagDetails = null;
+
+  return { isFlagged, flagReason, flagStatus, flaggedAt, flagDetails };
+}
+
 export const onRequest = async (context) => {
   const { request, env } = context;
   const { pathname, searchParams } = new URL(request.url);
@@ -108,6 +134,8 @@ export const onRequest = async (context) => {
       const messagesData = await env.SPORTS_KV.get(messagesKey);
       let messages = messagesData ? JSON.parse(messagesData) : [];
 
+      const moderation = getModerationFlagsForText(text);
+
       const message = {
         id: crypto.randomUUID(),
         userId: user.id,
@@ -115,6 +143,7 @@ export const onRequest = async (context) => {
         text: text.trim(),
         timestamp: new Date().toISOString(),
         matchId,
+        ...moderation,
       };
 
       messages.push(message);
