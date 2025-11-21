@@ -19,7 +19,9 @@ export default function Navbar() {
     { href: '/stats', label: 'Stats', icon: 'stats' as const },
     { href: '/news', label: 'News', icon: 'news' as const },
     { href: '/feed', label: 'For You', icon: 'stats' as const },
+    { href: '/notifications', label: 'Notifications', icon: 'news' as const },
     { href: '/predictions', label: 'Predictions', icon: 'target' as const },
+    { href: '/account', label: 'Account', icon: 'team' as const },
   ];
 
   useEffect(() => {
