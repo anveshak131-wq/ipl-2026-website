@@ -18,6 +18,7 @@ export default function Navbar() {
     { href: '/teams', label: 'Teams', icon: 'team' as const },
     { href: '/stats', label: 'Stats', icon: 'stats' as const },
     { href: '/news', label: 'News', icon: 'news' as const },
+    { href: '/feed', label: 'For You', icon: 'stats' as const },
     { href: '/predictions', label: 'Predictions', icon: 'target' as const },
   ];
 

@@ -273,7 +273,7 @@ export default function FeedPage() {
           <div className="mb-10">
             <div className="inline-flex items-center space-x-2 mb-4">
               <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2">
-                <Icon name="star" size={16} /> FOR YOU
+                <Icon name="stats" size={16} /> FOR YOU
               </span>
             </div>
             <h1 className="text-4xl md:text-5xl font-black text-white mb-3 tracking-tight">
@@ -288,7 +288,7 @@ export default function FeedPage() {
             {/* Left: Preferences */}
             <section className="lg:col-span-1 bg-white/5 border border-white/10 rounded-2xl p-5 backdrop-blur-sm">
               <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <Icon name="settings" size={16} /> Your preferences
+                <Icon name="stats" size={16} /> Your preferences
               </h2>
 
               {isAuthenticated ? (
@@ -458,7 +458,7 @@ export default function FeedPage() {
                           <div className="flex items-center gap-1">
                             {(favoriteTeams.length > 0 || favoritePlayers.length > 0) && item.score > 0 && (
                               <>
-                                <Icon name="sparkles" size={14} />
+                                <Icon name="stats" size={14} />
                                 <span>
                                   Prioritized for you
                                   {item.kind === 'highlight' ? ' (favorite team match)' : ''}
