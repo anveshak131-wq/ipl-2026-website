@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Script from 'next/script';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import type { Match } from '@/types';
@@ -38,6 +39,27 @@ interface User {
   name: string;
 }
 
+const getPasswordStrength = (password: string) => {
+  if (!password) {
+    return { label: '', score: 0 };
+  }
+
+  let score = 0;
+
+  if (password.length >= 12) score += 1;
+  if (/[A-Z]/.test(password)) score += 1;
+  if (/[0-9]/.test(password)) score += 1;
+  if (/[^A-Za-z0-9]/.test(password)) score += 1;
+
+  if (score <= 1) {
+    return { label: 'Weak', score };
+  }
+  if (score === 2 || score === 3) {
+    return { label: 'Medium', score };
+  }
+  return { label: 'Strong', score };
+};
+
 export default function LiveScorePage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
@@ -54,6 +76,9 @@ export default function LiveScorePage() {
   const [authFormData, setAuthFormData] = useState({ email: '', password: '', name: '' });
   const [expandedCommentary, setExpandedCommentary] = useState<Record<string, boolean>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const passwordStrength = getPasswordStrength(authFormData.password);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileReady, setTurnstileReady] = useState(false);
 
   // Track user activity for admin engagement page
   const trackUserActivity = useCallback(async () => {
@@ -90,6 +115,42 @@ export default function LiveScorePage() {
     }
     setIsLoading(false);
   }, []);
+
+  // Initialize Cloudflare Turnstile widget when signup modal is open
+  useEffect(() => {
+    if (!turnstileReady || !showAuthModal || authMode !== 'signup') {
+      return;
+    }
+
+    if (typeof window === 'undefined') return;
+
+    const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+    if (!siteKey) {
+      return;
+    }
+
+    const anyWindow = window as any;
+    if (!anyWindow.turnstile) {
+      return;
+    }
+
+    const container = document.getElementById('turnstile-container');
+    if (!container) {
+      return;
+    }
+    // Clear any previous widget
+    container.innerHTML = '';
+
+    anyWindow.turnstile.render('#turnstile-container', {
+      sitekey: siteKey,
+      callback: (token: string) => {
+        setTurnstileToken(token);
+      },
+      'error-callback': () => {
+        setTurnstileToken(null);
+      },
+    } as any);
+  }, [turnstileReady, showAuthModal, authMode]);
 
   // Fetch matches and live scores, and determine which matches should show live panels
   useEffect(() => {
@@ -280,14 +341,27 @@ export default function LiveScorePage() {
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (authMode === 'signup') {
+      if (!authFormData.password || authFormData.password.length < 12) {
+        alert('Password must be at least 12 characters long.');
+        return;
+      }
+      if (!turnstileToken) {
+        alert('Please complete the human verification before creating an account.');
+        return;
+      }
+    }
+
     try {
       // Always POST to /api/auth; the server infers signup vs signin from body fields
       const response = await fetch('/api/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(authMode === 'signin'
-          ? { email: authFormData.email, password: authFormData.password }
-          : authFormData),
+        body: JSON.stringify(
+          authMode === 'signin'
+            ? { email: authFormData.email, password: authFormData.password }
+            : { ...authFormData, turnstileToken },
+        ),
       });
 
       if (response.ok) {
@@ -324,6 +398,11 @@ export default function LiveScorePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 flex flex-col">
+      <Script
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
+        strategy="afterInteractive"
+        onLoad={() => setTurnstileReady(true)}
+      />
       <Navbar />
 
       <main className="flex-grow container mx-auto px-4 py-8">
@@ -638,9 +717,53 @@ export default function LiveScorePage() {
                 value={authFormData.password}
                 onChange={(e) => setAuthFormData({ ...authFormData, password: e.target.value })}
                 required
-                minLength={6}
+                minLength={12}
                 className="w-full px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
               />
+
+              {authMode === 'signup' && authFormData.password && (
+                <div className="space-y-1 text-xs mt-1">
+                  <div className="flex items-center justify-between text-gray-400">
+                    <span>Password strength</span>
+                    <span
+                      className={
+                        passwordStrength.label === 'Weak'
+                          ? 'text-red-400'
+                          : passwordStrength.label === 'Medium'
+                          ? 'text-yellow-400'
+                          : 'text-emerald-400'
+                      }
+                    >
+                      {passwordStrength.label}
+                    </span>
+                  </div>
+                  <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                    <div
+                      className={
+                        'h-full transition-all ' +
+                        (passwordStrength.label === 'Weak'
+                          ? 'bg-red-500'
+                          : passwordStrength.label === 'Medium'
+                          ? 'bg-yellow-500'
+                          : 'bg-emerald-500')
+                      }
+                      style={{ width: `${(passwordStrength.score / 4) * 100}%` }}
+                    />
+                  </div>
+                  <p className="text-[11px] text-gray-500">
+                    Use at least 12 characters with a mix of letters, numbers, and symbols.
+                  </p>
+                </div>
+              )}
+
+              {authMode === 'signup' && (
+                <div className="mt-3 space-y-1">
+                  <div id="turnstile-container" className="flex justify-center" />
+                  <p className="text-[11px] text-gray-500 text-center">
+                    This quick check helps keep the live chat free from bots and spam.
+                  </p>
+                </div>
+              )}
 
               <button
                 type="submit"

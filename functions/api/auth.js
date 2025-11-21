@@ -10,6 +10,20 @@ const encryptPassword = (password, salt) => {
 const generateSalt = () => crypto.randomBytes(16).toString('hex');
 const generateToken = () => crypto.randomBytes(32).toString('hex');
 
+// Very common passwords to block at signup (case-insensitive)
+const COMMON_PASSWORDS = new Set([
+  'password',
+  'password1',
+  '123456',
+  '123456789',
+  '12345678',
+  'qwerty',
+  '111111',
+  'abc123',
+  'letmein',
+  'iloveyou',
+]);
+
 export const onRequest = async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
@@ -48,11 +62,66 @@ export const onRequest = async (context) => {
 
     // Sign Up
     if (action === 'signup' && method === 'POST') {
-      const { email, password, name } = body;
+      const { email, password, name, turnstileToken } = body;
 
       if (!email || !password || !name) {
         return new Response(
           JSON.stringify({ error: 'Missing required fields' }),
+          { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
+
+      // Optional Cloudflare Turnstile verification for human check
+      const secretKey = env.TURNSTILE_SECRET_KEY;
+      if (secretKey && turnstileToken) {
+        try {
+          const formData = new URLSearchParams();
+          formData.append('secret', secretKey);
+          formData.append('response', String(turnstileToken));
+          const ip = request.headers.get('CF-Connecting-IP');
+          if (ip) {
+            formData.append('remoteip', ip);
+          }
+
+          const verifyRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+            method: 'POST',
+            body: formData,
+          });
+
+          const verifyData = await verifyRes.json();
+          if (!verifyData.success) {
+            return new Response(
+              JSON.stringify({ error: 'Human verification failed. Please try again.' }),
+              { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+            );
+          }
+        } catch (e) {
+          console.error('Turnstile verification error:', e);
+          return new Response(
+            JSON.stringify({ error: 'Unable to verify human check. Please try again.' }),
+            { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+          );
+        }
+      } else if (secretKey && !turnstileToken) {
+        // If Turnstile is configured but no token provided, reject signup
+        return new Response(
+          JSON.stringify({ error: 'Human verification is required to create an account.' }),
+          { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
+
+      const normalizedPassword = String(password).trim();
+
+      if (normalizedPassword.length < 12) {
+        return new Response(
+          JSON.stringify({ error: 'Password must be at least 12 characters long' }),
+          { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
+
+      if (COMMON_PASSWORDS.has(normalizedPassword.toLowerCase())) {
+        return new Response(
+          JSON.stringify({ error: 'Password is too common. Please choose a stronger password.' }),
           { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
@@ -68,7 +137,7 @@ export const onRequest = async (context) => {
 
       // Create new user
       const salt = generateSalt();
-      const hashedPassword = encryptPassword(password, salt);
+      const hashedPassword = encryptPassword(normalizedPassword, salt);
       const userId = crypto.randomUUID();
       const token = generateToken();
       const createdAt = new Date().toISOString();
