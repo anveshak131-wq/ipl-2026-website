@@ -473,30 +473,32 @@ export default function AdminStatsPage() {
         lastUpdated: new Date().toISOString(),
       };
 
-        try {
-          const teamAggregates: TeamAggregate[] = teams.map((team) =>
-            computeTeamAggregate(team.id)
-          );
+      await api.updateSettings({ publishedStats: snapshot });
+      setPublishedStats(snapshot);
+      setPublishSuccess('Stats snapshot published to public /stats page.');
+      setTimeout(() => setPublishSuccess(null), 4000);
+    } catch (error) {
+      console.error('Failed to publish stats snapshot:', error);
+      setPublishError('Failed to publish stats. Please try again.');
+    } finally {
+      setIsPublishing(false);
+    }
+  };
 
-          const finalTopRunScorers = sortByRunsDesc(
-            topRunScorers.length ? topRunScorers : suggestedTopRunScorers
-          );
-          const finalTopWicketTakers = sortByWicketsDesc(
-            topWicketTakers.length ? topWicketTakers : suggestedTopWicketTakers
-          );
-          const finalBestStrikeRates = sortByStrikeRateDesc(
-            bestStrikeRates.length ? bestStrikeRates : suggestedBestStrikeRates
-          );
-          const finalBestEconomyRates = sortByEconomyAsc(
-            bestEconomyRates.length ? bestEconomyRates : suggestedBestEconomyRates
-          );
-      <div className="flex min-h-screen bg-ipl-dark">
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-white">Loading...</div>
-        </div>
-      </div>
-    );
-  }
+  const handleSaveStatsConfig = async () => {
+    setIsSavingStatsConfig(true);
+    setStatsConfigMessage(null);
+    try {
+      await api.updateSettings({ statsConfig });
+      setStatsConfigMessage('Stats display settings saved.');
+    } catch (error) {
+      console.error('Failed to save stats display settings:', error);
+      setStatsConfigMessage('Failed to save display settings.');
+    } finally {
+      setIsSavingStatsConfig(false);
+      setTimeout(() => setStatsConfigMessage(null), 4000);
+    }
+  };
 
   if (!isAuthenticated) {
     return null;
