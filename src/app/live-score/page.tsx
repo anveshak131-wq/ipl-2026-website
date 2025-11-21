@@ -388,6 +388,45 @@ export default function LiveScorePage() {
     setMessages([]);
   };
 
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+
+    const confirmed = window.confirm(
+      'This will delete your account and anonymize your chat messages. This cannot be undone. Do you want to continue?'
+    );
+    if (!confirmed) return;
+
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      alert('You are not logged in.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/account?action=delete', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('auth_token');
+        setUser(null);
+        setMessages([]);
+        router.push('/');
+      } else {
+        const error = await response.json().catch(() => null);
+        alert(error?.error || 'Failed to delete account. Please try again.');
+      }
+    } catch (err) {
+      console.error('Delete account error:', err);
+      alert('An error occurred while deleting your account. Please try again.');
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
@@ -650,6 +689,13 @@ export default function LiveScorePage() {
                       className="w-full px-3 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg transition-colors text-sm"
                     >
                       Sign Out
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDeleteAccount}
+                      className="w-full px-3 py-2 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-lg transition-colors text-xs"
+                    >
+                      Delete my account
                     </button>
                   </form>
                 </div>
