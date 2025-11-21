@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Script from 'next/script';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import Emoji, { EmojiName } from '@/components/emoji/Emoji';
+import EmojiPicker from '@/components/emoji/EmojiPicker';
 import type { Match } from '@/types';
 
 interface LiveScoreData {
@@ -58,6 +60,56 @@ const getPasswordStrength = (password: string) => {
     return { label: 'Medium', score };
   }
   return { label: 'Strong', score };
+};
+
+const EMOJI_CODE_MAP: Record<string, EmojiName> = {
+  fire: 'fire',
+  clap: 'clap',
+  rocket: 'rocket',
+  heart: 'heart',
+  wow: 'wow',
+  thumbs_up: 'thumbs_up',
+};
+
+const renderMessageTextWithEmojis = (text: string) => {
+  if (!text) return null;
+
+  const parts: Array<string | { key: string; emoji: EmojiName }> = [];
+  const regex = /:(fire|clap|rocket|heart|wow|thumbs_up):/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+
+    const code = match[1];
+    const emojiName = EMOJI_CODE_MAP[code];
+    if (emojiName) {
+      parts.push({ key: `${match.index}-${code}`, emoji: emojiName });
+    } else {
+      parts.push(match[0]);
+    }
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return (
+    <>
+      {parts.map((part, index) =>
+        typeof part === 'string' ? (
+          <span key={index}>{part}</span>
+        ) : (
+          <Emoji key={part.key || index} name={part.emoji} size={18} className="mx-0.5" />
+        ),
+      )}
+    </>
+  );
 };
 
 export default function LiveScorePage() {
@@ -655,7 +707,9 @@ export default function LiveScorePage() {
                               {new Date(msg.timestamp).toLocaleTimeString()}
                             </span>
                           </div>
-                          <p className="text-gray-300 mt-1">{msg.text}</p>
+                          <p className="text-gray-300 mt-1 break-words">
+                            {renderMessageTextWithEmojis(msg.text)}
+                          </p>
                         </div>
                       ))
                     ) : (
@@ -668,6 +722,11 @@ export default function LiveScorePage() {
 
                   {/* Message Input */}
                   <form onSubmit={handleSendMessage} className="space-y-2">
+                    <EmojiPicker
+                      onSelect={(code) =>
+                        setNewMessage((prev) => (prev ? `${prev} ${code}`.trim() : code))
+                      }
+                    />
                     <input
                       type="text"
                       value={newMessage}
