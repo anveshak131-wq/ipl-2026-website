@@ -1081,59 +1081,197 @@ function KeyPlayersSection({ teamData, keyPlayers, primaryColor, secondaryColor 
 
 // Stats Tab
 function StatsTab({ teamData, primaryColor, secondaryColor, batsmen, bowlers, allRounders, wicketkeepers }: any) {
+  const squad: Player[] = (teamData.players || []) as Player[];
+
+  const totals = squad.reduce(
+    (acc, p) => {
+      const s = p.stats || {};
+      acc.matches += s.matches || 0;
+      acc.runs += s.runs || 0;
+      acc.wickets += s.wickets || 0;
+      acc.fours += s.fours || 0;
+      acc.sixes += s.sixes || 0;
+      acc.fifties += s.fifties || 0;
+      acc.hundreds += s.hundreds || 0;
+      return acc;
+    },
+    { matches: 0, runs: 0, wickets: 0, fours: 0, sixes: 0, fifties: 0, hundreds: 0 },
+  );
+
+  const totalFiftyPlus = totals.fifties + totals.hundreds;
+
+  const topRunScorer = squad.reduce<Player | null>((best, p) => {
+    const currentRuns = p.stats?.runs || 0;
+    const bestRuns = best?.stats?.runs || 0;
+    return currentRuns > bestRuns ? p : best;
+  }, null);
+
+  const topWicketTaker = squad.reduce<Player | null>((best, p) => {
+    const currentWkts = p.stats?.wickets || 0;
+    const bestWkts = best?.stats?.wickets || 0;
+    return currentWkts > bestWkts ? p : best;
+  }, null);
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl animate-fade-in"
-           style={{
-             background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-             borderColor: primaryColor.medium,
-             boxShadow: `0 10px 30px ${primaryColor.glow}15`
-           }}>
-        <div className="flex items-center gap-3 mb-6">
-          <CricketBatIcon className="w-8 h-8" color={primaryColor.solid} />
-          <h3 className="text-2xl font-black" style={{ color: primaryColor.textOnLight }}>Squad Composition</h3>
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div
+          className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl animate-fade-in"
+          style={{
+            background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+            borderColor: primaryColor.medium,
+            boxShadow: `0 10px 30px ${primaryColor.glow}15`,
+          }}
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <CricketBatIcon className="w-8 h-8" color={primaryColor.solid} />
+            <h3 className="text-2xl font-black" style={{ color: primaryColor.textOnLight }}>
+              Squad Composition
+            </h3>
+          </div>
+          <div className="space-y-4">
+            {[
+              { label: 'Batsmen', value: batsmen.length, Icon: BatsmanIcon },
+              { label: 'Bowlers', value: bowlers.length, Icon: BowlerIcon },
+              { label: 'All-rounders', value: allRounders.length, Icon: AllRounderIcon },
+              { label: 'Wicket-keepers', value: wicketkeepers.length, Icon: WicketKeeperIcon },
+            ].map((item, i) => (
+              <div
+                key={i}
+                className="flex justify-between items-center p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-all"
+              >
+                <span
+                  className="font-semibold flex items-center gap-3"
+                  style={{ color: primaryColor.textOnLight }}
+                >
+                  <item.Icon className="w-5 h-5" color={primaryColor.solid} />
+                  {item.label}
+                </span>
+                <span className="text-4xl font-black" style={{ color: primaryColor.text }}>
+                  {item.value}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="space-y-4">
-          {[
-            { label: 'Batsmen', value: batsmen.length, Icon: BatsmanIcon },
-            { label: 'Bowlers', value: bowlers.length, Icon: BowlerIcon },
-            { label: 'All-rounders', value: allRounders.length, Icon: AllRounderIcon },
-            { label: 'Wicket-keepers', value: wicketkeepers.length, Icon: WicketKeeperIcon }
-          ].map((item, i) => (
-            <div key={i} className="flex justify-between items-center p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-all">
-              <span className="font-semibold flex items-center gap-3" style={{ color: primaryColor.textOnLight }}>
-                <item.Icon className="w-5 h-5" color={primaryColor.solid} />
-                {item.label}
-              </span>
-              <span className="text-4xl font-black" style={{ color: primaryColor.text }}>{item.value}</span>
-            </div>
-          ))}
+
+        <div
+          className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl animate-fade-in"
+          style={{
+            background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+            borderColor: primaryColor.medium,
+            animationDelay: '100ms',
+            boxShadow: `0 10px 30px ${primaryColor.glow}15`,
+          }}
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <GlobeIcon className="w-8 h-8" color={primaryColor.solid} />
+            <h3 className="text-2xl font-black" style={{ color: primaryColor.textOnLight }}>
+              Player Origin
+            </h3>
+          </div>
+          <div className="space-y-4">
+            {[
+              {
+                label: 'Indian Players',
+                value:
+                  teamData.players?.filter((p: Player) => p.nationality === 'India').length || 0,
+              },
+              {
+                label: 'Foreign Players',
+                value:
+                  teamData.players?.filter((p: Player) => p.nationality !== 'India').length || 0,
+              },
+            ].map((item, i) => (
+              <div
+                key={i}
+                className="flex justify-between items-center p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-all"
+              >
+                <span className="font-semibold" style={{ color: primaryColor.textOnLight }}>
+                  {item.label}
+                </span>
+                <span className="text-4xl font-black" style={{ color: primaryColor.text }}>
+                  {item.value}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
-      <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl animate-fade-in"
-           style={{
-             background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-             borderColor: primaryColor.medium,
-             animationDelay: '100ms',
-             boxShadow: `0 10px 30px ${primaryColor.glow}15`
-           }}>
-        <div className="flex items-center gap-3 mb-6">
-          <GlobeIcon className="w-8 h-8" color={primaryColor.solid} />
-          <h3 className="text-2xl font-black" style={{ color: primaryColor.textOnLight }}>Player Origin</h3>
-        </div>
-        <div className="space-y-4">
-          {[
-            { label: 'Indian Players', value: teamData.players?.filter((p: Player) => p.nationality === 'India').length || 0 },
-            { label: 'Foreign Players', value: teamData.players?.filter((p: Player) => p.nationality !== 'India').length || 0 }
-          ].map((item, i) => (
-            <div key={i} className="flex justify-between items-center p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-all">
-              <span className="font-semibold" style={{ color: primaryColor.textOnLight }}>{item.label}</span>
-              <span className="text-4xl font-black" style={{ color: primaryColor.text }}>{item.value}</span>
+      {squad.length > 0 && (
+        <div
+          className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl animate-fade-in"
+          style={{
+            background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+            borderColor: primaryColor.medium,
+            animationDelay: '200ms',
+            boxShadow: `0 10px 30px ${primaryColor.glow}20`,
+          }}
+        >
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <CricketBatIcon className="w-7 h-7" color={primaryColor.solid} />
+              <h3 className="text-2xl font-black" style={{ color: primaryColor.textOnLight }}>
+                Team Stats (from player careers)
+              </h3>
             </div>
-          ))}
+            <p className="text-[11px] uppercase tracking-wide text-gray-100/80">
+              Aggregated from squad player stats
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+            <div className="p-4 rounded-xl bg-black/20 border border-white/10">
+              <p className="text-xs uppercase text-gray-300 mb-1">Total Runs</p>
+              <p className="text-2xl font-black text-white">{totals.runs}</p>
+            </div>
+            <div className="p-4 rounded-xl bg-black/20 border border-white/10">
+              <p className="text-xs uppercase text-gray-300 mb-1">Total Wickets</p>
+              <p className="text-2xl font-black text-white">{totals.wickets}</p>
+            </div>
+            <div className="p-4 rounded-xl bg-black/20 border border-white/10">
+              <p className="text-xs uppercase text-gray-300 mb-1">50+ Scores</p>
+              <p className="text-2xl font-black text-white">{totalFiftyPlus}</p>
+            </div>
+            <div className="p-4 rounded-xl bg-black/20 border border-white/10">
+              <p className="text-xs uppercase text-gray-300 mb-1">Total Fours</p>
+              <p className="text-2xl font-black text-white">{totals.fours}</p>
+            </div>
+            <div className="p-4 rounded-xl bg-black/20 border border-white/10">
+              <p className="text-xs uppercase text-gray-300 mb-1">Total Sixes</p>
+              <p className="text-2xl font-black text-white">{totals.sixes}</p>
+            </div>
+            <div className="p-4 rounded-xl bg-black/20 border border-white/10">
+              <p className="text-xs uppercase text-gray-300 mb-1">Player Matches (sum)</p>
+              <p className="text-2xl font-black text-white">{totals.matches}</p>
+            </div>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            {topRunScorer && (
+              <div className="p-4 rounded-xl bg-black/25 border border-white/10 flex flex-col gap-1">
+                <p className="text-xs uppercase text-gray-300">Top run-scorer in squad</p>
+                <p className="text-base font-semibold text-white">{topRunScorer.name}</p>
+                <p className="text-xs text-gray-300">
+                  Runs: <span className="font-semibold text-white">{topRunScorer.stats.runs}</span> ·
+                  Matches: <span className="font-semibold text-white">{topRunScorer.stats.matches}</span>
+                </p>
+              </div>
+            )}
+            {topWicketTaker && (
+              <div className="p-4 rounded-xl bg-black/25 border border-white/10 flex flex-col gap-1">
+                <p className="text-xs uppercase text-gray-300">Top wicket-taker in squad</p>
+                <p className="text-base font-semibold text-white">{topWicketTaker.name}</p>
+                <p className="text-xs text-gray-300">
+                  Wickets: <span className="font-semibold text-white">{topWicketTaker.stats.wickets}</span> ·
+                  Matches: <span className="font-semibold text-white">{topWicketTaker.stats.matches}</span>
+                </p>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
