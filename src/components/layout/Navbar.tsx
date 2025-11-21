@@ -11,18 +11,29 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
 
-  const navItems = [
-    { href: '/', label: 'Home', icon: null },
+  const isLinkActive = (href: string) => {
+    if (!pathname) return false;
+    if (href === '/') return pathname === '/';
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
+
+  const primaryNavItems = [
+    { href: '/', label: 'Home', icon: null as const },
     { href: '/matches', label: 'Schedule', icon: 'cricket' as const },
     { href: '/live-score', label: 'Live Score', icon: 'cricket' as const },
     { href: '/teams', label: 'Teams', icon: 'team' as const },
     { href: '/stats', label: 'Stats', icon: 'stats' as const },
     { href: '/news', label: 'News', icon: 'news' as const },
+    { href: '/predictions', label: 'Predictions', icon: 'target' as const },
+  ];
+
+  const secondaryNavItems = [
     { href: '/feed', label: 'For You', icon: 'stats' as const },
     { href: '/notifications', label: 'Notifications', icon: 'news' as const },
-    { href: '/predictions', label: 'Predictions', icon: 'target' as const },
     { href: '/account', label: 'Account', icon: 'team' as const },
   ];
+
+  const allNavItems = [...primaryNavItems, ...secondaryNavItems];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -59,26 +70,57 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:block">
-            <div className="ml-10 flex items-center space-x-1 bg-white/5 rounded-xl p-1 backdrop-blur-sm">
-              {navItems.map((item) => {
-                const isActive = pathname === item.href;
+          <div className="hidden md:flex flex-1 items-center justify-end gap-4">
+            <div className="flex items-center space-x-1 bg-white/5 rounded-xl p-1 backdrop-blur-sm">
+              {primaryNavItems.map((item) => {
+                const isActive = isLinkActive(item.href);
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
                     className={`
                       relative px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 flex items-center gap-2
-                      ${isActive 
-                        ? 'text-white bg-gradient-to-r from-ipl-blue-dark to-ipl-purple shadow-lg shadow-ipl-purple/30' 
-                        : 'text-gray-300 hover:text-white hover:bg-white/10'
-                      }
+                      ${isActive
+                        ? 'text-white bg-gradient-to-r from-ipl-blue-dark to-ipl-purple shadow-lg shadow-ipl-purple/30'
+                        : 'text-gray-300 hover:text-white hover:bg-white/10'}
                     `}
                   >
                     {item.icon && <Icon name={item.icon} size={16} />}
                     {item.label}
                     {isActive && (
                       <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-transparent via-ipl-gold to-transparent" />
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+
+            <div className="flex items-center space-x-2">
+              {secondaryNavItems.map((item) => {
+                const isActive = isLinkActive(item.href);
+                const isPrimaryAction = item.href === '/feed';
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`
+                      relative flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold border transition-all duration-200
+                      ${isPrimaryAction
+                        ? isActive
+                          ? 'bg-ipl-gold text-black border-ipl-gold shadow-lg shadow-ipl-gold/30'
+                          : 'border-ipl-gold/60 text-ipl-gold hover:bg-ipl-gold/10 hover:border-ipl-gold'
+                        : isActive
+                          ? 'text-white border-ipl-gold bg-white/10 shadow-lg shadow-ipl-gold/20'
+                          : 'text-gray-200 border-white/15 hover:text-white hover:border-ipl-gold/70 hover:bg-white/5'}
+                    `}
+                  >
+                    {item.icon && <Icon name={item.icon} size={16} />}
+                    <span className="hidden sm:inline">{item.label}</span>
+                    <span className="sm:hidden">
+                      {item.label === 'Notifications' ? 'Alerts' : item.label}
+                    </span>
+                    {item.href === '/notifications' && isActive && (
+                      <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-ipl-gold animate-ping" />
                     )}
                   </Link>
                 );
@@ -124,8 +166,8 @@ export default function Navbar() {
       {isMenuOpen && (
         <div className="md:hidden animate-slide-up bg-[rgba(13,16,27,0.95)] backdrop-blur-xl border-t border-white/10">
           <div className="px-4 pt-2 pb-3 space-y-1">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href;
+            {allNavItems.map((item) => {
+              const isActive = isLinkActive(item.href);
               return (
                 <Link
                   key={item.href}
