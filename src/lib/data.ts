@@ -403,9 +403,23 @@ export const api = {
       }
       const allContent = (await response.json()) as Content[];
 
-      // Only include active news items and sort newest-first
+      const now = Date.now();
+      const isWithinSchedule = (item: Content, atMs: number) => {
+        if (!item.isActive) return false;
+        if (item.publishAt) {
+          const start = Date.parse(item.publishAt);
+          if (!Number.isNaN(start) && atMs < start) return false;
+        }
+        if (item.unpublishAt) {
+          const end = Date.parse(item.unpublishAt);
+          if (!Number.isNaN(end) && atMs >= end) return false;
+        }
+        return true;
+      };
+
+      // Only include scheduled & active news items and sort newest-first
       const newsItems = allContent
-        .filter((item) => item.type === 'news' && item.isActive)
+        .filter((item) => item.type === 'news' && isWithinSchedule(item, now))
         .sort((a, b) => {
           const dateA = new Date(a.publishedAt || a.createdAt || '').getTime() || 0;
           const dateB = new Date(b.publishedAt || b.createdAt || '').getTime() || 0;
@@ -419,16 +433,35 @@ export const api = {
       return mockNews;
     }
   },
-  
+
   getHighlights: async (): Promise<Highlight[]> => {
     try {
       const response = await fetch('/api/content');
       if (!response.ok) {
         throw new Error('Failed to fetch highlights');
       }
-      const allContent = await response.json();
-      // Filter for highlight type content
-      return allContent.filter((item: Content) => item.type === 'highlight');
+      const allContent = (await response.json()) as Content[];
+
+      const now = Date.now();
+      const isWithinSchedule = (item: Content, atMs: number) => {
+        if (!item.isActive) return false;
+        if (item.publishAt) {
+          const start = Date.parse(item.publishAt);
+          if (!Number.isNaN(start) && atMs < start) return false;
+        }
+        if (item.unpublishAt) {
+          const end = Date.parse(item.unpublishAt);
+          if (!Number.isNaN(end) && atMs >= end) return false;
+        }
+        return true;
+      };
+
+      // Filter for highlight type content that is within its schedule
+      const highlights = allContent.filter(
+        (item: Content) => item.type === 'highlight' && isWithinSchedule(item, now),
+      );
+
+      return highlights as unknown as Highlight[];
     } catch (error) {
       console.error('Error fetching highlights:', error);
       // Fallback to mock data if API fails

@@ -87,6 +87,7 @@ export default function ContentManager({
   const [activeContentType, setActiveContentType] = useState<'news' | 'banner' | 'highlight'>(initialType);
   const [newsCategoryFilter, setNewsCategoryFilter] = useState<'all' | 'match' | 'team' | 'player' | 'general'>('all');
   const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
+  const [previewAsOf, setPreviewAsOf] = useState<string>('');
 
   const [formData, setFormData] = useState<{
     type: 'banner' | 'highlight' | 'news';
@@ -101,6 +102,8 @@ export default function ContentManager({
     linkedTeamIds: string[];
     linkedMatchId: string;
     linkedPlayerIds: string[];
+    publishAt: string;
+    unpublishAt: string;
   }>({
     type: 'news',
     title: '',
@@ -114,6 +117,8 @@ export default function ContentManager({
     linkedTeamIds: [],
     linkedMatchId: '',
     linkedPlayerIds: [],
+    publishAt: '',
+    unpublishAt: '',
   });
 
   const currentType: 'news' | 'banner' | 'highlight' = restrictToType || activeContentType;
@@ -126,6 +131,27 @@ export default function ContentManager({
   const totalCurrent = itemsOfCurrentType.length;
   const publishedCurrent = itemsOfCurrentType.filter((c) => c.isActive).length;
   const draftCurrent = itemsOfCurrentType.filter((c) => !c.isActive).length;
+
+  const getPreviewAsOfDate = () => {
+    if (!previewAsOf) return new Date();
+    const d = new Date(previewAsOf);
+    if (Number.isNaN(d.getTime())) return new Date();
+    return d;
+  };
+
+  const isVisibleAt = (item: Content, at: Date) => {
+    if (!item.isActive) return false;
+    const atMs = at.getTime();
+    if (item.publishAt) {
+      const start = Date.parse(item.publishAt);
+      if (!Number.isNaN(start) && atMs < start) return false;
+    }
+    if (item.unpublishAt) {
+      const end = Date.parse(item.unpublishAt);
+      if (!Number.isNaN(end) && atMs >= end) return false;
+    }
+    return true;
+  };
 
   useEffect(() => {
     const checkAuth = () => {
@@ -248,6 +274,8 @@ export default function ContentManager({
       linkedTeamIds: [],
       linkedMatchId: '',
       linkedPlayerIds: [],
+      publishAt: '',
+      unpublishAt: '',
     });
     setShowForm(true);
   };
@@ -267,6 +295,8 @@ export default function ContentManager({
       linkedTeamIds: item.linkedTeamIds || [],
       linkedMatchId: item.linkedMatchId || '',
       linkedPlayerIds: item.linkedPlayerIds || [],
+      publishAt: item.publishAt || '',
+      unpublishAt: item.unpublishAt || '',
     });
     setShowForm(true);
   };
@@ -506,6 +536,25 @@ export default function ContentManager({
                 </button>
               </div>
             )}
+            <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-gray-300">
+              <div className="flex items-center gap-2">
+                <IconCalendar className="w-4 h-4" />
+                <span>Preview visibility as of:</span>
+                <input
+                  type="datetime-local"
+                  value={previewAsOf}
+                  onChange={(e) => setPreviewAsOf(e.target.value)}
+                  className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-ipl-gold/60 focus:ring-1 focus:ring-ipl-gold/40"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewAsOf('')}
+                className="px-3 py-1.5 rounded-full border border-white/10 text-[11px] text-gray-200 bg-slate-800/70 hover:bg-slate-700/80"
+              >
+                Use current time
+              </button>
+            </div>
           </div>
 
           {/* Stats */}
@@ -565,6 +614,19 @@ export default function ContentManager({
                         {item.isActive ? 'Published' : 'Draft'}
                       </span>
                     </div>
+                    {(item.type === 'news' || item.type === 'banner') && (
+                      <div className="absolute bottom-3 right-3">
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border backdrop-blur-sm ${
+                            isVisibleAt(item, getPreviewAsOfDate())
+                              ? 'bg-emerald-500/15 text-emerald-300 border-emerald-400/40'
+                              : 'bg-slate-700/60 text-slate-200 border-slate-500/40'
+                          }`}
+                        >
+                          {isVisibleAt(item, getPreviewAsOfDate()) ? 'Visible in preview' : 'Hidden in preview'}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Content */}
@@ -581,9 +643,11 @@ export default function ContentManager({
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-1 text-xs text-gray-400">
-                        <IconCalendar className="w-4 h-4" />
-                        {new Date().toLocaleDateString()}
+                      <div className="flex flex-col items-end gap-1 text-xs text-gray-400">
+                        <div className="flex items-center gap-1">
+                          <IconCalendar className="w-4 h-4" />
+                          {new Date().toLocaleDateString()}
+                        </div>
                       </div>
                     </div>
 
@@ -692,7 +756,7 @@ export default function ContentManager({
                         </label>
                         <select
                           value={formData.isActive ? 'active' : 'inactive'}
-                          onChange={(e) => setFormData({...formData, isActive: e.target.value === 'active'})}
+                          onChange={(e) => setFormData({ ...formData, isActive: e.target.value === 'active' })}
                           className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-ipl-gold focus:ring-2 focus:ring-ipl-gold/20 transition-all"
                         >
                           <option value="active">Published</option>
@@ -712,6 +776,36 @@ export default function ContentManager({
                             <label htmlFor="isImportant" className="text-sm text-gray-300">
                               Mark as important (reserve featured block on news pages)
                             </label>
+                          </div>
+                        )}
+                        {(formData.type === 'news' || formData.type === 'banner') && (
+                          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-300 mb-1">
+                                Publish start (optional)
+                              </label>
+                              <input
+                                type="datetime-local"
+                                value={formData.publishAt}
+                                onChange={(e) =>
+                                  setFormData({ ...formData, publishAt: e.target.value })
+                                }
+                                className="w-full bg-white/5 border border-white/20 rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold focus:ring-2 focus:ring-ipl-gold/20 transition-all"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-300 mb-1">
+                                Unpublish end (optional)
+                              </label>
+                              <input
+                                type="datetime-local"
+                                value={formData.unpublishAt}
+                                onChange={(e) =>
+                                  setFormData({ ...formData, unpublishAt: e.target.value })
+                                }
+                                className="w-full bg-white/5 border border-white/20 rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold focus:ring-2 focus:ring-ipl-gold/20 transition-all"
+                              />
+                            </div>
                           </div>
                         )}
                       </div>

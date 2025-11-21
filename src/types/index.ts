@@ -114,8 +114,10 @@ export interface Content {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
-   publishedAt?: string;
-   isImportant?: boolean;
+  publishedAt?: string;
+  publishAt?: string;
+  unpublishAt?: string;
+  isImportant?: boolean;
   // Optional structured news fields
   summary?: string;
   category?: 'match' | 'team' | 'player' | 'general';
