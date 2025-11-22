@@ -326,75 +326,111 @@ export default function WorldCricketPage() {
               </p>
             </div>
           ) : (
-            <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 md:gap-6">
-              {filteredMatches.map((m) => {
-                const teamA = m.teams?.[0] || m.teamInfo?.[0]?.shortname || m.teamInfo?.[0]?.name || '';
-                const teamB = m.teams?.[1] || m.teamInfo?.[1]?.shortname || m.teamInfo?.[1]?.name || '';
-                const matchup = teamA && teamB ? `${teamA} vs ${teamB}` : m.name || 'Cricket match';
-                const dateLabel = formatLocalDateTime(m.dateTimeGMT);
-                const status = m.status || '';
-                const score = m.score || '';
-                const matchType = m.matchType || '';
-                const seriesName = m.seriesName || '';
+            <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-black/60 via-slate-900/80 to-black/90 shadow-xl shadow-ipl-purple/20">
+              <div className="pointer-events-none absolute inset-0 opacity-70">
+                <div className="absolute -top-16 left-[-40px] h-32 w-32 rounded-full bg-ipl-blue-light/20 blur-2xl" />
+                <div className="absolute -bottom-20 right-[-40px] h-40 w-40 rounded-full bg-ipl-gold/25 blur-3xl" />
+              </div>
 
-                const isLive = (status || '').toLowerCase().includes('live');
+              <div className="relative px-4 py-4 sm:px-6 sm:py-5 space-y-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 text-xs text-gray-200">
+                    <Icon name="cricket" size={16} />
+                    <span className="font-semibold">
+                      {activeTab === 'live'
+                        ? 'Live matches'
+                        : activeTab === 'upcoming'
+                        ? 'Upcoming fixtures'
+                        : activeTab === 'recent'
+                        ? 'Recent results'
+                        : 'All fixtures around today'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[11px] text-gray-300">
+                    <span className="px-2 py-0.5 rounded-full bg-black/40 border border-white/10">
+                      {filteredMatches.length} matches
+                    </span>
+                    {activeTab === 'live' && filteredMatches.length > 0 && (
+                      <span className="inline-flex items-center gap-1 text-emerald-300">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span>Live</span>
+                      </span>
+                    )}
+                  </div>
+                </div>
 
-                return (
-                  <article
-                    key={m.id || `${matchup}-${dateLabel}`}
-                    onClick={() => setSelectedMatch(m)}
-                    className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900/85 via-slate-900/70 to-slate-950/90 backdrop-blur-md border border-white/10 hover:border-ipl-gold/70 transition-all duration-300 hover:shadow-2xl hover:shadow-ipl-gold/30 cursor-pointer transform-gpu hover:-translate-y-1"
-                  >
-                    <div className="absolute inset-0 opacity-60 pointer-events-none">
-                      <div className="absolute -top-16 right-[-40px] h-28 w-28 rounded-full bg-ipl-purple/25 blur-2xl" />
-                      <div className="absolute -bottom-16 left-[-40px] h-32 w-32 rounded-full bg-ipl-blue-light/20 blur-2xl" />
-                    </div>
+                <div className="mt-1 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
+                  {filteredMatches.map((m, idx) => {
+                    const teamA = m.teams?.[0] || m.teamInfo?.[0]?.shortname || m.teamInfo?.[0]?.name || '';
+                    const teamB = m.teams?.[1] || m.teamInfo?.[1]?.shortname || m.teamInfo?.[1]?.name || '';
+                    const matchup = teamA && teamB ? `${teamA} vs ${teamB}` : m.name || 'Cricket match';
+                    const dateLabel = formatLocalDateTime(m.dateTimeGMT);
+                    const status = m.status || '';
+                    const score = m.score || '';
+                    const matchType = m.matchType || '';
+                    const seriesName = m.seriesName || '';
 
-                    <div className="relative p-4 sm:p-5 space-y-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="space-y-1 min-w-0">
-                          <p className="text-[10px] uppercase tracking-wide text-gray-400 flex items-center gap-1">
-                            <span className="inline-flex w-1.5 h-1.5 rounded-full bg-ipl-gold" />
-                            <span className="truncate">{matchType || 'Cricket'}</span>
-                          </p>
-                          <h2 className="text-sm font-semibold text-white line-clamp-2">{matchup}</h2>
-                          {seriesName && (
-                            <p className="text-[10px] text-gray-400 line-clamp-1">{seriesName}</p>
+                    const isLive = (status || '').toLowerCase().includes('live');
+
+                    return (
+                      <article
+                        key={m.id || `${matchup}-${dateLabel}`}
+                        onClick={() => setSelectedMatch(m)}
+                        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900/85 via-slate-900/70 to-slate-950/90 backdrop-blur-md border border-white/10 hover:border-ipl-gold/70 transition-all duration-300 hover:shadow-2xl hover:shadow-ipl-gold/30 cursor-pointer transform-gpu hover:-translate-y-1 animate-slide-up"
+                        style={{ animationDelay: `${idx * 60}ms` }}
+                      >
+                        <div className="absolute inset-0 opacity-60 pointer-events-none">
+                          <div className="absolute -top-16 right-[-40px] h-28 w-28 rounded-full bg-ipl-purple/25 blur-2xl" />
+                          <div className="absolute -bottom-16 left-[-40px] h-32 w-32 rounded-full bg-ipl-blue-light/20 blur-2xl" />
+                        </div>
+
+                        <div className="relative p-4 sm:p-5 space-y-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="space-y-1 min-w-0">
+                              <p className="text-[10px] uppercase tracking-wide text-gray-400 flex items-center gap-1">
+                                <span className="inline-flex w-1.5 h-1.5 rounded-full bg-ipl-gold" />
+                                <span className="truncate">{matchType || 'Cricket'}</span>
+                              </p>
+                              <h2 className="text-sm font-semibold text-white line-clamp-2">{matchup}</h2>
+                              {seriesName && (
+                                <p className="text-[10px] text-gray-400 line-clamp-1">{seriesName}</p>
+                              )}
+                            </div>
+                            <div className="flex flex-col items-end gap-1">
+                              <span
+                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                                  isLive
+                                    ? 'bg-red-500/15 text-red-300 border-red-400/60'
+                                    : status.toLowerCase().includes('finished') || status.toLowerCase().includes('result')
+                                    ? 'bg-emerald-500/15 text-emerald-200 border-emerald-400/60'
+                                    : 'bg-slate-500/20 text-slate-200 border-slate-400/50'
+                                }`}
+                              >
+                                {isLive && <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />}
+                                <span>{status || (isLive ? 'Live' : 'Scheduled')}</span>
+                              </span>
+                              {dateLabel && <span className="text-[10px] text-gray-400">{dateLabel}</span>}
+                            </div>
+                          </div>
+
+                          {score && (
+                            <div className="rounded-2xl bg-black/40 border border-white/10 px-3 py-2 text-[12px] text-ipl-gold font-semibold">
+                              {score}
+                            </div>
+                          )}
+
+                          {m.venue && (
+                            <p className="text-[11px] text-gray-400 flex items-center gap-1">
+                              <span className="w-1 h-1 rounded-full bg-ipl-gold" />
+                              <span className="line-clamp-1">{m.venue}</span>
+                            </p>
                           )}
                         </div>
-                        <div className="flex flex-col items-end gap-1">
-                          <span
-                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
-                              isLive
-                                ? 'bg-red-500/15 text-red-300 border-red-400/60'
-                                : status.toLowerCase().includes('finished') || status.toLowerCase().includes('result')
-                                ? 'bg-emerald-500/15 text-emerald-200 border-emerald-400/60'
-                                : 'bg-slate-500/20 text-slate-200 border-slate-400/50'
-                            }`}
-                          >
-                            {isLive && <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />}
-                            <span>{status || (isLive ? 'Live' : 'Scheduled')}</span>
-                          </span>
-                          {dateLabel && <span className="text-[10px] text-gray-400">{dateLabel}</span>}
-                        </div>
-                      </div>
-
-                      {score && (
-                        <div className="rounded-2xl bg-black/40 border border-white/10 px-3 py-2 text-[12px] text-ipl-gold font-semibold">
-                          {score}
-                        </div>
-                      )}
-
-                      {m.venue && (
-                        <p className="text-[11px] text-gray-400 flex items-center gap-1">
-                          <span className="w-1 h-1 rounded-full bg-ipl-gold" />
-                          <span className="line-clamp-1">{m.venue}</span>
-                        </p>
-                      )}
-                    </div>
-                  </article>
-                );
-              })}
+                      </article>
+                    );
+                  })}
+                </div>
+              </div>
             </section>
           )}
         </div>
