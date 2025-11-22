@@ -18,17 +18,44 @@ interface DatasetSummary {
 function parseCsvSimple(text: string): ParsedCsv {
   const lines = text
     .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0);
+    .filter((line) => line.trim().length > 0);
 
   if (lines.length === 0) {
     return { headers: [], rows: [] };
   }
 
-  const headers = lines[0].split(',').map((h) => h.trim());
+  const parseLine = (line: string): string[] => {
+    const cells: string[] = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+
+      if (char === '"') {
+        // Handle escaped quotes within quoted values
+        if (inQuotes && line[i + 1] === '"') {
+          current += '"';
+          i += 1;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        cells.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+
+    cells.push(current.trim());
+    return cells;
+  };
+
+  const headers = parseLine(lines[0]);
 
   const rows = lines.slice(1).map((line) => {
-    const cols = line.split(',');
+    const cols = parseLine(line);
     // Normalize row length to headers length
     if (cols.length < headers.length) {
       return [...cols, ...Array(headers.length - cols.length).fill('')];
