@@ -204,17 +204,53 @@ export default function WorldCricketPage() {
   }, [activeTab, grouped.live, grouped.upcoming, grouped.recent, matches]);
 
   const seriesGroups = useMemo(() => {
-    const groups: Record<string, CricketDataMatch[]> = {};
+    type SeriesGroupMeta = {
+      matches: CricketDataMatch[];
+      hasLive: boolean;
+      firstTime: number;
+    };
+
+    const groups: Record<string, SeriesGroupMeta> = {};
 
     filteredMatches.forEach((m) => {
       const key = m.seriesName || 'Other series';
-      if (!groups[key]) {
-        groups[key] = [];
+      const status = (m.status || '').toLowerCase();
+      const isLive = status.includes('live');
+
+      let time = Number.POSITIVE_INFINITY;
+      if (m.dateTimeGMT) {
+        const d = new Date(m.dateTimeGMT);
+        if (!Number.isNaN(d.getTime())) {
+          time = d.getTime();
+        }
       }
-      groups[key].push(m);
+
+      if (!groups[key]) {
+        groups[key] = {
+          matches: [],
+          hasLive: false,
+          firstTime: time,
+        };
+      }
+
+      const group = groups[key];
+      group.matches.push(m);
+      if (isLive) {
+        group.hasLive = true;
+      }
+      if (time < group.firstTime) {
+        group.firstTime = time;
+      }
     });
 
-    return Object.entries(groups).sort((a, b) => a[0].localeCompare(b[0]));
+    return Object.entries(groups)
+      .sort(([, a], [, b]) => {
+        if (a.hasLive !== b.hasLive) {
+          return a.hasLive ? -1 : 1; // live series first
+        }
+        return a.firstTime - b.firstTime;
+      })
+      .map(([seriesName, meta]) => [seriesName, meta.matches] as [string, CricketDataMatch[]]);
   }, [filteredMatches]);
 
   const scoreCards = useMemo(() => {
@@ -450,14 +486,22 @@ export default function WorldCricketPage() {
                                     <div className="absolute -bottom-10 left-[-40px] h-28 w-28 rounded-full bg-ipl-blue-light/25 blur-2xl" />
                                   </div>
 
-                                  <div className="relative px-4 py-3 sm:px-5 sm:py-4 space-y-3">
+                                  <div className="relative px-5 py-4 sm:px-6 sm:py-5 space-y-3">
                                     <div className="flex items-start justify-between gap-3">
-                                      <div className="space-y-1 min-w-0">
+                                      <div className="space-y-1.5 min-w-0">
+                                        {seriesLabel && (
+                                          <div className="inline-flex items-center gap-1 rounded-full bg-ipl-purple/25 border border-ipl-gold/60 px-2.5 py-0.5 text-[10px] font-semibold text-ipl-gold">
+                                            <span className="w-1 h-1 rounded-full bg-ipl-gold" />
+                                            <span className="truncate max-w-[200px] sm:max-w-[260px]">
+                                              {seriesLabel}
+                                            </span>
+                                          </div>
+                                        )}
                                         <p className="text-[10px] uppercase tracking-wide text-gray-400 flex items-center gap-1">
                                           <span className="inline-flex w-1.5 h-1.5 rounded-full bg-ipl-gold" />
                                           <span className="truncate">{matchType || 'Cricket'}</span>
                                         </p>
-                                        <h2 className="text-sm sm:text-base font-semibold text-white line-clamp-2">
+                                        <h2 className="text-base sm:text-lg font-semibold text-white line-clamp-2">
                                           {matchup}
                                         </h2>
                                       </div>
@@ -483,16 +527,16 @@ export default function WorldCricketPage() {
                                       </div>
                                     </div>
 
-                                    <div className="rounded-2xl bg-black/40 border border-white/10 px-3 py-2 sm:px-4 sm:py-3 flex flex-col gap-2">
+                                    <div className="rounded-2xl bg-black/50 border border-white/15 px-4 py-3 sm:px-5 sm:py-4 flex flex-col gap-2.5">
                                       {hasTeamScores ? (
                                         <>
-                                          <div className="flex items-center justify-between gap-3 text-xs sm:text-sm text-gray-100">
+                                          <div className="flex items-center justify-between gap-3 text-sm sm:text-base text-gray-100">
                                             <span className="font-semibold truncate">{team1Label}</span>
                                             <span className="text-ipl-gold font-bold text-right min-w-[72px]">
                                               {team1Score || '—'}
                                             </span>
                                           </div>
-                                          <div className="flex items-center justify-between gap-3 text-xs sm:text-sm text-gray-100">
+                                          <div className="flex items-center justify-between gap-3 text-sm sm:text-base text-gray-100">
                                             <span className="font-semibold truncate">{team2Label}</span>
                                             <span className="text-ipl-gold font-bold text-right min-w-[72px]">
                                               {team2Score || '—'}
@@ -500,11 +544,11 @@ export default function WorldCricketPage() {
                                           </div>
                                         </>
                                       ) : score ? (
-                                        <div className="text-xs sm:text-sm text-ipl-gold font-semibold text-center">
+                                        <div className="text-sm sm:text-base text-ipl-gold font-semibold text-center">
                                           {score}
                                         </div>
                                       ) : (
-                                        <div className="text-[11px] text-gray-400 text-center">
+                                        <div className="text-xs sm:text-sm text-gray-400 text-center">
                                           Score not available yet.
                                         </div>
                                       )}
