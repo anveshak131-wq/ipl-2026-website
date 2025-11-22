@@ -68,6 +68,11 @@ export default function AdminMlLabPage() {
   const [datasetsError, setDatasetsError] = useState<string | null>(null);
   const [selectedDatasetKey, setSelectedDatasetKey] = useState<string | null>(null);
   const [selectedAlgorithmId, setSelectedAlgorithmId] = useState<string | null>(null);
+  const [datasetHeaders, setDatasetHeaders] = useState<string[]>([]);
+  const [isLoadingSchema, setIsLoadingSchema] = useState(false);
+  const [schemaError, setSchemaError] = useState<string | null>(null);
+  const [targetColumn, setTargetColumn] = useState<string | null>(null);
+  const [featureColumns, setFeatureColumns] = useState<string[]>([]);
 
   const loadDatasets = async () => {
     setIsLoadingDatasets(true);
@@ -115,12 +120,85 @@ export default function AdminMlLabPage() {
     loadDatasets();
   }, []);
 
+  useEffect(() => {
+    const loadSchema = async () => {
+      if (!selectedDatasetKey) {
+        setDatasetHeaders([]);
+        setTargetColumn(null);
+        setFeatureColumns([]);
+        setSchemaError(null);
+        return;
+      }
+
+      setIsLoadingSchema(true);
+      setSchemaError(null);
+
+      try {
+        const token =
+          typeof window !== 'undefined'
+            ? localStorage.getItem('adminToken') || localStorage.getItem('auth_token')
+            : null;
+
+        if (!token) {
+          setSchemaError('Sign in as admin to view dataset structure.');
+          setDatasetHeaders([]);
+          setFeatureColumns([]);
+          setIsLoadingSchema(false);
+          return;
+        }
+
+        const res = await fetch(`/api/admin/datasets?key=${encodeURIComponent(selectedDatasetKey)}`, {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json().catch(() => null);
+
+        if (!res.ok || !data?.dataset || !Array.isArray(data.dataset.headers)) {
+          setSchemaError(data?.error || 'Could not load dataset headers.');
+          setDatasetHeaders([]);
+          setFeatureColumns([]);
+        } else {
+          const headers = data.dataset.headers as string[];
+          setDatasetHeaders(headers);
+
+          let resolvedTarget: string | null = null;
+          if (targetColumn && headers.includes(targetColumn)) {
+            resolvedTarget = targetColumn;
+          } else if (headers.includes('toss_winner')) {
+            resolvedTarget = 'toss_winner';
+          }
+
+          setTargetColumn(resolvedTarget);
+
+          const defaultFeatures = headers.filter((h) => h !== resolvedTarget);
+          setFeatureColumns((prev) => {
+            const validPrev = prev.filter((h) => headers.includes(h) && h !== resolvedTarget);
+            return validPrev.length > 0 ? validPrev : defaultFeatures;
+          });
+        }
+      } catch (e) {
+        console.error('Load dataset schema error (ML Lab):', e);
+        setSchemaError('Unexpected error while loading dataset columns.');
+        setDatasetHeaders([]);
+        setFeatureColumns([]);
+      } finally {
+        setIsLoadingSchema(false);
+      }
+    };
+
+    loadSchema();
+  }, [selectedDatasetKey, targetColumn]);
+
   const selectedAlgorithm =
     selectedAlgorithmId != null
       ? ALGORITHMS.find((alg) => alg.id === selectedAlgorithmId) || null
       : null;
 
-  const canContinue = selectedAlgorithm && selectedDatasetKey;
+  const canContinue =
+    !!selectedAlgorithm && !!selectedDatasetKey && !!targetColumn && featureColumns.length > 0;
 
   return (
     <div className="flex min-h-screen bg-ipl-dark text-white">
@@ -242,11 +320,13 @@ export default function AdminMlLabPage() {
                       canContinue ? 'bg-emerald-500/20 text-emerald-300' : 'bg-white/5 text-gray-400'
                     }`}
                   >
-                    {canContinue ? 'Ready for design' : 'Pick dataset + algorithm'}
+                    {canContinue
+                      ? 'Config ready (dataset + algorithm + target + features)'
+                      : 'Pick dataset, algorithm, target, and features'}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                   <div>
                     <div className="text-[10px] text-gray-400">Dataset</div>
                     <div className="text-[11px] text-gray-100 truncate">
@@ -259,12 +339,116 @@ export default function AdminMlLabPage() {
                       {selectedAlgorithm ? selectedAlgorithm.name : 'None selected'}
                     </div>
                   </div>
+                  <div>
+                    <div className="text-[10px] text-gray-400">Target & features</div>
+                    <div className="text-[11px] text-gray-100 truncate">
+                      {targetColumn || 'No target selected'}
+                    </div>
+                    <div className="text-[10px] text-gray-400">
+                      Features: {featureColumns.length > 0 ? featureColumns.length : '0'}
+                    </div>
+                  </div>
                 </div>
 
                 <p className="text-[10px] text-gray-400">
                   Once you confirm which algorithm you like here in chat, we&apos;ll implement an actual ML
                   training pipeline that consumes your Workers KV datasets.
                 </p>
+              </div>
+
+              <div className="mt-4 rounded-xl border border-dashed border-white/15 bg-black/20 px-3 py-3 text-[11px] text-gray-300">
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <h3 className="text-sm font-semibold text-white">3. Select target and features</h3>
+                    <p className="text-[10px] text-gray-400">
+                      Choose one column as the target label (e.g. <code>toss_winner</code>) and mark the
+                      input feature columns you want the model to learn from.
+                    </p>
+                  </div>
+                </div>
+
+                {!selectedDatasetKey && (
+                  <div className="text-[11px] text-gray-400">
+                    Pick a dataset in step 1 to see its columns here.
+                  </div>
+                )}
+
+                {selectedDatasetKey && isLoadingSchema && (
+                  <div className="flex items-center gap-2 text-[11px] text-gray-300">
+                    <span className="inline-flex h-3 w-3 animate-ping rounded-full bg-ipl-gold/70" />
+                    Loading columns for <span className="font-mono text-ipl-gold">{selectedDatasetKey}</span>
+                    ...
+                  </div>
+                )}
+
+                {selectedDatasetKey && schemaError && !isLoadingSchema && (
+                  <div className="mt-2 bg-red-500/10 border border-red-500/40 rounded-md px-3 py-2 text-[11px] text-red-300">
+                    {schemaError}
+                  </div>
+                )}
+
+                {selectedDatasetKey && !isLoadingSchema && !schemaError && datasetHeaders.length === 0 && (
+                  <div className="text-[11px] text-gray-400">
+                    No headers found for this dataset. Make sure it was uploaded with a header row.
+                  </div>
+                )}
+
+                {selectedDatasetKey && !isLoadingSchema && !schemaError && datasetHeaders.length > 0 && (
+                  <div className="mt-2 max-h-64 overflow-auto border border-white/5 rounded-lg divide-y divide-white/5">
+                    {datasetHeaders.map((header) => {
+                      const isTarget = targetColumn === header;
+                      const isFeature = featureColumns.includes(header);
+                      return (
+                        <div
+                          key={header}
+                          className="flex items-center justify-between gap-2 px-3 py-1.5 bg-black/20 hover:bg-white/5"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="text-[11px] text-gray-100 truncate">{header}</div>
+                          </div>
+                          <div className="flex items-center gap-3 text-[10px]">
+                            <label className="inline-flex items-center gap-1">
+                              <input
+                                type="radio"
+                                name="target-column"
+                                checked={isTarget}
+                                onChange={() => {
+                                  setTargetColumn(header);
+                                  setFeatureColumns((prev) => {
+                                    const withoutNewTarget = prev.filter((h) => h !== header);
+                                    if (withoutNewTarget.length > 0) return withoutNewTarget;
+                                    return datasetHeaders.filter((h) => h !== header);
+                                  });
+                                }}
+                                className="h-3 w-3 accent-ipl-gold"
+                              />
+                              <span className="text-gray-300">Target</span>
+                            </label>
+                            <label className="inline-flex items-center gap-1">
+                              <input
+                                type="checkbox"
+                                checked={isFeature}
+                                disabled={isTarget}
+                                onChange={(e) => {
+                                  const checked = e.target.checked;
+                                  setFeatureColumns((prev) => {
+                                    if (checked) {
+                                      if (prev.includes(header)) return prev;
+                                      return [...prev, header];
+                                    }
+                                    return prev.filter((h) => h !== header);
+                                  });
+                                }}
+                                className="h-3 w-3 accent-ipl-gold"
+                              />
+                              <span className="text-gray-300">Feature</span>
+                            </label>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
           </div>
