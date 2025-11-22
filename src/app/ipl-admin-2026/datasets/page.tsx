@@ -107,7 +107,7 @@ export default function AdminDatasetsPage() {
     try {
       const token =
         typeof window !== 'undefined'
-          ? localStorage.getItem('auth_token') || localStorage.getItem('adminToken')
+          ? localStorage.getItem('adminToken') || localStorage.getItem('auth_token')
           : null;
 
       if (!token) {
@@ -161,7 +161,7 @@ export default function AdminDatasetsPage() {
     try {
       const token =
         typeof window !== 'undefined'
-          ? localStorage.getItem('auth_token') || localStorage.getItem('adminToken')
+          ? localStorage.getItem('adminToken') || localStorage.getItem('auth_token')
           : null;
 
       if (!token) {
