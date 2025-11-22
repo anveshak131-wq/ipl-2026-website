@@ -23,6 +23,9 @@ interface CricketDataMatch {
   venue?: string;
   dateTimeGMT?: string;
   matchType?: string;
+  team1ScoreText?: string;
+  team2ScoreText?: string;
+  seriesName?: string;
 }
 
 type WorldCricketTab = 'live' | 'upcoming' | 'recent' | 'all';
@@ -39,10 +42,22 @@ function classifyMatches(matches: CricketDataMatch[]): GroupedMatches {
 
   matches.forEach((m) => {
     const status = (m.status || '').toLowerCase();
+    const isFinished =
+      status.includes('won') ||
+      status.includes('lost') ||
+      status.includes('tied') ||
+      status.includes('tie') ||
+      status.includes('draw') ||
+      status.includes('no result') ||
+      status.includes('abandoned') ||
+      status.includes('washout') ||
+      status.includes('result');
+
     const hasLiveFlag =
       status.includes('live') ||
       status.includes('in progress') ||
-      status.includes('innings break');
+      status.includes('innings') ||
+      (status.includes('day') && !isFinished);
 
     let dt: Date | null = null;
     if (m.dateTimeGMT) {
@@ -52,7 +67,18 @@ function classifyMatches(matches: CricketDataMatch[]): GroupedMatches {
       }
     }
 
-    if (hasLiveFlag) {
+    let isLive = hasLiveFlag;
+    if (!isLive && dt) {
+      const start = dt.getTime();
+      const preWindow = start - 60 * 60 * 1000; // 1 hour before
+      const postWindow = start + 8 * 60 * 60 * 1000; // up to 8 hours after
+      const nowMs = now.getTime();
+      if (nowMs >= preWindow && nowMs <= postWindow && !isFinished) {
+        isLive = true;
+      }
+    }
+
+    if (isLive) {
       grouped.live.push(m);
     } else if (dt && dt.getTime() > now.getTime()) {
       grouped.upcoming.push(m);
@@ -81,7 +107,7 @@ export default function WorldCricketPage() {
   const [matches, setMatches] = useState<CricketDataMatch[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<WorldCricketTab>('live');
+  const [activeTab, setActiveTab] = useState<WorldCricketTab>('all');
   const [selectedMatch, setSelectedMatch] = useState<CricketDataMatch | null>(null);
 
   useEffect(() => {
@@ -91,7 +117,7 @@ export default function WorldCricketPage() {
       setIsLoading(true);
       setError(null);
       try {
-        const res = await fetch('/api/cricketdata-live');
+        const res = await fetch('/api/cricbuzz-matches');
         if (!res.ok) {
           throw new Error(`Failed to load world cricket scores: ${res.status}`);
         }
@@ -159,8 +185,8 @@ export default function WorldCricketPage() {
               </span>
             </h1>
             <p className="text-gray-300 text-sm md:text-base max-w-2xl">
-              Browse fixtures, live games, and recent results from international and domestic cricket, powered by
-              CricketData. This view complements your IPL live score by giving you a wider world‑cricket radar.
+              Browse fixtures, live games, and recent results from international and domestic cricket. This view
+              complements your IPL live score by giving you a wider world‑cricket radar.
             </p>
           </section>
 
@@ -391,10 +417,35 @@ export default function WorldCricketPage() {
             </div>
 
             {/* Score & venue */}
-            {selectedMatch.score && (
-              <div className="rounded-2xl bg-black/40 border border-ipl-gold/40 px-4 py-3 mb-3 text-sm text-ipl-gold font-semibold">
-                {selectedMatch.score}
+            {(selectedMatch.team1ScoreText || selectedMatch.team2ScoreText) ? (
+              <div className="mb-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[0, 1].map((idx) => {
+                  const info = selectedMatch.teamInfo?.[idx];
+                  const code = selectedMatch.teams?.[idx];
+                  const label = info?.shortname || info?.name || code || `Team ${idx + 1}`;
+                  const scoreText = idx === 0 ? selectedMatch.team1ScoreText : selectedMatch.team2ScoreText;
+                  if (!label && !scoreText) return null;
+                  return (
+                    <div
+                      key={idx}
+                      className="rounded-2xl bg-black/40 border border-ipl-gold/40 px-4 py-3 flex flex-col gap-1"
+                    >
+                      <span className="text-xs font-semibold text-gray-200 truncate">{label}</span>
+                      {scoreText ? (
+                        <span className="text-sm font-bold text-ipl-gold">{scoreText}</span>
+                      ) : (
+                        <span className="text-[11px] text-gray-400">No score yet</span>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
+            ) : (
+              selectedMatch.score && (
+                <div className="rounded-2xl bg-black/40 border border-ipl-gold/40 px-4 py-3 mb-3 text-sm text-ipl-gold font-semibold">
+                  {selectedMatch.score}
+                </div>
+              )
             )}
 
             {selectedMatch.venue && (
