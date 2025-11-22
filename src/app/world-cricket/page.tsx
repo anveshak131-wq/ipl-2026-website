@@ -112,6 +112,7 @@ export default function WorldCricketPage() {
   const [scorecard, setScorecard] = useState<any | null>(null);
   const [isScorecardLoading, setIsScorecardLoading] = useState(false);
   const [scorecardError, setScorecardError] = useState<string | null>(null);
+  const [collapsedSeries, setCollapsedSeries] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -201,6 +202,20 @@ export default function WorldCricketPage() {
         return matches;
     }
   }, [activeTab, grouped.live, grouped.upcoming, grouped.recent, matches]);
+
+  const seriesGroups = useMemo(() => {
+    const groups: Record<string, CricketDataMatch[]> = {};
+
+    filteredMatches.forEach((m) => {
+      const key = m.seriesName || 'Other series';
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(m);
+    });
+
+    return Object.entries(groups).sort((a, b) => a[0].localeCompare(b[0]));
+  }, [filteredMatches]);
 
   const scoreCards = useMemo(() => {
     if (!scorecard) return [];
@@ -359,74 +374,155 @@ export default function WorldCricketPage() {
                   </div>
                 </div>
 
-                <div className="mt-1 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
-                  {filteredMatches.map((m, idx) => {
-                    const teamA = m.teams?.[0] || m.teamInfo?.[0]?.shortname || m.teamInfo?.[0]?.name || '';
-                    const teamB = m.teams?.[1] || m.teamInfo?.[1]?.shortname || m.teamInfo?.[1]?.name || '';
-                    const matchup = teamA && teamB ? `${teamA} vs ${teamB}` : m.name || 'Cricket match';
-                    const dateLabel = formatLocalDateTime(m.dateTimeGMT);
-                    const status = m.status || '';
-                    const score = m.score || '';
-                    const matchType = m.matchType || '';
-                    const seriesName = m.seriesName || '';
-
-                    const isLive = (status || '').toLowerCase().includes('live');
+                <div className="mt-3 space-y-3">
+                  {seriesGroups.map(([seriesLabel, seriesMatches], seriesIdx) => {
+                    const isCollapsed = collapsedSeries[seriesLabel] ?? false;
+                    const liveCount = seriesMatches.filter((sm) => (sm.status || '').toLowerCase().includes('live')).length;
 
                     return (
-                      <article
-                        key={m.id || `${matchup}-${dateLabel}`}
-                        onClick={() => setSelectedMatch(m)}
-                        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900/85 via-slate-900/70 to-slate-950/90 backdrop-blur-md border border-white/10 hover:border-ipl-gold/70 transition-all duration-300 hover:shadow-2xl hover:shadow-ipl-gold/30 cursor-pointer transform-gpu hover:-translate-y-1 animate-slide-up"
-                        style={{ animationDelay: `${idx * 60}ms` }}
+                      <div
+                        key={seriesLabel || `series-${seriesIdx}`}
+                        className="rounded-2xl bg-black/40 border border-white/10 overflow-hidden"
                       >
-                        <div className="absolute inset-0 opacity-60 pointer-events-none">
-                          <div className="absolute -top-16 right-[-40px] h-28 w-28 rounded-full bg-ipl-purple/25 blur-2xl" />
-                          <div className="absolute -bottom-16 left-[-40px] h-32 w-32 rounded-full bg-ipl-blue-light/20 blur-2xl" />
-                        </div>
-
-                        <div className="relative p-4 sm:p-5 space-y-3">
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="space-y-1 min-w-0">
-                              <p className="text-[10px] uppercase tracking-wide text-gray-400 flex items-center gap-1">
-                                <span className="inline-flex w-1.5 h-1.5 rounded-full bg-ipl-gold" />
-                                <span className="truncate">{matchType || 'Cricket'}</span>
-                              </p>
-                              <h2 className="text-sm font-semibold text-white line-clamp-2">{matchup}</h2>
-                              {seriesName && (
-                                <p className="text-[10px] text-gray-400 line-clamp-1">{seriesName}</p>
-                              )}
-                            </div>
-                            <div className="flex flex-col items-end gap-1">
-                              <span
-                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
-                                  isLive
-                                    ? 'bg-red-500/15 text-red-300 border-red-400/60'
-                                    : status.toLowerCase().includes('finished') || status.toLowerCase().includes('result')
-                                    ? 'bg-emerald-500/15 text-emerald-200 border-emerald-400/60'
-                                    : 'bg-slate-500/20 text-slate-200 border-slate-400/50'
-                                }`}
-                              >
-                                {isLive && <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />}
-                                <span>{status || (isLive ? 'Live' : 'Scheduled')}</span>
-                              </span>
-                              {dateLabel && <span className="text-[10px] text-gray-400">{dateLabel}</span>}
-                            </div>
-                          </div>
-
-                          {score && (
-                            <div className="rounded-2xl bg-black/40 border border-white/10 px-3 py-2 text-[12px] text-ipl-gold font-semibold">
-                              {score}
-                            </div>
-                          )}
-
-                          {m.venue && (
-                            <p className="text-[11px] text-gray-400 flex items-center gap-1">
-                              <span className="w-1 h-1 rounded-full bg-ipl-gold" />
-                              <span className="line-clamp-1">{m.venue}</span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setCollapsedSeries((prev) => ({
+                              ...prev,
+                              [seriesLabel]: !isCollapsed,
+                            }))
+                          }
+                          className="w-full flex items-center justify-between gap-3 px-3.5 sm:px-4 py-2.5 hover:bg-white/5 transition-colors"
+                        >
+                          <div className="min-w-0 text-left">
+                            <p className="text-[11px] font-semibold text-gray-100 truncate">{seriesLabel}</p>
+                            <p className="text-[10px] text-gray-400">
+                              {seriesMatches.length} match{seriesMatches.length !== 1 ? 'es' : ''}
+                              {liveCount > 0 ? ` • ${liveCount} live` : ''}
                             </p>
-                          )}
-                        </div>
-                      </article>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {liveCount > 0 && (
+                              <span className="inline-flex items-center gap-1 text-[10px] text-emerald-300">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                <span>Live</span>
+                              </span>
+                            )}
+                            <span
+                              className={`inline-flex items-center justify-center w-5 h-5 rounded-full border border-white/20 text-[10px] text-gray-200 transition-transform ${
+                                isCollapsed ? '' : 'rotate-90'
+                              }`}
+                            >
+                              ▸
+                            </span>
+                          </div>
+                        </button>
+
+                        {!isCollapsed && (
+                          <div className="divide-y divide-white/5">
+                            {seriesMatches.map((m, idx) => {
+                              const teamA =
+                                m.teams?.[0] || m.teamInfo?.[0]?.shortname || m.teamInfo?.[0]?.name || '';
+                              const teamB =
+                                m.teams?.[1] || m.teamInfo?.[1]?.shortname || m.teamInfo?.[1]?.name || '';
+                              const matchup =
+                                teamA && teamB ? `${teamA} vs ${teamB}` : m.name || 'Cricket match';
+                              const dateLabel = formatLocalDateTime(m.dateTimeGMT);
+                              const status = m.status || '';
+                              const score = m.score || '';
+                              const matchType = m.matchType || '';
+                              const team1Label = teamA || 'Team 1';
+                              const team2Label = teamB || 'Team 2';
+                              const team1Score = m.team1ScoreText || '';
+                              const team2Score = m.team2ScoreText || '';
+                              const hasTeamScores = !!(team1Score || team2Score);
+                              const isLive = status.toLowerCase().includes('live');
+
+                              return (
+                                <article
+                                  key={m.id || `${matchup}-${dateLabel}`}
+                                  onClick={() => setSelectedMatch(m)}
+                                  className="relative overflow-hidden bg-gradient-to-r from-slate-950/90 via-slate-900/85 to-slate-950/90 cursor-pointer transform-gpu hover:-translate-y-[1px] transition-all duration-300 animate-slide-up"
+                                  style={{ animationDelay: `${seriesIdx * 120 + idx * 80}ms` }}
+                                >
+                                  <div className="absolute inset-0 opacity-60 pointer-events-none">
+                                    <div className="absolute -top-10 right-[-40px] h-24 w-24 rounded-full bg-ipl-purple/25 blur-2xl" />
+                                    <div className="absolute -bottom-10 left-[-40px] h-28 w-28 rounded-full bg-ipl-blue-light/25 blur-2xl" />
+                                  </div>
+
+                                  <div className="relative px-4 py-3 sm:px-5 sm:py-4 space-y-3">
+                                    <div className="flex items-start justify-between gap-3">
+                                      <div className="space-y-1 min-w-0">
+                                        <p className="text-[10px] uppercase tracking-wide text-gray-400 flex items-center gap-1">
+                                          <span className="inline-flex w-1.5 h-1.5 rounded-full bg-ipl-gold" />
+                                          <span className="truncate">{matchType || 'Cricket'}</span>
+                                        </p>
+                                        <h2 className="text-sm sm:text-base font-semibold text-white line-clamp-2">
+                                          {matchup}
+                                        </h2>
+                                      </div>
+                                      <div className="flex flex-col items-end gap-1">
+                                        <span
+                                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${
+                                            isLive
+                                              ? 'bg-red-500/15 text-red-300 border-red-400/60'
+                                              : status.toLowerCase().includes('finished') ||
+                                                status.toLowerCase().includes('result')
+                                              ? 'bg-emerald-500/15 text-emerald-200 border-emerald-400/60'
+                                              : 'bg-slate-500/20 text-slate-200 border-slate-400/50'
+                                          }`}
+                                        >
+                                          {isLive && (
+                                            <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+                                          )}
+                                          <span>{status || (isLive ? 'Live' : 'Scheduled')}</span>
+                                        </span>
+                                        {dateLabel && (
+                                          <span className="text-[10px] text-gray-400">{dateLabel}</span>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    <div className="rounded-2xl bg-black/40 border border-white/10 px-3 py-2 sm:px-4 sm:py-3 flex flex-col gap-2">
+                                      {hasTeamScores ? (
+                                        <>
+                                          <div className="flex items-center justify-between gap-3 text-xs sm:text-sm text-gray-100">
+                                            <span className="font-semibold truncate">{team1Label}</span>
+                                            <span className="text-ipl-gold font-bold text-right min-w-[72px]">
+                                              {team1Score || '—'}
+                                            </span>
+                                          </div>
+                                          <div className="flex items-center justify-between gap-3 text-xs sm:text-sm text-gray-100">
+                                            <span className="font-semibold truncate">{team2Label}</span>
+                                            <span className="text-ipl-gold font-bold text-right min-w-[72px]">
+                                              {team2Score || '—'}
+                                            </span>
+                                          </div>
+                                        </>
+                                      ) : score ? (
+                                        <div className="text-xs sm:text-sm text-ipl-gold font-semibold text-center">
+                                          {score}
+                                        </div>
+                                      ) : (
+                                        <div className="text-[11px] text-gray-400 text-center">
+                                          Score not available yet.
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    {m.venue && (
+                                      <p className="text-[11px] text-gray-400 flex items-center gap-1">
+                                        <span className="w-1 h-1 rounded-full bg-ipl-gold" />
+                                        <span className="line-clamp-1">{m.venue}</span>
+                                      </p>
+                                    )}
+                                  </div>
+                                </article>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
                     );
                   })}
                 </div>
