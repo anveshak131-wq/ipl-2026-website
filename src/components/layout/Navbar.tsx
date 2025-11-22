@@ -36,7 +36,6 @@ export default function Navbar() {
   ];
 
   const secondaryNavItems: NavItem[] = [
-    { href: '/feed', label: 'For You', icon: 'stats' },
     { href: '/notifications', label: 'Notifications', icon: 'news' },
     { href: '/account', label: 'Account', icon: 'team' },
   ];
