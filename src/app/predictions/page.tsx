@@ -19,6 +19,231 @@ interface Prediction {
   analysis: string;
 }
 
+interface TossTeamStat {
+  team: string;
+  matches: number;
+  tossesWon: number;
+  tossWinPct?: number;
+  wins: number;
+  matchesWhenWinToss: number;
+  winsWhenWinToss: number;
+  winPctWhenWinToss?: number;
+  matchesWhenLoseToss: number;
+  winsWhenLoseToss: number;
+  winPctWhenLoseToss?: number;
+  tossImpact: number;
+}
+
+interface TossAnalyticsSnapshot {
+  datasetKeys: string[];
+  totals: {
+    totalMatches: number;
+  };
+  teams: TossTeamStat[];
+  perVenue?: Record<string, unknown>;
+  generatedAt?: string;
+}
+
+interface TossTeamAggregate {
+  code: string;
+  name: string;
+  matches: number;
+  wins: number;
+  tossesWon: number;
+  matchesWhenWinToss: number;
+  winsWhenWinToss: number;
+  matchesWhenLoseToss: number;
+  winsWhenLoseToss: number;
+}
+
+function mapAnalyticsTeamNameToCode(name: string): string | null {
+  const n = name.trim().toLowerCase();
+  if (!n) return null;
+
+  if (n.includes('royal challengers')) return 'RCB';
+  if (n.includes('mumbai indians')) return 'MI';
+  if (n.includes('chennai super kings')) return 'CSK';
+  if (n.includes('rajasthan royals')) return 'RR';
+  if (n.includes('sunrisers hyderabad')) return 'SRH';
+  if (n.includes('gujarat titans')) return 'GT';
+  if (n.includes('punjab kings')) return 'PBKS';
+  if (n.includes('delhi capitals')) return 'DC';
+  if (n.includes('kolkata knight riders')) return 'KKR';
+  if (n.includes('lucknow super giants')) return 'LSG';
+
+  return null;
+}
+
+function buildTossIndex(snapshot: TossAnalyticsSnapshot | null): Record<string, TossTeamAggregate> {
+  const byCode: Record<string, TossTeamAggregate> = {};
+  if (!snapshot || !Array.isArray(snapshot.teams)) return byCode;
+
+  for (const t of snapshot.teams) {
+    if (!t.team) continue;
+    const code = mapAnalyticsTeamNameToCode(t.team);
+    if (!code) continue;
+
+    if (!byCode[code]) {
+      byCode[code] = {
+        code,
+        name: t.team,
+        matches: 0,
+        wins: 0,
+        tossesWon: 0,
+        matchesWhenWinToss: 0,
+        winsWhenWinToss: 0,
+        matchesWhenLoseToss: 0,
+        winsWhenLoseToss: 0,
+      };
+    }
+
+    const agg = byCode[code];
+    agg.matches += t.matches || 0;
+    agg.wins += t.wins || 0;
+    agg.tossesWon += t.tossesWon || 0;
+    agg.matchesWhenWinToss += t.matchesWhenWinToss || 0;
+    agg.winsWhenWinToss += t.winsWhenWinToss || 0;
+    agg.matchesWhenLoseToss += t.matchesWhenLoseToss || 0;
+    agg.winsWhenLoseToss += t.winsWhenLoseToss || 0;
+
+    // Prefer the latest human-friendly name (e.g. Capitals over Daredevils)
+    agg.name = t.team;
+  }
+
+  return byCode;
+}
+
+function deriveTeamTossProfile(agg?: TossTeamAggregate | null) {
+  if (!agg || agg.matches <= 0) {
+    return {
+      baseWinPct: 0,
+      winPctWhenWinToss: 0,
+      winPctWhenLoseToss: 0,
+      tossImpact: 0,
+    };
+  }
+
+  const baseWinPct = agg.wins / Math.max(1, agg.matches);
+  const winPctWhenWinToss =
+    agg.matchesWhenWinToss > 0
+      ? agg.winsWhenWinToss / agg.matchesWhenWinToss
+      : baseWinPct;
+  const winPctWhenLoseToss =
+    agg.matchesWhenLoseToss > 0
+      ? agg.winsWhenLoseToss / agg.matchesWhenLoseToss
+      : baseWinPct;
+  const tossImpact = winPctWhenWinToss - winPctWhenLoseToss;
+
+  return { baseWinPct, winPctWhenWinToss, winPctWhenLoseToss, tossImpact };
+}
+
+function getTeamCodeFromShortName(shortName: string): string {
+  return shortName.trim().toUpperCase();
+}
+
+function buildPredictionFromToss(
+  match: Match,
+  tossIndex: Record<string, TossTeamAggregate>,
+): Prediction {
+  const code1 = getTeamCodeFromShortName(match.team1.shortName);
+  const code2 = getTeamCodeFromShortName(match.team2.shortName);
+
+  const agg1 = tossIndex[code1];
+  const agg2 = tossIndex[code2];
+
+  const profile1 = deriveTeamTossProfile(agg1);
+  const profile2 = deriveTeamTossProfile(agg2);
+
+  // Base probabilities from overall win percentage
+  let base1 = profile1.baseWinPct;
+  let base2 = profile2.baseWinPct;
+
+  if (base1 === 0 && base2 === 0) {
+    base1 = 0.5;
+    base2 = 0.5;
+  }
+
+  let p1 = base1;
+  let p2 = base2;
+
+  const sumBase = p1 + p2;
+  if (sumBase > 0) {
+    p1 /= sumBase;
+    p2 /= sumBase;
+  } else {
+    p1 = 0.5;
+    p2 = 0.5;
+  }
+
+  // Incorporate how strongly each team is affected by the toss
+  const k = 0.25; // small weight so toss impact nudges, not dominates
+  p1 += k * profile1.tossImpact;
+  p2 += k * profile2.tossImpact;
+
+  // Renormalize and clamp
+  const sum = p1 + p2;
+  if (sum > 0) {
+    p1 /= sum;
+    p2 /= sum;
+  }
+
+  const clamp = (v: number) => Math.min(0.95, Math.max(0.05, v));
+  p1 = clamp(p1);
+  p2 = clamp(p2);
+
+  const predictedWinner =
+    p1 > p2 ? match.team1.shortName : match.team2.shortName;
+
+  const diff = Math.abs(p1 - p2);
+  const confidence = 60 + diff * 40; // 60–100 based on separation
+
+  const keyFactors: string[] = [];
+
+  if (agg1 && agg1.matches > 0) {
+    keyFactors.push(
+      `${match.team1.shortName} historical win rate in selected datasets: ${(profile1.baseWinPct * 100).toFixed(1)}%`,
+    );
+    keyFactors.push(
+      `${match.team1.shortName} toss impact: ${(profile1.tossImpact * 100).toFixed(1)}% (win toss ${(profile1.winPctWhenWinToss * 100).toFixed(1)}% vs lose toss ${(profile1.winPctWhenLoseToss * 100).toFixed(1)}%)`,
+    );
+  }
+
+  if (agg2 && agg2.matches > 0) {
+    keyFactors.push(
+      `${match.team2.shortName} historical win rate in selected datasets: ${(profile2.baseWinPct * 100).toFixed(1)}%`,
+    );
+    keyFactors.push(
+      `${match.team2.shortName} toss impact: ${(profile2.tossImpact * 100).toFixed(1)}% (win toss ${(profile2.winPctWhenWinToss * 100).toFixed(1)}% vs lose toss ${(profile2.winPctWhenLoseToss * 100).toFixed(1)}%)`,
+    );
+  }
+
+  if (!keyFactors.length) {
+    keyFactors.push(
+      'Limited historical match data in the selected datasets; predictions are treated as near 50–50.',
+    );
+  }
+
+  const strongerTeamName =
+    p1 > p2 ? match.team1.shortName : match.team2.shortName;
+  const weakerTeamName =
+    p1 > p2 ? match.team2.shortName : match.team1.shortName;
+
+  const analysis =
+    agg1 || agg2
+      ? `Using historical results from the selected IPL datasets, ${strongerTeamName} edge ahead of ${weakerTeamName}. We combine each team’s overall win record with how much the toss shifts their win percentage to estimate these probabilities: ${(p1 * 100).toFixed(1)}% for ${match.team1.shortName} and ${(p2 * 100).toFixed(1)}% for ${match.team2.shortName}.`
+      : `With very little historical data for these two teams in the selected datasets, this matchup is treated as almost perfectly balanced, keeping win probabilities close to 50–50 for both sides.`;
+
+  return {
+    matchId: match.id,
+    team1WinProbability: p1 * 100,
+    team2WinProbability: p2 * 100,
+    predictedWinner,
+    confidence,
+    keyFactors,
+    analysis,
+  };
+}
+
 export default function PredictionsPage() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [predictions, setPredictions] = useState<Map<string, Prediction>>(new Map());
@@ -28,29 +253,29 @@ export default function PredictionsPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const matchesData = await api.getMatches();
-        setMatches(matchesData.filter(m => m.status === 'upcoming'));
+        const [matchesData, settingsData] = await Promise.all([
+          api.getMatches(),
+          api.getSettings().catch(() => ({})),
+        ]);
 
-        // TODO: Replace with actual AI predictions from API
-        const mockPredictions = new Map<string, Prediction>();
-        matchesData.forEach((match) => {
-          mockPredictions.set(match.id, {
-            matchId: match.id,
-            team1WinProbability: Math.random() * 100,
-            team2WinProbability: Math.random() * 100,
-            predictedWinner: Math.random() > 0.5 ? match.team1.shortName : match.team2.shortName,
-            confidence: 70 + Math.random() * 25,
-            keyFactors: [
-              'Recent form',
-              'Head-to-head record',
-              'Player injuries',
-              'Venue conditions',
-              'Weather forecast'
-            ],
-            analysis: `Based on historical data and current form, ${Math.random() > 0.5 ? match.team1.shortName : match.team2.shortName} has a slight edge in this matchup. Key factors include recent performance, player availability, and venue conditions.`
-          });
+        const upcoming = matchesData.filter((m) => m.status === 'upcoming');
+        setMatches(upcoming);
+
+        let tossSnapshot: TossAnalyticsSnapshot | null = null;
+        if (settingsData && (settingsData as any).publishedStats?.tossAnalytics) {
+          tossSnapshot = (settingsData as any).publishedStats
+            .tossAnalytics as TossAnalyticsSnapshot;
+        }
+
+        const tossIndex = buildTossIndex(tossSnapshot);
+
+        const nextPredictions = new Map<string, Prediction>();
+        upcoming.forEach((match) => {
+          const prediction = buildPredictionFromToss(match, tossIndex);
+          nextPredictions.set(match.id, prediction);
         });
-        setPredictions(mockPredictions);
+
+        setPredictions(nextPredictions);
       } catch (error) {
         console.error('Failed to fetch data:', error);
       } finally {
