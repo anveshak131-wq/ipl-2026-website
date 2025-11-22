@@ -15,6 +15,51 @@ interface TeamAggregate {
   avgStrikeRate: number;
 }
 
+interface DatasetSummary {
+  key: string;
+  rowCount?: number;
+  uploadedAt?: string;
+  uploadedBy?: string;
+}
+
+interface TossTeamStat {
+  team: string;
+  matches: number;
+  tossesWon: number;
+  tossWinPct: number;
+  wins: number;
+  matchesWhenWinToss: number;
+  winsWhenWinToss: number;
+  winPctWhenWinToss: number;
+  matchesWhenLoseToss: number;
+  winsWhenLoseToss: number;
+  winPctWhenLoseToss: number;
+  tossImpact: number;
+}
+
+interface TossVenueStat {
+  team: string;
+  venue: string;
+  matches: number;
+  matchesWhenWinToss: number;
+  winsWhenWinToss: number;
+  winPctWhenWinToss: number;
+  matchesWhenLoseToss: number;
+  winsWhenLoseToss: number;
+  winPctWhenLoseToss: number;
+  tossImpact: number;
+}
+
+interface TossAnalyticsSnapshot {
+  datasetKeys: string[];
+  totals: {
+    totalMatches: number;
+  };
+  teams: TossTeamStat[];
+  perVenue: Record<string, TossVenueStat[]>;
+  generatedAt: string;
+}
+
 interface PublishedStats {
   description?: string;
   leaders?: {
@@ -29,6 +74,7 @@ interface PublishedStats {
     team2Id?: string;
   };
   insights?: string[];
+  tossAnalytics?: TossAnalyticsSnapshot;
   lastUpdated?: string;
 }
 
@@ -105,6 +151,12 @@ export default function AdminStatsPage() {
   const [isSavingStatsConfig, setIsSavingStatsConfig] = useState(false);
   const [statsConfigMessage, setStatsConfigMessage] = useState<string | null>(null);
 
+  const [availableDatasets, setAvailableDatasets] = useState<DatasetSummary[]>([]);
+  const [tossDatasetKeys, setTossDatasetKeys] = useState<string[]>([]);
+  const [tossAnalytics, setTossAnalytics] = useState<TossAnalyticsSnapshot | null>(null);
+  const [tossLoading, setTossLoading] = useState(false);
+  const [tossError, setTossError] = useState<string | null>(null);
+
   const snapshotFreshness = useMemo(
     () =>
       publishedStats?.lastUpdated
@@ -180,6 +232,8 @@ export default function AdminStatsPage() {
           team1Id = teamsData[0].id;
         }
 
+        let initialTossDatasetKeys: string[] = [];
+
         if (settingsData) {
           if ((settingsData as any).publishedStats) {
             const published = (settingsData as any).publishedStats as PublishedStats;
@@ -192,6 +246,13 @@ export default function AdminStatsPage() {
                 team1Id = published.defaultTeams.team1Id;
               if (published.defaultTeams.team2Id)
                 team2Id = published.defaultTeams.team2Id;
+            }
+
+            if (published.tossAnalytics) {
+              setTossAnalytics(published.tossAnalytics);
+              if (published.tossAnalytics.datasetKeys?.length) {
+                initialTossDatasetKeys = published.tossAnalytics.datasetKeys;
+              }
             }
           }
 
@@ -206,6 +267,33 @@ export default function AdminStatsPage() {
 
         if (team1Id) setSelectedTeam1Id(team1Id);
         if (team2Id) setSelectedTeam2Id(team2Id);
+
+        try {
+          const token =
+            typeof window !== 'undefined'
+              ? localStorage.getItem('adminToken') || localStorage.getItem('auth_token')
+              : null;
+          if (token) {
+            const res = await fetch('/api/admin/datasets', {
+              method: 'GET',
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            const data = await res.json().catch(() => null);
+            if (res.ok && data?.datasets) {
+              const list = data.datasets as DatasetSummary[];
+              setAvailableDatasets(list);
+              if (initialTossDatasetKeys.length) {
+                setTossDatasetKeys(initialTossDatasetKeys);
+              } else if (list.length) {
+                setTossDatasetKeys([list[0].key]);
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Failed to load datasets for toss analytics:', error);
+        }
       } catch (error) {
         console.error('Failed to load data for admin stats:', error);
       } finally {
@@ -432,6 +520,14 @@ export default function AdminStatsPage() {
     [players.length, teams.length, leaderboardsWithEntries, suggestedInsights.length]
   );
 
+  const tossLuckiestTeams = useMemo(() => {
+    if (!tossAnalytics || !tossAnalytics.teams?.length) return [] as TossTeamStat[];
+    return [...tossAnalytics.teams]
+      .filter((t) => t.matches > 0)
+      .sort((a, b) => b.tossImpact - a.tossImpact)
+      .slice(0, 6);
+  }, [tossAnalytics]);
+
   const handlePublish = async () => {
     if (!players.length || !teams.length) return;
     setIsPublishing(true);
@@ -470,6 +566,7 @@ export default function AdminStatsPage() {
           team2Id: selectedTeam2Id || teams[1]?.id,
         },
         insights: suggestedInsights,
+        tossAnalytics: tossAnalytics || undefined,
         lastUpdated: new Date().toISOString(),
       };
 
@@ -497,6 +594,68 @@ export default function AdminStatsPage() {
     } finally {
       setIsSavingStatsConfig(false);
       setTimeout(() => setStatsConfigMessage(null), 4000);
+    }
+  };
+
+  const toggleTossDatasetKey = (key: string) => {
+    setTossDatasetKeys((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
+    );
+  };
+
+  const handleRunTossAnalytics = async () => {
+    setTossError(null);
+    if (!tossDatasetKeys.length) {
+      setTossError('Select at least one dataset to run toss analytics.');
+      return;
+    }
+
+    const token =
+      typeof window !== 'undefined'
+        ? localStorage.getItem('adminToken') || localStorage.getItem('auth_token')
+        : null;
+
+    if (!token) {
+      setTossError('Admin session expired. Please sign in again.');
+      return;
+    }
+
+    setTossLoading(true);
+    try {
+      const res = await fetch('/api/admin/analytics/toss', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ datasetKeys: tossDatasetKeys }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok || !data?.success) {
+        setTossError(data?.error || 'Failed to compute toss analytics.');
+        setTossAnalytics(null);
+        return;
+      }
+
+      const snapshot: TossAnalyticsSnapshot = {
+        datasetKeys: Array.isArray(data.datasetKeys)
+          ? data.datasetKeys
+          : tossDatasetKeys,
+        totals: data.totals || { totalMatches: 0 },
+        teams: Array.isArray(data.teams) ? data.teams : [],
+        perVenue: data.perVenue || {},
+        generatedAt: new Date().toISOString(),
+      };
+
+      setTossAnalytics(snapshot);
+    } catch (error) {
+      console.error('Toss analytics error:', error);
+      setTossError('Unexpected error while computing toss analytics.');
+      setTossAnalytics(null);
+    } finally {
+      setTossLoading(false);
     }
   };
 
@@ -739,6 +898,102 @@ export default function AdminStatsPage() {
                 rows={4}
                 placeholder="Example: IPL 2026 has been dominated by top-order aggression and death-over specialists. Here are the standout performers so far."
               />
+            </div>
+
+            <div className="glass-effect rounded-xl p-6">
+              <h2 className="text-lg font-semibold text-white mb-2">Luck &amp; toss analytics</h2>
+              <p className="text-xs text-gray-400 mb-3">
+                Select one or more uploaded match datasets, then run toss analytics to see which
+                teams benefit most from the toss.
+              </p>
+              {availableDatasets.length ? (
+                <div className="space-y-3 text-xs text-gray-200">
+                  <div className="space-y-1 max-h-32 overflow-y-auto pr-1">
+                    {availableDatasets.map((ds) => {
+                      const checked = tossDatasetKeys.includes(ds.key);
+                      return (
+                        <label
+                          key={ds.key}
+                          className="flex items-center justify-between gap-2 px-2 py-1 rounded-md hover:bg-white/5 cursor-pointer"
+                        >
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => toggleTossDatasetKey(ds.key)}
+                              className="h-3.5 w-3.5 accent-ipl-gold"
+                            />
+                            <span className="font-mono text-[11px]">{ds.key}</span>
+                          </div>
+                          <div className="text-[10px] text-gray-400 text-right">
+                            {typeof ds.rowCount === 'number'
+                              ? `${ds.rowCount} rows`
+                              : 'row count unknown'}
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={handleRunTossAnalytics}
+                      disabled={tossLoading || !tossDatasetKeys.length}
+                      className="inline-flex items-center justify-center px-3 py-1.5 rounded-md bg-ipl-gold text-[11px] font-semibold text-black hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {tossLoading ? 'Running analytics…' : 'Run toss analytics'}
+                    </button>
+                    {tossAnalytics && (
+                      <p className="text-[11px] text-gray-300">
+                        Analysed {tossAnalytics.totals.totalMatches} matches from{' '}
+                        {tossAnalytics.datasetKeys.join(', ')}
+                      </p>
+                    )}
+                  </div>
+                  {tossError && (
+                    <p className="text-[11px] text-red-300">{tossError}</p>
+                  )}
+                  {tossLuckiestTeams.length > 0 && (
+                    <div className="mt-2 border-t border-white/10 pt-2">
+                      <p className="text-[11px] text-gray-400 mb-1">
+                        Luckiest teams by toss impact (win % after winning toss minus after losing
+                        toss).
+                      </p>
+                      <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
+                        {tossLuckiestTeams.map((team) => (
+                          <div
+                            key={team.team}
+                            className="flex items-center justify-between rounded-md bg-black/30 border border-white/10 px-2 py-1.5"
+                          >
+                            <div className="text-[11px] text-gray-100">
+                              {team.team}{' '}
+                              <span className="text-gray-400">
+                                ({team.matches} matches)
+                              </span>
+                            </div>
+                            <div className="text-right text-[11px]">
+                              <div className="text-ipl-gold font-semibold">
+                                Toss impact {(team.tossImpact * 100).toFixed(1)}%
+                              </div>
+                              <div className="text-gray-400">
+                                Win% win toss{' '}
+                                {(team.winPctWhenWinToss * 100).toFixed(1)}%
+                                , lose toss{' '}
+                                {(team.winPctWhenLoseToss * 100).toFixed(1)}%
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <p className="text-xs text-gray-400">
+                  No datasets found yet. Upload match CSVs in the Data Lab tab to enable toss
+                  analytics.
+                </p>
+              )}
             </div>
 
             <div className="glass-effect rounded-xl p-6">
