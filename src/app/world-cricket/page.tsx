@@ -82,6 +82,7 @@ export default function WorldCricketPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<WorldCricketTab>('live');
+  const [selectedMatch, setSelectedMatch] = useState<CricketDataMatch | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -232,7 +233,8 @@ export default function WorldCricketPage() {
                 return (
                   <article
                     key={m.id || `${matchup}-${dateLabel}`}
-                    className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/10 hover:border-ipl-gold/60 transition-all duration-300 hover:shadow-xl hover:shadow-ipl-gold/25 group"
+                    onClick={() => setSelectedMatch(m)}
+                    className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/10 hover:border-ipl-gold/60 transition-all duration-300 hover:shadow-xl hover:shadow-ipl-gold/25 group cursor-pointer"
                   >
                     <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <div className="absolute inset-0 bg-gradient-to-br from-ipl-blue-light/10 via-ipl-gold/10 to-ipl-purple/10" />
@@ -285,15 +287,134 @@ export default function WorldCricketPage() {
               })}
             </section>
           )}
-
-          <p className="text-[10px] text-gray-500 mt-4 max-w-xl">
-            Data for this section is provided by CricketData.org via their free eCricScore API (+/‑ 7 days fixtures,
-            live games, and recent results). Timings are shown in your local timezone.
-          </p>
         </div>
       </main>
 
       <Footer />
+
+      {selectedMatch && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setSelectedMatch(null)}
+          />
+          <div className="relative z-10 w-full max-w-xl mx-4 rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 border border-white/10 shadow-2xl p-6 sm:p-7">
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div>
+                <p className="text-[11px] text-gray-400 uppercase tracking-wide mb-1">
+                  {selectedMatch.matchType || 'Cricket'}
+                </p>
+                <h2 className="text-lg sm:text-xl font-black text-white leading-snug">
+                  {(() => {
+                    const teamA =
+                      selectedMatch.teams?.[0] ||
+                      selectedMatch.teamInfo?.[0]?.shortname ||
+                      selectedMatch.teamInfo?.[0]?.name ||
+                      '';
+                    const teamB =
+                      selectedMatch.teams?.[1] ||
+                      selectedMatch.teamInfo?.[1]?.shortname ||
+                      selectedMatch.teamInfo?.[1]?.name ||
+                      '';
+                    const matchup = teamA && teamB ? `${teamA} vs ${teamB}` : selectedMatch.name;
+                    return matchup || 'Cricket match';
+                  })()}
+                </h2>
+                {selectedMatch.dateTimeGMT && (
+                  <p className="text-[11px] text-gray-400 mt-1">
+                    {formatLocalDateTime(selectedMatch.dateTimeGMT)}
+                  </p>
+                )}
+              </div>
+              <div className="flex flex-col items-end gap-2">
+                <span
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${(() => {
+                    const status = (selectedMatch.status || '').toLowerCase();
+                    const isLive = status.includes('live') || status.includes('in progress');
+                    if (isLive) return 'bg-red-500/15 text-red-300 border-red-400/60';
+                    if (status.includes('finished') || status.includes('result'))
+                      return 'bg-emerald-500/15 text-emerald-200 border-emerald-400/60';
+                    return 'bg-slate-500/20 text-slate-200 border-slate-400/50';
+                  })()}`}
+                >
+                  {(() => {
+                    const status = selectedMatch.status || '';
+                    return status || 'Scheduled';
+                  })()}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedMatch(null)}
+                  className="inline-flex items-center justify-center w-7 h-7 rounded-full border border-white/30 text-gray-300 hover:text-white hover:border-ipl-gold/70 hover:bg-white/5 text-xs transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* Teams pill row */}
+            <div className="flex items-center justify-between gap-4 mb-4">
+              {['A', 'B'].map((slot, idx) => {
+                const info = selectedMatch.teamInfo?.[idx];
+                const code = selectedMatch.teams?.[idx];
+                const label = info?.shortname || info?.name || code || `Team ${idx + 1}`;
+                const initials = (label || 'T')
+                  .split(' ')
+                  .map((p) => p[0])
+                  .join('')
+                  .slice(0, 3)
+                  .toUpperCase();
+                const isFirst = idx === 0;
+                return (
+                  <div
+                    key={slot}
+                    className="flex-1 flex items-center gap-3 rounded-2xl bg-slate-900/70 border border-white/10 px-3 py-2"
+                  >
+                    <div
+                      className={`flex items-center justify-center w-9 h-9 rounded-2xl text-xs font-bold text-white ${
+                        isFirst
+                          ? 'bg-gradient-to-br from-ipl-blue-light to-ipl-purple'
+                          : 'bg-gradient-to-br from-ipl-gold to-ipl-purple'
+                      }`}
+                    >
+                      {initials}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-white truncate">{label}</p>
+                      {info?.name && info?.shortname && info.name !== info.shortname && (
+                        <p className="text-[10px] text-gray-400 truncate">{info.name}</p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Score & venue */}
+            {selectedMatch.score && (
+              <div className="rounded-2xl bg-black/40 border border-ipl-gold/40 px-4 py-3 mb-3 text-sm text-ipl-gold font-semibold">
+                {selectedMatch.score}
+              </div>
+            )}
+
+            {selectedMatch.venue && (
+              <div className="flex items-center gap-2 text-[11px] text-gray-300 mb-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-ipl-gold" />
+                <span className="truncate">{selectedMatch.venue}</span>
+              </div>
+            )}
+
+            {/* Lightweight AI-style hint */}
+            <div className="mt-3 rounded-2xl bg-slate-900/70 border border-white/10 px-4 py-3 text-[11px] text-gray-300">
+              <p className="font-semibold text-gray-100 mb-1">AI-style insight</p>
+              <p>
+                This match is part of the global cricket feed within a ±7 day window. Use this view as a quick radar
+                for what&apos;s happening beyond the IPL — tap back to switch between live, upcoming, and recent games.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
