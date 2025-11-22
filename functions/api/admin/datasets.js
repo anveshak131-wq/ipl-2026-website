@@ -6,10 +6,11 @@
 export const onRequest = async (context) => {
   const { request, env } = context;
   const method = request.method;
+  const url = new URL(request.url);
 
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   };
 
@@ -17,7 +18,7 @@ export const onRequest = async (context) => {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
 
-  if (method !== 'POST' && method !== 'GET') {
+  if (method !== 'POST' && method !== 'GET' && method !== 'DELETE') {
     return new Response(
       JSON.stringify({ error: 'Method not allowed' }),
       { status: 405, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
@@ -79,8 +80,41 @@ export const onRequest = async (context) => {
       );
     }
 
-    // List existing datasets
+    // List existing datasets or fetch a single dataset by key
     if (method === 'GET') {
+      const datasetKey = url.searchParams.get('key');
+
+      if (datasetKey) {
+        const safeKey = datasetKey.trim();
+        if (!safeKey) {
+          return new Response(
+            JSON.stringify({ error: 'datasetKey cannot be empty' }),
+            { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
+          );
+        }
+
+        const value = await env.SPORTS_KV.get(`dataset:${safeKey}`);
+        if (!value) {
+          return new Response(
+            JSON.stringify({ error: 'Dataset not found' }),
+            { status: 404, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
+          );
+        }
+
+        try {
+          const dataset = JSON.parse(value);
+          return new Response(
+            JSON.stringify({ dataset }),
+            { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
+          );
+        } catch {
+          return new Response(
+            JSON.stringify({ error: 'Malformed dataset in KV' }),
+            { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
+          );
+        }
+      }
+
       const list = await env.SPORTS_KV.list({ prefix: 'dataset:' });
 
       const datasets = [];
@@ -102,6 +136,24 @@ export const onRequest = async (context) => {
 
       return new Response(
         JSON.stringify({ datasets }),
+        { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
+      );
+    }
+
+    if (method === 'DELETE') {
+      const datasetKey = url.searchParams.get('key');
+      if (!datasetKey || !datasetKey.trim()) {
+        return new Response(
+          JSON.stringify({ error: 'datasetKey is required' }),
+          { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
+        );
+      }
+
+      const safeKey = datasetKey.trim();
+      await env.SPORTS_KV.delete(`dataset:${safeKey}`);
+
+      return new Response(
+        JSON.stringify({ success: true }),
         { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
       );
     }

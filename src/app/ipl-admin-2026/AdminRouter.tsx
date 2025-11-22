@@ -11,6 +11,7 @@ import AdminContent from './content/page';
 import AdminSettings from './settings/page';
 import AdminLegalPage from './legal/page';
 import AdminDatasets from './datasets/page';
+import AdminDatasetManager from './dataset-manager/page';
 
 export default function AdminRouter() {
   const router = useRouter();
@@ -127,6 +128,8 @@ export default function AdminRouter() {
       return <AdminContent />;
     } else if (pathname === '/ipl-admin-2026/datasets') {
       return <AdminDatasets />;
+    } else if (pathname === '/ipl-admin-2026/dataset-manager') {
+      return <AdminDatasetManager />;
     } else if (pathname === '/ipl-admin-2026/settings') {
       return <AdminSettings />;
     } else if (pathname === '/ipl-admin-2026/legal') {

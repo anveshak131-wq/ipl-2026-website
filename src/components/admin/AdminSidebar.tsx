@@ -134,6 +134,21 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         group: 'Content',
       },
       {
+        href: '/ipl-admin-2026/dataset-manager',
+        label: 'Data Lab (Edit)',
+        icon: (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M11 5h10M11 9h10M11 13h4M11 17h2M4 5h.01M4 9h.01M4 13h.01M4 17h.01M7 5h.01M7 9h.01M7 13h.01M7 17h.01"
+            />
+          </svg>
+        ),
+        group: 'Content',
+      },
+      {
         href: '/ipl-admin-2026/datasets',
         label: 'Data Lab (CSV)',
         icon: (
