@@ -221,49 +221,81 @@ export default function WorldCricketPage() {
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
           {/* Header */}
-          <section className="space-y-3 animate-slide-up">
-            <div className="inline-flex items-center space-x-2 mb-1">
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2">
-                <Icon name="cricket" size={16} />
-                GLOBAL LIVE CRICKET
-              </span>
+          <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ipl-blue-dark/80 via-ipl-purple/80 to-black/90 px-5 py-6 md:px-8 md:py-7 shadow-xl shadow-ipl-purple/30 animate-slide-up">
+            <div className="pointer-events-none absolute inset-0 opacity-70">
+              <div className="absolute -top-24 -right-10 h-40 w-40 rounded-full bg-ipl-gold/30 blur-3xl" />
+              <div className="absolute -bottom-24 -left-10 h-48 w-48 rounded-full bg-ipl-blue-light/30 blur-3xl" />
             </div>
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-white tracking-tight">
-              Live & Recent
-              <span className="block bg-gradient-to-r from-ipl-blue-light via-ipl-gold to-ipl-purple bg-clip-text text-transparent mt-1">
-                Matches Around the World
-              </span>
-            </h1>
-            <p className="text-gray-300 text-sm md:text-base max-w-2xl">
-              Browse fixtures, live games, and recent results from international and domestic cricket. This view
-              complements your IPL live score by giving you a wider world‑cricket radar.
-            </p>
+            <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+              <div className="space-y-3 max-w-xl">
+                <div className="inline-flex items-center gap-2">
+                  <span className="px-3 py-1 rounded-full text-[10px] font-semibold bg-black/40 border border-white/20 text-ipl-gold flex items-center gap-2 backdrop-blur">
+                    <span className="inline-flex w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Global live cricket overview
+                  </span>
+                </div>
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-white">
+                  World Cricket
+                  <span className="block bg-gradient-to-r from-ipl-gold via-ipl-blue-light to-ipl-purple bg-clip-text text-transparent mt-1">
+                    Live, upcoming & recent
+                  </span>
+                </h1>
+                <p className="text-gray-200 text-sm md:text-base max-w-xl">
+                  Follow international and domestic fixtures around the globe with rich scorecards alongside your IPL
+                  experience.
+                </p>
+              </div>
+              <div className="grid grid-cols-3 gap-3 min-w-[220px] text-center text-xs">
+                <div className="rounded-2xl bg-black/40 border border-emerald-400/60 px-3 py-2 flex flex-col gap-1">
+                  <span className="text-[10px] uppercase tracking-wide text-emerald-200/90">Live</span>
+                  <span className="text-xl font-extrabold text-emerald-300">{grouped.live.length}</span>
+                  <span className="text-[10px] text-emerald-100/80">matches</span>
+                </div>
+                <div className="rounded-2xl bg-black/35 border border-sky-400/50 px-3 py-2 flex flex-col gap-1">
+                  <span className="text-[10px] uppercase tracking-wide text-sky-200/90">Upcoming</span>
+                  <span className="text-xl font-extrabold text-sky-200">{grouped.upcoming.length}</span>
+                  <span className="text-[10px] text-sky-100/80">in schedule</span>
+                </div>
+                <div className="rounded-2xl bg-black/35 border border-violet-400/50 px-3 py-2 flex flex-col gap-1">
+                  <span className="text-[10px] uppercase tracking-wide text-violet-200/90">Recent</span>
+                  <span className="text-xl font-extrabold text-violet-200">{grouped.recent.length}</span>
+                  <span className="text-[10px] text-violet-100/80">results</span>
+                </div>
+              </div>
+            </div>
           </section>
 
           {/* Tabs */}
-          <div className="inline-flex items-center gap-1 bg-black/40 border border-white/10 rounded-full px-1 py-1 text-[11px]">
-            {[
-              { key: 'live' as WorldCricketTab, label: 'Live now' },
-              { key: 'upcoming' as WorldCricketTab, label: 'Upcoming' },
-              { key: 'recent' as WorldCricketTab, label: 'Recent results' },
-              { key: 'all' as WorldCricketTab, label: 'All (+/- 7 days)' },
-            ].map((tab) => (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => setActiveTab(tab.key)}
-                className={`px-3 py-1 rounded-full font-semibold whitespace-nowrap transition-colors ${
-                  activeTab === tab.key
-                    ? 'bg-gradient-to-r from-ipl-blue-dark to-ipl-purple text-white shadow-sm shadow-ipl-purple/40 border border-ipl-gold/40'
-                    : 'bg-transparent text-gray-300 border border-transparent hover:border-white/20 hover:bg-white/5'
-                }`}
-              >
-                {tab.label}
-                {tab.key === 'live' && grouped.live.length > 0 && (
-                  <span className="ml-1 inline-flex w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                )}
-              </button>
-            ))}
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="inline-flex items-center gap-1 bg-black/50 border border-white/10 rounded-full px-1 py-1 text-[11px] backdrop-blur">
+              {[
+                { key: 'live' as WorldCricketTab, label: 'Live now', count: grouped.live.length },
+                { key: 'upcoming' as WorldCricketTab, label: 'Upcoming', count: grouped.upcoming.length },
+                { key: 'recent' as WorldCricketTab, label: 'Recent results', count: grouped.recent.length },
+                { key: 'all' as WorldCricketTab, label: 'All (+/- 7 days)', count: matches.length },
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`px-3.5 py-1.5 rounded-full font-semibold whitespace-nowrap transition-all duration-200 ${
+                    activeTab === tab.key
+                      ? 'bg-gradient-to-r from-ipl-blue-dark to-ipl-purple text-white shadow-sm shadow-ipl-purple/40 border border-ipl-gold/60 scale-[1.03]'
+                      : 'bg-transparent text-gray-300 border border-transparent hover:border-white/25 hover:bg-white/5'
+                  }`}
+                >
+                  <span className="flex items-center gap-1.5">
+                    <span>{tab.label}</span>
+                    <span className="px-1.5 py-0.5 rounded-full bg-black/40 text-[9px] font-semibold text-gray-200">
+                      {tab.count}
+                    </span>
+                    {tab.key === 'live' && tab.count > 0 && (
+                      <span className="ml-0.5 inline-flex w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                    )}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Content */}
@@ -294,7 +326,7 @@ export default function WorldCricketPage() {
               </p>
             </div>
           ) : (
-            <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 md:gap-6">
               {filteredMatches.map((m) => {
                 const teamA = m.teams?.[0] || m.teamInfo?.[0]?.shortname || m.teamInfo?.[0]?.name || '';
                 const teamB = m.teams?.[1] || m.teamInfo?.[1]?.shortname || m.teamInfo?.[1]?.name || '';
@@ -303,6 +335,7 @@ export default function WorldCricketPage() {
                 const status = m.status || '';
                 const score = m.score || '';
                 const matchType = m.matchType || '';
+                const seriesName = m.seriesName || '';
 
                 const isLive = (status || '').toLowerCase().includes('live');
 
@@ -310,19 +343,24 @@ export default function WorldCricketPage() {
                   <article
                     key={m.id || `${matchup}-${dateLabel}`}
                     onClick={() => setSelectedMatch(m)}
-                    className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/10 hover:border-ipl-gold/60 transition-all duration-300 hover:shadow-xl hover:shadow-ipl-gold/25 group cursor-pointer"
+                    className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900/85 via-slate-900/70 to-slate-950/90 backdrop-blur-md border border-white/10 hover:border-ipl-gold/70 transition-all duration-300 hover:shadow-2xl hover:shadow-ipl-gold/30 cursor-pointer transform-gpu hover:-translate-y-1"
                   >
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="absolute inset-0 bg-gradient-to-br from-ipl-blue-light/10 via-ipl-gold/10 to-ipl-purple/10" />
+                    <div className="absolute inset-0 opacity-60 pointer-events-none">
+                      <div className="absolute -top-16 right-[-40px] h-28 w-28 rounded-full bg-ipl-purple/25 blur-2xl" />
+                      <div className="absolute -bottom-16 left-[-40px] h-32 w-32 rounded-full bg-ipl-blue-light/20 blur-2xl" />
                     </div>
 
-                    <div className="relative p-4 space-y-3">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex flex-col">
-                          <p className="text-[11px] text-gray-400 uppercase tracking-wide">
-                            {matchType || 'Cricket'}
+                    <div className="relative p-4 sm:p-5 space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="space-y-1 min-w-0">
+                          <p className="text-[10px] uppercase tracking-wide text-gray-400 flex items-center gap-1">
+                            <span className="inline-flex w-1.5 h-1.5 rounded-full bg-ipl-gold" />
+                            <span className="truncate">{matchType || 'Cricket'}</span>
                           </p>
-                          <h2 className="text-sm font-bold text-white line-clamp-2">{matchup}</h2>
+                          <h2 className="text-sm font-semibold text-white line-clamp-2">{matchup}</h2>
+                          {seriesName && (
+                            <p className="text-[10px] text-gray-400 line-clamp-1">{seriesName}</p>
+                          )}
                         </div>
                         <div className="flex flex-col items-end gap-1">
                           <span
@@ -334,19 +372,15 @@ export default function WorldCricketPage() {
                                 : 'bg-slate-500/20 text-slate-200 border-slate-400/50'
                             }`}
                           >
-                            {isLive && (
-                              <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-                            )}
+                            {isLive && <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />}
                             <span>{status || (isLive ? 'Live' : 'Scheduled')}</span>
                           </span>
-                          {dateLabel && (
-                            <span className="text-[10px] text-gray-400">{dateLabel}</span>
-                          )}
+                          {dateLabel && <span className="text-[10px] text-gray-400">{dateLabel}</span>}
                         </div>
                       </div>
 
                       {score && (
-                        <div className="rounded-xl bg-black/30 border border-white/10 px-3 py-2 text-[12px] text-ipl-gold font-semibold">
+                        <div className="rounded-2xl bg-black/40 border border-white/10 px-3 py-2 text-[12px] text-ipl-gold font-semibold">
                           {score}
                         </div>
                       )}
