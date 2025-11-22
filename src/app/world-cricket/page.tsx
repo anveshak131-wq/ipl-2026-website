@@ -517,21 +517,20 @@ export default function WorldCricketPage() {
                   const batTeam = first?.batTeamDetails || first?.batTeam || {};
                   const bowlTeam = first?.bowlTeamDetails || first?.bowlTeam || {};
 
-                  const batsmen: any[] = Array.isArray(batTeam.batsmenData)
-                    ? batTeam.batsmenData
-                    : Array.isArray(batTeam.batsmen)
-                    ? batTeam.batsmen
-                    : Array.isArray(batTeam.players)
-                    ? batTeam.players
-                    : [];
+                  const toArray = (val: any): any[] => {
+                    if (!val) return [];
+                    if (Array.isArray(val)) return val;
+                    if (typeof val === 'object') return Object.values(val);
+                    return [];
+                  };
 
-                  const bowlers: any[] = Array.isArray(bowlTeam.bowlersData)
-                    ? bowlTeam.bowlersData
-                    : Array.isArray(bowlTeam.bowlers)
-                    ? bowlTeam.bowlers
-                    : Array.isArray(bowlTeam.players)
-                    ? bowlTeam.players
-                    : [];
+                  const batsmen: any[] = toArray(
+                    batTeam.batsmenData || batTeam.batsmen || batTeam.players,
+                  );
+
+                  const bowlers: any[] = toArray(
+                    bowlTeam.bowlersData || bowlTeam.bowlers || bowlTeam.players,
+                  );
 
                   const batTeamName = batTeam.batTeamName || batTeam.teamName || '';
                   const bowlTeamName = bowlTeam.bowlTeamName || bowlTeam.teamName || '';
