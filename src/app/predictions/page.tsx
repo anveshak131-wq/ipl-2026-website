@@ -201,25 +201,25 @@ function buildPredictionFromToss(
 
   if (agg1 && agg1.matches > 0) {
     keyFactors.push(
-      `${match.team1.shortName} historical win rate in selected datasets: ${(profile1.baseWinPct * 100).toFixed(1)}%`,
+      `${match.team1.shortName} model-estimated win rate: ${(profile1.baseWinPct * 100).toFixed(1)}%`,
     );
     keyFactors.push(
-      `${match.team1.shortName} toss impact: ${(profile1.tossImpact * 100).toFixed(1)}% (win toss ${(profile1.winPctWhenWinToss * 100).toFixed(1)}% vs lose toss ${(profile1.winPctWhenLoseToss * 100).toFixed(1)}%)`,
+      `${match.team1.shortName} toss impact in the model: ${(profile1.tossImpact * 100).toFixed(1)}% (win toss ${(profile1.winPctWhenWinToss * 100).toFixed(1)}% vs lose toss ${(profile1.winPctWhenLoseToss * 100).toFixed(1)}%)`,
     );
   }
 
   if (agg2 && agg2.matches > 0) {
     keyFactors.push(
-      `${match.team2.shortName} historical win rate in selected datasets: ${(profile2.baseWinPct * 100).toFixed(1)}%`,
+      `${match.team2.shortName} model-estimated win rate: ${(profile2.baseWinPct * 100).toFixed(1)}%`,
     );
     keyFactors.push(
-      `${match.team2.shortName} toss impact: ${(profile2.tossImpact * 100).toFixed(1)}% (win toss ${(profile2.winPctWhenWinToss * 100).toFixed(1)}% vs lose toss ${(profile2.winPctWhenLoseToss * 100).toFixed(1)}%)`,
+      `${match.team2.shortName} toss impact in the model: ${(profile2.tossImpact * 100).toFixed(1)}% (win toss ${(profile2.winPctWhenWinToss * 100).toFixed(1)}% vs lose toss ${(profile2.winPctWhenLoseToss * 100).toFixed(1)}%)`,
     );
   }
 
   if (!keyFactors.length) {
     keyFactors.push(
-      'Limited historical match data in the selected datasets; predictions are treated as near 50–50.',
+      'Limited match information available for this matchup; the prediction model keeps win probabilities close to 50–50.',
     );
   }
 
@@ -230,8 +230,8 @@ function buildPredictionFromToss(
 
   const analysis =
     agg1 || agg2
-      ? `Using historical results from the selected IPL datasets, ${strongerTeamName} edge ahead of ${weakerTeamName}. We combine each team’s overall win record with how much the toss shifts their win percentage to estimate these probabilities: ${(p1 * 100).toFixed(1)}% for ${match.team1.shortName} and ${(p2 * 100).toFixed(1)}% for ${match.team2.shortName}.`
-      : `With very little historical data for these two teams in the selected datasets, this matchup is treated as almost perfectly balanced, keeping win probabilities close to 50–50 for both sides.`;
+      ? `Our prediction model gives ${strongerTeamName} a slight edge over ${weakerTeamName}. It blends team performance indicators with how strongly the toss tends to influence their results to estimate these probabilities: ${(p1 * 100).toFixed(1)}% for ${match.team1.shortName} and ${(p2 * 100).toFixed(1)}% for ${match.team2.shortName}.`
+      : `With limited information for this particular matchup, the model treats it as almost perfectly balanced, keeping win probabilities close to 50–50 for both sides.`;
 
   return {
     matchId: match.id,
