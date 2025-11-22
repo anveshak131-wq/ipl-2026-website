@@ -158,14 +158,14 @@ export default function ContentManager({
       try {
         const token = localStorage.getItem('adminToken');
         if (!token) {
-          router.push('/admin');
+          router.push('/ipl-admin-2026');
           return;
         }
         setIsAuthenticated(true);
         fetchContent();
         fetchContext();
       } catch (error) {
-        router.push('/admin');
+        router.push('/ipl-admin-2026');
       } finally {
         setAuthLoading(false);
       }
@@ -396,7 +396,7 @@ export default function ContentManager({
               <div className="mb-2 text-xs text-gray-400 flex items-center gap-1">
                 <button
                   type="button"
-                  onClick={() => router.push('/admin/dashboard')}
+                  onClick={() => router.push('/ipl-admin-2026/dashboard')}
                   className="hover:text-ipl-gold transition-colors"
                 >
                   Admin
@@ -404,7 +404,7 @@ export default function ContentManager({
                 <span className="text-gray-600">/</span>
                 <button
                   type="button"
-                  onClick={() => router.push('/admin/content')}
+                  onClick={() => router.push('/ipl-admin-2026/content')}
                   className="hover:text-ipl-gold transition-colors"
                 >
                   Content

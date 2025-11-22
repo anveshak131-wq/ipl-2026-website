@@ -68,7 +68,7 @@ export default function AdminLiveScorePage() {
     const checkAuth = () => {
       const token = localStorage.getItem('auth_token');
       if (!token) {
-        router.push('/admin');
+        router.push('/ipl-admin-2026');
         return;
       }
 

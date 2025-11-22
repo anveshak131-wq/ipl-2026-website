@@ -139,7 +139,7 @@ export default function AdminPlayers() {
   useEffect(() => {
     const token = localStorage.getItem('adminToken');
     if (!token) {
-      router.push('/admin');
+      router.push('/ipl-admin-2026');
       return;
     }
     setIsAuthenticated(true);
@@ -249,7 +249,7 @@ export default function AdminPlayers() {
 
       if (!token) {
         alert('Admin session expired. Please log in again.');
-        router.push('/admin');
+        router.push('/ipl-admin-2026');
         return;
       }
 
@@ -472,7 +472,7 @@ export default function AdminPlayers() {
   if (isLoading) {
     return (
       <div className="flex min-h-screen bg-ipl-dark">
-        <AdminSidebar currentPage="/admin/players" />
+        <AdminSidebar currentPage="/ipl-admin-2026/players" />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-white">Loading...</div>
         </div>
@@ -482,7 +482,7 @@ export default function AdminPlayers() {
 
   return (
     <div className="flex min-h-screen bg-ipl-dark">
-      <AdminSidebar currentPage="/admin/players" />
+      <AdminSidebar currentPage="/ipl-admin-2026/players" />
       
       <div className="flex-1">
         <div className="p-8">

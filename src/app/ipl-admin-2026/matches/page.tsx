@@ -114,13 +114,13 @@ export default function AdminMatches() {
             try {
                 const token = localStorage.getItem('adminToken');
                 if (!token) {
-                    router.push('/admin');
+                    router.push('/ipl-admin-2026');
                     return;
                 }
                 setIsAuthenticated(true);
                 fetchInitialData();
             } catch (error) {
-                router.push('/admin');
+                router.push('/ipl-admin-2026');
             } finally {
                 setAuthLoading(false);
             }
@@ -359,7 +359,7 @@ export default function AdminMatches() {
                             <div className="mb-2 text-xs text-gray-400 flex items-center gap-1">
                                 <button
                                     type="button"
-                                    onClick={() => router.push('/admin/dashboard')}
+                                    onClick={() => router.push('/ipl-admin-2026/dashboard')}
                                     className="hover:text-ipl-gold transition-colors"
                                 >
                                     Admin
@@ -367,7 +367,7 @@ export default function AdminMatches() {
                                 <span className="text-gray-600">/</span>
                                 <button
                                     type="button"
-                                    onClick={() => router.push('/admin/teams')}
+                                    onClick={() => router.push('/ipl-admin-2026/teams')}
                                     className="hover:text-ipl-gold transition-colors"
                                 >
                                     Competition

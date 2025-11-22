@@ -199,6 +199,58 @@ export const onRequest = async (context) => {
       }
 
       const token = generateToken(hardcodedUser);
+
+      // Sync hardcoded admin into KV so that /api/auth and KV-protected
+      // admin APIs (datasets, analytics, etc.) recognize this session.
+      if (env && env.SPORTS_KV) {
+        const email = hardcodedUser.email;
+        const nowIso = new Date().toISOString();
+        let existingUser = null;
+        try {
+          const raw = await env.SPORTS_KV.get(`user:${email}`);
+          if (raw) {
+            existingUser = JSON.parse(raw);
+          }
+        } catch {
+          existingUser = null;
+        }
+
+        const userRecord = {
+          id: existingUser?.id || hardcodedUser.id,
+          email,
+          name: existingUser?.name || hardcodedUser.username,
+          // Preserve any password fields/salt if they existed from setup,
+          // but override role, token, and lastLogin.
+          salt: existingUser?.salt,
+          hashedPassword: existingUser?.hashedPassword,
+          token,
+          role: hardcodedUser.role,
+          isBlocked: existingUser?.isBlocked ?? false,
+          createdAt: existingUser?.createdAt || nowIso,
+          lastLogin: nowIso,
+        };
+
+        // Store/refresh user in KV (1 year TTL, like /api/auth signup)
+        await env.SPORTS_KV.put(`user:${email}`, JSON.stringify(userRecord), {
+          expirationTtl: 31536000,
+        });
+
+        // Map token -> email/role so /api/auth?action=verify and other
+        // KV-backed admin APIs can validate this session.
+        await env.SPORTS_KV.put(
+          `token:${token}`,
+          JSON.stringify({
+            userId: userRecord.id,
+            email,
+            role: userRecord.role,
+            createdAt: nowIso,
+          }),
+          {
+            expirationTtl: 2592000, // 30 days
+          }
+        );
+      }
+
       return new Response(
         JSON.stringify({
           success: true,
