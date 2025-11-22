@@ -6,6 +6,14 @@ import { usePathname } from 'next/navigation';
 import IPLLogo from '../ui/IPLLogo';
 import Icon from '../ui/Icon';
 
+type NavIconName = 'cricket' | 'stats' | 'news' | 'team' | 'target' | 'trophy';
+
+interface NavItem {
+  href: string;
+  label: string;
+  icon?: NavIconName;
+}
+
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -17,20 +25,20 @@ export default function Navbar() {
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
-  const primaryNavItems = [
-    { href: '/', label: 'Home', icon: null as const },
-    { href: '/matches', label: 'Schedule', icon: 'cricket' as const },
-    { href: '/live-score', label: 'Live Score', icon: 'cricket' as const },
-    { href: '/teams', label: 'Teams', icon: 'team' as const },
-    { href: '/stats', label: 'Stats', icon: 'stats' as const },
-    { href: '/news', label: 'News', icon: 'news' as const },
-    { href: '/predictions', label: 'Predictions', icon: 'target' as const },
+  const primaryNavItems: NavItem[] = [
+    { href: '/', label: 'Home' },
+    { href: '/matches', label: 'Schedule', icon: 'cricket' },
+    { href: '/live-score', label: 'Live Score', icon: 'cricket' },
+    { href: '/teams', label: 'Teams', icon: 'team' },
+    { href: '/stats', label: 'Stats', icon: 'stats' },
+    { href: '/news', label: 'News', icon: 'news' },
+    { href: '/predictions', label: 'Predictions', icon: 'target' },
   ];
 
-  const secondaryNavItems = [
-    { href: '/feed', label: 'For You', icon: 'stats' as const },
-    { href: '/notifications', label: 'Notifications', icon: 'news' as const },
-    { href: '/account', label: 'Account', icon: 'team' as const },
+  const secondaryNavItems: NavItem[] = [
+    { href: '/feed', label: 'For You', icon: 'stats' },
+    { href: '/notifications', label: 'Notifications', icon: 'news' },
+    { href: '/account', label: 'Account', icon: 'team' },
   ];
 
   const allNavItems = [...primaryNavItems, ...secondaryNavItems];
