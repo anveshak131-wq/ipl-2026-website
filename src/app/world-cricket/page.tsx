@@ -404,12 +404,11 @@ export default function WorldCricketPage() {
               </div>
             )}
 
-            {/* Lightweight AI-style hint */}
             <div className="mt-3 rounded-2xl bg-slate-900/70 border border-white/10 px-4 py-3 text-[11px] text-gray-300">
-              <p className="font-semibold text-gray-100 mb-1">AI-style insight</p>
+              <p className="font-semibold text-gray-100 mb-1">Match context</p>
               <p>
-                This match is part of the global cricket feed within a ±7 day window. Use this view as a quick radar
-                for what&apos;s happening beyond the IPL — tap back to switch between live, upcoming, and recent games.
+                This match comes from the external world‑cricket feed for the last and next few days. Use the tabs at
+                the top of the page to switch between live, upcoming, and recent games.
               </p>
             </div>
           </div>
