@@ -9,7 +9,7 @@ export const onRequest = async (context) => {
 
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   };
 
@@ -17,7 +17,7 @@ export const onRequest = async (context) => {
     return new Response(null, { status: 204, headers: corsHeaders });
   }
 
-  if (method !== 'POST') {
+  if (method !== 'POST' && method !== 'GET') {
     return new Response(
       JSON.stringify({ error: 'Method not allowed' }),
       { status: 405, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
@@ -76,6 +76,33 @@ export const onRequest = async (context) => {
       return new Response(
         JSON.stringify({ error: 'Forbidden' }),
         { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
+      );
+    }
+
+    // List existing datasets
+    if (method === 'GET') {
+      const list = await env.SPORTS_KV.list({ prefix: 'dataset:' });
+
+      const datasets = [];
+      for (const entry of list.keys) {
+        try {
+          const value = await env.SPORTS_KV.get(entry.name);
+          if (!value) continue;
+          const parsed = JSON.parse(value);
+          datasets.push({
+            key: parsed.key || entry.name.replace(/^dataset:/, ''),
+            rowCount: parsed.meta?.rowCount,
+            uploadedAt: parsed.meta?.uploadedAt,
+            uploadedBy: parsed.meta?.uploadedBy,
+          });
+        } catch {
+          // Ignore malformed entries
+        }
+      }
+
+      return new Response(
+        JSON.stringify({ datasets }),
+        { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
       );
     }
 

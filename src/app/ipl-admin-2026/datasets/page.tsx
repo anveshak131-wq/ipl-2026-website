@@ -1,10 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface ParsedCsv {
   headers: string[];
   rows: string[][];
+}
+
+interface DatasetSummary {
+  key: string;
+  rowCount?: number;
+  uploadedAt?: string;
+  uploadedBy?: string;
 }
 
 function parseCsvSimple(text: string): ParsedCsv {
@@ -42,6 +49,9 @@ export default function AdminDatasetsPage() {
   const [datasetKey, setDatasetKey] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [datasets, setDatasets] = useState<DatasetSummary[]>([]);
+  const [isLoadingList, setIsLoadingList] = useState(false);
+  const [listError, setListError] = useState<string | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -88,6 +98,48 @@ export default function AdminDatasetsPage() {
       setIsParsing(false);
     };
     reader.readAsText(file);
+  };
+
+  const fetchDatasets = async () => {
+    setIsLoadingList(true);
+    setListError(null);
+
+    try {
+      const token =
+        typeof window !== 'undefined'
+          ? localStorage.getItem('auth_token') || localStorage.getItem('adminToken')
+          : null;
+
+      if (!token) {
+        setListError('Sign in as admin to view saved datasets.');
+        setDatasets([]);
+        setIsLoadingList(false);
+        return;
+      }
+
+      const res = await fetch('/api/admin/datasets', {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok || !data?.datasets) {
+        setListError(data?.error || 'Could not load dataset list.');
+        setDatasets([]);
+      } else {
+        setDatasets(data.datasets as DatasetSummary[]);
+        setListError(null);
+      }
+    } catch (e) {
+      console.error('Load dataset list error:', e);
+      setListError('Unexpected error while loading dataset list.');
+      setDatasets([]);
+    } finally {
+      setIsLoadingList(false);
+    }
   };
 
   const handleSaveToKv = async () => {
@@ -142,6 +194,7 @@ export default function AdminDatasetsPage() {
         setSaveMessage(
           `Saved dataset '${data.datasetKey}' with ${data.rowCount ?? parsed.rows.length} rows to KV.`,
         );
+        fetchDatasets();
       }
     } catch (e) {
       console.error('Save dataset error:', e);
