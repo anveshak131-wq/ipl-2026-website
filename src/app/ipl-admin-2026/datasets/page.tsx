@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import AdminSidebar from '@/components/admin/AdminSidebar';
 
 interface ParsedCsv {
   headers: string[];
@@ -205,8 +206,10 @@ export default function AdminDatasetsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-ipl-dark text-white">
-      <div className="max-w-6xl mx-auto px-6 py-8">
+    <div className="flex min-h-screen bg-ipl-dark text-white">
+      <AdminSidebar currentPage="/ipl-admin-2026/datasets" />
+      <div className="flex-1">
+        <div className="max-w-6xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold">Data Lab: CSV Upload</h1>
