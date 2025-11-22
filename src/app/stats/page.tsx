@@ -35,6 +35,8 @@ interface PublishedStats {
   lastUpdated?: string;
 }
 
+type StatsTabKey = 'overview' | 'batting' | 'bowling' | 'teams' | 'toss';
+
 function sortByRunsDesc(players: Player[]): Player[] {
   return [...players].sort((a, b) => b.stats.runs - a.stats.runs);
 }
@@ -67,6 +69,7 @@ export default function StatsPage() {
     showBestEconomyRates: true,
     showInsights: true,
   });
+  const [activeStatsTab, setActiveStatsTab] = useState<StatsTabKey>('overview');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -341,6 +344,18 @@ export default function StatsPage() {
     return insights;
   }, [publishedStats, insights]);
 
+  const handleStatsTabClick = (tab: StatsTabKey, targetId: string) => {
+    setActiveStatsTab(tab);
+    if (typeof window === 'undefined') return;
+    const el = document.getElementById(targetId);
+    if (!el) return;
+
+    const rect = el.getBoundingClientRect();
+    const offset = 96; // offset for sticky main navbar
+    const targetTop = rect.top + window.scrollY - offset;
+    window.scrollTo({ top: targetTop, behavior: 'smooth' });
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -380,7 +395,7 @@ export default function StatsPage() {
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           {/* Hero / Header */}
-          <section className="space-y-4 animate-slide-up">
+          <section id="stats-overview" className="space-y-4 animate-slide-up">
             <div className="inline-flex items-center space-x-2 mb-2">
               <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2">
                 <Icon name="stats" size={16} />
@@ -412,12 +427,46 @@ export default function StatsPage() {
             )}
           </section>
 
+          {/* Contextual sub-navigation */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 -mt-4">
+            <div className="inline-flex items-center gap-1 bg-black/40 border border-white/10 rounded-full px-2 py-1 overflow-x-auto no-scrollbar">
+              {[
+                { key: 'overview' as StatsTabKey, label: 'Overview', targetId: 'stats-overview' },
+                { key: 'batting' as StatsTabKey, label: 'Batting', targetId: 'stats-batting' },
+                { key: 'bowling' as StatsTabKey, label: 'Bowling', targetId: 'stats-bowling' },
+                { key: 'teams' as StatsTabKey, label: 'Teams', targetId: 'stats-teams' },
+                { key: 'toss' as StatsTabKey, label: 'Toss & Luck', targetId: 'stats-toss' },
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => handleStatsTabClick(tab.key, tab.targetId)}
+                  className={`px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 whitespace-nowrap transition-colors
+                    ${
+                      activeStatsTab === tab.key
+                        ? 'bg-gradient-to-r from-ipl-blue-dark to-ipl-purple text-white shadow-sm shadow-ipl-purple/40 border border-ipl-gold/40'
+                        : 'bg-transparent text-gray-300 border border-transparent hover:border-white/20 hover:bg-white/5'
+                    }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <p className="text-[11px] text-gray-400 md:text-right">
+              Quickly jump between season overview, batting and bowling leaders, team comparison,
+              and toss & luck insights.
+            </p>
+          </div>
+
           {/* Season Leaders */}
           {(statsConfig.showTopRunScorers || statsConfig.showTopWicketTakers) && (
             <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Batting leaders */}
               {statsConfig.showTopRunScorers && (
-                <div className="rounded-3xl bg-white/5 border border-white/10 p-6 backdrop-blur-md shadow-xl">
+                <div
+                  id="stats-batting"
+                  className="rounded-3xl bg-white/5 border border-white/10 p-6 backdrop-blur-md shadow-xl"
+                >
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-ipl-gold to-ipl-purple flex items-center justify-center">
@@ -503,7 +552,10 @@ export default function StatsPage() {
 
               {/* Bowling leaders */}
               {statsConfig.showTopWicketTakers && (
-                <div className="rounded-3xl bg-white/5 border border-white/10 p-6 backdrop-blur-md shadow-xl">
+                <div
+                  id="stats-bowling"
+                  className="rounded-3xl bg-white/5 border border-white/10 p-6 backdrop-blur-md shadow-xl"
+                >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
@@ -589,6 +641,31 @@ export default function StatsPage() {
               )}
             </section>
           )}
+
+          {/* Teams anchor (placeholder) */}
+          <section
+            id="stats-teams"
+            className="rounded-3xl bg-white/5 border border-white/10 p-6 md:p-8 backdrop-blur-md text-xs text-gray-300"
+          >
+            <h2 className="text-sm md:text-base font-bold text-white mb-2">Teams spotlight</h2>
+            <p>
+              Team comparison cards on this page already use aggregated squad statistics. A richer
+              dedicated teams analytics view will appear here in a future update.
+            </p>
+          </section>
+
+          {/* Toss & Luck anchor (placeholder) */}
+          <section
+            id="stats-toss"
+            className="rounded-3xl bg-white/5 border border-white/10 p-6 md:p-8 backdrop-blur-md text-xs text-gray-300"
+          >
+            <h2 className="text-sm md:text-base font-bold text-white mb-2">Toss &amp; luck insights</h2>
+            <p>
+              Toss &amp; luck analytics from admin-selected datasets will surface here once
+              published. For now, visit the AI Predictions page to see how toss trends are already
+              influencing win probabilities.
+            </p>
+          </section>
 
           {/* Strike rate & economy tables */}
           {(statsConfig.showBestStrikeRates || statsConfig.showBestEconomyRates) && (

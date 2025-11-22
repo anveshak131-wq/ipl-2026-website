@@ -56,6 +56,8 @@ interface TossTeamAggregate {
   winsWhenLoseToss: number;
 }
 
+type PredictionsTabKey = 'upcoming' | 'today' | 'byTeam' | 'byVenue';
+
 function mapAnalyticsTeamNameToCode(name: string): string | null {
   const n = name.trim().toLowerCase();
   if (!n) return null;
@@ -249,6 +251,9 @@ export default function PredictionsPage() {
   const [predictions, setPredictions] = useState<Map<string, Prediction>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [selectedMatch, setSelectedMatch] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<PredictionsTabKey>('upcoming');
+  const [selectedTeamFilter, setSelectedTeamFilter] = useState<string>('ALL');
+  const [selectedVenueFilter, setSelectedVenueFilter] = useState<string>('ALL');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -298,7 +303,48 @@ export default function PredictionsPage() {
     );
   }
 
+  const uniqueTeams = Array.from(
+    new Set(
+      matches.flatMap((m) => [m.team1.shortName, m.team2.shortName]).filter(Boolean),
+    ),
+  ).sort((a, b) => a.localeCompare(b));
+
+  const uniqueVenues = Array.from(
+    new Set(matches.map((m) => m.venue).filter((v): v is string => Boolean(v))),
+  ).sort((a, b) => a.localeCompare(b));
+
+  const todayLabel = new Date().toDateString();
+
+  const filteredMatches = matches.filter((match) => {
+    if (activeTab === 'today') {
+      const d = new Date(match.date);
+      if (d.toDateString() !== todayLabel) return false;
+    }
+
+    if (activeTab === 'byTeam' && selectedTeamFilter !== 'ALL') {
+      const code = selectedTeamFilter.toUpperCase();
+      const t1 = match.team1.shortName.toUpperCase();
+      const t2 = match.team2.shortName.toUpperCase();
+      if (t1 !== code && t2 !== code) return false;
+    }
+
+    if (activeTab === 'byVenue' && selectedVenueFilter !== 'ALL') {
+      if (match.venue !== selectedVenueFilter) return false;
+    }
+
+    return true;
+  });
+
   const selectedPrediction = selectedMatch ? predictions.get(selectedMatch) : null;
+
+  const matchesHeadingLabel =
+    activeTab === 'today'
+      ? "Today's Matches"
+      : activeTab === 'byTeam'
+      ? 'Matches by Team'
+      : activeTab === 'byVenue'
+      ? 'Matches by Venue'
+      : 'Upcoming Matches';
 
   return (
     <div className="min-h-screen">
@@ -328,6 +374,40 @@ export default function PredictionsPage() {
             </p>
           </div>
 
+          {/* Contextual sub-navigation for predictions */}
+          <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div className="inline-flex items-center gap-1 bg-black/40 border border-white/10 rounded-full px-2 py-1 overflow-x-auto no-scrollbar">
+              {[
+                { key: 'upcoming' as PredictionsTabKey, label: 'Upcoming' },
+                { key: 'today' as PredictionsTabKey, label: 'Today' },
+                { key: 'byTeam' as PredictionsTabKey, label: 'By Team' },
+                { key: 'byVenue' as PredictionsTabKey, label: 'By Venue' },
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => {
+                    setActiveTab(tab.key);
+                    if (tab.key !== 'byTeam') setSelectedTeamFilter('ALL');
+                    if (tab.key !== 'byVenue') setSelectedVenueFilter('ALL');
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 whitespace-nowrap transition-colors
+                    ${
+                      activeTab === tab.key
+                        ? 'bg-gradient-to-r from-ipl-blue-dark to-ipl-purple text-white shadow-sm shadow-ipl-purple/40 border border-ipl-gold/40'
+                        : 'bg-transparent text-gray-300 border border-transparent hover:border-white/20 hover:bg-white/5'
+                    }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            <p className="text-[11px] text-gray-400 md:text-right">
+              Filter upcoming fixtures by day, team, or venue to focus predictions on what matters
+              most to you.
+            </p>
+          </div>
+
           {/* Beta Notice */}
           <div className="mb-8 p-4 rounded-xl bg-gradient-to-r from-ipl-purple/20 to-ipl-gold/20 border border-ipl-gold/30">
             <p className="text-sm text-gray-300">
@@ -341,11 +421,48 @@ export default function PredictionsPage() {
             <div className="lg:col-span-1">
               <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 p-6 sticky top-8">
                 <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                  <Icon name="cricket" size={20} /> Upcoming Matches
+                  <Icon name="cricket" size={20} /> {matchesHeadingLabel}
                 </h2>
+
+                {activeTab === 'byTeam' && uniqueTeams.length > 0 && (
+                  <div className="mb-3 text-[11px] text-gray-300">
+                    <label className="block mb-1">Filter by team</label>
+                    <select
+                      value={selectedTeamFilter}
+                      onChange={(e) => setSelectedTeamFilter(e.target.value)}
+                      className="w-full bg-black/50 border border-white/15 rounded-lg px-3 py-1.5 text-[11px] text-white focus:outline-none focus:ring-2 focus:ring-ipl-gold/40"
+                    >
+                      <option value="ALL">All teams</option>
+                      {uniqueTeams.map((code) => (
+                        <option key={code} value={code}>
+                          {code}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {activeTab === 'byVenue' && uniqueVenues.length > 0 && (
+                  <div className="mb-3 text-[11px] text-gray-300">
+                    <label className="block mb-1">Filter by venue</label>
+                    <select
+                      value={selectedVenueFilter}
+                      onChange={(e) => setSelectedVenueFilter(e.target.value)}
+                      className="w-full bg-black/50 border border-white/15 rounded-lg px-3 py-1.5 text-[11px] text-white focus:outline-none focus:ring-2 focus:ring-ipl-gold/40"
+                    >
+                      <option value="ALL">All venues</option>
+                      {uniqueVenues.map((venue) => (
+                        <option key={venue} value={venue}>
+                          {venue}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
                 <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {matches.length > 0 ? (
-                    matches.map((match) => (
+                  {filteredMatches.length > 0 ? (
+                    filteredMatches.map((match) => (
                       <button
                         key={match.id}
                         onClick={() => setSelectedMatch(match.id)}
