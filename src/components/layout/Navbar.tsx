@@ -43,6 +43,19 @@ export default function Navbar() {
 
   const allNavItems = [...primaryNavItems, ...secondaryNavItems];
 
+  const getNavBadgeLabel = (href: string): string | null => {
+    if (href === '/stats') return 'Numbers';
+    if (href === '/predictions') return 'AI Picks';
+    return null;
+  };
+
+  const getNavTooltip = (href: string): string | null => {
+    if (href === '/stats') return 'Leaderboards, records, and team comparisons';
+    if (href === '/predictions')
+      return 'AI-powered match win chances & toss insights';
+    return null;
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
@@ -82,10 +95,13 @@ export default function Navbar() {
             <div className="flex items-center space-x-1 bg-white/5 rounded-xl p-1 backdrop-blur-sm">
               {primaryNavItems.map((item) => {
                 const isActive = isLinkActive(item.href);
+                const badgeLabel = getNavBadgeLabel(item.href);
+                const tooltip = getNavTooltip(item.href);
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
+                    title={tooltip || undefined}
                     className={`
                       relative px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 flex items-center gap-2
                       ${isActive
@@ -94,7 +110,14 @@ export default function Navbar() {
                     `}
                   >
                     {item.icon && <Icon name={item.icon} size={16} />}
-                    {item.label}
+                    <span className="flex items-center gap-1">
+                      <span>{item.label}</span>
+                      {badgeLabel && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-ipl-gold/15 text-ipl-gold border border-ipl-gold/40">
+                          {badgeLabel}
+                        </span>
+                      )}
+                    </span>
                     {isActive && (
                       <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-transparent via-ipl-gold to-transparent" />
                     )}
@@ -176,10 +199,13 @@ export default function Navbar() {
           <div className="px-4 pt-2 pb-3 space-y-1">
             {allNavItems.map((item) => {
               const isActive = isLinkActive(item.href);
+              const badgeLabel = getNavBadgeLabel(item.href);
+              const tooltip = getNavTooltip(item.href);
               return (
                 <Link
                   key={item.href}
                   href={item.href}
+                  title={tooltip || undefined}
                   className={`
                     flex items-center gap-3 px-4 py-3 rounded-lg text-base font-bold transition-all duration-200
                     ${isActive 
@@ -190,7 +216,14 @@ export default function Navbar() {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.icon && <Icon name={item.icon} size={20} />}
-                  {item.label}
+                  <span className="flex items-center gap-2">
+                    <span>{item.label}</span>
+                    {badgeLabel && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-ipl-gold/15 text-ipl-gold border border-ipl-gold/40">
+                        {badgeLabel}
+                      </span>
+                    )}
+                  </span>
                   {isActive && (
                     <div className="ml-auto w-2 h-2 rounded-full bg-ipl-gold animate-glow" />
                   )}
