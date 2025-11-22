@@ -39,6 +39,9 @@ export default function AdminDatasetsPage() {
   const [parsed, setParsed] = useState<ParsedCsv>({ headers: [], rows: [] });
   const [error, setError] = useState<string | null>(null);
   const [isParsing, setIsParsing] = useState(false);
+  const [datasetKey, setDatasetKey] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -54,6 +57,7 @@ export default function AdminDatasetsPage() {
     setIsParsing(true);
     setError(null);
     setFileName(file.name);
+    setSaveMessage(null);
 
     const reader = new FileReader();
     reader.onload = () => {
@@ -63,8 +67,11 @@ export default function AdminDatasetsPage() {
         if (result.headers.length === 0) {
           setError('The CSV file appears to be empty.');
           setParsed({ headers: [], rows: [] });
+          setDatasetKey('');
         } else {
           setParsed(result);
+          const baseName = file.name.replace(/\.csv$/i, '');
+          setDatasetKey(baseName || 'ipl_dataset');
         }
       } catch (e) {
         console.error('Error parsing CSV:', e);
@@ -77,9 +84,71 @@ export default function AdminDatasetsPage() {
     reader.onerror = () => {
       setError('Failed to read file. Please try again.');
       setParsed({ headers: [], rows: [] });
+      setDatasetKey('');
       setIsParsing(false);
     };
     reader.readAsText(file);
+  };
+
+  const handleSaveToKv = async () => {
+    if (!parsed.headers.length || !parsed.rows.length) {
+      setError('No data to save. Please upload and parse a CSV first.');
+      return;
+    }
+
+    const key = datasetKey.trim();
+    if (!key) {
+      setError('Please enter a dataset key before saving.');
+      return;
+    }
+
+    setIsSaving(true);
+    setError(null);
+    setSaveMessage(null);
+
+    try {
+      const token =
+        typeof window !== 'undefined'
+          ? localStorage.getItem('auth_token') || localStorage.getItem('adminToken')
+          : null;
+
+      if (!token) {
+        setError('Admin session expired. Please sign in again.');
+        setIsSaving(false);
+        return;
+      }
+
+      const res = await fetch('/api/admin/datasets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          datasetKey: key,
+          headers: parsed.headers,
+          rows: parsed.rows,
+          meta: {
+            sourceFile: fileName || null,
+          },
+        }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok || !data?.success) {
+        setError(data?.error || 'Failed to save dataset to KV.');
+      } else {
+        setSaveMessage(
+          `Saved dataset '${data.datasetKey}' with ${data.rowCount ?? parsed.rows.length} rows to KV.`,
+        );
+      }
+    } catch (e) {
+      console.error('Save dataset error:', e);
+      setError('Unexpected error while saving dataset.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -93,6 +162,11 @@ export default function AdminDatasetsPage() {
               safe, local preview.
             </p>
           </div>
+          {saveMessage && (
+            <div className="mb-3 bg-emerald-500/10 border border-emerald-500/40 rounded-lg p-2 text-[11px] text-emerald-200">
+              {saveMessage}
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
@@ -149,6 +223,34 @@ export default function AdminDatasetsPage() {
                 Parsing CSV...
               </div>
             )}
+
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-[2fr,1fr] gap-3 items-end">
+              <div>
+                <label className="block text-xs font-semibold text-gray-300 mb-1" htmlFor="dataset-key">
+                  Dataset key in KV
+                </label>
+                <input
+                  id="dataset-key"
+                  type="text"
+                  value={datasetKey}
+                  onChange={(e) => setDatasetKey(e.target.value)}
+                  placeholder="e.g. ipl_2025_matches"
+                  className="w-full px-3 py-2 rounded-lg bg-black/30 border border-white/10 text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                />
+                <p className="mt-1 text-[10px] text-gray-500">
+                  Saved under <span className="font-mono text-ipl-gold">dataset:&#123;key&#125;</span> in SPORTS_KV.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSaveToKv}
+                disabled={isSaving || !parsed.headers.length || !parsed.rows.length}
+                className="w-full inline-flex items-center justify-center px-3 py-2 rounded-lg bg-ipl-gold text-black text-xs font-semibold hover:bg-ipl-gold/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isSaving ? 'Saving…' : 'Save to Workers KV'}
+              </button>
+            </div>
           </div>
 
           <div className="bg-[#111827] border border-white/10 rounded-2xl p-6 text-xs text-gray-300 space-y-2">
