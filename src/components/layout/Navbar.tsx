@@ -26,13 +26,12 @@ export default function Navbar() {
   };
 
   const primaryNavItems: NavItem[] = [
-    { href: '/', label: 'Home' },
-    { href: '/matches', label: 'Schedule', icon: 'cricket' },
     { href: '/live-score', label: 'Live Score', icon: 'cricket' },
+    { href: '/matches', label: 'Matches', icon: 'cricket' },
     { href: '/teams', label: 'Teams', icon: 'team' },
     { href: '/stats', label: 'Stats', icon: 'stats' },
-    { href: '/news', label: 'News', icon: 'news' },
     { href: '/predictions', label: 'Predictions', icon: 'target' },
+    { href: '/news', label: 'News', icon: 'news' },
   ];
 
   const secondaryNavItems: NavItem[] = [
@@ -128,27 +127,19 @@ export default function Navbar() {
             <div className="flex items-center space-x-2">
               {secondaryNavItems.map((item) => {
                 const isActive = isLinkActive(item.href);
-                const isPrimaryAction = item.href === '/feed';
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
+                    aria-label={item.label}
                     className={`
-                      relative flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold border transition-all duration-200
-                      ${isPrimaryAction
-                        ? isActive
-                          ? 'bg-ipl-gold text-black border-ipl-gold shadow-lg shadow-ipl-gold/30'
-                          : 'border-ipl-gold/60 text-ipl-gold hover:bg-ipl-gold/10 hover:border-ipl-gold'
-                        : isActive
-                          ? 'text-white border-ipl-gold bg-white/10 shadow-lg shadow-ipl-gold/20'
-                          : 'text-gray-200 border-white/15 hover:text-white hover:border-ipl-gold/70 hover:bg-white/5'}
+                      relative flex items-center justify-center w-9 h-9 rounded-full border transition-all duration-200
+                      ${isActive
+                        ? 'text-white border-ipl-gold bg-white/10 shadow-lg shadow-ipl-gold/20'
+                        : 'text-gray-200 border-white/15 hover:text-white hover:border-ipl-gold/70 hover:bg-white/5'}
                     `}
                   >
                     {item.icon && <Icon name={item.icon} size={16} />}
-                    <span className="hidden sm:inline">{item.label}</span>
-                    <span className="sm:hidden">
-                      {item.label === 'Notifications' ? 'Alerts' : item.label}
-                    </span>
                     {item.href === '/notifications' && isActive && (
                       <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-ipl-gold animate-ping" />
                     )}
