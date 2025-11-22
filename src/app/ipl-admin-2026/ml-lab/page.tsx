@@ -73,6 +73,14 @@ export default function AdminMlLabPage() {
   const [schemaError, setSchemaError] = useState<string | null>(null);
   const [targetColumn, setTargetColumn] = useState<string | null>(null);
   const [featureColumns, setFeatureColumns] = useState<string[]>([]);
+  const [isTraining, setIsTraining] = useState(false);
+  const [trainingError, setTrainingError] = useState<string | null>(null);
+  const [trainingMetrics, setTrainingMetrics] = useState<{
+    numSamples: number;
+    numFeatures: number;
+    numClasses: number;
+    trainAccuracy: number;
+  } | null>(null);
 
   const loadDatasets = async () => {
     setIsLoadingDatasets(true);
@@ -199,6 +207,60 @@ export default function AdminMlLabPage() {
 
   const canContinue =
     !!selectedAlgorithm && !!selectedDatasetKey && !!targetColumn && featureColumns.length > 0;
+
+  const handleTrainModel = async () => {
+    if (!canContinue || !selectedAlgorithm || !selectedDatasetKey || !targetColumn) return;
+
+    setIsTraining(true);
+    setTrainingError(null);
+    setTrainingMetrics(null);
+
+    try {
+      const token =
+        typeof window !== 'undefined'
+          ? localStorage.getItem('adminToken') || localStorage.getItem('auth_token')
+          : null;
+
+      if (!token) {
+        setTrainingError('Admin session expired. Please sign in again.');
+        setIsTraining(false);
+        return;
+      }
+
+      const res = await fetch('/api/admin/ml/train', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          datasetKey: selectedDatasetKey,
+          targetColumn,
+          featureColumns,
+          algorithmId: selectedAlgorithm.id,
+          hyperparams: {},
+        }),
+      });
+
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok || !data?.success) {
+        setTrainingError(data?.error || 'Failed to train model.');
+      } else {
+        setTrainingMetrics({
+          numSamples: data.numSamples,
+          numFeatures: data.numFeatures,
+          numClasses: data.numClasses,
+          trainAccuracy: data.metrics?.trainAccuracy ?? 0,
+        });
+      }
+    } catch (e) {
+      console.error('Train model error (ML Lab):', e);
+      setTrainingError('Unexpected error while training model.');
+    } finally {
+      setIsTraining(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-ipl-dark text-white">
@@ -351,9 +413,58 @@ export default function AdminMlLabPage() {
                 </div>
 
                 <p className="text-[10px] text-gray-400">
-                  Once you confirm which algorithm you like here in chat, we&apos;ll implement an actual ML
-                  training pipeline that consumes your Workers KV datasets.
+                  When you&apos;re happy with the selection, use the Training controls below to run a small
+                  experiment directly from this admin page.
                 </p>
+              </div>
+
+              <div className="mt-3 rounded-xl border border-white/10 bg-black/40 px-3 py-3 text-[11px] text-gray-200 flex flex-col gap-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <h3 className="text-sm font-semibold text-white">4. Train model</h3>
+                    <p className="text-[10px] text-gray-400">
+                      Runs a lightweight training loop inside a Cloudflare Worker using your selected
+                      dataset, target, features, and algorithm.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleTrainModel}
+                    disabled={!canContinue || isTraining}
+                    className="px-3 py-1.5 rounded-md text-[11px] font-semibold bg-ipl-gold text-black hover:bg-ipl-gold/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isTraining ? 'Training…' : 'Train model'}
+                  </button>
+                </div>
+
+                {trainingError && (
+                  <div className="mt-1 bg-red-500/10 border border-red-500/40 rounded-md px-3 py-2 text-[11px] text-red-300">
+                    {trainingError}
+                  </div>
+                )}
+
+                {trainingMetrics && !trainingError && (
+                  <div className="mt-1 grid grid-cols-2 md:grid-cols-4 gap-2 text-[10px] text-gray-300">
+                    <div>
+                      <div className="text-gray-400">Samples used</div>
+                      <div className="text-gray-100 font-semibold">{trainingMetrics.numSamples}</div>
+                    </div>
+                    <div>
+                      <div className="text-gray-400">Features</div>
+                      <div className="text-gray-100 font-semibold">{trainingMetrics.numFeatures}</div>
+                    </div>
+                    <div>
+                      <div className="text-gray-400">Classes</div>
+                      <div className="text-gray-100 font-semibold">{trainingMetrics.numClasses}</div>
+                    </div>
+                    <div>
+                      <div className="text-gray-400">Train accuracy</div>
+                      <div className="text-gray-100 font-semibold">
+                        {(trainingMetrics.trainAccuracy * 100).toFixed(1)}%
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="mt-4 rounded-xl border border-dashed border-white/15 bg-black/20 px-3 py-3 text-[11px] text-gray-300">
