@@ -523,13 +523,18 @@ export default function AdminStatsPage() {
   const tossLuckiestTeams = useMemo(() => {
     if (!tossAnalytics || !tossAnalytics.teams?.length) return [] as TossTeamStat[];
     const legacyTeams = [
-      'Rising Pune Supergiant',
-      'Gujarat Lions',
-      'Deccan Chargers',
-      'Kochi Tuskers Kerala',
+      'rising pune supergiant',
+      'rising pune supergiants',
+      'gujarat lions',
+      'deccan chargers',
+      'kochi tuskers kerala',
     ];
     return [...tossAnalytics.teams]
-      .filter((t) => t.matches > 0 && !legacyTeams.includes(t.team))
+      .filter((t) => {
+        if (t.matches <= 0) return false;
+        const name = (t.team || '').trim().toLowerCase();
+        return !legacyTeams.includes(name);
+      })
       .sort((a, b) => b.tossImpact - a.tossImpact)
       .slice(0, 6);
   }, [tossAnalytics]);

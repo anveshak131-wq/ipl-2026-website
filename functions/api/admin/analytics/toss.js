@@ -4,6 +4,26 @@
  * stored in Workers KV.
  */
 
+// Normalise team names so that historical franchises that were renamed are
+// aggregated under their current identities.
+const normalizeTeamName = (name) => {
+  if (!name) return name;
+  const trimmed = String(name).trim();
+  const lower = trimmed.toLowerCase();
+
+  // Delhi Daredevils -> Delhi Capitals
+  if (lower === 'delhi daredevils') {
+    return 'Delhi Capitals';
+  }
+
+  // Kings XI / Eleven Punjab -> Punjab Kings
+  if (lower === 'kings xi punjab' || lower === 'kings eleven punjab') {
+    return 'Punjab Kings';
+  }
+
+  return trimmed;
+};
+
 export const onRequest = async (context) => {
   const { request, env } = context;
   const method = request.method;
@@ -196,10 +216,10 @@ export const onRequest = async (context) => {
       for (const row of rows) {
         if (!Array.isArray(row)) continue;
 
-        const team1 = row[idxTeam1];
-        const team2 = row[idxTeam2];
-        const tossWinner = row[idxTossWinner];
-        const winningTeam = row[idxWinningTeam];
+        const team1 = normalizeTeamName(row[idxTeam1]);
+        const team2 = normalizeTeamName(row[idxTeam2]);
+        const tossWinner = normalizeTeamName(row[idxTossWinner]);
+        const winningTeam = normalizeTeamName(row[idxWinningTeam]);
         const venue = idxVenue !== -1 ? row[idxVenue] : undefined;
 
         if (!team1 || !team2) continue;
