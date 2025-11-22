@@ -522,8 +522,14 @@ export default function AdminStatsPage() {
 
   const tossLuckiestTeams = useMemo(() => {
     if (!tossAnalytics || !tossAnalytics.teams?.length) return [] as TossTeamStat[];
+    const legacyTeams = [
+      'Rising Pune Supergiant',
+      'Gujarat Lions',
+      'Deccan Chargers',
+      'Kochi Tuskers Kerala',
+    ];
     return [...tossAnalytics.teams]
-      .filter((t) => t.matches > 0)
+      .filter((t) => t.matches > 0 && !legacyTeams.includes(t.team))
       .sort((a, b) => b.tossImpact - a.tossImpact)
       .slice(0, 6);
   }, [tossAnalytics]);
