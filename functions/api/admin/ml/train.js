@@ -127,9 +127,8 @@ export const onRequest = async (context) => {
       );
     }
 
-    // Load and combine all selected datasets, enforcing identical headers
-    let headers = null;
-    const combinedRows = [];
+    // Load all selected datasets and verify that each has the target & feature columns
+    const datasetsMeta = [];
 
     for (const key of datasetKeysList) {
       const value = await env.SPORTS_KV.get(`dataset:${key}`);
@@ -150,105 +149,87 @@ export const onRequest = async (context) => {
         );
       }
 
-      const currentHeaders = Array.isArray(dataset.headers) ? dataset.headers : null;
+      const headers = Array.isArray(dataset.headers) ? dataset.headers : null;
       const rows = Array.isArray(dataset.rows) ? dataset.rows : null;
 
-      if (!currentHeaders || !rows) {
+      if (!headers || !rows) {
         return new Response(
           JSON.stringify({ error: `Dataset '${key}' is missing headers or rows` }),
           { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
         );
       }
 
-      if (!headers) {
-        headers = currentHeaders;
-      } else {
-        const sameLength = headers.length === currentHeaders.length;
-        const sameValues =
-          sameLength && headers.every((h, index) => h === currentHeaders[index]);
-        if (!sameValues) {
-          return new Response(
-            JSON.stringify({
-              error:
-                'All selected datasets must have identical headers (same columns in the same order) to train a single model.',
-            }),
-            { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
-          );
-        }
+      const targetIndex = headers.indexOf(targetColumn);
+      if (targetIndex === -1) {
+        return new Response(
+          JSON.stringify({ error: `Dataset '${key}' does not contain target column '${targetColumn}'` }),
+          { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
+        );
       }
 
-      for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        if (Array.isArray(row)) {
-          combinedRows.push(row);
+      const missingFeatures = [];
+      const featureIndices = featureColumns.map((col) => {
+        const idx = headers.indexOf(col);
+        if (idx === -1) {
+          missingFeatures.push(col);
         }
+        return idx;
+      });
+
+      if (missingFeatures.length > 0) {
+        return new Response(
+          JSON.stringify({
+            error: `Dataset '${key}' is missing feature columns: ${missingFeatures.join(', ')}`,
+          }),
+          { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
+        );
       }
-    }
 
-    if (!headers || combinedRows.length === 0) {
-      return new Response(
-        JSON.stringify({ error: 'No rows available after combining selected datasets' }),
-        { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
-      );
-    }
-
-    const targetIndex = headers.indexOf(targetColumn);
-    if (targetIndex === -1) {
-      return new Response(
-        JSON.stringify({ error: `Target column '${targetColumn}' not found in dataset` }),
-        { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
-      );
-    }
-
-    const featureIndices = featureColumns
-      .map((col) => ({ col, idx: headers.indexOf(col) }))
-      .filter((entry) => entry.idx !== -1);
-
-    if (featureIndices.length === 0) {
-      return new Response(
-        JSON.stringify({ error: 'None of the featureColumns were found in dataset headers' }),
-        { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
-      );
+      datasetsMeta.push({ key, headers, rows, targetIndex, featureIndices });
     }
 
     const maxRows = (hyperparams && Number(hyperparams.maxRows)) || 1000;
     const learningRate = (hyperparams && Number(hyperparams.learningRate)) || 0.05;
     const epochs = Math.min((hyperparams && Number(hyperparams.epochs)) || 20, 50);
 
-    // Build feature matrix X and label vector y from combined rows
+    // Build feature matrix X and label vector y from all datasets
     const X = [];
     const y = [];
     const labelToIndex = new Map();
     const indexToLabel = [];
 
-    for (let i = 0; i < combinedRows.length && X.length < maxRows; i++) {
-      const row = combinedRows[i];
-      if (!Array.isArray(row)) continue;
+    outerLoop: for (const meta of datasetsMeta) {
+      const { rows, targetIndex, featureIndices } = meta;
+      for (let i = 0; i < rows.length; i++) {
+        if (X.length >= maxRows) break outerLoop;
+        const row = rows[i];
+        if (!Array.isArray(row)) continue;
 
-      const labelRaw = row[targetIndex];
-      if (labelRaw == null || labelRaw === '') continue;
+        const labelRaw = row[targetIndex];
+        if (labelRaw == null || labelRaw === '') continue;
 
-      const features = featureIndices.map(({ idx }) => {
-        const raw = row[idx];
-        const num = parseFloat(raw == null || raw === '' ? '0' : String(raw));
-        return Number.isFinite(num) ? num : 0;
-      });
+        const features = featureIndices.map((idx) => {
+          const raw = row[idx];
+          const num = parseFloat(raw == null || raw === '' ? '0' : String(raw));
+          return Number.isFinite(num) ? num : 0;
+        });
 
-      let labelIndex;
-      if (labelToIndex.has(labelRaw)) {
-        labelIndex = labelToIndex.get(labelRaw);
-      } else {
-        labelIndex = indexToLabel.length;
-        labelToIndex.set(labelRaw, labelIndex);
-        indexToLabel.push(labelRaw);
+        let labelIndex;
+        if (labelToIndex.has(labelRaw)) {
+          labelIndex = labelToIndex.get(labelRaw);
+        } else {
+          labelIndex = indexToLabel.length;
+          labelToIndex.set(labelRaw, labelIndex);
+          indexToLabel.push(labelRaw);
+        }
+
+        X.push(features);
+        y.push(labelIndex);
       }
-
-      X.push(features);
-      y.push(labelIndex);
     }
 
     const numSamples = X.length;
-    const numFeatures = featureIndices.length;
+    const numFeatures = featureColumns.length;
     const numClasses = indexToLabel.length;
 
     if (numSamples < 2 || numClasses < 2) {
