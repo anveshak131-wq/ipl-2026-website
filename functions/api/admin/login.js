@@ -298,19 +298,57 @@ export const onRequest = async (context) => {
             }
           }
 
-          // Use the existing token from KV
-          const token = user.token;
-          
+          // Ensure there is a valid token mapping in KV for this admin.
+          // If the existing token has expired (token:<token> missing), generate
+          // a new one and refresh both user and token entries.
+          let token = user.token;
+          const nowIso = new Date().toISOString();
+
+          if (!token) {
+            // Generate a new random token if none stored
+            const tokenBuffer = crypto.randomBytes(32);
+            token = tokenBuffer.toString('hex');
+          }
+
+          const updatedUser = {
+            ...user,
+            token,
+            lastLogin: nowIso,
+          };
+
+          // Store/refresh user in KV with 1 year TTL
+          await env.SPORTS_KV.put(
+            `user:${username}`,
+            JSON.stringify(updatedUser),
+            {
+              expirationTtl: 365 * 24 * 60 * 60,
+            }
+          );
+
+          // Store/refresh token mapping so /api/auth?action=verify works
+          await env.SPORTS_KV.put(
+            `token:${token}`,
+            JSON.stringify({
+              userId: updatedUser.id,
+              email: updatedUser.email,
+              role: updatedUser.role,
+              createdAt: nowIso,
+            }),
+            {
+              expirationTtl: 7 * 24 * 60 * 60,
+            }
+          );
+
           return new Response(
             JSON.stringify({
               success: true,
               token,
               user: {
-                id: user.id,
-                username: user.email,
-                email: user.email,
-                role: user.role
-              }
+                id: updatedUser.id,
+                username: updatedUser.email,
+                email: updatedUser.email,
+                role: updatedUser.role,
+              },
             }),
             {
               status: 200,
