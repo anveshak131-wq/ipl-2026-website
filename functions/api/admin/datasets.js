@@ -128,6 +128,8 @@ export const onRequest = async (context) => {
             rowCount: parsed.meta?.rowCount,
             uploadedAt: parsed.meta?.uploadedAt,
             uploadedBy: parsed.meta?.uploadedBy,
+            seasonRange: parsed.meta?.seasonRange,
+            seasonCount: parsed.meta?.seasonCount,
           });
         } catch {
           // Ignore malformed entries
@@ -183,6 +185,36 @@ export const onRequest = async (context) => {
       );
     }
 
+    let seasonRange;
+    let seasonCount;
+
+    const seasonIndex = headers.indexOf('season');
+    if (seasonIndex !== -1) {
+      const seasonsSet = new Set();
+      for (const row of rows) {
+        if (!Array.isArray(row)) continue;
+        const raw = row[seasonIndex];
+        if (raw == null) continue;
+        const str = String(raw).trim();
+        if (!str) continue;
+        seasonsSet.add(str);
+      }
+      if (seasonsSet.size > 0) {
+        const values = Array.from(seasonsSet);
+        const numeric = values
+          .map((v) => parseInt(v, 10))
+          .filter((n) => Number.isFinite(n));
+        if (numeric.length > 0) {
+          const min = Math.min(...numeric);
+          const max = Math.max(...numeric);
+          seasonRange = min === max ? String(min) : `${min}-${max}`;
+        } else {
+          seasonRange = values.join(', ');
+        }
+        seasonCount = seasonsSet.size;
+      }
+    }
+
     const dataset = {
       key: safeKey,
       headers,
@@ -192,6 +224,8 @@ export const onRequest = async (context) => {
         uploadedBy: email,
         uploadedAt: new Date().toISOString(),
         rowCount: Array.isArray(rows) ? rows.length : 0,
+        seasonRange,
+        seasonCount,
       },
     };
 

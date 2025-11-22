@@ -230,8 +230,8 @@ function buildPredictionFromToss(
 
   const analysis =
     agg1 || agg2
-      ? `Our prediction gives ${strongerTeamName} a slight edge over ${weakerTeamName}. It blends team performance indicators with how strongly the toss tends to influence their results to estimate these probabilities: ${(p1 * 100).toFixed(1)}% for ${match.team1.shortName} and ${(p2 * 100).toFixed(1)}% for ${match.team2.shortName}.`
-      : `With limited information for this particular matchup, the contest is treated as almost perfectly balanced, keeping win probabilities close to 50–50 for both sides.`;
+      ? `Prediction: ${match.team1.shortName} vs ${match.team2.shortName} – ${(p1 * 100).toFixed(1)}% vs ${(p2 * 100).toFixed(1)}%. ${strongerTeamName} have a slight edge.`
+      : `Prediction: ${match.team1.shortName} vs ${match.team2.shortName} is almost 50–50; both teams look very closely matched.`;
 
   return {
     matchId: match.id,

@@ -20,6 +20,8 @@ interface DatasetSummary {
   rowCount?: number;
   uploadedAt?: string;
   uploadedBy?: string;
+  seasonRange?: string;
+  seasonCount?: number;
 }
 
 interface TossTeamStat {
@@ -156,6 +158,7 @@ export default function AdminStatsPage() {
   const [tossAnalytics, setTossAnalytics] = useState<TossAnalyticsSnapshot | null>(null);
   const [tossLoading, setTossLoading] = useState(false);
   const [tossError, setTossError] = useState<string | null>(null);
+  const [tossDatasetWeights, setTossDatasetWeights] = useState<Record<string, number>>({});
 
   const snapshotFreshness = useMemo(
     () =>
@@ -284,6 +287,11 @@ export default function AdminStatsPage() {
             if (res.ok && data?.datasets) {
               const list = data.datasets as DatasetSummary[];
               setAvailableDatasets(list);
+              const initialWeights: Record<string, number> = {};
+              for (const ds of list) {
+                initialWeights[ds.key] = 100;
+              }
+              setTossDatasetWeights(initialWeights);
               if (initialTossDatasetKeys.length) {
                 setTossDatasetKeys(initialTossDatasetKeys);
               } else if (list.length) {
@@ -520,6 +528,30 @@ export default function AdminStatsPage() {
     [players.length, teams.length, leaderboardsWithEntries, suggestedInsights.length]
   );
 
+  const effectiveTossWeightsLabel = useMemo(() => {
+    if (!tossDatasetKeys.length) return '';
+
+    const entries: { key: string; weight: number }[] = [];
+    let weightSum = 0;
+
+    for (const key of tossDatasetKeys) {
+      const raw = tossDatasetWeights[key];
+      const w = typeof raw === 'number' && raw > 0 ? raw : 100;
+      entries.push({ key, weight: w });
+      weightSum += w;
+    }
+
+    if (entries.length <= 1 || weightSum <= 0) return '';
+
+    const parts = entries.map((entry) => {
+      const pct = (entry.weight / weightSum) * 100;
+      const rounded = Math.round(pct);
+      return `${entry.key} ~ ${rounded}%`;
+    });
+
+    return `Effective weighting: ${parts.join(', ')}`;
+  }, [tossDatasetKeys, tossDatasetWeights]);
+
   const tossLuckiestTeams = useMemo(() => {
     if (!tossAnalytics || !tossAnalytics.teams?.length) return [] as TossTeamStat[];
     const legacyTeams = [
@@ -608,6 +640,13 @@ export default function AdminStatsPage() {
     }
   };
 
+  const updateTossDatasetWeight = (key: string, value: number) => {
+    setTossDatasetWeights((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
   const toggleTossDatasetKey = (key: string) => {
     setTossDatasetKeys((prev) =>
       prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key],
@@ -633,13 +672,21 @@ export default function AdminStatsPage() {
 
     setTossLoading(true);
     try {
+      const weightsPayload: Record<string, number> = {};
+      tossDatasetKeys.forEach((key) => {
+        const w = tossDatasetWeights[key];
+        if (typeof w === 'number' && w > 0) {
+          weightsPayload[key] = w;
+        }
+      });
+
       const res = await fetch('/api/admin/analytics/toss', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ datasetKeys: tossDatasetKeys }),
+        body: JSON.stringify({ datasetKeys: tossDatasetKeys, datasetWeights: weightsPayload }),
       });
 
       const data = await res.json().catch(() => null);
@@ -917,6 +964,11 @@ export default function AdminStatsPage() {
                 Select one or more uploaded match datasets, then run toss analytics to see which
                 teams benefit most from the toss.
               </p>
+              <p className="text-[11px] text-gray-500 mb-3">
+                When combining multiple datasets, adjust the weight sliders so that newer or more
+                trusted seasons contribute more strongly. We normalise these values automatically
+                when running the analytics.
+              </p>
               {availableDatasets.length ? (
                 <div className="space-y-3 text-xs text-gray-200">
                   <div className="space-y-1 max-h-32 overflow-y-auto pr-1">
@@ -925,21 +977,49 @@ export default function AdminStatsPage() {
                       return (
                         <label
                           key={ds.key}
-                          className="flex items-center justify-between gap-2 px-2 py-1 rounded-md hover:bg-white/5 cursor-pointer"
+                          className="flex flex-col gap-1 px-2 py-1 rounded-md hover:bg-white/5 cursor-pointer"
                         >
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={checked}
-                              onChange={() => toggleTossDatasetKey(ds.key)}
-                              className="h-3.5 w-3.5 accent-ipl-gold"
-                            />
-                            <span className="font-mono text-[11px]">{ds.key}</span>
+                          <div className="flex items-start justify-between gap-2 w-full">
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => toggleTossDatasetKey(ds.key)}
+                                className="h-3.5 w-3.5 accent-ipl-gold"
+                              />
+                              <span className="font-mono text-[11px]">{ds.key}</span>
+                            </div>
+                            <div className="text-[10px] text-gray-400 text-right space-y-0.5">
+                              <div>
+                                {typeof ds.rowCount === 'number'
+                                  ? `${ds.rowCount} rows`
+                                  : 'row count unknown'}
+                              </div>
+                              {ds.seasonRange && (
+                                <div>
+                                  Seasons: {ds.seasonRange}
+                                  {typeof ds.seasonCount === 'number'
+                                    ? ` (${ds.seasonCount} season${ds.seasonCount === 1 ? '' : 's'})`
+                                    : ''}
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          <div className="text-[10px] text-gray-400 text-right">
-                            {typeof ds.rowCount === 'number'
-                              ? `${ds.rowCount} rows`
-                              : 'row count unknown'}
+                          <div className="flex items-center gap-2 w-full pl-6 pr-1">
+                            <input
+                              type="range"
+                              min={50}
+                              max={150}
+                              step={10}
+                              value={tossDatasetWeights[ds.key] ?? 100}
+                              onChange={(e) =>
+                                updateTossDatasetWeight(ds.key, Number(e.target.value))
+                              }
+                              className="flex-1 h-1.5 cursor-pointer accent-ipl-gold"
+                            />
+                            <span className="text-[10px] text-gray-300 whitespace-nowrap">
+                              {((tossDatasetWeights[ds.key] ?? 100) / 100).toFixed(2)}x
+                            </span>
                           </div>
                         </label>
                       );
@@ -955,10 +1035,15 @@ export default function AdminStatsPage() {
                       {tossLoading ? 'Running analytics…' : 'Run toss analytics'}
                     </button>
                     {tossAnalytics && (
-                      <p className="text-[11px] text-gray-300">
-                        Analysed {tossAnalytics.totals.totalMatches} matches from{' '}
-                        {tossAnalytics.datasetKeys.join(', ')}
-                      </p>
+                      <div className="text-[11px] text-gray-300 space-y-0.5">
+                        <p>
+                          Analysed {tossAnalytics.totals.totalMatches} matches from{' '}
+                          {tossAnalytics.datasetKeys.join(', ')}
+                        </p>
+                        {effectiveTossWeightsLabel && (
+                          <p className="text-gray-400">{effectiveTossWeightsLabel}</p>
+                        )}
+                      </div>
                     )}
                   </div>
                   {tossError && (

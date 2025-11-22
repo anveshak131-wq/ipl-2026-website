@@ -107,7 +107,7 @@ export const onRequest = async (context) => {
       );
     }
 
-    const { datasetKeys } = body;
+    const { datasetKeys, datasetWeights } = body;
 
     if (!Array.isArray(datasetKeys) || datasetKeys.length === 0) {
       return new Response(
@@ -125,6 +125,40 @@ export const onRequest = async (context) => {
         JSON.stringify({ error: 'datasetKeys must contain at least one non-empty string' }),
         { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
       );
+    }
+
+    // Optional per-dataset weighting: admins can upweight more recent datasets.
+    const rawWeightsByKey = {};
+    if (datasetWeights && typeof datasetWeights === 'object') {
+      for (const [rawKey, rawVal] of Object.entries(datasetWeights)) {
+        if (!rawKey) continue;
+        const key = String(rawKey).trim();
+        if (!key) continue;
+        const num = Number(rawVal);
+        if (!Number.isFinite(num) || num <= 0) continue;
+        rawWeightsByKey[key] = num;
+      }
+    }
+
+    // Normalise weights so they sum to 1 across the selected datasetKeys.
+    const normalisedWeightsByKey = {};
+    let totalWeight = 0;
+    for (const key of trimmedKeys) {
+      const candidate = Number(rawWeightsByKey[key]);
+      const w = Number.isFinite(candidate) && candidate > 0 ? candidate : 1;
+      normalisedWeightsByKey[key] = w;
+      totalWeight += w;
+    }
+
+    if (totalWeight > 0) {
+      for (const key of trimmedKeys) {
+        normalisedWeightsByKey[key] = normalisedWeightsByKey[key] / totalWeight;
+      }
+    } else {
+      const equal = 1 / trimmedKeys.length;
+      for (const key of trimmedKeys) {
+        normalisedWeightsByKey[key] = equal;
+      }
     }
 
     // Aggregation structures
@@ -213,6 +247,8 @@ export const onRequest = async (context) => {
         );
       }
 
+      const datasetWeight = normalisedWeightsByKey[key] ?? 1 / trimmedKeys.length;
+
       for (const row of rows) {
         if (!Array.isArray(row)) continue;
 
@@ -228,45 +264,49 @@ export const onRequest = async (context) => {
         const hasToss = tossWinner && typeof tossWinner === 'string';
         const hasResult = winningTeam && typeof winningTeam === 'string';
 
-        // Each row is a match between team1 and team2
+        // Each row is a match between team1 and team2.
+        // Keep totalMatches as a raw count, but scale team/venue stats by datasetWeight
+        // so newer datasets can have more influence.
         totalMatches++;
+
+        const w = datasetWeight;
 
         // Ensure entries
         const t1 = ensureTeamEntry(team1);
         const t2 = ensureTeamEntry(team2);
-        t1.matches++;
-        t2.matches++;
+        t1.matches += w;
+        t2.matches += w;
 
         if (hasResult) {
           if (winningTeam === team1) {
-            t1.wins++;
+            t1.wins += w;
           } else if (winningTeam === team2) {
-            t2.wins++;
+            t2.wins += w;
           }
         }
 
         if (hasToss) {
           if (tossWinner === team1) {
-            t1.tossesWon++;
-            t1.matchesWhenWinToss++;
+            t1.tossesWon += w;
+            t1.matchesWhenWinToss += w;
             if (hasResult && winningTeam === team1) {
-              t1.winsWhenWinToss++;
+              t1.winsWhenWinToss += w;
             }
             // team2 lost toss
-            t2.matchesWhenLoseToss++;
+            t2.matchesWhenLoseToss += w;
             if (hasResult && winningTeam === team2) {
-              t2.winsWhenLoseToss++;
+              t2.winsWhenLoseToss += w;
             }
           } else if (tossWinner === team2) {
-            t2.tossesWon++;
-            t2.matchesWhenWinToss++;
+            t2.tossesWon += w;
+            t2.matchesWhenWinToss += w;
             if (hasResult && winningTeam === team2) {
-              t2.winsWhenWinToss++;
+              t2.winsWhenWinToss += w;
             }
             // team1 lost toss
-            t1.matchesWhenLoseToss++;
+            t1.matchesWhenLoseToss += w;
             if (hasResult && winningTeam === team1) {
-              t1.winsWhenLoseToss++;
+              t1.winsWhenLoseToss += w;
             }
           }
         }
@@ -275,27 +315,27 @@ export const onRequest = async (context) => {
         if (venue && typeof venue === 'string') {
           const v1 = ensureVenueEntry(team1, venue);
           const v2 = ensureVenueEntry(team2, venue);
-          v1.matches++;
-          v2.matches++;
+          v1.matches += w;
+          v2.matches += w;
 
           if (hasToss) {
             if (tossWinner === team1) {
-              v1.matchesWhenWinToss++;
+              v1.matchesWhenWinToss += w;
               if (hasResult && winningTeam === team1) {
-                v1.winsWhenWinToss++;
+                v1.winsWhenWinToss += w;
               }
-              v2.matchesWhenLoseToss++;
+              v2.matchesWhenLoseToss += w;
               if (hasResult && winningTeam === team2) {
-                v2.winsWhenLoseToss++;
+                v2.winsWhenLoseToss += w;
               }
             } else if (tossWinner === team2) {
-              v2.matchesWhenWinToss++;
+              v2.matchesWhenWinToss += w;
               if (hasResult && winningTeam === team2) {
-                v2.winsWhenWinToss++;
+                v2.winsWhenWinToss += w;
               }
-              v1.matchesWhenLoseToss++;
+              v1.matchesWhenLoseToss += w;
               if (hasResult && winningTeam === team1) {
-                v1.winsWhenLoseToss++;
+                v1.winsWhenLoseToss += w;
               }
             }
           }
