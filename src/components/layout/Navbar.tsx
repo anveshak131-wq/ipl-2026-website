@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import IPLLogo from '../ui/IPLLogo';
 import Icon from '../ui/Icon';
 
-type NavIconName = 'cricket' | 'stats' | 'news' | 'team' | 'target' | 'trophy';
+type NavIconName = 'cricket' | 'stats' | 'news' | 'team' | 'target' | 'trophy' | 'bell' | 'user';
 
 interface NavItem {
   href: string;
@@ -35,8 +35,8 @@ export default function Navbar() {
   ];
 
   const secondaryNavItems: NavItem[] = [
-    { href: '/notifications', label: 'Notifications', icon: 'news' },
-    { href: '/account', label: 'Account', icon: 'team' },
+    { href: '/notifications', label: 'Notifications', icon: 'bell' },
+    { href: '/account', label: 'Account', icon: 'user' },
   ];
 
   const allNavItems = [...primaryNavItems, ...secondaryNavItems];

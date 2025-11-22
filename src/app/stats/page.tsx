@@ -53,6 +53,75 @@ function sortByEconomyAsc(players: Player[]): Player[] {
   return [...players].sort((a, b) => a.stats.economy - b.stats.economy);
 }
 
+function getBattingFormLabel(p: Player): 'Hot' | 'Consistent' | 'Cooling' {
+  const matches = p.stats.matches || 0;
+  const runs = p.stats.runs || 0;
+  const strikeRate = p.stats.strikeRate || 0;
+  const runsPerMatch = matches > 0 ? runs / matches : 0;
+
+  if (runsPerMatch >= 45 && strikeRate >= 140) return 'Hot';
+  if (runsPerMatch >= 30 && strikeRate >= 125) return 'Consistent';
+  return 'Cooling';
+}
+
+function getBattingContextLine(p: Player): string {
+  const matches = p.stats.matches || 0;
+  const runs = p.stats.runs || 0;
+  const strikeRate = p.stats.strikeRate || 0;
+  const boundaries = (p.stats.fours || 0) + (p.stats.sixes || 0);
+
+  if (matches > 0 && runs > 0) {
+    const runsPerMatch = runs / matches;
+    const projected = Math.round(((runsPerMatch * 14) / 50)) * 50;
+    if (projected > 0) {
+      return `On track to cross around ${projected} runs if this pace continues.`;
+    }
+  }
+
+  if (strikeRate > 0 && boundaries > 0 && runs > 0) {
+    const ballsFaced = (runs * 100) / strikeRate;
+    const ballsPerBoundary = ballsFaced / boundaries;
+    if (ballsPerBoundary > 0) {
+      return `Strikes a four or six roughly every ${ballsPerBoundary.toFixed(0)} balls.`;
+    }
+  }
+
+  return '';
+}
+
+function getBowlingFormLabel(p: Player): 'Hot' | 'Consistent' | 'Cooling' {
+  const matches = p.stats.matches || 0;
+  const wickets = p.stats.wickets || 0;
+  const economy = p.stats.economy || 0;
+  const wicketsPerMatch = matches > 0 ? wickets / matches : 0;
+
+  if (wicketsPerMatch >= 2 || (economy > 0 && economy <= 7)) return 'Hot';
+  if (wicketsPerMatch >= 1.2 || (economy > 0 && economy <= 8.5)) return 'Consistent';
+  return 'Cooling';
+}
+
+function getBowlingContextLine(p: Player): string {
+  const economy = p.stats.economy || 0;
+  const bowlingAverage = p.stats.bowlingAverage || 0;
+
+  if (economy > 0 && bowlingAverage > 0) {
+    const oversPerWicket = bowlingAverage / economy;
+    const ballsPerWicket = oversPerWicket * 6;
+    if (ballsPerWicket > 0) {
+      return `Strikes once every about ${ballsPerWicket.toFixed(0)} balls on average.`;
+    }
+  }
+
+  const matches = p.stats.matches || 0;
+  const wickets = p.stats.wickets || 0;
+  if (matches > 0 && wickets > 0) {
+    const wicketsPerMatch = wickets / matches;
+    return `Takes around ${wicketsPerMatch.toFixed(1)} wickets per match.`;
+  }
+
+  return '';
+}
+
 export default function StatsPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -70,6 +139,8 @@ export default function StatsPage() {
     showInsights: true,
   });
   const [activeStatsTab, setActiveStatsTab] = useState<StatsTabKey>('overview');
+  const [leadersRange, setLeadersRange] = useState<'season' | 'recent'>('season');
+  const [leadersLimit, setLeadersLimit] = useState<10 | 50>(10);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -133,28 +204,28 @@ export default function StatsPage() {
   const computedTopRunScorers = useMemo(() => {
     return [...players]
       .sort((a, b) => b.stats.runs - a.stats.runs)
-      .slice(0, 5);
+      .slice(0, 50);
   }, [players]);
 
   const computedTopWicketTakers = useMemo(() => {
     return [...players]
       .filter((p) => p.stats.wickets > 0)
       .sort((a, b) => b.stats.wickets - a.stats.wickets)
-      .slice(0, 5);
+      .slice(0, 50);
   }, [players]);
 
   const computedBestStrikeRates = useMemo(() => {
     return [...players]
       .filter((p) => p.stats.runs >= 300)
       .sort((a, b) => b.stats.strikeRate - a.stats.strikeRate)
-      .slice(0, 5);
+      .slice(0, 50);
   }, [players]);
 
   const computedBestEconomyRates = useMemo(() => {
     return [...players]
       .filter((p) => p.stats.wickets >= 20 && p.stats.economy > 0)
       .sort((a, b) => a.stats.economy - b.stats.economy)
-      .slice(0, 5);
+      .slice(0, 50);
   }, [players]);
 
   const topRunScorers = useMemo(() => {
@@ -461,6 +532,62 @@ export default function StatsPage() {
           {/* Season Leaders */}
           {(statsConfig.showTopRunScorers || statsConfig.showTopWicketTakers) && (
             <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="lg:col-span-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-1 text-[11px] text-gray-300">
+                <div className="inline-flex items-center gap-1 bg-black/40 border border-white/10 rounded-full px-1 py-0.5">
+                  <span className="px-2 py-0.5 rounded-full uppercase tracking-wide text-[10px] text-gray-400">
+                    Range
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setLeadersRange('season')}
+                    className={`px-3 py-0.5 rounded-full font-semibold transition-colors ${
+                      leadersRange === 'season'
+                        ? 'bg-gradient-to-r from-ipl-blue-dark to-ipl-purple text-white shadow-sm shadow-ipl-purple/40'
+                        : 'text-gray-300 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    All season
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLeadersRange('recent')}
+                    className={`px-3 py-0.5 rounded-full font-semibold transition-colors ${
+                      leadersRange === 'recent'
+                        ? 'bg-gradient-to-r from-ipl-blue-dark to-ipl-purple text-white shadow-sm shadow-ipl-purple/40'
+                        : 'text-gray-300 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    Last 5 matches
+                  </button>
+                </div>
+                <div className="inline-flex items-center gap-1 bg-black/40 border border-white/10 rounded-full px-1 py-0.5">
+                  <span className="px-2 py-0.5 rounded-full uppercase tracking-wide text-[10px] text-gray-400">
+                    Showing
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setLeadersLimit(10)}
+                    className={`px-3 py-0.5 rounded-full font-semibold transition-colors ${
+                      leadersLimit === 10
+                        ? 'bg-gradient-to-r from-ipl-gold to-ipl-purple text-black shadow-sm shadow-ipl-gold/40'
+                        : 'text-gray-300 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    Top 10
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLeadersLimit(50)}
+                    className={`px-3 py-0.5 rounded-full font-semibold transition-colors ${
+                      leadersLimit === 50
+                        ? 'bg-gradient-to-r from-ipl-gold to-ipl-purple text-black shadow-sm shadow-ipl-gold/40'
+                        : 'text-gray-300 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    Top 50
+                  </button>
+                </div>
+              </div>
               {/* Batting leaders */}
               {statsConfig.showTopRunScorers && (
                 <div
@@ -482,8 +609,19 @@ export default function StatsPage() {
                   </div>
 
                   <div className="space-y-2">
-                    {topRunScorers.map((p, index) => {
+                    {topRunScorers.slice(0, leadersLimit).map((p, index) => {
                       const isLeader = index === 0;
+                      const team = teams.find((t) => t.id === p.teamId);
+                      const formLabel = getBattingFormLabel(p);
+                      const contextLine = getBattingContextLine(p);
+                      const formBaseClasses =
+                        'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border';
+                      const formClasses =
+                        formLabel === 'Hot'
+                          ? `${formBaseClasses} bg-red-500/15 text-red-300 border-red-400/60`
+                          : formLabel === 'Consistent'
+                          ? `${formBaseClasses} bg-emerald-500/15 text-emerald-300 border-emerald-400/60`
+                          : `${formBaseClasses} bg-slate-500/20 text-slate-200 border-slate-400/50`;
                       return (
                         <div
                           key={p.id}
@@ -516,7 +654,8 @@ export default function StatsPage() {
                                   {p.name}
                                 </div>
                                 <div className="text-[11px] text-gray-400">
-                                  {p.role} • {p.stats.matches} matches
+                                  {p.role} • {team?.shortName || 'Unknown'} • {p.stats.matches}{' '}
+                                  matches
                                 </div>
                               </div>
                             </div>
@@ -534,6 +673,17 @@ export default function StatsPage() {
                               </div>
                             </div>
                           </div>
+                          <div className="mt-1 flex items-center justify-between gap-2">
+                            <span className={formClasses}>
+                              <span className="opacity-70">Form:</span>
+                              <span>{formLabel}</span>
+                            </span>
+                          </div>
+                          {contextLine && (
+                            <div className="mt-1 text-[11px] text-gray-300">
+                              {contextLine}
+                            </div>
+                          )}
                           {expandedPlayerId === p.id && (
                             <div className="mt-2 pt-2 border-t border-white/10 text-[11px] text-gray-300 flex flex-wrap gap-x-4 gap-y-1">
                               <span>Highest: {p.stats.highest}</span>
@@ -571,12 +721,23 @@ export default function StatsPage() {
               </div>
 
               <div className="space-y-2">
-                {topWicketTakers.map((p, index) => {
+                {topWicketTakers.slice(0, leadersLimit).map((p, index) => {
                   const isLeader = index === 0;
                   const bowlingAverage =
                     p.stats.bowlingAverage !== undefined
                       ? p.stats.bowlingAverage.toFixed(1)
                       : '-';
+                  const team = teams.find((t) => t.id === p.teamId);
+                  const formLabel = getBowlingFormLabel(p);
+                  const contextLine = getBowlingContextLine(p);
+                  const formBaseClasses =
+                    'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border';
+                  const formClasses =
+                    formLabel === 'Hot'
+                      ? `${formBaseClasses} bg-emerald-500/20 text-emerald-200 border-emerald-400/70`
+                      : formLabel === 'Consistent'
+                      ? `${formBaseClasses} bg-sky-500/20 text-sky-200 border-sky-400/70`
+                      : `${formBaseClasses} bg-slate-500/20 text-slate-200 border-slate-400/50`;
 
                   return (
                     <div
@@ -610,7 +771,8 @@ export default function StatsPage() {
                               {p.name}
                             </div>
                             <div className="text-[11px] text-gray-400">
-                              {p.role} • {p.stats.matches} matches
+                              {p.role} • {team?.shortName || 'Unknown'} • {p.stats.matches}{' '}
+                              matches
                             </div>
                           </div>
                         </div>

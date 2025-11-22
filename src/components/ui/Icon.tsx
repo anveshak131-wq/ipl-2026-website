@@ -1,7 +1,7 @@
 import Image from 'next/image';
 
 interface IconProps {
-  name: 'cricket' | 'stats' | 'news' | 'team' | 'target' | 'trophy';
+  name: 'cricket' | 'stats' | 'news' | 'team' | 'target' | 'trophy' | 'bell' | 'user';
   className?: string;
   size?: number;
 }

@@ -786,6 +786,36 @@ export default function LiveScorePage() {
             </div>
           </div>
         </div>
+        <div className="mt-10">
+          <section className="bg-slate-800/40 rounded-2xl border border-white/10 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold text-ipl-gold uppercase tracking-wide">More live cricket</p>
+              <h2 className="text-lg font-bold text-white mt-1">See other live matches worldwide</h2>
+              <p className="text-xs text-gray-400 mt-1 max-w-md">
+                Browse scores from international and domestic games beyond IPL, powered by CricketData.
+              </p>
+            </div>
+            <a
+              href="/world-cricket"
+              className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-gradient-to-r from-ipl-blue-light to-ipl-purple text-sm font-semibold text-white shadow-lg shadow-ipl-purple/30 hover:shadow-ipl-purple/50 hover:opacity-95 transition-all"
+            >
+              Open global live scores
+              <svg
+                className="w-4 h-4 ml-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                />
+              </svg>
+            </a>
+          </section>
+        </div>
       </main>
 
       {/* Auth Modal */}
