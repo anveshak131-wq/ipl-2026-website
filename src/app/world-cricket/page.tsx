@@ -513,9 +513,8 @@ export default function WorldCricketPage() {
                 <p className="text-[11px] text-red-300">{scorecardError}</p>
               ) : scoreCards.length > 0 ? (
                 (() => {
+                  // Prefer the first innings object; this covers most one-innings views
                   const first = scoreCards[0] as any;
-                  const batTeam = first?.batTeamDetails || first?.batTeam || {};
-                  const bowlTeam = first?.bowlTeamDetails || first?.bowlTeam || {};
 
                   const toArray = (val: any): any[] => {
                     if (!val) return [];
@@ -524,16 +523,29 @@ export default function WorldCricketPage() {
                     return [];
                   };
 
+                  // Cricbuzz hscard usually exposes `batsman` and `bowler` arrays directly on the innings
                   const batsmen: any[] = toArray(
-                    batTeam.batsmenData || batTeam.batsmen || batTeam.players,
+                    first.batsman ||
+                      first.batsmen ||
+                      first.batTeamDetails?.batsmenData ||
+                      first.batTeamDetails?.batsmen,
                   );
 
                   const bowlers: any[] = toArray(
-                    bowlTeam.bowlersData || bowlTeam.bowlers || bowlTeam.players,
+                    first.bowler ||
+                      first.bowlers ||
+                      first.bowlTeamDetails?.bowlersData ||
+                      first.bowlTeamDetails?.bowlers,
                   );
 
-                  const batTeamName = batTeam.batTeamName || batTeam.teamName || '';
-                  const bowlTeamName = bowlTeam.bowlTeamName || bowlTeam.teamName || '';
+                  const batTeamName =
+                    first.batteamname ||
+                    first.batTeamName ||
+                    first.batteamsname ||
+                    first.batteamsname ||
+                    '';
+
+                  const bowlTeamName = '';
 
                   const hasBatting = batsmen.length > 0;
                   const hasBowling = bowlers.length > 0;
@@ -667,14 +679,6 @@ export default function WorldCricketPage() {
                   );
                 })()
               ) : null}
-            </div>
-
-            <div className="mt-3 rounded-2xl bg-slate-900/70 border border-white/10 px-4 py-3 text-[11px] text-gray-300">
-              <p className="font-semibold text-gray-100 mb-1">Match context</p>
-              <p>
-                This match comes from the external world‑cricket feed for the last and next few days. Use the tabs at
-                the top of the page to switch between live, upcoming, and recent games.
-              </p>
             </div>
           </div>
         </div>
