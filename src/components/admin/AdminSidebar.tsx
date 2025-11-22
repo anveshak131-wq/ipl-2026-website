@@ -164,6 +164,21 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         group: 'Content',
       },
       {
+        href: '/ipl-admin-2026/ml-lab',
+        label: 'ML Lab',
+        icon: (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M5 12a7 7 0 0114 0 7 7 0 01-14 0zm7-5v10m-4-5h8"
+            />
+          </svg>
+        ),
+        group: 'Content',
+      },
+      {
         href: '/ipl-admin-2026/content',
         label: 'Content Hub',
         icon: (
