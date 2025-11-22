@@ -210,164 +210,165 @@ export default function AdminDatasetsPage() {
       <AdminSidebar currentPage="/ipl-admin-2026/datasets" />
       <div className="flex-1">
         <div className="max-w-6xl mx-auto px-6 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold">Data Lab: CSV Upload</h1>
-            <p className="text-sm text-gray-400 mt-1">
-              Upload an IPL CSV file and preview it instantly in a table. Nothing is saved yet  this is a
-              safe, local preview.
-            </p>
-          </div>
-          {saveMessage && (
-            <div className="mb-3 bg-emerald-500/10 border border-emerald-500/40 rounded-lg p-2 text-[11px] text-emerald-200">
-              {saveMessage}
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-2xl font-bold">Data Lab: CSV Upload</h1>
+              <p className="text-sm text-gray-400 mt-1">
+                Upload an IPL CSV file and preview it instantly in a table. Nothing is saved yet — this is a
+                safe, local preview.
+              </p>
             </div>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div className="lg:col-span-2 bg-[#111827] border border-white/10 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold mb-3">Upload CSV</h2>
-            <p className="text-xs text-gray-400 mb-4">
-              Recommended: exported IPL fixtures or results CSV with a header row.
-            </p>
-
-            <label className="block w-full border border-dashed border-gray-500/60 rounded-xl p-6 text-center cursor-pointer hover:border-ipl-gold/80 hover:bg-white/5 transition-colors">
-              <input
-                type="file"
-                accept=".csv"
-                className="hidden"
-                onChange={handleFileChange}
-              />
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-ipl-gold/10 border border-ipl-gold/40 flex items-center justify-center text-ipl-gold">
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M16 12l-4-4m0 0l-4 4m4-4v12"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-sm font-semibold">Click to choose a .csv file</p>
-                  <p className="text-xs text-gray-400 mt-1">We parse it directly in your browser.</p>
-                </div>
-                {fileName && (
-                  <p className="text-xs text-gray-300 mt-2">
-                    Selected file: <span className="font-mono text-ipl-gold">{fileName}</span>
-                  </p>
-                )}
-              </div>
-            </label>
-
-            {error && (
-              <div className="mt-4 bg-red-500/10 border border-red-500/40 rounded-lg p-3 text-xs text-red-300">
-                {error}
+            {saveMessage && (
+              <div className="mb-3 bg-emerald-500/10 border border-emerald-500/40 rounded-lg p-2 text-[11px] text-emerald-200">
+                {saveMessage}
               </div>
             )}
+          </div>
 
-            {isParsing && (
-              <div className="mt-4 flex items-center gap-2 text-xs text-gray-300">
-                <span className="inline-flex h-3 w-3 animate-ping rounded-full bg-ipl-gold/70" />
-                Parsing CSV...
-              </div>
-            )}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div className="lg:col-span-2 bg-[#111827] border border-white/10 rounded-2xl p-6">
+              <h2 className="text-lg font-semibold mb-3">Upload CSV</h2>
+              <p className="text-xs text-gray-400 mb-4">
+                Recommended: exported IPL fixtures or results CSV with a header row.
+              </p>
 
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-[2fr,1fr] gap-3 items-end">
-              <div>
-                <label className="block text-xs font-semibold text-gray-300 mb-1" htmlFor="dataset-key">
-                  Dataset key in KV
-                </label>
+              <label className="block w-full border border-dashed border-gray-500/60 rounded-xl p-6 text-center cursor-pointer hover:border-ipl-gold/80 hover:bg-white/5 transition-colors">
                 <input
-                  id="dataset-key"
-                  type="text"
-                  value={datasetKey}
-                  onChange={(e) => setDatasetKey(e.target.value)}
-                  placeholder="e.g. ipl_2025_matches"
-                  className="w-full px-3 py-2 rounded-lg bg-black/30 border border-white/10 text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                  type="file"
+                  accept=".csv"
+                  className="hidden"
+                  onChange={handleFileChange}
                 />
-                <p className="mt-1 text-[10px] text-gray-500">
-                  Saved under <span className="font-mono text-ipl-gold">dataset:&#123;key&#125;</span> in SPORTS_KV.
-                </p>
-              </div>
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-ipl-gold/10 border border-ipl-gold/40 flex items-center justify-center text-ipl-gold">
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M16 12l-4-4m0 0l-4 4m4-4v12"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">Click to choose a .csv file</p>
+                    <p className="text-xs text-gray-400 mt-1">We parse it directly in your browser.</p>
+                  </div>
+                  {fileName && (
+                    <p className="text-xs text-gray-300 mt-2">
+                      Selected file: <span className="font-mono text-ipl-gold">{fileName}</span>
+                    </p>
+                  )}
+                </div>
+              </label>
 
-              <button
-                type="button"
-                onClick={handleSaveToKv}
-                disabled={isSaving || !parsed.headers.length || !parsed.rows.length}
-                className="w-full inline-flex items-center justify-center px-3 py-2 rounded-lg bg-ipl-gold text-black text-xs font-semibold hover:bg-ipl-gold/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {isSaving ? 'Saving…' : 'Save to Workers KV'}
-              </button>
+              {error && (
+                <div className="mt-4 bg-red-500/10 border border-red-500/40 rounded-lg p-3 text-xs text-red-300">
+                  {error}
+                </div>
+              )}
+
+              {isParsing && (
+                <div className="mt-4 flex items-center gap-2 text-xs text-gray-300">
+                  <span className="inline-flex h-3 w-3 animate-ping rounded-full bg-ipl-gold/70" />
+                  Parsing CSV...
+                </div>
+              )}
+
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-[2fr,1fr] gap-3 items-end">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-300 mb-1" htmlFor="dataset-key">
+                    Dataset key in KV
+                  </label>
+                  <input
+                    id="dataset-key"
+                    type="text"
+                    value={datasetKey}
+                    onChange={(e) => setDatasetKey(e.target.value)}
+                    placeholder="e.g. ipl_2025_matches"
+                    className="w-full px-3 py-2 rounded-lg bg-black/30 border border-white/10 text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                  />
+                  <p className="mt-1 text-[10px] text-gray-500">
+                    Saved under <span className="font-mono text-ipl-gold">dataset:&#123;key&#125;</span> in SPORTS_KV.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleSaveToKv}
+                  disabled={isSaving || !parsed.headers.length || !parsed.rows.length}
+                  className="w-full inline-flex items-center justify-center px-3 py-2 rounded-lg bg-ipl-gold text-black text-xs font-semibold hover:bg-ipl-gold/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isSaving ? 'Saving…' : 'Save to Workers KV'}
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-[#111827] border border-white/10 rounded-2xl p-6 text-xs text-gray-300 space-y-2">
+              <h2 className="text-sm font-semibold text-white mb-2">Tips</h2>
+              <ul className="list-disc list-inside space-y-1">
+                <li>First row should contain column names (e.g. match_id, date, venue, team1, team2, stage).</li>
+                <li>Keep cells simple — this viewer assumes values do not contain commas.</li>
+                <li>
+                  Use this page as a quick sanity check before wiring the data into your prediction models or
+                  dashboards.
+                </li>
+              </ul>
             </div>
           </div>
 
-          <div className="bg-[#111827] border border-white/10 rounded-2xl p-6 text-xs text-gray-300 space-y-2">
-            <h2 className="text-sm font-semibold text-white mb-2">Tips</h2>
-            <ul className="list-disc list-inside space-y-1">
-              <li>First row should contain column names (e.g. match_id, date, venue, team1, team2, stage).</li>
-              <li>Keep cells simple  this viewer assumes values do not contain commas.</li>
-              <li>
-                Use this page as a quick sanity check before wiring the data into your prediction models or
-                dashboards.
-              </li>
-            </ul>
-          </div>
-        </div>
+          <div className="bg-[#020617] border border-white/10 rounded-2xl p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-white">Preview</h2>
+              <p className="text-[11px] text-gray-400">
+                {parsed.rows.length > 0
+                  ? `Showing ${parsed.rows.length} rows — first ${Math.min(parsed.rows.length, 200)} displayed`
+                  : 'No data loaded yet'}
+              </p>
+            </div>
 
-        <div className="bg-[#020617] border border-white/10 rounded-2xl p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-white">Preview</h2>
-            <p className="text-[11px] text-gray-400">
-              {parsed.rows.length > 0
-                ? `Showing ${parsed.rows.length} rows  first ${Math.min(parsed.rows.length, 200)} displayed`
-                : 'No data loaded yet'}
-            </p>
-          </div>
-
-          <div className="overflow-auto max-h-[480px] border border-white/5 rounded-xl">
-            {parsed.headers.length > 0 ? (
-              <table className="min-w-full text-xs">
-                <thead className="bg-white/5 sticky top-0 z-10">
-                  <tr>
-                    {parsed.headers.map((header) => (
-                      <th
-                        key={header}
-                        className="px-3 py-2 text-left font-semibold text-gray-200 border-b border-white/10 whitespace-nowrap"
-                      >
-                        {header}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5">
-                  {parsed.rows.slice(0, 200).map((row, rowIndex) => (
-                    <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'bg-black/10' : ''}>
-                      {row.map((cell, cellIndex) => (
-                        <td
-                          key={cellIndex}
-                          className="px-3 py-1.5 text-gray-200 whitespace-nowrap max-w-xs truncate"
-                          title={cell}
+            <div className="overflow-auto max-h-[480px] border border-white/5 rounded-xl">
+              {parsed.headers.length > 0 ? (
+                <table className="min-w-full text-xs">
+                  <thead className="bg-white/5 sticky top-0 z-10">
+                    <tr>
+                      {parsed.headers.map((header) => (
+                        <th
+                          key={header}
+                          className="px-3 py-2 text-left font-semibold text-gray-200 border-b border-white/10 whitespace-nowrap"
                         >
-                          {cell}
-                        </td>
+                          {header}
+                        </th>
                       ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            ) : (
-              <div className="py-10 text-center text-sm text-gray-500">
-                Upload a CSV to see a table preview here.
-              </div>
-            )}
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {parsed.rows.slice(0, 200).map((row, rowIndex) => (
+                      <tr key={rowIndex} className={rowIndex % 2 === 0 ? 'bg-black/10' : ''}>
+                        {row.map((cell, cellIndex) => (
+                          <td
+                            key={cellIndex}
+                            className="px-3 py-1.5 text-gray-200 whitespace-nowrap max-w-xs truncate"
+                            title={cell}
+                          >
+                            {cell}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <div className="py-10 text-center text-sm text-gray-500">
+                  Upload a CSV to see a table preview here.
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
