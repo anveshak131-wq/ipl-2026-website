@@ -66,7 +66,7 @@ export default function AdminMlLabPage() {
   const [datasets, setDatasets] = useState<DatasetSummary[]>([]);
   const [isLoadingDatasets, setIsLoadingDatasets] = useState(false);
   const [datasetsError, setDatasetsError] = useState<string | null>(null);
-  const [selectedDatasetKey, setSelectedDatasetKey] = useState<string | null>(null);
+  const [selectedDatasetKeys, setSelectedDatasetKeys] = useState<string[]>([]);
   const [selectedAlgorithmId, setSelectedAlgorithmId] = useState<string | null>(null);
   const [datasetHeaders, setDatasetHeaders] = useState<string[]>([]);
   const [isLoadingSchema, setIsLoadingSchema] = useState(false);
@@ -128,9 +128,11 @@ export default function AdminMlLabPage() {
     loadDatasets();
   }, []);
 
+  const primaryDatasetKey = selectedDatasetKeys.length > 0 ? selectedDatasetKeys[0] : null;
+
   useEffect(() => {
     const loadSchema = async () => {
-      if (!selectedDatasetKey) {
+      if (!primaryDatasetKey) {
         setDatasetHeaders([]);
         setTargetColumn(null);
         setFeatureColumns([]);
@@ -155,7 +157,7 @@ export default function AdminMlLabPage() {
           return;
         }
 
-        const res = await fetch(`/api/admin/datasets?key=${encodeURIComponent(selectedDatasetKey)}`, {
+        const res = await fetch(`/api/admin/datasets?key=${encodeURIComponent(primaryDatasetKey)}`, {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${token}`,
@@ -198,18 +200,21 @@ export default function AdminMlLabPage() {
     };
 
     loadSchema();
-  }, [selectedDatasetKey, targetColumn]);
+  }, [primaryDatasetKey, targetColumn]);
 
   const selectedAlgorithm =
     selectedAlgorithmId != null
       ? ALGORITHMS.find((alg) => alg.id === selectedAlgorithmId) || null
       : null;
 
+  const hasSelectedDatasets = selectedDatasetKeys.length > 0;
+
   const canContinue =
-    !!selectedAlgorithm && !!selectedDatasetKey && !!targetColumn && featureColumns.length > 0;
+    !!selectedAlgorithm && hasSelectedDatasets && !!targetColumn && featureColumns.length > 0;
 
   const handleTrainModel = async () => {
-    if (!canContinue || !selectedAlgorithm || !selectedDatasetKey || !targetColumn) return;
+    if (!canContinue || !selectedAlgorithm || !targetColumn || selectedDatasetKeys.length === 0)
+      return;
 
     setIsTraining(true);
     setTrainingError(null);
@@ -234,7 +239,7 @@ export default function AdminMlLabPage() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          datasetKey: selectedDatasetKey,
+          datasetKeys: selectedDatasetKeys,
           targetColumn,
           featureColumns,
           algorithmId: selectedAlgorithm.id,
@@ -271,8 +276,9 @@ export default function AdminMlLabPage() {
             <div>
               <h1 className="text-2xl font-bold">ML Lab: Models</h1>
               <p className="text-sm text-gray-400 mt-1">
-                Choose a dataset from Data Lab and an algorithm you want to prototype. We&apos;ll wire up
-                training flows next.
+                Choose one or more datasets from Data Lab and an algorithm you want to train. Then
+                configure target &amp; features and run lightweight experiments directly from this admin
+                page.
               </p>
             </div>
           </div>
@@ -305,12 +311,18 @@ export default function AdminMlLabPage() {
 
               <div className="space-y-1 max-h-[360px] overflow-auto mt-2">
                 {datasets.map((d) => {
-                  const isActive = selectedDatasetKey === d.key;
+                  const isActive = selectedDatasetKeys.includes(d.key);
                   return (
                     <button
                       key={d.key}
                       type="button"
-                      onClick={() => setSelectedDatasetKey(d.key)}
+                      onClick={() =>
+                        setSelectedDatasetKeys((prev) =>
+                          prev.includes(d.key)
+                            ? prev.filter((key) => key !== d.key)
+                            : [...prev, d.key],
+                        )
+                      }
                       className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-left text-[11px] transition-colors border ${
                         isActive
                           ? 'bg-ipl-gold/10 border-ipl-gold/60 text-ipl-gold'
@@ -392,7 +404,11 @@ export default function AdminMlLabPage() {
                   <div>
                     <div className="text-[10px] text-gray-400">Dataset</div>
                     <div className="text-[11px] text-gray-100 truncate">
-                      {selectedDatasetKey || 'None selected'}
+                      {selectedDatasetKeys.length === 0
+                        ? 'None selected'
+                        : selectedDatasetKeys.length === 1
+                        ? selectedDatasetKeys[0]
+                        : `${selectedDatasetKeys[0]} + ${selectedDatasetKeys.length - 1} more`}
                     </div>
                   </div>
                   <div>
@@ -478,33 +494,33 @@ export default function AdminMlLabPage() {
                   </div>
                 </div>
 
-                {!selectedDatasetKey && (
+                {!primaryDatasetKey && (
                   <div className="text-[11px] text-gray-400">
                     Pick a dataset in step 1 to see its columns here.
                   </div>
                 )}
 
-                {selectedDatasetKey && isLoadingSchema && (
+                {primaryDatasetKey && isLoadingSchema && (
                   <div className="flex items-center gap-2 text-[11px] text-gray-300">
                     <span className="inline-flex h-3 w-3 animate-ping rounded-full bg-ipl-gold/70" />
-                    Loading columns for <span className="font-mono text-ipl-gold">{selectedDatasetKey}</span>
+                    Loading columns for <span className="font-mono text-ipl-gold">{primaryDatasetKey}</span>
                     ...
                   </div>
                 )}
 
-                {selectedDatasetKey && schemaError && !isLoadingSchema && (
+                {primaryDatasetKey && schemaError && !isLoadingSchema && (
                   <div className="mt-2 bg-red-500/10 border border-red-500/40 rounded-md px-3 py-2 text-[11px] text-red-300">
                     {schemaError}
                   </div>
                 )}
 
-                {selectedDatasetKey && !isLoadingSchema && !schemaError && datasetHeaders.length === 0 && (
+                {primaryDatasetKey && !isLoadingSchema && !schemaError && datasetHeaders.length === 0 && (
                   <div className="text-[11px] text-gray-400">
                     No headers found for this dataset. Make sure it was uploaded with a header row.
                   </div>
                 )}
 
-                {selectedDatasetKey && !isLoadingSchema && !schemaError && datasetHeaders.length > 0 && (
+                {primaryDatasetKey && !isLoadingSchema && !schemaError && datasetHeaders.length > 0 && (
                   <div className="mt-2 max-h-64 overflow-auto border border-white/5 rounded-lg divide-y divide-white/5">
                     {datasetHeaders.map((header) => {
                       const isTarget = targetColumn === header;

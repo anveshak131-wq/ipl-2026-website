@@ -89,15 +89,26 @@ export const onRequest = async (context) => {
 
     const {
       datasetKey,
+      datasetKeys,
       targetColumn,
       featureColumns,
       algorithmId,
       hyperparams,
     } = body;
 
-    if (!datasetKey || typeof datasetKey !== 'string') {
+    let datasetKeysList = [];
+
+    if (Array.isArray(datasetKeys) && datasetKeys.length > 0) {
+      datasetKeysList = datasetKeys
+        .map((k) => (typeof k === 'string' ? k.trim() : ''))
+        .filter((k) => k);
+    } else if (typeof datasetKey === 'string' && datasetKey.trim()) {
+      datasetKeysList = [datasetKey.trim()];
+    }
+
+    if (datasetKeysList.length === 0) {
       return new Response(
-        JSON.stringify({ error: 'datasetKey is required' }),
+        JSON.stringify({ error: 'datasetKey or datasetKeys is required' }),
         { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
       );
     }
@@ -116,31 +127,68 @@ export const onRequest = async (context) => {
       );
     }
 
-    const safeKey = datasetKey.trim();
-    const value = await env.SPORTS_KV.get(`dataset:${safeKey}`);
-    if (!value) {
-      return new Response(
-        JSON.stringify({ error: 'Dataset not found' }),
-        { status: 404, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
-      );
+    // Load and combine all selected datasets, enforcing identical headers
+    let headers = null;
+    const combinedRows = [];
+
+    for (const key of datasetKeysList) {
+      const value = await env.SPORTS_KV.get(`dataset:${key}`);
+      if (!value) {
+        return new Response(
+          JSON.stringify({ error: `Dataset '${key}' not found` }),
+          { status: 404, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
+        );
+      }
+
+      let dataset;
+      try {
+        dataset = JSON.parse(value);
+      } catch {
+        return new Response(
+          JSON.stringify({ error: `Malformed dataset in KV for key '${key}'` }),
+          { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
+        );
+      }
+
+      const currentHeaders = Array.isArray(dataset.headers) ? dataset.headers : null;
+      const rows = Array.isArray(dataset.rows) ? dataset.rows : null;
+
+      if (!currentHeaders || !rows) {
+        return new Response(
+          JSON.stringify({ error: `Dataset '${key}' is missing headers or rows` }),
+          { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
+        );
+      }
+
+      if (!headers) {
+        headers = currentHeaders;
+      } else {
+        const sameLength = headers.length === currentHeaders.length;
+        const sameValues =
+          sameLength && headers.every((h, index) => h === currentHeaders[index]);
+        if (!sameValues) {
+          return new Response(
+            JSON.stringify({
+              error:
+                'All selected datasets must have identical headers (same columns in the same order) to train a single model.',
+            }),
+            { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
+          );
+        }
+      }
+
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        if (Array.isArray(row)) {
+          combinedRows.push(row);
+        }
+      }
     }
 
-    let dataset;
-    try {
-      dataset = JSON.parse(value);
-    } catch {
+    if (!headers || combinedRows.length === 0) {
       return new Response(
-        JSON.stringify({ error: 'Malformed dataset in KV' }),
-        { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
-      );
-    }
-
-    const headers = Array.isArray(dataset.headers) ? dataset.headers : null;
-    const rows = Array.isArray(dataset.rows) ? dataset.rows : null;
-    if (!headers || !rows) {
-      return new Response(
-        JSON.stringify({ error: 'Dataset format is invalid (missing headers/rows)' }),
-        { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
+        JSON.stringify({ error: 'No rows available after combining selected datasets' }),
+        { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } },
       );
     }
 
@@ -167,14 +215,14 @@ export const onRequest = async (context) => {
     const learningRate = (hyperparams && Number(hyperparams.learningRate)) || 0.05;
     const epochs = Math.min((hyperparams && Number(hyperparams.epochs)) || 20, 50);
 
-    // Build feature matrix X and label vector y
+    // Build feature matrix X and label vector y from combined rows
     const X = [];
     const y = [];
     const labelToIndex = new Map();
     const indexToLabel = [];
 
-    for (let i = 0; i < rows.length && X.length < maxRows; i++) {
-      const row = rows[i];
+    for (let i = 0; i < combinedRows.length && X.length < maxRows; i++) {
+      const row = combinedRows[i];
       if (!Array.isArray(row)) continue;
 
       const labelRaw = row[targetIndex];
@@ -306,7 +354,7 @@ export const onRequest = async (context) => {
     return new Response(
       JSON.stringify({
         success: true,
-        datasetKey: safeKey,
+        datasetKeys: datasetKeysList,
         targetColumn,
         featureColumns,
         algorithmId: algorithmId || 'simple_neural_net',
