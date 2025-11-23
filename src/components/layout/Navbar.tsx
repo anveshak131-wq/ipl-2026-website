@@ -129,7 +129,7 @@ export default function Navbar() {
             </div>
 
             {/* Secondary Nav Icons */}
-            <div className="flex items-center gap-3 pl-4 border-l border-white/10">
+            <div className="flex items-center gap-3 pl-4 border-l border-white/10 pointer-events-auto">
               {secondaryNavItems.map((item) => {
                 const isActive = isLinkActive(item.href);
                 return (
@@ -138,15 +138,15 @@ export default function Navbar() {
                     href={item.href}
                     aria-label={item.label}
                     className={`
-                      relative flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-300
+                      relative flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-300 cursor-pointer pointer-events-auto
                       ${isActive
                         ? 'text-white bg-blue-500/30 border border-blue-400/60 shadow-lg shadow-blue-500/20'
                         : 'text-gray-200 border border-white/10 hover:text-white hover:border-blue-500/50 hover:bg-white/5'}
                     `}
                   >
-                    {item.icon && <Icon name={item.icon} size={18} />}
+                    {item.icon && <Icon name={item.icon} size={18} className="pointer-events-none" />}
                     {item.href === '/notifications' && (
-                      <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-lg shadow-red-500/50" />
+                      <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-lg shadow-red-500/50 pointer-events-none" />
                     )}
                   </Link>
                 );
