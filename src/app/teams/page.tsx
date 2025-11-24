@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -16,7 +16,7 @@ import TeamCardSkeleton from '@/components/teams/TeamCardSkeleton';
 type SortOption = 'name' | 'titles' | 'players';
 type TitleFilter = 'all' | '0' | '1' | '2+';
 
-export default function TeamsPage() {
+function TeamsPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -416,5 +416,21 @@ export default function TeamsPage() {
                 teamData={selectedPlayer ? teams.find(t => t.id === selectedPlayer.teamId) : undefined}
             />
         </div>
+    );
+}
+
+export default function TeamsPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen">
+                <Navbar />
+                <div className="flex items-center justify-center h-96">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ipl-gold"></div>
+                </div>
+                <Footer />
+            </div>
+        }>
+            <TeamsPageContent />
+        </Suspense>
     );
 }
