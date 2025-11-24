@@ -245,8 +245,8 @@ export default function TeamsPage() {
                                             key={filter}
                                             onClick={() => setTitleFilter(filter)}
                                             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${titleFilter === filter
-                                                    ? 'bg-ipl-gold text-slate-900 shadow-lg shadow-ipl-gold/40'
-                                                    : 'bg-slate-800/60 text-gray-300 border border-white/10 hover:border-ipl-gold/50'
+                                                ? 'bg-ipl-gold text-slate-900 shadow-lg shadow-ipl-gold/40'
+                                                : 'bg-slate-800/60 text-gray-300 border border-white/10 hover:border-ipl-gold/50'
                                                 }`}
                                         >
                                             {filter === 'all' ? 'All' : filter === '2+' ? '2+ 🏆' : filter === '0' ? 'No titles' : '1 🏆'}
@@ -277,8 +277,8 @@ export default function TeamsPage() {
                                     <button
                                         onClick={() => setShowFavoritesFirst(!showFavoritesFirst)}
                                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${showFavoritesFirst
-                                                ? 'bg-rose-500/20 text-rose-300 border border-rose-500/50'
-                                                : 'bg-slate-800/60 text-gray-300 border border-white/10 hover:border-rose-500/50'
+                                            ? 'bg-rose-500/20 text-rose-300 border border-rose-500/50'
+                                            : 'bg-slate-800/60 text-gray-300 border border-white/10 hover:border-rose-500/50'
                                             }`}
                                     >
                                         ⭐ Favorites first
