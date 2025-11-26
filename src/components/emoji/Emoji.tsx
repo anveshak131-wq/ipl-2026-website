@@ -2,8 +2,29 @@
 
 import CustomEmoji, { EmojiType } from './CustomEmoji';
 
+// Export type for legacy compatibility
+export type EmojiName = 
+  | 'trophy' 
+  | 'cricket' 
+  | 'fire' 
+  | 'star' 
+  | 'star-outline'
+  | 'people' 
+  | 'globe' 
+  | 'lightning' 
+  | 'calendar' 
+  | 'chart' 
+  | 'target'
+  | 'sparkles'
+  | 'party'
+  | 'clap'
+  | 'rocket'
+  | 'heart'
+  | 'wow'
+  | 'thumbs_up';
+
 interface EmojiProps {
-  name: string;
+  name: EmojiName | string;
   size?: number | string;
   className?: string;
   animate?: boolean;
@@ -25,7 +46,12 @@ const EMOJI_CHAR: Record<string, string> = {
   chart: "📊",
   target: "🎯",
   sparkles: "✨",
-  party: "🎉"
+  party: "🎉",
+  clap: "👏",
+  rocket: "🚀",
+  heart: "❤️",
+  wow: "😮",
+  thumbs_up: "👍"
 };
 
 // Mapping string names to CustomEmoji types
@@ -42,7 +68,13 @@ const EMOJI_TYPE_MAP: Record<string, EmojiType> = {
   chart: 'chart',
   target: 'target',
   sparkles: 'sparkles',
-  party: 'party'
+  party: 'party',
+  // Legacy names that map to our custom emojis
+  clap: 'sparkles',  // Map to sparkles
+  rocket: 'fire',     // Map to fire
+  heart: 'star',      // Map to star
+  wow: 'sparkles',    // Map to sparkles
+  thumbs_up: 'star'   // Map to star
 };
 
 export default function Emoji({ 
