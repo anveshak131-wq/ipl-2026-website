@@ -12,6 +12,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Icon from '@/components/ui/Icon';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import TeamCardSkeleton from '@/components/teams/TeamCardSkeleton';
+import { CustomEmoji } from '@/components/emoji/Emoji';
 
 type SortOption = 'name' | 'titles' | 'players';
 type TitleFilter = 'all' | '0' | '1' | '2+';
@@ -248,11 +249,19 @@ function TeamsPageContent() {
                                                 ? 'bg-ipl-gold text-slate-900 shadow-lg shadow-ipl-gold/40'
                                                 : 'bg-slate-800/60 text-gray-300 border border-white/10 hover:border-ipl-gold/50'
                                                 }`}
-                                        >
-                                            {filter === 'all' ? 'All' : filter === '2+' ? '2+ 🏆' : filter === '0' ? 'No titles' : '1 🏆'}
-                                        </button>
-                                    ))}
-                                </div>
+                                                >
+                                                {filter === 'all' ? 'All' : filter === '2+' ? (
+                                                    <span className="flex items-center gap-1">
+                                                        2+ <CustomEmoji type="trophy" size={14} />
+                                                    </span>
+                                                ) : filter === '0' ? 'No titles' : (
+                                                    <span className="flex items-center gap-1">
+                                                        1 <CustomEmoji type="trophy" size={14} />
+                                                    </span>
+                                                )}
+                                                </button>
+                                                ))}
+                                                </div>
 
                                 <div className="h-6 w-px bg-white/10" />
 
@@ -277,13 +286,13 @@ function TeamsPageContent() {
                                     <button
                                         onClick={() => setShowFavoritesFirst(!showFavoritesFirst)}
                                         className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${showFavoritesFirst
-                                            ? 'bg-rose-500/20 text-rose-300 border border-rose-500/50'
-                                            : 'bg-slate-800/60 text-gray-300 border border-white/10 hover:border-rose-500/50'
+                                                ? 'bg-rose-500/20 text-rose-300 border border-rose-500/50'
+                                                : 'bg-slate-800/60 text-gray-300 border border-white/10 hover:border-rose-500/50'
                                             }`}
-                                    >
-                                        ⭐ Favorites first
-                                    </button>
-                                )}
+                                        >
+                                            <CustomEmoji type="star" size={14} /> Favorites first
+                                        </button>
+                                        )}
 
                                 {/* Clear Filters */}
                                 {hasActiveFilters && (
@@ -377,15 +386,15 @@ function TeamsPageContent() {
                                                 .map((team) => (
                                                     <div key={team.id} className="text-center">
                                                         <div className="text-sm font-bold text-gray-400 mb-2">{team.shortName}</div>
-                                                        <div className="flex items-center justify-center gap-1 text-2xl">
+                                                        <div className="flex items-center justify-center gap-1">
                                                             {[...Array(team.trophies?.length || 0)].map((_, i) => (
-                                                                <span key={i}>🏆</span>
+                                                                <CustomEmoji key={i} type="trophy" size={24} />
                                                             ))}
                                                         </div>
                                                         <div className="text-xs text-gray-500 mt-1">{team.trophies?.length} titles</div>
                                                     </div>
                                                 ))}
-                                        </div>
+                                                </div>
                                     </div>
 
                                     <button

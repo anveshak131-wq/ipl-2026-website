@@ -1,38 +1,78 @@
-"use client";
+'use client';
 
-import React from "react";
-
-export type EmojiName = "fire" | "clap" | "rocket" | "heart" | "wow" | "thumbs_up";
+import CustomEmoji, { EmojiType } from './CustomEmoji';
 
 interface EmojiProps {
-  name: EmojiName;
-  size?: number;
+  name: string;
+  size?: number | string;
   className?: string;
-  animated?: boolean;
+  animate?: boolean;
+  color?: string;
+  gradient?: boolean;
 }
 
-const EMOJI_CHAR: Record<EmojiName, string> = {
+// Legacy emoji character mapping (for fallback)
+const EMOJI_CHAR: Record<string, string> = {
+  trophy: "🏆",
+  cricket: "🏏",
   fire: "🔥",
-  clap: "👏",
-  rocket: "🚀",
-  heart: "💜",
-  wow: "😲",
-  thumbs_up: "👍",
+  star: "⭐",
+  "star-outline": "☆",
+  people: "👥",
+  globe: "🌍",
+  lightning: "⚡",
+  calendar: "📅",
+  chart: "📊",
+  target: "🎯",
+  sparkles: "✨",
+  party: "🎉"
 };
 
-export default function Emoji({ name, size = 20, className = "", animated = true }: EmojiProps) {
-  const char = EMOJI_CHAR[name] ?? "✨";
+// Mapping string names to CustomEmoji types
+const EMOJI_TYPE_MAP: Record<string, EmojiType> = {
+  trophy: 'trophy',
+  cricket: 'cricket',
+  fire: 'fire',
+  star: 'star',
+  'star-outline': 'star-outline',
+  people: 'people',
+  globe: 'globe',
+  lightning: 'lightning',
+  calendar: 'calendar',
+  chart: 'chart',
+  target: 'target',
+  sparkles: 'sparkles',
+  party: 'party'
+};
 
-  return (
-    <span
-      role="img"
-      aria-label={name.replace("_", " ")}
-      className={`inline-flex items-center justify-center rounded-full bg-white/5 px-1 ${
-        animated ? "transition-transform duration-150 hover:scale-125" : ""
-      } ${className}`}
-      style={{ fontSize: size }}
-    >
-      <span className="drop-shadow-[0_0_6px_rgba(255,255,255,0.45)]">{char}</span>
-    </span>
-  );
+export default function Emoji({ 
+  name, 
+  size = 20, 
+  className = '', 
+  animate = true,
+  color,
+  gradient = true
+}: EmojiProps) {
+  const emojiType = EMOJI_TYPE_MAP[name];
+  
+  if (emojiType) {
+    return (
+      <CustomEmoji
+        type={emojiType}
+        size={size}
+        className={className}
+        animate={animate}
+        color={color}
+        gradient={gradient}
+      />
+    );
+  }
+  
+  // Fallback to character emoji
+  const char = EMOJI_CHAR[name] ?? "✨";
+  return <span className={className} style={{ fontSize: typeof size === 'number' ? `${size}px` : size }}>{char}</span>;
 }
+
+// Convenient exports for direct usage
+export { CustomEmoji };
+export type { EmojiType };

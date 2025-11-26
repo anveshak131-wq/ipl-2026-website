@@ -7,6 +7,7 @@ import RCBLottie from '@/components/ui/RCBLottie';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { getOptimalTextColorForGradient } from '@/lib/colorUtils';
 import { motion } from 'framer-motion';
+import { CustomEmoji } from '@/components/emoji/Emoji';
 import { useState } from 'react';
 
 interface EnhancedTeamCardProps {
@@ -148,27 +149,27 @@ export default function EnhancedTeamCard({ team, onPlayerClick, isFavorite = fal
 
         {/* Quick Stats Row */}
         <div className="flex items-center gap-3 flex-wrap">
-          {/* Players */}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900/40 border border-white/10 backdrop-blur-sm">
-            <span className="text-base">👥</span>
-            <span className="text-xs font-bold text-white">{playerCount}</span>
-          </div>
-
-          {/* Overseas */}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900/40 border border-white/10 backdrop-blur-sm">
-            <span className="text-base">🌍</span>
-            <span className="text-xs font-bold text-white">{overseasCount}</span>
-          </div>
-
-          {/* Captain */}
-          {captain && (
+            {/* Players */}
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900/40 border border-white/10 backdrop-blur-sm">
-              <span className="text-base">⚡</span>
-              <span className="text-xs font-bold text-white truncate max-w-[100px]">
-                {captain.name.split(' ').pop()}
-              </span>
+                <CustomEmoji type="people" size={16} />
+                <span className="text-xs font-bold text-white">{playerCount}</span>
             </div>
-          )}
+
+            {/* Overseas */}
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900/40 border border-white/10 backdrop-blur-sm">
+                <CustomEmoji type="globe" size={16} />
+                <span className="text-xs font-bold text-white">{overseasCount}</span>
+            </div>
+
+            {/* Captain */}
+            {captain && (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900/40 border border-white/10 backdrop-blur-sm">
+                    <CustomEmoji type="lightning" size={16} />
+                    <span className="text-xs font-bold text-white truncate max-w-[100px]">
+                        {captain.name.split(' ').pop()}
+                    </span>
+                </div>
+            )}
         </div>
 
         {/* Team Colors */}
