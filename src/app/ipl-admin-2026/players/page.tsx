@@ -7,6 +7,7 @@ import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
 import { parseDateDDMMYYYY, formatDateDDMMYYYY, calculateAge, isValidDate } from '@/lib/dateUtils';
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
+import { CustomEmoji } from '@/components/emoji/Emoji';
 
 // Sort icons
 const ChevronUpIcon = ({ className }: { className?: string }) => (
@@ -647,10 +648,10 @@ export default function AdminPlayers() {
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                   </svg>
-                  <span className="flex-1 text-left truncate">
+                  <span className="flex-1 text-left truncate flex items-center gap-2">
                     {selectedTeam === 'all' 
-                      ? '🏆 All Teams' 
-                      : `🏏 ${teams.find(t => t.id === selectedTeam)?.shortName || 'Select'}`
+                      ? <><CustomEmoji type="trophy" size={14} /> All Teams</>
+                      : <><CustomEmoji type="cricket" size={14} /> {teams.find(t => t.id === selectedTeam)?.shortName || 'Select'}</>
                     }
                   </span>
                   <svg 
@@ -688,7 +689,7 @@ export default function AdminPlayers() {
                         </svg>
                       </div>
                       <div className="flex-1">
-                        <div className="font-semibold">🏆 All Teams</div>
+                        <div className="font-semibold flex items-center gap-2"><CustomEmoji type="trophy" size={16} /> All Teams</div>
                         <div className="text-xs text-gray-400">{players.length} total players</div>
                       </div>
                       {selectedTeam === 'all' && (
@@ -880,8 +881,8 @@ export default function AdminPlayers() {
                               <div className="text-xs text-gray-500">{player.nationality}</div>
                             </div>
                             {player.isCaptain && (
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30" title="Captain">
-                                ⭐ C
+                              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30" title="Captain">
+                                <CustomEmoji type="star" size={14} /> C
                               </span>
                             )}
                           </div>

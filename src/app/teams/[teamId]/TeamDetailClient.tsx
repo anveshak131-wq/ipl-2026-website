@@ -26,6 +26,7 @@ import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import RCBLottie from '@/components/ui/RCBLottie';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { getOptimalTextColor } from '@/lib/colorUtils';
+import { CustomEmoji } from '@/components/emoji/Emoji';
 
 interface TeamDetailClientProps {
   teamId: string;
@@ -1356,8 +1357,8 @@ function AboutTab({ teamData, primaryColor, secondaryColor, coachingStaff }: any
                boxShadow: `0 10px 30px ${primaryColor.glow}15`
              }}>
           <div className="flex items-center gap-3 mb-6">
-            <span className="text-3xl">🎯</span>
-            <h4 className="text-2xl font-black" style={{ color: primaryColor.textOnLight }}>Coaching Staff</h4>
+           <CustomEmoji type="target" size={32} />
+           <h4 className="text-2xl font-black" style={{ color: primaryColor.textOnLight }}>Coaching Staff</h4>
           </div>
           <dl className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm" style={{ color: primaryColor.textOnLight }}>
             {coachingStaff.headCoach && (
@@ -1415,8 +1416,8 @@ function AboutTab({ teamData, primaryColor, secondaryColor, coachingStaff }: any
                boxShadow: `0 10px 30px ${primaryColor.glow}15`
              }}>
           <div className="flex items-center gap-3 mb-8">
-            <span className="text-4xl">🏆</span>
-            <h4 className="text-2xl font-black" style={{ color: primaryColor.textOnLight }}>Trophy Cabinet</h4>
+           <CustomEmoji type="trophy" size={40} />
+           <h4 className="text-2xl font-black" style={{ color: primaryColor.textOnLight }}>Trophy Cabinet</h4>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {teamData.trophies.map((trophy: any, idx: number) => (

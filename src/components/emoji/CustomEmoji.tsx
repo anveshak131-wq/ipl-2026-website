@@ -16,7 +16,12 @@ export type EmojiType =
   | 'chart' 
   | 'target'
   | 'sparkles'
-  | 'party';
+  | 'party'
+  | 'clock'
+  | 'crown'
+  | 'flag-india'
+  | 'stadium'
+  | 'glove';
 
 interface CustomEmojiProps {
   type: EmojiType;
@@ -499,6 +504,151 @@ export default function CustomEmoji({
                 }}
               />
             ))}
+          </svg>
+        );
+
+      case 'clock':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" style={svgProps} className={className}>
+            <defs>
+              <linearGradient id="clock-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: color || '#60A5FA', stopOpacity: 1 }} />
+                <stop offset="100%" style={{ stopColor: color || '#3B82F6', stopOpacity: 1 }} />
+              </linearGradient>
+            </defs>
+            <motion.circle
+              cx="12"
+              cy="12"
+              r="9"
+              stroke={gradient ? "url(#clock-gradient)" : (color || "#60A5FA")}
+              strokeWidth="2"
+              fill="none"
+            />
+            <motion.path
+              d="M12 6V12L16 14"
+              stroke={gradient ? "url(#clock-gradient)" : (color || "#60A5FA")}
+              strokeWidth="2"
+              strokeLinecap="round"
+              animate={animate ? { rotate: 360 } : {}}
+              transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+              style={{ transformOrigin: '12px 12px' }}
+            />
+          </svg>
+        );
+
+      case 'crown':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" style={svgProps} className={className}>
+            <defs>
+              <linearGradient id="crown-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: color || '#FFD700', stopOpacity: 1 }} />
+                <stop offset="100%" style={{ stopColor: color || '#FFA500', stopOpacity: 1 }} />
+              </linearGradient>
+            </defs>
+            <motion.path
+              d="M2 18L5 9L9 13L12 6L15 13L19 9L22 18H2Z"
+              fill={gradient ? "url(#crown-gradient)" : (color || "#FFD700")}
+              animate={animate ? { 
+                y: [0, -3, 0],
+                filter: [
+                  "drop-shadow(0 0 4px #FFD700)",
+                  "drop-shadow(0 0 12px #FFD700)",
+                  "drop-shadow(0 0 4px #FFD700)"
+                ]
+              } : {}}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            <motion.circle cx="5" cy="9" r="1.5" fill="#FFF" />
+            <motion.circle cx="12" cy="6" r="1.5" fill="#FFF" />
+            <motion.circle cx="19" cy="9" r="1.5" fill="#FFF" />
+          </svg>
+        );
+
+      case 'flag-india':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" style={svgProps} className={className}>
+            <motion.rect x="6" y="4" width="14" height="4" fill="#FF9933" />
+            <motion.rect x="6" y="8" width="14" height="4" fill="#FFFFFF" />
+            <motion.rect x="6" y="12" width="14" height="4" fill="#138808" />
+            <motion.circle cx="13" cy="10" r="2" stroke="#000080" strokeWidth="0.5" fill="none" />
+            <motion.line x1="5" y1="4" x2="5" y2="20" stroke="#8B4513" strokeWidth="1" />
+            {animate && (
+              <motion.path
+                d="M6 4L20 4L20 16L6 16"
+                stroke="rgba(255,255,255,0.3)"
+                strokeWidth="0.5"
+                fill="none"
+                animate={{ pathLength: [0, 1, 0] }}
+                transition={{ duration: 3, repeat: Infinity }}
+              />
+            )}
+          </svg>
+        );
+
+      case 'stadium':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" style={svgProps} className={className}>
+            <defs>
+              <linearGradient id="stadium-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: color || '#A855F7', stopOpacity: 1 }} />
+                <stop offset="100%" style={{ stopColor: color || '#7C3AED', stopOpacity: 1 }} />
+              </linearGradient>
+            </defs>
+            <motion.ellipse
+              cx="12"
+              cy="16"
+              rx="9"
+              ry="3"
+              fill={gradient ? "url(#stadium-gradient)" : (color || "#A855F7")}
+              opacity="0.3"
+            />
+            <motion.path
+              d="M5 10C5 7 8 4 12 4C16 4 19 7 19 10V16H5V10Z"
+              stroke={gradient ? "url(#stadium-gradient)" : (color || "#A855F7")}
+              strokeWidth="2"
+              fill="none"
+              animate={animate ? { scale: [1, 1.05, 1] } : {}}
+              transition={{ duration: 3, repeat: Infinity }}
+            />
+            <motion.path
+              d="M8 10V16 M12 7V16 M16 10V16"
+              stroke={gradient ? "url(#stadium-gradient)" : (color || "#A855F7")}
+              strokeWidth="1.5"
+              opacity="0.5"
+            />
+          </svg>
+        );
+
+      case 'glove':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" style={svgProps} className={className}>
+            <defs>
+              <linearGradient id="glove-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: color || '#F59E0B', stopOpacity: 1 }} />
+                <stop offset="100%" style={{ stopColor: color || '#D97706', stopOpacity: 1 }} />
+              </linearGradient>
+            </defs>
+            <motion.path
+              d="M8 4C6 4 4 6 4 8V14C4 16 6 18 8 18H10V14C10 12 12 10 14 10V6C14 4 12 4 10 4H8Z"
+              fill={gradient ? "url(#glove-gradient)" : (color || "#F59E0B")}
+              animate={animate ? { 
+                scale: [1, 1.1, 1],
+                rotate: [0, -5, 0]
+              } : {}}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            <motion.path
+              d="M14 6V10H16V8C16 6 15 6 14 6Z"
+              fill={gradient ? "url(#glove-gradient)" : (color || "#D97706")}
+            />
+            <motion.circle
+              cx="8"
+              cy="10"
+              r="1.5"
+              fill="#8B4513"
+              animate={animate ? { scale: [1, 1.2, 1] } : {}}
+              transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+            />
           </svg>
         );
 

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { CustomEmoji } from '@/components/emoji/Emoji';
 
 export default function AdminSetup() {
   const [email, setEmail] = useState('');
@@ -95,8 +96,8 @@ export default function AdminSetup() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">
-            🏏 IPL 2026 Admin Setup
+          <h1 className="text-3xl font-bold text-white mb-2 flex items-center justify-center gap-2">
+            <CustomEmoji type="cricket" size={24} /> IPL 2026 Admin Setup
           </h1>
           <p className="text-slate-400">Create your initial admin account</p>
         </div>

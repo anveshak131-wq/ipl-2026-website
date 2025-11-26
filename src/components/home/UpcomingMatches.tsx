@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Match } from '@/types';
 import { api } from '@/lib/data';
 import LoadingSpinner from '../ui/LoadingSpinner';
+import { CustomEmoji } from '@/components/emoji/Emoji';
 
 export default function UpcomingMatches() {
   const [matches, setMatches] = useState<Match[]>([]);
@@ -88,7 +89,7 @@ export default function UpcomingMatches() {
                       ? 'bg-red-500/20 text-red-400 border-red-500/30 animate-pulse'
                       : 'bg-green-500/20 text-green-400 border-green-500/30'
                   }`}>
-                    {match.status === 'upcoming' && '🎯 Upcoming'}
+                    {match.status === 'upcoming' && <><CustomEmoji type="target" size={16} /> Upcoming</>}
                     {match.status === 'live' && '🔴 Live Now'}
                     {match.status === 'completed' && '✅ Finished'}
                   </span>
@@ -105,7 +106,7 @@ export default function UpcomingMatches() {
                 {/* Time */}
                 <div className="space-y-1">
                   <p className="text-sm font-semibold text-gray-300">
-                    📅 {formatDate(match.date)}
+                    <CustomEmoji type="calendar" size={14} /> {formatDate(match.date)}
                   </p>
                   <p className="text-lg font-bold text-white">
                     🕐 {match.time} IST

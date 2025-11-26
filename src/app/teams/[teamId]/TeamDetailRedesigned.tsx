@@ -12,6 +12,7 @@ import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import RCBLottie from '@/components/ui/RCBLottie';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { getAnimatedLogoPath } from '@/lib/logoUtils';
+import { CustomEmoji } from '@/components/emoji/Emoji';
 
 interface TeamDetailRedesignedProps {
   teamId: string;
@@ -115,7 +116,7 @@ function StatsCard({ icon, value, label, delay }: any) {
       <div className="absolute inset-0 bg-gradient-to-br from-red-500/0 via-red-500/5 to-gold-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       
       {/* Icon */}
-      <div className="relative mb-4 text-6xl transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">
+      <div className="relative mb-4 transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">
         {icon}
       </div>
       
@@ -226,7 +227,7 @@ function PlayerCard3D({ player, onClick, index }: any) {
             )}
             {player.nationality !== 'India' && (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                🌍 Foreign
+                <CustomEmoji type="globe" size={16} /> Foreign
               </span>
             )}
           </div>
@@ -400,11 +401,11 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
 
               {/* Tagline with Neon Effect */}
               <div className="space-y-4">
-                <h2 className="text-2xl md:text-4xl font-bold text-yellow-500 uppercase tracking-widest animate-pulse"
+                <h2 className="text-2xl md:text-4xl font-bold text-yellow-500 uppercase tracking-widest animate-pulse flex items-center justify-center gap-3"
                     style={{
                       textShadow: '0 0 10px rgba(218,165,32,0.8), 0 0 20px rgba(218,165,32,0.6), 0 0 40px rgba(218,165,32,0.4)'
                     }}>
-                  ⚡ Play Bold ⚡
+                  <CustomEmoji type="lightning" size={32} /> Play Bold <CustomEmoji type="lightning" size={32} />
                 </h2>
                 
                 <h1 className="text-6xl md:text-8xl lg:text-9xl font-black text-white leading-none tracking-tighter"
@@ -451,25 +452,25 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <StatsCard
-                icon="🏏"
+                icon={<CustomEmoji type="cricket" size={48} />}
                 value={teamData.players?.length || 0}
                 label="Squad Size"
                 delay={0}
               />
               <StatsCard
-                icon="👑"
+                icon={<CustomEmoji type="crown" size={48} />}
                 value={teamData.players?.filter(p => p.isCaptain).length || 0}
                 label="Captain"
                 delay={100}
               />
               <StatsCard
-                icon="🌍"
+                icon={<CustomEmoji type="globe" size={48} />}
                 value={teamData.players?.filter(p => p.nationality !== 'India').length || 0}
                 label="Foreign Players"
                 delay={200}
               />
               <StatsCard
-                icon="🏆"
+                icon={<CustomEmoji type="trophy" size={48} />}
                 value={0}
                 label="IPL Titles"
                 delay={300}
@@ -484,9 +485,9 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
             <div className="relative inline-flex gap-3 p-2 rounded-3xl backdrop-blur-xl border border-white/10"
                  style={{ background: 'linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))' }}>
               {[
-                { id: 'squad', label: 'Squad', icon: '👥' },
-                { id: 'stats', label: 'Statistics', icon: '📊' },
-                { id: 'achievements', label: 'Legacy', icon: '🏆' }
+                { id: 'squad', label: 'Squad', iconType: 'people' },
+                { id: 'stats', label: 'Statistics', iconType: 'chart' },
+                { id: 'achievements', label: 'Legacy', iconType: 'trophy' }
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -503,7 +504,7 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
                     color: '#FFFFFF'
                   }}
                 >
-                  <span>{tab.icon}</span>
+                  <CustomEmoji type={tab.iconType as any} size={20} />
                   <span>{tab.label}</span>
                 </button>
               ))}
@@ -518,11 +519,11 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
               {/* Filter Bar */}
               <div className="flex flex-wrap justify-center gap-3">
                 {[
-                  { id: 'all', label: 'All Players', icon: '👥' },
-                  { id: 'batsman', label: 'Batsmen', icon: '🏏' },
-                  { id: 'bowler', label: 'Bowlers', icon: '⚡' },
-                  { id: 'all-rounder', label: 'All-Rounders', icon: '🎯' },
-                  { id: 'wicket-keeper', label: 'Keepers', icon: '🧤' }
+                  { id: 'all', label: 'All Players', iconType: 'people' },
+                  { id: 'batsman', label: 'Batsmen', iconType: 'cricket' },
+                  { id: 'bowler', label: 'Bowlers', iconType: 'lightning' },
+                  { id: 'all-rounder', label: 'All-Rounders', iconType: 'target' },
+                  { id: 'wicket-keeper', label: 'Keepers', iconType: 'glove' }
                 ].map((filter) => (
                   <button
                     key={filter.id}
@@ -540,7 +541,7 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
                       color: '#FFFFFF'
                     }}
                   >
-                    <span>{filter.icon}</span>
+                    <CustomEmoji type={filter.iconType as any} size={18} />
                     <span>{filter.label}</span>
                     <span className="ml-1 px-2 py-0.5 rounded-full bg-black/30 text-xs">
                       {filter.id === 'all' 
@@ -555,15 +556,15 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
               {/* Player Cards Sections in fixed order: Batters, Wicket-keepers, All-rounders, Bowlers */}
               <div className="space-y-12">
                 {[
-                  { title: 'Batters', players: batsmen, icon: '🏏' },
-                  { title: 'Wicket-keepers', players: wicketkeepers, icon: '🧤' },
-                  { title: 'All-rounders', players: allRounders, icon: '🎯' },
-                  { title: 'Bowlers', players: bowlers, icon: '⚡' }
+                  { title: 'Batters', players: batsmen, iconType: 'cricket' },
+                  { title: 'Wicket-keepers', players: wicketkeepers, iconType: 'glove' },
+                  { title: 'All-rounders', players: allRounders, iconType: 'target' },
+                  { title: 'Bowlers', players: bowlers, iconType: 'lightning' }
                 ].map((section, sIdx) => (
                   section.players.length > 0 && (
                     <div key={sIdx} className="animate-fade-in" style={{ animationDelay: `${sIdx * 80}ms` }}>
                       <h3 className="text-3xl font-black mb-6 flex items-center gap-4 text-white">
-                        <span className="text-3xl">{section.icon}</span>
+                        <CustomEmoji type={section.iconType as any} size={32} />
                         {section.title}
                         <span className="text-lg font-normal text-white/70">({section.players.length})</span>
                       </h3>
@@ -600,19 +601,19 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
               <div className="rounded-3xl backdrop-blur-xl p-8 border border-white/10"
                    style={{ background: 'linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))' }}>
                 <h3 className="text-3xl font-black mb-6 flex items-center gap-3 text-white">
-                  <span>📊</span>
+                  <CustomEmoji type="chart" size={32} />
                   Squad Breakdown
                 </h3>
                 <div className="space-y-4">
                   {[
-                    { role: 'Batsman', count: (teamData.players || []).filter(p => p.role === 'Batsman').length, color: '#EC1C24', icon: '🏏' },
-                    { role: 'Bowler', count: (teamData.players || []).filter(p => p.role === 'Bowler').length, color: '#DAA520', icon: '⚡' },
-                    { role: 'All-rounder', count: (teamData.players || []).filter(p => p.role === 'All-rounder').length, color: '#EC1C24', icon: '🎯' },
-                    { role: 'Wicket-keeper', count: (teamData.players || []).filter(p => p.role === 'Wicket-keeper').length, color: '#DAA520', icon: '🧤' }
+                    { role: 'Batsman', count: (teamData.players || []).filter(p => p.role === 'Batsman').length, color: '#EC1C24', iconType: 'cricket' },
+                    { role: 'Bowler', count: (teamData.players || []).filter(p => p.role === 'Bowler').length, color: '#DAA520', iconType: 'lightning' },
+                    { role: 'All-rounder', count: (teamData.players || []).filter(p => p.role === 'All-rounder').length, color: '#EC1C24', iconType: 'target' },
+                    { role: 'Wicket-keeper', count: (teamData.players || []).filter(p => p.role === 'Wicket-keeper').length, color: '#DAA520', iconType: 'glove' }
                   ].map((item, i) => (
                     <div key={i} className="group flex justify-between items-center p-4 rounded-2xl bg-white/5 hover:bg-white/10 transition-all cursor-pointer">
                       <span className="font-semibold flex items-center gap-3 text-white">
-                        <span className="text-2xl">{item.icon}</span>
+                        <CustomEmoji type={item.iconType as any} size={24} />
                         {item.role}
                       </span>
                       <div className="flex items-center gap-4">
@@ -636,18 +637,18 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
               <div className="rounded-3xl backdrop-blur-xl p-8 border border-white/10"
                    style={{ background: 'linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))' }}>
                 <h3 className="text-3xl font-black mb-6 flex items-center gap-3 text-white">
-                  <span>🌍</span>
+                  <CustomEmoji type="globe" size={32} />
                   Player Origin
                 </h3>
                 <div className="space-y-6">
                   {[
-                    { label: 'Indian Players', count: (teamData.players || []).filter(p => p.nationality === 'India').length, flag: '🇮🇳' },
-                    { label: 'Foreign Players', count: (teamData.players || []).filter(p => p.nationality !== 'India').length, flag: '🌏' }
+                    { label: 'Indian Players', count: (teamData.players || []).filter(p => p.nationality === 'India').length, iconType: 'flag-india' },
+                    { label: 'Foreign Players', count: (teamData.players || []).filter(p => p.nationality !== 'India').length, iconType: 'globe' }
                   ].map((item, i) => (
                     <div key={i} className="group p-6 rounded-2xl bg-white/5 hover:bg-white/10 transition-all">
                       <div className="flex justify-between items-center mb-3">
                         <span className="font-semibold flex items-center gap-2 text-white">
-                          <span className="text-3xl">{item.flag}</span>
+                          <CustomEmoji type={item.iconType as any} size={32} />
                           {item.label}
                         </span>
                         <span className="text-5xl font-black bg-gradient-to-r from-red-500 to-yellow-500 bg-clip-text text-transparent">
@@ -677,9 +678,9 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
                 <div className="rounded-3xl backdrop-blur-xl p-12 border border-white/10"
                      style={{ background: 'linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))' }}>
                   <h3 className="text-4xl font-black mb-8 flex items-center justify-center gap-3 text-white">
-                    <span>🏆</span>
+                    <CustomEmoji type="trophy" size={40} />
                     Trophy Cabinet
-                    <span>🏆</span>
+                    <CustomEmoji type="trophy" size={40} />
                   </h3>
                   
                   {teamData.trophies.length > 0 ? (
@@ -712,7 +713,7 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
                 <div className="rounded-3xl backdrop-blur-xl p-12 border border-white/10"
                      style={{ background: 'linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))' }}>
                   <h3 className="text-4xl font-black mb-8 flex items-center gap-3 text-white">
-                    <span>🏟️</span>
+                    <CustomEmoji type="stadium" size={40} />
                     Home Grounds
                   </h3>
                   

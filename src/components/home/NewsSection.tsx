@@ -5,6 +5,7 @@ import { News } from '@/types';
 import { api } from '@/lib/data';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import NewsModal from '../news/NewsModal';
+import { CustomEmoji } from '@/components/emoji/Emoji';
 
 export default function NewsSection() {
   const [news, setNews] = useState<News[]>([]);
@@ -130,9 +131,9 @@ export default function NewsSection() {
 
                   <div className="absolute top-4 left-4 flex flex-wrap gap-2">
                     <span className={`px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wide border ${getCategoryColor(featuredImportant.category || 'general')}`}>
-                      {featuredImportant.category === 'match' && '🏏'}
-                      {featuredImportant.category === 'team' && '👥'}
-                      {featuredImportant.category === 'player' && '⭐'}
+                      {featuredImportant.category === 'match' && <CustomEmoji type="cricket" size={16} />}
+                      {featuredImportant.category === 'team' && <CustomEmoji type="people" size={16} />}
+                      {featuredImportant.category === 'player' && <CustomEmoji type="star" size={16} />}
                       {featuredImportant.category === 'general' && '📰'}
                       {featuredImportant.category
                         ? ' ' + featuredImportant.category.charAt(0).toUpperCase() + featuredImportant.category.slice(1)
@@ -198,9 +199,9 @@ export default function NewsSection() {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                       <div className="absolute top-3 right-3 z-10">
                         <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide border ${getCategoryColor(article.category || 'general')}`}>
-                          {article.category === 'match' && '🏏'}
-                          {article.category === 'team' && '👥'}
-                          {article.category === 'player' && '⭐'}
+                          {article.category === 'match' && <CustomEmoji type="cricket" size={16} />}
+                          {article.category === 'team' && <CustomEmoji type="people" size={16} />}
+                          {article.category === 'player' && <CustomEmoji type="star" size={16} />}
                           {article.category === 'general' && '📰'}
                           {article.category ? article.category.charAt(0).toUpperCase() + article.category.slice(1) : 'General'}
                         </span>
@@ -275,9 +276,9 @@ export default function NewsSection() {
                     {/* Category Badge */}
                     <div className="absolute top-4 right-4 z-10">
                       <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide border ${getCategoryColor(article.category || 'general')}`}>
-                        {article.category === 'match' && '🏏'}
-                        {article.category === 'team' && '👥'}
-                        {article.category === 'player' && '⭐'}
+                        {article.category === 'match' && <CustomEmoji type="cricket" size={16} />}
+                        {article.category === 'team' && <CustomEmoji type="people" size={16} />}
+                        {article.category === 'player' && <CustomEmoji type="star" size={16} />}
                         {article.category === 'general' && '📰'}
                         {article.category
                           ? article.category.charAt(0).toUpperCase() + article.category.slice(1)

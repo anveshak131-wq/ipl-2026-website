@@ -17,6 +17,11 @@ export type EmojiName =
   | 'target'
   | 'sparkles'
   | 'party'
+  | 'clock'
+  | 'crown'
+  | 'flag-india'
+  | 'stadium'
+  | 'glove'
   | 'clap'
   | 'rocket'
   | 'heart'
@@ -51,7 +56,12 @@ const EMOJI_CHAR: Record<string, string> = {
   rocket: "🚀",
   heart: "❤️",
   wow: "😮",
-  thumbs_up: "👍"
+  thumbs_up: "👍",
+  clock: "🕐",
+  crown: "👑",
+  "flag-india": "🇮🇳",
+  stadium: "🏟️",
+  glove: "🧤"
 };
 
 // Mapping string names to CustomEmoji types
@@ -69,12 +79,17 @@ const EMOJI_TYPE_MAP: Record<string, EmojiType> = {
   target: 'target',
   sparkles: 'sparkles',
   party: 'party',
+  clock: 'clock',
+  crown: 'crown',
+  'flag-india': 'flag-india',
+  stadium: 'stadium',
+  glove: 'glove',
   // Legacy names that map to our custom emojis
-  clap: 'sparkles',  // Map to sparkles
-  rocket: 'fire',     // Map to fire
-  heart: 'star',      // Map to star
-  wow: 'sparkles',    // Map to sparkles
-  thumbs_up: 'star'   // Map to star
+  clap: 'sparkles',
+  rocket: 'fire',
+  heart: 'star',
+  wow: 'sparkles',
+  thumbs_up: 'star'
 };
 
 export default function Emoji({ 

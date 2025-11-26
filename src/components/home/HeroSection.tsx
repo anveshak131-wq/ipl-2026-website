@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import IPLLogo from '../ui/IPLLogo';
+import { CustomEmoji } from '@/components/emoji/Emoji';
 
 export default function HeroSection() {
   const router = useRouter();
@@ -287,13 +288,13 @@ export default function HeroSection() {
 
                 {/* Floating Stats Pills */}
                 <div className="absolute top-10 right-10 bg-white/10 backdrop-blur-xl px-6 py-3 rounded-full border border-white/20 shadow-xl animate-float">
-                  <p className="text-sm font-bold text-white">🏆 10 TEAMS</p>
+                  <p className="text-sm font-bold text-white"><CustomEmoji type="trophy" size={16} /> 10 TEAMS</p>
                 </div>
                 <div className="absolute bottom-20 left-10 bg-white/10 backdrop-blur-xl px-6 py-3 rounded-full border border-white/20 shadow-xl animate-float" style={{ animationDelay: '1s' }}>
-                  <p className="text-sm font-bold text-white">🔥 74 MATCHES</p>
+                  <p className="text-sm font-bold text-white"><CustomEmoji type="fire" size={16} /> 74 MATCHES</p>
                 </div>
                 <div className="absolute top-1/2 -right-5 bg-white/10 backdrop-blur-xl px-6 py-3 rounded-full border border-white/20 shadow-xl animate-float" style={{ animationDelay: '2s' }}>
-                  <p className="text-sm font-bold text-white">⚡ LIVE</p>
+                  <p className="text-sm font-bold text-white"><CustomEmoji type="lightning" size={16} /> LIVE</p>
                 </div>
               </div>
             </div>

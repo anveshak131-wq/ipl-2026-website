@@ -7,6 +7,7 @@ import RCBLottie from '@/components/ui/RCBLottie';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { getOptimalTextColorForGradient } from '@/lib/colorUtils';
 import { motion } from 'framer-motion';
+import { CustomEmoji } from '@/components/emoji/Emoji';
 
 interface TeamCardProps {
   team: Team;
@@ -131,7 +132,7 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
         {/* Player Count Badge with animation */}
         <div className="flex justify-center">
           <span className="px-4 py-2 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold backdrop-blur-sm group-hover:bg-white/20 group-hover:scale-110 transition-all duration-300 flex items-center gap-2">
-            <span className="text-base">👥</span>
+            <CustomEmoji type="people" size={16} />
             <span>{team.players?.length || 0} Players</span>
           </span>
         </div>

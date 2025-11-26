@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import { api } from '@/lib/data';
+import { CustomEmoji } from '@/components/emoji/Emoji';
 
 const IconUserGroup = ({ className }: { className?: string }) => (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -89,9 +90,9 @@ export default function AdminDashboard() {
         liveMatches: 0
     });
     const [recentActivities] = useState<Activity[]>([
-        { id: '1', type: 'match', title: 'Match scheduled: RCB vs MI', time: '2 hours ago', icon: '🏏' },
-        { id: '2', type: 'team', title: 'Team updated: Gujarat Titans', time: '5 hours ago', icon: '👥' },
-        { id: '3', type: 'player', title: 'New player added: Virat Kohli', time: '1 day ago', icon: '⭐' },
+        { id: '1', type: 'match', title: 'Match scheduled: RCB vs MI', time: '2 hours ago', icon: 'cricket' },
+        { id: '2', type: 'team', title: 'Team updated: Gujarat Titans', time: '5 hours ago', icon: 'people' },
+        { id: '3', type: 'player', title: 'New player added: Virat Kohli', time: '1 day ago', icon: 'star' },
         { id: '4', type: 'content', title: 'News published: IPL 2026 Schedule', time: '2 days ago', icon: '📰' }
     ]);
 
@@ -349,15 +350,19 @@ export default function AdminDashboard() {
                             </div>
 
                             <div className="space-y-4">
-                                {recentActivities.map((activity, index) => (
-                                    <div
-                                        key={activity.id}
-                                        className="group relative flex items-start space-x-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 border border-transparent hover:border-white/10"
-                                    >
-                                        {/* Timeline dot */}
-                                        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-[#2F6FED]/20 to-purple-500/20 flex items-center justify-center border border-white/10">
-                                            <span className="text-lg">{activity.icon}</span>
-                                        </div>
+                            {recentActivities.map((activity, index) => (
+                            <div
+                                key={activity.id}
+                                className="group relative flex items-start space-x-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 border border-transparent hover:border-white/10"
+                            >
+                                {/* Timeline dot */}
+                                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-[#2F6FED]/20 to-purple-500/20 flex items-center justify-center border border-white/10">
+                                    {activity.icon === '📰' ? (
+                                        <span className="text-lg">{activity.icon}</span>
+                                    ) : (
+                                        <CustomEmoji type={activity.icon as 'cricket' | 'people' | 'star'} size={20} />
+                                    )}
+                                </div>
 
                                         {/* Content */}
                                         <div className="flex-1 min-w-0">

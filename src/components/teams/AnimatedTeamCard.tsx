@@ -8,6 +8,7 @@ import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { getOptimalTextColorForGradient } from '@/lib/colorUtils';
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { useState } from 'react';
+import { CustomEmoji } from '@/components/emoji/Emoji';
 
 interface AnimatedTeamCardProps {
   team: Team;
@@ -220,7 +221,7 @@ export default function AnimatedTeamCard({ team, onPlayerClick, isFavorite = fal
                   } : {}}
                   transition={{ duration: 0.5 }}
                 >
-                  {isFavorite ? '⭐' : '☆'}
+                  <CustomEmoji type={isFavorite ? 'star' : 'star-outline'} size={20} animate={isFavorite} />
                 </motion.span>
               </motion.button>
             )}
@@ -250,7 +251,7 @@ export default function AnimatedTeamCard({ team, onPlayerClick, isFavorite = fal
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ delay: index * 0.1 + 0.3, type: 'spring' }}
                 >
-                  🏆 {trophyCount}
+                  <CustomEmoji type="trophy" size={14} /> {trophyCount}
                 </motion.span>
               )}
             </div>
@@ -267,9 +268,9 @@ export default function AnimatedTeamCard({ team, onPlayerClick, isFavorite = fal
             transition={{ delay: index * 0.1 + 0.4 }}
           >
             {[
-              { icon: '👥', value: playerCount, label: 'Players' },
-              { icon: '🌍', value: overseasCount, label: 'Overseas' },
-              { icon: '⚡', value: captain?.name.split(' ').pop() || 'TBA', label: 'Captain' }
+              { type: 'people' as const, value: playerCount, label: 'Players' },
+              { type: 'globe' as const, value: overseasCount, label: 'Overseas' },
+              { type: 'lightning' as const, value: captain?.name.split(' ').pop() || 'TBA', label: 'Captain' }
             ].map((stat, i) => (
               <motion.div
                 key={i}
@@ -279,7 +280,7 @@ export default function AnimatedTeamCard({ team, onPlayerClick, isFavorite = fal
                 transition={{ delay: index * 0.1 + 0.5 + i * 0.1, type: 'spring' }}
                 whileHover={{ scale: 1.1, backgroundColor: 'rgba(15, 23, 42, 0.6)' }}
               >
-                <span className="text-base">{stat.icon}</span>
+                <CustomEmoji type={stat.type} size={16} />
                 <span className="text-xs font-bold text-white truncate max-w-[100px]">
                   {stat.value}
                 </span>
@@ -366,8 +367,8 @@ export default function AnimatedTeamCard({ team, onPlayerClick, isFavorite = fal
             </motion.button>
 
             {[
-              { icon: '📅', onClick: handleSchedule, label: 'Schedule' },
-              { icon: '📊', onClick: handleStats, label: 'Stats' }
+              { type: 'calendar' as const, onClick: handleSchedule, label: 'Schedule' },
+              { type: 'chart' as const, onClick: handleStats, label: 'Stats' }
             ].map((action, i) => (
               <motion.button
                 key={i}
@@ -378,7 +379,7 @@ export default function AnimatedTeamCard({ team, onPlayerClick, isFavorite = fal
                 whileHover={{ scale: 1.2, rotate: 15 }}
                 whileTap={{ scale: 0.9 }}
               >
-                {action.icon}
+                <CustomEmoji type={action.type} size={20} />
               </motion.button>
             ))}
           </motion.div>
