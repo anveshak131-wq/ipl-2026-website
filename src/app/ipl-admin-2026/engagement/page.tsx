@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
+import ModernDialog from '@/components/admin/ModernDialog';
 
 // Polling configuration
 const POLL_INTERVAL_NORMAL = 5000; // 5 seconds
@@ -539,182 +540,129 @@ export default function AdminEngagementPage() {
       </main>
 
       {/* Action Modal */}
-      {showActionModal && selectedUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => setShowActionModal(false)}
-          />
-          <div className="relative z-10 w-full max-w-lg mx-4">
-            <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 rounded-2xl shadow-2xl border border-white/10 overflow-hidden">
-              {/* Header */}
-              <div className="px-6 pt-5 pb-4 border-b border-white/10 flex items-start gap-3">
-                <div
-                  className={`mt-1 flex h-9 w-9 items-center justify-center rounded-full border text-sm font-semibold ${
-                    actionType === 'block'
-                      ? 'border-yellow-400/40 bg-yellow-500/10 text-yellow-300'
-                      : 'border-red-400/40 bg-red-500/10 text-red-300'
-                  }`}
-                >
-                  {actionType === 'block' ? '!' : '×'}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h2 className="text-xl font-semibold text-white">
-                      {actionType === 'block' ? 'Block user from chat' : 'Delete user account'}
-                    </h2>
-                    <span
-                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                        actionType === 'block'
-                          ? 'bg-yellow-500/10 text-yellow-300 border border-yellow-400/30'
-                          : 'bg-red-500/10 text-red-300 border border-red-400/30'
-                      }`}
-                    >
-                      {actionType === 'block' ? 'Block action' : 'Danger action'}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-300">
-                    {actionType === 'block'
-                      ? `This will prevent ${selectedUser.name} from sending messages or participating in chat.`
-                      : `This will permanently remove ${selectedUser.name}'s account and related data. This action cannot be undone.`}
-                  </p>
-                </div>
-              </div>
-
-              {/* Body */}
-              <div className="px-6 py-5 space-y-4">
-                <div className="flex items-center justify-between text-sm">
-                  <div className="text-gray-400">
-                    <span className="text-gray-500">User:</span>{' '}
-                    <span className="text-white font-medium">{selectedUser.name}</span>
-                  </div>
-                  <div className="text-xs text-gray-500 truncate max-w-[220px]">
-                    {selectedUser.email}
-                  </div>
-                </div>
-
-                {actionType === 'block' && (
-                  <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-2">
-                      Reason for blocking <span className="text-gray-500">(optional)</span>
-                    </label>
-                    <textarea
-                      placeholder="Add a short note so other admins understand why this user was blocked..."
-                      value={actionReason}
-                      onChange={(e) => setActionReason(e.target.value)}
-                      maxLength={200}
-                      rows={3}
-                      className="w-full px-4 py-2.5 bg-slate-900/80 border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-ipl-gold/70 focus:border-transparent resize-none"
-                    />
-                    <div className="mt-1 text-xs text-gray-500 flex justify-between">
-                      <span>Keep it short and factual. This is visible only to admins.</span>
-                      <span>{actionReason.length}/200</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Footer */}
-              <div className="px-6 pb-5 pt-3 border-t border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3">
-                <button
-                  onClick={() => setShowActionModal(false)}
-                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-white/10 bg-slate-800/60 text-sm font-medium text-gray-200 hover:bg-slate-700/80 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmAction}
-                  disabled={isProcessing}
-                  className={`w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-red-900/40 transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
-                    actionType === 'block'
-                      ? 'bg-yellow-600 hover:bg-yellow-500 text-black'
-                      : 'bg-red-600 hover:bg-red-500 text-white'
-                  }`}
-                >
-                  {isProcessing
-                    ? 'Processing...'
-                    : actionType === 'block'
-                    ? 'Confirm block'
-                    : 'Confirm delete'}
-                </button>
-              </div>
+      <ModernDialog
+        isOpen={showActionModal && !!selectedUser}
+        onClose={() => setShowActionModal(false)}
+        title={actionType === 'block' ? 'Block user from chat' : 'Delete user account'}
+        description={
+          actionType === 'block'
+            ? `This will prevent ${selectedUser?.name} from sending messages or participating in chat.`
+            : `This will permanently remove ${selectedUser?.name}'s account and related data. This action cannot be undone.`
+        }
+        variant={actionType === 'block' ? 'warning' : 'danger'}
+        size="lg"
+        icon={actionType === 'block' ? '⚠️' : '🚨'}
+        footer={
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3">
+            <button
+              onClick={() => setShowActionModal(false)}
+              className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-white/10 bg-slate-800/60 text-sm font-medium text-gray-200 hover:bg-slate-700/80 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmAction}
+              disabled={isProcessing}
+              className={`w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-semibold shadow-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
+                actionType === 'block'
+                  ? 'bg-yellow-600 hover:bg-yellow-500 text-black'
+                  : 'bg-red-600 hover:bg-red-500 text-white'
+              }`}
+            >
+              {isProcessing
+                ? 'Processing...'
+                : actionType === 'block'
+                ? 'Confirm block'
+                : 'Confirm delete'}
+            </button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <div className="flex items-center justify-between text-sm">
+            <div className="text-gray-400">
+              <span className="text-gray-500">User:</span>{' '}
+              <span className="text-white font-medium">{selectedUser?.name}</span>
+            </div>
+            <div className="text-xs text-gray-500 truncate max-w-[220px]">
+              {selectedUser?.email}
             </div>
           </div>
+
+          {actionType === 'block' && (
+            <div>
+              <label className="block text-xs font-medium text-gray-400 mb-2">
+                Reason for blocking <span className="text-gray-500">(optional)</span>
+              </label>
+              <textarea
+                placeholder="Add a short note so other admins understand why this user was blocked..."
+                value={actionReason}
+                onChange={(e) => setActionReason(e.target.value)}
+                maxLength={200}
+                rows={3}
+                className="w-full px-4 py-2.5 bg-slate-900/80 border border-white/10 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-transparent resize-none"
+              />
+              <div className="mt-1 text-xs text-gray-500 flex justify-between">
+                <span>Keep it short and factual. This is visible only to admins.</span>
+                <span>{actionReason.length}/200</span>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </ModernDialog>
 
       {/* Message Delete Modal */}
-      {showMessageModal && selectedMessage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            onClick={() => {
-              if (isProcessing) return;
-              setShowMessageModal(false);
-              setSelectedMessage(null);
-            }}
-          />
-          <div className="relative z-10 w-full max-w-lg mx-4">
-            <div className="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 rounded-2xl shadow-2xl border border-white/10 overflow-hidden">
-              {/* Header */}
-              <div className="px-6 pt-5 pb-4 border-b border-white/10 flex items-start gap-3">
-                <div className="mt-1 flex h-9 w-9 items-center justify-center rounded-full border border-red-400/40 bg-red-500/10 text-red-300 text-sm font-semibold">
-                  !
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h2 className="text-xl font-semibold text-white">Delete chat message</h2>
-                    <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-red-500/10 text-red-300 border border-red-400/30">
-                      Danger action
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-300">
-                    This will permanently remove this message from the live chat history. This action cannot be undone.
-                  </p>
-                </div>
+      <ModernDialog
+        isOpen={showMessageModal && !!selectedMessage}
+        onClose={() => {
+          if (!isProcessing) {
+            setShowMessageModal(false);
+            setSelectedMessage(null);
+          }
+        }}
+        title="Delete chat message"
+        description="This will permanently remove this message from the live chat history. This action cannot be undone."
+        variant="danger"
+        size="lg"
+        icon="🗑️"
+        footer={
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3">
+            <button
+              onClick={() => {
+                if (isProcessing) return;
+                setShowMessageModal(false);
+                setSelectedMessage(null);
+              }}
+              className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-white/10 bg-slate-800/60 text-sm font-medium text-gray-200 hover:bg-slate-700/80 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmDeleteMessage}
+              disabled={isProcessing}
+              className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-semibold bg-red-600 hover:bg-red-500 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {isProcessing ? 'Deleting…' : 'Delete message'}
+            </button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <div className="text-xs uppercase tracking-wide text-gray-500">Message preview</div>
+          <div className="rounded-xl border border-white/10 bg-slate-900/70 p-4">
+            <div className="flex items-center justify-between mb-2 gap-3">
+              <div className="text-sm text-gray-300">
+                <span className="text-gray-500">From:</span>{' '}
+                <span className="text-white font-medium">{selectedMessage?.userName}</span>
               </div>
-
-              {/* Body */}
-              <div className="px-6 py-5 space-y-4">
-                <div className="text-xs uppercase tracking-wide text-gray-500">Message preview</div>
-                <div className="rounded-xl border border-white/10 bg-slate-900/70 p-4">
-                  <div className="flex items-center justify-between mb-2 gap-3">
-                    <div className="text-sm text-gray-300">
-                      <span className="text-gray-500">From:</span>{' '}
-                      <span className="text-white font-medium">{selectedMessage.userName}</span>
-                    </div>
-                    <div className="text-[11px] text-gray-500 whitespace-nowrap">
-                      {new Date(selectedMessage.timestamp).toLocaleString()}
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-200 line-clamp-3">{selectedMessage.text}</p>
-                </div>
-              </div>
-
-              {/* Footer */}
-              <div className="px-6 pb-5 pt-3 border-t border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3">
-                <button
-                  onClick={() => {
-                    if (isProcessing) return;
-                    setShowMessageModal(false);
-                    setSelectedMessage(null);
-                  }}
-                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-white/10 bg-slate-800/60 text-sm font-medium text-gray-200 hover:bg-slate-700/80 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmDeleteMessage}
-                  disabled={isProcessing}
-                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-red-900/40 bg-red-600 hover:bg-red-500 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {isProcessing ? 'Deleting…' : 'Delete message'}
-                </button>
+              <div className="text-[11px] text-gray-500 whitespace-nowrap">
+                {selectedMessage?.timestamp ? new Date(selectedMessage.timestamp).toLocaleString() : ''}
               </div>
             </div>
+            <p className="text-sm text-gray-200 line-clamp-3">{selectedMessage?.text}</p>
           </div>
         </div>
-      )}
+      </ModernDialog>
     </div>
   );
 }

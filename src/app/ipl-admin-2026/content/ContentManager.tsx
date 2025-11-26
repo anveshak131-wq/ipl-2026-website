@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AuroraBackground from '@/components/ui/AuroraBackground';
+import ModernDialog from '@/components/admin/ModernDialog';
 import { Content, Team, Match, Player } from '@/types';
 import { api } from '@/lib/data';
 
@@ -717,23 +718,36 @@ export default function ContentManager({
           )}
 
           {/* Content Form Modal */}
-          {showForm && (
-            <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fadeIn">
-              <div className="glass-effect rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-                <div className="p-8">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-3xl font-bold text-white">
-                      {editingContent ? 'Edit Content' : 'Create New Content'}
-                    </h2>
-                    <button 
-                      onClick={() => setShowForm(false)}
-                      className="text-gray-400 hover:text-white text-3xl w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 transition-all"
-                    >
-                      ×
-                    </button>
-                  </div>
-
-                  <form onSubmit={handleSubmit} className="space-y-6">
+          <ModernDialog
+            isOpen={showForm}
+            onClose={() => setShowForm(false)}
+            title={editingContent ? 'Edit Content' : 'Create New Content'}
+            description={editingContent ? 'Update your content details' : 'Add new content to your platform'}
+            variant="info"
+            size="xl"
+            icon="📝"
+            showCloseButton={true}
+            contentClassName="max-h-[70vh] overflow-y-auto"
+            footer={
+              <div className="flex gap-4">
+                <button
+                  type="submit"
+                  form="content-form"
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold py-3 px-6 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200"
+                >
+                  {editingContent ? 'Update Content' : 'Create Content'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  className="flex-1 border border-white/10 bg-slate-800/60 text-white font-semibold py-3 px-6 rounded-xl hover:bg-slate-700/80 transition-all duration-200"
+                >
+                  Cancel
+                </button>
+              </div>
+            }
+          >
+            <form id="content-form" onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <label className="block text-sm font-semibold text-gray-300 mb-2">
@@ -967,27 +981,9 @@ export default function ContentManager({
                       </div>
                     </div>
 
-                    {/* Form Actions */}
-                    <div className="flex gap-4 pt-6 border-t border-white/10">
-                      <button
-                        type="submit"
-                        className="flex-1 bg-gradient-to-r from-ipl-gold to-ipl-purple text-white font-semibold py-4 px-6 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200"
-                      >
-                        {editingContent ? 'Update Content' : 'Create Content'}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setShowForm(false)}
-                        className="flex-1 glass-effect text-white font-semibold py-4 px-6 rounded-xl hover:bg-white/20 transition-all duration-200"
-                      >
-                        Cancel
-                      </button>
-                    </div>
+                    {/* Form Actions - Moved to Footer */}
                   </form>
-                </div>
-              </div>
-            </div>
-          )}
+            </ModernDialog>
         </div>
       </div>
     </div>

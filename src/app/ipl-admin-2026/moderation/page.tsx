@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
+import ModernDialog from '@/components/admin/ModernDialog';
 
 type ModerationStatus = 'idle' | 'loading' | 'ok' | 'error';
 type FlagStatus = 'pending' | 'safe' | 'action_taken' | null;
@@ -372,85 +373,84 @@ export default function AdminModerationPage() {
           </div>
         </div>
 
-        {selectedMessage && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center">
-            <div
-              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-              onClick={closeActionModal}
-            />
-            <div className="relative z-10 w-full max-w-lg mx-4">
-              <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 shadow-2xl overflow-hidden">
-                <div className="px-6 pt-5 pb-4 border-b border-white/10 flex items-start gap-3">
-                  <div
-                    className={`mt-1 flex h-9 w-9 items-center justify-center rounded-full border text-sm font-semibold ${
-                      selectedAction === 'delete'
-                        ? 'border-red-400/40 bg-red-500/10 text-red-300'
-                        : selectedAction === 'blockUser'
-                        ? 'border-yellow-400/40 bg-yellow-500/10 text-yellow-300'
-                        : 'border-emerald-400/40 bg-emerald-500/10 text-emerald-300'
-                    }`}
-                  >
-                    !
-                  </div>
-                  <div className="flex-1">
-                    <h2 className="text-xl font-semibold text-white mb-1">
-                      {selectedAction === 'delete'
-                        ? 'Delete chat message'
-                        : selectedAction === 'blockUser'
-                        ? 'Block user from chat'
-                        : 'Mark message as safe'}
-                    </h2>
-                    <p className="text-sm text-gray-300">
-                      {selectedAction === 'delete'
-                        ? 'This will permanently remove this message from chat history.'
-                        : selectedAction === 'blockUser'
-                        ? 'This will block the user from sending further messages.'
-                        : 'This will remove the flag from this message.'}
-                    </p>
-                  </div>
+        <ModernDialog
+          isOpen={!!selectedMessage}
+          onClose={closeActionModal}
+          title={
+            selectedAction === 'delete'
+              ? 'Delete chat message'
+              : selectedAction === 'blockUser'
+              ? 'Block user from chat'
+              : 'Mark message as safe'
+          }
+          description={
+            selectedAction === 'delete'
+              ? 'This will permanently remove this message from chat history.'
+              : selectedAction === 'blockUser'
+              ? 'This will block the user from sending further messages.'
+              : 'This will remove the flag from this message.'
+          }
+          variant={
+            selectedAction === 'delete'
+              ? 'danger'
+              : selectedAction === 'blockUser'
+              ? 'warning'
+              : 'success'
+          }
+          size="lg"
+          icon={
+            selectedAction === 'delete'
+              ? '🗑️'
+              : selectedAction === 'blockUser'
+              ? '⛔'
+              : '✅'
+          }
+          footer={
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3">
+              <button
+                onClick={closeActionModal}
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-white/10 bg-slate-800/60 text-sm font-medium text-gray-200 hover:bg-slate-700/80 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmAction}
+                disabled={isProcessing}
+                className={`w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed ${
+                  selectedAction === 'delete'
+                    ? 'bg-red-600 hover:bg-red-500 text-white'
+                    : selectedAction === 'blockUser'
+                    ? 'bg-yellow-600 hover:bg-yellow-500 text-black'
+                    : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                }`}
+              >
+                {isProcessing ? 'Processing…' : 'Confirm'}
+              </button>
+            </div>
+          }
+        >
+          <div className="space-y-4">
+            <div className="text-xs uppercase tracking-wide text-gray-500">Message</div>
+            <div className="rounded-xl border border-white/10 bg-slate-900/80 p-4">
+              <div className="flex items-center justify-between mb-2 gap-3">
+                <div className="text-sm text-gray-300">
+                  <span className="text-gray-500">From:</span>{' '}
+                  <span className="text-white font-medium">
+                    {selectedMessage?.userName || 'Unknown user'}
+                  </span>
                 </div>
-
-                <div className="px-6 py-5 space-y-4 text-sm text-gray-200">
-                  <div className="text-xs uppercase tracking-wide text-gray-500">Message</div>
-                  <div className="rounded-xl border border-white/10 bg-slate-900/80 p-4">
-                    <div className="flex items-center justify-between mb-2 gap-3">
-                      <div className="text-sm text-gray-300">
-                        <span className="text-gray-500">From:</span>{' '}
-                        <span className="text-white font-medium">
-                          {selectedMessage.userName || 'Unknown user'}
-                        </span>
-                      </div>
-                      {selectedMessage.timestamp && (
-                        <div className="text-[11px] text-gray-500 whitespace-nowrap">
-                          {new Date(selectedMessage.timestamp).toLocaleString()}
-                        </div>
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-100 whitespace-pre-wrap">
-                      {selectedMessage.text}
-                    </p>
+                {selectedMessage?.timestamp && (
+                  <div className="text-[11px] text-gray-500 whitespace-nowrap">
+                    {new Date(selectedMessage.timestamp).toLocaleString()}
                   </div>
-                </div>
-
-                <div className="px-6 pb-5 pt-3 border-t border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3">
-                  <button
-                    onClick={closeActionModal}
-                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-white/10 bg-slate-800/60 text-sm font-medium text-gray-200 hover:bg-slate-700/80 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={confirmAction}
-                    disabled={isProcessing}
-                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-red-900/40 bg-red-600 hover:bg-red-500 text-white transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                  >
-                    {isProcessing ? 'Processing…' : 'Confirm'}
-                  </button>
-                </div>
+                )}
               </div>
+              <p className="text-sm text-gray-100 whitespace-pre-wrap">
+                {selectedMessage?.text}
+              </p>
             </div>
           </div>
-        )}
+        </ModernDialog>
       </main>
     </div>
   );
