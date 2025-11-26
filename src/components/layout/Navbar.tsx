@@ -4,14 +4,14 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import IPLLogo from '../ui/IPLLogo';
-import Icon from '../ui/Icon';
+import Emoji from '../emoji/Emoji';
 
-type NavIconName = 'cricket' | 'stats' | 'news' | 'team' | 'target' | 'trophy' | 'bell' | 'user';
+type NavEmojiName = 'cricket' | 'chart' | 'news' | 'glove' | 'target' | 'trophy' | 'sparkles' | 'people' | 'fire' | 'star';
 
 interface NavItem {
   href: string;
   label: string;
-  icon?: NavIconName;
+  emoji?: NavEmojiName;
 }
 
 export default function Navbar() {
@@ -26,17 +26,17 @@ export default function Navbar() {
   };
 
   const primaryNavItems: NavItem[] = [
-    { href: '/live-score', label: 'Live Score', icon: 'cricket' },
-    { href: '/matches', label: 'Matches', icon: 'cricket' },
-    { href: '/teams', label: 'Teams', icon: 'team' },
-    { href: '/stats', label: 'Stats', icon: 'stats' },
-    { href: '/predictions', label: 'Predictions', icon: 'target' },
-    { href: '/news', label: 'News', icon: 'news' },
+    { href: '/live-score', label: 'Live Score', emoji: 'cricket' },
+    { href: '/matches', label: 'Matches', emoji: 'cricket' },
+    { href: '/teams', label: 'Teams', emoji: 'glove' },
+    { href: '/stats', label: 'Stats', emoji: 'chart' },
+    { href: '/predictions', label: 'Predictions', emoji: 'target' },
+    { href: '/news', label: 'News', emoji: 'fire' },
   ];
 
   const secondaryNavItems: NavItem[] = [
-    { href: '/notifications', label: 'Notifications', icon: 'bell' },
-    { href: '/account', label: 'Account', icon: 'user' },
+    { href: '/notifications', label: 'Notifications', emoji: 'sparkles' },
+    { href: '/account', label: 'Account', emoji: 'people' },
   ];
 
   const allNavItems = [...primaryNavItems, ...secondaryNavItems];
@@ -111,7 +111,7 @@ export default function Navbar() {
                         : 'text-gray-200 hover:text-white hover:bg-white/8'}
                     `}
                   >
-                    {item.icon && <Icon name={item.icon} size={16} />}
+                    {item.emoji && <Emoji name={item.emoji} size={16} animate={true} />}
                     <span className="flex items-center gap-1.5">
                       <span>{item.label}</span>
                       {badgeLabel && (
@@ -144,7 +144,7 @@ export default function Navbar() {
                         : 'text-gray-200 border border-white/10 hover:text-white hover:border-blue-500/50 hover:bg-white/5'}
                     `}
                   >
-                    {item.icon && <Icon name={item.icon} size={18} className="pointer-events-none" />}
+                    {item.emoji && <Emoji name={item.emoji} size={18} animate={true} className="pointer-events-none" />}
                     {item.href === '/notifications' && (
                       <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-lg shadow-red-500/50 pointer-events-none" />
                     )}
@@ -201,7 +201,7 @@ export default function Navbar() {
                   `}
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  {item.icon && <Icon name={item.icon} size={20} />}
+                  {item.emoji && <Emoji name={item.emoji} size={20} animate={true} />}
                   <span className="flex items-center gap-2 flex-1">
                     <span>{item.label}</span>
                     {badgeLabel && (
