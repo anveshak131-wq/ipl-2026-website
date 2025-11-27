@@ -8,7 +8,8 @@
  * Users must accept terms to access any other route
  */
 export const PUBLIC_ROUTES_WITHOUT_TERMS = [
-  "/terms",
+  "/",                    // Home page - shows modal
+  "/terms",               // Terms page - shows content only
   "/legal",
   "/privacy",
   "/rcb-lion", // Static page

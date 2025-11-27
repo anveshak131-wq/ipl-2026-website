@@ -47,10 +47,10 @@ export default function TermsGuard({ children }: TermsGuardProps) {
     const { isAccepted } = getTermsAcceptanceStatus();
 
     if (!isAccepted) {
-      // Terms not accepted, redirect to terms page
+      // Terms not accepted, redirect to home page (modal will show there)
       // Store the intended destination for redirect after acceptance
       sessionStorage.setItem("terms_redirect_after", pathname);
-      router.push("/terms");
+      router.push("/");
       return;
     }
 
@@ -63,9 +63,9 @@ export default function TermsGuard({ children }: TermsGuardProps) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isChecking) {
-        // Escape during loading redirects to terms
+        // Escape during loading redirects to home
         sessionStorage.setItem("terms_redirect_after", pathname);
-        router.push("/terms");
+        router.push("/");
       }
     };
 
@@ -94,7 +94,7 @@ export default function TermsGuard({ children }: TermsGuardProps) {
             aria-hidden="true"
           />
           <p className="text-white text-lg">Verifying access...</p>
-          <p className="text-gray-400 text-sm mt-2">Press Escape to go to terms page</p>
+          <p className="text-gray-400 text-sm mt-2">Press Escape to go to home page</p>
         </div>
       </motion.div>
     );

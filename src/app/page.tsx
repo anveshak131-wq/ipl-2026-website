@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
 import HeroSection from '@/components/home/HeroSection';
@@ -6,12 +9,70 @@ import UpcomingMatches from '@/components/home/UpcomingMatches';
 import NewsSection from '@/components/home/NewsSection';
 import Footer from '@/components/layout/Footer';
 import AuroraBackground from '@/components/ui/AuroraBackground';
+import TermsAcceptanceModal from '@/components/legal/TermsAcceptanceModal';
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [lastAcceptanceDate, setLastAcceptanceDate] = useState<string | null>(null);
+  const [needsReAcceptance, setNeedsReAcceptance] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
+
+  useEffect(() => {
+    setIsHydrated(true);
+    
+    // Check if user has accepted terms
+    const termsAccepted = localStorage.getItem("terms_accepted");
+    const acceptanceDate = localStorage.getItem("terms_accepted_date");
+    const acceptedVersion = localStorage.getItem("terms_version");
+    
+    setLastAcceptanceDate(acceptanceDate);
+
+    if (termsAccepted !== "true") {
+      // Show modal on first visit
+      setShowTermsModal(true);
+    } else if (acceptedVersion !== "1.1") {
+      // Show modal if version has been updated
+      setNeedsReAcceptance(true);
+      setShowTermsModal(true);
+    }
+  }, []);
+
+  const handleAcceptTerms = () => {
+    setShowTermsModal(false);
+    // Redirect to intended route if there is one
+    const redirectPath = sessionStorage.getItem("terms_redirect_after");
+    if (redirectPath && redirectPath !== "/") {
+      sessionStorage.removeItem("terms_redirect_after");
+      router.push(redirectPath);
+    }
+  };
+
+  const handleDeclineTerms = () => {
+    // User declined, don't show modal again but they can't access other pages
+    setShowTermsModal(false);
+  };
+
+  // Only render modal after hydration
+  const shouldShowModal = isHydrated && showTermsModal;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-blue-950/20 to-slate-950">
       <AuroraBackground />
       <Navbar />
+
+      {/* Terms Acceptance Modal */}
+      {shouldShowModal && (
+        <TermsAcceptanceModal
+          isOpen={shouldShowModal}
+          onAccept={handleAcceptTerms}
+          onDecline={handleDeclineTerms}
+          needsReAcceptance={needsReAcceptance}
+          lastAcceptanceDate={lastAcceptanceDate}
+        />
+      )}
+
       <main className="relative z-10">
         {/* Hero Section */}
         <section className="relative overflow-hidden pt-8 md:pt-12">
