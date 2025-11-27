@@ -37,110 +37,159 @@ export default function SportsUP18Logo({
         width={width}
         height={height}
         viewBox="0 0 100 100"
-        className={`${animated ? 'transition-all duration-300' : ''} ${
+        className={`${animated ? 'transition-transform duration-300' : ''} ${
           isHovered && animated ? 'scale-110' : 'scale-100'
         }`}
         style={{
-          filter: isHovered && animated ? 'drop-shadow(0 0 15px rgba(251, 191, 36, 0.8))' : 'none',
+          filter: isHovered && animated ? 'drop-shadow(0 0 20px rgba(34, 211, 238, 0.65))' : 'none',
         }}
       >
         <defs>
+          <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#fbbf24" />
+            <stop offset="30%" stopColor="#f97316" />
+            <stop offset="65%" stopColor="#22d3ee" />
+            <stop offset="100%" stopColor="#38bdf8" />
+          </linearGradient>
+          <linearGradient id="sStrokeGradient" x1="30%" y1="0%" x2="70%" y2="100%">
+            <stop offset="0%" stopColor="#fde68a" />
+            <stop offset="45%" stopColor="#f97316" />
+            <stop offset="100%" stopColor="#a855f7" />
+          </linearGradient>
+          <radialGradient id="glowGradient" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="rgba(34, 211, 238, 0.45)" />
+            <stop offset="65%" stopColor="rgba(24, 24, 27, 0.15)" />
+            <stop offset="100%" stopColor="rgba(24, 24, 27, 0)" />
+          </radialGradient>
+          <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+
           <style>{`
-            @keyframes sharpPulse {
-              0%, 100% { opacity: 1; }
-              50% { opacity: 0.7; }
+            @keyframes orbit {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
             }
-            @keyframes slideRight {
-              0% { transform: translateX(-5px); }
-              50% { transform: translateX(0); }
-              100% { transform: translateX(-5px); }
+            @keyframes pulseRing {
+              0%, 100% { opacity: 0.35; transform: scale(1); }
+              50% { opacity: 0.7; transform: scale(1.07); }
             }
-            .logo-pulse {
-              animation: sharpPulse 2s ease-in-out infinite;
+            @keyframes shimmerStroke {
+              0% { stroke-dashoffset: 0; }
+              100% { stroke-dashoffset: -180; }
             }
-            .logo-slide {
-              animation: slideRight 2s ease-in-out infinite;
+            @keyframes flareBlink {
+              0%, 100% { opacity: 0; transform: scale(0.6); }
+              50% { opacity: 0.7; transform: scale(1.1); }
+            }
+            .logo-ring {
+              animation: pulseRing 4s ease-in-out infinite;
+              transform-origin: 50px 50px;
+            }
+            .logo-s {
+              animation: shimmerStroke 6s linear infinite;
+            }
+            .logo-orbit {
+              animation: orbit 7.5s linear infinite;
+              transform-origin: 50px 50px;
+            }
+            .logo-flare {
+              animation: flareBlink 2.8s ease-in-out infinite;
             }
           `}</style>
         </defs>
 
-        {/* Bold geometric background - sharp angles */}
-        {/* Top left triangle */}
-        <polygon
-          points="0,0 40,0 0,40"
-          fill="#fbbf24"
-          opacity="0.9"
-          className={animated ? 'logo-pulse' : ''}
+        {/* Ambient glow */}
+        <circle
+          cx="50"
+          cy="50"
+          r="48"
+          fill="url(#glowGradient)"
+          className={animated ? 'logo-ring' : ''}
+          style={{ animationDuration: animated ? (isHovered ? '2.4s' : '4s') : undefined }}
         />
 
-        {/* Bottom right triangle */}
-        <polygon
-          points="100,100 60,100 100,60"
-          fill="#3b82f6"
-          opacity="0.9"
-          className={animated ? 'logo-pulse' : ''}
-          style={{ animationDelay: '0.3s' }}
+        {/* Stadium arc ring */}
+        <circle
+          cx="50"
+          cy="50"
+          r="40"
+          fill="none"
+          stroke="url(#ringGradient)"
+          strokeWidth="5"
+          strokeLinecap="round"
+          strokeDasharray="120 40"
+          className={animated ? 'logo-ring' : ''}
+          style={{
+            animationDuration: animated ? (isHovered ? '2.2s' : '4.6s') : undefined,
+            filter: 'url(#softGlow)',
+          }}
         />
 
-        {/* Center geometric shape - sharp S */}
-        <g className={animated ? 'logo-slide' : ''}>
-          {/* Upper S curve - angular */}
-          <polygon
-            points="35,25 55,25 50,35 40,35"
-            fill="#fbbf24"
-          />
-          <polygon
-            points="45,30 65,30 60,40 50,40"
-            fill="#fbbf24"
-          />
+        {/* Dynamic energy orbit trail */}
+        <path
+          d="M20 58c4 12 18 22 32 22s28-10 32-22"
+          fill="none"
+          stroke="rgba(56, 189, 248, 0.35)"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
 
-          {/* Lower S curve - angular */}
-          <polygon
-            points="40,60 60,60 55,70 45,70"
-            fill="#3b82f6"
-          />
-          <polygon
-            points="35,65 55,65 50,75 40,75"
-            fill="#3b82f6"
-          />
+        {/* Stylised "S" stroke */}
+        <path
+          d="M70 28c-10-12-36-12-46 0-8 10-2 22 14 24 18 2 22 12 10 20-10 7-26 4-34-6"
+          fill="none"
+          stroke="url(#sStrokeGradient)"
+          strokeWidth="8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeDasharray={animated ? '120 40' : 'none'}
+          className={animated ? 'logo-s' : ''}
+          style={{
+            filter: 'url(#softGlow)',
+            animationDuration: animated ? (isHovered ? '3.2s' : '6s') : undefined,
+          }}
+        />
+
+        {/* Cricket stump pulse */}
+        <g
+          className={animated ? 'logo-flare' : ''}
+          style={{
+            transformOrigin: '68px 35px',
+            animationDuration: animated ? (isHovered ? '1.8s' : '2.8s') : undefined,
+          }}
+        >
+          <rect x="65" y="30" width="4" height="18" rx="2" fill="#fde68a" opacity="0.85" />
         </g>
 
-        {/* Center accent - upward chevron (18 indicator) */}
-        <g className={animated ? 'logo-pulse' : ''} style={{ animationDelay: '0.6s' }}>
-          <polygon
-            points="50,35 58,45 50,50 42,45"
-            fill="#a78bfa"
-            opacity="0.95"
-          />
+        {/* Cricket ball orbit */}
+        <g
+          className={animated ? 'logo-orbit' : ''}
+          style={{
+            transformOrigin: '50px 50px',
+            animationDuration: animated ? (isHovered ? '3s' : '7.5s') : undefined,
+          }}
+        >
+          <g transform="translate(50 10)">
+            <circle r="6"
+              fill="#f97316"
+              stroke="#fff7ed"
+              strokeWidth="1.2"
+              filter="url(#softGlow)"
+            />
+            <path
+              d="M-4 -1c2.2.8 4.4.8 6.8 0"
+              stroke="#fde68a"
+              strokeWidth="0.8"
+              strokeLinecap="round"
+            />
+            <circle r="2.8" cx="-1.6" cy="-1.8" fill="rgba(255, 255, 255, 0.6)" />
+          </g>
         </g>
-
-        {/* Right accent line - sharp */}
-        <line
-          x1="70"
-          y1="30"
-          x2="85"
-          y2="45"
-          stroke="#fbbf24"
-          strokeWidth="3"
-          strokeLinecap="round"
-          opacity="0.8"
-          className={animated ? 'logo-slide' : ''}
-          style={{ animationDelay: '0.2s' }}
-        />
-
-        {/* Bottom accent line - sharp */}
-        <line
-          x1="30"
-          y1="70"
-          x2="45"
-          y2="85"
-          stroke="#3b82f6"
-          strokeWidth="3"
-          strokeLinecap="round"
-          opacity="0.8"
-          className={animated ? 'logo-slide' : ''}
-          style={{ animationDelay: '0.4s' }}
-        />
       </svg>
     </div>
   );
