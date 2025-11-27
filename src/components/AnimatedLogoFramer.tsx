@@ -43,9 +43,24 @@ export default function AnimatedLogoFramer({ size = 120, animated = true, varian
       compact: '/logo/sportsup18_crest_compact.svg',
       horizontal: '/logo/sportsup18_crest_horizontal.svg',
       stacked: '/logo/sportsup18_crest.svg',
+      mascot: '/logo/sportsup18_mascot.svg',
+      scoreboard: '/logo/sportsup18_scoreboard_detailed.svg',
+      detailed_crest: '/logo/sportsup18_crest_detailed.svg',
       inline: '/logo/sportsup18_animated.svg'
     }
     const src = map[variant]
+    // if scoreboard and animated requested, the parent will request AnimatedScoreboard separately
+    if (variant === 'scoreboard' && typeof window !== 'undefined') {
+      try {
+        // Dynamically import the animated scoreboard component client-side
+        // Fallback: show static svg
+        const AnimatedScoreboard = require('./AnimatedScoreboard').default
+        return <AnimatedScoreboard size={size} animated={animated} />
+      } catch (e) {
+        return <img src={src} alt="SportsUP18 logo" style={{ width: px, height: 'auto' }} />
+      }
+    }
+
     return <img src={src} alt="SportsUP18 logo" style={{ width: px, height: 'auto' }} />
   }
 
