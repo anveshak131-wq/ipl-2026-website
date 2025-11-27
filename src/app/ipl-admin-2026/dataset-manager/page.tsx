@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import ModernDialog from "@/components/admin/ModernDialog";
 
 interface DatasetSummary {
   key: string;
@@ -511,85 +512,61 @@ export default function AdminDatasetManagerPage() {
         </div>
       </div>
 
-      {isAddColumnDialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-2xl bg-[#020617] border border-white/10 shadow-2xl shadow-black/40">
-            <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between">
-              <div>
-                <h2 className="text-sm font-semibold text-white">Add new column</h2>
-                <p className="mt-1 text-xs text-gray-400">
-                  Give this column a clear, machine-friendly name you can reuse in models and charts.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={closeAddColumnDialog}
-                className="p-1 rounded-md text-gray-400 hover:text-white hover:bg-white/5"
-              >
-                <span className="sr-only">Close</span>
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            <div className="px-5 py-4 space-y-3">
-              <div>
-                <label
-                  className="block text-xs font-semibold text-gray-300 mb-1"
-                  htmlFor="new-column-name"
-                >
-                  Column name
-                </label>
-                <input
-                  id="new-column-name"
-                  type="text"
-                  value={newColumnName}
-                  onChange={(e) => {
-                    setNewColumnName(e.target.value);
-                    if (newColumnError) setNewColumnError(null);
-                  }}
-                  placeholder="e.g. win_probability, venue_alt, phase"
-                  className="w-full px-3 py-2 rounded-lg bg-black/40 border border-white/15 text-xs text-gray-100 placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                />
-              </div>
-
-              {newColumnError && (
-                <div className="text-[11px] text-red-300 bg-red-500/10 border border-red-500/40 rounded-md px-3 py-2">
-                  {newColumnError}
-                </div>
-              )}
-            </div>
-
-            <div className="px-5 py-3 border-t border-white/10 flex items-center justify-end gap-2 bg-black/20 rounded-b-2xl">
-              <button
-                type="button"
-                onClick={closeAddColumnDialog}
-                className="px-3 py-1.5 rounded-md text-[11px] text-gray-200 bg-transparent hover:bg-white/5"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={confirmAddColumnDialog}
-                className="px-3 py-1.5 rounded-md text-[11px] font-semibold bg-ipl-gold text-black hover:bg-ipl-gold/90"
-              >
-                Add column
-              </button>
-            </div>
+      <ModernDialog
+        isOpen={isAddColumnDialogOpen}
+        onClose={closeAddColumnDialog}
+        title="Add new column"
+        description="Give this column a clear, machine-friendly name you can reuse in models and charts."
+        variant="info"
+        size="sm"
+        icon="➕"
+        footer={
+          <div className="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={closeAddColumnDialog}
+              className="px-4 py-2 rounded-lg text-sm text-gray-200 bg-transparent border border-white/10 hover:bg-white/5"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={confirmAddColumnDialog}
+              className="px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700"
+            >
+              Add column
+            </button>
           </div>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <label
+              className="block text-sm font-medium text-gray-300 mb-2"
+              htmlFor="new-column-name"
+            >
+              Column name
+            </label>
+            <input
+              id="new-column-name"
+              type="text"
+              value={newColumnName}
+              onChange={(e) => {
+                setNewColumnName(e.target.value);
+                if (newColumnError) setNewColumnError(null);
+              }}
+              placeholder="e.g. win_probability, venue_alt, phase"
+              className="w-full px-4 py-2.5 rounded-xl bg-slate-900/60 border border-white/10 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+            />
+          </div>
+
+          {newColumnError && (
+            <div className="text-sm text-red-300 bg-red-500/10 border border-red-500/40 rounded-lg px-4 py-3">
+              {newColumnError}
+            </div>
+          )}
         </div>
-      )}
+      </ModernDialog>
     </div>
   );
 }
