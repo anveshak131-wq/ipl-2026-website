@@ -149,7 +149,8 @@ X-Admin-Token: {admin_token}
 
 #### 2. **Provider Failover** (Built-in)
 - Primary: Resend
-- Fallback: SendGrid
+- Secondary: Elastic Email
+- Tertiary: SendGrid
 - Fallback: Mailgun
 - Automatic switching on provider failure
 
@@ -387,6 +388,7 @@ POST /api/admin-email-dashboard/ab-test
 - ✅ Admin token for dashboard
 - ✅ One-time unsubscribe tokens
 - ✅ Token expiration and validation
+- ✅ Provider webhook signature verification (Elastic Email, Resend, SendGrid, Mailgun)
 
 ### Privacy
 - ✅ GDPR compliant

@@ -172,12 +172,17 @@ async function sendEmail(request, env, corsHeaders) {
 }
 
 /**
- * Send email via Resend, SendGrid, or fallback service
+ * Send email via Resend, Elastic Email, SendGrid, or fallback service
  */
 async function sendEmailViaProvider(emailData, env) {
   // Try Resend first
   if (env.RESEND_API_KEY) {
     return await sendViaResend(emailData, env.RESEND_API_KEY);
+  }
+
+  // Try Elastic Email
+  if (env.ELASTIC_EMAIL_API_KEY) {
+    return await sendViaElasticEmail(emailData, env.ELASTIC_EMAIL_API_KEY);
   }
 
   // Try SendGrid
@@ -223,6 +228,45 @@ async function sendViaResend(emailData, apiKey) {
     return { success: true, messageId: data.id };
   } catch (error) {
     console.error('Resend error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Send via Elastic Email
+ * API docs: https://elasticemail.com/developers/api-documentation/rest-api
+ */
+async function sendViaElasticEmail(emailData, apiKey) {
+  try {
+    const response = await fetch('https://api.elasticemail.com/v2/email/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        apikey: apiKey,
+        from: emailData.from,
+        to: emailData.to,
+        subject: emailData.subject,
+        bodyHtml: emailData.html,
+      }).toString(),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      return { success: false, error: error || 'Elastic Email API error' };
+    }
+
+    const data = await response.json();
+    
+    // Elastic Email returns transaction ID
+    if (data.success) {
+      return { success: true, messageId: data.transactionid || data.transaction_id || 'elastic-' + Date.now() };
+    } else {
+      return { success: false, error: data.error || 'Elastic Email error' };
+    }
+  } catch (error) {
+    console.error('Elastic Email error:', error);
     return { success: false, error: error.message };
   }
 }

@@ -150,7 +150,36 @@ function detectProvider(body) {
     };
   }
 
+  // Elastic Email webhook format
+  if (body.status && body.email && body.messageid) {
+    return {
+      provider: 'elastic-email',
+      type: normalizeElasticEmailEvent(body.status),
+      email: body.email,
+      messageId: body.messageid,
+      timestamp: body.dateSent ? new Date(body.dateSent).getTime() : Date.now(),
+      raw: body,
+    };
+  }
+
   return null;
+}
+
+/**
+ * Normalize Elastic Email event type to standard format
+ */
+function normalizeElasticEmailEvent(elasticStatus) {
+  const statusMap = {
+    'Sent': 'email-sent',
+    'Delivered': 'email-delivered',
+    'Opened': 'email-opened',
+    'Clicked': 'email-clicked',
+    'Bounced': 'bounce',
+    'AbuseReport': 'complained',
+    'Unsubscribed': 'unsubscribed',
+    'Failed': 'failed',
+  };
+  return statusMap[elasticStatus] || elasticStatus.toLowerCase();
 }
 
 /**

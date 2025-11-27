@@ -170,7 +170,8 @@ User Request
 ```bash
 # Email Provider (choose one)
 RESEND_API_KEY=re_xxxxx (PRIMARY)
-SENDGRID_API_KEY=SG.xxxxx (FALLBACK)
+ELASTIC_EMAIL_API_KEY=xxxx (SECONDARY)
+SENDGRID_API_KEY=SG.xxxxx (TERTIARY)
 MAILGUN_API_KEY=xxxx (FALLBACK)
 
 # Admin
@@ -178,6 +179,7 @@ ADMIN_EMAIL_TOKEN=your_secure_token_here
 
 # (Optional) Webhook Verification
 RESEND_WEBHOOK_SECRET=xxxx
+ELASTIC_EMAIL_WEBHOOK_SECRET=xxxx
 SENDGRID_WEBHOOK_VERIFICATION_TOKEN=xxxx
 MAILGUN_WEBHOOK_SIGNATURE_SIGNING_KEY=xxxx
 ```
@@ -201,6 +203,11 @@ triggers = { crons = ["*/5 * * * *"] }
 Dashboard → Settings → Webhooks
 - Add: `https://yourdomain.com/api/email-analytics/webhooks/resend`
 - Events: email_sent, email_delivered, email_opened, email_clicked, email_bounced, email_complained
+
+#### Elastic Email
+Settings → API → Webhooks
+- Add: `https://yourdomain.com/api/email-analytics/webhooks/elastic-email`
+- Events: Sent, Delivered, Opened, Clicked, Bounced, AbuseReport, Unsubscribed
 
 #### SendGrid
 Settings → Mail Send Settings → Event Webhook

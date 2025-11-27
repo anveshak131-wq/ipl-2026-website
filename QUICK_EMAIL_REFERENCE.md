@@ -99,6 +99,7 @@ Subject: 🏏 Match Reminder: RCB vs MI Starting in 30 Minutes!
 
 ### Step 1: Pick Email Provider
 - **Resend** (easiest) → https://resend.com
+- **Elastic Email** → https://elasticemail.com
 - **SendGrid** → https://sendgrid.com
 - **Mailgun** → https://mailgun.com
 
@@ -110,9 +111,16 @@ Subject: 🏏 Match Reminder: RCB vs MI Starting in 30 Minutes!
 ### Step 3: Add to Cloudflare
 ```
 Cloudflare Pages → Your Project → Settings → Environment Variables
-→ Secrets → Add:
+→ Secrets → Add one of:
 
 RESEND_API_KEY: your_key_here
+OR
+ELASTIC_EMAIL_API_KEY: your_key_here
+OR
+SENDGRID_API_KEY: your_key_here
+OR
+MAILGUN_API_KEY: your_key_here
+MAILGUN_DOMAIN: your_domain
 ```
 
 **Done!** 🎉 System works immediately.
