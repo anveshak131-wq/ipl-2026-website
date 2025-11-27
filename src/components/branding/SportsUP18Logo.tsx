@@ -35,7 +35,7 @@ export default function SportsUP18Logo({
     >
       {/* Background circle */}
       <div
-        className="absolute rounded-full bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-400/40 backdrop-blur-md"
+        className="absolute rounded-full bg-gradient-to-br from-blue-600/25 to-cyan-600/25 border border-blue-400/40 backdrop-blur-md"
         style={{
           width: width + padding * 2,
           height: height + padding * 2,
@@ -50,22 +50,22 @@ export default function SportsUP18Logo({
           isHovered && animated ? 'scale-110' : 'scale-100'
         }`}
         style={{
-          filter: isHovered && animated ? 'drop-shadow(0 0 20px rgba(249, 115, 22, 0.8)) drop-shadow(0 0 40px rgba(239, 68, 68, 0.5))' : 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))',
+          filter: isHovered && animated ? 'drop-shadow(0 0 20px rgba(59, 130, 246, 0.8)) drop-shadow(0 0 40px rgba(34, 197, 234, 0.5))' : 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))',
         }}
       >
         <defs>
-          <linearGradient id="cricketGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#f97316" />
-            <stop offset="100%" stopColor="#dc2626" />
+          <linearGradient id="mainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#3b82f6" />
+            <stop offset="100%" stopColor="#06b6d4" />
           </linearGradient>
 
           <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#fbbf24" />
-            <stop offset="100%" stopColor="#f97316" />
+            <stop offset="0%" stopColor="#22d3ee" />
+            <stop offset="100%" stopColor="#3b82f6" />
           </linearGradient>
 
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+          <filter id="softGlow">
+            <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
             <feMerge>
               <feMergeNode in="coloredBlur"/>
               <feMergeNode in="SourceGraphic"/>
@@ -73,86 +73,68 @@ export default function SportsUP18Logo({
           </filter>
 
           <style>{`
-            @keyframes spin-fast {
+            @keyframes float-up {
+              0%, 100% { transform: translateY(0px); }
+              50% { transform: translateY(-3px); }
+            }
+            @keyframes rotate-slow {
               from { transform: rotate(0deg); }
               to { transform: rotate(360deg); }
             }
-            @keyframes pulse-ring {
-              0%, 100% { r: 55; opacity: 0.8; }
-              50% { r: 60; opacity: 0.3; }
-            }
-            @keyframes shimmer {
-              0% { opacity: 0.5; }
-              50% { opacity: 1; }
-              100% { opacity: 0.5; }
+            @keyframes pulse-scale {
+              0%, 100% { transform: scale(1); opacity: 0.8; }
+              50% { transform: scale(1.1); opacity: 0.4; }
             }
             
-            .cricket-ball {
-              transform-origin: 60px 60px;
-              animation: ${animated ? 'spin-fast 4s linear infinite' : 'none'};
+            .arrow-up {
+              animation: ${animated ? 'float-up 2s ease-in-out infinite' : 'none'};
             }
-            .pulse-ring {
-              animation: ${animated ? 'pulse-ring 2s ease-in-out infinite' : 'none'};
+            .rotating-ring {
+              animation: ${animated ? 'rotate-slow 8s linear infinite' : 'none'};
             }
-            .shimmer {
-              animation: ${animated ? 'shimmer 2.5s ease-in-out infinite' : 'none'};
+            .pulse-circle {
+              animation: ${animated ? 'pulse-scale 2.5s ease-in-out infinite' : 'none'};
             }
           `}</style>
         </defs>
 
-        {/* Outer ring */}
-        <circle cx="60" cy="60" r="58" fill="none" stroke="url(#cricketGradient)" strokeWidth="2" opacity="0.9"/>
-        
-        {/* Pulsing ring effect */}
-        <circle cx="60" cy="60" r="55" fill="none" stroke="url(#accentGradient)" strokeWidth="1.5" opacity="0.4" className="pulse-ring"/>
-
-        {/* Main background circle */}
-        <circle cx="60" cy="60" r="52" fill="url(#cricketGradient)" opacity="0.08"/>
-
-        {/* Cricket Ball - Spinning */}
-        <g className="cricket-ball">
-          {/* Ball body */}
-          <circle cx="60" cy="60" r="24" fill="url(#cricketGradient)" filter="url(#glow)"/>
-          
-          {/* Ball shine */}
-          <circle cx="52" cy="52" r="7" fill="#fef3c7" opacity="0.5" className="shimmer"/>
-          
-          {/* Stitching pattern - red cricket ball style */}
-          <path d="M 48 55 Q 60 50 72 55" stroke="#fed7aa" strokeWidth="1.5" fill="none" opacity="0.8" strokeLinecap="round"/>
-          <path d="M 48 65 Q 60 70 72 65" stroke="#fed7aa" strokeWidth="1.5" fill="none" opacity="0.8" strokeLinecap="round"/>
-          <path d="M 55 48 Q 60 60 55 72" stroke="#fed7aa" strokeWidth="1" fill="none" opacity="0.6" strokeLinecap="round"/>
-          <path d="M 65 48 Q 60 60 65 72" stroke="#fed7aa" strokeWidth="1" fill="none" opacity="0.6" strokeLinecap="round"/>
+        {/* Rotating outer ring */}
+        <g className="rotating-ring">
+          <circle cx="60" cy="60" r="56" fill="none" stroke="url(#mainGradient)" strokeWidth="1.5" opacity="0.6" strokeDasharray="5,5"/>
         </g>
 
-        {/* Wickets - Three Stumps */}
+        {/* Pulsing background circle */}
+        <circle cx="60" cy="60" r="52" fill="url(#mainGradient)" opacity="0.08" className="pulse-circle"/>
+
+        {/* Central hexagon - modern tech feel */}
         <g opacity="0.9">
-          {/* Left stump */}
-          <rect x="40" y="75" width="2.5" height="20" fill="url(#accentGradient)" rx="1"/>
-          {/* Middle stump */}
-          <rect x="58.75" y="75" width="2.5" height="20" fill="url(#accentGradient)" rx="1"/>
-          {/* Right stump */}
-          <rect x="77.5" y="75" width="2.5" height="20" fill="url(#accentGradient)" rx="1"/>
-          
-          {/* Bails - top */}
-          <rect x="40" y="73" width="40" height="2" fill="url(#accentGradient)" opacity="0.8" rx="1"/>
+          <path d="M 60 35 L 75 42.5 L 75 57.5 L 60 65 L 45 57.5 L 45 42.5 Z" fill="url(#mainGradient)" filter="url(#softGlow)"/>
+          <path d="M 60 35 L 75 42.5 L 75 57.5 L 60 65 L 45 57.5 L 45 42.5 Z" fill="none" stroke="url(#accentGradient)" strokeWidth="1" opacity="0.6"/>
         </g>
 
-        {/* Bat - Angled */}
-        <g opacity="0.85" transform="translate(60, 60) rotate(-35) translate(-60, -60)">
-          {/* Bat blade */}
-          <rect x="54" y="25" width="12" height="28" fill="url(#accentGradient)" rx="2"/>
+        {/* Upward arrow - growth/momentum */}
+        <g className="arrow-up" opacity="0.95">
+          {/* Arrow shaft */}
+          <line x1="60" y1="75" x2="60" y2="85" stroke="url(#accentGradient)" strokeWidth="2.5" strokeLinecap="round"/>
           
-          {/* Bat handle */}
-          <rect x="56" y="53" width="8" height="18" fill="url(#accentGradient)" opacity="0.9" rx="2"/>
-          
-          {/* Bat grip detail */}
-          <line x1="54" y1="58" x2="66" y2="58" stroke="#fef3c7" strokeWidth="1" opacity="0.6"/>
-          <line x1="54" y1="63" x2="66" y2="63" stroke="#fef3c7" strokeWidth="1" opacity="0.6"/>
+          {/* Arrow head */}
+          <path d="M 55 80 L 60 75 L 65 80" fill="none" stroke="url(#accentGradient)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
         </g>
 
-        {/* Decorative accent - star */}
+        {/* Side accent lines - dynamic feel */}
+        <g opacity="0.5">
+          <line x1="35" y1="50" x2="40" y2="50" stroke="url(#accentGradient)" strokeWidth="1.5" strokeLinecap="round"/>
+          <line x1="35" y1="60" x2="40" y2="60" stroke="url(#accentGradient)" strokeWidth="1.5" strokeLinecap="round"/>
+          
+          <line x1="80" y1="50" x2="85" y2="50" stroke="url(#accentGradient)" strokeWidth="1.5" strokeLinecap="round"/>
+          <line x1="80" y1="60" x2="85" y2="60" stroke="url(#accentGradient)" strokeWidth="1.5" strokeLinecap="round"/>
+        </g>
+
+        {/* Bottom accent dots */}
         <g opacity="0.7">
-          <path d="M 100 30 L 103 37 L 111 37 L 105 42 L 107 49 L 100 44 L 93 49 L 95 42 L 89 37 L 97 37 Z" fill="url(#accentGradient)"/>
+          <circle cx="50" cy="95" r="1.5" fill="url(#accentGradient)"/>
+          <circle cx="60" cy="98" r="1.5" fill="url(#accentGradient)"/>
+          <circle cx="70" cy="95" r="1.5" fill="url(#accentGradient)"/>
         </g>
       </svg>
     </div>
