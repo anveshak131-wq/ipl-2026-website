@@ -102,8 +102,8 @@ export default function Navbar() {
           {/* Logo Section */}
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center group relative shrink-0">
-              <div className="group-hover:scale-110 transition-transform duration-300">
-                <AnimatedLogo size={140} variant="inline" animated={motionEnabled} />
+                <div className="group-hover:scale-110 transition-transform duration-300">
+                <AnimatedLogo size={140} variant="horizontal" animated={motionEnabled} />
               </div>
             </Link>
 

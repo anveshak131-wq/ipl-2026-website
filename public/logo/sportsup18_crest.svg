@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 280" width="240" height="280" role="img" aria-labelledby="t">
+  <title id="t">SportsUP18 Crest</title>
+  <defs>
+    <linearGradient id="crestGrad" x1="0" x2="1">
+      <stop offset="0%" stop-color="#0B7A3F" />
+      <stop offset="100%" stop-color="#0FA67A" />
+    </linearGradient>
+  </defs>
+
+  <path d="M120 12 L200 52 C200 140 140 220 120 236 C100 220 40 140 40 52 Z" fill="url(#crestGrad)" stroke="#072226" stroke-width="3" />
+
+  <!-- Stumps -->
+  <g transform="translate(90,120)" fill="#F3F4F6">
+    <rect x="0" y="0" width="6" height="48" rx="1" />
+    <rect x="12" y="0" width="6" height="48" rx="1" />
+    <rect x="24" y="0" width="6" height="48" rx="1" />
+  </g>
+
+  <!-- Bat crossing behind stumps -->
+  <g transform="translate(56,132) rotate(-28 40 10)">
+    <rect x="0" y="0" width="110" height="18" rx="6" fill="#E6D5C6" stroke="#C7A17A" stroke-width="1" />
+  </g>
+
+  <!-- Wordmark at bottom -->
+  <text x="120" y="260" font-family="Bebas Neue, Arial, Helvetica, sans-serif" font-size="28" fill="#F8FAFC" text-anchor="middle">SportsUP 18</text>
+</svg>

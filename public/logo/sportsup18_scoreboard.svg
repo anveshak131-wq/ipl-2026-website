@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 120" width="360" height="120" role="img" aria-labelledby="ts">
+  <title id="ts">SportsUP18 Scoreboard</title>
+  <rect width="100%" height="100%" rx="10" fill="#071033" />
+  <g transform="translate(8,10)">
+    <rect x="0" y="0" width="220" height="100" rx="8" fill="#0B1F3A" stroke="#0B7A3F" stroke-width="2" />
+    <text x="18" y="42" font-family="Inter, Arial" font-size="20" fill="#9EECD9">SPORTSUP</text>
+    <rect x="156" y="18" width="46" height="30" rx="4" fill="#111827" stroke="#E63946" stroke-width="2" />
+    <text x="179" y="40" font-family="Bebas Neue, Arial" font-size="20" fill="#E63946" text-anchor="middle">18</text>
+  </g>
+  <g transform="translate(236,14)">
+    <rect x="0" y="0" width="108" height="92" rx="6" fill="#071022" stroke="#0FA67A" stroke-width="1" />
+    <text x="54" y="50" font-family="Inter, Arial" font-size="22" fill="#F3F4F6" text-anchor="middle">LIVE</text>
+  </g>
+</svg>
