@@ -210,6 +210,8 @@ Value: ["user1@email.com", "user2@email.com", ...]
 
 ## 📞 Quick Help
 
+**Using Elastic Email?** → `docs/ELASTIC_EMAIL_SETUP.md` ⭐
+
 **Email setup issue?** → `EMAIL_NOTIFICATION_SETUP.md`
 
 **Want to build UI?** → `EMAIL_FRONTEND_GUIDE.md`
