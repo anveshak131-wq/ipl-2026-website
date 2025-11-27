@@ -96,44 +96,44 @@ export default function SportsUP18Logo({
         </defs>
 
         {/* Outer ring */}
-        <circle cx="60" cy="60" r="58" fill="none" stroke="url(#goldGradient)" strokeWidth="1.5" opacity="0.6"/>
+        <circle cx="60" cy="60" r="58" fill="none" stroke="url(#goldGradient)" strokeWidth="2" opacity="1"/>
 
         {/* Background circle */}
-        <circle cx="60" cy="60" r="56" fill="#030712" opacity="0.3"/>
+        <circle cx="60" cy="60" r="56" fill="#030712" opacity="0.5"/>
 
         {/* Top left triangle - Gold */}
-        <polygon points="35,35 55,35 45,50" fill="url(#goldGradient)" opacity="0.9" className="glow-element"/>
+        <polygon points="35,35 55,35 45,50" fill="url(#goldGradient)" opacity="1" className="glow-element"/>
 
         {/* Bottom right triangle - Blue */}
-        <polygon points="65,70 85,70 75,85" fill="url(#blueGradient)" opacity="0.9" className="glow-element" style={{ animationDelay: '0.3s' }}/>
+        <polygon points="65,70 85,70 75,85" fill="url(#blueGradient)" opacity="1" className="glow-element" style={{ animationDelay: '0.3s' }}/>
 
         {/* Center chevron - Purple */}
-        <g className="slide-left" opacity="0.95">
+        <g className="slide-left" opacity="1">
           <polygon points="50,50 58,58 50,62 42,58" fill="url(#purpleGradient)"/>
         </g>
 
         {/* Upper S curve - Gold segments */}
-        <g className="slide-right" opacity="0.7">
+        <g className="slide-right" opacity="0.9">
           <polygon points="45,40 55,40 52,45 48,45" fill="url(#goldGradient)"/>
           <polygon points="52,43 62,43 59,48 55,48" fill="url(#goldGradient)"/>
         </g>
 
         {/* Lower S curve - Blue segments */}
-        <g opacity="0.7">
+        <g opacity="0.9">
           <polygon points="48,72 58,72 55,77 51,77" fill="url(#blueGradient)"/>
           <polygon points="45,77 55,77 52,82 48,82" fill="url(#blueGradient)"/>
         </g>
 
         {/* Right accent line - Gold */}
-        <line x1="70" y1="40" x2="82" y2="52" stroke="url(#goldGradient)" strokeWidth="2.5" strokeLinecap="round" opacity="0.8" className="slide-right" style={{ animationDelay: '0.2s' }}/>
+        <line x1="70" y1="40" x2="82" y2="52" stroke="url(#goldGradient)" strokeWidth="3" strokeLinecap="round" opacity="1" className="slide-right" style={{ animationDelay: '0.2s' }}/>
 
         {/* Bottom accent line - Blue */}
-        <line x1="38" y1="75" x2="50" y2="87" stroke="url(#blueGradient)" strokeWidth="2.5" strokeLinecap="round" opacity="0.8" className="slide-left" style={{ animationDelay: '0.4s' }}/>
+        <line x1="38" y1="75" x2="50" y2="87" stroke="url(#blueGradient)" strokeWidth="3" strokeLinecap="round" opacity="1" className="slide-left" style={{ animationDelay: '0.4s' }}/>
 
         {/* Corner accent dots */}
-        <g opacity="0.8" className="glow-element" style={{ animationDelay: '0.6s' }}>
-          <circle cx="38" cy="38" r="1.5" fill="url(#goldGradient)"/>
-          <circle cx="82" cy="82" r="1.5" fill="url(#blueGradient)"/>
+        <g opacity="1" className="glow-element" style={{ animationDelay: '0.6s' }}>
+          <circle cx="38" cy="38" r="2" fill="url(#goldGradient)"/>
+          <circle cx="82" cy="82" r="2" fill="url(#blueGradient)"/>
         </g>
       </svg>
     </div>
