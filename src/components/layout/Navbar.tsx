@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import AnimatedLogo from '../AnimatedLogo';
+import SportsUP18LogoWithText from '../branding/SportsUP18LogoWithText';
+import SportsUP18Logo from '../branding/SportsUP18Logo';
 import Emoji from '../emoji/Emoji';
 
 type NavEmojiName = 'cricket' | 'chart' | 'news' | 'glove' | 'target' | 'trophy' | 'sparkles' | 'people' | 'fire' | 'star';
@@ -90,26 +92,38 @@ export default function Navbar() {
     <nav 
       className={`sticky top-0 z-50 border-b transition-all duration-500 ${
         scrolled 
-          ? 'bg-[rgba(10,14,39,0.8)] backdrop-blur-2xl border-blue-500/20 shadow-2xl shadow-black/40' 
-          : 'bg-[rgba(10,14,39,0.6)] backdrop-blur-xl border-blue-500/10'
+          ? 'bg-[rgba(10,14,39,0.95)] backdrop-blur-3xl border-blue-500/30 shadow-2xl shadow-black/50' 
+          : 'bg-[rgba(10,14,39,0.7)] backdrop-blur-2xl border-blue-500/20'
       }`}
       style={{
-        backdropFilter: scrolled ? 'blur(20px) saturate(200%)' : 'blur(15px) saturate(150%)',
+        backdropFilter: scrolled ? 'blur(25px) saturate(220%)' : 'blur(20px) saturate(180%)',
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo Section */}
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center group relative shrink-0">
-                <div className="group-hover:scale-110 transition-transform duration-300">
-                    <div className="md:hidden">
-                      <AnimatedLogo size={72} variant="mascot" animated={motionEnabled} />
-                    </div>
-                    <div className="hidden md:block">
-                      <AnimatedLogo size={140} variant="horizontal" animated={motionEnabled} />
-                    </div>
-                  </div>
+          {/* Logo Section - New SportsUP18 Logo */}
+          <div className="flex items-center gap-2 md:gap-4">
+            <Link 
+              href="/" 
+              className="flex items-center group relative shrink-0 hover:opacity-90 transition-opacity duration-300"
+            >
+              {/* Mobile: Icon only */}
+              <div className="md:hidden">
+                <SportsUP18Logo 
+                  size="md" 
+                  animated={motionEnabled}
+                  className="drop-shadow-lg"
+                />
+              </div>
+              
+              {/* Desktop: Logo with text */}
+              <div className="hidden md:flex">
+                <SportsUP18LogoWithText 
+                  size="md" 
+                  animated={motionEnabled}
+                  className="drop-shadow-lg hover:drop-shadow-2xl transition-all duration-300"
+                />
+              </div>
             </Link>
 
             {/* Motion toggle */}
@@ -117,7 +131,7 @@ export default function Navbar() {
               onClick={toggleMotion}
               aria-label={motionEnabled ? 'Disable animations' : 'Enable animations'}
               title={motionEnabled ? 'Disable animations' : 'Enable animations'}
-              className="hidden md:inline-flex items-center justify-center w-9 h-9 rounded-lg text-gray-200 hover:text-white hover:bg-white/6 transition-all duration-200"
+              className="hidden md:inline-flex items-center justify-center w-10 h-10 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 border border-white/10 hover:border-blue-500/50 transition-all duration-300"
             >
               {motionEnabled ? (
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 3v18l15-9L5 3z"/></svg>
@@ -130,7 +144,7 @@ export default function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex flex-1 items-center justify-end gap-6 ml-8">
             {/* Primary Nav */}
-            <div className="flex items-center space-x-1 bg-white/5 rounded-xl p-1.5 backdrop-blur-sm border border-white/10 hover:border-white/20 transition-colors duration-300">
+            <div className="flex items-center space-x-1 bg-gradient-to-r from-white/8 to-white/5 rounded-xl p-1.5 backdrop-blur-md border border-white/15 hover:border-blue-500/40 hover:bg-gradient-to-r hover:from-white/12 hover:to-white/8 transition-all duration-300 shadow-lg shadow-black/20">
               {primaryNavItems.map((item, index) => {
                 const isActive = isLinkActive(item.href);
                 const badgeLabel = getNavBadgeLabel(item.href);
@@ -142,10 +156,10 @@ export default function Navbar() {
                     title={tooltip || undefined}
                     style={{ animationDelay: `${index * 50}ms` }}
                     className={`
-                      relative px-3.5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center gap-2
+                      relative px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center gap-2 whitespace-nowrap
                       ${isActive
-                        ? 'text-white bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg shadow-blue-500/40'
-                        : 'text-gray-200 hover:text-white hover:bg-white/8'}
+                        ? 'text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 shadow-lg shadow-blue-500/50 border border-blue-400/30'
+                        : 'text-gray-300 hover:text-white hover:bg-white/10 hover:border border-transparent hover:border-blue-500/30'}
                     `}
                   >
                     {item.emoji && <Emoji name={item.emoji} size={16} animate={true} />}
@@ -166,7 +180,7 @@ export default function Navbar() {
             </div>
 
             {/* Secondary Nav Icons */}
-            <div className="flex items-center gap-3 pl-4 border-l border-white/10 pointer-events-auto">
+            <div className="flex items-center gap-3 pl-4 border-l border-white/15 pointer-events-auto">
               {secondaryNavItems.map((item) => {
                 const isActive = isLinkActive(item.href);
                 return (
@@ -175,10 +189,10 @@ export default function Navbar() {
                     href={item.href}
                     aria-label={item.label}
                     className={`
-                      relative flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-300 cursor-pointer pointer-events-auto
+                      relative flex items-center justify-center w-11 h-11 rounded-lg transition-all duration-300 cursor-pointer pointer-events-auto
                       ${isActive
-                        ? 'text-white bg-blue-500/30 border border-blue-400/60 shadow-lg shadow-blue-500/20'
-                        : 'text-gray-200 border border-white/10 hover:text-white hover:border-blue-500/50 hover:bg-white/5'}
+                        ? 'text-white bg-gradient-to-br from-blue-500/40 to-blue-600/40 border border-blue-400/60 shadow-lg shadow-blue-500/30'
+                        : 'text-gray-300 border border-white/15 hover:text-white hover:border-blue-500/50 hover:bg-white/8 hover:shadow-lg hover:shadow-blue-500/10'}
                     `}
                   >
                     {item.emoji && <Emoji name={item.emoji} size={18} animate={true} className="pointer-events-none" />}
