@@ -40,8 +40,8 @@ export default function AnimatedLogoFramer({ size = 120, animated = true, varian
   // Provide static SVG fallbacks for alternate variants
   if (variant !== 'inline') {
     const map: Record<string, string> = {
-      compact: '/logo/sportsup18_monogram_compact.svg',
-      horizontal: '/logo/sportsup18_scoreboard.svg',
+      compact: '/logo/sportsup18_crest_compact.svg',
+      horizontal: '/logo/sportsup18_crest_horizontal.svg',
       stacked: '/logo/sportsup18_crest.svg',
       inline: '/logo/sportsup18_animated.svg'
     }

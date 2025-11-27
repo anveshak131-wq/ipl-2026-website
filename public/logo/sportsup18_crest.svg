@@ -1,26 +1,38 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 280" width="240" height="280" role="img" aria-labelledby="t">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 300" width="260" height="300" role="img" aria-labelledby="t">
   <title id="t">SportsUP18 Crest</title>
   <defs>
     <linearGradient id="crestGrad" x1="0" x2="1">
-      <stop offset="0%" stop-color="#0B7A3F" />
+      <stop offset="0%" stop-color="#07372a" />
       <stop offset="100%" stop-color="#0FA67A" />
     </linearGradient>
+    <filter id="softShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#00121a" flood-opacity="0.45" />
+    </filter>
   </defs>
 
-  <path d="M120 12 L200 52 C200 140 140 220 120 236 C100 220 40 140 40 52 Z" fill="url(#crestGrad)" stroke="#072226" stroke-width="3" />
+  <!-- Rounded shield with subtle inner border -->
+  <g filter="url(#softShadow)">
+    <path d="M130 18 C190 40, 220 96, 220 158 C220 226, 160 268, 130 286 C100 268, 40 226, 40 158 C40 96, 70 40, 130 18 Z" fill="url(#crestGrad)" stroke="#052927" stroke-width="3" />
+    <path d="M130 34 C180 52, 204 96, 204 150 C204 210, 156 246, 130 260 C104 246, 56 210, 56 150 C56 96, 80 52, 130 34 Z" fill="none" stroke="#0b4f3a" stroke-width="2" opacity="0.18" />
+  </g>
 
-  <!-- Stumps -->
-  <g transform="translate(90,120)" fill="#F3F4F6">
+  <!-- Bat (diagonal) placed slightly behind -->
+  <g transform="translate(36,130) rotate(-26 70 18)">
+    <rect x="0" y="0" width="140" height="22" rx="8" fill="#E6D5C6" stroke="#C7A17A" stroke-width="1" />
+    <rect x="8" y="14" width="24" height="8" rx="3" fill="#C7A17A" />
+  </g>
+
+  <!-- Stumps centered -->
+  <g transform="translate(100,120)" fill="#F8FAFC">
     <rect x="0" y="0" width="6" height="48" rx="1" />
     <rect x="12" y="0" width="6" height="48" rx="1" />
     <rect x="24" y="0" width="6" height="48" rx="1" />
+    <rect x="-4" y="-6" width="36" height="4" rx="2" />
   </g>
 
-  <!-- Bat crossing behind stumps -->
-  <g transform="translate(56,132) rotate(-28 40 10)">
-    <rect x="0" y="0" width="110" height="18" rx="6" fill="#E6D5C6" stroke="#C7A17A" stroke-width="1" />
-  </g>
+  <!-- Ball (foreground) -->
+  <circle cx="182" cy="136" r="10" fill="#E63946" stroke="#C12A3A" stroke-width="1.5" />
 
-  <!-- Wordmark at bottom -->
-  <text x="120" y="260" font-family="Bebas Neue, Arial, Helvetica, sans-serif" font-size="28" fill="#F8FAFC" text-anchor="middle">SportsUP 18</text>
+  <!-- Wordmark rounded baseline -->
+  <text x="130" y="276" font-family="Bebas Neue, Arial, Helvetica, sans-serif" font-size="28" fill="#F8FAFC" text-anchor="middle" letter-spacing="1">SPORTSUP 18</text>
 </svg>
