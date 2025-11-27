@@ -35,7 +35,7 @@ export default function SportsUP18Logo({
     >
       {/* Background circle */}
       <div
-        className="absolute rounded-full bg-gradient-to-br from-blue-600/25 to-cyan-600/25 border border-blue-400/40 backdrop-blur-md"
+        className="absolute rounded-full bg-gradient-to-br from-yellow-500/20 to-blue-500/20 border border-yellow-400/40 backdrop-blur-md"
         style={{
           width: width + padding * 2,
           height: height + padding * 2,
@@ -50,91 +50,90 @@ export default function SportsUP18Logo({
           isHovered && animated ? 'scale-110' : 'scale-100'
         }`}
         style={{
-          filter: isHovered && animated ? 'drop-shadow(0 0 20px rgba(59, 130, 246, 0.8)) drop-shadow(0 0 40px rgba(34, 197, 234, 0.5))' : 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))',
+          filter: isHovered && animated ? 'drop-shadow(0 0 20px rgba(251, 191, 36, 0.8)) drop-shadow(0 0 40px rgba(59, 130, 246, 0.5))' : 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))',
         }}
       >
         <defs>
-          <linearGradient id="mainGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#fbbf24" />
+            <stop offset="100%" stopColor="#f59e0b" />
+          </linearGradient>
+
+          <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#3b82f6" />
-            <stop offset="100%" stopColor="#06b6d4" />
+            <stop offset="100%" stopColor="#1e40af" />
           </linearGradient>
 
-          <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#22d3ee" />
-            <stop offset="100%" stopColor="#3b82f6" />
+          <linearGradient id="purpleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#a78bfa" />
+            <stop offset="100%" stopColor="#7c3aed" />
           </linearGradient>
-
-          <filter id="softGlow">
-            <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
-            <feMerge>
-              <feMergeNode in="coloredBlur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
 
           <style>{`
-            @keyframes float-up {
-              0%, 100% { transform: translateY(0px); }
-              50% { transform: translateY(-3px); }
+            @keyframes pulse-glow {
+              0%, 100% { opacity: 0.8; }
+              50% { opacity: 1; }
             }
-            @keyframes rotate-slow {
-              from { transform: rotate(0deg); }
-              to { transform: rotate(360deg); }
+            @keyframes slide-left {
+              0%, 100% { transform: translateX(0px); }
+              50% { transform: translateX(-2px); }
             }
-            @keyframes pulse-scale {
-              0%, 100% { transform: scale(1); opacity: 0.8; }
-              50% { transform: scale(1.1); opacity: 0.4; }
+            @keyframes slide-right {
+              0%, 100% { transform: translateX(0px); }
+              50% { transform: translateX(2px); }
             }
             
-            .arrow-up {
-              animation: ${animated ? 'float-up 2s ease-in-out infinite' : 'none'};
+            .glow-element {
+              animation: ${animated ? 'pulse-glow 2s ease-in-out infinite' : 'none'};
             }
-            .rotating-ring {
-              animation: ${animated ? 'rotate-slow 8s linear infinite' : 'none'};
+            .slide-left {
+              animation: ${animated ? 'slide-left 2.5s ease-in-out infinite' : 'none'};
             }
-            .pulse-circle {
-              animation: ${animated ? 'pulse-scale 2.5s ease-in-out infinite' : 'none'};
+            .slide-right {
+              animation: ${animated ? 'slide-right 2.5s ease-in-out infinite' : 'none'};
             }
           `}</style>
         </defs>
 
-        {/* Rotating outer ring */}
-        <g className="rotating-ring">
-          <circle cx="60" cy="60" r="56" fill="none" stroke="url(#mainGradient)" strokeWidth="1.5" opacity="0.6" strokeDasharray="5,5"/>
+        {/* Outer ring */}
+        <circle cx="60" cy="60" r="58" fill="none" stroke="url(#goldGradient)" strokeWidth="1.5" opacity="0.6"/>
+
+        {/* Background circle */}
+        <circle cx="60" cy="60" r="56" fill="#030712" opacity="0.3"/>
+
+        {/* Top left triangle - Gold */}
+        <polygon points="35,35 55,35 45,50" fill="url(#goldGradient)" opacity="0.9" className="glow-element"/>
+
+        {/* Bottom right triangle - Blue */}
+        <polygon points="65,70 85,70 75,85" fill="url(#blueGradient)" opacity="0.9" className="glow-element" style={{ animationDelay: '0.3s' }}/>
+
+        {/* Center chevron - Purple */}
+        <g className="slide-left" opacity="0.95">
+          <polygon points="50,50 58,58 50,62 42,58" fill="url(#purpleGradient)"/>
         </g>
 
-        {/* Pulsing background circle */}
-        <circle cx="60" cy="60" r="52" fill="url(#mainGradient)" opacity="0.08" className="pulse-circle"/>
-
-        {/* Central hexagon - modern tech feel */}
-        <g opacity="0.9">
-          <path d="M 60 35 L 75 42.5 L 75 57.5 L 60 65 L 45 57.5 L 45 42.5 Z" fill="url(#mainGradient)" filter="url(#softGlow)"/>
-          <path d="M 60 35 L 75 42.5 L 75 57.5 L 60 65 L 45 57.5 L 45 42.5 Z" fill="none" stroke="url(#accentGradient)" strokeWidth="1" opacity="0.6"/>
+        {/* Upper S curve - Gold segments */}
+        <g className="slide-right" opacity="0.7">
+          <polygon points="45,40 55,40 52,45 48,45" fill="url(#goldGradient)"/>
+          <polygon points="52,43 62,43 59,48 55,48" fill="url(#goldGradient)"/>
         </g>
 
-        {/* Upward arrow - growth/momentum */}
-        <g className="arrow-up" opacity="0.95">
-          {/* Arrow shaft */}
-          <line x1="60" y1="75" x2="60" y2="85" stroke="url(#accentGradient)" strokeWidth="2.5" strokeLinecap="round"/>
-          
-          {/* Arrow head */}
-          <path d="M 55 80 L 60 75 L 65 80" fill="none" stroke="url(#accentGradient)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </g>
-
-        {/* Side accent lines - dynamic feel */}
-        <g opacity="0.5">
-          <line x1="35" y1="50" x2="40" y2="50" stroke="url(#accentGradient)" strokeWidth="1.5" strokeLinecap="round"/>
-          <line x1="35" y1="60" x2="40" y2="60" stroke="url(#accentGradient)" strokeWidth="1.5" strokeLinecap="round"/>
-          
-          <line x1="80" y1="50" x2="85" y2="50" stroke="url(#accentGradient)" strokeWidth="1.5" strokeLinecap="round"/>
-          <line x1="80" y1="60" x2="85" y2="60" stroke="url(#accentGradient)" strokeWidth="1.5" strokeLinecap="round"/>
-        </g>
-
-        {/* Bottom accent dots */}
+        {/* Lower S curve - Blue segments */}
         <g opacity="0.7">
-          <circle cx="50" cy="95" r="1.5" fill="url(#accentGradient)"/>
-          <circle cx="60" cy="98" r="1.5" fill="url(#accentGradient)"/>
-          <circle cx="70" cy="95" r="1.5" fill="url(#accentGradient)"/>
+          <polygon points="48,72 58,72 55,77 51,77" fill="url(#blueGradient)"/>
+          <polygon points="45,77 55,77 52,82 48,82" fill="url(#blueGradient)"/>
+        </g>
+
+        {/* Right accent line - Gold */}
+        <line x1="70" y1="40" x2="82" y2="52" stroke="url(#goldGradient)" strokeWidth="2.5" strokeLinecap="round" opacity="0.8" className="slide-right" style={{ animationDelay: '0.2s' }}/>
+
+        {/* Bottom accent line - Blue */}
+        <line x1="38" y1="75" x2="50" y2="87" stroke="url(#blueGradient)" strokeWidth="2.5" strokeLinecap="round" opacity="0.8" className="slide-left" style={{ animationDelay: '0.4s' }}/>
+
+        {/* Corner accent dots */}
+        <g opacity="0.8" className="glow-element" style={{ animationDelay: '0.6s' }}>
+          <circle cx="38" cy="38" r="1.5" fill="url(#goldGradient)"/>
+          <circle cx="82" cy="82" r="1.5" fill="url(#blueGradient)"/>
         </g>
       </svg>
     </div>
