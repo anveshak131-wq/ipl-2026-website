@@ -35,7 +35,7 @@ export default function SportsUP18Logo({
     >
       {/* Background circle */}
       <div
-        className="absolute rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-400/30 backdrop-blur-sm"
+        className="absolute rounded-full bg-gradient-to-br from-blue-600/30 to-purple-600/30 border border-blue-400/50 backdrop-blur-md"
         style={{
           width: width + padding * 2,
           height: height + padding * 2,
@@ -50,28 +50,28 @@ export default function SportsUP18Logo({
           isHovered && animated ? 'scale-110' : 'scale-100'
         }`}
         style={{
-          filter: isHovered && animated ? 'drop-shadow(0 0 20px rgba(251, 191, 36, 0.9)) drop-shadow(0 0 40px rgba(59, 130, 246, 0.5))' : 'drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15))',
+          filter: isHovered && animated ? 'drop-shadow(0 0 20px rgba(59, 130, 246, 0.8)) drop-shadow(0 0 40px rgba(139, 92, 246, 0.5))' : 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3))',
         }}
       >
         <defs>
-          <linearGradient id="cricketGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#fbbf24" />
-            <stop offset="50%" stopColor="#f59e0b" />
-            <stop offset="100%" stopColor="#d97706" />
+          <linearGradient id="ballGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#3b82f6" />
+            <stop offset="50%" stopColor="#1e40af" />
+            <stop offset="100%" stopColor="#0c4a6e" />
           </linearGradient>
           
-          <linearGradient id="cricketGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#3b82f6" />
-            <stop offset="100%" stopColor="#1e40af" />
-          </linearGradient>
-
-          <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id="batGradient" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#ec4899" />
             <stop offset="100%" stopColor="#a855f7" />
           </linearGradient>
 
-          <filter id="glow">
-            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+          <radialGradient id="glowGradient" cx="40%" cy="40%">
+            <stop offset="0%" stopColor="#60a5fa" />
+            <stop offset="100%" stopColor="#3b82f6" />
+          </radialGradient>
+
+          <filter id="softGlow">
+            <feGaussianBlur stdDeviation="1.5" result="coloredBlur"/>
             <feMerge>
               <feMergeNode in="coloredBlur"/>
               <feMergeNode in="SourceGraphic"/>
@@ -79,97 +79,76 @@ export default function SportsUP18Logo({
           </filter>
 
           <style>{`
-            @keyframes spin-ball {
+            @keyframes rotate-ball {
               from { transform: rotate(0deg); }
               to { transform: rotate(360deg); }
             }
-            @keyframes float-bat {
-              0%, 100% { transform: translateY(0px) rotate(-15deg); }
-              50% { transform: translateY(-4px) rotate(-15deg); }
-            }
-            @keyframes pulse-ring {
-              0%, 100% { r: 55; opacity: 0.8; }
-              50% { r: 60; opacity: 0.3; }
-            }
-            @keyframes shimmer {
-              0% { stroke-dashoffset: 100; }
-              100% { stroke-dashoffset: 0; }
-            }
-            @keyframes glow-pulse {
-              0%, 100% { opacity: 0.6; }
+            @keyframes pulse-glow {
+              0%, 100% { opacity: 0.7; }
               50% { opacity: 1; }
             }
+            @keyframes swing-bat {
+              0%, 100% { transform: rotate(-25deg); }
+              50% { transform: rotate(15deg); }
+            }
             
-            .cricket-ball {
+            .ball {
               transform-origin: 60px 60px;
-              animation: ${animated ? 'spin-ball 8s linear infinite' : 'none'};
+              animation: ${animated ? 'rotate-ball 6s linear infinite' : 'none'};
             }
-            .cricket-bat {
+            .bat {
               transform-origin: 60px 60px;
-              animation: ${animated ? 'float-bat 3s ease-in-out infinite' : 'none'};
+              animation: ${animated ? 'swing-bat 2s ease-in-out infinite' : 'none'};
             }
-            .pulse-ring {
-              animation: ${animated ? 'pulse-ring 2.5s ease-in-out infinite' : 'none'};
-            }
-            .glow-accent {
-              animation: ${animated ? 'glow-pulse 2s ease-in-out infinite' : 'none'};
+            .glow {
+              animation: ${animated ? 'pulse-glow 2.5s ease-in-out infinite' : 'none'};
             }
           `}</style>
         </defs>
 
-        {/* Outer ring with gradient */}
-        <circle cx="60" cy="60" r="58" fill="none" stroke="url(#cricketGradient1)" strokeWidth="2" opacity="0.9"/>
+        {/* Outer glow ring */}
+        <circle cx="60" cy="60" r="58" fill="none" stroke="url(#ballGradient)" strokeWidth="1.5" opacity="0.5" className="glow"/>
         
-        {/* Pulsing ring effect */}
-        <circle cx="60" cy="60" r="55" fill="none" stroke="url(#cricketGradient2)" strokeWidth="1.5" opacity="0.4" className="pulse-ring"/>
+        {/* Main background */}
+        <circle cx="60" cy="60" r="56" fill="url(#glowGradient)" opacity="0.08"/>
 
-        {/* Main background circle */}
-        <circle cx="60" cy="60" r="52" fill="url(#cricketGradient2)" opacity="0.15"/>
-
-        {/* Cricket Ball - Main Element */}
-        <g className="cricket-ball">
+        {/* Cricket Ball */}
+        <g className="ball">
           {/* Ball body */}
-          <circle cx="60" cy="60" r="28" fill="url(#cricketGradient1)" filter="url(#glow)"/>
+          <circle cx="60" cy="60" r="26" fill="url(#ballGradient)" filter="url(#softGlow)"/>
           
-          {/* Ball shine */}
-          <circle cx="50" cy="50" r="10" fill="#fef3c7" opacity="0.4"/>
+          {/* Ball highlight */}
+          <circle cx="48" cy="48" r="8" fill="#93c5fd" opacity="0.5"/>
           
-          {/* Stitching pattern */}
-          <path d="M 45 40 Q 60 35 75 40" stroke="#fed7aa" strokeWidth="1.5" fill="none" opacity="0.8" strokeLinecap="round"/>
-          <path d="M 45 60 Q 60 65 75 60" stroke="#fed7aa" strokeWidth="1.5" fill="none" opacity="0.8" strokeLinecap="round"/>
-          <path d="M 40 50 Q 45 60 50 70" stroke="#fed7aa" strokeWidth="1" fill="none" opacity="0.6" strokeLinecap="round"/>
-          <path d="M 70 50 Q 75 60 80 70" stroke="#fed7aa" strokeWidth="1" fill="none" opacity="0.6" strokeLinecap="round"/>
+          {/* Stitching - curved lines */}
+          <path d="M 45 50 Q 60 42 75 50" stroke="#bfdbfe" strokeWidth="1.5" fill="none" opacity="0.7" strokeLinecap="round"/>
+          <path d="M 45 70 Q 60 78 75 70" stroke="#bfdbfe" strokeWidth="1.5" fill="none" opacity="0.7" strokeLinecap="round"/>
+          <path d="M 50 45 Q 55 60 50 75" stroke="#bfdbfe" strokeWidth="1" fill="none" opacity="0.5" strokeLinecap="round"/>
+          <path d="M 70 45 Q 65 60 70 75" stroke="#bfdbfe" strokeWidth="1" fill="none" opacity="0.5" strokeLinecap="round"/>
         </g>
 
         {/* Cricket Bat */}
-        <g className="cricket-bat">
+        <g className="bat">
+          {/* Bat blade - wider at top */}
+          <path d="M 54 25 L 66 25 L 64 42 L 56 42 Z" fill="url(#batGradient)" opacity="0.95"/>
+          
           {/* Bat handle */}
-          <rect x="56" y="20" width="8" height="35" rx="4" fill="url(#accentGradient)" opacity="0.9"/>
+          <rect x="57" y="42" width="6" height="28" rx="3" fill="url(#batGradient)" opacity="0.9"/>
           
-          {/* Bat blade */}
-          <ellipse cx="60" cy="15" rx="12" ry="8" fill="url(#accentGradient)"/>
-          
-          {/* Bat detail */}
-          <line x1="56" y1="25" x2="64" y2="25" stroke="#fbbf24" strokeWidth="1" opacity="0.6"/>
-          <line x1="56" y1="32" x2="64" y2="32" stroke="#fbbf24" strokeWidth="1" opacity="0.6"/>
+          {/* Bat edge highlight */}
+          <line x1="54" y1="28" x2="66" y2="28" stroke="#f472b6" strokeWidth="1" opacity="0.6"/>
         </g>
 
-        {/* Upward Arrow - Growth Indicator */}
-        <g className="glow-accent">
-          <path d="M 60 85 L 60 75 M 55 80 L 60 75 L 65 80" stroke="url(#accentGradient)" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.85"/>
+        {/* Upward arrow - growth indicator */}
+        <g opacity="0.8">
+          <path d="M 60 92 L 60 82 M 55 87 L 60 82 L 65 87" stroke="url(#batGradient)" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
         </g>
 
-        {/* Number 18 Badge */}
-        <g>
-          <rect x="78" y="35" width="28" height="22" rx="6" fill="rgba(15, 23, 42, 0.85)" stroke="url(#cricketGradient1)" strokeWidth="1.5" opacity="0.9"/>
-          <text x="92" y="51" fontFamily="system-ui, -apple-system, sans-serif" fontSize="12" fontWeight="800" fill="#fbbf24" textAnchor="middle">
-            18
-          </text>
+        {/* Decorative corner accent */}
+        <g opacity="0.6">
+          <circle cx="85" cy="35" r="3" fill="url(#batGradient)"/>
+          <circle cx="82" cy="38" r="2" fill="url(#batGradient)"/>
         </g>
-
-        {/* Accent dots for visual interest */}
-        <circle cx="35" cy="35" r="2.5" fill="url(#cricketGradient1)" opacity="0.6" className={animated ? 'glow-accent' : ''}/>
-        <circle cx="85" cy="85" r="2.5" fill="url(#cricketGradient2)" opacity="0.6" className={animated ? 'glow-accent' : ''} style={{ animationDelay: '0.5s' }}/>
       </svg>
     </div>
   );
