@@ -12,6 +12,10 @@ import ModernMatchesGrid from '@/components/home/ModernMatchesGrid';
 import ModernNewsSection from '@/components/home/ModernNewsSection';
 import ModernStatsSection from '@/components/home/ModernStatsSection';
 import ModernFeatureShowcase from '@/components/home/ModernFeatureShowcase';
+import ScrollTriggeredStats from '@/components/home/ScrollTriggeredStats';
+import ParallaxSection from '@/components/effects/ParallaxSection';
+import ConfettiAnimation from '@/components/effects/ConfettiAnimation';
+import FloatingBadge from '@/components/effects/FloatingBadge';
 import { useRouter } from "next/navigation";
 import { api } from '@/lib/data';
 import type { Team, Match, News } from '@/types';
@@ -26,6 +30,8 @@ export default function Home() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [news, setNews] = useState<News[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [hasLiveMatch, setHasLiveMatch] = useState(false);
 
   useEffect(() => {
     setIsHydrated(true);
@@ -57,6 +63,15 @@ export default function Home() {
         setTeams(teamsData);
         setMatches(matchesData);
         setNews(newsData);
+
+        // Check if there's a live match
+        const liveMatch = matchesData.some((match) => match.status === 'live');
+        if (liveMatch) {
+          setHasLiveMatch(true);
+          setShowConfetti(true);
+          // Auto-hide confetti after 3 seconds
+          setTimeout(() => setShowConfetti(false), 3000);
+        }
       } catch (error) {
         console.error('Error loading data:', error);
       } finally {
@@ -101,10 +116,26 @@ export default function Home() {
         />
       )}
 
+      {/* Confetti Animation - triggers on live match */}
+      <ConfettiAnimation trigger={showConfetti} duration={3000} particleCount={50} />
+
+      {/* Floating Badge - shows when there's a live match */}
+      {hasLiveMatch && (
+        <FloatingBadge
+          text="Live Now"
+          icon="🔴"
+          color="red"
+          position="top-right"
+          animated
+        />
+      )}
+
       <main className="relative z-10">
-        {/* Modern Hero Section */}
+        {/* Modern Hero Section with Parallax */}
         <section className="relative overflow-hidden">
-          <ModernHeroSection />
+          <ParallaxSection speed={0.5}>
+            <ModernHeroSection />
+          </ParallaxSection>
         </section>
 
         {/* Divider */}
@@ -127,7 +158,7 @@ export default function Home() {
           <ModernTeamsShowcase teams={teams} isLoading={isLoading} />
         </section>
 
-        {/* Statistics Section */}
+        {/* Statistics Section with Scroll Trigger */}
         <section className="relative py-12 md:py-20">
           <div className="max-w-7xl mx-auto px-4 md:px-6">
             <div className="mb-12 animate-fade-in-up">
@@ -140,7 +171,15 @@ export default function Home() {
             </div>
           </div>
           <div className="max-w-7xl mx-auto px-4 md:px-6">
-            <ModernStatsSection />
+            <ScrollTriggeredStats
+              stats={[
+                { label: 'Total Matches', value: '74', icon: '🏏', color: 'from-ipl-gold to-yellow-400' },
+                { label: 'Teams', value: '10', icon: '🎯', color: 'from-blue-500 to-cyan-500' },
+                { label: 'Players', value: '500+', icon: '👥', color: 'from-purple-500 to-pink-500' },
+                { label: 'Venues', value: '15', icon: '🏟️', color: 'from-green-500 to-emerald-500' },
+              ]}
+              isLoading={isLoading}
+            />
           </div>
         </section>
 
