@@ -128,7 +128,6 @@ export default function TermsPage() {
             <option value="ta">தமிழ்</option>
           </select>
         </nav>
-        </nav>
 
         {panels && panels.length > 0 ? (
           <section className="space-y-6 mb-10">
