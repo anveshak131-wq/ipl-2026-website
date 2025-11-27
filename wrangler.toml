@@ -7,3 +7,25 @@ pages_build_output_dir = "out"
 binding = "SPORTS_KV"
 id = "local-sports-kv"
 preview_id = "local-sports-kv-preview"
+
+[[kv_namespaces]]
+binding = "IPL_CACHE"
+id = "local-ipl-cache"
+preview_id = "local-ipl-cache-preview"
+
+# Environment configuration for email service
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+# Scheduled event for email reminders
+[[triggers.crons]]
+cron = "*/5 * * * *"  # Run every 5 minutes
+
+# Email service environment variables
+# Uncomment and set your email service credentials:
+# RESEND_API_KEY = "your-resend-api-key"
+# OR
+# SENDGRID_API_KEY = "your-sendgrid-api-key"
+# OR
+# MAILGUN_API_KEY = "your-mailgun-api-key"
+# MAILGUN_DOMAIN = "your-mailgun-domain"

@@ -44,7 +44,7 @@ export default function TermsAcceptanceModal({
   const t = termsTranslations[language];
   const REQUIRED_TERMS_VERSION = "1.1";
 
-  const handleAcceptTerms = () => {
+  const handleAcceptTerms = async () => {
     localStorage.setItem("terms_accepted", "true");
     localStorage.setItem("terms_accepted_date", new Date().toISOString());
     localStorage.setItem("terms_version", REQUIRED_TERMS_VERSION);
@@ -56,6 +56,27 @@ export default function TermsAcceptanceModal({
         timestamp: new Date().toISOString(),
         language: language,
       });
+    }
+
+    // Sync terms acceptance to backend
+    try {
+      const token = localStorage.getItem("auth_token");
+      if (token) {
+        await fetch("/api/preferences", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            termsAccepted: true,
+            emailNotificationsEnabled: true, // Enable email notifications by default
+          }),
+        });
+      }
+    } catch (error) {
+      console.error("Failed to sync terms acceptance:", error);
+      // Don't block user acceptance if backend sync fails
     }
 
     setCheckedItems({
