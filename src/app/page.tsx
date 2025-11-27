@@ -3,14 +3,18 @@
 import { useEffect, useState } from "react";
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
-import HeroSection from '@/components/home/HeroSection';
-import TeamsShowcase from '@/components/home/TeamsShowcase';
-import UpcomingMatches from '@/components/home/UpcomingMatches';
-import NewsSection from '@/components/home/NewsSection';
 import Footer from '@/components/layout/Footer';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import TermsAcceptanceModal from '@/components/legal/TermsAcceptanceModal';
+import ModernHeroSection from '@/components/home/ModernHeroSection';
+import ModernTeamsShowcase from '@/components/home/ModernTeamsShowcase';
+import ModernMatchesGrid from '@/components/home/ModernMatchesGrid';
+import ModernNewsSection from '@/components/home/ModernNewsSection';
+import ModernStatsSection from '@/components/home/ModernStatsSection';
+import ModernFeatureShowcase from '@/components/home/ModernFeatureShowcase';
 import { useRouter } from "next/navigation";
+import { api } from '@/lib/data';
+import type { Team, Match, News } from '@/types';
 
 export default function Home() {
   const router = useRouter();
@@ -18,6 +22,10 @@ export default function Home() {
   const [lastAcceptanceDate, setLastAcceptanceDate] = useState<string | null>(null);
   const [needsReAcceptance, setNeedsReAcceptance] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [news, setNews] = useState<News[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setIsHydrated(true);
@@ -37,6 +45,26 @@ export default function Home() {
       setNeedsReAcceptance(true);
       setShowTermsModal(true);
     }
+
+    // Load data
+    const loadData = async () => {
+      try {
+        const [teamsData, matchesData, newsData] = await Promise.all([
+          api.getTeams(),
+          api.getMatches(),
+          api.getNews(),
+        ]);
+        setTeams(teamsData);
+        setMatches(matchesData);
+        setNews(newsData);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
   const handleAcceptTerms = () => {
@@ -74,9 +102,9 @@ export default function Home() {
       )}
 
       <main className="relative z-10">
-        {/* Hero Section */}
-        <section className="relative overflow-hidden pt-8 md:pt-12">
-          <HeroSection />
+        {/* Modern Hero Section */}
+        <section className="relative overflow-hidden">
+          <ModernHeroSection />
         </section>
 
         {/* Divider */}
@@ -96,7 +124,24 @@ export default function Home() {
               </p>
             </div>
           </div>
-          <TeamsShowcase />
+          <ModernTeamsShowcase teams={teams} isLoading={isLoading} />
+        </section>
+
+        {/* Statistics Section */}
+        <section className="relative py-12 md:py-20">
+          <div className="max-w-7xl mx-auto px-4 md:px-6">
+            <div className="mb-12 animate-fade-in-up">
+              <h2 className="text-3xl md:text-4xl font-bold text-white mb-3 tracking-tight">
+                <span className="gradient-text">Key Statistics</span>
+              </h2>
+              <p className="text-gray-300 text-lg md:text-xl max-w-2xl">
+                Discover the numbers behind IPL 2026.
+              </p>
+            </div>
+          </div>
+          <div className="max-w-7xl mx-auto px-4 md:px-6">
+            <ModernStatsSection />
+          </div>
         </section>
 
         {/* Matches Section */}
@@ -110,8 +155,15 @@ export default function Home() {
                 Don't miss the most exciting cricket action. Check out upcoming matches and live scores.
               </p>
             </div>
+            <ModernMatchesGrid matches={matches} isLoading={isLoading} />
           </div>
-          <UpcomingMatches />
+        </section>
+
+        {/* Features Section */}
+        <section className="relative py-12 md:py-20">
+          <div className="max-w-7xl mx-auto px-4 md:px-6">
+            <ModernFeatureShowcase />
+          </div>
         </section>
 
         {/* News Section */}
@@ -125,8 +177,8 @@ export default function Home() {
                 Stay updated with the latest news, highlights, and stories from the IPL.
               </p>
             </div>
+            <ModernNewsSection articles={news} isLoading={isLoading} />
           </div>
-          <NewsSection />
         </section>
 
         {/* CTA Section */}
