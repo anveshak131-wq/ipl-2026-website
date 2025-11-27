@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import AnimatedLogo from '../AnimatedLogo';
 import SportsUP18LogoWithText from '../branding/SportsUP18LogoWithText';
 import SportsUP18Logo from '../branding/SportsUP18Logo';
 import Emoji from '../emoji/Emoji';
@@ -102,7 +101,7 @@ export default function Navbar() {
               {/* Mobile: Icon only */}
               <div className="md:hidden">
                 <SportsUP18Logo 
-                  size="md" 
+                  size="lg" 
                   animated={motionEnabled}
                   className="drop-shadow-lg"
                 />

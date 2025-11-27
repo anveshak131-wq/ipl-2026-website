@@ -18,13 +18,13 @@ export default function SportsUP18Logo({
   const [isHovered, setIsHovered] = useState(false);
 
   const sizeMap = {
-    sm: { width: 32, height: 32 },
-    md: { width: 48, height: 48 },
-    lg: { width: 64, height: 64 },
-    xl: { width: 96, height: 96 },
+    sm: { width: 48, height: 48, padding: 6 },
+    md: { width: 64, height: 64, padding: 8 },
+    lg: { width: 80, height: 80, padding: 10 },
+    xl: { width: 120, height: 120, padding: 12 },
   };
 
-  const { width, height } = sizeMap[size];
+  const { width, height, padding } = sizeMap[size];
 
   return (
     <div
@@ -33,6 +33,15 @@ export default function SportsUP18Logo({
       onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
     >
+      {/* Background circle */}
+      <div
+        className="absolute rounded-full bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-400/30 backdrop-blur-sm"
+        style={{
+          width: width + padding * 2,
+          height: height + padding * 2,
+        }}
+      />
+      
       <svg
         width={width}
         height={height}
