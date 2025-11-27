@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
+import ModernDialog from '@/components/admin/ModernDialog';
 import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
 import { parseDateDDMMYYYY, formatDateDDMMYYYY, calculateAge, isValidDate } from '@/lib/dateUtils';
@@ -1011,23 +1012,35 @@ export default function AdminPlayers() {
           </div>
 
           {/* Player Form Modal */}
-          {showForm && (
-            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-              <div className="glass-effect rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                <div className="p-8">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-white">
-                      {editingPlayer ? 'Edit Player' : 'Add New Player'}
-                    </h2>
-                    <button 
-                      onClick={() => setShowForm(false)}
-                      className="text-gray-400 hover:text-white text-2xl"
-                    >
-                      ×
-                    </button>
-                  </div>
-
-                  <form onSubmit={handleSubmit} className="space-y-6">
+          <ModernDialog
+            isOpen={showForm}
+            onClose={() => setShowForm(false)}
+            title={editingPlayer ? 'Edit Player' : 'Add New Player'}
+            description={editingPlayer ? 'Update player information' : 'Add a new player to the database'}
+            variant="info"
+            size="xl"
+            icon="🏏"
+            contentClassName="max-h-[70vh] overflow-y-auto"
+            footer={
+              <div className="flex gap-4">
+                <button
+                  type="submit"
+                  form="player-form"
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold py-3 px-6 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200"
+                >
+                  {editingPlayer ? 'Update Player' : 'Add Player'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  className="flex-1 border border-white/10 bg-slate-800/60 text-white font-semibold py-3 px-6 rounded-xl hover:bg-slate-700/80 transition-all duration-200"
+                >
+                  Cancel
+                </button>
+              </div>
+            }
+          >
+            <form id="player-form" onSubmit={handleSubmit} className="space-y-6">
                     {/* Basic Info */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
@@ -1366,112 +1379,63 @@ export default function AdminPlayers() {
                         </div>
                       </div>
                     </div>
-
-                    {/* Form Actions */}
-                    <div className="flex space-x-4 pt-6 border-t border-white/10">
-                      <button
-                        type="submit"
-                        className="ipl-button flex-1"
-                      >
-                        {editingPlayer ? 'Update Player' : 'Add Player'}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setShowForm(false)}
-                        className="flex-1 glass-effect text-white font-semibold py-3 px-6 rounded-lg hover:bg-white/20 transition-all duration-200"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            </div>
-          )}
+            </form>
+          </ModernDialog>
         </div>
       </div>
 
       {/* Delete Confirmation Modal */}
-      {showDeleteModal && deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          {/* Backdrop */}
-          <div 
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={cancelDelete}
-          />
-          
-          {/* Modal Content */}
-          <div className="relative z-10 w-full max-w-md mx-4 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-white/10 p-8 animate-in fade-in zoom-in-95 duration-200">
-            {/* Icon */}
-            <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 rounded-full bg-red-500/20 border border-red-500/30 flex items-center justify-center">
-                <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </div>
-            </div>
-
-            {/* Title */}
-            <h3 className="text-center text-xl font-bold text-white mb-2">Delete Player</h3>
-
-            {/* Message */}
-            <p className="text-center text-gray-300 mb-6">
-              Are you sure you want to delete{' '}
-              <span className="font-semibold text-ipl-gold">{deleteTarget.name}</span>? This action cannot be undone.
-            </p>
-
-            {/* Warning Badge */}
-            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 mb-6 flex items-start gap-2">
-              <svg className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-              <p className="text-sm text-red-300">This will permanently remove all player data.</p>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-3">
-              <button
-                onClick={cancelDelete}
-                disabled={isDeleting}
-                className="flex-1 px-4 py-3 rounded-lg bg-gray-700/50 hover:bg-gray-700 text-white font-semibold transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                disabled={isDeleting}
-                className="flex-1 px-4 py-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {isDeleting ? (
-                  <>
-                    <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    Deleting...
-                  </>
-                ) : (
-                  <>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                    Delete
-                  </>
-                )}
-              </button>
-            </div>
-
-            {/* Close button */}
+      <ModernDialog
+        isOpen={showDeleteModal && !!deleteTarget}
+        onClose={cancelDelete}
+        title="Delete Player"
+        description={`Are you sure you want to delete ${deleteTarget?.name}? This action cannot be undone.`}
+        variant="danger"
+        size="md"
+        icon="🗑️"
+        footer={
+          <div className="flex gap-3">
             <button
               onClick={cancelDelete}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-300 transition-colors"
+              disabled={isDeleting}
+              className="flex-1 px-4 py-3 rounded-lg bg-gray-700/50 hover:bg-gray-700 text-white font-semibold transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              Cancel
+            </button>
+            <button
+              onClick={confirmDelete}
+              disabled={isDeleting}
+              className="flex-1 px-4 py-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isDeleting ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Delete
+                </>
+              )}
             </button>
           </div>
+        }
+      >
+        <div className="space-y-4">
+          {/* Warning Badge */}
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 flex items-start gap-2">
+            <svg className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            <p className="text-sm text-red-300">This will permanently remove all player data.</p>
+          </div>
         </div>
-      )}
+      </ModernDialog>
     </div>
   );
 }
