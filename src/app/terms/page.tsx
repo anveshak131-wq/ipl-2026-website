@@ -2,12 +2,42 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 export default function TermsPage() {
   const [customContent, setCustomContent] = useState<string | null>(null);
   const [panels, setPanels] = useState<
     { id: string; title: string; body: string }[] | null
   >(null);
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showAcceptanceModal, setShowAcceptanceModal] = useState(false);
+  const [hasSeenTerms, setHasSeenTerms] = useState(false);
+
+  useEffect(() => {
+    // Check if user has already accepted terms
+    const storedAcceptance = localStorage.getItem("terms_accepted");
+    const acceptanceDate = localStorage.getItem("terms_accepted_date");
+    
+    if (storedAcceptance === "true" && acceptanceDate) {
+      setTermsAccepted(true);
+      setHasSeenTerms(true);
+    } else {
+      setShowAcceptanceModal(true);
+    }
+  }, []);
+
+  const handleAcceptTerms = () => {
+    localStorage.setItem("terms_accepted", "true");
+    localStorage.setItem("terms_accepted_date", new Date().toISOString());
+    localStorage.setItem("terms_version", "1.0");
+    setTermsAccepted(true);
+    setShowAcceptanceModal(false);
+  };
+
+  const handleDeclineTerms = () => {
+    setShowAcceptanceModal(false);
+    // User can still view but operations requiring terms acceptance will be blocked
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -61,6 +91,21 @@ export default function TermsPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white">
+      {/* Acceptance Status Banner */}
+      {termsAccepted && (
+        <motion.div
+          initial={{ y: -100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border-b border-emerald-500/20 px-6 py-3 text-center"
+        >
+          <p className="text-sm text-emerald-300 flex items-center justify-center gap-2">
+            <span className="text-lg">✅</span>
+            Terms accepted on {new Date(localStorage.getItem("terms_accepted_date") || "").toLocaleDateString()}
+          </p>
+        </motion.div>
+      )}
+
       <div className="max-w-5xl mx-auto px-6 py-12 md:py-16">
         <header className="mb-6 md:mb-8 flex items-center justify-between gap-4">
           <div>
@@ -240,6 +285,131 @@ export default function TermsPage() {
           </div>
         </footer>
       </div>
+
+      {/* Terms Acceptance Modal */}
+      {showAcceptanceModal && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={handleDeclineTerms}
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+          />
+          
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          >
+            <div className="w-full max-w-md bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 rounded-2xl border border-white/10 shadow-2xl overflow-hidden">
+              {/* Header with animated gradient line */}
+              <div className="relative px-6 py-6 border-b border-white/10 bg-gradient-to-r from-white/5 to-white/3">
+                <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500" />
+                
+                <div className="flex items-start gap-4">
+                  <motion.div
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                    className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-yellow-400/30 bg-yellow-500/15 text-lg"
+                  >
+                    ⚖️
+                  </motion.div>
+
+                  <div className="flex-1">
+                    <motion.h2
+                      initial={{ x: -10, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.1, duration: 0.3 }}
+                      className="text-lg font-semibold text-white leading-tight"
+                    >
+                      Accept Terms & Conditions
+                    </motion.h2>
+                    <motion.p
+                      initial={{ x: -10, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.15, duration: 0.3 }}
+                      className="mt-1 text-sm text-gray-300"
+                    >
+                      Please review and accept our terms to continue
+                    </motion.p>
+                  </div>
+
+                  <motion.button
+                    whileHover={{ scale: 1.1, rotate: 90 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleDeclineTerms}
+                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
+                  >
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </motion.button>
+                </div>
+              </div>
+
+              {/* Content */}
+              <motion.div
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.3 }}
+                className="px-6 py-6 space-y-4"
+              >
+                <div className="space-y-3 bg-slate-900/50 rounded-lg p-4 border border-white/5">
+                  <p className="text-sm text-gray-300">
+                    <span className="font-semibold text-white">By accepting these terms:</span>
+                  </p>
+                  <ul className="list-disc list-inside space-y-2 text-xs text-gray-400">
+                    <li>You confirm you've read our Terms of Service</li>
+                    <li>You agree to follow community guidelines</li>
+                    <li>You understand this is a demo platform</li>
+                    <li>You accept our liability limitations</li>
+                  </ul>
+                </div>
+
+                <p className="text-xs text-gray-500">
+                  You can review the full terms at any time by visiting this page. Your acceptance is recorded and dated.
+                </p>
+              </motion.div>
+
+              {/* Footer */}
+              <motion.div
+                initial={{ y: 10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.25, duration: 0.3 }}
+                className="border-t border-white/10 bg-gradient-to-r from-white/2 to-white/1 px-6 py-4 flex gap-3"
+              >
+                <button
+                  onClick={handleDeclineTerms}
+                  className="flex-1 px-4 py-2.5 rounded-lg border border-white/10 bg-slate-800/60 text-sm font-medium text-gray-200 hover:bg-slate-700/80 transition-colors"
+                >
+                  Decline
+                </button>
+                <button
+                  onClick={handleAcceptTerms}
+                  className="flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold bg-gradient-to-r from-yellow-500 to-amber-500 text-slate-900 hover:from-yellow-400 hover:to-amber-400 transition-all shadow-lg shadow-yellow-900/40"
+                >
+                  Accept Terms
+                </button>
+              </motion.div>
+            </div>
+          </motion.div>
+        </>
+      )}
     </main>
   );
 }
