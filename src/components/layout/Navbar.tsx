@@ -111,7 +111,7 @@ export default function Navbar() {
               {/* Desktop: Logo with text - Larger size */}
               <div className="hidden md:flex">
                 <SportsUP18LogoWithText 
-                  size="lg" 
+                  size="xl" 
                   animated={motionEnabled}
                   className="drop-shadow-lg hover:drop-shadow-2xl transition-all duration-300"
                 />
