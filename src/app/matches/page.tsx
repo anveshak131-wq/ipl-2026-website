@@ -94,7 +94,7 @@ export default function MatchesPage() {
               ].map((tab) => (
                 <button
                   key={tab.key}
-                  onClick={() => setFilter(tab.key as any)}
+                  onClick={() => setFilter(tab.key as 'all' | 'upcoming' | 'live' | 'completed')}
                   className={`group relative overflow-hidden px-6 py-3 rounded-lg text-sm font-bold transition-all duration-500 whitespace-nowrap flex items-center gap-2 transform hover:scale-105 ${
                     filter === tab.key ? 'scale-105' : ''
                   }`}

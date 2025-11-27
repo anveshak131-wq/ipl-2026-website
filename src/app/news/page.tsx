@@ -68,17 +68,44 @@ export default function NewsPage() {
     });
   };
 
-  const getImageSrc = (input?: any) => {
-    let url: string | undefined;
-    if (!input) url = undefined;
-    else if (typeof input === 'string') url = input;
-    else url = input.image || input.imageUrl || input.image_url || input.img;
+  const getPlaceholderImage = () => 
+    'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"%3E%3Crect fill="%23333" width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" font-size="24" fill="%23999" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E';
 
-    if (!url) return 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"%3E%3Crect fill="%23333" width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" font-size="24" fill="%23999" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E';
-    const trimmed = String(url).trim();
-    if (trimmed.startsWith('//')) return window.location.protocol + trimmed;
-    if (trimmed.startsWith('/')) return window.location.origin + trimmed;
-    return trimmed;
+  const getImageSrc = (input?: any) => {
+    try {
+      let url: string | undefined;
+      
+      if (!input) {
+        return getPlaceholderImage();
+      }
+      
+      if (typeof input === 'string') {
+        url = input;
+      } else if (typeof input === 'object') {
+        url = input.image || input.imageUrl || input.image_url || input.img;
+      }
+
+      if (!url || typeof url !== 'string') {
+        return getPlaceholderImage();
+      }
+
+      const trimmed = url.trim();
+      if (!trimmed) return getPlaceholderImage();
+      
+      // Validate URL format
+      try {
+        new URL(trimmed, typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
+      } catch {
+        return getPlaceholderImage();
+      }
+
+      if (trimmed.startsWith('//')) return (typeof window !== 'undefined' ? window.location.protocol : 'https:') + trimmed;
+      if (trimmed.startsWith('/')) return (typeof window !== 'undefined' ? window.location.origin : 'http://localhost') + trimmed;
+      return trimmed;
+    } catch (error) {
+      console.error('Error processing image URL:', error);
+      return getPlaceholderImage();
+    }
   };
 
   const getCategoryColor = (category: string) => {

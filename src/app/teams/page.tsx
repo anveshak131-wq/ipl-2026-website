@@ -58,17 +58,26 @@ function TeamsPageContent() {
     useEffect(() => {
         const fetchTeams = async () => {
             try {
-                const teamsData = await api.getTeams();
-                const playersData = await api.getPlayers();
+                const [teamsData, playersData] = await Promise.all([
+                    api.getTeams(),
+                    api.getPlayers().catch(() => []) // Fallback to empty array on error
+                ]);
 
                 const teamsWithPlayers = teamsData.map(team => ({
                     ...team,
-                    players: playersData.filter(player => player.teamId === team.id)
+                    players: (playersData || []).filter(player => player.teamId === team.id)
                 }));
 
                 setTeams(teamsWithPlayers);
             } catch (error) {
                 console.error('Failed to fetch teams:', error);
+                // Still try to display teams even if players fail
+                try {
+                    const teamsData = await api.getTeams();
+                    setTeams(teamsData.map(team => ({ ...team, players: [] })));
+                } catch (err) {
+                    console.error('Failed to fetch teams:', err);
+                }
             } finally {
                 setIsLoading(false);
             }
