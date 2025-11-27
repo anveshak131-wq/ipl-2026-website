@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import AnimatedLogo from '../AnimatedLogo';
+import AnimatedLogo from '../AnimatedLogoFramer';
 import Emoji from '../emoji/Emoji';
 
 type NavEmojiName = 'cricket' | 'chart' | 'news' | 'glove' | 'target' | 'trophy' | 'sparkles' | 'people' | 'fire' | 'star';
