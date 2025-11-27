@@ -13,6 +13,13 @@ interface TermsGuardProps {
  * Client-side wrapper that enforces terms acceptance
  * Redirects to /terms if user hasn't accepted
  * Allows whitelisted routes to be accessed without acceptance
+ * 
+ * Features:
+ * - Keyboard navigation (Escape to close)
+ * - ARIA labels for accessibility
+ * - Loading state with animated spinner
+ * - Route whitelisting
+ * - localStorage persistence
  */
 export default function TermsGuard({ children }: TermsGuardProps) {
   const router = useRouter();
@@ -52,6 +59,22 @@ export default function TermsGuard({ children }: TermsGuardProps) {
     setIsChecking(false);
   }, [pathname, router]);
 
+  // Handle Escape key to close loading modal (accessibility)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isChecking) {
+        // Escape during loading redirects to terms
+        sessionStorage.setItem("terms_redirect_after", pathname);
+        router.push("/terms");
+      }
+    };
+
+    if (isChecking) {
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [isChecking, pathname, router]);
+
   if (isChecking) {
     // Show loading state while checking
     return (
@@ -60,14 +83,18 @@ export default function TermsGuard({ children }: TermsGuardProps) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 to-slate-800"
+        role="status"
+        aria-label="Verifying access..."
       >
         <div className="text-center">
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
             className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"
+            aria-hidden="true"
           />
           <p className="text-white text-lg">Verifying access...</p>
+          <p className="text-gray-400 text-sm mt-2">Press Escape to go to terms page</p>
         </div>
       </motion.div>
     );
@@ -78,5 +105,15 @@ export default function TermsGuard({ children }: TermsGuardProps) {
     return null;
   }
 
-  return <>{children}</>;
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
+        {children}
+      </motion.div>
+    </AnimatePresence>
+  );
 }
