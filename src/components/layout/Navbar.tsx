@@ -103,8 +103,13 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             <Link href="/" className="flex items-center group relative shrink-0">
                 <div className="group-hover:scale-110 transition-transform duration-300">
-                <AnimatedLogo size={140} variant="horizontal" animated={motionEnabled} />
-              </div>
+                    <div className="md:hidden">
+                      <AnimatedLogo size={72} variant="mascot" animated={motionEnabled} />
+                    </div>
+                    <div className="hidden md:block">
+                      <AnimatedLogo size={140} variant="horizontal" animated={motionEnabled} />
+                    </div>
+                  </div>
             </Link>
 
             {/* Motion toggle */}

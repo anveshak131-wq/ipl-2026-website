@@ -6,7 +6,7 @@ import { motion } from 'framer-motion'
 type Props = {
   size?: number
   animated?: boolean
-  variant?: 'compact' | 'horizontal' | 'stacked' | 'inline'
+  variant?: 'compact' | 'horizontal' | 'stacked' | 'inline' | 'mascot' | 'scoreboard' | 'detailed_crest'
 }
 
 // Clean, responsive logo component with optional animation.
@@ -38,6 +38,23 @@ export default function AnimatedLogoFramer({ size = 120, animated = true, varian
   }, [animated])
 
   // Provide static SVG fallbacks for alternate variants
+  const [ScoreboardComp, setScoreboardComp] = useState<null | React.ComponentType<any>>(null)
+
+  // If the parent requested the scoreboard variant, dynamically load the animated component client-side.
+  useEffect(() => {
+    if (variant !== 'scoreboard') return
+    if (typeof window === 'undefined') return
+    let mounted = true
+    import('./AnimatedScoreboard')
+      .then((m) => {
+        if (mounted && m && m.default) setScoreboardComp(() => m.default)
+      })
+      .catch(() => {
+        // ignore — fallback will show static svg
+      })
+    return () => { mounted = false }
+  }, [variant])
+
   if (variant !== 'inline') {
     const map: Record<string, string> = {
       compact: '/logo/sportsup18_crest_compact.svg',
@@ -49,16 +66,10 @@ export default function AnimatedLogoFramer({ size = 120, animated = true, varian
       inline: '/logo/sportsup18_animated.svg'
     }
     const src = map[variant]
-    // if scoreboard and animated requested, the parent will request AnimatedScoreboard separately
-    if (variant === 'scoreboard' && typeof window !== 'undefined') {
-      try {
-        // Dynamically import the animated scoreboard component client-side
-        // Fallback: show static svg
-        const AnimatedScoreboard = require('./AnimatedScoreboard').default
-        return <AnimatedScoreboard size={size} animated={animated} />
-      } catch (e) {
-        return <img src={src} alt="SportsUP18 logo" style={{ width: px, height: 'auto' }} />
-      }
+
+    if (variant === 'scoreboard') {
+      if (ScoreboardComp) return <ScoreboardComp size={size} animated={animated} />
+      return <img src={src} alt="SportsUP18 logo" style={{ width: px, height: 'auto' }} />
     }
 
     return <img src={src} alt="SportsUP18 logo" style={{ width: px, height: 'auto' }} />
