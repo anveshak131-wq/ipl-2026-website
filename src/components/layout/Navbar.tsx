@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import SportsUP18LogoWithText from '../branding/SportsUP18LogoWithText';
+import AnimatedLogo from '../AnimatedLogo';
 import Emoji from '../emoji/Emoji';
 
 type NavEmojiName = 'cricket' | 'chart' | 'news' | 'glove' | 'target' | 'trophy' | 'sparkles' | 'people' | 'fire' | 'star';
@@ -18,6 +18,30 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+
+  const [motionEnabled, setMotionEnabled] = useState(true);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('sportsup_motion');
+      if (stored !== null) {
+        setMotionEnabled(stored === '1');
+      } else {
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        setMotionEnabled(!prefersReduced);
+      }
+    } catch (e) {
+      setMotionEnabled(true);
+    }
+  }, []);
+
+  const toggleMotion = () => {
+    setMotionEnabled((v) => {
+      const next = !v;
+      try { localStorage.setItem('sportsup_motion', next ? '1' : '0'); } catch {}
+      return next;
+    });
+  };
 
   const isLinkActive = (href: string) => {
     if (!pathname) return false;
@@ -76,15 +100,27 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo Section */}
-          <Link href="/" className="flex items-center group relative shrink-0">
-            <SportsUP18LogoWithText 
-              size="md" 
-              animated 
-              showText 
-              textPosition="right"
-              className="group-hover:scale-110 transition-transform duration-300"
-            />
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center group relative shrink-0">
+              <div className="group-hover:scale-110 transition-transform duration-300">
+                <AnimatedLogo size={140} variant="inline" animated={motionEnabled} />
+              </div>
+            </Link>
+
+            {/* Motion toggle */}
+            <button
+              onClick={toggleMotion}
+              aria-label={motionEnabled ? 'Disable animations' : 'Enable animations'}
+              title={motionEnabled ? 'Disable animations' : 'Enable animations'}
+              className="hidden md:inline-flex items-center justify-center w-9 h-9 rounded-lg text-gray-200 hover:text-white hover:bg-white/6 transition-all duration-200"
+            >
+              {motionEnabled ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 3v18l15-9L5 3z"/></svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h6v16H4zM14 4h6v16h-6z"/></svg>
+              )}
+            </button>
+          </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex flex-1 items-center justify-end gap-6 ml-8">
