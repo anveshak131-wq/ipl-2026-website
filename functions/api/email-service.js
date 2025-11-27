@@ -1,5 +1,6 @@
 /**
  * Cloudflare Pages Function for email notifications
+ * Enhanced with personalization, queue management, and analytics
  * Sends match reminders 30 minutes before matches
  */
 
@@ -33,6 +34,8 @@ export const onRequest = async (context) => {
       return await sendMatchReminder(request, env, corsHeaders);
     } else if (action === 'send-email') {
       return await sendEmail(request, env, corsHeaders);
+    } else if (action === 'send-batch') {
+      return await sendBatchEmails(request, env, corsHeaders);
     } else {
       return new Response(
         JSON.stringify({ error: 'Invalid action' }),
@@ -473,11 +476,144 @@ function generateMatchReminderHTML(team1, team2, venue, time, date) {
           <p style="margin: 10px 0 0 0;">
             <a href="https://sportsup99.com/terms">Terms of Service</a> | 
             <a href="https://sportsup99.com/privacy">Privacy Policy</a> |
-            <a href="https://sportsup99.com/account">Notification Settings</a>
+            <a href="https://sportsup99.com/account">Notification Settings</a> |
+            <a href="https://sportsup99.com/api/email-preferences/unsubscribe/{{unsubscribeToken}}">Unsubscribe</a>
           </p>
         </div>
       </div>
     </body>
     </html>
   `;
+}
+
+/**
+ * Send batch emails with personalization
+ */
+async function sendBatchEmails(request, env, corsHeaders) {
+  try {
+    const body = await request.json();
+    const { emails } = body;
+
+    if (!Array.isArray(emails) || emails.length === 0) {
+      return new Response(
+        JSON.stringify({ error: 'emails must be a non-empty array' }),
+        { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
+
+    const results = [];
+    for (const emailData of emails) {
+      const result = await sendPersonalizedEmail(emailData, env);
+      results.push(result);
+    }
+
+    const successful = results.filter(r => r.success).length;
+    const failed = results.filter(r => !r.success).length;
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        sent: successful,
+        failed,
+        results,
+      }),
+      { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+    );
+  } catch (error) {
+    console.error('Send batch error:', error);
+    return new Response(
+      JSON.stringify({ error: 'Failed to send batch' }),
+      { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+    );
+  }
+}
+
+/**
+ * Send personalized email with user segment preferences
+ */
+async function sendPersonalizedEmail(emailData, env) {
+  try {
+    const { email, matchId, team1, team2, venue, time, date, personalization } = emailData;
+
+    if (!email) {
+      return { success: false, email, error: 'Email address required' };
+    }
+
+    // Get user segment and preferences
+    const userData = await env.SPORTS_KV.get(`user:${email}`);
+    if (!userData) {
+      return { success: false, email, error: 'User not found' };
+    }
+
+    const user = JSON.parse(userData);
+    const prefs = user.emailPreferences || {};
+
+    // Generate personalized subject and content
+    const subject = `🏏 ${user.name}, Don't miss: ${team1.shortName} vs ${team2.shortName}!`;
+    const greeting = `Hi ${user.name}`;
+
+    let htmlContent = generateMatchReminderHTML(team1, team2, venue, time, date);
+    htmlContent = htmlContent.replace('Hi there!', greeting);
+
+    // Generate unsubscribe token
+    const unsubToken = crypto.randomUUID();
+    await env.SPORTS_KV.put(
+      `unsubscribe-token:${unsubToken}`,
+      JSON.stringify({ email, category: 'all' }),
+      { expirationTtl: 30 * 24 * 60 * 60 }
+    );
+
+    htmlContent = htmlContent.replace(
+      '{{unsubscribeToken}}',
+      unsubToken
+    );
+
+    const emailResult = await sendEmailViaProvider(
+      {
+        from: 'noreply@sportsup99.com',
+        to: email,
+        subject,
+        html: htmlContent,
+      },
+      env
+    );
+
+    if (emailResult.success) {
+      // Log email sent
+      const emailLog = {
+        matchId,
+        email,
+        sentAt: new Date().toISOString(),
+        type: 'match-reminder',
+        personalized: true,
+        segment: user.segment || 'unknown',
+      };
+
+      await env.SPORTS_KV.put(
+        `email-log:${email}:${matchId}`,
+        JSON.stringify(emailLog),
+        { expirationTtl: 2592000 }
+      );
+
+      return {
+        success: true,
+        email,
+        matchId,
+        messageId: emailResult.messageId,
+      };
+    } else {
+      return {
+        success: false,
+        email,
+        error: emailResult.error,
+      };
+    }
+  } catch (error) {
+    console.error('Send personalized error:', error);
+    return {
+      success: false,
+      email: emailData.email,
+      error: error.message,
+    };
+  }
 }
