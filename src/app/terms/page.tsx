@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 
 export default function TermsPage() {
+  const router = useRouter();
   const [customContent, setCustomContent] = useState<string | null>(null);
   const [panels, setPanels] = useState<
     { id: string; title: string; body: string }[] | null
@@ -32,6 +34,14 @@ export default function TermsPage() {
     localStorage.setItem("terms_version", "1.0");
     setTermsAccepted(true);
     setShowAcceptanceModal(false);
+    
+    // Redirect to intended route or home page after acceptance
+    const redirectPath = sessionStorage.getItem("terms_redirect_after") || "/";
+    sessionStorage.removeItem("terms_redirect_after");
+    
+    setTimeout(() => {
+      router.push(redirectPath);
+    }, 500); // Small delay for animation
   };
 
   const handleDeclineTerms = () => {
