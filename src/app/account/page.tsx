@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Script from 'next/script';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Team } from '@/types';
@@ -23,6 +24,24 @@ interface SessionsResponse {
   sessions?: { id: string }[];
 }
 
+interface User {
+  id: string;
+  email: string;
+  name: string;
+}
+
+const getPasswordStrength = (password: string) => {
+  let score = 0;
+  if (password.length >= 12) score++;
+  if (password.length >= 16) score++;
+  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
+  if (/\d/.test(password)) score++;
+  if (/[^a-zA-Z\d]/.test(password)) score++;
+
+  const labels = ['Weak', 'Weak', 'Medium', 'Strong', 'Very Strong'];
+  return { score, label: labels[score] || 'Weak' };
+};
+
 export default function AccountPage() {
   const [loading, setLoading] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
@@ -30,6 +49,12 @@ export default function AccountPage() {
   const [revokingSessions, setRevokingSessions] = useState(false);
 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
+  const [authFormData, setAuthFormData] = useState({ email: '', password: '', name: '' });
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileReady, setTurnstileReady] = useState(false);
+  const passwordStrength = getPasswordStrength(authFormData.password);
 
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
@@ -51,6 +76,89 @@ export default function AccountPage() {
     const initials = parts.slice(0, 2).map((p) => p[0]?.toUpperCase() || '').join('');
     return initials || 'U';
   }, [displayName, email]);
+
+  // Initialize Cloudflare Turnstile widget when signup modal is open
+  useEffect(() => {
+    if (!turnstileReady || !showAuthModal || authMode !== 'signup') {
+      return;
+    }
+
+    if (typeof window === 'undefined') return;
+
+    const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+    if (!siteKey) {
+      return;
+    }
+
+    const anyWindow = window as any;
+    if (!anyWindow.turnstile) {
+      return;
+    }
+
+    const container = document.getElementById('turnstile-container');
+    if (!container) {
+      return;
+    }
+    // Clear any previous widget
+    container.innerHTML = '';
+
+    anyWindow.turnstile.render('#turnstile-container', {
+      sitekey: siteKey,
+      callback: (token: string) => {
+        setTurnstileToken(token);
+      },
+      'error-callback': () => {
+        setTurnstileToken(null);
+      },
+    } as any);
+  }, [turnstileReady, showAuthModal, authMode]);
+
+  // Handle auth
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (authMode === 'signup') {
+      if (!authFormData.password || authFormData.password.length < 12) {
+        alert('Password must be at least 12 characters long.');
+        return;
+      }
+      if (!turnstileToken) {
+        alert('Please complete the human verification before creating an account.');
+        return;
+      }
+    }
+
+    try {
+      // Always POST to /api/auth; the server infers signup vs signin from body fields
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(
+          authMode === 'signin'
+            ? { email: authFormData.email, password: authFormData.password }
+            : { ...authFormData, turnstileToken },
+        ),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('auth_token', data.token);
+        setIsAuthenticated(true);
+        setShowAuthModal(false);
+        setAuthFormData({ email: '', password: '', name: '' });
+        setTurnstileToken(null);
+        // Reload page to refresh account data
+        window.location.reload();
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Authentication failed');
+      }
+    } catch (error) {
+      console.error('Auth error:', error);
+      alert('Error during authentication');
+    }
+  };
 
   useEffect(() => {
     const token =
@@ -296,31 +404,168 @@ export default function AccountPage() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-ipl-dark">
+        <Script
+          src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
+          strategy="afterInteractive"
+          onLoad={() => setTurnstileReady(true)}
+        />
         <Navbar />
         <main className="max-w-3xl mx-auto px-4 py-16">
-          <h1 className="text-3xl font-bold text-white mb-4">Account</h1>
-          <p className="text-gray-300 text-sm">
-            Please sign in from the live score or chat page to manage your account settings.
-          </p>
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-white mb-4">Account</h1>
+            <p className="text-gray-300 text-sm mb-8">
+              Sign in or create an account to manage your profile, favorites, and security settings.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={() => {
+                  setShowAuthModal(true);
+                  setAuthMode('signin');
+                }}
+                className="px-6 py-3 bg-ipl-gold hover:bg-ipl-gold/90 text-black font-semibold rounded-lg transition-colors"
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => {
+                  setShowAuthModal(true);
+                  setAuthMode('signup');
+                }}
+                className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg transition-colors"
+              >
+                Create Account
+              </button>
+            </div>
+          </div>
         </main>
         <Footer />
+
+        {/* Auth Modal */}
+        {showAuthModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowAuthModal(false)} />
+            <div className="relative z-10 w-full max-w-md mx-4 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-white/10 p-8">
+              <h2 className="text-2xl font-bold text-white mb-6">
+                {authMode === 'signin' ? 'Sign In' : 'Create Account'}
+              </h2>
+
+              <form onSubmit={handleAuth} className="space-y-4">
+                {authMode === 'signup' && (
+                  <input
+                    type="text"
+                    placeholder="Full Name"
+                    value={authFormData.name}
+                    onChange={(e) => setAuthFormData({ ...authFormData, name: e.target.value })}
+                    required
+                    className="w-full px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                  />
+                )}
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={authFormData.email}
+                  onChange={(e) => setAuthFormData({ ...authFormData, email: e.target.value })}
+                  required
+                  className="w-full px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={authFormData.password}
+                  onChange={(e) => setAuthFormData({ ...authFormData, password: e.target.value })}
+                  required
+                  minLength={12}
+                  className="w-full px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                />
+
+                {authMode === 'signup' && authFormData.password && (
+                  <div className="space-y-1 text-xs mt-1">
+                    <div className="flex items-center justify-between text-gray-400">
+                      <span>Password strength</span>
+                      <span
+                        className={
+                          passwordStrength.label === 'Weak'
+                            ? 'text-red-400'
+                            : passwordStrength.label === 'Medium'
+                            ? 'text-yellow-400'
+                            : 'text-emerald-400'
+                        }
+                      >
+                        {passwordStrength.label}
+                      </span>
+                    </div>
+                    <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                      <div
+                        className={
+                          'h-full transition-all ' +
+                          (passwordStrength.label === 'Weak'
+                            ? 'bg-red-500'
+                            : passwordStrength.label === 'Medium'
+                            ? 'bg-yellow-500'
+                            : 'bg-emerald-500')
+                        }
+                        style={{ width: `${(passwordStrength.score / 4) * 100}%` }}
+                      />
+                    </div>
+                    <p className="text-[11px] text-gray-500">
+                      Use at least 12 characters with a mix of letters, numbers, and symbols.
+                    </p>
+                  </div>
+                )}
+
+                {authMode === 'signup' && (
+                  <div className="mt-3 space-y-1">
+                    <div id="turnstile-container" className="flex justify-center" />
+                    <p className="text-[11px] text-gray-500 text-center">
+                      This quick check helps keep the platform free from bots and spam.
+                    </p>
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className="w-full px-4 py-2 bg-ipl-gold hover:bg-ipl-gold/90 text-black font-semibold rounded-lg transition-colors"
+                >
+                  {authMode === 'signin' ? 'Sign In' : 'Create Account'}
+                </button>
+              </form>
+
+              <div className="mt-6 text-center">
+                <button
+                  onClick={() => setAuthMode(authMode === 'signin' ? 'signup' : 'signin')}
+                  className="text-ipl-gold hover:text-ipl-gold/80 text-sm"
+                >
+                  {authMode === 'signin' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+                </button>
+              </div>
+
+              <button
+                onClick={() => setShowAuthModal(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-300"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
 
+  // Authenticated view
   return (
     <div className="min-h-screen bg-ipl-dark">
       <Navbar />
-      <main className="max-w-5xl mx-auto px-4 py-12">
-        <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-ipl-gold to-ipl-purple flex items-center justify-center text-black font-bold text-lg">
-              {avatarInitials}
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-white">Account settings</h1>
-              <p className="text-sm text-gray-400">Manage your profile, favorites, and security.</p>
-            </div>
+      <main className="max-w-3xl mx-auto px-4 py-16">
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-ipl-gold to-ipl-purple flex items-center justify-center text-black font-bold text-lg">
+            {avatarInitials}
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-white">Account settings</h1>
+            <p className="text-sm text-gray-400">Manage your profile, favorites, and security.</p>
           </div>
         </div>
 
