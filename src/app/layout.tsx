@@ -8,16 +8,16 @@ export const metadata: Metadata = {
   keywords: "SportsUP18, IPL 2026, cricket, T20, Indian Premier League, live scores, teams, players, schedule",
   authors: [{ name: "SportsUP18" }],
   icons: {
-    icon: "/logos/sportsup18_logo_round.svg",
-    shortcut: "/logos/sportsup18_logo_round.svg",
-    apple: "/logos/sportsup18_logo_round.svg",
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
   },
   openGraph: {
     title: "SportsUP18 - Official Website",
     description: "SportsUP18 is your IPL 2026 experience platform.",
     type: "website",
     locale: "en_US",
-    images: ["/logos/sportsup18_logo_round.svg"],
+    images: ["/favicon.svg"],
   },
 };
 

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import IPLLogo from '../ui/IPLLogo';
+import SportsUP18LogoWithText from '../branding/SportsUP18LogoWithText';
 import Emoji from '../emoji/Emoji';
 
 type NavEmojiName = 'cricket' | 'chart' | 'news' | 'glove' | 'target' | 'trophy' | 'sparkles' | 'people' | 'fire' | 'star';
@@ -76,18 +76,14 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo Section */}
-          <Link href="/" className="flex items-center space-x-3 group relative shrink-0">
-            <div className="flex items-center justify-center transform group-hover:scale-115 transition-transform duration-400 ease-out">
-              <IPLLogo size="md" animated />
-            </div>
-            <div className="flex flex-col -ml-1">
-              <span className="text-white font-bold text-xl md:text-2xl leading-none tracking-tight transition-all duration-300">
-                SportsUP18
-              </span>
-              <span className="text-blue-400 text-xs md:text-sm font-semibold tracking-widest transition-colors duration-300 group-hover:text-cyan-300">
-                IPL 2026
-              </span>
-            </div>
+          <Link href="/" className="flex items-center group relative shrink-0">
+            <SportsUP18LogoWithText 
+              size="md" 
+              animated 
+              showText 
+              textPosition="right"
+              className="group-hover:scale-110 transition-transform duration-300"
+            />
           </Link>
 
           {/* Desktop Navigation */}

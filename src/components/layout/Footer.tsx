@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import IPLLogo from '../ui/IPLLogo';
+import SportsUP18LogoWithText from '../branding/SportsUP18LogoWithText';
 
 export default function Footer() {
   return (
@@ -8,12 +8,13 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center space-x-3 mb-4">
-              <IPLLogo size="sm" animated />
-              <div className="flex flex-col">
-                <span className="text-white font-black text-xl leading-none">SportsUP18</span>
-                <span className="text-ipl-gold text-sm font-bold">IPL 2026</span>
-              </div>
+            <div className="mb-4">
+              <SportsUP18LogoWithText 
+                size="sm" 
+                animated 
+                showText 
+                textPosition="right"
+              />
             </div>
             <p className="text-gray-300 text-sm leading-relaxed">
               SportsUP18 is your IPL 2026 experience platform. Experience the excitement of the world's premier T20 cricket league.
