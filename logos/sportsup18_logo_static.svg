@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-labelledby="title desc">
+  <title id="title">SportsUP18 Logo Static</title>
+  <desc id="desc">SportsUP18 static logo without animations</desc>
+  <defs>
+    <linearGradient id="cricketGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="50%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+    
+    <linearGradient id="cricketGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#1e40af" />
+    </linearGradient>
+
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ec4899" />
+      <stop offset="100%" stop-color="#a855f7" />
+    </linearGradient>
+
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Outer ring with gradient -->
+  <circle cx="60" cy="60" r="58" fill="none" stroke="url(#cricketGrad1)" stroke-width="2" opacity="0.9"/>
+  
+  <!-- Pulse ring effect (static) -->
+  <circle cx="60" cy="60" r="55" fill="none" stroke="url(#cricketGrad2)" stroke-width="1.5" opacity="0.4"/>
+
+  <!-- Main background circle -->
+  <circle cx="60" cy="60" r="52" fill="url(#cricketGrad2)" opacity="0.15"/>
+
+  <!-- Cricket Ball -->
+  <g>
+    <!-- Ball body -->
+    <circle cx="60" cy="60" r="28" fill="url(#cricketGrad1)" filter="url(#glow)"/>
+    
+    <!-- Ball shine -->
+    <circle cx="50" cy="50" r="10" fill="#fef3c7" opacity="0.4"/>
+    
+    <!-- Stitching pattern -->
+    <path d="M 45 40 Q 60 35 75 40" stroke="#fed7aa" stroke-width="1.5" fill="none" opacity="0.8" stroke-linecap="round"/>
+    <path d="M 45 60 Q 60 65 75 60" stroke="#fed7aa" stroke-width="1.5" fill="none" opacity="0.8" stroke-linecap="round"/>
+    <path d="M 40 50 Q 45 60 50 70" stroke="#fed7aa" stroke-width="1" fill="none" opacity="0.6" stroke-linecap="round"/>
+    <path d="M 70 50 Q 75 60 80 70" stroke="#fed7aa" stroke-width="1" fill="none" opacity="0.6" stroke-linecap="round"/>
+  </g>
+
+  <!-- Cricket Bat -->
+  <g>
+    <!-- Bat handle -->
+    <rect x="56" y="20" width="8" height="35" rx="4" fill="url(#accentGrad)" opacity="0.9"/>
+    
+    <!-- Bat blade -->
+    <ellipse cx="60" cy="15" rx="12" ry="8" fill="url(#accentGrad)"/>
+    
+    <!-- Bat detail -->
+    <line x1="56" y1="25" x2="64" y2="25" stroke="#fbbf24" stroke-width="1" opacity="0.6"/>
+    <line x1="56" y1="32" x2="64" y2="32" stroke="#fbbf24" stroke-width="1" opacity="0.6"/>
+  </g>
+
+  <!-- Upward Arrow - Growth Indicator -->
+  <g>
+    <path d="M 60 85 L 60 75 M 55 80 L 60 75 L 65 80" stroke="url(#accentGrad)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  </g>
+
+  <!-- Number 18 Badge -->
+  <g>
+    <rect x="78" y="35" width="28" height="22" rx="6" fill="rgba(15, 23, 42, 0.85)" stroke="url(#cricketGrad1)" stroke-width="1.5" opacity="0.9"/>
+    <text x="92" y="51" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="800" fill="#fbbf24" text-anchor="middle">
+      18
+    </text>
+  </g>
+
+  <!-- Accent dots for visual interest -->
+  <circle cx="35" cy="35" r="2.5" fill="url(#cricketGrad1)" opacity="0.6"/>
+  <circle cx="85" cy="85" r="2.5" fill="url(#cricketGrad2)" opacity="0.6"/>
+</svg>

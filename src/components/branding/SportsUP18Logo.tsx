@@ -36,160 +36,131 @@ export default function SportsUP18Logo({
       <svg
         width={width}
         height={height}
-        viewBox="0 0 100 100"
-        className={`${animated ? 'transition-transform duration-300' : ''} ${
+        viewBox="0 0 120 120"
+        className={`${animated ? 'transition-all duration-300' : ''} ${
           isHovered && animated ? 'scale-110' : 'scale-100'
         }`}
         style={{
-          filter: isHovered && animated ? 'drop-shadow(0 0 20px rgba(34, 211, 238, 0.65))' : 'none',
+          filter: isHovered && animated ? 'drop-shadow(0 0 20px rgba(251, 191, 36, 0.9)) drop-shadow(0 0 40px rgba(59, 130, 246, 0.5))' : 'drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15))',
         }}
       >
         <defs>
-          <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id="cricketGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#fbbf24" />
-            <stop offset="30%" stopColor="#f97316" />
-            <stop offset="65%" stopColor="#22d3ee" />
-            <stop offset="100%" stopColor="#38bdf8" />
+            <stop offset="50%" stopColor="#f59e0b" />
+            <stop offset="100%" stopColor="#d97706" />
           </linearGradient>
-          <linearGradient id="sStrokeGradient" x1="30%" y1="0%" x2="70%" y2="100%">
-            <stop offset="0%" stopColor="#fde68a" />
-            <stop offset="45%" stopColor="#f97316" />
+          
+          <linearGradient id="cricketGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#3b82f6" />
+            <stop offset="100%" stopColor="#1e40af" />
+          </linearGradient>
+
+          <linearGradient id="accentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#ec4899" />
             <stop offset="100%" stopColor="#a855f7" />
           </linearGradient>
-          <radialGradient id="glowGradient" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="rgba(34, 211, 238, 0.45)" />
-            <stop offset="65%" stopColor="rgba(24, 24, 27, 0.15)" />
-            <stop offset="100%" stopColor="rgba(24, 24, 27, 0)" />
-          </radialGradient>
-          <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur" />
+
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
             <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
             </feMerge>
           </filter>
 
           <style>{`
-            @keyframes orbit {
-              0% { transform: rotate(0deg); }
-              100% { transform: rotate(360deg); }
+            @keyframes spin-ball {
+              from { transform: rotate(0deg); }
+              to { transform: rotate(360deg); }
             }
-            @keyframes pulseRing {
-              0%, 100% { opacity: 0.35; transform: scale(1); }
-              50% { opacity: 0.7; transform: scale(1.07); }
+            @keyframes float-bat {
+              0%, 100% { transform: translateY(0px) rotate(-15deg); }
+              50% { transform: translateY(-4px) rotate(-15deg); }
             }
-            @keyframes shimmerStroke {
-              0% { stroke-dashoffset: 0; }
-              100% { stroke-dashoffset: -180; }
+            @keyframes pulse-ring {
+              0%, 100% { r: 55; opacity: 0.8; }
+              50% { r: 60; opacity: 0.3; }
             }
-            @keyframes flareBlink {
-              0%, 100% { opacity: 0; transform: scale(0.6); }
-              50% { opacity: 0.7; transform: scale(1.1); }
+            @keyframes shimmer {
+              0% { stroke-dashoffset: 100; }
+              100% { stroke-dashoffset: 0; }
             }
-            .logo-ring {
-              animation: pulseRing 4s ease-in-out infinite;
-              transform-origin: 50px 50px;
+            @keyframes glow-pulse {
+              0%, 100% { opacity: 0.6; }
+              50% { opacity: 1; }
             }
-            .logo-s {
-              animation: shimmerStroke 6s linear infinite;
+            
+            .cricket-ball {
+              transform-origin: 60px 60px;
+              animation: ${animated ? 'spin-ball 8s linear infinite' : 'none'};
             }
-            .logo-orbit {
-              animation: orbit 7.5s linear infinite;
-              transform-origin: 50px 50px;
+            .cricket-bat {
+              transform-origin: 60px 60px;
+              animation: ${animated ? 'float-bat 3s ease-in-out infinite' : 'none'};
             }
-            .logo-flare {
-              animation: flareBlink 2.8s ease-in-out infinite;
+            .pulse-ring {
+              animation: ${animated ? 'pulse-ring 2.5s ease-in-out infinite' : 'none'};
+            }
+            .glow-accent {
+              animation: ${animated ? 'glow-pulse 2s ease-in-out infinite' : 'none'};
             }
           `}</style>
         </defs>
 
-        {/* Ambient glow */}
-        <circle
-          cx="50"
-          cy="50"
-          r="48"
-          fill="url(#glowGradient)"
-          className={animated ? 'logo-ring' : ''}
-          style={{ animationDuration: animated ? (isHovered ? '2.4s' : '4s') : undefined }}
-        />
+        {/* Outer ring with gradient */}
+        <circle cx="60" cy="60" r="58" fill="none" stroke="url(#cricketGradient1)" strokeWidth="2" opacity="0.9"/>
+        
+        {/* Pulsing ring effect */}
+        <circle cx="60" cy="60" r="55" fill="none" stroke="url(#cricketGradient2)" strokeWidth="1.5" opacity="0.4" className="pulse-ring"/>
 
-        {/* Stadium arc ring */}
-        <circle
-          cx="50"
-          cy="50"
-          r="40"
-          fill="none"
-          stroke="url(#ringGradient)"
-          strokeWidth="5"
-          strokeLinecap="round"
-          strokeDasharray="120 40"
-          className={animated ? 'logo-ring' : ''}
-          style={{
-            animationDuration: animated ? (isHovered ? '2.2s' : '4.6s') : undefined,
-            filter: 'url(#softGlow)',
-          }}
-        />
+        {/* Main background circle */}
+        <circle cx="60" cy="60" r="52" fill="url(#cricketGradient2)" opacity="0.15"/>
 
-        {/* Dynamic energy orbit trail */}
-        <path
-          d="M20 58c4 12 18 22 32 22s28-10 32-22"
-          fill="none"
-          stroke="rgba(56, 189, 248, 0.35)"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-
-        {/* Stylised "S" stroke */}
-        <path
-          d="M70 28c-10-12-36-12-46 0-8 10-2 22 14 24 18 2 22 12 10 20-10 7-26 4-34-6"
-          fill="none"
-          stroke="url(#sStrokeGradient)"
-          strokeWidth="8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeDasharray={animated ? '120 40' : 'none'}
-          className={animated ? 'logo-s' : ''}
-          style={{
-            filter: 'url(#softGlow)',
-            animationDuration: animated ? (isHovered ? '3.2s' : '6s') : undefined,
-          }}
-        />
-
-        {/* Cricket stump pulse */}
-        <g
-          className={animated ? 'logo-flare' : ''}
-          style={{
-            transformOrigin: '68px 35px',
-            animationDuration: animated ? (isHovered ? '1.8s' : '2.8s') : undefined,
-          }}
-        >
-          <rect x="65" y="30" width="4" height="18" rx="2" fill="#fde68a" opacity="0.85" />
+        {/* Cricket Ball - Main Element */}
+        <g className="cricket-ball">
+          {/* Ball body */}
+          <circle cx="60" cy="60" r="28" fill="url(#cricketGradient1)" filter="url(#glow)"/>
+          
+          {/* Ball shine */}
+          <circle cx="50" cy="50" r="10" fill="#fef3c7" opacity="0.4"/>
+          
+          {/* Stitching pattern */}
+          <path d="M 45 40 Q 60 35 75 40" stroke="#fed7aa" strokeWidth="1.5" fill="none" opacity="0.8" strokeLinecap="round"/>
+          <path d="M 45 60 Q 60 65 75 60" stroke="#fed7aa" strokeWidth="1.5" fill="none" opacity="0.8" strokeLinecap="round"/>
+          <path d="M 40 50 Q 45 60 50 70" stroke="#fed7aa" strokeWidth="1" fill="none" opacity="0.6" strokeLinecap="round"/>
+          <path d="M 70 50 Q 75 60 80 70" stroke="#fed7aa" strokeWidth="1" fill="none" opacity="0.6" strokeLinecap="round"/>
         </g>
 
-        {/* Cricket ball orbit */}
-        <g
-          className={animated ? 'logo-orbit' : ''}
-          style={{
-            transformOrigin: '50px 50px',
-            animationDuration: animated ? (isHovered ? '3s' : '7.5s') : undefined,
-          }}
-        >
-          <g transform="translate(50 10)">
-            <circle r="6"
-              fill="#f97316"
-              stroke="#fff7ed"
-              strokeWidth="1.2"
-              filter="url(#softGlow)"
-            />
-            <path
-              d="M-4 -1c2.2.8 4.4.8 6.8 0"
-              stroke="#fde68a"
-              strokeWidth="0.8"
-              strokeLinecap="round"
-            />
-            <circle r="2.8" cx="-1.6" cy="-1.8" fill="rgba(255, 255, 255, 0.6)" />
-          </g>
+        {/* Cricket Bat */}
+        <g className="cricket-bat">
+          {/* Bat handle */}
+          <rect x="56" y="20" width="8" height="35" rx="4" fill="url(#accentGradient)" opacity="0.9"/>
+          
+          {/* Bat blade */}
+          <ellipse cx="60" cy="15" rx="12" ry="8" fill="url(#accentGradient)"/>
+          
+          {/* Bat detail */}
+          <line x1="56" y1="25" x2="64" y2="25" stroke="#fbbf24" strokeWidth="1" opacity="0.6"/>
+          <line x1="56" y1="32" x2="64" y2="32" stroke="#fbbf24" strokeWidth="1" opacity="0.6"/>
         </g>
+
+        {/* Upward Arrow - Growth Indicator */}
+        <g className="glow-accent">
+          <path d="M 60 85 L 60 75 M 55 80 L 60 75 L 65 80" stroke="url(#accentGradient)" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round" opacity="0.85"/>
+        </g>
+
+        {/* Number 18 Badge */}
+        <g>
+          <rect x="78" y="35" width="28" height="22" rx="6" fill="rgba(15, 23, 42, 0.85)" stroke="url(#cricketGradient1)" strokeWidth="1.5" opacity="0.9"/>
+          <text x="92" y="51" fontFamily="system-ui, -apple-system, sans-serif" fontSize="12" fontWeight="800" fill="#fbbf24" textAnchor="middle">
+            18
+          </text>
+        </g>
+
+        {/* Accent dots for visual interest */}
+        <circle cx="35" cy="35" r="2.5" fill="url(#cricketGradient1)" opacity="0.6" className={animated ? 'glow-accent' : ''}/>
+        <circle cx="85" cy="85" r="2.5" fill="url(#cricketGradient2)" opacity="0.6" className={animated ? 'glow-accent' : ''} style={{ animationDelay: '0.5s' }}/>
       </svg>
     </div>
   );

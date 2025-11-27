@@ -23,10 +23,10 @@ export default function SportsUP18LogoWithText({
   const [isHovered, setIsHovered] = useState(false);
 
   const textSizeMap = {
-    sm: 'text-xs',
-    md: 'text-sm',
-    lg: 'text-lg',
-    xl: 'text-2xl',
+    sm: { main: 'text-xs', sub: 'text-[8px]' },
+    md: { main: 'text-sm', sub: 'text-[10px]' },
+    lg: { main: 'text-lg', sub: 'text-xs' },
+    xl: { main: 'text-2xl', sub: 'text-sm' },
   };
 
   const textSize = textSizeMap[size];
@@ -38,7 +38,7 @@ export default function SportsUP18LogoWithText({
 
   return (
     <div
-      className={`${containerClass} cursor-pointer ${className}`}
+      className={`${containerClass} cursor-pointer ${className} ${animated ? 'transition-all duration-300 hover:scale-105' : ''}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={onClick}
@@ -53,27 +53,44 @@ export default function SportsUP18LogoWithText({
               50% { background-position: 100% 50%; }
               100% { background-position: 0% 50%; }
             }
+            @keyframes text-glow {
+              0%, 100% { text-shadow: 0 0 10px rgba(251, 191, 36, 0.3); }
+              50% { text-shadow: 0 0 20px rgba(251, 191, 36, 0.6), 0 0 30px rgba(59, 130, 246, 0.3); }
+            }
             .sportsup-brand-text {
               background: linear-gradient(
-                90deg,
+                135deg,
                 #fbbf24 0%,
                 #f59e0b 25%,
-                #60a5fa 50%,
-                #a78bfa 75%,
+                #3b82f6 50%,
+                #ec4899 75%,
                 #fbbf24 100%
               );
               background-size: 200% 200%;
-              ${animated ? 'animation: text-gradient-shift 4s ease infinite;' : ''}
+              ${animated ? 'animation: text-gradient-shift 5s ease infinite;' : ''}
               -webkit-background-clip: text;
               -webkit-text-fill-color: transparent;
               background-clip: text;
+              font-weight: 900;
+              letter-spacing: -0.5px;
+            }
+            .sportsup-subtitle {
+              background: linear-gradient(
+                90deg,
+                #60a5fa 0%,
+                #ec4899 100%
+              );
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+              background-clip: text;
+              ${animated ? 'animation: text-glow 3s ease-in-out infinite;' : ''}
             }
           `}</style>
 
-          <div className={`${textSize} font-black tracking-tight sportsup-brand-text`}>
+          <div className={`${textSize.main} sportsup-brand-text`}>
             SportsUP18
           </div>
-          <div className="text-[10px] md:text-xs font-semibold text-gray-400 tracking-widest">
+          <div className={`${textSize.sub} font-bold tracking-widest sportsup-subtitle`}>
             LIVE CRICKET
           </div>
         </div>
