@@ -34,10 +34,10 @@ export default function RCBPremiumLogo({
   const inView = useInView(containerRef, { once: true, margin: '-100px' });
 
   const sizeClasses = {
-    sm: 'w-32 h-32',      // Increased from w-24 h-24
-    md: 'w-64 h-64',      // Increased from w-48 h-48
-    lg: 'w-80 h-80',      // Increased from w-64 h-64
-    xl: 'w-[28rem] h-[28rem]',  // Increased from w-96 h-96
+    sm: 'w-40 h-40',      // Further increased
+    md: 'w-80 h-80',      // Further increased
+    lg: 'w-96 h-96',      // Further increased
+    xl: 'w-[36rem] h-[36rem]',  // Further increased
   };
 
   useEffect(() => {
