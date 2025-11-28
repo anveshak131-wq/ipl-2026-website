@@ -7,7 +7,9 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import EnhancedTeamCard from '@/components/teams/EnhancedTeamCard';
 import PlayerModal from '@/components/teams/PlayerModal';
-import { Team, Player } from '@/types';
+import TeamComparisonTool from '@/components/teams/TeamComparisonTool';
+import TeamQuickStatsPreview from '@/components/teams/TeamQuickStatsPreview';
+import { Team, Player, Match } from '@/types';
 import { api } from '@/lib/data';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Icon from '@/components/ui/Icon';
@@ -17,14 +19,16 @@ import { CustomEmoji } from '@/components/emoji/Emoji';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import GradientText from '@/components/ui/GradientText';
 
-type SortOption = 'name' | 'titles' | 'players';
+type SortOption = 'name' | 'titles' | 'players' | 'performance';
 type TitleFilter = 'all' | '0' | '1' | '2+';
+type ViewMode = 'grid' | 'list';
 
 function TeamsPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
 
     const [teams, setTeams] = useState<Team[]>([]);
+    const [matches, setMatches] = useState<Match[]>([]);
     const [searchTerm, setSearchTerm] = useState(searchParams?.get('search') || '');
     const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
     const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
@@ -32,6 +36,10 @@ function TeamsPageContent() {
     const [isLoading, setIsLoading] = useState(true);
     const [sortBy, setSortBy] = useState<SortOption>((searchParams?.get('sort') as SortOption) || 'name');
     const [titleFilter, setTitleFilter] = useState<TitleFilter>((searchParams?.get('titles') as TitleFilter) || 'all');
+    const [homeGroundFilter, setHomeGroundFilter] = useState<string>('all');
+    const [viewMode, setViewMode] = useState<ViewMode>('grid');
+    const [showComparison, setShowComparison] = useState(false);
+    const [hoveredTeam, setHoveredTeam] = useState<string | null>(null);
     const [favorites, setFavorites] = useState<string[]>([]);
     const [showFavoritesFirst, setShowFavoritesFirst] = useState(false);
 
@@ -61,9 +69,10 @@ function TeamsPageContent() {
     useEffect(() => {
         const fetchTeams = async () => {
             try {
-                const [teamsData, playersData] = await Promise.all([
+                const [teamsData, playersData, matchesData] = await Promise.all([
                     api.getTeams(),
-                    api.getPlayers().catch(() => []) // Fallback to empty array on error
+                    api.getPlayers().catch(() => []), // Fallback to empty array on error
+                    api.getMatches().catch(() => []) // Fetch matches for performance calculation
                 ]);
 
                 const teamsWithPlayers = teamsData.map(team => ({
@@ -72,6 +81,7 @@ function TeamsPageContent() {
                 }));
 
                 setTeams(teamsWithPlayers);
+                setMatches(matchesData || []);
             } catch (error) {
                 console.error('Failed to fetch teams:', error);
                 // Still try to display teams even if players fail
@@ -111,8 +121,31 @@ function TeamsPageContent() {
         setSearchTerm('');
         setSortBy('name');
         setTitleFilter('all');
+        setHomeGroundFilter('all');
         setShowFavoritesFirst(false);
     };
+
+    // Calculate team performance (win rate from recent matches)
+    const calculateTeamPerformance = (team: Team): number => {
+        const teamMatches = matches.filter(
+            (m) => m.status === 'completed' && (m.team1.id === team.id || m.team2.id === team.id)
+        );
+        if (teamMatches.length === 0) return 0;
+        const wins = teamMatches.filter((m) => {
+            if (!m.result) return false;
+            return m.result.includes(team.shortName) || m.result.includes(team.name);
+        }).length;
+        return (wins / teamMatches.length) * 100;
+    };
+
+    // Get all unique home grounds
+    const allHomeGrounds = useMemo(() => {
+        const grounds = new Set<string>();
+        teams.forEach(team => {
+            team.homeGrounds?.forEach(ground => grounds.add(ground));
+        });
+        return Array.from(grounds).sort();
+    }, [teams]);
 
     // Filter and sort teams
     const filteredAndSortedTeams = useMemo(() => {
@@ -138,6 +171,13 @@ function TeamsPageContent() {
             });
         }
 
+        // Home ground filter
+        if (homeGroundFilter !== 'all') {
+            result = result.filter((team) => 
+                team.homeGrounds?.some(ground => ground === homeGroundFilter)
+            );
+        }
+
         // Sort
         result = [...result].sort((a, b) => {
             if (sortBy === 'titles') {
@@ -145,6 +185,9 @@ function TeamsPageContent() {
             }
             if (sortBy === 'players') {
                 return (b.players?.length || 0) - (a.players?.length || 0);
+            }
+            if (sortBy === 'performance') {
+                return calculateTeamPerformance(b) - calculateTeamPerformance(a);
             }
             return a.name.localeCompare(b.name);
         });
@@ -171,7 +214,7 @@ function TeamsPageContent() {
         0
     );
 
-    const hasActiveFilters = searchTerm || sortBy !== 'name' || titleFilter !== 'all' || showFavoritesFirst;
+    const hasActiveFilters = searchTerm || sortBy !== 'name' || titleFilter !== 'all' || homeGroundFilter !== 'all' || showFavoritesFirst;
 
     return (
         <div className="min-h-screen">
@@ -297,6 +340,26 @@ function TeamsPageContent() {
 
                                 <div className="h-6 w-px bg-white/10" />
 
+                                {/* Home Ground Filter */}
+                                {allHomeGrounds.length > 0 && (
+                                    <>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs text-gray-400 font-semibold uppercase tracking-wide">Ground:</span>
+                                            <select
+                                                value={homeGroundFilter}
+                                                onChange={(e) => setHomeGroundFilter(e.target.value)}
+                                                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800/60 text-white border border-white/10 focus:border-ipl-gold focus:outline-none hover:border-ipl-gold/50 transition-all cursor-pointer"
+                                            >
+                                                <option value="all">All Grounds</option>
+                                                {allHomeGrounds.map(ground => (
+                                                    <option key={ground} value={ground}>{ground}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="h-6 w-px bg-white/10" />
+                                    </>
+                                )}
+
                                 {/* Sort Dropdown */}
                                 <div className="flex items-center gap-2">
                                     <span className="text-xs text-gray-400 font-semibold uppercase tracking-wide">Sort:</span>
@@ -308,8 +371,48 @@ function TeamsPageContent() {
                                         <option value="name">Name (A-Z)</option>
                                         <option value="titles">Titles (Most first)</option>
                                         <option value="players">Squad size</option>
+                                        <option value="performance">Recent Performance</option>
                                     </select>
                                 </div>
+
+                                <div className="h-6 w-px bg-white/10" />
+
+                                {/* View Toggle */}
+                                <div className="flex items-center gap-2">
+                                    <span className="text-xs text-gray-400 font-semibold uppercase tracking-wide">View:</span>
+                                    <div className="flex rounded-lg border border-white/10 overflow-hidden">
+                                        <button
+                                            onClick={() => setViewMode('grid')}
+                                            className={`px-3 py-1.5 text-xs font-bold transition-all ${
+                                                viewMode === 'grid'
+                                                    ? 'bg-ipl-gold text-slate-900'
+                                                    : 'bg-slate-800/60 text-gray-300 hover:bg-white/10'
+                                            }`}
+                                        >
+                                            Grid
+                                        </button>
+                                        <button
+                                            onClick={() => setViewMode('list')}
+                                            className={`px-3 py-1.5 text-xs font-bold transition-all ${
+                                                viewMode === 'list'
+                                                    ? 'bg-ipl-gold text-slate-900'
+                                                    : 'bg-slate-800/60 text-gray-300 hover:bg-white/10'
+                                            }`}
+                                        >
+                                            List
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="h-6 w-px bg-white/10" />
+
+                                {/* Comparison Tool */}
+                                <button
+                                    onClick={() => setShowComparison(true)}
+                                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-500/20 text-purple-300 border border-purple-500/50 hover:bg-purple-500/30 transition-all flex items-center gap-1.5"
+                                >
+                                    <CustomEmoji type="target" size={14} /> Compare
+                                </button>
 
                                 <div className="h-6 w-px bg-white/10" />
 
@@ -374,7 +477,10 @@ function TeamsPageContent() {
                         </div>
                     ) : (
                         <motion.div 
-                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                            className={viewMode === 'grid' 
+                                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                                : "space-y-4"
+                            }
                             initial="hidden"
                             animate="visible"
                             variants={{
@@ -405,6 +511,9 @@ function TeamsPageContent() {
                                             transition: { duration: 0.3 }
                                         }}
                                         style={{ perspective: 1000 }}
+                                        className="relative"
+                                        onMouseEnter={() => setHoveredTeam(team.id)}
+                                        onMouseLeave={() => setHoveredTeam(null)}
                                     >
                                         <EnhancedTeamCard
                                             team={team}
@@ -412,6 +521,9 @@ function TeamsPageContent() {
                                             isFavorite={favorites.includes(team.id)}
                                             onToggleFavorite={() => toggleFavorite(team.id)}
                                         />
+                                        {hoveredTeam === team.id && (
+                                            <TeamQuickStatsPreview team={team} matches={matches} />
+                                        )}
                                     </motion.div>
                                 ))}
                             </AnimatePresence>
@@ -487,6 +599,13 @@ function TeamsPageContent() {
                 teamColors={selectedPlayer ? teams.find(t => t.id === selectedPlayer.teamId)?.colors : undefined}
                 teamData={selectedPlayer ? teams.find(t => t.id === selectedPlayer.teamId) : undefined}
             />
+
+            {showComparison && (
+                <TeamComparisonTool
+                    teams={teams}
+                    onClose={() => setShowComparison(false)}
+                />
+            )}
         </div>
     );
 }
