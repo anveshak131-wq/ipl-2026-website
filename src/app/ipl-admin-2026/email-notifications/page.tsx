@@ -511,7 +511,11 @@ export default function AdminEmailNotificationsPage() {
   };
 
   // Load templates, schedules, and logs from localStorage on mount
+  const hasLoadedData = useRef(false);
   useEffect(() => {
+    // Prevent multiple loads
+    if (hasLoadedData.current) return;
+    
     const storedTemplates = localStorage.getItem('email_templates');
     if (storedTemplates) {
       try {
@@ -541,6 +545,11 @@ export default function AdminEmailNotificationsPage() {
         console.error('Error loading logs:', e);
       }
     }
+
+    // Only load matches/news when authenticated
+    if (!isAuthenticated) return;
+    
+    hasLoadedData.current = true;
 
     // Load matches and news for bulk email sending
     const loadMatchesAndNews = async () => {
@@ -599,7 +608,7 @@ export default function AdminEmailNotificationsPage() {
         setNews(transformedNews);
       } catch (e) {
         console.error('Error loading matches/news:', e);
-        showError('Failed to load matches and news data');
+        // Don't show error toast to avoid flickering
       } finally {
         setIsLoadingMatches(false);
       }
@@ -607,7 +616,7 @@ export default function AdminEmailNotificationsPage() {
 
     loadMatchesAndNews();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run once on mount - showError is stable from useToast
+  }, [isAuthenticated]); // Only load when authenticated
 
   // Bulk operations handlers
   const handleSelectAll = () => {
