@@ -12,8 +12,8 @@
 // '10' = CSK (Chennai Super Kings)
 export function getAnimatedLogoPath(teamId: string): string {
   const logoMap: { [key: string]: string } = {
-    // RCB uses a custom animated inferno lion SVG in /public/logos
-    '1': 'rcb_inferno_lion.svg',       // RCB
+    // RCB uses the premium animated logo SVG in /public/logos
+    '1': 'rcb_logo_premium.svg',       // RCB
     '2': 'mi_logo_animated.svg',       // MI
     '3': 'srh_logo_animated.svg',      // SRH
     '4': 'gt_logo_animated.svg',       // GT
@@ -41,7 +41,7 @@ export function getAnimatedLogoPath(teamId: string): string {
 // Get regular logo path (fallback)
 export function getLogoPath(teamId: string): string {
   const logoMap: { [key: string]: string } = {
-    '1': 'rcb_logo_new.svg',      // RCB
+    '1': 'rcb_logo_premium.svg',      // RCB
     '2': 'mi_logo_new.svg',       // MI
     '3': 'srh_logo_new.svg',      // SRH
     '4': 'gt_logo_new.svg',       // GT
@@ -54,7 +54,7 @@ export function getLogoPath(teamId: string): string {
   };
 
   const numericId = teamId.replace('team', '');
-  const logoFile = logoMap[numericId] || 'rcb_logo_new.svg';
+  const logoFile = logoMap[numericId] || 'rcb_logo_premium.svg';
   return `/logos/${logoFile}`;
 }
 

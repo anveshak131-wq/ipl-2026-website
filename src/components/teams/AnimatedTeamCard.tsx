@@ -25,7 +25,7 @@ export default function AnimatedTeamCard({ team, onPlayerClick, isFavorite = fal
   
   const animatedLogo = getAnimatedLogoPath(team.id);
   const fallbackLogo = getLogoPath(team.id);
-  const isRCBStaticExport = animatedLogo.endsWith('rcb_inferno_lion.svg');
+  const isRCBStaticExport = animatedLogo.endsWith('rcb_logo_premium.svg');
 
   const trophyCount = team.trophies?.length || 0;
   const playerCount = team.players?.length || 0;

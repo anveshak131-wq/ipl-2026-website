@@ -22,7 +22,7 @@ export default function EnhancedTeamCard({ team, onPlayerClick, isFavorite = fal
   const [imageError, setImageError] = useState(false);
   const animatedLogo = getAnimatedLogoPath(team.id);
   const fallbackLogo = getLogoPath(team.id);
-  const isRCBStaticExport = animatedLogo.endsWith('rcb_inferno_lion.svg');
+  const isRCBStaticExport = animatedLogo.endsWith('rcb_logo_premium.svg');
 
   const trophyCount = team.trophies?.length || 0;
   const playerCount = team.players?.length || 0;

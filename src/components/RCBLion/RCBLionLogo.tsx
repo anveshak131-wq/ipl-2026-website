@@ -6,13 +6,13 @@ interface Props {
   className?: string;
 }
 
-// Simple wrapper that renders the new animated inferno lion SVG from /public/logos.
+// Premium RCB logo component - renders the new premium animated logo
 export default function RCBLionLogo({ className }: Props) {
   return (
     <div className={`rcb-logo-shell ${className ?? ''}`}>
       <img
-        src="/logos/rcb_inferno_lion.svg"
-        alt="Royal Challengers Bengaluru lion crest"
+        src="/logos/rcb_logo_premium.svg"
+        alt="Royal Challengers Bengaluru premium logo"
         className="w-full h-full object-contain"
       />
     </div>

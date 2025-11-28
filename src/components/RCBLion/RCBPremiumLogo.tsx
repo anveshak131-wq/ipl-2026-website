@@ -11,6 +11,7 @@ const RCB_COLORS = {
   darkRed: '#B91C1C',
   lightRed: '#FEE2E2',
   orange: '#FF8C00',
+  maneGold: '#FFA500',
 };
 
 interface RCBPremiumLogoProps {
@@ -59,6 +60,7 @@ export default function RCBPremiumLogo({
   const gradientId1 = `rcb-gradient-1-${uniqueId.current}`;
   const gradientId2 = `rcb-gradient-2-${uniqueId.current}`;
   const gradientId3 = `rcb-gradient-3-${uniqueId.current}`;
+  const gradientId4 = `rcb-gradient-4-${uniqueId.current}`;
   const glowFilterId = `rcb-glow-${uniqueId.current}`;
   const shadowFilterId = `rcb-shadow-${uniqueId.current}`;
 
@@ -91,7 +93,7 @@ export default function RCBPremiumLogo({
 
       {/* Main Logo Container */}
       <motion.svg
-        viewBox="0 0 300 300"
+        viewBox="0 0 400 400"
         className="relative z-10 w-full h-full"
         initial="hidden"
         animate={controls}
@@ -155,14 +157,21 @@ export default function RCBPremiumLogo({
             </stop>
           </linearGradient>
 
-          {/* Secondary Gradient - Gold Accent */}
+          {/* Mane Gradient */}
           <linearGradient id={gradientId2} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor={RCB_COLORS.gold} stopOpacity="0.9" />
-            <stop offset="100%" stopColor={RCB_COLORS.orange} stopOpacity="0.9" />
+            <stop offset="0%" stopColor={RCB_COLORS.gold} stopOpacity="0.95" />
+            <stop offset="50%" stopColor={RCB_COLORS.maneGold} stopOpacity="0.9" />
+            <stop offset="100%" stopColor={RCB_COLORS.orange} stopOpacity="0.85" />
           </linearGradient>
 
-          {/* Radial Gradient for Glow */}
-          <radialGradient id={gradientId3} cx="50%" cy="50%">
+          {/* Body Gradient */}
+          <linearGradient id={gradientId3} x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stopColor={RCB_COLORS.primary} stopOpacity="0.9" />
+            <stop offset="100%" stopColor={RCB_COLORS.darkRed} stopOpacity="0.95" />
+          </linearGradient>
+
+          {/* Glow Gradient */}
+          <radialGradient id={gradientId4} cx="50%" cy="50%">
             <stop offset="0%" stopColor={RCB_COLORS.primary} stopOpacity="0.8" />
             <stop offset="100%" stopColor={RCB_COLORS.primary} stopOpacity="0" />
           </radialGradient>
@@ -190,28 +199,7 @@ export default function RCBPremiumLogo({
           </filter>
         </defs>
 
-        {/* Outer Glow Ring */}
-        <motion.circle
-          cx="150"
-          cy="150"
-          r="140"
-          fill="none"
-          stroke={`url(#${gradientId1})`}
-          strokeWidth="3"
-          opacity="0.3"
-          filter={`url(#${glowFilterId})`}
-          animate={animated ? {
-            opacity: [0.2, 0.5, 0.2],
-            scale: [1, 1.05, 1],
-          } : {}}
-          transition={{
-            duration: 3,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-        />
-
-        {/* Shield Background with 3D Effect */}
+        {/* Shield Background */}
         <motion.g
           filter={`url(#${shadowFilterId})`}
           animate={animated ? {
@@ -224,25 +212,17 @@ export default function RCBPremiumLogo({
           }}
         >
           <path
-            d="M150 30 L250 70 L250 150 C250 200 220 240 150 260 C80 240 50 200 50 150 L50 70 Z"
+            d="M200 40 L320 80 L320 200 C320 260 280 300 200 320 C120 300 80 260 80 200 L80 80 Z"
             fill={`url(#${gradientId1})`}
             stroke={RCB_COLORS.gold}
-            strokeWidth="2"
+            strokeWidth="2.5"
             opacity="0.95"
-          />
-          {/* Inner highlight for 3D effect */}
-          <path
-            d="M150 30 L250 70 L250 150 C250 200 220 240 150 260 C80 240 50 200 50 150 L50 70 Z"
-            fill="none"
-            stroke="rgba(255,255,255,0.2)"
-            strokeWidth="1"
-            strokeDasharray="5,5"
           />
         </motion.g>
 
-        {/* Crown/Coronet at Top */}
+        {/* Crown at Top */}
         <motion.g
-          transform="translate(150, 50)"
+          transform="translate(200, 60)"
           animate={animated ? {
             y: [0, -3, 0],
             rotate: [0, 2, 0],
@@ -254,23 +234,22 @@ export default function RCBPremiumLogo({
           }}
         >
           <path
-            d="M-40 -15 L-30 -5 L-20 -10 L-10 -5 L0 -15 L10 -5 L20 -10 L30 -5 L40 -15 L0 -25 Z"
+            d="M-50 -20 L-40 -8 L-25 -15 L-15 -8 L0 -20 L15 -8 L25 -15 L40 -8 L50 -20 L0 -30 Z"
             fill={`url(#${gradientId2})`}
             stroke={RCB_COLORS.secondary}
-            strokeWidth="1.5"
+            strokeWidth="2"
             filter={`url(#${glowFilterId})`}
           />
-          {/* Crown jewels */}
-          {[-20, 0, 20].map((x, i) => (
+          {[-30, 0, 30].map((x, i) => (
             <motion.circle
               key={i}
               cx={x}
-              cy={-18}
-              r="3"
+              cy={-23}
+              r="4"
               fill={RCB_COLORS.primary}
               animate={animated ? {
                 opacity: [0.6, 1, 0.6],
-                scale: [1, 1.2, 1],
+                scale: [1, 1.3, 1],
               } : {}}
               transition={{
                 duration: 2,
@@ -282,83 +261,11 @@ export default function RCBPremiumLogo({
           ))}
         </motion.g>
 
-        {/* Lion Mane - Dynamic Flowing Animation */}
+        {/* Full Lion Body - Fierce and Powerful */}
         <motion.g
-          transform="translate(150, 120)"
+          transform="translate(200, 200)"
           animate={animated ? {
-            rotate: [-2, 2, -2],
-          } : {}}
-          transition={{
-            duration: 6,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-        >
-          {/* Left Mane */}
-          <motion.path
-            d="M-60 -20 Q-80 -30 -85 -45 Q-90 -65 -75 -75 Q-60 -80 -45 -70 Q-30 -65 -20 -60"
-            fill="none"
-            stroke={`url(#${gradientId1})`}
-            strokeWidth="8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            opacity="0.9"
-            filter={`url(#${glowFilterId})`}
-            animate={animated ? {
-              pathLength: [0.8, 1, 0.8],
-              opacity: [0.7, 1, 0.7],
-            } : {}}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          />
-          {/* Right Mane */}
-          <motion.path
-            d="M60 -20 Q80 -30 85 -45 Q90 -65 75 -75 Q60 -80 45 -70 Q30 -65 20 -60"
-            fill="none"
-            stroke={`url(#${gradientId1})`}
-            strokeWidth="8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            opacity="0.9"
-            filter={`url(#${glowFilterId})`}
-            animate={animated ? {
-              pathLength: [0.8, 1, 0.8],
-              opacity: [0.7, 1, 0.7],
-            } : {}}
-            transition={{
-              duration: 3,
-              repeat: Infinity,
-              ease: 'easeInOut',
-              delay: 0.5,
-            }}
-          />
-          {/* Center Mane Flow */}
-          <motion.path
-            d="M-30 -10 Q-10 -15 0 -20 Q10 -15 30 -10"
-            fill="none"
-            stroke={RCB_COLORS.gold}
-            strokeWidth="6"
-            strokeLinecap="round"
-            opacity="0.8"
-            animate={animated ? {
-              pathLength: [0, 1, 0],
-            } : {}}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: 'easeInOut',
-            }}
-          />
-        </motion.g>
-
-        {/* Lion Face - Bold and Regal */}
-        <motion.g
-          transform="translate(150, 140)"
-          animate={animated ? {
-            y: [0, -2, 0],
+            y: [0, -3, 0],
           } : {}}
           transition={{
             duration: 4,
@@ -366,128 +273,296 @@ export default function RCBPremiumLogo({
             ease: 'easeInOut',
           }}
         >
-          {/* Face Shape */}
-          <motion.ellipse
-            cx="0"
-            cy="0"
-            rx="45"
-            ry="50"
-            fill={RCB_COLORS.secondary}
-            opacity="0.95"
-            filter={`url(#${shadowFilterId})`}
-          />
-
-          {/* Eyes - Animated Blink */}
-          <motion.g>
-            {/* Left Eye */}
-            <motion.ellipse
-              cx="-15"
-              cy="-5"
-              rx="8"
-              ry="10"
-              fill="#FFFFFF"
-              animate={animated ? {
-                scaleY: [1, 0.1, 1],
-              } : {}}
-              transition={{
-                duration: 0.3,
-                repeat: Infinity,
-                repeatDelay: 4,
-                ease: 'easeInOut',
-              }}
-            />
-            <motion.circle
-              cx="-15"
-              cy="-5"
-              r="5"
-              fill={RCB_COLORS.primary}
-              animate={animated ? {
-                scale: [1, 1.2, 1],
-                opacity: [1, 0.8, 1],
-              } : {}}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: 'easeInOut',
-              }}
-            />
-            <circle cx="-15" cy="-5" r="2" fill={RCB_COLORS.secondary} />
-
-            {/* Right Eye */}
-            <motion.ellipse
-              cx="15"
-              cy="-5"
-              rx="8"
-              ry="10"
-              fill="#FFFFFF"
-              animate={animated ? {
-                scaleY: [1, 0.1, 1],
-              } : {}}
-              transition={{
-                duration: 0.3,
-                repeat: Infinity,
-                repeatDelay: 4,
-                ease: 'easeInOut',
-              }}
-            />
-            <motion.circle
-              cx="15"
-              cy="-5"
-              r="5"
-              fill={RCB_COLORS.primary}
-              animate={animated ? {
-                scale: [1, 1.2, 1],
-                opacity: [1, 0.8, 1],
-              } : {}}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: 'easeInOut',
-                delay: 0.1,
-              }}
-            />
-            <circle cx="15" cy="-5" r="2" fill={RCB_COLORS.secondary} />
-          </motion.g>
-
-          {/* Nose */}
-          <motion.path
-            d="M-5 10 Q0 15 5 10"
-            fill="none"
-            stroke={RCB_COLORS.gold}
-            strokeWidth="2.5"
-            strokeLinecap="round"
+          {/* Lion Mane - Flowing and Dynamic */}
+          <motion.g
             animate={animated ? {
-              strokeWidth: [2.5, 3, 2.5],
+              rotate: [-3, 3, -3],
             } : {}}
             transition={{
-              duration: 2,
+              duration: 6,
               repeat: Infinity,
               ease: 'easeInOut',
             }}
-          />
+          >
+            {/* Left Side Mane - Multiple Layers */}
+            <path
+              d="M-80 -40 Q-100 -50 -110 -70 Q-115 -90 -100 -110 Q-85 -120 -70 -110 Q-55 -105 -45 -100 Q-35 -95 -25 -90"
+              fill="none"
+              stroke={`url(#${gradientId2})`}
+              strokeWidth="10"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.95"
+              filter={`url(#${glowFilterId})`}
+            />
+            <path
+              d="M-70 -30 Q-90 -40 -100 -60 Q-105 -80 -90 -100 Q-75 -110 -60 -100 Q-45 -95 -35 -90 Q-25 -85 -15 -80"
+              fill="none"
+              stroke={`url(#${gradientId2})`}
+              strokeWidth="8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.85"
+            />
+            <path
+              d="M-60 -20 Q-80 -30 -90 -50 Q-95 -70 -80 -90 Q-65 -100 -50 -90 Q-35 -85 -25 -80"
+              fill="none"
+              stroke={RCB_COLORS.gold}
+              strokeWidth="6"
+              strokeLinecap="round"
+              opacity="0.9"
+            />
 
-          {/* Mouth/Chin */}
-          <path
-            d="M-20 25 Q0 30 20 25"
-            fill="none"
-            stroke={RCB_COLORS.gold}
-            strokeWidth="2"
-            strokeLinecap="round"
-            opacity="0.7"
-          />
+            {/* Right Side Mane - Multiple Layers */}
+            <path
+              d="M80 -40 Q100 -50 110 -70 Q115 -90 100 -110 Q85 -120 70 -110 Q55 -105 45 -100 Q35 -95 25 -90"
+              fill="none"
+              stroke={`url(#${gradientId2})`}
+              strokeWidth="10"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.95"
+              filter={`url(#${glowFilterId})`}
+            />
+            <path
+              d="M70 -30 Q90 -40 100 -60 Q105 -80 90 -100 Q75 -110 60 -100 Q45 -95 35 -90 Q25 -85 15 -80"
+              fill="none"
+              stroke={`url(#${gradientId2})`}
+              strokeWidth="8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.85"
+            />
+            <path
+              d="M60 -20 Q80 -30 90 -50 Q95 -70 80 -90 Q65 -100 50 -90 Q35 -85 25 -80"
+              fill="none"
+              stroke={RCB_COLORS.gold}
+              strokeWidth="6"
+              strokeLinecap="round"
+              opacity="0.9"
+            />
+
+            {/* Top Mane Flow */}
+            <path
+              d="M-40 -30 Q-20 -35 0 -40 Q20 -35 40 -30"
+              fill="none"
+              stroke={RCB_COLORS.gold}
+              strokeWidth="7"
+              strokeLinecap="round"
+              opacity="0.9"
+            />
+          </motion.g>
+
+          {/* Lion Head - Fierce and Bold */}
+          <motion.g>
+            {/* Head Shape */}
+            <ellipse
+              cx="0"
+              cy="-20"
+              rx="55"
+              ry="60"
+              fill={RCB_COLORS.secondary}
+              opacity="0.98"
+              filter={`url(#${shadowFilterId})`}
+            />
+
+            {/* Fierce Eyes */}
+            <motion.g>
+              {/* Left Eye */}
+              <ellipse
+                cx="-18"
+                cy="-25"
+                rx="10"
+                ry="12"
+                fill="#FFFFFF"
+                animate={animated ? {
+                  scaleY: [1, 0.1, 1],
+                } : {}}
+                transition={{
+                  duration: 0.3,
+                  repeat: Infinity,
+                  repeatDelay: 4,
+                  ease: 'easeInOut',
+                }}
+              />
+              <motion.circle
+                cx="-18"
+                cy="-25"
+                r="6"
+                fill={RCB_COLORS.primary}
+                animate={animated ? {
+                  scale: [1, 1.3, 1],
+                  opacity: [1, 0.7, 1],
+                } : {}}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                }}
+              />
+              <circle cx="-18" cy="-25" r="2.5" fill={RCB_COLORS.secondary} />
+              {/* Eye Glow */}
+              <circle cx="-18" cy="-25" r="8" fill={RCB_COLORS.primary} opacity="0.3">
+                <animate attributeName="opacity" values="0.3;0.6;0.3" dur="2s" repeatCount="indefinite" />
+              </circle>
+
+              {/* Right Eye */}
+              <ellipse
+                cx="18"
+                cy="-25"
+                rx="10"
+                ry="12"
+                fill="#FFFFFF"
+                animate={animated ? {
+                  scaleY: [1, 0.1, 1],
+                } : {}}
+                transition={{
+                  duration: 0.3,
+                  repeat: Infinity,
+                  repeatDelay: 4,
+                  ease: 'easeInOut',
+                }}
+              />
+              <motion.circle
+                cx="18"
+                cy="-25"
+                r="6"
+                fill={RCB_COLORS.primary}
+                animate={animated ? {
+                  scale: [1, 1.3, 1],
+                  opacity: [1, 0.7, 1],
+                } : {}}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: 'easeInOut',
+                  delay: 0.1,
+                }}
+              />
+              <circle cx="18" cy="-25" r="2.5" fill={RCB_COLORS.secondary} />
+              {/* Eye Glow */}
+              <circle cx="18" cy="-25" r="8" fill={RCB_COLORS.primary} opacity="0.3">
+                <animate attributeName="opacity" values="0.3;0.6;0.3" dur="2s" repeatCount="indefinite" begin="0.1s" />
+              </circle>
+            </motion.g>
+
+            {/* Nose - Bold */}
+            <path
+              d="M-6 5 Q0 12 6 5"
+              fill="none"
+              stroke={RCB_COLORS.gold}
+              strokeWidth="3"
+              strokeLinecap="round"
+            />
+
+            {/* Mouth - Roaring Expression */}
+            <path
+              d="M-25 15 Q0 25 25 15 Q20 35 0 30 Q-20 35 -25 15"
+              fill={RCB_COLORS.primary}
+              opacity="0.9"
+            />
+            <path
+              d="M-20 20 Q0 28 20 20"
+              fill="none"
+              stroke={RCB_COLORS.gold}
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+
+            {/* Whiskers */}
+            <g stroke={RCB_COLORS.gold} strokeWidth="1.5" strokeLinecap="round" opacity="0.7">
+              <line x1="-35" y1="-5" x2="-50" y2="-8" />
+              <line x1="-35" y1="0" x2="-50" y2="0" />
+              <line x1="-35" y1="5" x2="-50" y2="8" />
+              <line x1="35" y1="-5" x2="50" y2="-8" />
+              <line x1="35" y1="0" x2="50" y2="0" />
+              <line x1="35" y1="5" x2="50" y2="8" />
+            </g>
+          </motion.g>
+
+          {/* Lion Body - Powerful and Muscular */}
+          <motion.g>
+            {/* Chest and Front Body */}
+            <ellipse
+              cx="0"
+              cy="40"
+              rx="45"
+              ry="50"
+              fill={`url(#${gradientId3})`}
+              opacity="0.95"
+              filter={`url(#${shadowFilterId})`}
+            />
+
+            {/* Front Legs */}
+            <path
+              d="M-30 50 L-35 90 L-25 90 Z"
+              fill={RCB_COLORS.secondary}
+              opacity="0.9"
+            />
+            <path
+              d="M30 50 L35 90 L25 90 Z"
+              fill={RCB_COLORS.secondary}
+              opacity="0.9"
+            />
+
+            {/* Back Body */}
+            <ellipse
+              cx="0"
+              cy="80"
+              rx="40"
+              ry="45"
+              fill={`url(#${gradientId3})`}
+              opacity="0.9"
+            />
+
+            {/* Hind Legs */}
+            <path
+              d="M-25 85 L-30 120 L-20 120 Z"
+              fill={RCB_COLORS.secondary}
+              opacity="0.9"
+            />
+            <path
+              d="M25 85 L30 120 L20 120 Z"
+              fill={RCB_COLORS.secondary}
+              opacity="0.9"
+            />
+
+            {/* Tail - Curved and Dynamic */}
+            <motion.path
+              d="M25 75 Q50 60 60 40 Q65 25 55 15"
+              fill="none"
+              stroke={`url(#${gradientId2})`}
+              strokeWidth="8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.9"
+              filter={`url(#${glowFilterId})`}
+              animate={animated ? {
+                pathLength: [0.8, 1, 0.8],
+                opacity: [0.8, 1, 0.8],
+              } : {}}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: 'easeInOut',
+              }}
+            />
+            {/* Tail Tuft */}
+            <circle cx="55" cy="15" r="6" fill={RCB_COLORS.gold} opacity="0.9" />
+          </motion.g>
         </motion.g>
 
         {/* RCB Text - Bold and Dynamic */}
-        <motion.g transform="translate(150, 230)">
+        <motion.g transform="translate(200, 340)">
           <motion.text
             x="0"
             y="0"
-            fontSize="32"
+            fontSize="36"
             fontWeight="900"
             fill={`url(#${gradientId1})`}
             textAnchor="middle"
             fontFamily="Arial Black, sans-serif"
-            letterSpacing="4"
+            letterSpacing="5"
             filter={`url(#${glowFilterId})`}
             animate={animated ? {
               opacity: [0.9, 1, 0.9],
@@ -505,15 +580,15 @@ export default function RCBPremiumLogo({
           <text
             x="0"
             y="0"
-            fontSize="32"
+            fontSize="36"
             fontWeight="900"
             fill="none"
             stroke={RCB_COLORS.secondary}
-            strokeWidth="1"
+            strokeWidth="1.5"
             textAnchor="middle"
             fontFamily="Arial Black, sans-serif"
-            letterSpacing="4"
-            opacity="0.3"
+            letterSpacing="5"
+            opacity="0.4"
           >
             RCB
           </text>
@@ -524,26 +599,26 @@ export default function RCBPremiumLogo({
           <>
             {[...Array(12)].map((_, i) => {
               const angle = (i * 30) * (Math.PI / 180);
-              const radius = 100;
-              const x = 150 + Math.cos(angle) * radius;
-              const y = 150 + Math.sin(angle) * radius;
+              const radius = 140;
+              const x = 200 + Math.cos(angle) * radius;
+              const y = 200 + Math.sin(angle) * radius;
               
               return (
                 <motion.circle
                   key={i}
                   cx={x}
                   cy={y}
-                  r="3"
+                  r="4"
                   fill={i % 2 === 0 ? RCB_COLORS.primary : RCB_COLORS.gold}
                   opacity="0.6"
                   animate={{
-                    scale: [0.5, 1.5, 0.5],
-                    opacity: [0.3, 0.8, 0.3],
-                    x: [x, x + Math.cos(angle) * 10, x],
-                    y: [y, y + Math.sin(angle) * 10, y],
+                    scale: [0.5, 1.8, 0.5],
+                    opacity: [0.3, 0.9, 0.3],
+                    x: [x, x + Math.cos(angle) * 15, x],
+                    y: [y, y + Math.sin(angle) * 15, y],
                   }}
                   transition={{
-                    duration: 2 + Math.random(),
+                    duration: 2.5 + Math.random(),
                     repeat: Infinity,
                     delay: i * 0.2,
                     ease: 'easeInOut',
@@ -571,4 +646,3 @@ export default function RCBPremiumLogo({
     </div>
   );
 }
-
