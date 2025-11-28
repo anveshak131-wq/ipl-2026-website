@@ -53,24 +53,125 @@ export default function BulkEmailSendModal({
     }
   };
 
+  const generateProfessionalSubject = (match: { team1: string; team2: string; date: string; venue: string; status?: string }) => {
+    const matchDate = new Date(match.date);
+    const now = new Date();
+    const hoursUntilMatch = (matchDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+    
+    // Generate different subject styles based on timing and context
+    const subjects = [];
+    
+    // Time-based variations
+    if (hoursUntilMatch <= 1) {
+      subjects.push(`⚡ LIVE SOON: ${match.team1} vs ${match.team2} - Match Starting!`);
+      subjects.push(`🔥 Don't Miss: ${match.team1} vs ${match.team2} - Starting Now!`);
+      subjects.push(`⏰ Final Reminder: ${match.team1} vs ${match.team2} - Match About to Begin!`);
+    } else if (hoursUntilMatch <= 24) {
+      subjects.push(`📅 Today's Match: ${match.team1} vs ${match.team2} - ${match.venue}`);
+      subjects.push(`🎯 Upcoming Clash: ${match.team1} vs ${match.team2} - Don't Miss It!`);
+      subjects.push(`🏏 Match Alert: ${match.team1} vs ${match.team2} - Today at ${matchDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`);
+    } else {
+      const daysUntil = Math.floor(hoursUntilMatch / 24);
+      const dayName = matchDate.toLocaleDateString('en-US', { weekday: 'long' });
+      subjects.push(`📆 ${dayName}'s Match: ${match.team1} vs ${match.team2} - ${match.venue}`);
+      subjects.push(`🏆 Upcoming Match: ${match.team1} vs ${match.team2} - ${daysUntil} Day${daysUntil > 1 ? 's' : ''} Away`);
+      subjects.push(`🎪 Match Preview: ${match.team1} vs ${match.team2} - Save the Date!`);
+    }
+    
+    // Venue-based variations (if it's a notable venue)
+    const notableVenues = ['Wankhede', 'Eden Gardens', 'Chinnaswamy', 'Chepauk', 'Narendra Modi'];
+    if (notableVenues.some(v => match.venue.includes(v))) {
+      subjects.push(`🏟️ Epic Clash at ${match.venue}: ${match.team1} vs ${match.team2}`);
+    }
+    
+    // Team rivalry variations (you can customize based on known rivalries)
+    const rivalries = [
+      ['CSK', 'MI'],
+      ['RCB', 'CSK'],
+      ['MI', 'RCB'],
+      ['KKR', 'MI'],
+    ];
+    
+    const isRivalry = rivalries.some(([t1, t2]) => 
+      (match.team1.includes(t1) && match.team2.includes(t2)) ||
+      (match.team1.includes(t2) && match.team2.includes(t1))
+    );
+    
+    if (isRivalry) {
+      subjects.push(`⚔️ Classic Rivalry: ${match.team1} vs ${match.team2} - The Battle Continues!`);
+      subjects.push(`🔥 Rivalry Renewed: ${match.team1} vs ${match.team2} - Who Will Win?`);
+    }
+    
+    // Action-oriented variations
+    subjects.push(`🎯 Match Alert: ${match.team1} vs ${match.team2} - Get Ready for the Action!`);
+    subjects.push(`🏏 Don't Miss: ${match.team1} vs ${match.team2} - Live Cricket Action Awaits!`);
+    subjects.push(`📺 Tune In: ${match.team1} vs ${match.team2} - Catch All the Excitement!`);
+    
+    // Return a random professional subject
+    const randomIndex = Math.floor(Math.random() * subjects.length);
+    return subjects[randomIndex];
+  };
+
+  const generateProfessionalBody = (match: { team1: string; team2: string; date: string; venue: string; status?: string }) => {
+    const matchDate = new Date(match.date);
+    const formattedDate = matchDate.toLocaleString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    
+    const timeUntil = matchDate.getTime() - new Date().getTime();
+    const hoursUntil = Math.floor(timeUntil / (1000 * 60 * 60));
+    const minutesUntil = Math.floor((timeUntil % (1000 * 60 * 60)) / (1000 * 60));
+    
+    let timeMessage = '';
+    if (hoursUntil > 0) {
+      timeMessage = `in ${hoursUntil} hour${hoursUntil > 1 ? 's' : ''}${minutesUntil > 0 ? ` and ${minutesUntil} minute${minutesUntil > 1 ? 's' : ''}` : ''}`;
+    } else if (minutesUntil > 0) {
+      timeMessage = `in ${minutesUntil} minute${minutesUntil > 1 ? 's' : ''}`;
+    } else {
+      timeMessage = 'very soon';
+    }
+    
+    return `Dear {{userName}},
+
+Get ready for an electrifying cricket match! ${match.team1} will face off against ${match.team2} ${timeMessage}.
+
+📅 **Match Details:**
+• **Teams:** ${match.team1} vs ${match.team2}
+• **Date & Time:** ${formattedDate}
+• **Venue:** ${match.venue}
+• **Status:** ${match.status || 'Upcoming'}
+
+🎯 **What to Expect:**
+This promises to be an exciting encounter between two competitive teams. Don't miss out on the live action, thrilling moments, and nail-biting finishes!
+
+📺 **How to Watch:**
+Tune in to catch all the action live. Whether you're supporting {{teamName}} or just love great cricket, this is a match you won't want to miss.
+
+Stay connected for live updates, scores, and highlights!
+
+Best regards,
+The SportsUP Team
+
+---
+*You can customize this email using variables: {{userName}}, {{userEmail}}, {{teamName}}, {{matchDate}}, {{matchTime}}, {{venue}}, and {{opponent}}*`;
+  };
+
   const handleMatchSelect = (matchId: string) => {
     const match = matches.find((m) => m.id === matchId);
     if (match) {
       setSelectedMatch(matchId);
-      // Parse the date properly
-      const matchDate = new Date(match.date);
-      const formattedDate = matchDate.toLocaleString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      });
       
-      // Auto-fill subject and body for match
-      setSubject(`Match Reminder: ${match.team1} vs ${match.team2}`);
-      setBody(`Don't miss the exciting match between ${match.team1} and ${match.team2}!\n\nMatch Details:\n- Date & Time: ${formattedDate}\n- Venue: ${match.venue}\n- Status: ${match.status || 'Upcoming'}\n\nTune in to catch all the action!\n\nYou can use variables like {{userName}}, {{userEmail}}, {{teamName}}, {{matchDate}}, {{matchTime}}, {{venue}}, and {{opponent}} in your email.`);
+      // Generate professional subject using AI-like logic
+      const professionalSubject = generateProfessionalSubject(match);
+      const professionalBody = generateProfessionalBody(match);
+      
+      setSubject(professionalSubject);
+      setBody(professionalBody);
     }
   };
 
