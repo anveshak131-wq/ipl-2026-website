@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import SportsUP18LogoWithText from '../branding/SportsUP18LogoWithText';
 import SportsUP18Logo from '../branding/SportsUP18Logo';
 import Emoji from '../emoji/Emoji';
+import NavbarSearch from './NavbarSearch';
 
 type NavEmojiName = 'cricket' | 'chart' | 'news' | 'glove' | 'target' | 'trophy' | 'sparkles' | 'people' | 'fire' | 'star' | 'cricket-bat' | 'lightning' | 'clock' | 'venue';
 
@@ -120,6 +121,9 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex flex-1 items-center justify-end gap-6 ml-8">
+            {/* Search Bar */}
+            <NavbarSearch />
+            
             {/* Primary Nav */}
             <div className="flex items-center space-x-1 bg-gradient-to-r from-white/8 to-white/5 rounded-xl p-1.5 backdrop-blur-md border border-white/15 hover:border-blue-500/40 hover:bg-gradient-to-r hover:from-white/12 hover:to-white/8 transition-all duration-300 shadow-lg shadow-black/20">
               {primaryNavItems.map((item, index) => {
