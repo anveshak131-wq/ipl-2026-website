@@ -354,13 +354,60 @@ export default function PredictionsPage() {
     <div className="min-h-screen">
       <Navbar />
 
-      <main className="relative py-16 min-h-screen overflow-hidden">
+      <main className="relative py-16 min-h-screen overflow-hidden section-match-bg">
         <AuroraBackground />
         
-        {/* Floating Animated Orbs */}
-        <div className="absolute top-20 right-20 w-96 h-96 bg-ipl-blue-light/10 rounded-full blur-3xl animate-float" />
-        <div className="absolute top-40 left-20 w-80 h-80 bg-ipl-gold/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
-        <div className="absolute bottom-20 right-1/3 w-72 h-72 bg-ipl-purple/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '4s' }} />
+        {/* Enhanced Floating Animated Orbs */}
+        <motion.div 
+          className="absolute top-20 right-20 w-96 h-96 rounded-full blur-3xl"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.2), transparent)',
+          }}
+          animate={{
+            y: [0, -30, 0],
+            x: [0, 20, 0],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div 
+          className="absolute top-40 left-20 w-80 h-80 rounded-full blur-3xl"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(245, 158, 11, 0.25), rgba(236, 72, 153, 0.15), transparent)',
+          }}
+          animate={{
+            y: [0, 30, 0],
+            x: [0, -20, 0],
+            scale: [1, 1.15, 1],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 2
+          }}
+        />
+        <motion.div 
+          className="absolute bottom-20 right-1/3 w-72 h-72 rounded-full blur-3xl"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.15), transparent)',
+          }}
+          animate={{
+            y: [0, -20, 0],
+            x: [0, 15, 0],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{
+            duration: 12,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 4
+          }}
+        />
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
@@ -375,7 +422,7 @@ export default function PredictionsPage() {
                 className="inline-flex items-center space-x-2 mb-4"
                 whileHover={{ scale: 1.05 }}
               >
-                <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2 hover:bg-white/15 transition-all duration-300 cursor-default">
+                <span className="px-3 py-1 rounded-full text-xs font-bold glass-effect text-amber-300 flex items-center gap-2 hover:bg-white/20 transition-all duration-300 cursor-default">
                   <Icon name="target" size={16} /> AI PREDICTIONS
                 </span>
               </motion.div>

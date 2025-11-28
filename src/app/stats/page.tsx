@@ -465,8 +465,43 @@ export default function StatsPage() {
     <div className="min-h-screen flex flex-col bg-ipl-dark">
       <Navbar />
 
-      <main className="relative flex-1 py-12 overflow-hidden">
+      <main className="relative flex-1 py-12 overflow-hidden section-match-bg">
         <AuroraBackground />
+        
+        {/* Enhanced floating orbs */}
+        <motion.div 
+          className="absolute top-20 right-10 w-96 h-96 rounded-full blur-3xl"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(99, 102, 241, 0.25), rgba(139, 92, 246, 0.15), transparent)',
+          }}
+          animate={{
+            y: [0, -25, 0],
+            x: [0, 15, 0],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            duration: 9,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div 
+          className="absolute bottom-20 left-10 w-80 h-80 rounded-full blur-3xl"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(236, 72, 153, 0.2), rgba(245, 158, 11, 0.12), transparent)',
+          }}
+          animate={{
+            y: [0, 25, 0],
+            x: [0, -15, 0],
+            scale: [1, 1.12, 1],
+          }}
+          transition={{
+            duration: 11,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1.5
+          }}
+        />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           {/* Hero / Header */}
@@ -476,26 +511,32 @@ export default function StatsPage() {
                 className="inline-flex items-center space-x-2 mb-2"
                 whileHover={{ scale: 1.05 }}
               >
-                <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2">
+                <span className="px-3 py-1 rounded-full text-xs font-bold glass-effect text-amber-300 flex items-center gap-2">
                   <Icon name="stats" size={16} />
                   STATS & RECORDS HUB
                 </span>
               </motion.div>
               <motion.h1 
-                className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight"
+                className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
+                style={{
+                  background: 'linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #cbd5e1 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
               >
                 Season Leaders &
                 <span className="block mt-1">
-                  <GradientText gradient="from-blue-400 via-purple-400 to-pink-400" animate>
+                  <GradientText gradient="from-indigo-400 via-purple-400 to-pink-400" animate>
                     Deep IPL Insights
                   </GradientText>
                 </span>
               </motion.h1>
               <motion.p 
-                className="text-gray-300 text-base md:text-lg max-w-2xl"
+                className="text-slate-200 text-base md:text-lg max-w-2xl"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.3 }}

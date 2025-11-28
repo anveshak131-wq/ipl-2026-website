@@ -143,23 +143,79 @@ export default function NewsPage() {
     <div className="min-h-screen">
       <Navbar />
 
-      <main className="relative py-16 min-h-screen overflow-hidden">
+      <main className="relative py-16 min-h-screen overflow-hidden section-news-bg">
         <AuroraBackground />
+        
+        {/* Enhanced floating orbs */}
+        <motion.div 
+          className="absolute top-20 right-10 w-96 h-96 rounded-full blur-3xl"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(99, 102, 241, 0.25), rgba(139, 92, 246, 0.15), transparent)',
+          }}
+          animate={{
+            y: [0, -25, 0],
+            x: [0, 15, 0],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            duration: 9,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div 
+          className="absolute bottom-20 left-10 w-80 h-80 rounded-full blur-3xl"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(236, 72, 153, 0.2), rgba(245, 158, 11, 0.12), transparent)',
+          }}
+          animate={{
+            y: [0, 25, 0],
+            x: [0, -15, 0],
+            scale: [1, 1.12, 1],
+          }}
+          transition={{
+            duration: 11,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1.5
+          }}
+        />
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-12 animate-slide-up">
-            <div className="inline-flex items-center space-x-2 mb-4">
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2 hover:bg-white/15 transition-all duration-300 hover:scale-105 cursor-default">
-                <Icon name="news" size={16} /> LATEST UPDATES
-              </span>
+          <AnimatedSection direction="down" delay={0.1}>
+            <div className="mb-12">
+              <motion.div 
+                className="inline-flex items-center space-x-2 mb-4"
+                whileHover={{ scale: 1.05 }}
+              >
+                <span className="px-3 py-1 rounded-full text-xs font-bold glass-effect text-amber-300 flex items-center gap-2 hover:bg-white/20 transition-all duration-300 cursor-default">
+                  <Icon name="news" size={16} /> LATEST UPDATES
+                </span>
+              </motion.div>
+              <motion.h1 
+                className="text-5xl md:text-6xl font-black mb-4 tracking-tight"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                style={{
+                  background: 'linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #cbd5e1 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                IPL News & <GradientText gradient="from-indigo-400 via-purple-400 to-pink-400" animate>Updates</GradientText>
+              </motion.h1>
+              <motion.p 
+                className="text-slate-200 text-lg max-w-2xl"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                Stay updated with the latest news, match reports, and exclusive player insights from IPL 2026
+              </motion.p>
             </div>
-            <h1 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight hover:scale-[1.02] transition-transform duration-300">
-              IPL News & <span className="bg-gradient-to-r from-ipl-blue-light via-ipl-gold to-ipl-purple bg-clip-text text-transparent animate-glow">Updates</span>
-            </h1>
-            <p className="text-gray-300 text-lg max-w-2xl">
-              Stay updated with the latest news, match reports, and exclusive player insights from IPL 2026
-            </p>
-          </div>
+          </AnimatedSection>
 
           <div className="mb-12 space-y-6 animate-fade-in">
             <div className="relative">

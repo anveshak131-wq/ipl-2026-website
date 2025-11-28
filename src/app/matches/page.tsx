@@ -62,10 +62,57 @@ export default function MatchesPage() {
       <Navbar />
       
       <main className="relative py-16 min-h-screen section-match-bg">
-        {/* Floating orbs */}
-        <div className="absolute top-20 right-10 w-96 h-96 bg-ipl-blue-light/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '0s' }} />
-        <div className="absolute bottom-20 left-10 w-80 h-80 bg-ipl-gold/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-ipl-purple/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '4s' }} />
+        {/* Enhanced floating orbs with vibrant colors */}
+        <motion.div 
+          className="absolute top-20 right-10 w-96 h-96 rounded-full blur-3xl"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.2), transparent)',
+          }}
+          animate={{
+            y: [0, -30, 0],
+            x: [0, 20, 0],
+            scale: [1, 1.1, 1],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div 
+          className="absolute bottom-20 left-10 w-80 h-80 rounded-full blur-3xl"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(236, 72, 153, 0.25), rgba(245, 158, 11, 0.15), transparent)',
+          }}
+          animate={{
+            y: [0, 30, 0],
+            x: [0, -20, 0],
+            scale: [1, 1.15, 1],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 1
+          }}
+        />
+        <motion.div 
+          className="absolute top-1/2 left-1/2 w-72 h-72 rounded-full blur-3xl"
+          style={{ 
+            background: 'radial-gradient(circle, rgba(59, 130, 246, 0.2), rgba(14, 165, 233, 0.15), transparent)',
+          }}
+          animate={{
+            y: [0, -20, 0],
+            x: [0, 15, 0],
+            scale: [1, 1.2, 1],
+          }}
+          transition={{
+            duration: 12,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 2
+          }}
+        />
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
@@ -76,16 +123,27 @@ export default function MatchesPage() {
               </span>
             </div>
             <motion.h1 
-              className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight"
+              className="text-5xl md:text-6xl font-black mb-4 tracking-tight"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
+              style={{
+                background: 'linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #cbd5e1 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
             >
-              IPL 2026 <GradientText gradient="from-blue-400 via-purple-400 to-pink-400" animate>Fixtures</GradientText>
+              IPL 2026 <GradientText gradient="from-indigo-400 via-purple-400 to-pink-400" animate>Fixtures</GradientText>
             </motion.h1>
-            <p className="text-gray-300 text-lg max-w-2xl leading-relaxed animate-fade-in" style={{ animationDelay: '120ms' }}>
+            <motion.p 
+              className="text-slate-200 text-lg max-w-2xl leading-relaxed"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
               Live scores, upcoming matches, and detailed fixtures for the entire IPL 2026 season
-            </p>
+            </motion.p>
           </div>
 
           {/* Filter Tabs - Premium Design */}
@@ -95,10 +153,10 @@ export default function MatchesPage() {
                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
                  }}>
               {[
-                { key: 'all', label: 'All Matches', icon: 'stats' as const, color: '#7C3AED' },
-                { key: 'upcoming', label: 'Upcoming', icon: 'target' as const, color: '#3B82F6' },
-                { key: 'live', label: 'Live', icon: 'cricket' as const, color: '#EF4444' },
-                { key: 'completed', label: 'Completed', icon: 'trophy' as const, color: '#10B981' }
+                { key: 'all', label: 'All Matches', icon: 'stats' as const, color: '#6366f1', gradient: 'from-indigo-500 to-purple-500' },
+                { key: 'upcoming', label: 'Upcoming', icon: 'target' as const, color: '#3b82f6', gradient: 'from-blue-500 to-cyan-500' },
+                { key: 'live', label: 'Live', icon: 'cricket' as const, color: '#ef4444', gradient: 'from-red-500 to-pink-500' },
+                { key: 'completed', label: 'Completed', icon: 'trophy' as const, color: '#10b981', gradient: 'from-emerald-500 to-teal-500' }
               ].map((tab) => (
                 <button
                   key={tab.key}
@@ -109,25 +167,27 @@ export default function MatchesPage() {
                   style={filter === tab.key ? {
                     background: `linear-gradient(135deg, ${tab.color}, ${tab.color}dd)`,
                     color: '#fff',
-                    boxShadow: `0 10px 30px ${tab.color}40, 0 0 40px ${tab.color}20`,
-                    border: `2px solid ${tab.color}60`,
+                    boxShadow: `0 10px 30px ${tab.color}50, 0 0 50px ${tab.color}30, inset 0 1px 0 rgba(255, 255, 255, 0.2)`,
+                    border: `2px solid ${tab.color}80`,
                   } : {
-                    background: 'transparent',
-                    color: '#9CA3AF',
-                    border: '2px solid transparent',
+                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04))',
+                    color: '#cbd5e1',
+                    border: '2px solid rgba(255, 255, 255, 0.1)',
                   }}
                   onMouseEnter={(e) => {
                     if (filter !== tab.key) {
                       e.currentTarget.style.color = '#fff';
-                      e.currentTarget.style.background = `linear-gradient(135deg, ${tab.color}20, ${tab.color}10)`;
-                      e.currentTarget.style.borderColor = `${tab.color}40`;
+                      e.currentTarget.style.background = `linear-gradient(135deg, ${tab.color}25, ${tab.color}15)`;
+                      e.currentTarget.style.borderColor = `${tab.color}50`;
+                      e.currentTarget.style.boxShadow = `0 4px 16px ${tab.color}20`;
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (filter !== tab.key) {
-                      e.currentTarget.style.color = '#9CA3AF';
-                      e.currentTarget.style.background = 'transparent';
-                      e.currentTarget.style.borderColor = 'transparent';
+                      e.currentTarget.style.color = '#cbd5e1';
+                      e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04))';
+                      e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                      e.currentTarget.style.boxShadow = 'none';
                     }
                   }}
                 >
