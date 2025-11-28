@@ -83,8 +83,9 @@ export default function AdminEmailNotificationsPage() {
   const [schedules, setSchedules] = useState<EmailSchedule[]>([]);
   const [emailLogs, setEmailLogs] = useState<EmailLog[]>([]);
   const [showBulkEmailModal, setShowBulkEmailModal] = useState(false);
-  const [matches, setMatches] = useState<Array<{ id: string; team1: string; team2: string; date: string; venue: string }>>([]);
+  const [matches, setMatches] = useState<Array<{ id: string; team1: string; team2: string; date: string; venue: string; status?: string }>>([]);
   const [news, setNews] = useState<Array<{ id: string; title: string; summary: string }>>([]);
+  const [isLoadingMatches, setIsLoadingMatches] = useState(false);
 
   // Load saved filters from localStorage
   useEffect(() => {
@@ -532,7 +533,72 @@ export default function AdminEmailNotificationsPage() {
         console.error('Error loading logs:', e);
       }
     }
-  }, []);
+
+    // Load matches and news for bulk email sending
+    const loadMatchesAndNews = async () => {
+      setIsLoadingMatches(true);
+      try {
+        const [matchesData, newsData] = await Promise.all([
+          api.getMatches().catch(() => []),
+          api.getNews().catch(() => []),
+        ]);
+
+        // Transform matches to the format expected by the modal
+        // Match structure from API: { id, date, time, venue, team1: Team, team2: Team, status }
+        const transformedMatches = (matchesData || [])
+          .filter((m: any) => {
+            // Only include upcoming or scheduled matches
+            return m.status === 'upcoming' || m.status === 'scheduled' || !m.status;
+          })
+          .map((m: any) => {
+            // Handle both Team objects and string team names
+            const team1Name = typeof m.team1 === 'object' 
+              ? (m.team1?.name || m.team1?.shortName || m.team1?.id || 'Team 1')
+              : (m.team1 || m.team1Name || 'Team 1');
+            
+            const team2Name = typeof m.team2 === 'object'
+              ? (m.team2?.name || m.team2?.shortName || m.team2?.id || 'Team 2')
+              : (m.team2 || m.team2Name || 'Team 2');
+
+            // Combine date and time if time exists
+            const matchDate = m.time 
+              ? `${m.date}T${m.time}` 
+              : (m.date || m.matchDate || new Date().toISOString());
+
+            return {
+              id: m.id,
+              team1: team1Name,
+              team2: team2Name,
+              date: matchDate,
+              venue: m.venue || m.stadium || 'TBD',
+              status: m.status || 'upcoming',
+            };
+          })
+          .sort((a: any, b: any) => {
+            // Sort by date, upcoming first
+            return new Date(a.date).getTime() - new Date(b.date).getTime();
+          });
+
+        setMatches(transformedMatches);
+
+        // Transform news data
+        const transformedNews = (newsData || []).slice(0, 50).map((n: any) => ({
+          id: n.id,
+          title: n.title || 'News Article',
+          summary: n.summary || n.description || n.content?.substring(0, 200) || '',
+        }));
+
+        setNews(transformedNews);
+      } catch (e) {
+        console.error('Error loading matches/news:', e);
+        showError('Failed to load matches and news data');
+      } finally {
+        setIsLoadingMatches(false);
+      }
+    };
+
+    loadMatchesAndNews();
+  }, [showError]);
 
   // Bulk operations handlers
   const handleSelectAll = () => {
@@ -1310,7 +1376,7 @@ export default function AdminEmailNotificationsPage() {
                 news={news}
               />
             )}
-          </div>
+        </div>
         </PageTransition>
       </div>
     </div>

@@ -57,9 +57,20 @@ export default function BulkEmailSendModal({
     const match = matches.find((m) => m.id === matchId);
     if (match) {
       setSelectedMatch(matchId);
+      // Parse the date properly
+      const matchDate = new Date(match.date);
+      const formattedDate = matchDate.toLocaleString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+      
       // Auto-fill subject and body for match
       setSubject(`Match Reminder: ${match.team1} vs ${match.team2}`);
-      setBody(`Don't miss the exciting match between ${match.team1} and ${match.team2}!\n\nMatch Details:\n- Date: ${new Date(match.date).toLocaleString()}\n- Venue: ${match.venue}\n\nTune in to catch all the action!`);
+      setBody(`Don't miss the exciting match between ${match.team1} and ${match.team2}!\n\nMatch Details:\n- Date & Time: ${formattedDate}\n- Venue: ${match.venue}\n- Status: ${match.status || 'Upcoming'}\n\nTune in to catch all the action!\n\nYou can use variables like {{userName}}, {{userEmail}}, {{teamName}}, {{matchDate}}, {{matchTime}}, {{venue}}, and {{opponent}} in your email.`);
     }
   };
 
@@ -230,18 +241,33 @@ export default function BulkEmailSendModal({
           {emailType === 'match' && (
             <div className="mb-4">
               <label className="block text-sm font-medium text-[#E6EDF3] mb-2">Select Match</label>
-              <select
-                value={selectedMatch}
-                onChange={(e) => handleMatchSelect(e.target.value)}
-                className="w-full px-4 py-2 bg-[#141A22] border border-[#2A3440] rounded-lg text-[#E6EDF3] focus:outline-none focus:ring-2 focus:ring-[#2F6FED]"
-              >
-                <option value="">Select a match...</option>
-                {matches.map((match) => (
-                  <option key={match.id} value={match.id}>
-                    {match.team1} vs {match.team2} - {new Date(match.date).toLocaleString()}
-                  </option>
-                ))}
-              </select>
+              {matches.length === 0 ? (
+                <div className="px-4 py-3 bg-[#141A22] border border-[#2A3440] rounded-lg text-[#AEBAC7] text-sm">
+                  No upcoming matches found. Please check back later or create matches in the Matches admin page.
+                </div>
+              ) : (
+                <select
+                  value={selectedMatch}
+                  onChange={(e) => handleMatchSelect(e.target.value)}
+                  className="w-full px-4 py-2 bg-[#141A22] border border-[#2A3440] rounded-lg text-[#E6EDF3] focus:outline-none focus:ring-2 focus:ring-[#2F6FED]"
+                >
+                  <option value="">Select a match...</option>
+                  {matches.map((match) => {
+                    const matchDate = new Date(match.date);
+                    const formattedDate = matchDate.toLocaleString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    });
+                    return (
+                      <option key={match.id} value={match.id}>
+                        {match.team1} vs {match.team2} - {formattedDate} ({match.venue})
+                      </option>
+                    );
+                  })}
+                </select>
+              )}
             </div>
           )}
 
