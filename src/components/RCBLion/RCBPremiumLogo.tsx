@@ -369,7 +369,7 @@ export default function RCBPremiumLogo({
             {/* Fierce Eyes */}
             <motion.g>
               {/* Left Eye */}
-              <ellipse
+              <motion.ellipse
                 cx="-18"
                 cy="-25"
                 rx="10"
@@ -407,7 +407,7 @@ export default function RCBPremiumLogo({
               </circle>
 
               {/* Right Eye */}
-              <ellipse
+              <motion.ellipse
                 cx="18"
                 cy="-25"
                 rx="10"
