@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { TrendingUp, Users, MessageSquare, Activity, Calendar, Eye, BarChart3, Zap, ArrowUpRight, Clock } from 'lucide-react';
