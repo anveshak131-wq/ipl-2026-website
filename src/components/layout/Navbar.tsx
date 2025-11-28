@@ -1,12 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { useState, useEffect, useTransition } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import SportsUP18LogoWithText from '../branding/SportsUP18LogoWithText';
 import SportsUP18Logo from '../branding/SportsUP18Logo';
 import Emoji from '../emoji/Emoji';
 import NavbarSearch from './NavbarSearch';
+import NavbarSkeleton from '../ui/NavbarSkeleton';
 
 type NavEmojiName = 'cricket' | 'chart' | 'news' | 'glove' | 'target' | 'trophy' | 'sparkles' | 'people' | 'fire' | 'star' | 'cricket-bat' | 'lightning' | 'clock' | 'venue';
 
@@ -43,13 +45,20 @@ export default function Navbar() {
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
+  // Reorganized: Priority-based grouping
+  // Group 1: Real-time & Core (Most Important)
+  // Group 2: Explore & Discover
+  // Group 3: Analytics & Insights
   const primaryNavItems: NavItem[] = [
+    // Real-time & Core Features (Highest Priority)
     { href: '/live-score', label: 'Live Score', emoji: 'lightning' },
     { href: '/matches', label: 'Matches', emoji: 'cricket-bat' },
+    // Explore & Discover
     { href: '/teams', label: 'Teams', emoji: 'trophy' },
+    { href: '/news', label: 'News', emoji: 'fire' },
+    // Analytics & Insights
     { href: '/stats', label: 'Stats', emoji: 'chart' },
     { href: '/predictions', label: 'Predictions', emoji: 'target' },
-    { href: '/news', label: 'News', emoji: 'fire' },
   ];
 
   const secondaryNavItems: NavItem[] = [
@@ -120,44 +129,73 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex flex-1 items-center justify-end gap-6 ml-8">
-            {/* Search Bar */}
+          <div className="hidden md:flex flex-1 items-center justify-end gap-4 ml-8">
+            {/* Search Bar - Moved before nav items for better discoverability */}
             <NavbarSearch />
             
-            {/* Primary Nav */}
-            <div className="flex items-center space-x-1 bg-gradient-to-r from-white/8 to-white/5 rounded-xl p-1.5 backdrop-blur-md border border-white/15 hover:border-blue-500/40 hover:bg-gradient-to-r hover:from-white/12 hover:to-white/8 transition-all duration-300 shadow-lg shadow-black/20">
-              {primaryNavItems.map((item, index) => {
-                const isActive = isLinkActive(item.href);
-                const badgeLabel = getNavBadgeLabel(item.href);
-                const tooltip = getNavTooltip(item.href);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    title={tooltip || undefined}
-                    style={{ animationDelay: `${index * 50}ms` }}
-                    className={`
-                      relative px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center gap-2 whitespace-nowrap
-                      ${isActive
-                        ? 'text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 shadow-lg shadow-blue-500/50 border border-blue-400/30'
-                        : 'text-gray-300 hover:text-white hover:bg-white/10 hover:border border-transparent hover:border-blue-500/30'}
-                    `}
-                  >
-                    {item.emoji && <Emoji name={item.emoji} size={16} animate={true} />}
-                    <span className="flex items-center gap-1.5">
+            {/* Primary Nav - Reorganized with visual grouping */}
+            <div className="flex items-center gap-2">
+              {/* Group 1: Real-time & Core (Highlighted) */}
+              <div className="flex items-center space-x-1 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-xl p-1.5 backdrop-blur-md border border-blue-500/30 shadow-lg shadow-blue-500/10">
+                {primaryNavItems.slice(0, 2).map((item, index) => {
+                  const isActive = isLinkActive(item.href);
+                  const tooltip = getNavTooltip(item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      title={tooltip || undefined}
+                      className={`
+                        relative px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-300 flex items-center gap-2 whitespace-nowrap
+                        ${isActive
+                          ? 'text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 shadow-lg shadow-blue-500/50 border border-blue-400/30'
+                          : 'text-white/90 hover:text-white hover:bg-white/15 hover:border border-transparent hover:border-blue-400/40'}
+                      `}
+                    >
+                      {item.emoji && <Emoji name={item.emoji} size={16} animate={true} />}
                       <span>{item.label}</span>
-                      {badgeLabel && (
-                        <span className="text-[11px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-200 border border-blue-500/50 font-medium">
-                          {badgeLabel}
-                        </span>
+                      {isActive && (
+                        <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent rounded-full" />
                       )}
-                    </span>
-                    {isActive && (
-                      <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent rounded-full" />
-                    )}
-                  </Link>
-                );
-              })}
+                    </Link>
+                  );
+                })}
+              </div>
+
+              {/* Group 2 & 3: Explore & Analytics (Standard styling) */}
+              <div className="flex items-center space-x-1 bg-gradient-to-r from-white/8 to-white/5 rounded-xl p-1.5 backdrop-blur-md border border-white/15 hover:border-blue-500/40 hover:bg-gradient-to-r hover:from-white/12 hover:to-white/8 transition-all duration-300 shadow-lg shadow-black/20">
+                {primaryNavItems.slice(2).map((item, index) => {
+                  const isActive = isLinkActive(item.href);
+                  const badgeLabel = getNavBadgeLabel(item.href);
+                  const tooltip = getNavTooltip(item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      title={tooltip || undefined}
+                      className={`
+                        relative px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center gap-2 whitespace-nowrap
+                        ${isActive
+                          ? 'text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 shadow-lg shadow-blue-500/50 border border-blue-400/30'
+                          : 'text-gray-300 hover:text-white hover:bg-white/10 hover:border border-transparent hover:border-blue-500/30'}
+                      `}
+                    >
+                      {item.emoji && <Emoji name={item.emoji} size={16} animate={true} />}
+                      <span className="flex items-center gap-1.5">
+                        <span>{item.label}</span>
+                        {badgeLabel && (
+                          <span className="text-[11px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-200 border border-blue-500/50 font-medium">
+                            {badgeLabel}
+                          </span>
+                        )}
+                      </span>
+                      {isActive && (
+                        <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1/2 h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent rounded-full" />
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
 
             {/* Secondary Nav Icons */}
