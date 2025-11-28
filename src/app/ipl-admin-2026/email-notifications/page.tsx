@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
@@ -93,53 +93,8 @@ export default function AdminEmailNotificationsPage() {
     }
   }, []);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const token =
-          typeof window !== 'undefined'
-            ? localStorage.getItem('auth_token') || localStorage.getItem('adminToken')
-            : null;
-
-        if (!token) {
-          router.push('/ipl-admin-2026');
-          return;
-        }
-
-        const response = await fetch(`/api/auth?action=verify&token=${token}`);
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-          try {
-            localStorage.removeItem('auth_token');
-            localStorage.removeItem('adminToken');
-          } catch (e) {}
-          router.push('/ipl-admin-2026');
-          return;
-        }
-
-        const role = data.user?.role;
-        if (role !== 'admin' && role !== 'super_admin') {
-          showError('Access denied. Admin privileges required.');
-          router.push('/');
-          return;
-        }
-
-        setIsAuthenticated(true);
-        await fetchUsers(token);
-      } catch (e) {
-        console.error('Admin email auth error:', e);
-        showError('Authentication failed');
-        router.push('/ipl-admin-2026');
-      } finally {
-        setAuthLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, [router, showError]);
-
-  const fetchUsers = async (tokenOverride?: string) => {
+  // Define fetchUsers before useEffect that uses it - use useRef to avoid dependency issues
+  const fetchUsers = useCallback(async (tokenOverride?: string) => {
     try {
       setIsLoading(true);
       const token =
@@ -171,7 +126,71 @@ export default function AdminEmailNotificationsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // showError is stable from useToast, no need to include it
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const checkAuth = async () => {
+      try {
+        const token =
+          typeof window !== 'undefined'
+            ? localStorage.getItem('auth_token') || localStorage.getItem('adminToken')
+            : null;
+
+        if (!token) {
+          if (isMounted) router.push('/ipl-admin-2026');
+          return;
+        }
+
+        const response = await fetch(`/api/auth?action=verify&token=${token}`);
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          try {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('adminToken');
+          } catch (e) {}
+          if (isMounted) router.push('/ipl-admin-2026');
+          return;
+        }
+
+        const role = data.user?.role;
+        if (role !== 'admin' && role !== 'super_admin') {
+          if (isMounted) {
+            showError('Access denied. Admin privileges required.');
+            router.push('/');
+          }
+          return;
+        }
+
+        if (isMounted) {
+          setIsAuthenticated(true);
+          await fetchUsers(token);
+        }
+      } catch (e) {
+        console.error('Admin email auth error:', e);
+        if (isMounted) {
+          showError('Authentication failed');
+          router.push('/ipl-admin-2026');
+        }
+      } finally {
+        if (isMounted) {
+          setAuthLoading(false);
+        }
+      }
+    };
+
+    if (authLoading) {
+      checkAuth();
+    }
+
+    return () => {
+      isMounted = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   // Get all unique teams from users
   const allTeams = useMemo(() => {
