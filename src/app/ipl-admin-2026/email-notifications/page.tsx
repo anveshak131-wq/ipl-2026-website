@@ -2,7 +2,30 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import {
+  Mail,
+  Users,
+  CheckCircle2,
+  XCircle,
+  RefreshCw,
+  Search,
+  Filter,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  X,
+} from 'lucide-react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
+import { PageTransition, SkeletonLoader } from '@/components/admin/animations';
+import { EmptyStateIllustration, AnimatedStatusIcon } from '@/components/admin/icons';
+import { ToastContainer, useToast } from '@/components/admin/Toast';
+import AdvancedFilterBuilder, {
+  FilterCondition,
+  SavedFilter,
+} from '@/components/admin/AdvancedFilterBuilder';
+import FilterChips from '@/components/admin/FilterChips';
+import DateRangePicker from '@/components/admin/DateRangePicker';
 
 interface EmailUser {
   id: string;
@@ -15,18 +38,45 @@ interface EmailUser {
   unsubscribeReason: string | null;
   timezone: string | null;
   lastLogin: string | null;
+  createdAt?: string;
 }
+
+type SortField = 'name' | 'email' | 'lastLogin' | 'createdAt' | 'favoriteTeamsCount';
+type SortDirection = 'asc' | 'desc';
 
 export default function AdminEmailNotificationsPage() {
   const router = useRouter();
+  const { toasts, success, error: showError, closeToast } = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [users, setUsers] = useState<EmailUser[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterConditions, setFilterConditions] = useState<FilterCondition[]>([]);
+  const [sortField, setSortField] = useState<SortField>('name');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [savedFilters, setSavedFilters] = useState<SavedFilter[]>([]);
+  const [lastLoginRange, setLastLoginRange] = useState<{ start: Date | null; end: Date | null }>({
+    start: null,
+    end: null,
+  });
+  const [subscriptionRange, setSubscriptionRange] = useState<{ start: Date | null; end: Date | null }>({
+    start: null,
+    end: null,
+  });
+
+  // Load saved filters from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem('email_notifications_saved_filters');
+    if (stored) {
+      try {
+        setSavedFilters(JSON.parse(stored));
+      } catch (e) {
+        console.error('Error loading saved filters:', e);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -55,7 +105,7 @@ export default function AdminEmailNotificationsPage() {
 
         const role = data.user?.role;
         if (role !== 'admin' && role !== 'super_admin') {
-          alert('Access denied. Admin privileges required.');
+          showError('Access denied. Admin privileges required.');
           router.push('/');
           return;
         }
@@ -64,6 +114,7 @@ export default function AdminEmailNotificationsPage() {
         await fetchUsers(token);
       } catch (e) {
         console.error('Admin email auth error:', e);
+        showError('Authentication failed');
         router.push('/ipl-admin-2026');
       } finally {
         setAuthLoading(false);
@@ -71,12 +122,11 @@ export default function AdminEmailNotificationsPage() {
     };
 
     checkAuth();
-  }, [router]);
+  }, [router, showError]);
 
   const fetchUsers = async (tokenOverride?: string) => {
     try {
       setIsLoading(true);
-      setError(null);
       const token =
         tokenOverride ||
         (typeof window !== 'undefined'
@@ -102,16 +152,91 @@ export default function AdminEmailNotificationsPage() {
       setUsers(data.users || []);
     } catch (e: any) {
       console.error('Failed to load email users:', e);
-      setError(e?.message || 'Failed to load users');
+      showError(e?.message || 'Failed to load users');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const filteredUsers = useMemo(() => {
-    if (!searchQuery) return users;
+  // Get all unique teams from users
+  const allTeams = useMemo(() => {
+    const teams = new Set<string>();
+    users.forEach((user) => {
+      if (user.favoriteTeamIds) {
+        user.favoriteTeamIds.forEach((team) => teams.add(team));
+      }
+    });
+    return Array.from(teams).sort();
+  }, [users]);
+
+  // Get all unique timezones from users
+  const allTimezones = useMemo(() => {
+    const timezones = new Set<string>();
+    users.forEach((user) => {
+      if (user.timezone) {
+        timezones.add(user.timezone);
+      }
+    });
+    return Array.from(timezones).sort();
+  }, [users]);
+
+  // Filter fields configuration
+  const filterFields = [
+    { value: 'notificationStatus', label: 'Notification Status', type: 'select' as const },
+    { value: 'termsAccepted', label: 'Terms Accepted', type: 'select' as const },
+    { value: 'favoriteTeams', label: 'Favorite Teams', type: 'select' as const },
+    { value: 'timezone', label: 'Timezone', type: 'select' as const },
+    { value: 'email', label: 'Email', type: 'text' as const },
+    { value: 'name', label: 'Name', type: 'text' as const },
+  ];
+
+  // Apply filters
+  const applyFilters = (conditions: FilterCondition[]) => {
+    setFilterConditions(conditions);
+  };
+
+  // Get field label
+  const getFieldLabel = (field: string): string => {
+    const fieldConfig = filterFields.find((f) => f.value === field);
+    return fieldConfig?.label || field;
+  };
+
+  // Save filter preset
+  const handleSaveFilter = (name: string, conditions: FilterCondition[]) => {
+    const newFilter: SavedFilter = {
+      id: Date.now().toString(),
+      name,
+      conditions,
+      createdAt: Date.now(),
+    };
+    const updated = [...savedFilters, newFilter];
+    setSavedFilters(updated);
+    localStorage.setItem('email_notifications_saved_filters', JSON.stringify(updated));
+    success('Filter preset saved');
+  };
+
+  // Delete filter preset
+  const handleDeleteFilter = (id: string) => {
+    const updated = savedFilters.filter((f) => f.id !== id);
+    setSavedFilters(updated);
+    localStorage.setItem('email_notifications_saved_filters', JSON.stringify(updated));
+    success('Filter preset deleted');
+  };
+
+  // Load filter preset
+  const handleLoadFilter = (filter: SavedFilter) => {
+    setFilterConditions(filter.conditions);
+    success(`Loaded filter: ${filter.name}`);
+  };
+
+  // Filter and sort users
+  const filteredAndSortedUsers = useMemo(() => {
+    let result = [...users];
+
+    // Apply search query
+    if (searchQuery) {
     const q = searchQuery.toLowerCase();
-    return users.filter((u) => {
+      result = result.filter((u) => {
       const name = u.name || '';
       return (
         u.email.toLowerCase().includes(q) ||
@@ -119,7 +244,144 @@ export default function AdminEmailNotificationsPage() {
         (u.favoriteTeamIds || []).join(',').toLowerCase().includes(q)
       );
     });
-  }, [users, searchQuery]);
+    }
+
+    // Apply filter conditions
+    if (filterConditions.length > 0) {
+      result = result.filter((user) => {
+        return filterConditions.every((condition) => {
+          switch (condition.field) {
+            case 'notificationStatus':
+              if (condition.operator === 'equals') {
+                if (condition.value === 'enabled') {
+                  return user.emailNotificationsEnabled && !user.unsubscribedAt;
+                } else if (condition.value === 'disabled') {
+                  return !user.emailNotificationsEnabled && !user.unsubscribedAt;
+                } else if (condition.value === 'unsubscribed') {
+                  return !!user.unsubscribedAt;
+                }
+              }
+              return true;
+
+            case 'termsAccepted':
+              if (condition.operator === 'equals') {
+                return user.termsAccepted === (condition.value === 'true');
+              }
+              return true;
+
+            case 'favoriteTeams':
+              if (condition.operator === 'in') {
+                const teams = Array.isArray(condition.value)
+                  ? condition.value
+                  : String(condition.value).split(',').map((t) => t.trim());
+                return teams.some((team) => user.favoriteTeamIds?.includes(team));
+              }
+              return true;
+
+            case 'timezone':
+              if (condition.operator === 'equals') {
+                return user.timezone === condition.value;
+              } else if (condition.operator === 'contains') {
+                return user.timezone?.toLowerCase().includes(String(condition.value).toLowerCase());
+              }
+              return true;
+
+            case 'email':
+              if (condition.operator === 'contains') {
+                return user.email.toLowerCase().includes(String(condition.value).toLowerCase());
+              } else if (condition.operator === 'startsWith') {
+                return user.email.toLowerCase().startsWith(String(condition.value).toLowerCase());
+              } else if (condition.operator === 'equals') {
+                return user.email.toLowerCase() === String(condition.value).toLowerCase();
+              }
+              return true;
+
+            case 'name':
+              const name = user.name || '';
+              if (condition.operator === 'contains') {
+                return name.toLowerCase().includes(String(condition.value).toLowerCase());
+              } else if (condition.operator === 'startsWith') {
+                return name.toLowerCase().startsWith(String(condition.value).toLowerCase());
+              } else if (condition.operator === 'equals') {
+                return name.toLowerCase() === String(condition.value).toLowerCase();
+              }
+              return true;
+
+            default:
+              return true;
+          }
+        });
+      });
+    }
+
+    // Apply date range filters
+    if (lastLoginRange.start || lastLoginRange.end) {
+      result = result.filter((user) => {
+        if (!user.lastLogin) return false;
+        const loginDate = new Date(user.lastLogin);
+        if (lastLoginRange.start && loginDate < lastLoginRange.start) return false;
+        if (lastLoginRange.end) {
+          const endDate = new Date(lastLoginRange.end);
+          endDate.setHours(23, 59, 59, 999);
+          if (loginDate > endDate) return false;
+        }
+        return true;
+      });
+    }
+
+    if (subscriptionRange.start || subscriptionRange.end) {
+      result = result.filter((user) => {
+        const subDate = user.createdAt ? new Date(user.createdAt) : null;
+        if (!subDate) return false;
+        if (subscriptionRange.start && subDate < subscriptionRange.start) return false;
+        if (subscriptionRange.end) {
+          const endDate = new Date(subscriptionRange.end);
+          endDate.setHours(23, 59, 59, 999);
+          if (subDate > endDate) return false;
+        }
+        return true;
+      });
+    }
+
+    // Apply sorting
+    result.sort((a, b) => {
+      let comparison = 0;
+
+      switch (sortField) {
+        case 'name':
+          const nameA = (a.name || '').toLowerCase();
+          const nameB = (b.name || '').toLowerCase();
+          comparison = nameA.localeCompare(nameB);
+          break;
+
+        case 'email':
+          comparison = a.email.toLowerCase().localeCompare(b.email.toLowerCase());
+          break;
+
+        case 'lastLogin':
+          const loginA = a.lastLogin ? new Date(a.lastLogin).getTime() : 0;
+          const loginB = b.lastLogin ? new Date(b.lastLogin).getTime() : 0;
+          comparison = loginA - loginB;
+          break;
+
+        case 'createdAt':
+          const createdA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const createdB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          comparison = createdA - createdB;
+          break;
+
+        case 'favoriteTeamsCount':
+          const countA = a.favoriteTeamIds?.length || 0;
+          const countB = b.favoriteTeamIds?.length || 0;
+          comparison = countA - countB;
+          break;
+      }
+
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+
+    return result;
+  }, [users, searchQuery, filterConditions, sortField, sortDirection, lastLoginRange, subscriptionRange]);
 
   const stats = useMemo(() => {
     const total = users.length;
@@ -139,8 +401,6 @@ export default function AdminEmailNotificationsPage() {
   const handleToggle = async (user: EmailUser) => {
     try {
       setIsUpdating(true);
-      setError(null);
-      setSuccess(null);
       const token =
         typeof window !== 'undefined'
           ? localStorage.getItem('auth_token') || localStorage.getItem('adminToken')
@@ -170,25 +430,43 @@ export default function AdminEmailNotificationsPage() {
       const data = await response.json();
       const updated = data.user as EmailUser;
       setUsers((prev) => prev.map((u) => (u.email === updated.email ? { ...u, ...updated } : u)));
-      setSuccess(
-        `${updated.emailNotificationsEnabled ? 'Enabled' : 'Disabled'} email notifications for ${
-          updated.email
-        }`
+
+      success(
+        `Email notifications ${updated.emailNotificationsEnabled ? 'enabled' : 'disabled'} for ${updated.email}`
       );
-      setTimeout(() => setSuccess(null), 3000);
     } catch (e: any) {
       console.error('Failed to update email user:', e);
-      setError(e?.message || 'Failed to update user');
+      showError(e?.message || 'Failed to update user');
     } finally {
       setIsUpdating(false);
     }
   };
 
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) {
+      return <ArrowUpDown className="w-4 h-4 text-[#6B7280]" />;
+    }
+    return sortDirection === 'asc' ? (
+      <ArrowUp className="w-4 h-4 text-[#2F6FED]" />
+    ) : (
+      <ArrowDown className="w-4 h-4 text-[#2F6FED]" />
+    );
+  };
+
   if (authLoading) {
     return (
-      <div className="flex min-h-screen bg-ipl-dark">
+      <div className="flex min-h-screen bg-[#0B0F13]">
         <div className="flex-1 flex items-center justify-center">
-          <div className="text-white">Loading...</div>
+          <div className="text-[#E6EDF3]">Loading...</div>
         </div>
       </div>
     );
@@ -199,145 +477,411 @@ export default function AdminEmailNotificationsPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-ipl-dark">
+    <div className="flex min-h-screen bg-[#0B0F13]">
       <AdminSidebar currentPage="/ipl-admin-2026/email-notifications" />
       <div className="flex-1">
-        <div className="p-8 max-w-6xl mx-auto">
-          {success && (
-            <div className="mb-6 p-4 bg-emerald-500/20 border border-emerald-500/40 rounded-lg text-emerald-300 text-sm">
-              {success}
-            </div>
-          )}
-          {error && (
-            <div className="mb-6 p-4 bg-red-500/20 border border-red-500/40 rounded-lg text-red-300 text-sm">
-              {error}
-            </div>
-          )}
+        <PageTransition>
+          <div className="p-8 max-w-7xl mx-auto">
+            {/* Toast Notifications */}
+            <ToastContainer toasts={toasts} onClose={closeToast} />
 
-          <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            {/* Header */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+            >
             <div>
-              <h1 className="text-3xl font-bold text-white mb-1">Email Notifications</h1>
-              <p className="text-gray-400 text-sm">
-                View who will receive match reminder emails and toggle notifications per user.
+                <h1 className="text-3xl font-bold text-[#E6EDF3] mb-2 flex items-center gap-3">
+                  <Mail className="w-8 h-8 text-[#2F6FED]" />
+                  Email Notifications
+                </h1>
+                <p className="text-[#AEBAC7] text-sm">
+                  Manage email notification preferences and view user subscription status.
               </p>
             </div>
-            <div className="flex items-center gap-3">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => fetchUsers()}
                 disabled={isLoading}
-                className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-sm text-white border border-white/20 disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#1A2332] border border-[#2A3440] text-[#E6EDF3] hover:bg-[#141A22] disabled:opacity-50 transition-colors"
               >
-                {isLoading ? 'Refreshing…' : 'Refresh'}
-              </button>
+                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                <span>{isLoading ? 'Refreshing…' : 'Refresh'}</span>
+              </motion.button>
+            </motion.div>
+
+            {/* Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="bg-[#141A22] border border-[#2A3440] rounded-xl p-6 hover:border-[#2F6FED]/50 transition-colors"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-xs text-[#AEBAC7] uppercase tracking-wider">Total Users</div>
+                  <Users className="w-5 h-5 text-[#2F6FED]" />
             </div>
+                <div className="text-3xl font-bold text-[#E6EDF3]">{stats.total}</div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-[#141A22] border border-[#2A3440] rounded-xl p-6 hover:border-[#10B981]/50 transition-colors"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-xs text-[#AEBAC7] uppercase tracking-wider">Terms Accepted</div>
+                  <CheckCircle2 className="w-5 h-5 text-[#10B981]" />
+          </div>
+                <div className="text-3xl font-bold text-[#10B981]">{stats.termsAccepted}</div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-[#141A22] border border-[#2A3440] rounded-xl p-6 hover:border-[#F59E0B]/50 transition-colors"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-xs text-[#AEBAC7] uppercase tracking-wider">Emails Enabled</div>
+                  <Mail className="w-5 h-5 text-[#F59E0B]" />
+            </div>
+                <div className="text-3xl font-bold text-[#F59E0B]">{stats.enabled}</div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="bg-[#141A22] border border-[#2A3440] rounded-xl p-6 hover:border-[#EF4444]/50 transition-colors"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-xs text-[#AEBAC7] uppercase tracking-wider">Unsubscribed</div>
+                  <XCircle className="w-5 h-5 text-[#EF4444]" />
+            </div>
+                <div className="text-3xl font-bold text-[#EF4444]">{stats.unsubscribed}</div>
+              </motion.div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-slate-800/70 border border-white/10 rounded-xl p-4">
-              <div className="text-xs text-gray-400 mb-1">Total users</div>
-              <div className="text-2xl font-semibold text-white">{stats.total}</div>
-            </div>
-            <div className="bg-slate-800/70 border border-white/10 rounded-xl p-4">
-              <div className="text-xs text-gray-400 mb-1">Accepted terms</div>
-              <div className="text-2xl font-semibold text-emerald-400">{stats.termsAccepted}</div>
-            </div>
-            <div className="bg-slate-800/70 border border-white/10 rounded-xl p-4">
-              <div className="text-xs text-gray-400 mb-1">Emails enabled</div>
-              <div className="text-2xl font-semibold text-ipl-gold">{stats.enabled}</div>
-            </div>
-            <div className="bg-slate-800/70 border border-white/10 rounded-xl p-4">
-              <div className="text-xs text-gray-400 mb-1">Unsubscribed</div>
-              <div className="text-2xl font-semibold text-red-400">{stats.unsubscribed}</div>
-            </div>
-          </div>
-
-          <div className="bg-slate-900/70 border border-white/10 rounded-2xl overflow-hidden">
-            <div className="p-4 border-b border-white/10 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-              <div className="relative w-full md:w-80">
+            {/* Filters and Sorting */}
+            <div className="bg-[#141A22] border border-[#2A3440] rounded-xl p-4 mb-6 space-y-4">
+              {/* Search and Quick Filters */}
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#AEBAC7]" />
                 <input
                   type="text"
                   placeholder="Search by name, email, or team…"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-3 pr-3 py-2 bg-black/30 border border-white/20 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-ipl-gold/60"
-                />
+                    className="w-full pl-10 pr-4 py-2 bg-[#0B0F13] border border-[#2A3440] rounded-lg text-sm text-[#E6EDF3] placeholder-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#2F6FED] focus:border-transparent transition-all"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <AdvancedFilterBuilder
+                    fields={filterFields.map((f) => {
+                      if (f.value === 'notificationStatus') {
+                        return {
+                          ...f,
+                          options: [
+                            { value: 'enabled', label: 'Enabled' },
+                            { value: 'disabled', label: 'Disabled' },
+                            { value: 'unsubscribed', label: 'Unsubscribed' },
+                          ],
+                        };
+                      }
+                      if (f.value === 'termsAccepted') {
+                        return {
+                          ...f,
+                          options: [
+                            { value: 'true', label: 'Accepted' },
+                            { value: 'false', label: 'Not Accepted' },
+                          ],
+                        };
+                      }
+                      if (f.value === 'favoriteTeams') {
+                        return {
+                          ...f,
+                          options: allTeams.map((team) => ({ value: team, label: team })),
+                        };
+                      }
+                      if (f.value === 'timezone') {
+                        return {
+                          ...f,
+                          options: allTimezones.map((tz) => ({ value: tz, label: tz })),
+                        };
+                      }
+                      return f;
+                    })}
+                    onApply={applyFilters}
+                    onClear={() => {
+                      setFilterConditions([]);
+                      setLastLoginRange({ start: null, end: null });
+                      setSubscriptionRange({ start: null, end: null });
+                    }}
+                    savedFilters={savedFilters}
+                    onSaveFilter={handleSaveFilter}
+                    onDeleteFilter={handleDeleteFilter}
+                    onLoadFilter={handleLoadFilter}
+                  />
+                </div>
               </div>
-              <div className="text-xs text-gray-400">
-                Showing {filteredUsers.length} of {users.length} users
+
+              {/* Date Range Filters */}
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-[#AEBAC7] whitespace-nowrap">Last Login:</span>
+                  <DateRangePicker
+                    value={lastLoginRange}
+                    onChange={setLastLoginRange}
+                    placeholder="Select date range"
+                  />
+                  {(lastLoginRange.start || lastLoginRange.end) && (
+                    <button
+                      onClick={() => setLastLoginRange({ start: null, end: null })}
+                      className="p-1 text-[#AEBAC7] hover:text-[#E6EDF3] transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-[#AEBAC7] whitespace-nowrap">Subscription:</span>
+                  <DateRangePicker
+                    value={subscriptionRange}
+                    onChange={setSubscriptionRange}
+                    placeholder="Select date range"
+                  />
+                  {(subscriptionRange.start || subscriptionRange.end) && (
+                    <button
+                      onClick={() => setSubscriptionRange({ start: null, end: null })}
+                      className="p-1 text-[#AEBAC7] hover:text-[#E6EDF3] transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
               </div>
+
+              {/* Filter Chips */}
+              <FilterChips
+                conditions={filterConditions}
+                onRemove={(id) => setFilterConditions(filterConditions.filter((c) => c.id !== id))}
+                onClearAll={() => {
+                  setFilterConditions([]);
+                  setLastLoginRange({ start: null, end: null });
+                  setSubscriptionRange({ start: null, end: null });
+                }}
+                getFieldLabel={getFieldLabel}
+              />
             </div>
 
+            {/* Table Container */}
+            <div className="bg-[#141A22] border border-[#2A3440] rounded-2xl overflow-hidden">
+              {/* Table Header with Sort */}
+              <div className="p-4 border-b border-[#2A3440] flex items-center justify-between">
+                <div className="text-xs text-[#AEBAC7]">
+                  Showing {filteredAndSortedUsers.length} of {users.length} users
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-[#AEBAC7]">Sort by:</span>
+                  <select
+                    value={sortField}
+                    onChange={(e) => handleSort(e.target.value as SortField)}
+                    className="px-3 py-1.5 bg-[#0B0F13] border border-[#2A3440] rounded-lg text-sm text-[#E6EDF3] focus:outline-none focus:ring-2 focus:ring-[#2F6FED]"
+                  >
+                    <option value="name">Name</option>
+                    <option value="email">Email</option>
+                    <option value="lastLogin">Last Login</option>
+                    <option value="createdAt">Subscription Date</option>
+                    <option value="favoriteTeamsCount">Favorite Teams Count</option>
+                  </select>
+                  <button
+                    onClick={() => setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')}
+                    className="p-1.5 bg-[#0B0F13] border border-[#2A3440] rounded-lg text-[#E6EDF3] hover:bg-[#1A2332] transition-colors"
+                    title={`Sort ${sortDirection === 'asc' ? 'Descending' : 'Ascending'}`}
+                  >
+                    {sortDirection === 'asc' ? (
+                      <ArrowUp className="w-4 h-4" />
+                    ) : (
+                      <ArrowDown className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Table */}
             <div className="overflow-x-auto">
               {isLoading ? (
-                <div className="p-8 text-center text-gray-400 text-sm">Loading users…</div>
-              ) : filteredUsers.length === 0 ? (
-                <div className="p-8 text-center text-gray-400 text-sm">No users found.</div>
+                  <div className="p-8 space-y-4">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div key={i} className="flex items-center gap-4">
+                        <SkeletonLoader width="100%" height="3rem" />
+                      </div>
+                    ))}
+                  </div>
+                ) : filteredAndSortedUsers.length === 0 ? (
+                  <EmptyStateIllustration
+                    type="search"
+                    title={searchQuery || filterConditions.length > 0 ? 'No users found' : 'No users yet'}
+                    description={
+                      searchQuery || filterConditions.length > 0
+                        ? 'Try adjusting your search terms or filters'
+                        : 'Users will appear here once they sign up'
+                    }
+                  />
               ) : (
                 <table className="w-full text-sm">
-                  <thead className="bg-slate-800/80">
-                    <tr className="text-left text-gray-400">
-                      <th className="px-4 py-3 font-medium">User</th>
-                      <th className="px-4 py-3 font-medium">Email</th>
+                    <thead className="bg-[#1A2332]">
+                      <tr className="text-left text-[#AEBAC7]">
+                        <th className="px-4 py-3 font-medium">
+                          <button
+                            onClick={() => handleSort('name')}
+                            className="flex items-center gap-2 hover:text-[#E6EDF3] transition-colors"
+                          >
+                            User
+                            {getSortIcon('name')}
+                          </button>
+                        </th>
+                        <th className="px-4 py-3 font-medium">
+                          <button
+                            onClick={() => handleSort('email')}
+                            className="flex items-center gap-2 hover:text-[#E6EDF3] transition-colors"
+                          >
+                            Email
+                            {getSortIcon('email')}
+                          </button>
+                        </th>
                       <th className="px-4 py-3 font-medium">Terms</th>
                       <th className="px-4 py-3 font-medium">Status</th>
-                      <th className="px-4 py-3 font-medium">Teams</th>
+                        <th className="px-4 py-3 font-medium">
+                          <button
+                            onClick={() => handleSort('favoriteTeamsCount')}
+                            className="flex items-center gap-2 hover:text-[#E6EDF3] transition-colors"
+                          >
+                            Teams
+                            {getSortIcon('favoriteTeamsCount')}
+                          </button>
+                        </th>
+                        <th className="px-4 py-3 font-medium">
+                          <button
+                            onClick={() => handleSort('lastLogin')}
+                            className="flex items-center gap-2 hover:text-[#E6EDF3] transition-colors"
+                          >
+                            Last Login
+                            {getSortIcon('lastLogin')}
+                          </button>
+                        </th>
                       <th className="px-4 py-3 font-medium text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {filteredUsers.map((user) => (
-                      <tr key={user.id || user.email} className="text-gray-200">
+                    <tbody className="divide-y divide-[#2A3440]">
+                      {filteredAndSortedUsers.map((user, index) => (
+                        <motion.tr
+                          key={user.id || user.email}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.03, duration: 0.3 }}
+                          className="text-[#AEBAC7] hover:bg-[#1A2332] transition-colors group"
+                          whileHover={{ x: 4 }}
+                        >
                         <td className="px-4 py-3 align-middle">
-                          <div className="font-semibold text-white text-sm">
+                            <div className="font-semibold text-[#E6EDF3] text-sm">
                             {user.name || 'Unnamed user'}
                           </div>
-                          <div className="text-[11px] text-gray-500">
-                            {user.lastLogin ? `Last login: ${new Date(user.lastLogin).toLocaleString()}` : 'No login yet'}
-                          </div>
+                            {user.timezone && (
+                              <div className="text-[11px] text-[#6B7280]">{user.timezone}</div>
+                            )}
                         </td>
                         <td className="px-4 py-3 align-middle text-xs md:text-sm">{user.email}</td>
                         <td className="px-4 py-3 align-middle">
-                          <span
-                            className={`inline-flex items-center px-2 py-1 rounded-full text-[11px] font-medium ${
-                              user.termsAccepted
-                                ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/40'
-                                : 'bg-yellow-500/10 text-yellow-300 border border-yellow-500/40'
-                            }`}
-                          >
+                            <div className="flex items-center gap-2">
+                              <AnimatedStatusIcon
+                                status={user.termsAccepted ? 'success' : 'warning'}
+                                size="sm"
+                              />
+                              <span className="text-xs">
                             {user.termsAccepted ? 'Accepted' : 'Not accepted'}
                           </span>
+                            </div>
                         </td>
                         <td className="px-4 py-3 align-middle">
-                          {user.emailNotificationsEnabled ? (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-medium bg-ipl-gold/15 text-ipl-gold border border-ipl-gold/40">
-                              Enabled
+                            <div className="flex items-center gap-2">
+                              <AnimatedStatusIcon
+                                status={
+                                  user.unsubscribedAt
+                                    ? 'error'
+                                    : user.emailNotificationsEnabled
+                                      ? 'success'
+                                      : 'inactive'
+                                }
+                                size="sm"
+                                pulse={user.emailNotificationsEnabled && !user.unsubscribedAt}
+                              />
+                              <span className="text-xs">
+                                {user.unsubscribedAt
+                                  ? 'Unsubscribed'
+                                  : user.emailNotificationsEnabled
+                                    ? 'Enabled'
+                                    : 'Disabled'}
                             </span>
-                          ) : (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-[11px] font-medium bg-red-500/10 text-red-300 border border-red-500/40">
-                              Disabled
-                            </span>
-                          )}
-                          {user.unsubscribedAt && (
-                            <div className="mt-1 text-[10px] text-gray-500">
-                              Unsubscribed {new Date(user.unsubscribedAt).toLocaleDateString()}
                             </div>
+                            {user.unsubscribedAt && (
+                              <div className="mt-1 text-[10px] text-[#6B7280]">
+                                {new Date(user.unsubscribedAt).toLocaleDateString()}
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 align-middle text-xs text-[#AEBAC7]">
+                            {user.favoriteTeamIds && user.favoriteTeamIds.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {user.favoriteTeamIds.map((team, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="px-2 py-0.5 bg-[#1A2332] border border-[#2A3440] rounded text-[10px]"
+                                  >
+                                    {team}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              'None'
                           )}
                         </td>
-                        <td className="px-4 py-3 align-middle text-xs text-gray-300">
-                          {user.favoriteTeamIds && user.favoriteTeamIds.length > 0
-                            ? user.favoriteTeamIds.join(', ')
-                            : 'None'}
+                          <td className="px-4 py-3 align-middle text-xs text-[#AEBAC7]">
+                            {user.lastLogin ? (
+                              <div>
+                                <div>{new Date(user.lastLogin).toLocaleDateString()}</div>
+                                <div className="text-[10px] text-[#6B7280]">
+                                  {new Date(user.lastLogin).toLocaleTimeString()}
+                                </div>
+                              </div>
+                            ) : (
+                              'Never'
+                            )}
                         </td>
                         <td className="px-4 py-3 align-middle text-right">
-                          <button
+                            <motion.button
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
                             onClick={() => handleToggle(user)}
                             disabled={isUpdating}
-                            className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-white/20 text-white bg-white/5 hover:bg-white/15 disabled:opacity-50"
+                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors disabled:opacity-50 ${
+                                user.emailNotificationsEnabled
+                                  ? 'border-red-500/40 text-red-300 bg-red-500/10 hover:bg-red-500/20'
+                                  : 'border-green-500/40 text-green-300 bg-green-500/10 hover:bg-green-500/20'
+                              }`}
                           >
                             {user.emailNotificationsEnabled ? 'Disable' : 'Enable'}
-                          </button>
+                            </motion.button>
                         </td>
-                      </tr>
+                        </motion.tr>
                     ))}
                   </tbody>
                 </table>
@@ -345,6 +889,7 @@ export default function AdminEmailNotificationsPage() {
             </div>
           </div>
         </div>
+        </PageTransition>
       </div>
     </div>
   );

@@ -21,7 +21,12 @@ export interface SavedFilter {
 }
 
 interface AdvancedFilterBuilderProps {
-  fields: { value: string; label: string; type: 'text' | 'number' | 'date' | 'select' }[];
+  fields: {
+    value: string;
+    label: string;
+    type: 'text' | 'number' | 'date' | 'select';
+    options?: { value: string; label: string }[];
+  }[];
   onApply: (conditions: FilterCondition[]) => void;
   onClear: () => void;
   savedFilters?: SavedFilter[];
@@ -230,15 +235,42 @@ export default function AdvancedFilterBuilder({
                             className="flex-1 px-3 py-2 bg-[#0B0F13] border border-[#2A3440] rounded-lg text-[#E6EDF3] text-sm focus:outline-none focus:ring-2 focus:ring-[#2F6FED]"
                           />
                         </div>
-                      ) : (
+                      ) : condition.operator === 'in' ? (
                         <input
-                          type={fields.find((f) => f.value === condition.field)?.type || 'text'}
+                          type="text"
                           value={Array.isArray(condition.value) ? condition.value.join(',') : condition.value}
                           onChange={(e) => updateCondition(condition.id, { value: e.target.value })}
-                          placeholder="Value"
+                          placeholder="Comma-separated values"
                           className="w-full px-3 py-2 bg-[#0B0F13] border border-[#2A3440] rounded-lg text-[#E6EDF3] text-sm focus:outline-none focus:ring-2 focus:ring-[#2F6FED]"
                         />
-                      )}
+                      ) : (() => {
+                        const field = fields.find((f) => f.value === condition.field);
+                        if (field?.type === 'select' && field.options) {
+                          return (
+                            <select
+                              value={Array.isArray(condition.value) ? condition.value[0] : condition.value}
+                              onChange={(e) => updateCondition(condition.id, { value: e.target.value })}
+                              className="w-full px-3 py-2 bg-[#0B0F13] border border-[#2A3440] rounded-lg text-[#E6EDF3] text-sm focus:outline-none focus:ring-2 focus:ring-[#2F6FED]"
+                            >
+                              <option value="">Select...</option>
+                              {field.options.map((opt) => (
+                                <option key={opt.value} value={opt.value}>
+                                  {opt.label}
+                                </option>
+                              ))}
+                            </select>
+                          );
+                        }
+                        return (
+                          <input
+                            type={field?.type || 'text'}
+                            value={Array.isArray(condition.value) ? condition.value.join(',') : condition.value}
+                            onChange={(e) => updateCondition(condition.id, { value: e.target.value })}
+                            placeholder="Value"
+                            className="w-full px-3 py-2 bg-[#0B0F13] border border-[#2A3440] rounded-lg text-[#E6EDF3] text-sm focus:outline-none focus:ring-2 focus:ring-[#2F6FED]"
+                          />
+                        );
+                      })()}
                     </div>
                   </div>
                 ))}
