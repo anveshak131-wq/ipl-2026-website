@@ -21,7 +21,7 @@ interface BulkEmailSendModalProps {
   templates: EmailTemplate[];
   selectedUserIds: string[];
   selectedUserEmails: string[];
-  matches?: Array<{ id: string; team1: string; team2: string; date: string; venue: string }>;
+  matches?: Array<{ id: string; team1: string; team2: string; date: string; venue: string; status?: string }>;
   news?: Array<{ id: string; title: string; summary: string }>;
 }
 
