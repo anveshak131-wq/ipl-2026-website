@@ -1,0 +1,9 @@
+# Security headers for admin routes
+# Cloudflare Pages will apply these headers automatically
+
+/ipl-admin-2026/*
+  X-Robots-Tag: noindex, nofollow, noarchive, nosnippet
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: no-referrer
+

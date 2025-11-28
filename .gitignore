@@ -27,6 +27,9 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env
+.env.production
+.env.development
 
 # vercel
 .vercel
@@ -35,3 +38,13 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 admin-links-local.txt
+
+# Admin secrets and sensitive files (uncomment if using environment-based approach)
+# src/app/ipl-admin-2026/
+# src/components/admin/
+
+# Secrets and API keys
+*.secret
+*.key
+secrets/
+.secrets/
