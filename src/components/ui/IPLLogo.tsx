@@ -15,6 +15,7 @@ export default function IPLLogo({ size = 'md', className = '', animated = false 
   };
 
   const sizeClass = sizes[size];
+  const uniqueId = `logo-${size}-${animated ? 'anim' : 'static'}`;
 
   return (
     <div className={`relative group ${animated ? 'float-animation' : ''}`}>
@@ -23,14 +24,24 @@ export default function IPLLogo({ size = 'md', className = '', animated = false 
         className={`${sizeClass} ${className} drop-shadow-2xl ${animated ? 'animate-scale-in' : ''}`}
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
+        preserveAspectRatio="xMidYMid meet"
       >
-        {/* Dynamic energy background - hexagon shape */}
+        {/* Background circle for better visibility */}
+        <circle
+          cx="100"
+          cy="100"
+          r="95"
+          fill={`url(#${uniqueId}-bg-gradient)`}
+          stroke={`url(#${uniqueId}-border-gradient)`}
+          strokeWidth="4"
+        />
+
+        {/* Hexagon shape - outer */}
         <g transform="translate(100, 100)">
-          {/* Outer hexagon with gradient */}
           <polygon
             points="-70,-60 70,-60 100,0 70,60 -70,60 -100,0"
-            fill="url(#new-bg-gradient)"
-            stroke="url(#new-border-gradient)"
+            fill={`url(#${uniqueId}-hex-bg)`}
+            stroke={`url(#${uniqueId}-hex-border)`}
             strokeWidth="3"
             className={animated ? 'animate-pulse' : ''}
           />
@@ -39,21 +50,21 @@ export default function IPLLogo({ size = 'md', className = '', animated = false 
           <polygon
             points="-55,-45 55,-45 75,0 55,45 -55,45 -75,0"
             fill="none"
-            stroke="url(#new-inner-accent)"
+            stroke={`url(#${uniqueId}-inner-accent)`}
             strokeWidth="2"
-            opacity="0.6"
+            opacity="0.7"
           />
         </g>
 
         {/* Cricket ball - centerpiece */}
         <g transform="translate(100, 100)">
-          {/* Ball shadow/glow */}
+          {/* Ball glow background */}
           <circle
             cx="0"
             cy="0"
-            r="32"
-            fill="url(#ball-glow)"
-            opacity="0.4"
+            r="35"
+            fill={`url(#${uniqueId}-ball-glow)`}
+            opacity="0.5"
             className={animated ? 'animate-pulse' : ''}
           />
           
@@ -61,74 +72,72 @@ export default function IPLLogo({ size = 'md', className = '', animated = false 
           <circle
             cx="0"
             cy="0"
-            r="28"
-            fill="url(#ball-gradient)"
-            stroke="url(#ball-stroke)"
-            strokeWidth="2"
+            r="30"
+            fill={`url(#${uniqueId}-ball-gradient)`}
+            stroke={`url(#${uniqueId}-ball-stroke)`}
+            strokeWidth="2.5"
           />
           
-          {/* Cricket ball seam - top curve */}
+          {/* Cricket ball seam - horizontal curves */}
           <path
-            d="M -20 -8 Q 0 -12 20 -8"
-            stroke="url(#seam-gradient)"
-            strokeWidth="3"
+            d="M -22 -10 Q 0 -14 22 -10"
+            stroke={`url(#${uniqueId}-seam-gradient)`}
+            strokeWidth="3.5"
             strokeLinecap="round"
             fill="none"
           />
-          
-          {/* Cricket ball seam - bottom curve */}
           <path
-            d="M -20 8 Q 0 12 20 8"
-            stroke="url(#seam-gradient)"
-            strokeWidth="3"
+            d="M -22 10 Q 0 14 22 10"
+            stroke={`url(#${uniqueId}-seam-gradient)`}
+            strokeWidth="3.5"
             strokeLinecap="round"
             fill="none"
           />
           
           {/* Cricket ball seam - vertical */}
           <path
-            d="M 0 -20 Q 8 0 0 20"
-            stroke="url(#seam-gradient)"
-            strokeWidth="2.5"
+            d="M 0 -24 Q 10 0 0 24"
+            stroke={`url(#${uniqueId}-seam-gradient)`}
+            strokeWidth="3"
             strokeLinecap="round"
             fill="none"
           />
         </g>
 
-        {/* Dynamic energy lines - top */}
+        {/* Dynamic energy lines - cardinal directions */}
         <g transform="translate(100, 100)" className={animated ? 'animate-spin-slow' : ''} style={{ transformOrigin: '100px 100px' }}>
-          <line x1="0" y1="-85" x2="0" y2="-75" stroke="url(#energy-gradient)" strokeWidth="4" strokeLinecap="round" />
-          <line x1="0" y1="75" x2="0" y2="85" stroke="url(#energy-gradient)" strokeWidth="4" strokeLinecap="round" />
-          <line x1="-85" y1="0" x2="-75" y2="0" stroke="url(#energy-gradient)" strokeWidth="4" strokeLinecap="round" />
-          <line x1="75" y1="0" x2="85" y2="0" stroke="url(#energy-gradient)" strokeWidth="4" strokeLinecap="round" />
+          <line x1="0" y1="-88" x2="0" y2="-78" stroke={`url(#${uniqueId}-energy-1)`} strokeWidth="5" strokeLinecap="round" />
+          <line x1="0" y1="78" x2="0" y2="88" stroke={`url(#${uniqueId}-energy-1)`} strokeWidth="5" strokeLinecap="round" />
+          <line x1="-88" y1="0" x2="-78" y2="0" stroke={`url(#${uniqueId}-energy-1)`} strokeWidth="5" strokeLinecap="round" />
+          <line x1="78" y1="0" x2="88" y2="0" stroke={`url(#${uniqueId}-energy-1)`} strokeWidth="5" strokeLinecap="round" />
         </g>
 
         {/* Diagonal energy lines */}
         <g transform="translate(100, 100)" className={animated ? 'animate-spin-slow' : ''} style={{ transformOrigin: '100px 100px', animationDirection: 'reverse' }}>
-          <line x1="-60" y1="-60" x2="-50" y2="-50" stroke="url(#energy-gradient-2)" strokeWidth="3" strokeLinecap="round" />
-          <line x1="50" y1="-50" x2="60" y2="-60" stroke="url(#energy-gradient-2)" strokeWidth="3" strokeLinecap="round" />
-          <line x1="-60" y1="60" x2="-50" y2="50" stroke="url(#energy-gradient-2)" strokeWidth="3" strokeLinecap="round" />
-          <line x1="50" y1="50" x2="60" y2="60" stroke="url(#energy-gradient-2)" strokeWidth="3" strokeLinecap="round" />
+          <line x1="-62" y1="-62" x2="-52" y2="-52" stroke={`url(#${uniqueId}-energy-2)`} strokeWidth="4" strokeLinecap="round" />
+          <line x1="52" y1="-52" x2="62" y2="-62" stroke={`url(#${uniqueId}-energy-2)`} strokeWidth="4" strokeLinecap="round" />
+          <line x1="-62" y1="62" x2="-52" y2="52" stroke={`url(#${uniqueId}-energy-2)`} strokeWidth="4" strokeLinecap="round" />
+          <line x1="52" y1="52" x2="62" y2="62" stroke={`url(#${uniqueId}-energy-2)`} strokeWidth="4" strokeLinecap="round" />
         </g>
 
         {/* Accent sparks */}
-        <g className={animated ? 'opacity-100' : 'opacity-80'}>
-          <circle cx="100" cy="30" r="3" fill="#00FFFF" className={animated ? 'animate-pulse' : ''} />
-          <circle cx="170" cy="100" r="2.5" fill="#FF3366" className={animated ? 'animate-pulse' : ''} style={{ animationDelay: '0.2s' }} />
-          <circle cx="100" cy="170" r="3" fill="#00FFFF" className={animated ? 'animate-pulse' : ''} style={{ animationDelay: '0.4s' }} />
-          <circle cx="30" cy="100" r="2.5" fill="#FF3366" className={animated ? 'animate-pulse' : ''} style={{ animationDelay: '0.6s' }} />
+        <g className={animated ? 'opacity-100' : 'opacity-85'}>
+          <circle cx="100" cy="28" r="3.5" fill="#00FFFF" className={animated ? 'animate-pulse' : ''} />
+          <circle cx="172" cy="100" r="3" fill="#FF3366" className={animated ? 'animate-pulse' : ''} style={{ animationDelay: '0.2s' }} />
+          <circle cx="100" cy="172" r="3.5" fill="#00FFFF" className={animated ? 'animate-pulse' : ''} style={{ animationDelay: '0.4s' }} />
+          <circle cx="28" cy="100" r="3" fill="#FF3366" className={animated ? 'animate-pulse' : ''} style={{ animationDelay: '0.6s' }} />
         </g>
 
         <defs>
-          {/* Background gradient - dark with vibrant edges */}
-          <radialGradient id="new-bg-gradient" cx="50%" cy="50%" r="80%">
+          {/* Background gradient */}
+          <radialGradient id={`${uniqueId}-bg-gradient`} cx="50%" cy="50%" r="80%">
             <stop offset="0%" stopColor="#0A0E27" />
             <stop offset="50%" stopColor="#0F172A" />
             <stop offset="100%" stopColor="#1E293B" />
           </radialGradient>
 
-          {/* Border gradient - electric colors */}
-          <linearGradient id="new-border-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          {/* Border gradient - vibrant colors */}
+          <linearGradient id={`${uniqueId}-border-gradient`} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#0066FF" />
             <stop offset="25%" stopColor="#00FFFF" />
             <stop offset="50%" stopColor="#FFD700" />
@@ -136,47 +145,60 @@ export default function IPLLogo({ size = 'md', className = '', animated = false 
             <stop offset="100%" stopColor="#0066FF" />
           </linearGradient>
 
+          {/* Hexagon background */}
+          <radialGradient id={`${uniqueId}-hex-bg`} cx="50%" cy="50%" r="70%">
+            <stop offset="0%" stopColor="#0F172A" />
+            <stop offset="100%" stopColor="#1E293B" />
+          </radialGradient>
+
+          {/* Hexagon border */}
+          <linearGradient id={`${uniqueId}-hex-border`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#0066FF" />
+            <stop offset="50%" stopColor="#FFD700" />
+            <stop offset="100%" stopColor="#FF3366" />
+          </linearGradient>
+
           {/* Inner accent */}
-          <linearGradient id="new-inner-accent" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#00FFFF" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#0066FF" stopOpacity="0.6" />
+          <linearGradient id={`${uniqueId}-inner-accent`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#00FFFF" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#0066FF" stopOpacity="0.7" />
           </linearGradient>
 
           {/* Cricket ball gradient */}
-          <radialGradient id="ball-gradient" cx="40%" cy="40%" r="70%">
+          <radialGradient id={`${uniqueId}-ball-gradient`} cx="40%" cy="40%" r="75%">
             <stop offset="0%" stopColor="#1A1A2E" />
             <stop offset="40%" stopColor="#16213E" />
             <stop offset="100%" stopColor="#0F172A" />
           </radialGradient>
 
           {/* Ball glow */}
-          <radialGradient id="ball-glow" cx="50%" cy="50%">
-            <stop offset="0%" stopColor="#0066FF" stopOpacity="0.6" />
-            <stop offset="100%" stopColor="#FF3366" stopOpacity="0.2" />
+          <radialGradient id={`${uniqueId}-ball-glow`} cx="50%" cy="50%">
+            <stop offset="0%" stopColor="#0066FF" stopOpacity="0.7" />
+            <stop offset="100%" stopColor="#FF3366" stopOpacity="0.3" />
           </radialGradient>
 
           {/* Ball stroke */}
-          <linearGradient id="ball-stroke" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={`${uniqueId}-ball-stroke`} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#0066FF" />
             <stop offset="100%" stopColor="#FF3366" />
           </linearGradient>
 
           {/* Seam gradient */}
-          <linearGradient id="seam-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+          <linearGradient id={`${uniqueId}-seam-gradient`} x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#FFD700" />
             <stop offset="50%" stopColor="#FFFFFF" />
             <stop offset="100%" stopColor="#FFD700" />
           </linearGradient>
 
-          {/* Energy lines gradient */}
-          <linearGradient id="energy-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          {/* Energy lines gradient 1 */}
+          <linearGradient id={`${uniqueId}-energy-1`} x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#00FFFF" />
             <stop offset="50%" stopColor="#0066FF" />
             <stop offset="100%" stopColor="#00FFFF" />
           </linearGradient>
 
           {/* Energy lines gradient 2 */}
-          <linearGradient id="energy-gradient-2" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={`${uniqueId}-energy-2`} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#FF3366" />
             <stop offset="50%" stopColor="#FFD700" />
             <stop offset="100%" stopColor="#FF3366" />
