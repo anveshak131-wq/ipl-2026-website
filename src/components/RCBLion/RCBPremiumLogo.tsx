@@ -5,10 +5,10 @@ import { useEffect, useRef, useState } from 'react';
 
 // RCB Brand Colors
 const RCB_COLORS = {
-  primary: '#EC1C24',      // RCB Red
+  primary: '#C8102E',      // RCB Dark Red (official darker shade)
   secondary: '#000000',     // Black
   gold: '#FFD700',          // Gold
-  darkRed: '#B91C1C',
+  darkRed: '#8B1A1A',       // Darker red for depth
   lightRed: '#FEE2E2',
   orange: '#FF8C00',
   maneGold: '#FFA500',
@@ -34,10 +34,10 @@ export default function RCBPremiumLogo({
   const inView = useInView(containerRef, { once: true, margin: '-100px' });
 
   const sizeClasses = {
-    sm: 'w-24 h-24',
-    md: 'w-48 h-48',
-    lg: 'w-64 h-64',
-    xl: 'w-96 h-96',
+    sm: 'w-32 h-32',      // Increased from w-24 h-24
+    md: 'w-64 h-64',      // Increased from w-48 h-48
+    lg: 'w-80 h-80',      // Increased from w-64 h-64
+    xl: 'w-[28rem] h-[28rem]',  // Increased from w-96 h-96
   };
 
   useEffect(() => {
