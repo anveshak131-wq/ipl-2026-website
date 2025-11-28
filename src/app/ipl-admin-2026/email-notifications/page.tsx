@@ -616,7 +616,7 @@ export default function AdminEmailNotificationsPage() {
 
     loadMatchesAndNews();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAuthenticated]); // Only load when authenticated
+  }, []); // Only run once on mount - load data when authenticated
 
   // Bulk operations handlers
   const handleSelectAll = () => {
