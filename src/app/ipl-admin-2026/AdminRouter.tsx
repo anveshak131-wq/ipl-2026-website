@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
+import GlobalSearch from '@/components/admin/GlobalSearch';
 import AdminDashboard from './dashboard/page';
 import AdminMatches from './matches/page';
 import AdminTeams from './teams/page';
@@ -147,6 +148,7 @@ export default function AdminRouter() {
       <div className="flex-1">
         {renderPage()}
       </div>
+      <GlobalSearch />
     </div>
   );
 }
