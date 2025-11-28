@@ -45,7 +45,7 @@ export default function SportsUP18Logo({
       <svg
         width={width}
         height={height}
-        viewBox="0 0 120 120"
+        viewBox="0 0 140 140"
         className={`${animated ? 'transition-all duration-300' : ''} ${
           isHovered && animated ? 'scale-110' : 'scale-100'
         }`}
@@ -107,21 +107,21 @@ export default function SportsUP18Logo({
             
             .ring {
               animation: ${animated ? 'spin-ring 8s linear infinite' : 'none'};
-              transform-origin: 60px 60px;
+              transform-origin: 70px 70px;
             }
             .glow {
               animation: ${animated ? 'pulse-glow 2.5s ease-in-out infinite' : 'none'};
             }
             .bat {
               animation: ${animated ? 'swing-bat 2s ease-in-out infinite' : 'none'};
-              transform-origin: 60px 60px;
+              transform-origin: 70px 70px;
             }
             .ball {
               animation: ${animated ? 'bounce-ball 2s ease-in-out infinite' : 'none'};
             }
             .glove {
               animation: ${animated ? 'rotate-glove 4s linear infinite' : 'none'};
-              transform-origin: 60px 60px;
+              transform-origin: 70px 70px;
             }
             .wicket {
               animation: ${animated ? 'float-wicket 3s ease-in-out infinite' : 'none'};
@@ -130,30 +130,30 @@ export default function SportsUP18Logo({
         </defs>
 
         {/* Outer rotating ring */}
-        <circle cx="60" cy="60" r="58" fill="none" stroke="url(#ringGradient)" strokeWidth="2" opacity="0.9" className="ring"/>
+        <circle cx="70" cy="70" r="65" fill="none" stroke="url(#ringGradient)" strokeWidth="2" opacity="0.9" className="ring"/>
 
         {/* Main background */}
-        <circle cx="60" cy="60" r="56" fill="url(#bgGradient)" stroke="url(#ringGradient)" strokeWidth="2"/>
+        <circle cx="70" cy="70" r="63" fill="url(#bgGradient)" stroke="url(#ringGradient)" strokeWidth="2"/>
 
         {/* Inner ring */}
-        <circle cx="60" cy="60" r="50" fill="none" stroke="url(#ringGradient)" strokeWidth="1" opacity="0.4" className="glow"/>
+        <circle cx="70" cy="70" r="55" fill="none" stroke="url(#ringGradient)" strokeWidth="1" opacity="0.4" className="glow"/>
 
         {/* Cricket Ball - Top Left (Bouncing) */}
-        <g className="ball" transform="translate(35, 35)">
+        <g className="ball" transform="translate(40, 40)">
           <circle cx="0" cy="0" r="6" fill="#F97316" stroke="#FDBA74" strokeWidth="1" filter="url(#glow)"/>
           <path d="M -3 -1 Q 0 0 3 1" stroke="#FDBA74" strokeWidth="0.8" fill="none"/>
           <path d="M -3 1 Q 0 0 3 -1" stroke="#FDBA74" strokeWidth="0.8" fill="none"/>
         </g>
 
         {/* Cricket Bat - Left Side (Swinging) */}
-        <g className="bat" transform="translate(25, 60)">
+        <g className="bat" transform="translate(30, 70)">
           <rect x="-4" y="-6" width="8" height="10" rx="1" fill="url(#batGradient)" stroke="#4B5563" strokeWidth="0.8"/>
           <rect x="-1.5" y="4" width="3" height="6" rx="0.5" fill="#0F172A" stroke="#020617" strokeWidth="0.5"/>
           <rect x="-1.8" y="10" width="3.6" height="2" fill="#22C55E"/>
         </g>
 
         {/* Wickets - Right Side (Floating) */}
-        <g className="wicket" transform="translate(90, 60)">
+        <g className="wicket" transform="translate(100, 70)">
           {/* Left stump */}
           <rect x="-5" y="-8" width="1.5" height="16" fill="#FACC15" rx="0.5"/>
           {/* Middle stump */}
@@ -165,7 +165,7 @@ export default function SportsUP18Logo({
         </g>
 
         {/* Cricket Glove - Bottom Left (Rotating) */}
-        <g className="glove" transform="translate(35, 90)">
+        <g className="glove" transform="translate(40, 100)">
           <ellipse cx="0" cy="0" rx="5" ry="6" fill="#22C55E" stroke="#16A34A" strokeWidth="0.8"/>
           <circle cx="-2" cy="-3" r="1.2" fill="#16A34A"/>
           <circle cx="0" cy="-4" r="1.2" fill="#16A34A"/>
@@ -174,19 +174,19 @@ export default function SportsUP18Logo({
         </g>
 
         {/* Cricket Bowl - Bottom Right (Pulsing) */}
-        <g className="glow" transform="translate(85, 90)">
+        <g className="glow" transform="translate(100, 100)">
           <circle cx="0" cy="0" r="5" fill="#38BDF8" stroke="#0284C7" strokeWidth="0.8" filter="url(#glow)"/>
           <circle cx="0" cy="0" r="3" fill="none" stroke="#60A5FA" strokeWidth="0.5" opacity="0.6"/>
           <path d="M -2 -2 L 2 2 M 2 -2 L -2 2" stroke="#60A5FA" strokeWidth="0.5" opacity="0.4"/>
         </g>
 
         {/* Center accent - pulsing */}
-        <circle cx="60" cy="60" r="8" fill="url(#ringGradient)" opacity="0.3" className="glow" filter="url(#glow)"/>
+        <circle cx="70" cy="70" r="8" fill="url(#ringGradient)" opacity="0.3" className="glow" filter="url(#glow)"/>
 
         {/* Decorative dots */}
         <g opacity="0.7">
-          <circle cx="50" cy="45" r="1.5" fill="#FACC15"/>
-          <circle cx="70" cy="75" r="1.5" fill="#38BDF8"/>
+          <circle cx="55" cy="50" r="1.5" fill="#FACC15"/>
+          <circle cx="85" cy="85" r="1.5" fill="#38BDF8"/>
         </g>
       </svg>
     </div>
