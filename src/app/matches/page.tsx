@@ -197,8 +197,8 @@ export default function MatchesPage() {
                   Try selecting a different filter
                 </p>
               </div>
-              </motion.div>
-            )}
+            </div>
+          )}
           </AnimatePresence>
 
           {/* Pagination - Premium Design */}

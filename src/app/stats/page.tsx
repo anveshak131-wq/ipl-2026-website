@@ -505,20 +505,19 @@ export default function StatsPage() {
               </motion.p>
             </section>
           </AnimatedSection>
-            {publishedStats?.lastUpdated && (
-              <p className="text-xs text-gray-400">
-                Snapshot published by admin on{' '}
-                {new Date(publishedStats.lastUpdated).toLocaleString('en-US', {
-                  day: '2-digit',
-                  month: 'short',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-                .
-              </p>
-            )}
-          </section>
+          {publishedStats?.lastUpdated && (
+            <p className="text-xs text-gray-400">
+              Snapshot published by admin on{' '}
+              {new Date(publishedStats.lastUpdated).toLocaleString('en-US', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+              .
+            </p>
+          )}
 
           {/* Contextual sub-navigation */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 -mt-4">
