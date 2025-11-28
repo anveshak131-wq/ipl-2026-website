@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Script from 'next/script';
 import Navbar from '@/components/layout/Navbar';
@@ -8,6 +9,9 @@ import Footer from '@/components/layout/Footer';
 import Emoji, { EmojiName } from '@/components/emoji/Emoji';
 import EmojiPicker from '@/components/emoji/EmojiPicker';
 import type { Match } from '@/types';
+import AnimatedSection from '@/components/ui/AnimatedSection';
+import GradientText from '@/components/ui/GradientText';
+import GlassCard from '@/components/ui/GlassCard';
 
 interface LiveScoreData {
   matchId: string;
@@ -500,8 +504,19 @@ export default function LiveScorePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Live Score Section */}
           <div className="lg:col-span-2">
-            <div className="bg-slate-800/50 rounded-2xl border border-white/10 p-8">
-              <h1 className="text-3xl font-bold text-white mb-8">Live Score</h1>
+            <GlassCard className="p-8">
+              <AnimatedSection direction="down" delay={0.1}>
+                <motion.h1 
+                  className="text-3xl font-bold text-white mb-8"
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <GradientText gradient="from-red-400 via-orange-400 to-yellow-400" animate>
+                    Live Score
+                  </GradientText>
+                </motion.h1>
+              </AnimatedSection>
 
               {isLiveLoading ? (
                 <div className="space-y-8 animate-pulse">
@@ -568,29 +583,66 @@ export default function LiveScorePage() {
                             )}
 
                             {/* Score Cards */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <motion.div 
+                              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                              initial="hidden"
+                              animate="visible"
+                              variants={{
+                                visible: {
+                                  transition: {
+                                    staggerChildren: 0.1,
+                                  },
+                                },
+                              }}
+                            >
                               {/* Team 1 */}
-                              <div className="bg-gradient-to-br from-red-900/20 to-red-600/20 border border-red-500/30 rounded-lg p-6">
+                              <motion.div
+                                variants={{
+                                  hidden: { opacity: 0, x: -50 },
+                                  visible: { opacity: 1, x: 0 },
+                                }}
+                                whileHover={{ scale: 1.02, y: -5 }}
+                                className="bg-gradient-to-br from-red-900/20 to-red-600/20 border border-red-500/30 rounded-lg p-6"
+                              >
                                 <h3 className="text-xl font-bold text-white mb-4">{liveScore.team1.name}</h3>
-                                <div className="space-y-2">
+                                <motion.div 
+                                  className="space-y-2"
+                                  key={`${liveScore.team1.runs}-${liveScore.team1.wickets}`}
+                                  initial={{ scale: 1.2 }}
+                                  animate={{ scale: 1 }}
+                                  transition={{ duration: 0.3 }}
+                                >
                                   <div className="text-4xl font-bold text-ipl-gold">
                                     {liveScore.team1.runs}/{liveScore.team1.wickets}
                                   </div>
                                   <div className="text-gray-300">Overs: {liveScore.team1.overs}</div>
-                                </div>
-                              </div>
+                                </motion.div>
+                              </motion.div>
 
                               {/* Team 2 */}
-                              <div className="bg-gradient-to-br from-yellow-900/20 to-yellow-600/20 border border-yellow-500/30 rounded-lg p-6">
+                              <motion.div
+                                variants={{
+                                  hidden: { opacity: 0, x: 50 },
+                                  visible: { opacity: 1, x: 0 },
+                                }}
+                                whileHover={{ scale: 1.02, y: -5 }}
+                                className="bg-gradient-to-br from-yellow-900/20 to-yellow-600/20 border border-yellow-500/30 rounded-lg p-6"
+                              >
                                 <h3 className="text-xl font-bold text-white mb-4">{liveScore.team2.name}</h3>
-                                <div className="space-y-2">
+                                <motion.div 
+                                  className="space-y-2"
+                                  key={`${liveScore.team2.runs}-${liveScore.team2.wickets}`}
+                                  initial={{ scale: 1.2 }}
+                                  animate={{ scale: 1 }}
+                                  transition={{ duration: 0.3 }}
+                                >
                                   <div className="text-4xl font-bold text-ipl-gold">
                                     {liveScore.team2.runs}/{liveScore.team2.wickets}
                                   </div>
                                   <div className="text-gray-300">Overs: {liveScore.team2.overs}</div>
-                                </div>
-                              </div>
-                            </div>
+                                </motion.div>
+                              </motion.div>
+                            </motion.div>
 
                             {/* Current Players */}
                             <div className="bg-slate-700/30 rounded-lg p-6 border border-white/5">
@@ -658,28 +710,39 @@ export default function LiveScorePage() {
                   })}
                 </div>
               ) : (
-                <div className="text-center py-16">
-                  <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-700/30 border border-white/10 mb-6">
+                <motion.div 
+                  className="text-center py-16"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <motion.div 
+                    className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-700/30 border border-white/10 mb-6"
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                  >
                     <svg className="w-10 h-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                  </div>
+                  </motion.div>
                   <h3 className="text-xl font-bold text-white mb-2">No Live Match</h3>
                   <p className="text-gray-400 mb-6 max-w-md mx-auto">
                     There are currently no live matches. Check back soon or view upcoming matches in the schedule.
                   </p>
-                  <a
+                  <motion.a
                     href="/matches"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     className="inline-flex items-center gap-2 px-6 py-3 bg-ipl-gold hover:bg-ipl-gold/90 text-slate-900 font-bold rounded-lg transition-colors"
                   >
                     View Schedule
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
-                  </a>
-                </div>
+                  </motion.a>
+                </motion.div>
               )}
-            </div>
+            </GlassCard>
           </div>
 
           {/* Chat Section */}

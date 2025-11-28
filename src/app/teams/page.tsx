@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, Suspense } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -13,6 +14,8 @@ import Icon from '@/components/ui/Icon';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import TeamCardSkeleton from '@/components/teams/TeamCardSkeleton';
 import { CustomEmoji } from '@/components/emoji/Emoji';
+import AnimatedSection from '@/components/ui/AnimatedSection';
+import GradientText from '@/components/ui/GradientText';
 
 type SortOption = 'name' | 'titles' | 'players';
 type TitleFilter = 'all' | '0' | '1' | '2+';
@@ -182,19 +185,39 @@ function TeamsPageContent() {
 
                 <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Hero Header */}
-                    <div className="mb-8 animate-slide-up">
-                        <div className="inline-flex items-center space-x-2 mb-4">
-                            <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2 hover:bg-white/15 transition-all duration-300 hover:scale-105 cursor-default">
-                                <Icon name="cricket" size={16} /> IPL 2026 TEAMS
-                            </span>
-                        </div>
-                        <h1 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight">
-                            Meet the <span className="bg-gradient-to-r from-ipl-blue-light via-ipl-gold to-ipl-purple bg-clip-text text-transparent animate-glow">Champions</span>
-                        </h1>
-                        <p className="text-gray-300 text-lg max-w-2xl">
-                            Explore all 10 elite franchises competing for glory in the world's biggest T20 league
-                        </p>
-                    </div>
+                    <AnimatedSection direction="down" delay={0.1}>
+                        <motion.div 
+                            className="mb-8"
+                            initial={{ opacity: 0, y: -30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6 }}
+                        >
+                            <motion.div 
+                                className="inline-flex items-center space-x-2 mb-4"
+                                whileHover={{ scale: 1.05 }}
+                            >
+                                <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2 hover:bg-white/15 transition-all duration-300 cursor-default">
+                                    <Icon name="cricket" size={16} /> IPL 2026 TEAMS
+                                </span>
+                            </motion.div>
+                            <motion.h1 
+                                className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight"
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.6, delay: 0.2 }}
+                            >
+                                Meet the <GradientText gradient="from-blue-400 via-purple-400 to-pink-400" animate>Champions</GradientText>
+                            </motion.h1>
+                            <motion.p 
+                                className="text-gray-300 text-lg max-w-2xl"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.6, delay: 0.3 }}
+                            >
+                                Explore all 10 elite franchises competing for glory in the world's biggest T20 league
+                            </motion.p>
+                        </motion.div>
+                    </AnimatedSection>
 
                     {/* Quick Stats Cards */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
@@ -350,18 +373,49 @@ function TeamsPageContent() {
                             </button>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {filteredAndSortedTeams.map((team, index) => (
-                                <div key={team.id} style={{ animationDelay: `${index * 50}ms` }}>
-                                    <EnhancedTeamCard
-                                        team={team}
-                                        onPlayerClick={handlePlayerClick}
-                                        isFavorite={favorites.includes(team.id)}
-                                        onToggleFavorite={() => toggleFavorite(team.id)}
-                                    />
-                                </div>
-                            ))}
-                        </div>
+                        <motion.div 
+                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                            initial="hidden"
+                            animate="visible"
+                            variants={{
+                                visible: {
+                                    transition: {
+                                        staggerChildren: 0.1,
+                                    },
+                                },
+                            }}
+                        >
+                            <AnimatePresence mode="popLayout">
+                                {filteredAndSortedTeams.map((team, index) => (
+                                    <motion.div
+                                        key={team.id}
+                                        layout
+                                        initial={{ opacity: 0, y: 50, scale: 0.9, rotateY: -15 }}
+                                        animate={{ opacity: 1, y: 0, scale: 1, rotateY: 0 }}
+                                        exit={{ opacity: 0, scale: 0.8, rotateY: 15 }}
+                                        transition={{
+                                            duration: 0.5,
+                                            delay: index * 0.05,
+                                            ease: [0.22, 1, 0.36, 1],
+                                        }}
+                                        whileHover={{ 
+                                            y: -12, 
+                                            scale: 1.03,
+                                            rotateY: 5,
+                                            transition: { duration: 0.3 }
+                                        }}
+                                        style={{ perspective: 1000 }}
+                                    >
+                                        <EnhancedTeamCard
+                                            team={team}
+                                            onPlayerClick={handlePlayerClick}
+                                            isFavorite={favorites.includes(team.id)}
+                                            onToggleFavorite={() => toggleFavorite(team.id)}
+                                        />
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
+                        </motion.div>
                     )}
 
                     {/* Enhanced Statistics Section */}

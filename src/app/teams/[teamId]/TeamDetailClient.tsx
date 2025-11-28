@@ -1,6 +1,7 @@
- 'use client';
+'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import SmartDescription from '@/components/teams/SmartDescription';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
@@ -9,6 +10,9 @@ import PlayerModal from '@/components/teams/PlayerModal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import IPLLogo from '@/components/ui/IPLLogo';
+import AnimatedSection from '@/components/ui/AnimatedSection';
+import GlassCard from '@/components/ui/GlassCard';
+import GradientText from '@/components/ui/GradientText';
 import { 
   UsersIcon, 
   StarIcon, 
@@ -49,6 +53,59 @@ function createColorVariations(hex: string) {
     text: '#FFFFFF',
     textOnLight: '#FFFFFF',
   };
+}
+
+// Animated Counter Component
+function AnimatedCounter({ value, duration = 2 }: { value: number; duration?: number }) {
+  const [count, setCount] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !isVisible) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, [isVisible]);
+
+  useEffect(() => {
+    if (!isVisible) return;
+
+    const startTime = Date.now();
+    const startValue = 0;
+    const endValue = value;
+
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / (duration * 1000), 1);
+      
+      // Easing function for smooth animation
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+      const currentValue = Math.floor(startValue + (endValue - startValue) * easeOutQuart);
+      
+      setCount(currentValue);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        setCount(endValue);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [isVisible, value, duration]);
+
+  return <span ref={ref}>{count}</span>;
 }
 
 export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
@@ -284,26 +341,50 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
       
       <main className="relative overflow-hidden">
         {/* Hero Section */}
-        <div className="relative min-h-screen flex items-center">
+        <motion.div 
+          className="relative min-h-screen flex items-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+        >
           {/* Animated Background */}
           <div className="absolute inset-0 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-gray-800 to-gray-900" />
             
-            {/* Team color gradient orbs */}
-            <div 
-              className="absolute w-[800px] h-[800px] rounded-full blur-3xl opacity-30 transition-all duration-700"
+            {/* Team color gradient orbs with parallax */}
+            <motion.div 
+              className="absolute w-[800px] h-[800px] rounded-full blur-3xl opacity-30"
               style={{
                 background: `radial-gradient(circle, ${primaryColor.medium}, transparent)`,
                 top: '-10%',
                 right: '-5%',
               }}
+              animate={{
+                y: [0, -30, 0],
+                scale: [1, 1.1, 1],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
             />
-            <div 
-              className="absolute w-[600px] h-[600px] rounded-full blur-3xl opacity-25 transition-all duration-700"
+            <motion.div 
+              className="absolute w-[600px] h-[600px] rounded-full blur-3xl opacity-25"
               style={{
                 background: `radial-gradient(circle, ${secondaryColor.medium}, transparent)`,
                 bottom: '-10%',
                 left: '-10%',
+              }}
+              animate={{
+                y: [0, 30, 0],
+                scale: [1, 1.15, 1],
+              }}
+              transition={{
+                duration: 10,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.5
               }}
             />
             
@@ -316,21 +397,25 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
 
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
             {/* Back Button */}
-            <button 
-              onClick={() => router.push('/teams')}
-              className="mb-12 flex items-center gap-3 text-gray-400 hover:text-white transition-all duration-300 group"
-            >
-              <div className="w-10 h-10 rounded-full bg-white/5 backdrop-blur-md flex items-center justify-center border border-white/10 group-hover:border-white/30 group-hover:scale-110 transition-all">
-                <svg className="w-5 h-5 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
-              </div>
-              <span className="font-semibold">Back to Teams</span>
-            </button>
+            <AnimatedSection direction="left" delay={0.2}>
+              <motion.button 
+                onClick={() => router.push('/teams')}
+                className="mb-12 flex items-center gap-3 text-gray-400 hover:text-white transition-all duration-300 group"
+                whileHover={{ x: -5 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <div className="w-10 h-10 rounded-full bg-white/5 backdrop-blur-md flex items-center justify-center border border-white/10 group-hover:border-white/30 group-hover:scale-110 transition-all">
+                  <svg className="w-5 h-5 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                </div>
+                <span className="font-semibold">Back to Teams</span>
+              </motion.button>
+            </AnimatedSection>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               {/* Left: Team Info */}
-              <div className="space-y-8 animate-slide-up">
+              <AnimatedSection direction="right" delay={0.3} className="space-y-8">
                 {/* Team Badge with IPL Logo - Fixed spacing */}
                 <div className="inline-flex items-center gap-4 px-6 py-3 rounded-full backdrop-blur-xl border shadow-xl transition-all duration-300 hover:scale-105"
                      style={{
@@ -342,12 +427,23 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
 
                 {/* Team Name */}
                 <div>
-                  <h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-white mb-6 leading-none tracking-tighter"
-                      style={{
-                        textShadow: `0 0 60px ${primaryColor.glow}, 0 4px 20px rgba(0,0,0,0.5)`
-                      }}>
+                  <motion.h1 
+                    className="text-6xl md:text-7xl lg:text-8xl font-black mb-6 leading-none tracking-tighter"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.4 }}
+                    style={{
+                      background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid}, ${primaryColor.solid})`,
+                      backgroundSize: '200% auto',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                      textShadow: `0 0 60px ${primaryColor.glow}, 0 4px 20px rgba(0,0,0,0.5)`,
+                      animation: 'gradient-shift 3s ease infinite'
+                    }}
+                  >
                     {teamData.name}
-                  </h1>
+                  </motion.h1>
                   
                   <div className="flex items-center gap-4 mb-6">
                     <div className="h-1 w-24 rounded-full shadow-lg transition-all duration-500"
@@ -392,10 +488,10 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                     <p className="text-gray-400 text-xs font-semibold mt-3 uppercase tracking-wider">Secondary</p>
                   </div>
                 </div>
-              </div>
+              </AnimatedSection>
 
               {/* Right: Team Logo from /logos folder */}
-              <div className="relative flex items-center justify-center animate-scale-in" style={{ animationDelay: '200ms' }}>
+              <AnimatedSection direction="left" delay={0.5} className="relative flex items-center justify-center">
                 {/* Glow effect */}
                 <div className="absolute inset-0 rounded-full blur-3xl opacity-30 animate-pulse"
                      style={{ 
@@ -457,15 +553,15 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                     </div>
                   </div>
                 </div>
-              </div>
+              </AnimatedSection>
             </div>
           </div>
 
           <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent pointer-events-none" />
-        </div>
+        </motion.div>
 
         {/* Stats Section with Custom Icons */}
-        <div className="relative z-20 -mt-20 mb-20">
+        <AnimatedSection direction="up" delay={0.2} className="relative z-20 -mt-20 mb-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {[
@@ -474,13 +570,17 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                 { label: 'Foreign', value: teamData.players?.filter(p => p.nationality !== 'India').length || 0, Icon: GlobeIcon },
                 { label: 'All-rounders', value: teamData.players?.filter(p => p.role === 'All-rounder').length || 0, Icon: AllRounderIcon }
               ].map((stat, index) => (
-                <div 
+                <motion.div
                   key={index}
-                  className="group relative overflow-hidden rounded-3xl backdrop-blur-xl p-8 border shadow-xl hover:scale-105 transition-all duration-500 animate-slide-up hover:shadow-2xl"
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  whileHover={{ scale: 1.05, y: -5 }}
+                  className="group relative overflow-hidden rounded-3xl backdrop-blur-xl p-8 border shadow-xl transition-all duration-500 hover:shadow-2xl"
                   style={{
                     background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
                     borderColor: primaryColor.medium,
-                    animationDelay: `${index * 100}ms`,
                     boxShadow: `0 10px 30px ${primaryColor.glow}20`
                   }}
                 >
@@ -489,17 +589,22 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                     <IPLLogo animated />
                   </div>
                   
-                  <div className="mb-4 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                  <motion.div 
+                    className="mb-4 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300"
+                    whileHover={{ rotate: 12, scale: 1.1 }}
+                  >
                     <stat.Icon className="w-12 h-12" color={primaryColor.solid} />
-                  </div>
+                  </motion.div>
                   <p className="text-5xl font-black mb-2 transform group-hover:scale-110 transition-transform duration-300" style={{ color: primaryColor.text }}>
-                    {stat.value}
+                    <AnimatedCounter value={stat.value} />
                   </p>
                   <p className="text-sm font-semibold uppercase tracking-wider transition-colors duration-300" style={{ color: primaryColor.textOnLight }}>{stat.label}</p>
                   
                   {/* Hover shimmer effect */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer" />
-                </div>
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                  </div>
+                </motion.div>
               ))}
             </div>
 
@@ -624,23 +729,29 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
               </div>
             )}
           </div>
-        </div>
+        </AnimatedSection>
 
         {/* Tab Navigation - Fixed overlap with proper spacing */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 mt-12">
+        <AnimatedSection direction="up" delay={0.3} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 mt-12">
           <div className="flex flex-col items-center gap-4">
             {/* IPL Logo Badge - Moved outside and above the tab container */}
-            <div className="w-12 h-12 rounded-full backdrop-blur-xl border-2 border-white/30 flex items-center justify-center shadow-xl z-10" style={{
-              background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
-              borderColor: primaryColor.medium,
-            }}>
+            <motion.div 
+              className="w-12 h-12 rounded-full backdrop-blur-xl border-2 border-white/30 flex items-center justify-center shadow-xl z-10" 
+              style={{
+                background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
+                borderColor: primaryColor.medium,
+              }}
+              whileHover={{ scale: 1.1, rotate: 360 }}
+              transition={{ duration: 0.5 }}
+            >
               <div className="w-7 h-7">
                 <IPLLogo animated />
               </div>
-            </div>
+            </motion.div>
             
             {/* Tab Container - Premium Design with Team Colors */}
-            <div className="relative inline-flex gap-2 p-1.5 rounded-2xl backdrop-blur-xl border-2 shadow-xl"
+            <motion.div 
+              className="relative inline-flex gap-2 p-1.5 rounded-2xl backdrop-blur-xl border-2 shadow-xl"
                  style={{
                    background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
                    borderColor: primaryColor.medium,
@@ -700,14 +811,22 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                   )}
                 </button>
               ))}
-            </div>
+            </motion.div>
           </div>
-        </div>
+        </AnimatedSection>
 
         {/* Content Sections */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-          {activeTab === 'squad' && (
-            <div className="space-y-16">
+          <AnimatePresence mode="wait">
+            {activeTab === 'squad' && (
+              <motion.div 
+                key="squad"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-16"
+              >
               {/* Squad Filters */}
               <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-fade-in">
                 <div className="flex items-center gap-3">
@@ -774,12 +893,21 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                 { title: 'Bowlers', players: bowlers, Icon: BowlerIcon }
               ].map((section, sectionIndex) => (
                 section.players.length > 0 && (
-                  <div key={sectionIndex} className="animate-fade-in" style={{ animationDelay: `${sectionIndex * 100}ms` }}>
-                    <h3 className="text-3xl font-black mb-8 flex items-center gap-4" style={{ color: primaryColor.text }}>
-                      <section.Icon className="w-10 h-10" color={primaryColor.solid} />
+                  <AnimatedSection key={sectionIndex} direction="up" delay={sectionIndex * 0.1}>
+                    <motion.h3 
+                      className="text-3xl font-black mb-8 flex items-center gap-4" 
+                      style={{ color: primaryColor.text }}
+                      whileHover={{ scale: 1.02 }}
+                    >
+                      <motion.div
+                        whileHover={{ rotate: 360 }}
+                        transition={{ duration: 0.6 }}
+                      >
+                        <section.Icon className="w-10 h-10" color={primaryColor.solid} />
+                      </motion.div>
                       {section.title}
                       <span className="text-lg font-normal" style={{ color: primaryColor.textOnLight }}>({section.players.length})</span>
-                    </h3>
+                    </motion.h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {section.players.map((player, playerIndex) => (
                         <PlayerCard 
@@ -796,14 +924,21 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                         />
                       ))}
                     </div>
-                  </div>
+                  </AnimatedSection>
                 )
               ))}
-            </div>
-          )}
+              </motion.div>
+            )}
 
-          {activeTab === 'stats' && (
-            <div className="space-y-10">
+            {activeTab === 'stats' && (
+              <motion.div 
+                key="stats"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-10"
+              >
               <KeyPlayersSection
                 teamData={teamData}
                 keyPlayers={keyPlayers}
@@ -819,12 +954,21 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                 allRounders={allRounders}
                 wicketkeepers={wicketkeepers}
               />
-            </div>
-          )}
+              </motion.div>
+            )}
 
-          {activeTab === 'about' && (
-            <AboutTab teamData={teamData} primaryColor={primaryColor} secondaryColor={secondaryColor} coachingStaff={coachingStaff} />
-          )}
+            {activeTab === 'about' && (
+              <motion.div
+                key="about"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                <AboutTab teamData={teamData} primaryColor={primaryColor} secondaryColor={secondaryColor} coachingStaff={coachingStaff} />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </main>
 
@@ -885,13 +1029,17 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
     );
 
   return (
-    <div
+    <motion.div
       onClick={onClick}
-      className="group relative overflow-hidden rounded-2xl backdrop-blur-xl p-6 border cursor-pointer transform hover:scale-105 hover:-translate-y-2 transition-all duration-500 shadow-xl hover:shadow-2xl animate-slide-up"
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay: index * 0.05 }}
+      whileHover={{ scale: 1.05, y: -8 }}
+      className="group relative overflow-hidden rounded-2xl backdrop-blur-xl p-6 border cursor-pointer transition-all duration-500 shadow-xl hover:shadow-2xl"
       style={{
         background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
         borderColor: isKeyPlayer ? '#facc15' : primaryColor.medium,
-        animationDelay: `${index * 50}ms`,
         boxShadow: isKeyPlayer
           ? `0 0 25px rgba(250, 204, 21, 0.6), 0 10px 30px ${primaryColor.glow}20`
           : `0 10px 25px ${primaryColor.glow}20`,
@@ -984,12 +1132,15 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
       </div>
 
       {/* Hover Arrow */}
-      <div className="absolute bottom-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all duration-300">
+      <motion.div 
+        className="absolute bottom-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300"
+        whileHover={{ x: 5, scale: 1.1 }}
+      >
         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 

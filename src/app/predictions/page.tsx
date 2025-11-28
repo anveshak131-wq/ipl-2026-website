@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { Match } from '@/types';
@@ -8,6 +9,9 @@ import { api } from '@/lib/data';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Icon from '@/components/ui/Icon';
 import AuroraBackground from '@/components/ui/AuroraBackground';
+import AnimatedSection from '@/components/ui/AnimatedSection';
+import GradientText from '@/components/ui/GradientText';
+import GlassCard from '@/components/ui/GlassCard';
 
 interface Prediction {
   matchId: string;
@@ -360,19 +364,39 @@ export default function PredictionsPage() {
         
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="mb-12 animate-slide-up">
-            <div className="inline-flex items-center space-x-2 mb-4">
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2 hover:bg-white/15 transition-all duration-300 hover:scale-105 cursor-default">
-                <Icon name="target" size={16} /> AI PREDICTIONS
-              </span>
-            </div>
-            <h1 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight hover:scale-[1.02] transition-transform duration-300">
-              AI Match <span className="bg-gradient-to-r from-ipl-blue-light via-ipl-gold to-ipl-purple bg-clip-text text-transparent animate-glow">Predictions</span>
-            </h1>
-            <p className="text-gray-300 text-lg max-w-2xl">
-              Intelligent match analysis and AI-powered win probability predictions for upcoming IPL fixtures
-            </p>
-          </div>
+          <AnimatedSection direction="down" delay={0.1}>
+            <motion.div 
+              className="mb-12"
+              initial={{ opacity: 0, y: -30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <motion.div 
+                className="inline-flex items-center space-x-2 mb-4"
+                whileHover={{ scale: 1.05 }}
+              >
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2 hover:bg-white/15 transition-all duration-300 cursor-default">
+                  <Icon name="target" size={16} /> AI PREDICTIONS
+                </span>
+              </motion.div>
+              <motion.h1 
+                className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                AI Match <GradientText gradient="from-blue-400 via-purple-400 to-pink-400" animate>Predictions</GradientText>
+              </motion.h1>
+              <motion.p 
+                className="text-gray-300 text-lg max-w-2xl"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+              >
+                Intelligent match analysis and AI-powered win probability predictions for upcoming IPL fixtures
+              </motion.p>
+            </motion.div>
+          </AnimatedSection>
 
           {/* Contextual sub-navigation for predictions */}
           <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
@@ -493,11 +517,20 @@ export default function PredictionsPage() {
 
             {/* Prediction Details */}
             <div className="lg:col-span-2">
-              {selectedPrediction && selectedMatch ? (
-                <div className="space-y-6">
-                  {/* Match Header */}
-                  {matches.find(m => m.id === selectedMatch) && (
-                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 p-8">
+              <AnimatePresence mode="wait">
+                {selectedPrediction && selectedMatch ? (
+                  <motion.div 
+                    key={selectedMatch}
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -50 }}
+                    transition={{ duration: 0.5 }}
+                    className="space-y-6"
+                  >
+                    {/* Match Header */}
+                    {matches.find(m => m.id === selectedMatch) && (
+                      <GlassCard hover delay={0.1}>
+                        <div className="p-8">
                       {/* Animated background on hover */}
                       <div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-300">
                         <div className="absolute inset-0 bg-gradient-to-br from-ipl-gold/10 to-ipl-purple/10" />
@@ -549,11 +582,13 @@ export default function PredictionsPage() {
                           </div>
                         );
                       })()}
-                    </div>
-                  )}
+                        </div>
+                      </GlassCard>
+                    )}
 
-                  {/* Win Probability */}
-                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 p-8">
+                    {/* Win Probability */}
+                    <GlassCard hover delay={0.2}>
+                      <div className="p-8">
                     <h3 className="text-2xl font-black text-white mb-8 flex items-center gap-2">
                       <Icon name="stats" size={24} /> Win Probability
                     </h3>
@@ -633,40 +668,73 @@ export default function PredictionsPage() {
                       </div>
                     </div>
 
-                    <p className="text-gray-300 leading-relaxed text-base">
-                      {selectedPrediction.analysis}
-                    </p>
-                  </div>
+                        <p className="text-gray-300 leading-relaxed text-base">
+                          {selectedPrediction.analysis}
+                        </p>
+                      </div>
+                    </GlassCard>
 
-                  {/* Key Factors */}
-                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 p-8">
-                    <h3 className="text-2xl font-black text-white mb-6">
-                      🔍 Key Factors
-                    </h3>
+                    {/* Key Factors */}
+                    <GlassCard hover delay={0.3}>
+                      <div className="p-8">
+                        <h3 className="text-2xl font-black text-white mb-6">
+                          🔍 Key Factors
+                        </h3>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {selectedPrediction.keyFactors.map((factor, index) => (
-                        <div
-                          key={index}
-                          className="p-4 rounded-xl bg-gradient-to-r from-white/10 to-white/5 border border-white/20 hover:border-ipl-gold/50 transition-all duration-300 flex items-center space-x-3 group cursor-pointer hover:bg-white/15"
+                        <motion.div 
+                          className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                          initial="hidden"
+                          animate="visible"
+                          variants={{
+                            visible: {
+                              transition: {
+                                staggerChildren: 0.1,
+                              },
+                            },
+                          }}
                         >
-                          <div className="w-3 h-3 bg-gradient-to-r from-ipl-gold to-ipl-purple rounded-full group-hover:scale-150 transition-transform duration-300" />
-                          <span className="text-gray-300 font-semibold text-sm group-hover:text-white transition-colors duration-300">
-                            {factor}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                          {selectedPrediction.keyFactors.map((factor, index) => (
+                            <motion.div
+                              key={index}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ duration: 0.4, delay: index * 0.1 }}
+                              whileHover={{ scale: 1.05, x: 5 }}
+                              className="p-4 rounded-xl bg-gradient-to-r from-white/10 to-white/5 border border-white/20 hover:border-ipl-gold/50 transition-all duration-300 flex items-center space-x-3 group cursor-pointer hover:bg-white/15"
+                            >
+                              <motion.div 
+                                className="w-3 h-3 bg-gradient-to-r from-ipl-gold to-ipl-purple rounded-full"
+                                whileHover={{ scale: 1.5, rotate: 180 }}
+                                transition={{ duration: 0.3 }}
+                              />
+                              <span className="text-gray-300 font-semibold text-sm group-hover:text-white transition-colors duration-300">
+                                {factor}
+                              </span>
+                            </motion.div>
+                          ))}
+                        </motion.div>
+                      </div>
+                    </GlassCard>
 
-                  {/* Disclaimer */}
-                  <div className="p-4 rounded-xl bg-gradient-to-r from-red-500/20 to-red-500/10 border border-red-500/30">
-                    <p className="text-xs text-gray-300 leading-relaxed">
-                      <span className="font-bold text-red-400">⚠️ Disclaimer:</span> These predictions are AI-generated and are for entertainment purposes only. They are not guaranteed to be accurate and should not be used for betting or financial decisions.
-                    </p>
-                  </div>
-                </div>
-              ) : (
+                    {/* Disclaimer */}
+                    <motion.div 
+                      className="p-4 rounded-xl bg-gradient-to-r from-red-500/20 to-red-500/10 border border-red-500/30"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.4 }}
+                    >
+                      <p className="text-xs text-gray-300 leading-relaxed">
+                        <span className="font-bold text-red-400">⚠️ Disclaimer:</span> These predictions are AI-generated and are for entertainment purposes only. They are not guaranteed to be accurate and should not be used for betting or financial decisions.
+                      </p>
+                    </motion.div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 p-12 text-center"
+                  >
                 <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 p-12 text-center">
                   <svg
                     className="w-16 h-16 mx-auto mb-4 text-gray-400"

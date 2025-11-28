@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import AuroraBackground from '@/components/ui/AuroraBackground';
@@ -8,6 +9,9 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Icon from '@/components/ui/Icon';
 import { api } from '@/lib/data';
 import type { Player, Team } from '@/types';
+import AnimatedSection from '@/components/ui/AnimatedSection';
+import GradientText from '@/components/ui/GradientText';
+import GlassCard from '@/components/ui/GlassCard';
 
 interface TeamAggregate {
   team: Team | null;
@@ -466,23 +470,41 @@ export default function StatsPage() {
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           {/* Hero / Header */}
-          <section id="stats-overview" className="space-y-4 animate-slide-up">
-            <div className="inline-flex items-center space-x-2 mb-2">
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2">
-                <Icon name="stats" size={16} />
-                STATS & RECORDS HUB
-              </span>
-            </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight">
-              Season Leaders &
-              <span className="block bg-gradient-to-r from-ipl-blue-light via-ipl-gold to-ipl-purple bg-clip-text text-transparent mt-1">
-                Deep IPL Insights
-              </span>
-            </h1>
-            <p className="text-gray-300 text-base md:text-lg max-w-2xl">
-              Explore Orange Cap and Purple Cap races, plus the best strike
-              rates and bowling economies across the league.
-            </p>
+          <AnimatedSection direction="down" delay={0.1}>
+            <section id="stats-overview" className="space-y-4">
+              <motion.div 
+                className="inline-flex items-center space-x-2 mb-2"
+                whileHover={{ scale: 1.05 }}
+              >
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2">
+                  <Icon name="stats" size={16} />
+                  STATS & RECORDS HUB
+                </span>
+              </motion.div>
+              <motion.h1 
+                className="text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                Season Leaders &
+                <span className="block mt-1">
+                  <GradientText gradient="from-blue-400 via-purple-400 to-pink-400" animate>
+                    Deep IPL Insights
+                  </GradientText>
+                </span>
+              </motion.h1>
+              <motion.p 
+                className="text-gray-300 text-base md:text-lg max-w-2xl"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+              >
+                Explore Orange Cap and Purple Cap races, plus the best strike
+                rates and bowling economies across the league.
+              </motion.p>
+            </section>
+          </AnimatedSection>
             {publishedStats?.lastUpdated && (
               <p className="text-xs text-gray-400">
                 Snapshot published by admin on{' '}
