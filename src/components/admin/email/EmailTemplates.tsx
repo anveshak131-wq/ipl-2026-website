@@ -134,7 +134,7 @@ export default function EmailTemplates({
   const extractVariables = (text: string): string[] => {
     const matches = text.match(/\{\{(\w+)\}\}/g);
     if (!matches) return [];
-    return [...new Set(matches.map((m) => m.replace(/[{}]/g, '')))];
+    return Array.from(new Set(matches.map((m) => m.replace(/[{}]/g, ''))));
   };
 
   const previewWithData = (template: EmailTemplate) => {
