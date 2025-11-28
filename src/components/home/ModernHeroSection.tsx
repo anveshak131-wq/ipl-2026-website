@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Play, Zap, TrendingUp, Radio } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -9,7 +9,6 @@ import CountdownTimer from '@/components/ui/CountdownTimer';
 import AnimatedCounter from '@/components/ui/AnimatedCounter';
 
 interface ModernHeroSectionProps {
-  matches?: Match[];
   nextMatch?: Match | null;
   liveMatchCount?: number;
   enableVideoBackground?: boolean;
@@ -17,7 +16,6 @@ interface ModernHeroSectionProps {
 }
 
 export default function ModernHeroSection({ 
-  matches = [], 
   nextMatch = null,
   liveMatchCount = 0,
   enableVideoBackground = false,

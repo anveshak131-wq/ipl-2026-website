@@ -178,7 +178,6 @@ export default function Home() {
         <section className="relative overflow-hidden">
           <ParallaxSection speed={0.5}>
             <ModernHeroSection 
-              matches={matches}
               nextMatch={nextMatch}
               liveMatchCount={liveMatchCount}
             />

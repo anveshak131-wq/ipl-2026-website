@@ -19,6 +19,11 @@ export default function ModernNewsSection({ articles, isLoading = false }: Moder
   const itemsPerPage = 4;
   const categories = ['all', 'breaking', 'analysis', 'player', 'team'];
 
+  // Reset display count when category changes - MUST be before any early returns
+  useEffect(() => {
+    setDisplayCount(itemsPerPage);
+  }, [selectedCategory, itemsPerPage]);
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -33,11 +38,6 @@ export default function ModernNewsSection({ articles, isLoading = false }: Moder
 
   const filteredArticles =
     selectedCategory === 'all' ? articles : articles.filter((a) => a.category === selectedCategory);
-  
-  // Reset display count when category changes
-  useEffect(() => {
-    setDisplayCount(itemsPerPage);
-  }, [selectedCategory]);
 
   return (
     <div className="space-y-8">

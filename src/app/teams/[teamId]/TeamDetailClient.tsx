@@ -14,6 +14,17 @@ import AnimatedSection from '@/components/ui/AnimatedSection';
 import GlassCard from '@/components/ui/GlassCard';
 import GradientText from '@/components/ui/GradientText';
 import CustomEmoji from '@/components/emoji/CustomEmoji';
+import UpcomingFixturesWidget from '@/components/teams/UpcomingFixturesWidget';
+import PlayerPerformanceChart from '@/components/teams/PlayerPerformanceChart';
+import TeamNewsFeed from '@/components/teams/TeamNewsFeed';
+import SocialMediaLinks from '@/components/teams/SocialMediaLinks';
+import TeamHistoryTimeline from '@/components/teams/TeamHistoryTimeline';
+import RecentResultsTimeline from '@/components/teams/RecentResultsTimeline';
+import TrophyShowcaseGallery from '@/components/teams/TrophyShowcaseGallery';
+import InteractiveStadiumTour from '@/components/teams/InteractiveStadiumTour';
+import PlayerComparisonTool from '@/components/teams/PlayerComparisonTool';
+import TeamFormationVisualizer from '@/components/teams/TeamFormationVisualizer';
+import { Calendar } from 'lucide-react';
 import { 
   UsersIcon, 
   StarIcon, 
@@ -25,7 +36,7 @@ import {
   CricketBatIcon,
   TrophyIcon
 } from '@/components/ui/CustomIcons';
-import { Team, Player, CoachingStaff, KeyPlayers } from '@/types';
+import { Team, Player, CoachingStaff, KeyPlayers, Match } from '@/types';
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import RCBLottie from '@/components/ui/RCBLottie';
@@ -127,8 +138,10 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
   } | null>(null);
   const [lastMatch, setLastMatch] = useState<any | null>(null);
   const [nextMatch, setNextMatch] = useState<any | null>(null);
+  const [allMatches, setAllMatches] = useState<Match[]>([]);
   const [coachingStaff, setCoachingStaff] = useState<CoachingStaff | null>(null);
   const [keyPlayers, setKeyPlayers] = useState<KeyPlayers | null>(null);
+  const [showPlayerComparison, setShowPlayerComparison] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -218,6 +231,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
 
         const matches = await res.json();
         const teamMatches = matches.filter((m: any) => m.team1?.id === teamData.id || m.team2?.id === teamData.id);
+        setAllMatches(teamMatches);
 
         const completed = teamMatches.filter((m: any) => m.status === 'completed');
         const upcoming = teamMatches.filter((m: any) => m.status === 'upcoming');
@@ -608,6 +622,22 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
               ))}
             </div>
 
+            {/* Upcoming Fixtures Widget */}
+            {teamData && (
+              <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl animate-fade-in mb-6"
+                   style={{
+                     background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+                     borderColor: primaryColor.medium,
+                     boxShadow: `0 10px 30px ${primaryColor.glow}15`,
+                   }}>
+                <h3 className="text-2xl font-black mb-6 flex items-center gap-3" style={{ color: primaryColor.textOnLight }}>
+                  <CricketBatIcon className="w-8 h-8" color={primaryColor.solid} />
+                  Upcoming Fixtures
+                </h3>
+                <UpcomingFixturesWidget team={teamData} matches={allMatches} />
+              </div>
+            )}
+
             {/* Match & Season Snapshot */}
             {seasonStats && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-fade-in">
@@ -827,6 +857,40 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                 transition={{ duration: 0.3 }}
                 className="space-y-16"
               >
+              {/* Team Formation Visualizer */}
+              {teamData && teamData.players && teamData.players.length > 0 && (
+                <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl"
+                     style={{
+                       background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+                       borderColor: primaryColor.medium,
+                       boxShadow: `0 10px 30px ${primaryColor.glow}15`,
+                     }}>
+                  <TeamFormationVisualizer
+                    players={teamData.players}
+                    primaryColor={primaryColor.solid}
+                    secondaryColor={secondaryColor.solid}
+                  />
+                </div>
+              )}
+
+              {/* Player Comparison Button */}
+              {teamData && teamData.players && teamData.players.length > 1 && (
+                <div className="flex justify-center">
+                  <motion.button
+                    onClick={() => setShowPlayerComparison(true)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-8 py-4 rounded-xl font-bold text-lg"
+                    style={{
+                      background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
+                      color: '#FFFFFF',
+                      boxShadow: `0 10px 30px ${primaryColor.glow}40`,
+                    }}
+                  >
+                    Compare Players
+                  </motion.button>
+                </div>
+              )}
               {/* Squad Filters */}
               <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-fade-in">
                 <div className="flex items-center gap-3">
@@ -954,6 +1018,64 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                 allRounders={allRounders}
                 wicketkeepers={wicketkeepers}
               />
+              
+              {/* Player Performance Charts */}
+              {teamData && teamData.players && teamData.players.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-10">
+                  <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl"
+                       style={{
+                         background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+                         borderColor: primaryColor.medium,
+                         boxShadow: `0 10px 30px ${primaryColor.glow}15`,
+                       }}>
+                    <PlayerPerformanceChart
+                      players={teamData.players}
+                      metric="runs"
+                      title="Top Run Scorers"
+                      color={primaryColor.solid}
+                    />
+                  </div>
+                  <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl"
+                       style={{
+                         background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+                         borderColor: primaryColor.medium,
+                         boxShadow: `0 10px 30px ${primaryColor.glow}15`,
+                       }}>
+                    <PlayerPerformanceChart
+                      players={teamData.players}
+                      metric="wickets"
+                      title="Top Wicket Takers"
+                      color={secondaryColor.solid}
+                    />
+                  </div>
+                  <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl"
+                       style={{
+                         background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+                         borderColor: primaryColor.medium,
+                         boxShadow: `0 10px 30px ${primaryColor.glow}15`,
+                       }}>
+                    <PlayerPerformanceChart
+                      players={teamData.players}
+                      metric="average"
+                      title="Best Batting Averages"
+                      color="#10B981"
+                    />
+                  </div>
+                  <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl"
+                       style={{
+                         background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+                         borderColor: primaryColor.medium,
+                         boxShadow: `0 10px 30px ${primaryColor.glow}15`,
+                       }}>
+                    <PlayerPerformanceChart
+                      players={teamData.players}
+                      metric="strikeRate"
+                      title="Best Strike Rates"
+                      color="#F59E0B"
+                    />
+                  </div>
+                </div>
+              )}
               </motion.div>
             )}
 
@@ -964,8 +1086,101 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
+                className="space-y-8"
               >
                 <AboutTab teamData={teamData} primaryColor={primaryColor} secondaryColor={secondaryColor} coachingStaff={coachingStaff} />
+                
+                {/* Recent Results Timeline */}
+                {teamData && (
+                  <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl"
+                       style={{
+                         background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+                         borderColor: primaryColor.medium,
+                         boxShadow: `0 10px 30px ${primaryColor.glow}15`,
+                       }}>
+                    <h3 className="text-2xl font-black mb-6 flex items-center gap-3" style={{ color: primaryColor.textOnLight }}>
+                      <Calendar className="w-8 h-8" color={primaryColor.solid} />
+                      Recent Results
+                    </h3>
+                    <RecentResultsTimeline team={teamData} matches={allMatches} />
+                  </div>
+                )}
+
+                {/* Trophy Showcase Gallery */}
+                {teamData && (
+                  <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl"
+                       style={{
+                         background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+                         borderColor: primaryColor.medium,
+                         boxShadow: `0 10px 30px ${primaryColor.glow}15`,
+                       }}>
+                    <TrophyShowcaseGallery
+                      team={teamData}
+                      primaryColor={primaryColor.solid}
+                      secondaryColor={secondaryColor.solid}
+                    />
+                  </div>
+                )}
+
+                {/* Interactive Stadium Tour */}
+                {teamData && teamData.homeGrounds && teamData.homeGrounds.length > 0 && (
+                  <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl"
+                       style={{
+                         background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+                         borderColor: primaryColor.medium,
+                         boxShadow: `0 10px 30px ${primaryColor.glow}15`,
+                       }}>
+                    <InteractiveStadiumTour
+                      team={teamData}
+                      primaryColor={primaryColor.solid}
+                      secondaryColor={secondaryColor.solid}
+                    />
+                  </div>
+                )}
+
+                {/* Team History Timeline */}
+                {teamData && (
+                  <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl"
+                       style={{
+                         background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+                         borderColor: primaryColor.medium,
+                         boxShadow: `0 10px 30px ${primaryColor.glow}15`,
+                       }}>
+                    <h3 className="text-2xl font-black mb-6 flex items-center gap-3" style={{ color: primaryColor.textOnLight }}>
+                      <TrophyIcon className="w-8 h-8" color={primaryColor.solid} />
+                      Team History
+                    </h3>
+                    <TeamHistoryTimeline team={teamData} primaryColor={primaryColor.solid} />
+                  </div>
+                )}
+
+                {/* Team News Feed */}
+                {teamData && (
+                  <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl"
+                       style={{
+                         background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+                         borderColor: primaryColor.medium,
+                         boxShadow: `0 10px 30px ${primaryColor.glow}15`,
+                       }}>
+                    <h3 className="text-2xl font-black mb-6 flex items-center gap-3" style={{ color: primaryColor.textOnLight }}>
+                      <CricketBatIcon className="w-8 h-8" color={primaryColor.solid} />
+                      Team News
+                    </h3>
+                    <TeamNewsFeed team={teamData} />
+                  </div>
+                )}
+
+                {/* Social Media Links */}
+                {teamData && (
+                  <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl"
+                       style={{
+                         background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+                         borderColor: primaryColor.medium,
+                         boxShadow: `0 10px 30px ${primaryColor.glow}15`,
+                       }}>
+                    <SocialMediaLinks team={teamData} primaryColor={primaryColor.solid} />
+                  </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -984,6 +1199,14 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
         teamColors={teamData?.colors}
         teamData={teamData || undefined}
       />
+
+      {showPlayerComparison && teamData && teamData.players && (
+        <PlayerComparisonTool
+          players={teamData.players}
+          primaryColor={primaryColor.solid}
+          onClose={() => setShowPlayerComparison(false)}
+        />
+      )}
     </div>
   );
 }

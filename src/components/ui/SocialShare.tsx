@@ -108,7 +108,7 @@ export default function SocialShare({ url, title, description = '', className = 
               transition={{ duration: 0.2 }}
               className="absolute bottom-full right-0 mb-2 bg-[rgba(10,14,39,0.98)] backdrop-blur-2xl border border-white/20 rounded-xl p-2 shadow-2xl z-50 min-w-[180px]"
             >
-              {navigator.share && (
+              {typeof navigator !== 'undefined' && 'share' in navigator && typeof navigator.share === 'function' && (
                 <button
                   onClick={handleNativeShare}
                   className="w-full px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold mb-2 hover:from-blue-600 hover:to-purple-600 transition-all duration-300 flex items-center gap-2"

@@ -149,8 +149,8 @@ export default function ModernTeamsShowcase({ teams, isLoading = false }: Modern
                   transition={{ duration: 0.3 }}
                 >
                   <p className="font-semibold">Players: {team.players?.length || 0}</p>
-                  {team.titles && (
-                    <p className="text-ipl-gold mt-1">🏆 {team.titles} Title{team.titles > 1 ? 's' : ''}</p>
+                  {team.trophies && team.trophies.length > 0 && (
+                    <p className="text-ipl-gold mt-1">🏆 {team.trophies.length} Title{team.trophies.length > 1 ? 's' : ''}</p>
                   )}
                 </motion.div>
               )}
