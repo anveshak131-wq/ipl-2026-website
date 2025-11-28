@@ -214,7 +214,11 @@ export default function Navbar() {
       {/* Mobile Navigation Menu */}
       {isMenuOpen && (
         <div className="md:hidden animate-slide-in-down bg-[rgba(10,14,39,0.95)] backdrop-blur-2xl border-t border-blue-500/20">
-          <div className="px-4 pt-2 pb-4 space-y-1">
+          <div className="px-4 pt-4 pb-4 space-y-3">
+            {/* Mobile Search */}
+            <div className="pb-2 border-b border-white/10">
+              <NavbarSearch onClose={() => setIsMenuOpen(false)} />
+            </div>
             {allNavItems.map((item, index) => {
               const isActive = isLinkActive(item.href);
               const badgeLabel = getNavBadgeLabel(item.href);
