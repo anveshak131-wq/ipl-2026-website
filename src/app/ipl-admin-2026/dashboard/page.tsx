@@ -63,11 +63,18 @@ export default function AdminDashboard() {
     matches: 'loading',
   });
 
+  const hasCheckedAuth = useRef(false);
+
   useEffect(() => {
+    // Skip auth check if already authenticated or already checked
+    if (isAuthenticated || hasCheckedAuth.current) return;
+    hasCheckedAuth.current = true;
+
     const checkAuth = async () => {
       const token = localStorage.getItem('auth_token') || localStorage.getItem('adminToken');
       if (!token) {
         router.push('/ipl-admin-2026');
+        setIsLoading(false);
         return;
       }
 
@@ -79,6 +86,7 @@ export default function AdminDashboard() {
           localStorage.removeItem('adminToken');
           localStorage.removeItem('auth_token');
           router.push('/ipl-admin-2026');
+          setIsLoading(false);
           return;
         }
 
@@ -86,19 +94,23 @@ export default function AdminDashboard() {
         if (userRole !== 'admin' && userRole !== 'super_admin') {
           alert('Access denied. Admin privileges required.');
           router.push('/');
+          setIsLoading(false);
           return;
         }
 
         setIsAuthenticated(true);
+        setIsLoading(false);
         await fetchStats();
       } catch (error) {
         console.error('Auth error:', error);
         router.push('/ipl-admin-2026');
+        setIsLoading(false);
       }
     };
 
     checkAuth();
-  }, [router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   const fetchStats = async () => {
     try {

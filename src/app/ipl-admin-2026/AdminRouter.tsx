@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import GlobalSearch from '@/components/admin/GlobalSearch';
@@ -20,19 +20,23 @@ export default function AdminRouter() {
   const pathname = usePathname();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const hasCheckedAuth = useRef(false);
 
   useEffect(() => {
+    // Prevent multiple auth checks
+    if (hasCheckedAuth.current) return;
+    
     // Check authentication and verify admin role
     const checkAuth = async () => {
+      // Mark as checked immediately to prevent re-runs
+      hasCheckedAuth.current = true;
+      
       try {
         const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
         if (!token) {
           // If already on the admin login page, don't push to the same route
-          if (
-            pathname !== '/ipl-admin-2026' &&
-            pathname !== '/ipl-admin-2026/' &&
-            pathname !== '/ipl-admin-2026/setup'
-          ) {
+          const isLoginPage = pathname === '/ipl-admin-2026' || pathname === '/ipl-admin-2026/' || pathname === '/ipl-admin-2026/setup';
+          if (!isLoginPage) {
             router.push('/ipl-admin-2026');
           }
           setIsLoading(false);
@@ -48,11 +52,8 @@ export default function AdminRouter() {
             // Invalid token, redirect to login
             localStorage.removeItem('adminToken');
             localStorage.removeItem('auth_token');
-            if (
-              pathname !== '/ipl-admin-2026' &&
-              pathname !== '/ipl-admin-2026/' &&
-              pathname !== '/ipl-admin-2026/setup'
-            ) {
+            const isLoginPage = pathname === '/ipl-admin-2026' || pathname === '/ipl-admin-2026/' || pathname === '/ipl-admin-2026/setup';
+            if (!isLoginPage) {
               router.push('/ipl-admin-2026');
             }
             setIsLoading(false);
@@ -71,32 +72,28 @@ export default function AdminRouter() {
 
           // User is authenticated and has admin role
           setIsAuthenticated(true);
+          setIsLoading(false);
         } catch (error) {
           console.error('Auth verification error:', error);
-          if (
-            pathname !== '/ipl-admin-2026' &&
-            pathname !== '/ipl-admin-2026/' &&
-            pathname !== '/ipl-admin-2026/setup'
-          ) {
+          const isLoginPage = pathname === '/ipl-admin-2026' || pathname === '/ipl-admin-2026/' || pathname === '/ipl-admin-2026/setup';
+          if (!isLoginPage) {
             router.push('/ipl-admin-2026');
           }
+          setIsLoading(false);
         }
       } catch (error) {
         // localStorage not available, redirect to login
-        if (
-          pathname !== '/ipl-admin-2026' &&
-          pathname !== '/ipl-admin-2026/' &&
-          pathname !== '/ipl-admin-2026/setup'
-        ) {
+        const isLoginPage = pathname === '/ipl-admin-2026' || pathname === '/ipl-admin-2026/' || pathname === '/ipl-admin-2026/setup';
+        if (!isLoginPage) {
           router.push('/ipl-admin-2026');
         }
-      } finally {
         setIsLoading(false);
       }
     };
 
     checkAuth();
-  }, [router, pathname]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   if (isLoading) {
     return (

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import AdminLogin from '@/components/admin/AdminLogin';
 import AdminRouter from './AdminRouter';
@@ -10,8 +10,13 @@ export default function AdminPage() {
   const pathname = usePathname();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const hasCheckedAuth = useRef(false);
 
   useEffect(() => {
+    // Prevent multiple auth checks
+    if (hasCheckedAuth.current) return;
+    hasCheckedAuth.current = true;
+
     // Check authentication on client side only
     const checkAuth = () => {
       try {

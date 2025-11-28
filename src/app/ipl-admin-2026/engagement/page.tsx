@@ -60,7 +60,12 @@ export default function AdminEngagementPage() {
   }, []);
 
   // Check authentication and verify admin role
+  const hasCheckedAuth = useRef(false);
   useEffect(() => {
+    // Prevent multiple auth checks
+    if (hasCheckedAuth.current || isAuthenticated) return;
+    hasCheckedAuth.current = true;
+
     const checkAuth = async () => {
       const token = localStorage.getItem('auth_token') || localStorage.getItem('adminToken');
       if (!token) {
@@ -100,7 +105,8 @@ export default function AdminEngagementPage() {
     };
 
     checkAuth();
-  }, [router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   // Fetch active users
   useEffect(() => {

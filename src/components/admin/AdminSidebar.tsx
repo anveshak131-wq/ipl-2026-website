@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import IPLLogo from '../ui/IPLLogo';
@@ -203,8 +203,12 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
   }, []);
 
   // Track current page as recent
+  const lastTrackedPathname = useRef<string>('');
   useEffect(() => {
-    if (!pathname || pathname === '/ipl-admin-2026') return;
+    if (!pathname || pathname === '/ipl-admin-2026' || pathname === '/ipl-admin-2026/') return;
+    // Prevent duplicate updates for the same pathname
+    if (lastTrackedPathname.current === pathname) return;
+    lastTrackedPathname.current = pathname;
 
     const currentItem = findMenuItemByHref(pathname);
     if (!currentItem) return;
@@ -217,12 +221,19 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
     };
 
     setRecentPages((prev) => {
+      // Check if this pathname is already in recent pages with recent timestamp
+      const existing = prev.find((p) => p.href === pathname);
+      if (existing && Date.now() - existing.timestamp < 1000) {
+        // Already tracked within last second, skip update
+        return prev;
+      }
       const filtered = prev.filter((p) => p.href !== pathname);
       const updated = [newRecent, ...filtered].slice(0, 5);
       localStorage.setItem('admin_recent_pages', JSON.stringify(updated));
       return updated;
     });
-  }, [pathname]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]); // pathname dependency is needed, but we guard against duplicates
 
   // Fetch pending counts
   useEffect(() => {

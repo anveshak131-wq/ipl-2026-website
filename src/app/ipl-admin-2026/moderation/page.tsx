@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import ModernDialog from '@/components/admin/ModernDialog';
@@ -41,7 +41,12 @@ export default function AdminModerationPage() {
 
   const matchId = 'current';
 
+  const hasCheckedAuth = useRef(false);
   useEffect(() => {
+    // Prevent multiple auth checks
+    if (hasCheckedAuth.current || isAuthenticated) return;
+    hasCheckedAuth.current = true;
+
     const checkAuth = async () => {
       const token =
         typeof window !== 'undefined'
@@ -84,7 +89,8 @@ export default function AdminModerationPage() {
     };
 
     checkAuth();
-  }, [router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   useEffect(() => {
     if (!isAuthenticated) return;
