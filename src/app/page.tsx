@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -16,6 +17,8 @@ import ScrollTriggeredStats from '@/components/home/ScrollTriggeredStats';
 import ParallaxSection from '@/components/effects/ParallaxSection';
 import ConfettiAnimation from '@/components/effects/ConfettiAnimation';
 import FloatingBadge from '@/components/effects/FloatingBadge';
+import AnimatedSection from '@/components/ui/AnimatedSection';
+import GradientText from '@/components/ui/GradientText';
 import { useRouter } from "next/navigation";
 import { api } from '@/lib/data';
 import type { Team, Match, News } from '@/types';
@@ -144,19 +147,29 @@ export default function Home() {
         </div>
 
         {/* Teams Section */}
-        <section className="relative py-12 md:py-20">
-          <div className="max-w-7xl mx-auto px-4 md:px-6">
-            <div className="mb-12 animate-fade-in-up">
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-3 tracking-tight">
-                <span className="gradient-text">Iconic Teams</span> of IPL 2026
-              </h2>
-              <p className="text-gray-300 text-lg md:text-xl max-w-2xl">
-                Explore all 10 teams competing in the Indian Premier League with their squads, stats, and more.
-              </p>
+        <AnimatedSection direction="up" delay={0.2}>
+          <section className="relative py-12 md:py-20">
+            <div className="max-w-7xl mx-auto px-4 md:px-6">
+              <motion.div 
+                className="mb-12"
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+              >
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-3 tracking-tight">
+                  <GradientText gradient="from-blue-400 via-purple-400 to-pink-400" animate>
+                    Iconic Teams
+                  </GradientText> of IPL 2026
+                </h2>
+                <p className="text-gray-300 text-lg md:text-xl max-w-2xl">
+                  Explore all 10 teams competing in the Indian Premier League with their squads, stats, and more.
+                </p>
+              </motion.div>
             </div>
-          </div>
-          <ModernTeamsShowcase teams={teams} isLoading={isLoading} />
-        </section>
+            <ModernTeamsShowcase teams={teams} isLoading={isLoading} />
+          </section>
+        </AnimatedSection>
 
         {/* Statistics Section with Scroll Trigger */}
         <section className="relative py-12 md:py-20">
@@ -221,24 +234,54 @@ export default function Home() {
         </section>
 
         {/* CTA Section */}
-        <section className="relative py-16 md:py-24 mt-12 md:mt-20">
-          <div className="max-w-4xl mx-auto px-4 md:px-6 text-center animate-fade-in-up">
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight">
-              Ready to Experience <span className="gradient-text">IPL 2026</span>?
-            </h2>
-            <p className="text-gray-300 text-lg md:text-xl mb-8 max-w-2xl mx-auto">
-              Join millions of cricket fans following live scores, stats, and all the action.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/live-score" className="btn-primary inline-block">
-                Watch Live Scores
-              </Link>
-              <Link href="/teams" className="btn-secondary inline-block">
-                Explore Teams
-              </Link>
-            </div>
-          </div>
-        </section>
+        <AnimatedSection direction="up" delay={0.3}>
+          <section className="relative py-16 md:py-24 mt-12 md:mt-20">
+            <motion.div 
+              className="max-w-4xl mx-auto px-4 md:px-6 text-center"
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
+            >
+              <motion.h2 
+                className="text-3xl md:text-5xl font-bold text-white mb-6 tracking-tight"
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
+                Ready to Experience <GradientText gradient="from-blue-400 via-purple-400 to-pink-400" animate>IPL 2026</GradientText>?
+              </motion.h2>
+              <motion.p 
+                className="text-gray-300 text-lg md:text-xl mb-8 max-w-2xl mx-auto"
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+              >
+                Join millions of cricket fans following live scores, stats, and all the action.
+              </motion.p>
+              <motion.div 
+                className="flex flex-col sm:flex-row gap-4 justify-center"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Link href="/live-score" className="btn-primary inline-block">
+                    Watch Live Scores
+                  </Link>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Link href="/teams" className="btn-secondary inline-block">
+                    Explore Teams
+                  </Link>
+                </motion.div>
+              </motion.div>
+            </motion.div>
+          </section>
+        </AnimatedSection>
       </main>
       <Footer />
     </div>

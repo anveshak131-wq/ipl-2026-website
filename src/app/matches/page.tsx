@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import MatchCard from '@/components/matches/MatchCard';
@@ -10,6 +11,8 @@ import { api } from '@/lib/data';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Icon from '@/components/ui/Icon';
 import AuroraBackground from '@/components/ui/AuroraBackground';
+import AnimatedSection from '@/components/ui/AnimatedSection';
+import GradientText from '@/components/ui/GradientText';
 
 export default function MatchesPage() {
   const [matches, setMatches] = useState<Match[]>([]);
@@ -72,9 +75,14 @@ export default function MatchesPage() {
                 <Icon name="cricket" size={16} /> MATCH SCHEDULE
               </span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight hover:scale-[1.02] transition-transform duration-300">
-              IPL 2026 <span className="bg-gradient-to-r from-ipl-blue-light via-ipl-gold to-ipl-purple bg-clip-text text-transparent animate-glow">Fixtures</span>
-            </h1>
+            <motion.h1 
+              className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              IPL 2026 <GradientText gradient="from-blue-400 via-purple-400 to-pink-400" animate>Fixtures</GradientText>
+            </motion.h1>
             <p className="text-gray-300 text-lg max-w-2xl leading-relaxed animate-fade-in" style={{ animationDelay: '120ms' }}>
               Live scores, upcoming matches, and detailed fixtures for the entire IPL 2026 season
             </p>
@@ -144,12 +152,38 @@ export default function MatchesPage() {
           </div>
 
           {/* Matches Grid */}
-          {filteredMatches.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in" style={{ animationDelay: '220ms' }}>
-              {filteredMatches.map((match, index) => (
-                <MatchCard key={match.id} match={match} index={index} />
-              ))}
-            </div>
+          <AnimatePresence mode="wait">
+            {filteredMatches.length > 0 ? (
+              <motion.div 
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                variants={{
+                  visible: {
+                    transition: {
+                      staggerChildren: 0.1,
+                    },
+                  },
+                }}
+              >
+                {filteredMatches.map((match, index) => (
+                  <motion.div
+                    key={match.id}
+                    initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{
+                      duration: 0.5,
+                      delay: index * 0.05,
+                      ease: [0.22, 1, 0.36, 1],
+                    }}
+                    whileHover={{ y: -8, transition: { duration: 0.2 } }}
+                  >
+                    <MatchCard match={match} index={index} />
+                  </motion.div>
+                ))}
+              </motion.div>
           ) : (
             <div className="text-center py-12 animate-fade-in" style={{ animationDelay: '220ms' }}>
               <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 p-8 max-w-md mx-auto">
@@ -163,8 +197,9 @@ export default function MatchesPage() {
                   Try selecting a different filter
                 </p>
               </div>
-            </div>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Pagination - Premium Design */}
           {filteredMatches.length > 0 && (
