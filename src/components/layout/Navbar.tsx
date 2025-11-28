@@ -7,7 +7,7 @@ import SportsUP18LogoWithText from '../branding/SportsUP18LogoWithText';
 import SportsUP18Logo from '../branding/SportsUP18Logo';
 import Emoji from '../emoji/Emoji';
 
-type NavEmojiName = 'cricket' | 'chart' | 'news' | 'glove' | 'target' | 'trophy' | 'sparkles' | 'people' | 'fire' | 'star';
+type NavEmojiName = 'cricket' | 'chart' | 'news' | 'glove' | 'target' | 'trophy' | 'sparkles' | 'people' | 'fire' | 'star' | 'cricket-bat' | 'lightning' | 'clock' | 'venue';
 
 interface NavItem {
   href: string;
@@ -43,9 +43,9 @@ export default function Navbar() {
   };
 
   const primaryNavItems: NavItem[] = [
-    { href: '/live-score', label: 'Live Score', emoji: 'cricket' },
-    { href: '/matches', label: 'Matches', emoji: 'cricket' },
-    { href: '/teams', label: 'Teams', emoji: 'glove' },
+    { href: '/live-score', label: 'Live Score', emoji: 'lightning' },
+    { href: '/matches', label: 'Matches', emoji: 'cricket-bat' },
+    { href: '/teams', label: 'Teams', emoji: 'trophy' },
     { href: '/stats', label: 'Stats', emoji: 'chart' },
     { href: '/predictions', label: 'Predictions', emoji: 'target' },
     { href: '/news', label: 'News', emoji: 'fire' },
