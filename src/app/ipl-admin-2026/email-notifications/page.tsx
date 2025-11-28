@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
@@ -135,7 +135,12 @@ export default function AdminEmailNotificationsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // showError is stable from useToast, no need to include it
 
+  const hasCheckedAuth = useRef(false);
   useEffect(() => {
+    // Prevent multiple auth checks
+    if (hasCheckedAuth.current) return;
+    hasCheckedAuth.current = true;
+
     let isMounted = true;
 
     const checkAuth = async () => {
@@ -146,7 +151,10 @@ export default function AdminEmailNotificationsPage() {
             : null;
 
         if (!token) {
-          if (isMounted) router.push('/ipl-admin-2026');
+          if (isMounted) {
+          router.push('/ipl-admin-2026');
+            setAuthLoading(false);
+          }
           return;
         }
 
@@ -158,7 +166,10 @@ export default function AdminEmailNotificationsPage() {
             localStorage.removeItem('auth_token');
             localStorage.removeItem('adminToken');
           } catch (e) {}
-          if (isMounted) router.push('/ipl-admin-2026');
+          if (isMounted) {
+          router.push('/ipl-admin-2026');
+            setAuthLoading(false);
+          }
           return;
         }
 
@@ -166,31 +177,28 @@ export default function AdminEmailNotificationsPage() {
         if (role !== 'admin' && role !== 'super_admin') {
           if (isMounted) {
             showError('Access denied. Admin privileges required.');
-            router.push('/');
+          router.push('/');
+            setAuthLoading(false);
           }
           return;
         }
 
         if (isMounted) {
-          setIsAuthenticated(true);
-          await fetchUsers(token);
+        setIsAuthenticated(true);
+          setAuthLoading(false);
+        await fetchUsers(token);
         }
       } catch (e) {
         console.error('Admin email auth error:', e);
         if (isMounted) {
           showError('Authentication failed');
-          router.push('/ipl-admin-2026');
-        }
-      } finally {
-        if (isMounted) {
-          setAuthLoading(false);
+        router.push('/ipl-admin-2026');
+        setAuthLoading(false);
         }
       }
     };
 
-    if (authLoading) {
-      checkAuth();
-    }
+    checkAuth();
 
     return () => {
       isMounted = false;
@@ -598,7 +606,8 @@ export default function AdminEmailNotificationsPage() {
     };
 
     loadMatchesAndNews();
-  }, [showError]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount - showError is stable from useToast
 
   // Bulk operations handlers
   const handleSelectAll = () => {
@@ -981,8 +990,8 @@ export default function AdminEmailNotificationsPage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 bg-[#0B0F13] border border-[#2A3440] rounded-lg text-sm text-[#E6EDF3] placeholder-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#2F6FED] focus:border-transparent transition-all"
-                  />
-                </div>
+                />
+              </div>
 
                 <div className="flex items-center gap-2">
                   <AdvancedFilterBuilder
@@ -1031,8 +1040,8 @@ export default function AdminEmailNotificationsPage() {
                     onDeleteFilter={handleDeleteFilter}
                     onLoadFilter={handleLoadFilter}
                   />
-                </div>
               </div>
+            </div>
 
               {/* Date Range Filters */}
               <div className="flex flex-wrap items-center gap-4">
@@ -1227,7 +1236,7 @@ export default function AdminEmailNotificationsPage() {
                           className="text-[#AEBAC7] hover:bg-[#1A2332] transition-colors group"
                           whileHover={{ x: 4 }}
                         >
-                          <td className="px-4 py-3 align-middle">
+                        <td className="px-4 py-3 align-middle">
                             <button
                               onClick={() => handleToggleUserSelection(user.id || user.email)}
                               className="flex items-center justify-center"
@@ -1280,12 +1289,12 @@ export default function AdminEmailNotificationsPage() {
                                     : 'Disabled'}
                             </span>
                             </div>
-                            {user.unsubscribedAt && (
+                          {user.unsubscribedAt && (
                               <div className="mt-1 text-[10px] text-[#6B7280]">
                                 {new Date(user.unsubscribedAt).toLocaleDateString()}
-                              </div>
-                            )}
-                          </td>
+                            </div>
+                          )}
+                        </td>
                           <td className="px-4 py-3 align-middle text-xs text-[#AEBAC7]">
                             {user.favoriteTeamIds && user.favoriteTeamIds.length > 0 ? (
                               <div className="flex flex-wrap gap-1">
