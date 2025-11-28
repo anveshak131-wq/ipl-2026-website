@@ -12,7 +12,7 @@ import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import RCBLottie from '@/components/ui/RCBLottie';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { getAnimatedLogoPath } from '@/lib/logoUtils';
-import { CustomEmoji } from '@/components/emoji/Emoji';
+import CustomEmoji from '@/components/emoji/CustomEmoji';
 
 interface TeamDetailRedesignedProps {
   teamId: string;
@@ -700,8 +700,8 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
                   )}
 
                   <div className="py-8 border-t border-white/10">
-                    <p className="text-3xl font-black text-transparent bg-gradient-to-r from-red-500 to-yellow-500 bg-clip-text animate-pulse">
-                      "Ee Sala Cup Namde" 🔥
+                    <p className="text-3xl font-black text-transparent bg-gradient-to-r from-red-500 to-yellow-500 bg-clip-text animate-pulse flex items-center gap-2">
+                      "Ee Sala Cup Namde" <CustomEmoji type="fire" size={32} animate={true} />
                     </p>
                     <p className="mt-2 italic text-white">(This Year, The Cup is Ours)</p>
                   </div>
@@ -721,7 +721,7 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
                     {teamData.homeGrounds.map((ground: string, i: number) => (
                       <div key={i} className="group p-6 rounded-2xl bg-white/5 hover:bg-white/10 transition-all border border-white/5 hover:border-white/20 hover:scale-105 transform">
                         <div className="flex items-start gap-4">
-                          <div className="text-5xl">🏟️</div>
+                          <CustomEmoji type="venue" size={48} animate={true} />
                           <div className="flex-1">
                             <p className="text-xl font-bold text-white">{ground}</p>
                             <p className="text-xs mt-2 text-gray-400">Official Home Ground</p>
@@ -737,20 +737,20 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
               <div className="rounded-3xl backdrop-blur-xl p-12 border border-white/10"
                    style={{ background: 'linear-gradient(135deg, rgba(236,28,36,0.1), rgba(218,165,32,0.1))' }}>
                 <h3 className="text-3xl font-black mb-8 flex items-center gap-3 text-white">
-                  <span>⭐</span>
+                  <CustomEmoji type="star" size={32} animate={true} />
                   Legacy Highlights
                 </h3>
                 <div className="space-y-4">
                   {[
-                    { icon: '🏏', text: 'Home for iconic cricket moments and legendary performances', color: 'from-red-500 to-yellow-500' },
-                    { icon: '🌟', text: 'Nurturing talent and creating future cricket champions', color: 'from-yellow-500 to-orange-500' },
-                    { icon: '❤️', text: 'Unwavering support from millions of passionate fans', color: 'from-red-600 to-pink-600' },
-                    { icon: '🔥', text: 'Known for bold, fearless cricket and never-give-up spirit', color: 'from-orange-500 to-red-500' },
-                    { icon: '👑', text: 'Consistently competitive in the IPL tournament', color: 'from-purple-500 to-pink-500' }
+                    { icon: 'cricket-bat', text: 'Home for iconic cricket moments and legendary performances', color: 'from-red-500 to-yellow-500' },
+                    { icon: 'star', text: 'Nurturing talent and creating future cricket champions', color: 'from-yellow-500 to-orange-500' },
+                    { icon: 'heart', text: 'Unwavering support from millions of passionate fans', color: 'from-red-600 to-pink-600' },
+                    { icon: 'fire', text: 'Known for bold, fearless cricket and never-give-up spirit', color: 'from-orange-500 to-red-500' },
+                    { icon: 'crown', text: 'Consistently competitive in the IPL tournament', color: 'from-purple-500 to-pink-500' }
                   ].map((achievement, i) => (
                     <div key={i} className="group flex items-center gap-4 p-6 rounded-2xl bg-white/5 hover:bg-white/10 transition-all hover:scale-105 cursor-pointer">
-                      <div className={`text-5xl transform group-hover:scale-125 group-hover:rotate-12 transition-all duration-300`}>
-                        {achievement.icon}
+                      <div className={`transform group-hover:scale-125 group-hover:rotate-12 transition-all duration-300`}>
+                        <CustomEmoji type={achievement.icon as any} size={48} animate={true} />
                       </div>
                       <p className={`text-xl font-bold bg-gradient-to-r ${achievement.color} bg-clip-text text-transparent`}>
                         {achievement.text}
@@ -783,9 +783,9 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
             </p>
             <div className="inline-flex items-center gap-3 px-8 py-4 rounded-full backdrop-blur-xl border border-red-500/50"
                  style={{ background: 'linear-gradient(135deg, rgba(236,28,36,0.2), rgba(218,165,32,0.2))' }}>
-              <span className="text-6xl animate-pulse">👑</span>
+              <CustomEmoji type="crown" size={64} animate={true} />
               <span className="text-2xl font-black text-yellow-500">PLAY BOLD. PLAY FEARLESS.</span>
-              <span className="text-6xl animate-pulse" style={{ animationDelay: '0.5s' }}>🔥</span>
+              <CustomEmoji type="fire" size={64} animate={true} />
             </div>
           </div>
         </section>

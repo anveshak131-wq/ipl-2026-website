@@ -13,6 +13,7 @@ import IPLLogo from '@/components/ui/IPLLogo';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import GlassCard from '@/components/ui/GlassCard';
 import GradientText from '@/components/ui/GradientText';
+import CustomEmoji from '@/components/emoji/CustomEmoji';
 import { 
   UsersIcon, 
   StarIcon, 
@@ -30,7 +31,6 @@ import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import RCBLottie from '@/components/ui/RCBLottie';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { getOptimalTextColor } from '@/lib/colorUtils';
-import { CustomEmoji } from '@/components/emoji/Emoji';
 
 interface TeamDetailClientProps {
   teamId: string;
@@ -1595,7 +1595,7 @@ function AboutTab({ teamData, primaryColor, secondaryColor, coachingStaff }: any
                boxShadow: `0 10px 30px ${primaryColor.glow}15`
              }}>
           <div className="flex items-center gap-3 mb-8">
-            <span className="text-4xl">🏟️</span>
+            <CustomEmoji type="venue" size={48} animate={true} />
             <h4 className="text-2xl font-black" style={{ color: primaryColor.textOnLight }}>Home Grounds</h4>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

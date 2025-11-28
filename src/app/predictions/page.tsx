@@ -12,6 +12,7 @@ import AuroraBackground from '@/components/ui/AuroraBackground';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import GradientText from '@/components/ui/GradientText';
 import GlassCard from '@/components/ui/GlassCard';
+import CustomEmoji from '@/components/emoji/CustomEmoji';
 
 interface Prediction {
   matchId: string;
@@ -482,7 +483,10 @@ export default function PredictionsPage() {
           {/* Beta Notice */}
           <div className="mb-8 p-4 rounded-xl bg-gradient-to-r from-ipl-purple/20 to-ipl-gold/20 border border-ipl-gold/30">
             <p className="text-sm text-gray-300">
-              <span className="font-semibold text-ipl-gold">⚠️ Beta Feature:</span> These predictions are AI-generated insights for entertainment purposes. Actual match outcomes may vary significantly.
+              <span className="font-semibold text-ipl-gold inline-flex items-center gap-2">
+                <CustomEmoji type="warning" size={20} animate={true} />
+                Beta Feature:
+              </span> These predictions are AI-generated insights for entertainment purposes. Actual match outcomes may vary significantly.
             </p>
           </div>
 
@@ -771,7 +775,10 @@ export default function PredictionsPage() {
                       transition={{ delay: 0.4 }}
                     >
                       <p className="text-xs text-gray-300 leading-relaxed">
-                        <span className="font-bold text-red-400">⚠️ Disclaimer:</span> These predictions are AI-generated and are for entertainment purposes only. They are not guaranteed to be accurate and should not be used for betting or financial decisions.
+                        <span className="font-bold text-red-400 inline-flex items-center gap-2">
+                          <CustomEmoji type="warning" size={18} animate={true} />
+                          Disclaimer:
+                        </span> These predictions are AI-generated and are for entertainment purposes only. They are not guaranteed to be accurate and should not be used for betting or financial decisions.
                       </p>
                     </motion.div>
                   </motion.div>

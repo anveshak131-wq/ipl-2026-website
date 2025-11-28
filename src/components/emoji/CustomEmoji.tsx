@@ -21,7 +21,13 @@ export type EmojiType =
   | 'crown'
   | 'flag-india'
   | 'stadium'
-  | 'glove';
+  | 'glove'
+  | 'warning'
+  | 'heart'
+  | 'cricket-bat'
+  | 'venue'
+  | 'art'
+  | 'energy';
 
 interface CustomEmojiProps {
   type: EmojiType;
@@ -649,6 +655,231 @@ export default function CustomEmoji({
               animate={animate ? { scale: [1, 1.2, 1] } : {}}
               transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
             />
+          </svg>
+        );
+
+      case 'warning':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" style={svgProps} className={className}>
+            <defs>
+              <linearGradient id="warning-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: color || '#FBBF24', stopOpacity: 1 }} />
+                <stop offset="100%" style={{ stopColor: color || '#F59E0B', stopOpacity: 1 }} />
+              </linearGradient>
+            </defs>
+            <motion.path
+              d="M12 2L22 20H2L12 2Z"
+              fill={gradient ? "url(#warning-gradient)" : (color || "#FBBF24")}
+              animate={animate ? { 
+                scale: [1, 1.05, 1],
+                filter: [
+                  "drop-shadow(0 0 2px #FBBF24)",
+                  "drop-shadow(0 0 8px #FBBF24)",
+                  "drop-shadow(0 0 2px #FBBF24)"
+                ]
+              } : {}}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            <motion.circle
+              cx="12"
+              cy="15"
+              r="1.5"
+              fill="#FFFFFF"
+              animate={animate ? { opacity: [1, 0.5, 1] } : {}}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            />
+            <motion.rect
+              x="11"
+              y="9"
+              width="2"
+              height="4"
+              rx="1"
+              fill="#FFFFFF"
+              animate={animate ? { scaleY: [1, 1.2, 1] } : {}}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            />
+          </svg>
+        );
+
+      case 'heart':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" style={svgProps} className={className}>
+            <defs>
+              <linearGradient id="heart-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: color || '#EF4444', stopOpacity: 1 }} />
+                <stop offset="100%" style={{ stopColor: color || '#DC2626', stopOpacity: 1 }} />
+              </linearGradient>
+            </defs>
+            <motion.path
+              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+              fill={gradient ? "url(#heart-gradient)" : (color || "#EF4444")}
+              animate={animate ? { 
+                scale: [1, 1.1, 1],
+                filter: [
+                  "drop-shadow(0 0 2px #EF4444)",
+                  "drop-shadow(0 0 8px #EF4444)",
+                  "drop-shadow(0 0 2px #EF4444)"
+                ]
+              } : {}}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            />
+          </svg>
+        );
+
+      case 'cricket-bat':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" style={svgProps} className={className}>
+            <defs>
+              <linearGradient id="cricket-bat-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: color || '#8B4513', stopOpacity: 1 }} />
+                <stop offset="100%" style={{ stopColor: color || '#654321', stopOpacity: 1 }} />
+              </linearGradient>
+            </defs>
+            <motion.path
+              d="M18 2L20 4L16 8L14 6L18 2Z"
+              fill={gradient ? "url(#cricket-bat-gradient)" : (color || "#8B4513")}
+              animate={animate ? { rotate: [0, 5, -5, 0] } : {}}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            <motion.path
+              d="M14 6L16 8L8 16L6 14L14 6Z"
+              fill={gradient ? "url(#cricket-bat-gradient)" : (color || "#8B4513")}
+            />
+            <motion.path
+              d="M6 14L8 16L4 20L2 18L6 14Z"
+              fill={gradient ? "url(#cricket-bat-gradient)" : (color || "#654321")}
+            />
+            <motion.circle
+              cx="5"
+              cy="19"
+              r="1.5"
+              fill="#FFD700"
+              animate={animate ? { scale: [1, 1.3, 1], opacity: [1, 0.7, 1] } : {}}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            />
+          </svg>
+        );
+
+      case 'venue':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" style={svgProps} className={className}>
+            <defs>
+              <linearGradient id="venue-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: color || '#10B981', stopOpacity: 1 }} />
+                <stop offset="100%" style={{ stopColor: color || '#059669', stopOpacity: 1 }} />
+              </linearGradient>
+            </defs>
+            <motion.ellipse
+              cx="12"
+              cy="18"
+              rx="10"
+              ry="4"
+              fill={gradient ? "url(#venue-gradient)" : (color || "#10B981")}
+              opacity="0.2"
+            />
+            <motion.path
+              d="M6 8C6 5 8 3 12 3C16 3 18 5 18 8V18H6V8Z"
+              stroke={gradient ? "url(#venue-gradient)" : (color || "#10B981")}
+              strokeWidth="2"
+              fill="none"
+              animate={animate ? { scale: [1, 1.05, 1] } : {}}
+              transition={{ duration: 3, repeat: Infinity }}
+            />
+            <motion.path
+              d="M9 8V18 M12 5V18 M15 8V18"
+              stroke={gradient ? "url(#venue-gradient)" : (color || "#10B981")}
+              strokeWidth="1.5"
+              opacity="0.6"
+            />
+            <motion.circle
+              cx="12"
+              cy="11"
+              r="2"
+              fill={gradient ? "url(#venue-gradient)" : (color || "#10B981")}
+              opacity="0.3"
+              animate={animate ? { scale: [1, 1.5, 1], opacity: [0.3, 0, 0.3] } : {}}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+          </svg>
+        );
+
+      case 'art':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" style={svgProps} className={className}>
+            <defs>
+              <linearGradient id="art-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: color || '#A855F7', stopOpacity: 1 }} />
+                <stop offset="100%" style={{ stopColor: color || '#7C3AED', stopOpacity: 1 }} />
+              </linearGradient>
+            </defs>
+            <motion.path
+              d="M12 2L15 9L22 10L17 15L18 22L12 18L6 22L7 15L2 10L9 9L12 2Z"
+              fill={gradient ? "url(#art-gradient)" : (color || "#A855F7")}
+              animate={animate ? { 
+                rotate: [0, 180, 360],
+                scale: [1, 1.1, 1]
+              } : {}}
+              transition={{ 
+                rotate: { duration: 4, repeat: Infinity, ease: "linear" },
+                scale: { duration: 2, repeat: Infinity }
+              }}
+            />
+            <motion.circle
+              cx="12"
+              cy="12"
+              r="3"
+              fill="#FFFFFF"
+              opacity="0.3"
+              animate={animate ? { scale: [1, 1.5, 1], opacity: [0.3, 0, 0.3] } : {}}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+          </svg>
+        );
+
+      case 'energy':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" style={svgProps} className={className}>
+            <defs>
+              <linearGradient id="energy-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: color || '#FBBF24', stopOpacity: 1 }} />
+                <stop offset="100%" style={{ stopColor: color || '#F59E0B', stopOpacity: 1 }} />
+              </linearGradient>
+            </defs>
+            <motion.path
+              d="M13 2L3 14H12L11 22L21 10H12L13 2Z"
+              fill={gradient ? "url(#energy-gradient)" : (color || "#FBBF24")}
+              animate={animate ? { 
+                scale: [1, 1.15, 1],
+                filter: [
+                  "drop-shadow(0 0 2px #FBBF24)",
+                  "drop-shadow(0 0 12px #FBBF24)",
+                  "drop-shadow(0 0 2px #FBBF24)"
+                ]
+              } : {}}
+              transition={{ duration: 1, repeat: Infinity }}
+            />
+            {animate && (
+              <>
+                <motion.circle
+                  cx="13"
+                  cy="8"
+                  r="2"
+                  fill="#FBBF24"
+                  opacity="0.6"
+                  animate={{ scale: [0, 2, 0], opacity: [0.6, 0, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                />
+                <motion.circle
+                  cx="17"
+                  cy="12"
+                  r="1.5"
+                  fill="#F59E0B"
+                  opacity="0.5"
+                  animate={{ scale: [0, 1.5, 0], opacity: [0.5, 0, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}
+                />
+              </>
+            )}
           </svg>
         );
 

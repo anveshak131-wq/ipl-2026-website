@@ -186,10 +186,10 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 md:px-6">
             <ScrollTriggeredStats
               stats={[
-                { label: 'Total Matches', value: '74', icon: '🏏', color: 'from-ipl-gold to-yellow-400' },
-                { label: 'Teams', value: '10', icon: '🎯', color: 'from-blue-500 to-cyan-500' },
-                { label: 'Players', value: '500+', icon: '👥', color: 'from-purple-500 to-pink-500' },
-                { label: 'Venues', value: '15', icon: '🏟️', color: 'from-green-500 to-emerald-500' },
+                { label: 'Total Matches', value: '74', icon: 'cricket-bat', color: 'from-ipl-gold to-yellow-400' },
+                { label: 'Teams', value: '10', icon: 'target', color: 'from-blue-500 to-cyan-500' },
+                { label: 'Players', value: '500+', icon: 'people', color: 'from-purple-500 to-pink-500' },
+                { label: 'Venues', value: '15', icon: 'venue', color: 'from-green-500 to-emerald-500' },
               ]}
               isLoading={isLoading}
             />

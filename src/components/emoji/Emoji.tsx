@@ -26,7 +26,12 @@ export type EmojiName =
   | 'rocket'
   | 'heart'
   | 'wow'
-  | 'thumbs_up';
+  | 'thumbs_up'
+  | 'warning'
+  | 'cricket-bat'
+  | 'venue'
+  | 'art'
+  | 'energy';
 
 interface EmojiProps {
   name: EmojiName | string;
@@ -61,7 +66,12 @@ const EMOJI_CHAR: Record<string, string> = {
   crown: "👑",
   "flag-india": "🇮🇳",
   stadium: "🏟️",
-  glove: "🧤"
+  glove: "🧤",
+  warning: "⚠️",
+  "cricket-bat": "🏏",
+  venue: "🏟️",
+  art: "🎨",
+  energy: "⚡"
 };
 
 // Mapping string names to CustomEmoji types
@@ -84,10 +94,15 @@ const EMOJI_TYPE_MAP: Record<string, EmojiType> = {
   'flag-india': 'flag-india',
   stadium: 'stadium',
   glove: 'glove',
+  warning: 'warning',
+  'cricket-bat': 'cricket-bat',
+  venue: 'venue',
+  art: 'art',
+  energy: 'energy',
   // Legacy names that map to our custom emojis
   clap: 'sparkles',
   rocket: 'fire',
-  heart: 'star',
+  heart: 'heart',
   wow: 'sparkles',
   thumbs_up: 'star'
 };

@@ -3,11 +3,12 @@
 import React from 'react';
 import { useScrollTrigger } from '@/hooks/useScrollTrigger';
 import AnimatedCard from '@/components/ui/AnimatedCard';
+import CustomEmoji, { EmojiType } from '@/components/emoji/CustomEmoji';
 
 interface Stat {
   label: string;
   value: string;
-  icon: string;
+  icon: string | EmojiType;
   color: string;
 }
 
@@ -49,7 +50,19 @@ export default function ScrollTriggeredStats({
               hover="lift"
               className="p-6 text-center h-full"
             >
-              <div className="text-4xl mb-3">{stat.icon}</div>
+              <div className="text-4xl mb-3 flex items-center justify-center">
+                {typeof stat.icon === 'string' && (stat.icon === '🏏' || stat.icon === '🎯' || stat.icon === '👥' || stat.icon === '🏟️') ? (
+                  <CustomEmoji 
+                    type={stat.icon === '🏏' ? 'cricket-bat' : stat.icon === '🎯' ? 'target' : stat.icon === '👥' ? 'people' : 'venue'} 
+                    size={48}
+                    animate={true}
+                  />
+                ) : typeof stat.icon === 'string' ? (
+                  <span>{stat.icon}</span>
+                ) : (
+                  <CustomEmoji type={stat.icon} size={48} animate={true} />
+                )}
+              </div>
               <div className={`text-3xl font-black mb-2 bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
                 {stat.value}
               </div>

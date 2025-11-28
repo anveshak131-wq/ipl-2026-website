@@ -6,6 +6,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { motion } from 'framer-motion';
 import AuroraBackground from '@/components/ui/AuroraBackground';
+import CustomEmoji from '@/components/emoji/CustomEmoji';
 
 export default function RCBLionPage() {
   const [selectedSize, setSelectedSize] = useState<'sm' | 'md' | 'lg' | 'xl'>('lg');
@@ -187,17 +188,17 @@ export default function RCBLionPage() {
             <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
                 {
-                  icon: '✨',
+                  icon: 'sparkles',
                   title: 'Dynamic Animations',
                   description: 'Smooth, fluid animations that bring the logo to life',
                 },
                 {
-                  icon: '🎨',
+                  icon: 'art',
                   title: 'Premium Design',
                   description: 'Modern, bold design with RCB brand colors',
                 },
                 {
-                  icon: '⚡',
+                  icon: 'energy',
                   title: 'Interactive Effects',
                   description: 'Hover effects and responsive animations',
                 },
@@ -210,7 +211,9 @@ export default function RCBLionPage() {
                   transition={{ duration: 0.5, delay: 0.7 + index * 0.1 }}
                   whileHover={{ scale: 1.05, y: -5 }}
                 >
-                  <div className="text-4xl mb-3">{feature.icon}</div>
+                  <div className="text-4xl mb-3 flex items-center justify-center">
+                    <CustomEmoji type={feature.icon as any} size={48} animate={true} />
+                  </div>
                   <h3 className="text-lg font-bold text-white mb-2">{feature.title}</h3>
                   <p className="text-sm text-gray-400">{feature.description}</p>
                 </motion.div>
