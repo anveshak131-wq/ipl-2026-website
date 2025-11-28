@@ -18,8 +18,10 @@ preview_id = "local-ipl-cache-preview"
 vars = { ENVIRONMENT = "production" }
 
 # Scheduled event for email reminders
+# This cron job runs every 5 minutes to check for matches starting in 30 minutes
 [[triggers.crons]]
 cron = "*/5 * * * *"  # Run every 5 minutes
+path = "/api/admin/match-reminders"
 
 # Email service environment variables
 # Uncomment and set your email service credentials:

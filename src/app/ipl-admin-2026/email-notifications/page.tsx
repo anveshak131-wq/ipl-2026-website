@@ -32,10 +32,12 @@ import AdvancedFilterBuilder, {
 import FilterChips from '@/components/admin/FilterChips';
 import DateRangePicker from '@/components/admin/DateRangePicker';
 import BulkEmailOperations from '@/components/admin/email/BulkEmailOperations';
+import BulkEmailSendModal from '@/components/admin/email/BulkEmailSendModal';
 import EmailTemplates, { EmailTemplate } from '@/components/admin/email/EmailTemplates';
 import EmailScheduler, { EmailSchedule } from '@/components/admin/email/EmailScheduler';
 import EmailLogs, { EmailLog } from '@/components/admin/email/EmailLogs';
 import { exportToCSV, prepareExportData } from '@/lib/admin/exportUtils';
+import { api } from '@/lib/data';
 
 interface EmailUser {
   id: string;
@@ -80,6 +82,9 @@ export default function AdminEmailNotificationsPage() {
   const [templates, setTemplates] = useState<EmailTemplate[]>([]);
   const [schedules, setSchedules] = useState<EmailSchedule[]>([]);
   const [emailLogs, setEmailLogs] = useState<EmailLog[]>([]);
+  const [showBulkEmailModal, setShowBulkEmailModal] = useState(false);
+  const [matches, setMatches] = useState<Array<{ id: string; team1: string; team2: string; date: string; venue: string }>>([]);
+  const [news, setNews] = useState<Array<{ id: string; title: string; summary: string }>>([]);
 
   // Load saved filters from localStorage
   useEffect(() => {
@@ -652,11 +657,71 @@ export default function AdminEmailNotificationsPage() {
   };
 
   const handleBulkSendEmail = () => {
-    success('Bulk email send feature - coming soon');
+    if (selectedUsers.size === 0) {
+      showError('Please select at least one user');
+      return;
+    }
+    setShowBulkEmailModal(true);
   };
 
   const handleBulkPreviewEmail = () => {
-    success('Email preview feature - coming soon');
+    if (selectedUsers.size === 0) {
+      showError('Please select at least one user');
+      return;
+    }
+    // For now, just open the send modal in preview mode
+    setShowBulkEmailModal(true);
+  };
+
+  const handleSendBulkEmail = async (data: {
+    templateId?: string;
+    subject: string;
+    body: string;
+    recipientIds: string[];
+    emailType: 'match' | 'news' | 'custom';
+    matchId?: string;
+    newsId?: string;
+  }) => {
+    try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') || localStorage.getItem('adminToken') : null;
+      if (!token) throw new Error('Missing admin token');
+
+      const response = await fetch('/api/admin/send-bulk-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || 'Failed to send emails');
+      }
+
+      const result = await response.json();
+
+      // Log the emails
+      const newLogs: EmailLog[] = result.sentEmails?.map((email: any) => ({
+        id: Date.now().toString() + Math.random(),
+        templateId: data.templateId || '',
+        templateName: templates.find((t) => t.id === data.templateId)?.name || 'Custom Email',
+        recipientEmail: email.email,
+        recipientName: email.name || 'User',
+        subject: data.subject,
+        status: 'sent' as const,
+        sentAt: new Date(),
+      })) || [];
+
+      setEmailLogs((prev) => [...newLogs, ...prev]);
+      localStorage.setItem('email_logs', JSON.stringify([...newLogs, ...emailLogs]));
+
+      success(`Emails sent successfully to ${result.sentCount || data.recipientIds.length} user${(result.sentCount || data.recipientIds.length) > 1 ? 's' : ''}`);
+    } catch (e: any) {
+      console.error('Failed to send bulk emails:', e);
+      throw e;
+    }
   };
 
   // Email template handlers
@@ -1229,7 +1294,23 @@ export default function AdminEmailNotificationsPage() {
             {activeTab === 'logs' && (
               <EmailLogs logs={emailLogs} />
             )}
-        </div>
+
+            {/* Bulk Email Send Modal */}
+            {activeTab === 'users' && (
+              <BulkEmailSendModal
+                isOpen={showBulkEmailModal}
+                onClose={() => setShowBulkEmailModal(false)}
+                onSend={handleSendBulkEmail}
+                templates={templates}
+                selectedUserIds={Array.from(selectedUsers)}
+                selectedUserEmails={filteredAndSortedUsers
+                  .filter((u) => selectedUsers.has(u.id || u.email))
+                  .map((u) => u.email)}
+                matches={matches}
+                news={news}
+              />
+            )}
+          </div>
         </PageTransition>
       </div>
     </div>
