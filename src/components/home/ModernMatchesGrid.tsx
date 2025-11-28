@@ -3,7 +3,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Calendar, MapPin, Users } from 'lucide-react';
+import { motion } from 'framer-motion';
 import AnimatedCard from '@/components/ui/AnimatedCard';
+import SocialShare from '@/components/ui/SocialShare';
+import CountdownTimer from '@/components/ui/CountdownTimer';
 import type { Match } from '@/types';
 
 interface ModernMatchesGridProps {
@@ -14,6 +17,13 @@ interface ModernMatchesGridProps {
 export default function ModernMatchesGrid({ matches, isLoading = false }: ModernMatchesGridProps) {
   const [selectedFilter, setSelectedFilter] = useState<'all' | 'upcoming' | 'live' | 'completed'>('all');
   const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
+  const [displayCount, setDisplayCount] = useState(6);
+  const itemsPerPage = 6;
+
+  // Reset display count when filter changes
+  useEffect(() => {
+    setDisplayCount(itemsPerPage);
+  }, [selectedFilter]);
 
   useEffect(() => {
     const now = new Date();
@@ -63,11 +73,12 @@ export default function ModernMatchesGrid({ matches, isLoading = false }: Modern
           <p className="text-gray-400 text-lg">No matches found</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredMatches.map((match, idx) => (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredMatches.slice(0, displayCount).map((match, idx) => (
             <Link key={match.id} href={`/matches/${match.id}`}>
               <AnimatedCard delay={idx} hover="lift" className="h-full p-6 cursor-pointer group">
-                {/* Status badge */}
+                {/* Status badge and share */}
                 <div className="flex items-center justify-between mb-4">
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-bold ${
@@ -80,7 +91,19 @@ export default function ModernMatchesGrid({ matches, isLoading = false }: Modern
                   >
                     {match.status === 'live' ? '🔴 LIVE' : match.status === 'completed' ? 'COMPLETED' : 'UPCOMING'}
                   </span>
+                  <SocialShare
+                    url={`/matches#${match.id}`}
+                    title={`${match.team1.shortName} vs ${match.team2.shortName}`}
+                    description={`${match.venue} - ${match.date}`}
+                  />
                 </div>
+                
+                {/* Countdown timer for upcoming matches */}
+                {match.status === 'upcoming' && (
+                  <div className="mb-4">
+                    <CountdownTimer targetDate={match.date} />
+                  </div>
+                )}
 
                 {/* Teams */}
                 <div className="mb-6">
@@ -123,8 +146,23 @@ export default function ModernMatchesGrid({ matches, isLoading = false }: Modern
                 <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-ipl-gold/0 to-ipl-gold/0 group-hover:from-ipl-gold/5 group-hover:to-ipl-gold/10 transition-all duration-300 pointer-events-none" />
               </AnimatedCard>
             </Link>
-          ))}
-        </div>
+            ))}
+          </div>
+          
+          {/* Load More Button */}
+          {filteredMatches.length > displayCount && (
+            <div className="text-center mt-8">
+              <motion.button
+                onClick={() => setDisplayCount(displayCount + itemsPerPage)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold hover:from-blue-600 hover:to-purple-600 transition-all duration-300 shadow-lg shadow-purple-500/50"
+              >
+                Load More ({filteredMatches.length - displayCount} remaining)
+              </motion.button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

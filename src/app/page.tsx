@@ -19,9 +19,15 @@ import ConfettiAnimation from '@/components/effects/ConfettiAnimation';
 import FloatingBadge from '@/components/effects/FloatingBadge';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import GradientText from '@/components/ui/GradientText';
+import BackToTop from '@/components/ui/BackToTop';
+import QuickStatsWidget from '@/components/home/QuickStatsWidget';
+import QuickFilters from '@/components/home/QuickFilters';
+import TrendingNews from '@/components/home/TrendingNews';
+import { TeamsSkeleton, MatchesSkeleton, NewsSkeleton, StatsSkeleton } from '@/components/home/HomePageSkeletons';
 import { useRouter } from "next/navigation";
 import { api } from '@/lib/data';
 import type { Team, Match, News } from '@/types';
+import { useMemo } from 'react';
 
 export default function Home() {
   const router = useRouter();
@@ -35,6 +41,30 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
   const [hasLiveMatch, setHasLiveMatch] = useState(false);
+  const [favoriteTeams, setFavoriteTeams] = useState<string[]>([]);
+  
+  // Calculate derived data
+  const liveMatchCount = useMemo(() => matches.filter(m => m.status === 'live').length, [matches]);
+  const nextMatch = useMemo(() => {
+    const upcoming = matches
+      .filter(m => m.status === 'upcoming')
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    return upcoming[0] || null;
+  }, [matches]);
+  
+  // Personalized content based on favorite teams
+  const personalizedMatches = useMemo(() => {
+    if (favoriteTeams.length === 0) return matches;
+    return matches.filter(m => 
+      favoriteTeams.includes(m.team1.id) || favoriteTeams.includes(m.team2.id)
+    );
+  }, [matches, favoriteTeams]);
+  
+  const personalizedNews = useMemo(() => {
+    if (favoriteTeams.length === 0) return news;
+    // Filter news related to favorite teams (simplified - would need team info in news)
+    return news;
+  }, [news, favoriteTeams]);
 
   useEffect(() => {
     setIsHydrated(true);
@@ -53,6 +83,16 @@ export default function Home() {
       // Show modal if version has been updated
       setNeedsReAcceptance(true);
       setShowTermsModal(true);
+    }
+
+    // Load favorite teams from localStorage
+    const savedFavorites = localStorage.getItem('favoriteTeams');
+    if (savedFavorites) {
+      try {
+        setFavoriteTeams(JSON.parse(savedFavorites));
+      } catch (e) {
+        console.error('Error parsing favorite teams:', e);
+      }
     }
 
     // Load data
@@ -137,8 +177,26 @@ export default function Home() {
         {/* Modern Hero Section with Parallax */}
         <section className="relative overflow-hidden">
           <ParallaxSection speed={0.5}>
-            <ModernHeroSection />
+            <ModernHeroSection 
+              matches={matches}
+              nextMatch={nextMatch}
+              liveMatchCount={liveMatchCount}
+            />
           </ParallaxSection>
+        </section>
+        
+        {/* Quick Stats Widget */}
+        <section className="relative py-8 md:py-12">
+          <div className="max-w-7xl mx-auto px-4 md:px-6">
+            <QuickStatsWidget matches={matches} isLoading={isLoading} />
+          </div>
+        </section>
+        
+        {/* Quick Filters */}
+        <section className="relative py-8">
+          <div className="max-w-7xl mx-auto px-4 md:px-6">
+            <QuickFilters matches={matches} />
+          </div>
         </section>
 
         {/* Divider */}
@@ -159,15 +217,24 @@ export default function Home() {
               >
                 <h2 className="text-3xl md:text-4xl font-bold text-white mb-3 tracking-tight">
                   <GradientText gradient="from-blue-400 via-purple-400 to-pink-400" animate>
-                    Iconic Teams
+                    {favoriteTeams.length > 0 ? 'Your Favorite Teams' : 'Iconic Teams'}
                   </GradientText> of IPL 2026
                 </h2>
                 <p className="text-gray-300 text-lg md:text-xl max-w-2xl">
-                  Explore all 10 teams competing in the Indian Premier League with their squads, stats, and more.
+                  {favoriteTeams.length > 0 
+                    ? 'Your favorite teams and all others competing in the Indian Premier League.'
+                    : 'Explore all 10 teams competing in the Indian Premier League with their squads, stats, and more.'
+                  }
                 </p>
               </motion.div>
             </div>
-            <ModernTeamsShowcase teams={teams} isLoading={isLoading} />
+            {isLoading ? (
+              <div className="max-w-7xl mx-auto px-4 md:px-6">
+                <TeamsSkeleton />
+              </div>
+            ) : (
+              <ModernTeamsShowcase teams={teams} isLoading={false} />
+            )}
           </section>
         </AnimatedSection>
 
@@ -184,15 +251,19 @@ export default function Home() {
             </div>
           </div>
           <div className="max-w-7xl mx-auto px-4 md:px-6">
-            <ScrollTriggeredStats
-              stats={[
-                { label: 'Total Matches', value: '74', icon: 'cricket-bat', color: 'from-ipl-gold to-yellow-400' },
-                { label: 'Teams', value: '10', icon: 'target', color: 'from-blue-500 to-cyan-500' },
-                { label: 'Players', value: '500+', icon: 'people', color: 'from-purple-500 to-pink-500' },
-                { label: 'Venues', value: '15', icon: 'venue', color: 'from-green-500 to-emerald-500' },
-              ]}
-              isLoading={isLoading}
-            />
+            {isLoading ? (
+              <StatsSkeleton />
+            ) : (
+              <ScrollTriggeredStats
+                stats={[
+                  { label: 'Total Matches', value: '74', icon: 'cricket-bat', color: 'from-ipl-gold to-yellow-400' },
+                  { label: 'Teams', value: '10', icon: 'target', color: 'from-blue-500 to-cyan-500' },
+                  { label: 'Players', value: '500+', icon: 'people', color: 'from-purple-500 to-pink-500' },
+                  { label: 'Venues', value: '15', icon: 'venue', color: 'from-green-500 to-emerald-500' },
+                ]}
+                isLoading={false}
+              />
+            )}
           </div>
         </section>
 
@@ -201,13 +272,27 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 md:px-6">
             <div className="mb-12 animate-fade-in-up">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-3 tracking-tight">
-                Upcoming <span className="gradient-text">Matches</span>
+                {favoriteTeams.length > 0 ? 'Your ' : ''}Upcoming <span className="gradient-text">Matches</span>
               </h2>
               <p className="text-gray-300 text-lg md:text-xl max-w-2xl">
-                Don't miss the most exciting cricket action. Check out upcoming matches and live scores.
+                {favoriteTeams.length > 0 
+                  ? 'Matches featuring your favorite teams and more exciting cricket action.'
+                  : "Don't miss the most exciting cricket action. Check out upcoming matches and live scores."
+                }
               </p>
             </div>
-            <ModernMatchesGrid matches={matches} isLoading={isLoading} />
+            {isLoading ? (
+              <MatchesSkeleton />
+            ) : (
+              <ModernMatchesGrid matches={favoriteTeams.length > 0 ? personalizedMatches : matches} isLoading={false} />
+            )}
+          </div>
+        </section>
+        
+        {/* Trending News Section */}
+        <section className="relative py-12 md:py-20">
+          <div className="max-w-7xl mx-auto px-4 md:px-6">
+            <TrendingNews articles={news} isLoading={isLoading} />
           </div>
         </section>
 
@@ -229,7 +314,11 @@ export default function Home() {
                 Stay updated with the latest news, highlights, and stories from the IPL.
               </p>
             </div>
-            <ModernNewsSection articles={news} isLoading={isLoading} />
+            {isLoading ? (
+              <NewsSkeleton />
+            ) : (
+              <ModernNewsSection articles={personalizedNews} isLoading={false} />
+            )}
           </div>
         </section>
 
@@ -284,6 +373,7 @@ export default function Home() {
         </AnimatedSection>
       </main>
       <Footer />
+      <BackToTop />
     </div>
   );
 }

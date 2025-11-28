@@ -4,6 +4,7 @@ import React from 'react';
 import { useScrollTrigger } from '@/hooks/useScrollTrigger';
 import AnimatedCard from '@/components/ui/AnimatedCard';
 import CustomEmoji, { EmojiType } from '@/components/emoji/CustomEmoji';
+import AnimatedCounter from '@/components/ui/AnimatedCounter';
 
 interface Stat {
   label: string;
@@ -64,7 +65,16 @@ export default function ScrollTriggeredStats({
                 )}
               </div>
               <div className={`text-3xl font-black mb-2 bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
-                {stat.value}
+                {stat.value.includes('+') ? (
+                  <>
+                    <AnimatedCounter value={parseInt(stat.value)} />
+                    <span>+</span>
+                  </>
+                ) : stat.value.match(/^\d+$/) ? (
+                  <AnimatedCounter value={parseInt(stat.value)} />
+                ) : (
+                  stat.value
+                )}
               </div>
               <div className="text-gray-400 text-sm font-semibold">
                 {stat.label}

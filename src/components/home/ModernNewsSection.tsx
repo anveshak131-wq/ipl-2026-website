@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Clock, ArrowRight, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 import AnimatedCard from '@/components/ui/AnimatedCard';
+import SocialShare from '@/components/ui/SocialShare';
 import type { News } from '@/types';
 
 interface ModernNewsSectionProps {
@@ -13,6 +15,8 @@ interface ModernNewsSectionProps {
 
 export default function ModernNewsSection({ articles, isLoading = false }: ModernNewsSectionProps) {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [displayCount, setDisplayCount] = useState(4);
+  const itemsPerPage = 4;
   const categories = ['all', 'breaking', 'analysis', 'player', 'team'];
 
   if (isLoading) {
@@ -29,6 +33,11 @@ export default function ModernNewsSection({ articles, isLoading = false }: Moder
 
   const filteredArticles =
     selectedCategory === 'all' ? articles : articles.filter((a) => a.category === selectedCategory);
+  
+  // Reset display count when category changes
+  useEffect(() => {
+    setDisplayCount(itemsPerPage);
+  }, [selectedCategory]);
 
   return (
     <div className="space-y-8">
@@ -51,7 +60,7 @@ export default function ModernNewsSection({ articles, isLoading = false }: Moder
 
       {/* News grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {filteredArticles.slice(0, 4).map((article, idx) => (
+        {filteredArticles.slice(0, displayCount).map((article, idx) => (
           <Link key={article.id} href={`/news/${article.id}`}>
             <AnimatedCard delay={idx} hover="lift" className="h-full overflow-hidden group cursor-pointer">
               {/* Image */}
@@ -68,15 +77,22 @@ export default function ModernNewsSection({ articles, isLoading = false }: Moder
 
               {/* Content */}
               <div className="p-6">
-                {/* Badge */}
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-ipl-gold/20 text-ipl-gold">
-                    {article.category}
-                  </span>
-                  <span className="text-xs text-gray-500 flex items-center gap-1">
-                    <Clock className="w-3 h-3" />
-                    {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString() : 'Recently'}
-                  </span>
+                {/* Badge and Share */}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-ipl-gold/20 text-ipl-gold">
+                      {article.category}
+                    </span>
+                    <span className="text-xs text-gray-500 flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString() : 'Recently'}
+                    </span>
+                  </div>
+                  <SocialShare
+                    url={`/news/${article.id}`}
+                    title={article.title}
+                    description={article.summary}
+                  />
                 </div>
 
                 {/* Title */}
@@ -98,16 +114,27 @@ export default function ModernNewsSection({ articles, isLoading = false }: Moder
         ))}
       </div>
 
-      {/* View all button */}
+      {/* Load More / View All */}
       <div className="text-center">
-        <Link
-          href="/news"
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-ipl-gold/30 hover:border-ipl-gold/60 text-ipl-gold hover:text-ipl-gold font-semibold transition-all duration-300 hover:bg-ipl-gold/5"
-        >
-          <Sparkles className="w-4 h-4" />
-          View all news
-          <ArrowRight className="w-4 h-4" />
-        </Link>
+        {filteredArticles.length > displayCount ? (
+          <motion.button
+            onClick={() => setDisplayCount(displayCount + itemsPerPage)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold hover:from-blue-600 hover:to-purple-600 transition-all duration-300 shadow-lg shadow-purple-500/50"
+          >
+            Load More ({filteredArticles.length - displayCount} remaining)
+          </motion.button>
+        ) : (
+          <Link
+            href="/news"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg border border-ipl-gold/30 hover:border-ipl-gold/60 text-ipl-gold hover:text-ipl-gold font-semibold transition-all duration-300 hover:bg-ipl-gold/5"
+          >
+            <Sparkles className="w-4 h-4" />
+            View all news
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        )}
       </div>
     </div>
   );

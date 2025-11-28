@@ -1,10 +1,28 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Play, Zap, TrendingUp } from 'lucide-react';
+import { Play, Zap, TrendingUp, Radio } from 'lucide-react';
+import { motion } from 'framer-motion';
+import type { Match } from '@/types';
+import CountdownTimer from '@/components/ui/CountdownTimer';
+import AnimatedCounter from '@/components/ui/AnimatedCounter';
 
-export default function ModernHeroSection() {
+interface ModernHeroSectionProps {
+  matches?: Match[];
+  nextMatch?: Match | null;
+  liveMatchCount?: number;
+  enableVideoBackground?: boolean;
+  videoUrl?: string;
+}
+
+export default function ModernHeroSection({ 
+  matches = [], 
+  nextMatch = null,
+  liveMatchCount = 0,
+  enableVideoBackground = false,
+  videoUrl = ''
+}: ModernHeroSectionProps) {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -20,6 +38,22 @@ export default function ModernHeroSection() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-slate-950 via-blue-950/30 to-slate-950">
+      {/* Video Background (optional) */}
+      {enableVideoBackground && videoUrl && (
+        <div className="absolute inset-0 z-0">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover opacity-20"
+          >
+            <source src={videoUrl} type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-blue-950/60 to-slate-950/80" />
+        </div>
+      )}
+      
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Gradient orbs */}
@@ -46,15 +80,48 @@ export default function ModernHeroSection() {
       {/* Content */}
       <div className="relative z-10 flex items-center justify-center min-h-screen px-4">
         <div className="max-w-5xl mx-auto text-center">
-          {/* Badge */}
-          <div
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border border-ipl-gold/30 bg-ipl-gold/5 mb-8 transition-all duration-700 ${
-              isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-            }`}
-          >
-            <Zap className="w-4 h-4 text-ipl-gold animate-pulse" />
-            <span className="text-sm font-semibold text-ipl-gold">IPL 2026 - Live Now</span>
+          {/* Badges */}
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
+            <div
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border border-ipl-gold/30 bg-ipl-gold/5 transition-all duration-700 ${
+                isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              }`}
+            >
+              <Zap className="w-4 h-4 text-ipl-gold animate-pulse" />
+              <span className="text-sm font-semibold text-ipl-gold">IPL 2026</span>
+            </div>
+            
+            {/* Live Match Count Badge */}
+            {liveMatchCount > 0 && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3 }}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-red-500/50 bg-red-500/20"
+              >
+                <Radio className="w-4 h-4 text-red-400 animate-pulse" />
+                <span className="text-sm font-semibold text-red-400">
+                  <AnimatedCounter value={liveMatchCount} /> Live Match{liveMatchCount > 1 ? 'es' : ''}
+                </span>
+              </motion.div>
+            )}
           </div>
+          
+          {/* Next Match Countdown */}
+          {nextMatch && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="mb-8 p-4 rounded-xl bg-white/5 backdrop-blur-md border border-white/20"
+            >
+              <p className="text-sm text-gray-400 mb-2">Next Match</p>
+              <p className="text-lg font-bold text-white mb-3">
+                {nextMatch.team1.shortName} vs {nextMatch.team2.shortName}
+              </p>
+              <CountdownTimer targetDate={nextMatch.date} />
+            </motion.div>
+          )}
 
           {/* Main heading */}
           <h1
@@ -117,12 +184,14 @@ export default function ModernHeroSection() {
             }`}
           >
             {[
-              { label: 'Teams', value: '10' },
-              { label: 'Matches', value: '74' },
-              { label: 'Players', value: '500+' },
+              { label: 'Teams', value: 10 },
+              { label: 'Matches', value: 74 },
+              { label: 'Players', value: 500, suffix: '+' },
             ].map((stat) => (
               <div key={stat.label} className="p-4 rounded-lg border border-white/10 bg-white/5 backdrop-blur">
-                <div className="text-2xl md:text-3xl font-bold text-ipl-gold mb-1">{stat.value}</div>
+                <div className="text-2xl md:text-3xl font-bold text-ipl-gold mb-1">
+                  <AnimatedCounter value={stat.value} suffix={stat.suffix || ''} />
+                </div>
                 <div className="text-xs md:text-sm text-gray-400">{stat.label}</div>
               </div>
             ))}
