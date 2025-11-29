@@ -15,13 +15,14 @@ import ModernFeatureShowcase from '@/components/home/ModernFeatureShowcase';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import GradientText from '@/components/ui/GradientText';
 import BackToTop from '@/components/ui/BackToTop';
+import QuickStatsWidget from '@/components/home/QuickStatsWidget';
 import { TeamsSkeleton, MatchesSkeleton, NewsSkeleton } from '@/components/home/HomePageSkeletons';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/data';
 import { useLeague } from '@/contexts/LeagueContext';
 import type { Team, Match, News } from '@/types';
 import { useMemo } from 'react';
-import { Trophy, Sparkles, ArrowRight, Zap, TrendingUp, Users } from 'lucide-react';
+import { Trophy, Sparkles, ArrowRight, Zap, Play, TrendingUp, Calendar, Radio } from 'lucide-react';
 
 export default function Home() {
   const router = useRouter();
@@ -45,7 +46,6 @@ export default function Home() {
   const [news, setNews] = useState<News[]>([]);
   const [newsLoading, setNewsLoading] = useState(true);
   
-  const [showConfetti, setShowConfetti] = useState(false);
   const [hasLiveMatch, setHasLiveMatch] = useState(false);
   
   // Calculate derived data
@@ -118,8 +118,6 @@ export default function Home() {
                        wplMatchesData.some(m => m.status === 'live');
         if (hasLive) {
           setHasLiveMatch(true);
-          setShowConfetti(true);
-          setTimeout(() => setShowConfetti(false), 3000);
         }
       } catch (error) {
         console.error('Error loading data:', error);
@@ -164,204 +162,285 @@ export default function Home() {
       )}
 
       <main className="relative z-10">
-        {/* Hero Section - Dual League Showcase */}
-        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-          {/* Background Effects */}
+        {/* Hero Section - Premium Design */}
+        <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+          {/* Animated Background */}
           <div className="absolute inset-0">
-            <div className="absolute top-0 left-0 w-1/2 h-full bg-gradient-to-r from-blue-600/20 via-transparent to-transparent" />
-            <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-purple-600/20 via-transparent to-transparent" />
-            <div className="absolute top-20 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-float" />
-            <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }} />
+            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-600/30 via-purple-600/20 to-pink-600/30" />
+            <motion.div
+              className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.3, 0.5, 0.3],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+            <motion.div
+              className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"
+              animate={{
+                scale: [1, 1.3, 1],
+                opacity: [0.3, 0.6, 0.3],
+              }}
+              transition={{
+                duration: 10,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1,
+              }}
+            />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_50%)]" />
           </div>
 
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32">
-            <AnimatedSection direction="down" delay={0.1}>
-              <div className="text-center mb-12">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
-                  className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30"
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+            <div className="text-center space-y-8">
+              {/* Badge */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-lg"
+              >
+                <Zap className="w-5 h-5 text-yellow-400" />
+                <span className="text-sm font-bold text-white uppercase tracking-wider">
+                  Cricket Premier Leagues 2026
+                </span>
+              </motion.div>
+
+              {/* Main Heading */}
+              <motion.h1
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white leading-tight"
+              >
+                Experience Cricket
+                <br />
+                <GradientText gradient="from-blue-400 via-purple-400 to-pink-400" animate>
+                  Like Never Before
+                </GradientText>
+              </motion.h1>
+
+              {/* Subtitle */}
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed"
+              >
+                Your ultimate destination for IPL and WPL. Live scores, real-time stats, breaking news, and everything cricket.
+              </motion.p>
+
+              {/* CTA Buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.6 }}
+                className="flex flex-wrap justify-center gap-4 pt-4"
+              >
+                <Link
+                  href="/live-score"
+                  className="group relative px-8 py-4 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold text-lg shadow-2xl shadow-blue-500/50 hover:shadow-blue-500/70 transition-all duration-300 transform hover:scale-105 overflow-hidden"
                 >
-                  <Zap className="w-4 h-4 text-blue-400" />
-                  <span className="text-sm font-bold text-blue-300 uppercase tracking-wider">
-                    Cricket Premier Leagues 2026
+                  <span className="relative z-10 flex items-center gap-2">
+                    <Play className="w-5 h-5" />
+                    Live Scores
                   </span>
-                </motion.div>
-
-                <motion.h1
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
-                  className="text-6xl md:text-8xl lg:text-9xl font-black text-white mb-6 leading-tight"
+                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </Link>
+                <Link
+                  href="/matches"
+                  className="px-8 py-4 rounded-xl bg-white/10 backdrop-blur-md text-white font-bold text-lg border-2 border-white/20 hover:border-white/40 hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
                 >
-                  Experience <GradientText gradient="from-blue-400 via-purple-400 to-pink-400" animate>Cricket</GradientText>
-                  <br />
-                  <span className="text-5xl md:text-7xl lg:text-8xl">Like Never Before</span>
-                </motion.h1>
+                  View Matches
+                </Link>
+              </motion.div>
+            </div>
+          </div>
 
-                <motion.p
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.3 }}
-                  className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-12"
-                >
-                  Follow both the Indian Premier League and Women's Premier League. 
-                  Live scores, stats, news, and everything cricket in one place.
-                </motion.p>
-              </div>
-            </AnimatedSection>
+          {/* Scroll Indicator */}
+          <motion.div
+            className="absolute bottom-8 left-1/2 -translate-x-1/2"
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            <div className="w-6 h-10 rounded-full border-2 border-white/30 flex items-start justify-center p-2">
+              <motion.div
+                className="w-1.5 h-1.5 rounded-full bg-white/50"
+                animate={{ y: [0, 12, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+            </div>
+          </motion.div>
+        </section>
 
-            {/* Dual League Cards */}
-            <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
+        {/* League Selection Cards - Premium Design */}
+        <section className="relative py-20 -mt-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
               {/* IPL Card */}
-              <AnimatedSection direction="left" delay={0.4}>
-                <motion.div
-                  whileHover={{ scale: 1.02, y: -8 }}
-                  className="relative group overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600/20 to-cyan-600/10 border border-blue-500/30 backdrop-blur-sm p-8 cursor-pointer"
-                  onClick={() => router.push('/ipl')}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  
-                  <div className="relative z-10">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="p-3 rounded-xl bg-blue-500/20 border border-blue-500/30">
-                        <Trophy className="w-6 h-6 text-blue-400" />
+              <motion.div 
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                whileHover={{ scale: 1.02, y: -5 }}
+                className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600/30 via-blue-500/20 to-cyan-500/30 backdrop-blur-xl border border-blue-500/30 p-8 cursor-pointer shadow-2xl"
+                onClick={() => router.push('/ipl')}
+              >
+                {/* Animated Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-cyan-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute -top-20 -right-20 w-40 h-40 bg-blue-500/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+                
+                <div className="relative z-10">
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="flex items-center gap-4">
+                      <div className="p-4 rounded-2xl bg-blue-500/20 border border-blue-400/30 backdrop-blur-sm">
+                        <Trophy className="w-8 h-8 text-blue-400" />
                       </div>
                       <div>
-                        <h3 className="text-2xl font-black text-white">Indian Premier League</h3>
-                        <p className="text-sm text-blue-300">IPL 2026</p>
+                        <h3 className="text-2xl font-black text-white mb-1">Indian Premier League</h3>
+                        <p className="text-sm text-blue-300 font-semibold">IPL 2026</p>
                       </div>
                     </div>
-
-                    <p className="text-gray-300 mb-6">
-                      The world's biggest T20 cricket league. Experience the thrill, passion, and glory.
-                    </p>
-
-                    <div className="grid grid-cols-3 gap-4 mb-6">
-                      <div className="text-center">
-                        <p className="text-2xl font-black text-white">{iplTeams.length}</p>
-                        <p className="text-xs text-gray-400">Teams</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-2xl font-black text-white">{iplMatches.length}</p>
-                        <p className="text-xs text-gray-400">Matches</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-2xl font-black text-white">{iplLiveMatches}</p>
-                        <p className="text-xs text-gray-400">Live</p>
-                      </div>
-                    </div>
-
-                    <Link
-                      href="/ipl"
-                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300"
-                    >
-                      Explore IPL
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
+                    <ArrowRight className="w-6 h-6 text-blue-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-300" />
                   </div>
-                </motion.div>
-              </AnimatedSection>
+
+                  <p className="text-gray-300 mb-6 leading-relaxed">
+                    The world's biggest T20 cricket league. Experience the thrill, passion, and glory.
+                  </p>
+
+                  <div className="grid grid-cols-3 gap-4 mb-6">
+                    <div className="text-center p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10">
+                      <p className="text-3xl font-black text-white mb-1">{iplTeams.length}</p>
+                      <p className="text-xs text-gray-400 uppercase tracking-wide">Teams</p>
+                    </div>
+                    <div className="text-center p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10">
+                      <p className="text-3xl font-black text-white mb-1">{iplMatches.length}</p>
+                      <p className="text-xs text-gray-400 uppercase tracking-wide">Matches</p>
+                    </div>
+                    <div className="text-center p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10">
+                      <p className="text-3xl font-black text-white mb-1">{iplLiveMatches}</p>
+                      <p className="text-xs text-gray-400 uppercase tracking-wide">Live</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-blue-400 font-semibold">
+                    <span>Explore IPL</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
+                </div>
+              </motion.div>
 
               {/* WPL Card */}
-              <AnimatedSection direction="right" delay={0.5}>
-                <motion.div
-                  whileHover={{ scale: 1.02, y: -8 }}
-                  className="relative group overflow-hidden rounded-2xl bg-gradient-to-br from-purple-600/20 to-pink-600/10 border border-purple-500/30 backdrop-blur-sm p-8 cursor-pointer"
-                  onClick={() => router.push('/wpl')}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  
-                  <div className="relative z-10">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="p-3 rounded-xl bg-purple-500/20 border border-purple-500/30">
-                        <Sparkles className="w-6 h-6 text-purple-400" />
+              <motion.div
+                initial={{ opacity: 0, x: 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                whileHover={{ scale: 1.02, y: -5 }}
+                className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-600/30 via-pink-500/20 to-rose-500/30 backdrop-blur-xl border border-purple-500/30 p-8 cursor-pointer shadow-2xl"
+                onClick={() => router.push('/wpl')}
+              >
+                {/* Animated Background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-pink-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute -top-20 -left-20 w-40 h-40 bg-purple-500/20 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+                
+                <div className="relative z-10">
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="flex items-center gap-4">
+                      <div className="p-4 rounded-2xl bg-purple-500/20 border border-purple-400/30 backdrop-blur-sm">
+                        <Sparkles className="w-8 h-8 text-purple-400" />
                       </div>
                       <div>
-                        <h3 className="text-2xl font-black text-white">Women's Premier League</h3>
-                        <p className="text-sm text-purple-300">WPL 2026</p>
+                        <h3 className="text-2xl font-black text-white mb-1">Women's Premier League</h3>
+                        <p className="text-sm text-purple-300 font-semibold">WPL 2026</p>
                       </div>
+            </div>
+                    <ArrowRight className="w-6 h-6 text-purple-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-300" />
+              </div>
+
+                  <p className="text-gray-300 mb-6 leading-relaxed">
+                    The pinnacle of women's T20 cricket. Power, passion, and excellence.
+                  </p>
+
+                  <div className="grid grid-cols-3 gap-4 mb-6">
+                    <div className="text-center p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10">
+                      <p className="text-3xl font-black text-white mb-1">{wplTeams.length}</p>
+                      <p className="text-xs text-gray-400 uppercase tracking-wide">Teams</p>
                     </div>
-
-                    <p className="text-gray-300 mb-6">
-                      The pinnacle of women's T20 cricket. Power, passion, and excellence.
-                    </p>
-
-                    <div className="grid grid-cols-3 gap-4 mb-6">
-                      <div className="text-center">
-                        <p className="text-2xl font-black text-white">{wplTeams.length}</p>
-                        <p className="text-xs text-gray-400">Teams</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-2xl font-black text-white">{wplMatches.length}</p>
-                        <p className="text-xs text-gray-400">Matches</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-2xl font-black text-white">{wplLiveMatches}</p>
-                        <p className="text-xs text-gray-400">Live</p>
-                      </div>
+                    <div className="text-center p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10">
+                      <p className="text-3xl font-black text-white mb-1">{wplMatches.length}</p>
+                      <p className="text-xs text-gray-400 uppercase tracking-wide">Matches</p>
                     </div>
-
-                    <Link
-                      href="/wpl"
-                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300"
-                    >
-                      Explore WPL
-                      <ArrowRight className="w-4 h-4" />
-                    </Link>
+                    <div className="text-center p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10">
+                      <p className="text-3xl font-black text-white mb-1">{wplLiveMatches}</p>
+                      <p className="text-xs text-gray-400 uppercase tracking-wide">Live</p>
+                    </div>
                   </div>
-                </motion.div>
-              </AnimatedSection>
+
+                  <div className="flex items-center gap-2 text-purple-400 font-semibold">
+                    <span>Explore WPL</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
+                </div>
+              </motion.div>
             </div>
 
             {/* Quick Stats Bar */}
-            <AnimatedSection direction="up" delay={0.6}>
-              <div className="mt-12 max-w-4xl mx-auto">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="rounded-xl bg-white/5 border border-white/10 px-6 py-4 text-center backdrop-blur-sm">
-                    <p className="text-3xl font-black text-white">{iplTeams.length + wplTeams.length}</p>
-                    <p className="text-xs text-gray-400 uppercase tracking-wide mt-1">Total Teams</p>
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="mt-12 max-w-4xl mx-auto"
+            >
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { label: 'Total Teams', value: iplTeams.length + wplTeams.length, icon: Trophy, color: 'from-blue-500 to-cyan-500' },
+                  { label: 'Total Matches', value: iplMatches.length + wplMatches.length, icon: Calendar, color: 'from-purple-500 to-pink-500' },
+                  { label: 'Live Now', value: totalLiveMatches, icon: Radio, color: 'from-red-500 to-orange-500' },
+                  { label: 'Leagues', value: 2, icon: TrendingUp, color: 'from-green-500 to-emerald-500' },
+                ].map((stat, idx) => (
+                  <div
+                    key={stat.label}
+                    className="relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-6 text-center group hover:bg-white/10 transition-all duration-300"
+                  >
+                    <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
+                    <stat.icon className="w-6 h-6 mx-auto mb-3 text-gray-400 group-hover:text-white transition-colors" />
+                    <p className="text-3xl font-black text-white mb-1">{stat.value}</p>
+                    <p className="text-xs text-gray-400 uppercase tracking-wide">{stat.label}</p>
                   </div>
-                  <div className="rounded-xl bg-white/5 border border-white/10 px-6 py-4 text-center backdrop-blur-sm">
-                    <p className="text-3xl font-black text-white">{iplMatches.length + wplMatches.length}</p>
-                    <p className="text-xs text-gray-400 uppercase tracking-wide mt-1">Total Matches</p>
-                  </div>
-                  <div className="rounded-xl bg-white/5 border border-white/10 px-6 py-4 text-center backdrop-blur-sm">
-                    <p className="text-3xl font-black text-white">{totalLiveMatches}</p>
-                    <p className="text-xs text-gray-400 uppercase tracking-wide mt-1">Live Now</p>
-                  </div>
-                  <div className="rounded-xl bg-white/5 border border-white/10 px-6 py-4 text-center backdrop-blur-sm">
-                    <p className="text-3xl font-black text-white">2</p>
-                    <p className="text-xs text-gray-400 uppercase tracking-wide mt-1">Leagues</p>
-                  </div>
-                </div>
-              </div>
-            </AnimatedSection>
+                ))}
+          </div>
+            </motion.div>
           </div>
         </section>
 
         {/* IPL Section */}
-        <section className="relative py-20 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-blue-950/10 to-transparent" />
+        <section className="relative py-24 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-blue-950/20 via-transparent to-transparent" />
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <AnimatedSection direction="up" delay={0.2}>
               <div className="flex items-center justify-between mb-12">
                 <div>
-                  <div className="inline-flex items-center gap-2 mb-4 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-500/30">
+                  <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-blue-500/20 border border-blue-500/30 backdrop-blur-sm">
                     <Trophy className="w-4 h-4 text-blue-400" />
                     <span className="text-xs font-bold text-blue-300 uppercase tracking-wider">Indian Premier League</span>
                   </div>
-                  <h2 className="text-4xl md:text-5xl font-black text-white">
+                  <h2 className="text-4xl md:text-6xl font-black text-white">
                     IPL <GradientText gradient="from-blue-400 to-cyan-400" animate>2026</GradientText>
-                  </h2>
+              </h2>
                 </div>
                 <Link
                   href="/ipl"
-                  className="text-blue-400 hover:text-cyan-400 font-semibold flex items-center gap-2 transition-colors"
+                  className="group flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:text-white transition-all duration-300"
                 >
                   View All
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
             </AnimatedSection>
@@ -374,7 +453,7 @@ export default function Home() {
                 <div className="mb-12">
                   <h3 className="text-2xl font-bold text-white mb-6">Featured Teams</h3>
                   <ModernTeamsShowcase teams={iplTeams.slice(0, 5)} />
-                </div>
+            </div>
               </AnimatedSection>
             ) : null}
 
@@ -391,28 +470,28 @@ export default function Home() {
             ) : null}
           </div>
         </section>
-
+        
         {/* WPL Section */}
-        <section className="relative py-20 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-purple-950/10 to-transparent" />
+        <section className="relative py-24 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-purple-950/20 via-transparent to-transparent" />
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <AnimatedSection direction="up" delay={0.2}>
               <div className="flex items-center justify-between mb-12">
                 <div>
-                  <div className="inline-flex items-center gap-2 mb-4 px-3 py-1 rounded-full bg-purple-500/20 border border-purple-500/30">
+                  <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-purple-500/20 border border-purple-500/30 backdrop-blur-sm">
                     <Sparkles className="w-4 h-4 text-purple-400" />
                     <span className="text-xs font-bold text-purple-300 uppercase tracking-wider">Women's Premier League</span>
                   </div>
-                  <h2 className="text-4xl md:text-5xl font-black text-white">
+                  <h2 className="text-4xl md:text-6xl font-black text-white">
                     WPL <GradientText gradient="from-purple-400 to-pink-400" animate>2026</GradientText>
                   </h2>
                 </div>
                 <Link
                   href="/wpl"
-                  className="text-purple-400 hover:text-pink-400 font-semibold flex items-center gap-2 transition-colors"
+                  className="group flex items-center gap-2 px-6 py-3 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-400 hover:text-white transition-all duration-300"
                 >
                   View All
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
               </div>
             </AnimatedSection>
@@ -444,11 +523,11 @@ export default function Home() {
         </section>
 
         {/* Combined Stats Section */}
-        <section className="relative py-20">
+        <section className="relative py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <AnimatedSection direction="up" delay={0.2}>
               <div className="text-center mb-12">
-                <h2 className="text-4xl md:text-5xl font-black text-white mb-4">
+                <h2 className="text-4xl md:text-6xl font-black text-white mb-4">
                   League <GradientText gradient="from-blue-400 via-purple-400 to-pink-400" animate>Statistics</GradientText>
                 </h2>
                 <p className="text-gray-300 text-lg max-w-2xl mx-auto">
@@ -464,19 +543,19 @@ export default function Home() {
         {newsLoading ? (
           <NewsSkeleton />
         ) : news.length > 0 ? (
-          <section className="relative py-20">
+          <section className="relative py-24">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <AnimatedSection direction="up" delay={0.2}>
                 <div className="flex items-center justify-between mb-12">
-                  <h2 className="text-4xl md:text-5xl font-black text-white">
+                  <h2 className="text-4xl md:text-6xl font-black text-white">
                     Latest <GradientText gradient="from-blue-400 to-purple-400" animate>News</GradientText>
-                  </h2>
+              </h2>
                   <Link
                     href="/news"
-                    className="text-blue-400 hover:text-purple-400 font-semibold flex items-center gap-2 transition-colors"
+                    className="group flex items-center gap-2 px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white hover:text-blue-400 transition-all duration-300"
                   >
                     View All
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </div>
               </AnimatedSection>
@@ -486,7 +565,7 @@ export default function Home() {
         ) : null}
 
         {/* Feature Showcase */}
-        <section className="relative py-20">
+        <section className="relative py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <ModernFeatureShowcase />
           </div>
@@ -494,18 +573,19 @@ export default function Home() {
 
         {/* CTA Section */}
         <AnimatedSection direction="up" delay={0.3}>
-          <section className="relative py-24 mt-12">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <section className="relative py-32 mt-12">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-purple-600/10 to-pink-600/10" />
+            <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
               <motion.h2
                 initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
-                className="text-4xl md:text-5xl font-black text-white mb-6"
+                className="text-4xl md:text-6xl font-black text-white mb-6"
               >
                 Ready to Experience <GradientText gradient="from-blue-400 via-purple-400 to-pink-400" animate>Cricket</GradientText>?
               </motion.h2>
-              <motion.p
+              <motion.p 
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -514,7 +594,7 @@ export default function Home() {
               >
                 Join millions of cricket fans following live scores, stats, and all the action from both leagues.
               </motion.p>
-              <motion.div
+              <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -525,14 +605,14 @@ export default function Home() {
                   href="/live-score"
                   className="px-8 py-4 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 transform hover:scale-105"
                 >
-                  Watch Live Scores
-                </Link>
+                    Watch Live Scores
+                  </Link>
                 <Link
                   href="/matches"
-                  className="px-8 py-4 rounded-xl bg-white/10 text-white font-bold border border-purple-500/50 hover:bg-purple-500/20 transition-all duration-300 transform hover:scale-105"
+                  className="px-8 py-4 rounded-xl bg-white/10 backdrop-blur-md text-white font-bold border-2 border-white/20 hover:border-white/40 hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
                 >
                   View All Matches
-                </Link>
+                  </Link>
               </motion.div>
             </div>
           </section>
