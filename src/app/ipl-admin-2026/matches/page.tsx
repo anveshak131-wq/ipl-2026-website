@@ -1253,86 +1253,87 @@ export default function AdminMatches() {
                             )}
                         </div>
                     ) : (
-                        <StaggeredList className="space-y-6" staggerDelay={0.1}>
-                            {matchesByDate.map(([date, dateMatches]) => (
-                                <motion.div 
-                                    key={date} 
-                                    className="glass-effect rounded-xl p-6 border border-white/10"
-                                    whileHover={{ scale: 1.01 }}
-                                >
-                                    <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                                        <div className="w-1 h-6 bg-gradient-to-b from-ipl-gold to-ipl-purple rounded-full"></div>
-                                        {formatDate(date)}
-                                    </h3>
-                                    <StaggeredList className="space-y-4" staggerDelay={0.05}>
-                                        {dateMatches.map((match) => (
-                                            <motion.div
-                                                key={match.id}
-                                                className="bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-all duration-200 border border-white/5"
-                                                whileHover={{ scale: 1.02, backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                                            >
-                                                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                                                    <div className="flex items-center gap-4">
-                                                        <div className="text-sm text-gray-400 font-medium min-w-[80px]">
-                                                            {formatTime(match.time)}
-                                                        </div>
+                        <div className="space-y-6">
+                            {matchesByDate.length > 0 ? (
+                                <StaggeredList className="space-y-6" staggerDelay={0.1}>
+                                    {matchesByDate.map(([date, dateMatches]) => (
+                                        <motion.div 
+                                            key={date} 
+                                            className="glass-effect rounded-xl p-6 border border-white/10"
+                                            whileHover={{ scale: 1.01 }}
+                                        >
+                                            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                                                <div className="w-1 h-6 bg-gradient-to-b from-ipl-gold to-ipl-purple rounded-full"></div>
+                                                {formatDate(date)}
+                                            </h3>
+                                            <StaggeredList className="space-y-4" staggerDelay={0.05}>
+                                                {dateMatches.map((match) => (
+                                                    <motion.div
+                                                        key={match.id}
+                                                        className="bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-all duration-200 border border-white/5"
+                                                        whileHover={{ scale: 1.02, backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+                                                    >
+                                                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                                                            <div className="flex items-center gap-4">
+                                                                <div className="text-sm text-gray-400 font-medium min-w-[80px]">
+                                                                    {formatTime(match.time)}
+                                                                </div>
 
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="flex items-center gap-2">
-                                                                {match.team1.id === '1' ? (
-                                                                  <div className="w-10 h-10 flex items-center justify-center">
-                                                                    <RCBLionLogo className="w-10 h-10" />
-                                                                  </div>
-                                                                ) : (
-                                                                  <img src={match.team1.logo} alt={match.team1.shortName} className="w-10 h-10 object-contain" />
-                                                                )}
-                                                                <span className="text-white font-bold">{match.team1.shortName}</span>
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="flex items-center gap-2">
+                                                                        {match.team1.id === '1' ? (
+                                                                          <div className="w-10 h-10 flex items-center justify-center">
+                                                                            <RCBLionLogo className="w-10 h-10" />
+                                                                          </div>
+                                                                        ) : (
+                                                                          <img src={match.team1.logo} alt={match.team1.shortName} className="w-10 h-10 object-contain" />
+                                                                        )}
+                                                                        <span className="text-white font-bold">{match.team1.shortName}</span>
+                                                                    </div>
+                                                                    <span className="text-gray-500 font-bold text-lg">vs</span>
+                                                                    <div className="flex items-center gap-2">
+                                                                        {match.team2.id === '1' ? (
+                                                                          <div className="w-10 h-10 flex items-center justify-center">
+                                                                            <RCBLionLogo className="w-10 h-10" />
+                                                                          </div>
+                                                                        ) : (
+                                                                          <img src={match.team2.logo} alt={match.team2.shortName} className="w-10 h-10 object-contain" />
+                                                                        )}
+                                                                        <span className="text-white font-bold">{match.team2.shortName}</span>
+                                                                    </div>
+                                                                </div>
                                                             </div>
-                                                            <span className="text-gray-500 font-bold text-lg">vs</span>
-                                                            <div className="flex items-center gap-2">
-                                                                {match.team2.id === '1' ? (
-                                                                  <div className="w-10 h-10 flex items-center justify-center">
-                                                                    <RCBLionLogo className="w-10 h-10" />
-                                                                  </div>
-                                                                ) : (
-                                                                  <img src={match.team2.logo} alt={match.team2.shortName} className="w-10 h-10 object-contain" />
-                                                                )}
-                                                                <span className="text-white font-bold">{match.team2.shortName}</span>
+
+                                                            <div className="flex items-center gap-3 flex-wrap">
+                                                                <div className="text-sm text-gray-400">
+                                                                    📍 {match.venue}
+                                                                </div>
+                                                                {getStatusBadge(match.status)}
+                                                                <div className="flex items-center gap-2">
+                                                                    <button
+                                                                        onClick={() => handleEdit(match)}
+                                                                        className="p-2 text-ipl-gold hover:bg-ipl-gold/10 rounded-lg transition-all duration-200"
+                                                                        title="Edit"
+                                                                    >
+                                                                        <IconEdit className="w-4 h-4" />
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => handleDelete(match.id)}
+                                                                        className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
+                                                                        title="Delete"
+                                                                    >
+                                                                        <IconTrash className="w-4 h-4" />
+                                                                    </button>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-
-                                                    <div className="flex items-center gap-3 flex-wrap">
-                                                        <div className="text-sm text-gray-400">
-                                                            📍 {match.venue}
-                                                        </div>
-                                                        {getStatusBadge(match.status)}
-                                                        <div className="flex items-center gap-2">
-                                                            <button
-                                                                onClick={() => handleEdit(match)}
-                                                                className="p-2 text-ipl-gold hover:bg-ipl-gold/10 rounded-lg transition-all duration-200"
-                                                                title="Edit"
-                                                            >
-                                                                <IconEdit className="w-4 h-4" />
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleDelete(match.id)}
-                                                                className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
-                                                                title="Delete"
-                                                            >
-                                                                <IconTrash className="w-4 h-4" />
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </motion.div>
-                                        ))}
-                                    </StaggeredList>
-                                </motion.div>
-                            ))}
-                        </StaggeredList>
-
-                            {matchesByDate.length === 0 && (
+                                                    </motion.div>
+                                                ))}
+                                            </StaggeredList>
+                                        </motion.div>
+                                    ))}
+                                </StaggeredList>
+                            ) : (
                                 <EmptyStateIllustration
                                     type="matches"
                                     title="No matches found"
