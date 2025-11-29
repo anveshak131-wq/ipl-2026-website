@@ -75,6 +75,7 @@ export default function AdminTeams() {
         shortName: '',
         logo: '',
         description: '',
+        league: 'ipl' as 'ipl' | 'wpl',
         colors: {
             primary: '#6B46C1',
             secondary: '#FFD700'
@@ -146,6 +147,7 @@ export default function AdminTeams() {
             shortName: '',
             logo: '',
             description: '',
+            league: 'ipl',
             colors: {
                 primary: '#6B46C1',
                 secondary: '#FFD700'
@@ -164,6 +166,7 @@ export default function AdminTeams() {
             shortName: team.shortName,
             logo: team.logo,
             description: team.description,
+            league: team.league,
             colors: team.colors,
             trophies: team.trophies || [],
             homeGrounds: team.homeGrounds || []
@@ -669,6 +672,21 @@ export default function AdminTeams() {
                                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all"
                                                 placeholder="https://example.com/logo.png"
                                             />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                League
+                                            </label>
+                                            <select
+                                                value={formData.league}
+                                                onChange={(e) => setFormData({ ...formData, league: e.target.value as 'ipl' | 'wpl' })}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all"
+                                                required
+                                            >
+                                                <option value="ipl">IPL (Indian Premier League)</option>
+                                                <option value="wpl">WPL (Women's Premier League)</option>
+                                            </select>
                                         </div>
 
                                         <div>

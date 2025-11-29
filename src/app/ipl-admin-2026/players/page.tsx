@@ -89,6 +89,7 @@ export default function AdminPlayers() {
     name: string;
     role: 'Batsman' | 'Bowler' | 'All-rounder' | 'Wicket-keeper';
     teamId: string;
+    league: 'ipl' | 'wpl';
     age: string;
     dateOfBirth: string; // DD/MM/YYYY format for input
     nationality: string;
@@ -115,6 +116,7 @@ export default function AdminPlayers() {
     name: '',
     role: 'Batsman',
     teamId: '',
+    league: 'ipl',
     age: '',
     dateOfBirth: '',
     nationality: '',
@@ -197,6 +199,7 @@ export default function AdminPlayers() {
       name: '',
       role: 'Batsman',
       teamId: '',
+      league: 'ipl',
       age: '',
       dateOfBirth: '',
       nationality: '',
@@ -254,6 +257,7 @@ export default function AdminPlayers() {
       name: player.name,
       role: player.role,
       teamId: player.teamId,
+      league: player.league,
       age: player.age.toString(),
       dateOfBirth: dobFormatted,
       nationality: player.nationality,
@@ -1115,6 +1119,21 @@ export default function AdminPlayers() {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
+                          League
+                        </label>
+                        <select
+                          value={formData.league}
+                          onChange={(e) => setFormData({...formData, league: e.target.value as 'ipl' | 'wpl'})}
+                          className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-ipl-gold"
+                          required
+                        >
+                          <option value="ipl">IPL (Indian Premier League)</option>
+                          <option value="wpl">WPL (Women's Premier League)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
                           Team
                         </label>
                         <select
@@ -1124,7 +1143,7 @@ export default function AdminPlayers() {
                           required
                         >
                           <option value="">Select a team</option>
-                          {teams.map(team => (
+                          {teams.filter(team => team.league === formData.league).map(team => (
                             <option key={team.id} value={team.id}>
                               {team.name}
                             </option>
