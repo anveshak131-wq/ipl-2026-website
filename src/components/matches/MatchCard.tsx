@@ -48,7 +48,7 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
 
   const renderTeamLogo = (team: Match['team1']) => {
     // ALWAYS prioritize team.logo first (especially for TBA/TBD teams)
-    if (team.logo) {
+    if (team.logo && team.logo.trim() !== '') {
       // Check for TBA logo
       if (team.logo.includes('tba_logo.svg')) {
         return (
@@ -75,6 +75,17 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
           />
         );
       }
+    }
+
+    // Check if it's a TBD team by ID or shortName
+    if (team.id.includes('tbd-') || team.shortName === 'TBD' || team.shortName?.includes('Place') || team.name?.includes('Place Team')) {
+      return (
+        <img
+          src="/logos/tba_logo.svg"
+          alt="TBA"
+          className="w-10 h-10 object-contain"
+        />
+      );
     }
 
     // Get league from team, match, or default to 'ipl'

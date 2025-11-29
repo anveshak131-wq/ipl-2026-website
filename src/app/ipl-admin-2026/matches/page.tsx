@@ -2262,8 +2262,19 @@ export default function AdminMatches() {
                                                     <div className="flex items-center gap-3">
                                                         <div className="flex items-center gap-2">
                                                             {(() => {
+                                                                // Check if it's a TBD team by ID, shortName, or name
+                                                                if (match.team1.id.includes('tbd-') || match.team1.shortName === 'TBD' || match.team1.shortName?.includes('Place') || match.team1.name?.includes('Place Team')) {
+                                                                    return (
+                                                                        <img 
+                                                                            src="/logos/tba_logo.svg" 
+                                                                            alt="TBA" 
+                                                                            className="w-8 h-8 object-contain"
+                                                                        />
+                                                                    );
+                                                                }
+                                                                
                                                                 // ALWAYS prioritize team.logo first (especially for TBA/TBD teams)
-                                                                if (match.team1.logo) {
+                                                                if (match.team1.logo && match.team1.logo.trim() !== '') {
                                                                     // Check for TBA logo
                                                                     if (match.team1.logo.includes('tba_logo.svg')) {
                                                                         return (
@@ -2328,8 +2339,19 @@ export default function AdminMatches() {
                                                         <span className="text-gray-500 font-bold">vs</span>
                                                         <div className="flex items-center gap-2">
                                                             {(() => {
+                                                                // Check if it's a TBD team by ID, shortName, or name
+                                                                if (match.team2.id.includes('tbd-') || match.team2.shortName === 'TBD' || match.team2.shortName?.includes('Place') || match.team2.name?.includes('Place Team')) {
+                                                                    return (
+                                                                        <img 
+                                                                            src="/logos/tba_logo.svg" 
+                                                                            alt="TBA" 
+                                                                            className="w-8 h-8 object-contain"
+                                                                        />
+                                                                    );
+                                                                }
+                                                                
                                                                 // ALWAYS prioritize team.logo first (especially for TBA/TBD teams)
-                                                                if (match.team2.logo) {
+                                                                if (match.team2.logo && match.team2.logo.trim() !== '') {
                                                                     // Check for TBA logo
                                                                     if (match.team2.logo.includes('tba_logo.svg')) {
                                                                         return (
@@ -2578,8 +2600,19 @@ export default function AdminMatches() {
                                                         <div className="flex items-center gap-3">
                                                             <div className="flex items-center gap-2">
                                                                 {(() => {
+                                                                    // Check if it's a TBD team by ID, shortName, or name
+                                                                    if (match.team1.id.includes('tbd-') || match.team1.shortName === 'TBD' || match.team1.shortName?.includes('Place') || match.team1.name?.includes('Place Team')) {
+                                                                        return (
+                                                                            <img 
+                                                                                src="/logos/tba_logo.svg" 
+                                                                                alt="TBA" 
+                                                                                className="w-10 h-10 object-contain"
+                                                                            />
+                                                                        );
+                                                                    }
+                                                                    
                                                                     // ALWAYS prioritize team.logo first (especially for TBA/TBD teams)
-                                                                    if (match.team1.logo) {
+                                                                    if (match.team1.logo && match.team1.logo.trim() !== '') {
                                                                         // Check for TBA logo
                                                                         if (match.team1.logo.includes('tba_logo.svg')) {
                                                                             return (
@@ -2644,8 +2677,19 @@ export default function AdminMatches() {
                                                             <span className="text-gray-500 font-bold text-lg">vs</span>
                                                             <div className="flex items-center gap-2">
                                                                 {(() => {
+                                                                    // Check if it's a TBD team by ID, shortName, or name
+                                                                    if (match.team2.id.includes('tbd-') || match.team2.shortName === 'TBD' || match.team2.shortName?.includes('Place') || match.team2.name?.includes('Place Team')) {
+                                                                        return (
+                                                                            <img 
+                                                                                src="/logos/tba_logo.svg" 
+                                                                                alt="TBA" 
+                                                                                className="w-10 h-10 object-contain"
+                                                                            />
+                                                                        );
+                                                                    }
+                                                                    
                                                                     // ALWAYS prioritize team.logo first (especially for TBA/TBD teams)
-                                                                    if (match.team2.logo) {
+                                                                    if (match.team2.logo && match.team2.logo.trim() !== '') {
                                                                         // Check for TBA logo
                                                                         if (match.team2.logo.includes('tba_logo.svg')) {
                                                                             return (

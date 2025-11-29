@@ -18,6 +18,11 @@
 // 'GG' = Gujarat Giants (WPL)
 // 'UPW' = UP Warriorz (WPL)
 export function getAnimatedLogoPath(teamId: string, shortName?: string, league?: 'ipl' | 'wpl'): string {
+  // Check for TBD teams - they should use TBA logo
+  if (teamId.includes('tbd-') || shortName === 'TBD' || shortName?.includes('Place')) {
+    return '/logos/tba_logo.svg';
+  }
+  
   // Check if it's a WPL team (by league or shortName pattern)
   const isWPL = league === 'wpl' || shortName?.includes('-W') || shortName === 'GG' || shortName === 'UPW';
   
