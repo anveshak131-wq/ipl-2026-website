@@ -106,9 +106,13 @@ const WPL_VENUES = [
 ];
 
 // Official WPL Match Times (2026 Season)
+// Times are stored in IST (Indian Standard Time)
+// Paris time reference:
+// 11:00 AM Paris = 3:30 PM IST (15:30)
+// 3:00 PM Paris = 7:30 PM IST (19:30)
 const WPL_TIMES = [
-    '11:00',
-    '15:00'
+    { paris: '11:00', ist: '15:30', display: '3:30 PM IST (11:00 AM Paris)' },
+    { paris: '15:00', ist: '19:30', display: '7:30 PM IST (3:00 PM Paris)' }
 ];
 
 export default function AdminMatches() {
@@ -556,10 +560,10 @@ export default function AdminMatches() {
             // Delete real matches from backend
             if (realMatches.length > 0) {
                 const deletePromises = realMatches.map(matchId => 
-                    api.deleteMatch(matchId)
-                );
+                api.deleteMatch(matchId)
+            );
 
-                await Promise.all(deletePromises);
+            await Promise.all(deletePromises);
             }
             
             // Remove both real and mock matches from local state
@@ -1470,46 +1474,55 @@ export default function AdminMatches() {
 
                                                 <div>
                                                     <label className="block text-sm font-medium text-gray-300 mb-2">
-                                                        Time
+                                                        Time (stored in IST)
                                                         {currentLeague === 'wpl' && (
                                                             <span className="ml-2 text-xs text-purple-300">(WPL 2026 times only)</span>
                                                         )}
                                                     </label>
                                                     {currentLeague === 'wpl' ? (
-                                                        // WPL: Dropdown with only 2 times
-                                                        <select
-                                                            value={formData.time}
-                                                            onChange={(e) => {
-                                                                setFormData({ ...formData, time: e.target.value });
-                                                            }}
-                                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition-colors"
-                                                            required
-                                                        >
-                                                            <option value="">Select a time...</option>
-                                                            {WPL_TIMES.map((time, index) => {
-                                                                // Convert 24-hour format to 12-hour format for display
-                                                                const [hours, minutes] = time.split(':');
-                                                                const hour = parseInt(hours);
-                                                                const ampm = hour >= 12 ? 'PM' : 'AM';
-                                                                const displayHour = hour % 12 || 12;
-                                                                const displayTime = `${displayHour}:${minutes} ${ampm}`;
-                                                                
-                                                                return (
-                                                                    <option key={index} value={time} className="bg-gray-900 text-white">
-                                                                        {displayTime}
+                                                        // WPL: Dropdown with only 2 times (showing both Paris and IST)
+                                                        <div className="space-y-2">
+                                                            <select
+                                                                value={formData.time}
+                                                                onChange={(e) => {
+                                                                    setFormData({ ...formData, time: e.target.value });
+                                                                }}
+                                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition-colors"
+                                                                required
+                                                            >
+                                                                <option value="">Select a time...</option>
+                                                                {WPL_TIMES.map((timeOption, index) => (
+                                                                    <option key={index} value={timeOption.ist} className="bg-gray-900 text-white">
+                                                                        {timeOption.display}
                                                                     </option>
-                                                                );
-                                                            })}
-                                                        </select>
+                                                                ))}
+                                                            </select>
+                                                            {formData.time && (
+                                                                <div className="flex items-center gap-2 text-xs text-purple-300 bg-purple-500/10 border border-purple-500/20 rounded-lg px-3 py-2">
+                                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                    </svg>
+                                                                    <span>
+                                                                        {(() => {
+                                                                            const selected = WPL_TIMES.find(t => t.ist === formData.time);
+                                                                            if (selected) {
+                                                                                return `Storing: ${selected.ist} IST (Paris: ${selected.paris})`;
+                                                                            }
+                                                                            return `Storing: ${formData.time} IST`;
+                                                                        })()}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                        </div>
                                                     ) : (
                                                         // IPL: Time input
-                                                        <input
-                                                            type="time"
-                                                            value={formData.time}
-                                                            onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ipl-gold transition-colors"
-                                                            required
-                                                        />
+                                                    <input
+                                                        type="time"
+                                                        value={formData.time}
+                                                        onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ipl-gold transition-colors"
+                                                        required
+                                                    />
                                                     )}
                                                 </div>
                                             </div>
@@ -1618,28 +1631,28 @@ export default function AdminMatches() {
                                                        </select>
                                                    ) : (
                                                        // IPL: Autocomplete input
-                                                       <div className="relative">
-                                                           <input
-                                                               type="text"
-                                                               value={formData.venue}
-                                                               onChange={(e) => {
-                                                                   setFormData({ ...formData, venue: e.target.value });
-                                                                   setVenueSearchQuery(e.target.value);
-                                                               }}
-                                                               onFocus={() => setVenueSearchQuery(formData.venue)}
-                                                               className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 pr-10 text-white focus:outline-none focus:border-ipl-gold transition-colors"
-                                                               placeholder="Search or select venue..."
-                                                               required
-                                                           />
-                                                           <svg 
-                                                               className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
-                                                               fill="none" 
-                                                               stroke="currentColor" 
-                                                               viewBox="0 0 24 24"
-                                                           >
-                                                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                                           </svg>
-                                                       </div>
+                                                   <div className="relative">
+                                                       <input
+                                                           type="text"
+                                                           value={formData.venue}
+                                                           onChange={(e) => {
+                                                               setFormData({ ...formData, venue: e.target.value });
+                                                               setVenueSearchQuery(e.target.value);
+                                                           }}
+                                                           onFocus={() => setVenueSearchQuery(formData.venue)}
+                                                           className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 pr-10 text-white focus:outline-none focus:border-ipl-gold transition-colors"
+                                                           placeholder="Search or select venue..."
+                                                           required
+                                                       />
+                                                       <svg 
+                                                           className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+                                                           fill="none" 
+                                                           stroke="currentColor" 
+                                                           viewBox="0 0 24 24"
+                                                       >
+                                                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                                       </svg>
+                                                   </div>
                                                    )}
                                                    
                                                    {/* Venue Suggestions Dropdown (IPL only) */}
@@ -1824,9 +1837,9 @@ export default function AdminMatches() {
                                                                 
                                                                 if (animatedPath1.endsWith('rcb_logo_premium.svg')) {
                                                                     return (
-                                                                        <div className="w-8 h-8 flex items-center justify-center">
-                                                                            <RCBLionLogo className="w-8 h-8" />
-                                                                        </div>
+                                                              <div className="w-8 h-8 flex items-center justify-center">
+                                                                <RCBLionLogo className="w-8 h-8" />
+                                                              </div>
                                                                     );
                                                                 }
                                                                 if (animatedPath1.endsWith('.json')) {
@@ -1861,9 +1874,9 @@ export default function AdminMatches() {
                                                                 
                                                                 if (animatedPath2.endsWith('rcb_logo_premium.svg')) {
                                                                     return (
-                                                                        <div className="w-8 h-8 flex items-center justify-center">
-                                                                            <RCBLionLogo className="w-8 h-8" />
-                                                                        </div>
+                                                              <div className="w-8 h-8 flex items-center justify-center">
+                                                                <RCBLionLogo className="w-8 h-8" />
+                                                              </div>
                                                                     );
                                                                 }
                                                                 if (animatedPath2.endsWith('.json')) {
@@ -2082,9 +2095,9 @@ export default function AdminMatches() {
                                                                     
                                                                     if (animatedPath1.endsWith('rcb_logo_premium.svg')) {
                                                                         return (
-                                                                            <div className="w-10 h-10 flex items-center justify-center">
-                                                                                <RCBLionLogo className="w-10 h-10" />
-                                                                            </div>
+                                                                  <div className="w-10 h-10 flex items-center justify-center">
+                                                                    <RCBLionLogo className="w-10 h-10" />
+                                                                  </div>
                                                                         );
                                                                     }
                                                                     if (animatedPath1.endsWith('.json')) {
@@ -2119,9 +2132,9 @@ export default function AdminMatches() {
                                                                     
                                                                     if (animatedPath2.endsWith('rcb_logo_premium.svg')) {
                                                                         return (
-                                                                            <div className="w-10 h-10 flex items-center justify-center">
-                                                                                <RCBLionLogo className="w-10 h-10" />
-                                                                            </div>
+                                                                  <div className="w-10 h-10 flex items-center justify-center">
+                                                                    <RCBLionLogo className="w-10 h-10" />
+                                                                  </div>
                                                                         );
                                                                     }
                                                                     if (animatedPath2.endsWith('.json')) {

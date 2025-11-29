@@ -5,6 +5,7 @@ import { Match } from '@/types';
 import { api } from '@/lib/data';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import { CustomEmoji } from '@/components/emoji/Emoji';
+import { formatMatchTime } from '@/lib/timeUtils';
 
 export default function UpcomingMatches() {
   const [matches, setMatches] = useState<Match[]>([]);
@@ -109,7 +110,7 @@ export default function UpcomingMatches() {
                     <CustomEmoji type="calendar" size={14} /> {formatDate(match.date)}
                   </p>
                   <p className="text-lg font-bold text-white">
-                    🕐 {match.time} IST
+                    🕐 {formatMatchTime(match.time, match.date)}
                   </p>
                 </div>
 

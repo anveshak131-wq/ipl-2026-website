@@ -5,6 +5,7 @@ import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import RCBLottie from '@/components/ui/RCBLottie';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { CustomEmoji } from '@/components/emoji/Emoji';
+import { formatMatchTime } from '@/lib/timeUtils';
 
 interface MatchCardProps {
   match: Match;
@@ -96,8 +97,9 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
             <p className="text-white font-bold text-base flex items-center gap-2">
               <CustomEmoji type="calendar" size={14} /> {formatDate(match.date)}
             </p>
-            <p className="text-gray-300 text-sm mt-1 flex items-center gap-2">
-              <CustomEmoji type="clock" size={14} /> {match.time} IST
+            <p className="text-gray-300 text-sm mt-1 flex items-center gap-2 flex-wrap">
+              <CustomEmoji type="clock" size={14} /> 
+              <span>{formatMatchTime(match.time, match.date)}</span>
             </p>
           </div>
         </div>
