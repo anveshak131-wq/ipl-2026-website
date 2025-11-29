@@ -29,8 +29,26 @@ export const onRequest = async (context) => {
 
   try {
     if (request.method === 'GET') {
+      const url = new URL(request.url);
+      const league = url.searchParams.get('league');
+      
       const playersData = await env.IPL_CACHE.get('players', 'json');
-      const players = playersData || [];
+      let players = playersData || [];
+      
+      // Ensure all players have league property (migration for existing data)
+      players = players.map(player => ({
+        ...player,
+        league: player.league || 'ipl' // Default to 'ipl' if missing
+      }));
+      
+      // Filter by league if specified
+      if (league && (league === 'ipl' || league === 'wpl')) {
+        players = players.filter(player => {
+          const playerLeague = player.league || 'ipl';
+          return playerLeague === league;
+        });
+      }
+      
       return new Response(JSON.stringify(players), {
         status: 200,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
@@ -59,6 +77,7 @@ export const onRequest = async (context) => {
       const newId = (players.length + 1).toString();
       const playerToAdd = {
         id: newId,
+        league: newPlayer.league || 'ipl', // Default to 'ipl' if not specified
         name: newPlayer.name,
         role: newPlayer.role,
         teamId: newPlayer.teamId,
@@ -122,7 +141,9 @@ export const onRequest = async (context) => {
       }
 
       players[index] = {
+        ...players[index], // Preserve existing properties
         id: updatedPlayer.id,
+        ...(updatedPlayer.league && { league: updatedPlayer.league }), // Update league if provided
         name: updatedPlayer.name,
         role: updatedPlayer.role,
         teamId: updatedPlayer.teamId,
@@ -149,6 +170,11 @@ export const onRequest = async (context) => {
           bestBowling: updatedPlayer.stats?.bestBowling || '-',
         },
       };
+      
+      // Ensure league property exists (default to existing or 'ipl')
+      if (!players[index].league) {
+        players[index].league = 'ipl';
+      }
 
       await env.IPL_CACHE.put('players', JSON.stringify(players));
 

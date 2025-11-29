@@ -338,9 +338,26 @@ export const api = {
         throw new Error('Failed to fetch players');
       }
       let players = await response.json();
+      
+      // If API returns empty array, use fallback mock data
+      if (!players || players.length === 0) {
+        console.log('API: No players returned, using fallback mock data');
+        let fallback = league ? mockPlayers.filter(p => p.league === league) : mockPlayers;
+        fallback = teamId ? fallback.filter(p => p.teamId === teamId) : fallback;
+        return teamId ? sortPlayersByRoleAndAge(fallback) : fallback;
+      }
+      
+      // Ensure all players have league property (migration for existing data)
+      players = players.map((p: Player) => ({
+        ...p,
+        league: p.league || 'ipl' // Default to 'ipl' if missing
+      }));
       // Filter by league if specified
       if (league) {
-        players = players.filter((p: Player) => p.league === league);
+        players = players.filter((p: Player) => {
+          const playerLeague = p.league || 'ipl';
+          return playerLeague === league;
+        });
       }
       // Filter by team if specified
       const list = teamId ? players.filter((p: Player) => p.teamId === teamId) : players;
