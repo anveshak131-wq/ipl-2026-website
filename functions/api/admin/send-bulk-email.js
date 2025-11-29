@@ -33,10 +33,24 @@ async function sendEmailViaProvider(emailData, env) {
     const result = await sendViaResend(emailData, resendKeyTrimmed);
     if (!result.success) {
       console.error('[Email Service] Resend failed:', result.error);
-      // Don't fall through to other providers - return error so user knows Resend failed
+      
+      // Check if it's a domain verification error - if so, fall back to Elastic Email
+      const isDomainError = result.error && (
+        result.error.includes('only send testing emails') ||
+        result.error.includes('verify a domain') ||
+        result.error.includes('domain verification')
+      );
+      
+      if (isDomainError && hasElastic) {
+        console.log('[Email Service] Resend requires domain verification. Falling back to Elastic Email (no domain required)...');
+        // Fall through to Elastic Email
+      } else {
+        // Other errors - return immediately
+        return result;
+      }
+    } else {
       return result;
     }
-    return result;
   }
 
   // WARNING: If Resend is not configured, warn user
@@ -94,9 +108,18 @@ async function sendViaResend(emailData, apiKey) {
 
     if (!response.ok) {
       let errorMessage = 'Resend API error';
+      let errorDetails = null;
       try {
         const error = await response.json();
+        errorDetails = error;
         errorMessage = error.message || error.error || JSON.stringify(error);
+        
+        // Check for specific Resend errors and provide helpful messages
+        if (error.message && error.message.includes('only send testing emails to your own email address')) {
+          errorMessage = `Resend Account Limitation: You can only send test emails to your account's verified email address. To send to other recipients, you need to verify a domain in Resend. See docs/RESEND_SETUP.md for instructions. Original error: ${error.message}`;
+        } else if (error.message && error.message.includes('verify a domain')) {
+          errorMessage = `Resend Domain Verification Required: ${error.message}. See docs/RESEND_SETUP.md for domain verification instructions.`;
+        }
       } catch (e) {
         try {
           const text = await response.text();
@@ -109,6 +132,7 @@ async function sendViaResend(emailData, apiKey) {
         to: emailData.to,
         status: response.status,
         error: errorMessage,
+        details: errorDetails,
       });
       return { success: false, error: errorMessage };
     }

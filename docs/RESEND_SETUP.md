@@ -31,7 +31,7 @@ Since you're using Resend, you should remove `SENDGRID_API_KEY` to avoid conflic
    - Example: `re_1234567890abcdef`
    - If you need to update it, click "Edit" and paste your Resend API key
 
-## Step 3: Configure From Address (Optional)
+## Step 4: Verify Domain (REQUIRED for sending to all users) ⚠️
 
 By default, emails will be sent from `onboarding@resend.dev` which works immediately.
 
@@ -64,10 +64,20 @@ To use your own domain:
 - Check logs to confirm Resend is being used
 
 ### Emails not sending?
+
+#### Error: "You can only send testing emails to your own email address"
+**Solution**: This means you're using Resend's test mode. You need to verify a domain:
+1. Go to [Resend Domains](https://resend.com/domains)
+2. Add and verify your domain
+3. Set `RESEND_FROM_ADDRESS` environment variable with your verified domain
+4. Redeploy
+
+#### Other issues:
 - Check Resend dashboard for API key status
 - Verify API key is correct in Cloudflare Pages
 - Check Cloudflare Pages logs for error messages
 - Make sure you redeployed after setting environment variables
+- Verify domain is fully verified in Resend dashboard
 
 ## Need Help?
 
