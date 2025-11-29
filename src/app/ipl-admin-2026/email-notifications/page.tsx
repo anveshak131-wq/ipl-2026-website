@@ -563,7 +563,12 @@ export default function AdminEmailNotificationsPage() {
         // Transform matches to the format expected by the modal
         // Match structure from API: { id, date, time, venue, team1: Team, team2: Team, status }
         // Include ALL matches (completed, live, upcoming) for maximum flexibility
-        const allMatches = Array.isArray(matchesData) ? matchesData : (matchesData?.matches || []);
+        // Handle both array response and object with matches property
+        const allMatches: any[] = Array.isArray(matchesData) 
+          ? matchesData 
+          : (matchesData && typeof matchesData === 'object' && 'matches' in matchesData && Array.isArray((matchesData as any).matches))
+            ? (matchesData as any).matches
+            : [];
         const transformedMatches = (allMatches || [])
           .map((m: any) => {
             // Handle both Team objects and string team names
