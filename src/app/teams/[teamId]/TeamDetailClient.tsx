@@ -45,6 +45,7 @@ import { getOptimalTextColor } from '@/lib/colorUtils';
 
 interface TeamDetailClientProps {
   teamId: string;
+  league?: 'ipl' | 'wpl';
 }
 
 
@@ -119,7 +120,7 @@ function AnimatedCounter({ value, duration = 2 }: { value: number; duration?: nu
   return <span ref={ref}>{count}</span>;
 }
 
-export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
+export default function TeamDetailClient({ teamId, league }: TeamDetailClientProps) {
   const router = useRouter();
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -154,13 +155,17 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
       try {
         const numericId = teamId.replace('team', '');
         
-        const teamsResponse = await fetch('/api/teams');
+        // Fetch teams with league filter if provided
+        const teamsUrl = league ? `/api/teams?league=${league}` : '/api/teams';
+        const teamsResponse = await fetch(teamsUrl);
         if (teamsResponse.ok) {
           const allTeams = await teamsResponse.json();
           const team = allTeams.find((t: Team) => t.id === numericId || t.id === teamId);
           
           if (team) {
-            const playersResponse = await fetch('/api/players');
+            // Fetch players with league filter if provided
+            const playersUrl = league ? `/api/players?league=${league}` : '/api/players';
+            const playersResponse = await fetch(playersUrl);
             if (playersResponse.ok) {
               const allPlayers = await playersResponse.json();
               const teamWithPlayers = {
@@ -218,7 +223,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
     };
 
     fetchTeamData();
-  }, [teamId]);
+  }, [teamId, league]);
 
   // Fetch matches and compute season snapshot once team data is available
   useEffect(() => {
@@ -226,7 +231,9 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
 
     const loadMatches = async () => {
       try {
-        const res = await fetch('/api/matches');
+        // Fetch matches with league filter if provided
+        const matchesUrl = league ? `/api/matches?league=${league}` : '/api/matches';
+        const res = await fetch(matchesUrl);
         if (!res.ok) return;
 
         const matches = await res.json();
@@ -280,7 +287,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
     };
 
     loadMatches();
-  }, [teamData]);
+  }, [teamData, league]);
 
   if (isLoading) {
     return (
@@ -304,7 +311,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
           <h1 className="text-2xl font-bold text-white mb-4">Team Not Found</h1>
           <p className="text-gray-400 mb-6">This team does not exist.</p>
           <button
-            onClick={() => router.push('/teams')}
+            onClick={() => router.push(league === 'wpl' ? '/wpl/teams' : '/teams')}
             className="px-6 py-2 bg-gradient-to-r from-ipl-blue-dark to-ipl-purple hover:from-ipl-purple hover:to-ipl-gold text-white rounded-lg transition-all duration-300 transform hover:scale-105"
           >
             Back to Teams
@@ -315,10 +322,14 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
     );
   }
 
+  // Determine league from team data or prop
+  const teamLeague = teamData.league || league || 'ipl';
+  const isWPL = teamLeague === 'wpl';
+
   const primaryColor = createColorVariations(teamData.colors.primary);
   const secondaryColor = createColorVariations(teamData.colors.secondary);
   const numericId = teamId.replace('team', '');
-  const teamLogoPath = getAnimatedLogoPath(teamData.id);
+  const teamLogoPath = getAnimatedLogoPath(teamData.id, teamData.shortName, teamData.league);
   const fallbackLogoPath = getLogoPath(teamData.id);
 
   // Apply squad filters
@@ -413,7 +424,7 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
             {/* Back Button */}
             <AnimatedSection direction="left" delay={0.2}>
               <motion.button 
-                onClick={() => router.push('/teams')}
+                onClick={() => router.push(isWPL ? '/wpl/teams' : '/teams')}
                 className="mb-12 flex items-center gap-3 text-gray-400 hover:text-white transition-all duration-300 group"
                 whileHover={{ x: -5 }}
                 whileTap={{ scale: 0.95 }}
@@ -430,12 +441,20 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
               {/* Left: Team Info */}
               <AnimatedSection direction="right" delay={0.3} className="space-y-8">
-                {/* Team Badge with IPL Logo - Fixed spacing */}
+                {/* Team Badge with League Logo - Fixed spacing */}
                 <div className="inline-flex items-center gap-4 px-6 py-3 rounded-full backdrop-blur-xl border shadow-xl transition-all duration-300 hover:scale-105"
                      style={{
                        background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
                        borderColor: primaryColor.medium
                      }}>
+                  {!isWPL && (
+                    <div className="w-5 h-5">
+                      <IPLLogo size="sm" />
+                    </div>
+                  )}
+                  {isWPL && (
+                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-gradient-to-r from-purple-500 to-pink-500 text-white">WPL</span>
+                  )}
                   <span className="text-sm font-bold tracking-wider whitespace-nowrap" style={{ color: primaryColor.textOnLight }}>{teamData.shortName}</span>
                 </div>
 
@@ -559,12 +578,19 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                       />
                     )}
                     
-                    {/* IPL Logo Badge with enhanced animation - Positioned to avoid overlap with team logo */}
-                    <div className="absolute bottom-1 right-1 md:bottom-2 md:right-2 w-12 h-12 md:w-14 md:h-14 rounded-full backdrop-blur-xl border-2 border-white/30 flex items-center justify-center shadow-xl transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 bg-gradient-to-br from-blue-900/80 to-purple-900/80 z-20">
-                      <div className="w-7 h-7 md:w-8 md:h-8">
-                        <IPLLogo animated />
+                    {/* League Logo Badge with enhanced animation - Positioned to avoid overlap with team logo */}
+                    {!isWPL && (
+                      <div className="absolute bottom-1 right-1 md:bottom-2 md:right-2 w-12 h-12 md:w-14 md:h-14 rounded-full backdrop-blur-xl border-2 border-white/30 flex items-center justify-center shadow-xl transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 bg-gradient-to-br from-blue-900/80 to-purple-900/80 z-20">
+                        <div className="w-7 h-7 md:w-8 md:h-8">
+                          <IPLLogo animated />
+                        </div>
                       </div>
-                    </div>
+                    )}
+                    {isWPL && (
+                      <div className="absolute bottom-1 right-1 md:bottom-2 md:right-2 w-12 h-12 md:w-14 md:h-14 rounded-full backdrop-blur-xl border-2 border-white/30 flex items-center justify-center shadow-xl transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 bg-gradient-to-br from-purple-900/80 to-pink-900/80 z-20">
+                        <span className="text-xs md:text-sm font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">WPL</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </AnimatedSection>
@@ -598,10 +624,17 @@ export default function TeamDetailClient({ teamId }: TeamDetailClientProps) {
                     boxShadow: `0 10px 30px ${primaryColor.glow}20`
                   }}
                 >
-                  {/* IPL Logo Watermark */}
-                  <div className="absolute top-3 right-3 w-8 h-8 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <IPLLogo animated />
-                  </div>
+                  {/* League Logo Watermark */}
+                  {!isWPL && (
+                    <div className="absolute top-3 right-3 w-8 h-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                      <IPLLogo animated />
+                    </div>
+                  )}
+                  {isWPL && (
+                    <div className="absolute top-3 right-3 px-2 py-1 rounded opacity-10 group-hover:opacity-20 transition-opacity bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30">
+                      <span className="text-xs font-bold text-purple-300">WPL</span>
+                    </div>
+                  )}
                   
                   <motion.div 
                     className="mb-4 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300"

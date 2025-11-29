@@ -20,7 +20,7 @@ interface EnhancedTeamCardProps {
 export default function EnhancedTeamCard({ team, onPlayerClick, isFavorite = false, onToggleFavorite }: EnhancedTeamCardProps) {
   const router = useRouter();
   const [imageError, setImageError] = useState(false);
-  const animatedLogo = getAnimatedLogoPath(team.id);
+  const animatedLogo = getAnimatedLogoPath(team.id, team.shortName, team.league);
   const fallbackLogo = getLogoPath(team.id);
   const isRCBStaticExport = animatedLogo.endsWith('rcb_logo_premium.svg');
 
@@ -31,7 +31,9 @@ export default function EnhancedTeamCard({ team, onPlayerClick, isFavorite = fal
 
   const handleViewFullSquad = () => {
     const teamRoute = team.id.startsWith('team') ? team.id : `team${team.id}`;
-    router.push(`/teams/${teamRoute}`);
+    // Use league-specific route for WPL teams
+    const basePath = team.league === 'wpl' ? '/wpl/teams' : '/teams';
+    router.push(`${basePath}/${teamRoute}`);
   };
 
   const handleSchedule = (e: React.MouseEvent) => {

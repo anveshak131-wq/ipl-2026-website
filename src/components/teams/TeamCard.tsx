@@ -24,7 +24,9 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
   const handleViewFullSquad = () => {
     // Ensure team ID has 'team' prefix for the route
     const teamRoute = team.id.startsWith('team') ? team.id : `team${team.id}`;
-    router.push(`/teams/${teamRoute}`);
+    // Use league-specific route for WPL teams
+    const basePath = team.league === 'wpl' ? '/wpl/teams' : '/teams';
+    router.push(`${basePath}/${teamRoute}`);
   };
 
   return (

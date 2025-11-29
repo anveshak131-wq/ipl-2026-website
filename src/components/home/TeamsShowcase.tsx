@@ -85,7 +85,9 @@ export default function TeamsShowcase() {
               onMouseLeave={() => setHoveredTeam(null)}
               onClick={() => {
                 const teamRoute = team.id.startsWith('team') ? team.id : `team${team.id}`;
-                router.push(`/teams/${teamRoute}`);
+                // Use league-specific route for WPL teams
+                const basePath = team.league === 'wpl' ? '/wpl/teams' : '/teams';
+                router.push(`${basePath}/${teamRoute}`);
               }}
               className="group relative overflow-hidden rounded-2xl cursor-pointer"
               variants={{
