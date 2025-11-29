@@ -122,15 +122,43 @@ function verifyAdminToken(request) {
   return true;
 }
 
-// Helper function to get team by ID
-function getTeamById(teamId) {
+// Helper function to get team by ID from teams array
+function getTeamById(teamId, teams) {
+  // First try to find in provided teams array
+  const team = teams.find(t => t.id === teamId);
+  if (team) return team;
+  
+  // Fallback to mockTeams for backward compatibility
   return mockTeams.find(t => t.id === teamId);
 }
 
 // Helper function to format match with full team objects
-function formatMatch(match) {
-  const team1 = getTeamById(match.team1Id);
-  const team2 = getTeamById(match.team2Id);
+function formatMatch(match, teams) {
+  // If match already has full team objects, use them
+  if (match.team1 && match.team1.name && match.team1.shortName) {
+    return {
+      id: match.id,
+      league: match.league || 'ipl',
+      date: match.date,
+      time: match.time,
+      venue: match.venue,
+      team1: match.team1,
+      team2: match.team2,
+      status: match.status
+    };
+  }
+  
+  // Otherwise, resolve team IDs to team objects
+  const team1 = getTeamById(match.team1Id, teams);
+  const team2 = getTeamById(match.team2Id, teams);
+  
+  // Log if teams are not found for debugging
+  if (!team1) {
+    console.warn(`Team not found for team1Id: ${match.team1Id}. Available teams:`, teams.map(t => ({ id: t.id, shortName: t.shortName })));
+  }
+  if (!team2) {
+    console.warn(`Team not found for team2Id: ${match.team2Id}. Available teams:`, teams.map(t => ({ id: t.id, shortName: t.shortName })));
+  }
   
   return {
     id: match.id,
@@ -138,8 +166,24 @@ function formatMatch(match) {
     date: match.date,
     time: match.time,
     venue: match.venue,
-    team1: team1 || { id: match.team1Id, shortName: 'Unknown' },
-    team2: team2 || { id: match.team2Id, shortName: 'Unknown' },
+    team1: team1 || { 
+      id: match.team1Id, 
+      shortName: `Team ${match.team1Id}`, 
+      name: `Team ${match.team1Id}`, 
+      logo: '', 
+      league: match.league || 'ipl',
+      colors: { primary: '#6B7280', secondary: '#9CA3AF' },
+      players: []
+    },
+    team2: team2 || { 
+      id: match.team2Id, 
+      shortName: `Team ${match.team2Id}`, 
+      name: `Team ${match.team2Id}`, 
+      logo: '', 
+      league: match.league || 'ipl',
+      colors: { primary: '#6B7280', secondary: '#9CA3AF' },
+      players: []
+    },
     status: match.status
   };
 }
@@ -175,8 +219,15 @@ async function handleGetRequest(context) {
       });
     }
     
+    // Fetch teams from KV storage to properly resolve team objects
+    let allTeams = await env.IPL_CACHE.get('teams', 'json');
+    if (!allTeams || allTeams.length === 0) {
+      // Fallback to mockTeams if KV is empty
+      allTeams = mockTeams;
+    }
+    
     // Format matches with team objects
-    const formattedMatches = matches.map(formatMatch);
+    const formattedMatches = matches.map(match => formatMatch(match, allTeams));
     
     return new Response(JSON.stringify(formattedMatches), {
       status: 200,
@@ -242,7 +293,13 @@ async function handlePostRequest(context) {
     // Save to KV
     await env.IPL_CACHE.put('matches', JSON.stringify(matches));
     
-    return new Response(JSON.stringify(formatMatch(newMatch)), {
+    // Fetch teams to format the response
+    let allTeams = await env.IPL_CACHE.get('teams', 'json');
+    if (!allTeams || allTeams.length === 0) {
+      allTeams = mockTeams;
+    }
+    
+    return new Response(JSON.stringify(formatMatch(newMatch, allTeams)), {
       status: 201,
       headers: { 'Content-Type': 'application/json' }
     });
@@ -312,7 +369,13 @@ async function handlePutRequest(context) {
     // Save to KV
     await env.IPL_CACHE.put('matches', JSON.stringify(matches));
     
-    return new Response(JSON.stringify(formatMatch(updatedMatch)), {
+    // Fetch teams to format the response
+    let allTeams = await env.IPL_CACHE.get('teams', 'json');
+    if (!allTeams || allTeams.length === 0) {
+      allTeams = mockTeams;
+    }
+    
+    return new Response(JSON.stringify(formatMatch(updatedMatch, allTeams)), {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });

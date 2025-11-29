@@ -1777,7 +1777,10 @@ export default function AdminMatches() {
                                                         <div className="flex items-center gap-2">
                                                             {(() => {
                                                                 const team1League = match.team1.league || match.league || 'ipl';
-                                                                const animatedPath1 = getAnimatedLogoPath(match.team1.id, match.team1.shortName, team1League);
+                                                                // Use team.logo if available (especially for WPL teams), otherwise get animated path
+                                                                const logoPath = match.team1.logo || getAnimatedLogoPath(match.team1.id, match.team1.shortName, team1League);
+                                                                const animatedPath1 = logoPath;
+                                                                
                                                                 if (animatedPath1.endsWith('rcb_logo_premium.svg')) {
                                                                     return (
                                                                         <div className="w-8 h-8 flex items-center justify-center">
@@ -1795,10 +1798,12 @@ export default function AdminMatches() {
                                                                 return (
                                                                     <img 
                                                                         src={animatedPath1} 
-                                                                        alt={match.team1.shortName} 
+                                                                        alt={match.team1.shortName || match.team1.name} 
                                                                         className="w-8 h-8 object-contain"
                                                                         onError={(e) => {
-                                                                            (e.target as HTMLImageElement).src = match.team1.logo || getLogoPath(match.team1.id);
+                                                                            // Fallback to getAnimatedLogoPath or default
+                                                                            const fallback = getAnimatedLogoPath(match.team1.id, match.team1.shortName, team1League) || getLogoPath(match.team1.id);
+                                                                            (e.target as HTMLImageElement).src = fallback;
                                                                         }}
                                                                     />
                                                                 );
@@ -1809,7 +1814,10 @@ export default function AdminMatches() {
                                                         <div className="flex items-center gap-2">
                                                             {(() => {
                                                                 const team2League = match.team2.league || match.league || 'ipl';
-                                                                const animatedPath2 = getAnimatedLogoPath(match.team2.id, match.team2.shortName, team2League);
+                                                                // Use team.logo if available (especially for WPL teams), otherwise get animated path
+                                                                const logoPath = match.team2.logo || getAnimatedLogoPath(match.team2.id, match.team2.shortName, team2League);
+                                                                const animatedPath2 = logoPath;
+                                                                
                                                                 if (animatedPath2.endsWith('rcb_logo_premium.svg')) {
                                                                     return (
                                                                         <div className="w-8 h-8 flex items-center justify-center">
@@ -1827,10 +1835,12 @@ export default function AdminMatches() {
                                                                 return (
                                                                     <img 
                                                                         src={animatedPath2} 
-                                                                        alt={match.team2.shortName} 
+                                                                        alt={match.team2.shortName || match.team2.name} 
                                                                         className="w-8 h-8 object-contain"
                                                                         onError={(e) => {
-                                                                            (e.target as HTMLImageElement).src = match.team2.logo || getLogoPath(match.team2.id);
+                                                                            // Fallback to getAnimatedLogoPath or default
+                                                                            const fallback = getAnimatedLogoPath(match.team2.id, match.team2.shortName, team2League) || getLogoPath(match.team2.id);
+                                                                            (e.target as HTMLImageElement).src = fallback;
                                                                         }}
                                                                     />
                                                                 );
@@ -2025,7 +2035,10 @@ export default function AdminMatches() {
                                                             <div className="flex items-center gap-2">
                                                                 {(() => {
                                                                     const team1League = match.team1.league || match.league || 'ipl';
-                                                                    const animatedPath1 = getAnimatedLogoPath(match.team1.id, match.team1.shortName, team1League);
+                                                                    // Use team.logo if available (especially for WPL teams), otherwise get animated path
+                                                                    const logoPath = match.team1.logo || getAnimatedLogoPath(match.team1.id, match.team1.shortName, team1League);
+                                                                    const animatedPath1 = logoPath;
+                                                                    
                                                                     if (animatedPath1.endsWith('rcb_logo_premium.svg')) {
                                                                         return (
                                                                             <div className="w-10 h-10 flex items-center justify-center">
@@ -2043,10 +2056,12 @@ export default function AdminMatches() {
                                                                     return (
                                                                         <img 
                                                                             src={animatedPath1} 
-                                                                            alt={match.team1.shortName} 
+                                                                            alt={match.team1.shortName || match.team1.name} 
                                                                             className="w-10 h-10 object-contain"
                                                                             onError={(e) => {
-                                                                                (e.target as HTMLImageElement).src = match.team1.logo || getLogoPath(match.team1.id);
+                                                                                // Fallback to getAnimatedLogoPath or default
+                                                                                const fallback = getAnimatedLogoPath(match.team1.id, match.team1.shortName, team1League) || getLogoPath(match.team1.id);
+                                                                                (e.target as HTMLImageElement).src = fallback;
                                                                             }}
                                                                         />
                                                                     );
@@ -2057,7 +2072,10 @@ export default function AdminMatches() {
                                                             <div className="flex items-center gap-2">
                                                                 {(() => {
                                                                     const team2League = match.team2.league || match.league || 'ipl';
-                                                                    const animatedPath2 = getAnimatedLogoPath(match.team2.id, match.team2.shortName, team2League);
+                                                                    // Use team.logo if available (especially for WPL teams), otherwise get animated path
+                                                                    const logoPath = match.team2.logo || getAnimatedLogoPath(match.team2.id, match.team2.shortName, team2League);
+                                                                    const animatedPath2 = logoPath;
+                                                                    
                                                                     if (animatedPath2.endsWith('rcb_logo_premium.svg')) {
                                                                         return (
                                                                             <div className="w-10 h-10 flex items-center justify-center">
@@ -2075,10 +2093,12 @@ export default function AdminMatches() {
                                                                     return (
                                                                         <img 
                                                                             src={animatedPath2} 
-                                                                            alt={match.team2.shortName} 
+                                                                            alt={match.team2.shortName || match.team2.name} 
                                                                             className="w-10 h-10 object-contain"
                                                                             onError={(e) => {
-                                                                                (e.target as HTMLImageElement).src = match.team2.logo || getLogoPath(match.team2.id);
+                                                                                // Fallback to getAnimatedLogoPath or default
+                                                                                const fallback = getAnimatedLogoPath(match.team2.id, match.team2.shortName, team2League) || getLogoPath(match.team2.id);
+                                                                                (e.target as HTMLImageElement).src = fallback;
                                                                             }}
                                                                         />
                                                                     );
