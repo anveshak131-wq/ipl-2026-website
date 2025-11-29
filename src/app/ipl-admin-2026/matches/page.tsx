@@ -1841,9 +1841,9 @@ export default function AdminMatches() {
                                                         </button>
                                                         <button
                                                             onClick={() => handleDelete(match.id)}
-                                                            className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 disabled:opacity-50"
                                                             disabled={isSubmitting || (match as any)._isMock}
                                                             title={(match as any)._isMock ? 'Cannot delete sample match' : 'Delete Match'}
+                                                            className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 disabled:opacity-50"
                                                         >
                                                             <IconTrash className="w-4 h-4" />
                                                         </button>
@@ -1993,11 +1993,9 @@ export default function AdminMatches() {
                                                             </button>
                                                             <button
                                                                 onClick={() => handleDelete(match.id)}
-                                                            disabled={isSubmitting || (match as any)._isMock}
-                                                            title={(match as any)._isMock ? 'Cannot delete sample match' : 'Delete Match'}
-                                                                className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 disabled:opacity-50"
                                                                 disabled={isSubmitting || (match as any)._isMock}
-                                                                title={(match as any)._isMock ? 'Cannot delete sample match' : 'Delete'}
+                                                                title={(match as any)._isMock ? 'Cannot delete sample match' : 'Delete Match'}
+                                                                className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 disabled:opacity-50"
                                                             >
                                                                 <IconTrash className="w-4 h-4" />
                                                             </button>

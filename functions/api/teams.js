@@ -238,13 +238,32 @@ async function handlePostRequest(context) {
     // Generate new ID
     const newId = String(Math.max(...teams.map(t => parseInt(t.id) || 0), 0) + 1);
     
+    // Determine default logo based on league and shortName if not provided
+    let defaultLogo = '';
+    if (!logo) {
+      // For WPL teams, use the animated logo path
+      if (league === 'wpl') {
+        const wplLogoMap = {
+          'MI-W': '/logos/wpl_mi_logo_animated.svg',
+          'RCB-W': '/logos/wpl_rcb_logo_animated.svg',
+          'DC-W': '/logos/wpl_dc_logo_animated.svg',
+          'GG': '/logos/wpl_gg_logo_animated.svg',
+          'UPW': '/logos/wpl_upw_logo_animated.svg',
+        };
+        defaultLogo = wplLogoMap[shortName.trim().toUpperCase()] || '';
+      } else {
+        // For IPL teams, use a generic IPL logo or leave empty for frontend to handle
+        defaultLogo = '';
+      }
+    }
+    
     // Create new team with proper league assignment
     const newTeam = {
       id: newId,
       league: league || 'ipl', // Use provided league or default to 'ipl'
       name: name.trim(),
       shortName: shortName.trim().toUpperCase(),
-      logo: logo || '/logos/default-team.svg', // Default logo if not provided
+      logo: logo || defaultLogo, // Use provided logo or calculated default (empty string will be handled by frontend)
       description: description.trim(),
       colors: colors || { primary: league === 'wpl' ? '#9333EA' : '#6B46C1', secondary: league === 'wpl' ? '#EC4899' : '#FFD700' },
       trophies: trophies || [],

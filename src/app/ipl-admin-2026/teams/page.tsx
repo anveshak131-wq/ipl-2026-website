@@ -346,6 +346,65 @@ export default function AdminTeams() {
         }
     };
 
+    const handleUpdateWPLTeams = async () => {
+        if (!confirm('This will update all existing WPL teams with their logos, colors, and descriptions. Continue?')) return;
+        
+        setIsSubmitting(true);
+        setError(null);
+        const results: string[] = [];
+
+        try {
+            // Get current WPL teams
+            const currentWPLTeams = teams.filter(t => t.league === 'wpl');
+            
+            if (currentWPLTeams.length === 0) {
+                setError('No WPL teams found. Please add WPL teams first.');
+                setIsSubmitting(false);
+                return;
+            }
+
+            // Update each existing WPL team with data from wpl-teams.ts
+            for (const existingTeam of currentWPLTeams) {
+                // Find matching team data by shortName
+                const teamData = wplTeams.find(t => 
+                    t.shortName.toUpperCase() === existingTeam.shortName.toUpperCase()
+                );
+
+                if (teamData) {
+                    try {
+                        // Update the team with new logo, colors, and description
+                        const updatedTeam = await api.updateTeam(existingTeam.id, {
+                            name: teamData.name,
+                            shortName: teamData.shortName,
+                            logo: teamData.logo,
+                            description: teamData.description,
+                            colors: teamData.colors,
+                            league: 'wpl' as const,
+                            trophies: existingTeam.trophies || [],
+                            homeGrounds: existingTeam.homeGrounds || []
+                        });
+                        results.push(`✅ Updated ${updatedTeam.name}`);
+                    } catch (err: any) {
+                        results.push(`❌ ${existingTeam.name}: ${err?.message || 'Failed to update'}`);
+                    }
+                } else {
+                    results.push(`⚠️ ${existingTeam.name}: No matching data found in wpl-teams.ts`);
+                }
+            }
+            
+            // Refresh teams list
+            await fetchTeams();
+            
+            setSuccess(`WPL teams updated! ${results.join(', ')}`);
+            setTimeout(() => setSuccess(null), 8000);
+        } catch (err) {
+            setError('Failed to update some WPL teams. Check console for details.');
+            console.error('WPL teams update error:', err);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     if (authLoading) {
         return (
             <div className="flex min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
@@ -401,6 +460,19 @@ export default function AdminTeams() {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                                     </svg>
                                     Add All WPL Teams
+                                </button>
+                            )}
+                            {currentLeague === 'wpl' && teams.filter(t => t.league === 'wpl').length > 0 && (
+                                <button
+                                    onClick={handleUpdateWPLTeams}
+                                    className="group relative px-5 py-3 bg-gradient-to-r from-indigo-600 via-purple-500 to-pink-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2"
+                                    disabled={isSubmitting}
+                                    title="Update existing WPL teams with logos, colors, and descriptions"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                    Update WPL Teams
                                 </button>
                             )}
                             <button
@@ -549,13 +621,25 @@ export default function AdminTeams() {
                                                                 }}
                                                             >
                                                                 {(() => {
-                                                                    // Use team.logo if available, otherwise try to get animated logo
-                                                                    if (team.logo) {
+                                                                    // Use team.logo if available and not the default placeholder
+                                                                    if (team.logo && team.logo !== '/logos/default-team.svg' && team.logo.trim() !== '') {
                                                                         return (
-                                                                            <img src={team.logo} alt={team.name} className="w-8 h-8 object-contain" />
+                                                                            <img 
+                                                                                src={team.logo} 
+                                                                                alt={team.name} 
+                                                                                className="w-8 h-8 object-contain"
+                                                                                onError={(e) => {
+                                                                                    // If logo fails to load, try animated logo
+                                                                                    const anim = getAnimatedLogoPath(team.id, team.shortName, team.league);
+                                                                                    if (anim && !anim.endsWith('.json') && !anim.endsWith('rcb_logo_premium.svg')) {
+                                                                                        (e.target as HTMLImageElement).src = anim;
+                                                                                    }
+                                                                                }}
+                                                                            />
                                                                         );
                                                                     }
                                                                     
+                                                                    // Try to get animated logo
                                                                     const anim = getAnimatedLogoPath(team.id, team.shortName, team.league);
                                                                     if (anim.endsWith('.json')) {
                                                                         return (
@@ -576,12 +660,24 @@ export default function AdminTeams() {
                                                                     // If we have an animated logo path, use it
                                                                     if (anim && anim !== '/logos/rcb_logo_animated.svg') {
                                                                         return (
-                                                                            <img src={anim} alt={team.name} className="w-8 h-8 object-contain" />
+                                                                            <img 
+                                                                                src={anim} 
+                                                                                alt={team.name} 
+                                                                                className="w-8 h-8 object-contain"
+                                                                                onError={(e) => {
+                                                                                    // Final fallback: show short name
+                                                                                    (e.target as HTMLImageElement).style.display = 'none';
+                                                                                    const parent = (e.target as HTMLImageElement).parentElement;
+                                                                                    if (parent) {
+                                                                                        parent.textContent = team.shortName.substring(0, 2);
+                                                                                    }
+                                                                                }}
+                                                                            />
                                                                         );
                                                                     }
 
                                                                     // Fallback to short name
-                                                                    return team.shortName.substring(0, 2);
+                                                                    return <span className="text-xs font-bold">{team.shortName.substring(0, 2)}</span>;
                                                                 })()}
                                                             </div>
                                                             <span className="font-semibold text-white">{team.name}</span>
@@ -664,13 +760,25 @@ export default function AdminTeams() {
                                                     }}
                                                 >
                                                     {(() => {
-                                                        // Use team.logo if available, otherwise try to get animated logo
-                                                        if (team.logo) {
+                                                        // Use team.logo if available and not the default placeholder
+                                                        if (team.logo && team.logo !== '/logos/default-team.svg' && team.logo.trim() !== '') {
                                                             return (
-                                                                <img src={team.logo} alt={team.name} className="w-10 h-10 object-contain" />
+                                                                <img 
+                                                                    src={team.logo} 
+                                                                    alt={team.name} 
+                                                                    className="w-10 h-10 object-contain"
+                                                                    onError={(e) => {
+                                                                        // If logo fails to load, try animated logo
+                                                                        const anim = getAnimatedLogoPath(team.id, team.shortName, team.league);
+                                                                        if (anim && !anim.endsWith('.json') && !anim.endsWith('rcb_logo_premium.svg')) {
+                                                                            (e.target as HTMLImageElement).src = anim;
+                                                                        }
+                                                                    }}
+                                                                />
                                                             );
                                                         }
                                                         
+                                                        // Try to get animated logo
                                                         const anim = getAnimatedLogoPath(team.id, team.shortName, team.league);
                                                         if (anim.endsWith('.json')) {
                                                             return (
@@ -691,12 +799,24 @@ export default function AdminTeams() {
                                                         // If we have an animated logo path, use it
                                                         if (anim && anim !== '/logos/rcb_logo_animated.svg') {
                                                             return (
-                                                                <img src={anim} alt={team.name} className="w-10 h-10 object-contain" />
+                                                                <img 
+                                                                    src={anim} 
+                                                                    alt={team.name} 
+                                                                    className="w-10 h-10 object-contain"
+                                                                    onError={(e) => {
+                                                                        // Final fallback: show short name
+                                                                        (e.target as HTMLImageElement).style.display = 'none';
+                                                                        const parent = (e.target as HTMLImageElement).parentElement;
+                                                                        if (parent) {
+                                                                            parent.textContent = team.shortName.substring(0, 2);
+                                                                        }
+                                                                    }}
+                                                                />
                                                             );
                                                         }
 
                                                         // Fallback to short name
-                                                        return team.shortName.substring(0, 2);
+                                                        return <span className="text-xs font-bold">{team.shortName.substring(0, 2)}</span>;
                                                     })()}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
