@@ -453,14 +453,28 @@ export const api = {
   deleteMatch: async (id: string): Promise<void> => {
     try {
       const token = localStorage.getItem('adminToken');
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
+      
       const response = await fetch(`/api/matches?id=${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         }
       });
+      
       if (!response.ok) {
-        throw new Error('Failed to delete match');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        const errorMessage = errorData.error || `Failed to delete match: ${response.status} ${response.statusText}`;
+        throw new Error(errorMessage);
+      }
+      
+      // Verify deletion was successful
+      const result = await response.json().catch(() => ({}));
+      if (!result.success && result.error) {
+        throw new Error(result.error);
       }
     } catch (error) {
       console.error('Error deleting match:', error);

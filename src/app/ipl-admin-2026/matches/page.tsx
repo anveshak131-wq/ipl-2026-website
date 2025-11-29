@@ -678,11 +678,16 @@ export default function AdminMatches() {
             setIsSubmitting(true);
             setError(null);
             await api.deleteMatch(matchId);
-            setMatches(matches.filter(m => m.id !== matchId));
+            
+            // Refresh matches from API to ensure consistency
+            const updatedMatches = await api.getMatches(currentLeague);
+            setMatches(updatedMatches);
+            
             showSuccess('Match deleted successfully');
-        } catch (error) {
+        } catch (error: any) {
             console.error('Failed to delete match:', error);
-            showError('Failed to delete match');
+            const errorMessage = error?.message || 'Failed to delete match. Please try again.';
+            showError(errorMessage);
         } finally {
             setIsSubmitting(false);
         }

@@ -134,6 +134,7 @@ function formatMatch(match) {
   
   return {
     id: match.id,
+    league: match.league || 'ipl', // Ensure league property is included
     date: match.date,
     time: match.time,
     venue: match.venue,
@@ -350,18 +351,30 @@ async function handleDeleteRequest(context) {
     // Get existing matches
     let matches = await env.IPL_CACHE.get('matches', 'json') || defaultMatches;
     
-    // Filter out the match to delete
-    const filteredMatches = matches.filter(m => m.id !== matchId);
+    // Ensure all matches have league property
+    matches = matches.map(m => ({
+      ...m,
+      league: m.league || 'ipl'
+    }));
     
-    if (filteredMatches.length === matches.length) {
+    // Find the match to delete
+    const matchIndex = matches.findIndex(m => m.id === matchId);
+    
+    if (matchIndex === -1) {
+      console.error(`Match with ID ${matchId} not found. Total matches: ${matches.length}`);
       return new Response(JSON.stringify({ error: 'Match not found' }), {
         status: 404,
         headers: { 'Content-Type': 'application/json' }
       });
     }
     
+    // Remove the match
+    matches.splice(matchIndex, 1);
+    
     // Save to KV
-    await env.IPL_CACHE.put('matches', JSON.stringify(filteredMatches));
+    await env.IPL_CACHE.put('matches', JSON.stringify(matches));
+    
+    console.log(`Match ${matchId} deleted successfully. Remaining matches: ${matches.length}`);
     
     return new Response(JSON.stringify({ success: true, message: 'Match deleted' }), {
       status: 200,
@@ -369,7 +382,7 @@ async function handleDeleteRequest(context) {
     });
   } catch (error) {
     console.error('Error deleting match:', error);
-    return new Response(JSON.stringify({ error: 'Failed to delete match' }), {
+    return new Response(JSON.stringify({ error: `Failed to delete match: ${error.message}` }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
