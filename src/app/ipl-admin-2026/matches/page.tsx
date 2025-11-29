@@ -105,6 +105,12 @@ const WPL_VENUES = [
     'BCA Stadium, Kotambi (Vadodara)'
 ];
 
+// Official WPL Match Times (2026 Season)
+const WPL_TIMES = [
+    '11:00',
+    '15:00'
+];
+
 export default function AdminMatches() {
     const router = useRouter();
     const { currentLeague } = useLeague();
@@ -145,12 +151,13 @@ export default function AdminMatches() {
         league: 'ipl' as 'ipl' | 'wpl' // Will be set from currentLeague when adding
     });
 
-    // Update formData.league and reset venue when league changes
+    // Update formData.league and reset venue/time when league changes
     useEffect(() => {
         setFormData(prev => ({
             ...prev,
             league: currentLeague,
-            venue: currentLeague === 'wpl' ? '' : prev.venue // Reset venue when switching to WPL
+            venue: currentLeague === 'wpl' ? '' : prev.venue, // Reset venue when switching to WPL
+            time: currentLeague === 'wpl' ? '' : prev.time // Reset time when switching to WPL
         }));
     }, [currentLeague]);
 
@@ -1462,14 +1469,48 @@ export default function AdminMatches() {
                                                 </div>
 
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-300 mb-2">Time</label>
-                                                    <input
-                                                        type="time"
-                                                        value={formData.time}
-                                                        onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ipl-gold transition-colors"
-                                                        required
-                                                    />
+                                                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                        Time
+                                                        {currentLeague === 'wpl' && (
+                                                            <span className="ml-2 text-xs text-purple-300">(WPL 2026 times only)</span>
+                                                        )}
+                                                    </label>
+                                                    {currentLeague === 'wpl' ? (
+                                                        // WPL: Dropdown with only 2 times
+                                                        <select
+                                                            value={formData.time}
+                                                            onChange={(e) => {
+                                                                setFormData({ ...formData, time: e.target.value });
+                                                            }}
+                                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition-colors"
+                                                            required
+                                                        >
+                                                            <option value="">Select a time...</option>
+                                                            {WPL_TIMES.map((time, index) => {
+                                                                // Convert 24-hour format to 12-hour format for display
+                                                                const [hours, minutes] = time.split(':');
+                                                                const hour = parseInt(hours);
+                                                                const ampm = hour >= 12 ? 'PM' : 'AM';
+                                                                const displayHour = hour % 12 || 12;
+                                                                const displayTime = `${displayHour}:${minutes} ${ampm}`;
+                                                                
+                                                                return (
+                                                                    <option key={index} value={time} className="bg-gray-900 text-white">
+                                                                        {displayTime}
+                                                                    </option>
+                                                                );
+                                                            })}
+                                                        </select>
+                                                    ) : (
+                                                        // IPL: Time input
+                                                        <input
+                                                            type="time"
+                                                            value={formData.time}
+                                                            onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ipl-gold transition-colors"
+                                                            required
+                                                        />
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
