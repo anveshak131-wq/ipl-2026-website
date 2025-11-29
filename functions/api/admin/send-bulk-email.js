@@ -7,24 +7,44 @@
  * Send email via Resend, Elastic Email, SendGrid, or Mailgun
  */
 async function sendEmailViaProvider(emailData, env) {
+  // Log all available API keys (for debugging - don't log actual keys)
+  const hasResend = !!(env.RESEND_API_KEY && env.RESEND_API_KEY.trim());
+  const hasSendGrid = !!(env.SENDGRID_API_KEY && env.SENDGRID_API_KEY.trim());
+  const hasElastic = !!(env.ELASTIC_EMAIL_API_KEY && env.ELASTIC_EMAIL_API_KEY.trim());
+  const hasMailgun = !!(env.MAILGUN_API_KEY && env.MAILGUN_API_KEY.trim() && env.MAILGUN_DOMAIN);
+  
+  console.log('[Email Service] Available providers:', {
+    Resend: hasResend,
+    SendGrid: hasSendGrid,
+    ElasticEmail: hasElastic,
+    Mailgun: hasMailgun,
+  });
+
   // Try Resend first (recommended for Cloudflare)
-  if (env.RESEND_API_KEY) {
-    console.log('[Email Service] Using Resend API');
-    return await sendViaResend(emailData, env.RESEND_API_KEY);
+  if (hasResend) {
+    console.log('[Email Service] Using Resend API (key starts with:', env.RESEND_API_KEY.substring(0, 3), '...)');
+    const result = await sendViaResend(emailData, env.RESEND_API_KEY);
+    if (!result.success) {
+      console.error('[Email Service] Resend failed:', result.error);
+    }
+    return result;
   }
 
   // Try Elastic Email
-  if (env.ELASTIC_EMAIL_API_KEY) {
+  if (hasElastic) {
+    console.log('[Email Service] Using Elastic Email API');
     return await sendViaElasticEmail(emailData, env.ELASTIC_EMAIL_API_KEY);
   }
 
   // Try SendGrid
-  if (env.SENDGRID_API_KEY) {
+  if (hasSendGrid) {
+    console.log('[Email Service] Using SendGrid API');
     return await sendViaSendGrid(emailData, env.SENDGRID_API_KEY);
   }
 
   // Try Mailgun
-  if (env.MAILGUN_API_KEY && env.MAILGUN_DOMAIN) {
+  if (hasMailgun) {
+    console.log('[Email Service] Using Mailgun API');
     return await sendViaMailgun(emailData, env.MAILGUN_API_KEY, env.MAILGUN_DOMAIN);
   }
 
@@ -32,7 +52,7 @@ async function sendEmailViaProvider(emailData, env) {
   console.error('[Email Service] No email service API key configured. Please configure RESEND_API_KEY, ELASTIC_EMAIL_API_KEY, SENDGRID_API_KEY, or MAILGUN_API_KEY in Cloudflare Pages environment variables.');
   return { 
     success: false, 
-    error: 'Email service not configured. Please configure an email service API key (Resend, Elastic Email, SendGrid, or Mailgun) in Cloudflare Pages environment variables.',
+    error: 'Email service not configured. Please configure RESEND_API_KEY in Cloudflare Pages environment variables. See docs/EMAIL_NOTIFICATIONS_SETUP.md for instructions.',
     messageId: null
   };
 }
