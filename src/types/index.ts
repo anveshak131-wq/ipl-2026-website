@@ -1,5 +1,7 @@
 // Core type definitions for IPL 2026 website
 
+export type League = 'ipl' | 'wpl';
+
 export interface Trophy {
   year: number;
   name: string;
@@ -7,6 +9,7 @@ export interface Trophy {
 
 export interface Team {
   id: string;
+  league: League; // IPL or WPL
   name: string;
   shortName: string;
   logo: string;
@@ -22,6 +25,7 @@ export interface Team {
 
 export interface Player {
   id: string;
+  league: League; // IPL or WPL
   name: string;
   role: 'Batsman' | 'Bowler' | 'All-rounder' | 'Wicket-keeper';
   teamId: string;
@@ -51,6 +55,7 @@ export interface Player {
 
 export interface Match {
   id: string;
+  league: League; // IPL or WPL
   date: string;
   time: string;
   venue: string;
@@ -74,6 +79,7 @@ export interface Match {
 
 export interface News {
   id: string;
+  league?: League | 'both'; // Optional: can be IPL, WPL, or both (for cross-league news)
   title: string;
   summary?: string;
   content: string;

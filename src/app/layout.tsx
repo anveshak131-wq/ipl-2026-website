@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import TermsGuard from "@/components/TermsGuard";
+import { LeagueProvider } from "@/contexts/LeagueContext";
 
 export const metadata: Metadata = {
   title: "SportsUP18 - Official Website",
@@ -29,9 +30,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased">
-        <TermsGuard>
-          {children}
-        </TermsGuard>
+        <LeagueProvider>
+          <TermsGuard>
+            {children}
+          </TermsGuard>
+        </LeagueProvider>
       </body>
     </html>
   );

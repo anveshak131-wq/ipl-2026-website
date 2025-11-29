@@ -11,6 +11,7 @@ import TeamComparisonTool from '@/components/teams/TeamComparisonTool';
 import TeamQuickStatsPreview from '@/components/teams/TeamQuickStatsPreview';
 import { Team, Player, Match } from '@/types';
 import { api } from '@/lib/data';
+import { useLeague } from '@/contexts/LeagueContext';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Icon from '@/components/ui/Icon';
 import AuroraBackground from '@/components/ui/AuroraBackground';
@@ -26,6 +27,7 @@ type ViewMode = 'grid' | 'list';
 function TeamsPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const { currentLeague } = useLeague();
 
     const [teams, setTeams] = useState<Team[]>([]);
     const [matches, setMatches] = useState<Match[]>([]);
@@ -70,9 +72,9 @@ function TeamsPageContent() {
         const fetchTeams = async () => {
             try {
                 const [teamsData, playersData, matchesData] = await Promise.all([
-                    api.getTeams(),
-                    api.getPlayers().catch(() => []), // Fallback to empty array on error
-                    api.getMatches().catch(() => []) // Fetch matches for performance calculation
+                    api.getTeams(currentLeague),
+                    api.getPlayers(undefined, currentLeague).catch(() => []), // Fallback to empty array on error
+                    api.getMatches(currentLeague).catch(() => []) // Fetch matches for performance calculation
                 ]);
 
                 const teamsWithPlayers = teamsData.map(team => ({
@@ -86,7 +88,7 @@ function TeamsPageContent() {
                 console.error('Failed to fetch teams:', error);
                 // Still try to display teams even if players fail
                 try {
-                    const teamsData = await api.getTeams();
+                    const teamsData = await api.getTeams(currentLeague);
                     setTeams(teamsData.map(team => ({ ...team, players: [] })));
                 } catch (err) {
                     console.error('Failed to fetch teams:', err);
@@ -97,7 +99,7 @@ function TeamsPageContent() {
         };
 
         fetchTeams();
-    }, []);
+    }, [currentLeague]); // Re-fetch when league changes
 
     const toggleFavorite = (teamId: string) => {
         const newFavorites = favorites.includes(teamId)

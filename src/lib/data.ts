@@ -7,6 +7,7 @@ import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 export const mockTeams: Team[] = [
   {
     id: '1',
+    league: 'ipl',
     name: 'Royal Challengers Bengaluru',
     shortName: 'RCB',
     logo: '/logos/rcb_logo_premium.svg',
@@ -18,6 +19,7 @@ export const mockTeams: Team[] = [
   },
   {
     id: '2',
+    league: 'ipl',
     name: 'Mumbai Indians',
     shortName: 'MI',
     logo: '/logos/mi_logo_new.svg',
@@ -35,6 +37,7 @@ export const mockTeams: Team[] = [
   },
   {
     id: '3',
+    league: 'ipl',
     name: 'Sunrisers Hyderabad',
     shortName: 'SRH',
     logo: '/logos/srh_logo_new.svg',
@@ -48,6 +51,7 @@ export const mockTeams: Team[] = [
   },
   {
     id: '4',
+    league: 'ipl',
     name: 'Gujarat Titans',
     shortName: 'GT',
     logo: '/logos/gt_logo_new.svg',
@@ -61,6 +65,7 @@ export const mockTeams: Team[] = [
   },
   {
     id: '5',
+    league: 'ipl',
     name: 'Punjab Kings',
     shortName: 'PBKS',
     logo: '/logos/kxip_logo_new.svg',
@@ -72,6 +77,7 @@ export const mockTeams: Team[] = [
   },
   {
     id: '6',
+    league: 'ipl',
     name: 'Delhi Capitals',
     shortName: 'DC',
     logo: '/logos/dc_logo_new.svg',
@@ -83,6 +89,7 @@ export const mockTeams: Team[] = [
   },
   {
     id: '7',
+    league: 'ipl',
     name: 'Lucknow Super Giants',
     shortName: 'LSG',
     logo: '/logos/lsg_logo_new.svg',
@@ -94,6 +101,7 @@ export const mockTeams: Team[] = [
   },
   {
     id: '8',
+    league: 'ipl',
     name: 'Rajasthan Royals',
     shortName: 'RR',
     logo: '/logos/rr_logo_new.svg',
@@ -107,6 +115,7 @@ export const mockTeams: Team[] = [
   },
   {
     id: '9',
+    league: 'ipl',
     name: 'Kolkata Knight Riders',
     shortName: 'KKR',
     logo: '/logos/kkr_logo_new.svg',
@@ -121,6 +130,7 @@ export const mockTeams: Team[] = [
   },
   {
     id: '10',
+    league: 'ipl',
     name: 'Chennai Super Kings',
     shortName: 'CSK',
     logo: '/logos/csk_logo_new.svg',
@@ -140,6 +150,7 @@ export const mockTeams: Team[] = [
 export const mockPlayers: Player[] = [
   {
     id: '1',
+    league: 'ipl',
     name: 'Virat Kohli',
     role: 'Batsman',
     teamId: '1',
@@ -166,6 +177,7 @@ export const mockPlayers: Player[] = [
   },
   {
     id: '2',
+    league: 'ipl',
     name: 'Rohit Sharma',
     role: 'Batsman',
     teamId: '2',
@@ -192,6 +204,7 @@ export const mockPlayers: Player[] = [
   },
   {
     id: '3',
+    league: 'ipl',
     name: 'Jasprit Bumrah',
     role: 'Bowler',
     teamId: '2',
@@ -221,15 +234,17 @@ export const mockPlayers: Player[] = [
 export const mockMatches: Match[] = [
   {
     id: '1',
+    league: 'ipl',
     date: '2026-03-23',
     time: '19:30',
     venue: 'M. A. Chidambaram Stadium, Chennai',
     team1: mockTeams[9], // CSK
-    team2: mockTeams[1], // RCB
+    team2: mockTeams[0], // RCB (index 0, not 1)
     status: 'upcoming'
   },
   {
     id: '2',
+    league: 'ipl',
     date: '2026-03-24',
     time: '15:30',
     venue: 'Eden Gardens, Kolkata',
@@ -239,6 +254,7 @@ export const mockMatches: Match[] = [
   },
   {
     id: '3',
+    league: 'ipl',
     date: '2026-03-25',
     time: '19:30',
     venue: 'Wankhede Stadium, Mumbai',
@@ -290,48 +306,62 @@ export const mockHighlights: Highlight[] = [
 
 // TODO: Replace with actual API calls to Cloudflare Workers
 export const api = {
-  getTeams: async (): Promise<Team[]> => {
+  getTeams: async (league?: 'ipl' | 'wpl'): Promise<Team[]> => {
     try {
-      const response = await fetch('/api/teams');
+      const url = league ? `/api/teams?league=${league}` : '/api/teams';
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error('Failed to fetch teams');
       }
-      return await response.json();
+      const teams = await response.json();
+      // Filter by league if specified
+      return league ? teams.filter((team: Team) => team.league === league) : teams;
     } catch (error) {
       console.error('Error fetching teams:', error);
       // Fallback to mock data if API fails
-      return mockTeams;
+      const fallback = league ? mockTeams.filter(team => team.league === league) : mockTeams;
+      return fallback;
     }
   },
   
-  getPlayers: async (teamId?: string): Promise<Player[]> => {
+  getPlayers: async (teamId?: string, league?: 'ipl' | 'wpl'): Promise<Player[]> => {
     try {
-      const response = await fetch('/api/players');
+      const url = league ? `/api/players?league=${league}` : '/api/players';
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error('Failed to fetch players');
       }
-      const players = await response.json();
+      let players = await response.json();
+      // Filter by league if specified
+      if (league) {
+        players = players.filter((p: Player) => p.league === league);
+      }
+      // Filter by team if specified
       const list = teamId ? players.filter((p: Player) => p.teamId === teamId) : players;
       return teamId ? sortPlayersByRoleAndAge(list) : list;
     } catch (error) {
       console.error('Error fetching players:', error);
       // Fallback to mock data if API fails
-      const fallback = teamId ? mockPlayers.filter(p => p.teamId === teamId) : mockPlayers;
+      let fallback = league ? mockPlayers.filter(p => p.league === league) : mockPlayers;
+      fallback = teamId ? fallback.filter(p => p.teamId === teamId) : fallback;
       return teamId ? sortPlayersByRoleAndAge(fallback) : fallback;
     }
   },
   
-  getMatches: async (): Promise<Match[]> => {
+  getMatches: async (league?: 'ipl' | 'wpl'): Promise<Match[]> => {
     try {
-      const response = await fetch('/api/matches');
+      const url = league ? `/api/matches?league=${league}` : '/api/matches';
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error('Failed to fetch matches');
       }
-      return await response.json();
+      const matches = await response.json();
+      // Filter by league if specified
+      return league ? matches.filter((match: Match) => match.league === league) : matches;
     } catch (error) {
       console.error('Error fetching matches:', error);
       // Fallback to mock data if API fails
-      return mockMatches;
+      return league ? mockMatches.filter(match => match.league === league) : mockMatches;
     }
   },
   
