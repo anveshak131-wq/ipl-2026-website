@@ -53,12 +53,27 @@ export const onRequest = async (context) => {
     if (request.method === 'GET') {
       const url = new URL(request.url);
       const type = url.searchParams.get('type');
+      const league = url.searchParams.get('league');
 
       const cached = await kvNamespace.get(KV_KEY);
       let content = cached ? JSON.parse(cached) : [];
 
+      // Ensure all content has league property (migration for existing data)
+      content = content.map(c => ({
+        ...c,
+        league: c.league || 'ipl' // Default to 'ipl' if missing
+      }));
+
       if (type) {
         content = content.filter(c => c.type === type);
+      }
+
+      // Filter by league if specified
+      if (league && (league === 'ipl' || league === 'wpl')) {
+        content = content.filter(c => {
+          const contentLeague = c.league || 'ipl';
+          return contentLeague === league;
+        });
       }
 
       return new Response(JSON.stringify(content), {
@@ -105,6 +120,7 @@ export const onRequest = async (context) => {
 
       const newContent = {
         ...body,
+        league: body.league || 'ipl', // Default to 'ipl' if not specified
         id: Date.now().toString(),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -184,7 +200,12 @@ export const onRequest = async (context) => {
 
       const updated = content.map(c =>
         c.id === body.id
-          ? { ...c, ...body, updatedAt: new Date().toISOString() }
+          ? { 
+              ...c, 
+              ...body, 
+              league: body.league || c.league || 'ipl', // Preserve or set league
+              updatedAt: new Date().toISOString() 
+            }
           : c
       );
 

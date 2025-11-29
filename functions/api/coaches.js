@@ -8,6 +8,7 @@ export async function onRequestGet(context) {
   try {
     const { searchParams } = new URL(context.request.url);
     const teamId = searchParams.get('teamId');
+    const league = searchParams.get('league');
 
     if (teamId) {
       // Fetch coaching staff for specific team
@@ -17,7 +18,22 @@ export async function onRequestGet(context) {
       });
     } else {
       // Fetch all coaching staff
-      const allTeams = await context.env.IPL_CACHE.get('teams', 'json') || [];
+      let allTeams = await context.env.IPL_CACHE.get('teams', 'json') || [];
+      
+      // Ensure all teams have league property
+      allTeams = allTeams.map(team => ({
+        ...team,
+        league: team.league || 'ipl'
+      }));
+      
+      // Filter teams by league if specified
+      if (league && (league === 'ipl' || league === 'wpl')) {
+        allTeams = allTeams.filter(team => {
+          const teamLeague = team.league || 'ipl';
+          return teamLeague === league;
+        });
+      }
+      
       const allCoaches = [];
       
       for (const team of allTeams) {

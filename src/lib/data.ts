@@ -378,9 +378,29 @@ export const api = {
       if (!response.ok) {
         throw new Error('Failed to fetch matches');
       }
-      const matches = await response.json();
+      let matches = await response.json();
+      
+      // If API returns empty array, use fallback mock data
+      if (!matches || matches.length === 0) {
+        console.log('API: No matches returned, using fallback mock data');
+        return league ? mockMatches.filter(match => match.league === league) : mockMatches;
+      }
+      
+      // Ensure all matches have league property (migration for existing data)
+      matches = matches.map((match: Match) => ({
+        ...match,
+        league: match.league || 'ipl' // Default to 'ipl' if missing
+      }));
+      
       // Filter by league if specified
-      return league ? matches.filter((match: Match) => match.league === league) : matches;
+      if (league) {
+        matches = matches.filter((match: Match) => {
+          const matchLeague = match.league || 'ipl';
+          return matchLeague === league;
+        });
+      }
+      
+      return matches;
     } catch (error) {
       console.error('Error fetching matches:', error);
       // Fallback to mock data if API fails

@@ -81,6 +81,7 @@ const mockTeams = [
 const defaultMatches = [
   {
     id: '1',
+    league: 'ipl',
     date: '2026-03-23',
     time: '19:30',
     venue: 'M. A. Chidambaram Stadium, Chennai',
@@ -90,6 +91,7 @@ const defaultMatches = [
   },
   {
     id: '2',
+    league: 'ipl',
     date: '2026-03-24',
     time: '15:30',
     venue: 'Eden Gardens, Kolkata',
@@ -99,6 +101,7 @@ const defaultMatches = [
   },
   {
     id: '3',
+    league: 'ipl',
     date: '2026-03-25',
     time: '19:30',
     venue: 'Wankhede Stadium, Mumbai',
@@ -142,15 +145,33 @@ function formatMatch(match) {
 
 // GET - Retrieve all matches
 async function handleGetRequest(context) {
-  const { env } = context;
+  const { env, request } = context;
   
   try {
+    // Get league query parameter
+    const url = new URL(request.url);
+    const league = url.searchParams.get('league');
+    
     // Try to get matches from KV storage
     let matches = await env.IPL_CACHE.get('matches', 'json');
     
     // Fallback to default matches if KV storage is empty
     if (!matches) {
       matches = defaultMatches;
+    }
+    
+    // Ensure all matches have league property (migration for existing data)
+    matches = matches.map(match => ({
+      ...match,
+      league: match.league || 'ipl' // Default to 'ipl' if missing
+    }));
+    
+    // Filter by league if specified
+    if (league && (league === 'ipl' || league === 'wpl')) {
+      matches = matches.filter(match => {
+        const matchLeague = match.league || 'ipl';
+        return matchLeague === league;
+      });
     }
     
     // Format matches with team objects
@@ -186,7 +207,7 @@ async function handlePostRequest(context) {
   
   try {
     const body = await request.json();
-    const { date, time, venue, team1Id, team2Id, status } = body;
+    const { date, time, venue, team1Id, team2Id, status, league } = body;
     
     // Validate required fields
     if (!date || !time || !venue || !team1Id || !team2Id) {
@@ -205,6 +226,7 @@ async function handlePostRequest(context) {
     // Create new match
     const newMatch = {
       id: newId,
+      league: league || 'ipl', // Default to 'ipl' if not specified
       date,
       time,
       venue,
@@ -246,7 +268,7 @@ async function handlePutRequest(context) {
   
   try {
     const body = await request.json();
-    const { id, date, time, venue, team1Id, team2Id, status } = body;
+    const { id, date, time, venue, team1Id, team2Id, status, league } = body;
     
     if (!id) {
       return new Response(JSON.stringify({ error: 'Match ID is required' }), {
@@ -275,8 +297,14 @@ async function handlePutRequest(context) {
       ...(venue && { venue }),
       ...(team1Id && { team1Id }),
       ...(team2Id && { team2Id }),
-      ...(status && { status })
+      ...(status && { status }),
+      ...(league && { league }) // Update league if provided
     };
+    
+    // Ensure league property exists (default to existing or 'ipl')
+    if (!updatedMatch.league) {
+      updatedMatch.league = matches[matchIndex].league || 'ipl';
+    }
     
     matches[matchIndex] = updatedMatch;
     
