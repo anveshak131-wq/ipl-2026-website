@@ -55,7 +55,31 @@ export async function POST(request: NextRequest) {
     );
 
     if (recipients.length === 0) {
-      return NextResponse.json({ error: 'No valid recipients found' }, { status: 400 });
+      // Check if users exist but don't have notifications enabled or are unsubscribed
+      const allMatchingUsers = users.filter(
+        (user: any) => {
+          const userId = user.id || user.email;
+          const userEmail = user.email;
+          return recipientIds.includes(userId) || recipientIds.includes(userEmail);
+        }
+      );
+      
+      if (allMatchingUsers.length === 0) {
+        return NextResponse.json({ 
+          error: 'No users found matching the selected recipients. Please ensure users exist and try again.' 
+        }, { status: 400 });
+      } else {
+        const disabledCount = allMatchingUsers.filter((u: any) => u.emailNotificationsEnabled === false).length;
+        const unsubscribedCount = allMatchingUsers.filter((u: any) => u.unsubscribedAt).length;
+        
+        let errorMsg = `No valid recipients found. ${allMatchingUsers.length} user(s) matched but: `;
+        const issues = [];
+        if (disabledCount > 0) issues.push(`${disabledCount} have email notifications disabled`);
+        if (unsubscribedCount > 0) issues.push(`${unsubscribedCount} have unsubscribed`);
+        errorMsg += issues.join(' and ') + '.';
+        
+        return NextResponse.json({ error: errorMsg }, { status: 400 });
+      }
     }
 
     // Process and send emails
