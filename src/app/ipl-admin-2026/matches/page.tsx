@@ -13,10 +13,11 @@ import { ToastContainer, useToast } from '@/components/admin/Toast';
 import BulkOperationsToolbar from '@/components/admin/BulkOperationsToolbar';
 import BulkEditModal from '@/components/admin/BulkEditModal';
 import BatchDeleteModal from '@/components/admin/BatchDeleteModal';
+import InteractiveChart, { ChartDataPoint } from '@/components/admin/InteractiveChart';
 import { exportToCSV, exportToJSON, exportToExcel, prepareExportData, formatDateForExport } from '@/lib/admin/exportUtils';
 import { Match, Team } from '@/types';
 import { api } from '@/lib/data';
-import { CheckSquare, Square } from 'lucide-react';
+import { CheckSquare, Square, BarChart3, Calendar as CalendarIcon, MapPin, Grid3x3, TrendingUp } from 'lucide-react';
 
 const IconTable = ({ className }: { className?: string }) => (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -92,7 +93,7 @@ export default function AdminMatches() {
     const [teams, setTeams] = useState<Team[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [authLoading, setAuthLoading] = useState(true);
-    const [viewMode, setViewMode] = useState<'table' | 'timeline'>('table');
+    const [viewMode, setViewMode] = useState<'table' | 'timeline' | 'analytics'>('table');
     const [showForm, setShowForm] = useState(false);
     const [showFilters, setShowFilters] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -198,6 +199,99 @@ export default function AdminMatches() {
 
         return { total, upcoming, live, completed };
     }, [matches]);
+
+    // Chart data computations
+    const matchesByStatusChart = useMemo<ChartDataPoint[]>(() => {
+        return [
+            { label: 'Scheduled', value: statusCounts.upcoming, color: '#2F6FED' },
+            { label: 'Live', value: statusCounts.live, color: '#EF4444' },
+            { label: 'Completed', value: statusCounts.completed, color: '#10B981' }
+        ];
+    }, [statusCounts]);
+
+    const matchesByMonthChart = useMemo<ChartDataPoint[]>(() => {
+        const monthCounts: { [key: string]: number } = {};
+        matches.forEach(match => {
+            const date = new Date(match.date);
+            const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+            monthCounts[monthKey] = (monthCounts[monthKey] || 0) + 1;
+        });
+        return Object.entries(monthCounts)
+            .sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
+            .map(([label, value]) => ({ label, value }));
+    }, [matches]);
+
+    const matchesByVenueChart = useMemo<ChartDataPoint[]>(() => {
+        const venueCounts: { [key: string]: number } = {};
+        matches.forEach(match => {
+            venueCounts[match.venue] = (venueCounts[match.venue] || 0) + 1;
+        });
+        return Object.entries(venueCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 10)
+            .map(([label, value]) => ({ label, value }));
+    }, [matches]);
+
+    const matchesByTeamChart = useMemo<ChartDataPoint[]>(() => {
+        const teamCounts: { [key: string]: number } = {};
+        matches.forEach(match => {
+            teamCounts[match.team1.shortName] = (teamCounts[match.team1.shortName] || 0) + 1;
+            teamCounts[match.team2.shortName] = (teamCounts[match.team2.shortName] || 0) + 1;
+        });
+        return Object.entries(teamCounts)
+            .sort((a, b) => b[1] - a[1])
+            .map(([label, value]) => ({ label, value }));
+    }, [matches]);
+
+    // Statistics dashboard data
+    const statisticsData = useMemo(() => {
+        const totalMatches = matches.length;
+        const matchesPerTeam = teams.map(team => {
+            const count = matches.filter(m => m.team1.id === team.id || m.team2.id === team.id).length;
+            return { team: team.shortName, count };
+        }).sort((a, b) => b.count - a.count);
+
+        const dates = matches.map(m => new Date(m.date));
+        const minDate = dates.length > 0 ? new Date(Math.min(...dates.map(d => d.getTime()))) : new Date();
+        const maxDate = dates.length > 0 ? new Date(Math.max(...dates.map(d => d.getTime()))) : new Date();
+        const daysDiff = Math.max(1, Math.ceil((maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24)));
+        const avgMatchesPerDay = totalMatches / daysDiff;
+
+        const now = new Date();
+        const weekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+        const upcomingThisWeek = matches.filter(m => {
+            const matchDate = new Date(m.date);
+            return matchDate >= now && matchDate <= weekFromNow && m.status === 'upcoming';
+        }).length;
+
+        const completedPercentage = totalMatches > 0 ? (statusCounts.completed / totalMatches) * 100 : 0;
+
+        return {
+            totalMatches,
+            matchesPerTeam,
+            avgMatchesPerDay: avgMatchesPerDay.toFixed(1),
+            upcomingThisWeek,
+            completedPercentage: completedPercentage.toFixed(1)
+        };
+    }, [matches, teams, statusCounts]);
+
+    // Team match matrix data
+    const teamMatchMatrix = useMemo(() => {
+        const matrix: { [key: string]: { [key: string]: number } } = {};
+        teams.forEach(team1 => {
+            matrix[team1.id] = {};
+            teams.forEach(team2 => {
+                if (team1.id !== team2.id) {
+                    const count = matches.filter(m => 
+                        (m.team1.id === team1.id && m.team2.id === team2.id) ||
+                        (m.team1.id === team2.id && m.team2.id === team1.id)
+                    ).length;
+                    matrix[team1.id][team2.id] = count;
+                }
+            });
+        });
+        return matrix;
+    }, [matches, teams]);
 
     const resetForm = () => {
         setFormData({
@@ -586,6 +680,16 @@ export default function AdminMatches() {
                                 >
                                     <IconTimeline className="w-5 h-5" />
                                 </button>
+                                <button
+                                    onClick={() => setViewMode('analytics')}
+                                    className={`p-2 rounded transition-all duration-200 ${viewMode === 'analytics'
+                                            ? 'bg-gradient-to-r from-ipl-gold to-ipl-purple text-white'
+                                            : 'text-gray-400 hover:text-white'
+                                        }`}
+                                    title="Analytics & Charts"
+                                >
+                                    <BarChart3 className="w-5 h-5" />
+                                </button>
                             </div>
 
                             <button
@@ -635,7 +739,7 @@ export default function AdminMatches() {
                             <div className="flex items-center justify-between mb-2">
                                 <div className="text-xs text-gray-400">Upcoming</div>
                                 <Clock className="w-4 h-4 text-blue-400" />
-                            </div>
+                        </div>
                             <div className="text-2xl font-bold text-blue-400">{statusCounts.upcoming}</div>
                         </motion.div>
                         <motion.div 
@@ -646,7 +750,7 @@ export default function AdminMatches() {
                             <div className="flex items-center justify-between mb-2">
                                 <div className="text-xs text-gray-400">Live</div>
                                 <Zap className="w-4 h-4 text-ipl-accent" />
-                            </div>
+                        </div>
                             <div className="text-2xl font-bold text-ipl-accent">{statusCounts.live}</div>
                         </motion.div>
                         <motion.div 
@@ -657,7 +761,7 @@ export default function AdminMatches() {
                             <div className="flex items-center justify-between mb-2">
                                 <div className="text-xs text-gray-400">Completed</div>
                                 <CheckCircle2 className="w-4 h-4 text-green-400" />
-                            </div>
+                        </div>
                             <div className="text-2xl font-bold text-green-400">{statusCounts.completed}</div>
                         </motion.div>
                     </StaggeredList>
@@ -1256,77 +1360,77 @@ export default function AdminMatches() {
                         <div className="space-y-6">
                             {matchesByDate.length > 0 ? (
                                 <StaggeredList className="space-y-6" staggerDelay={0.1}>
-                                    {matchesByDate.map(([date, dateMatches]) => (
+                            {matchesByDate.map(([date, dateMatches]) => (
                                         <motion.div 
                                             key={date} 
                                             className="glass-effect rounded-xl p-6 border border-white/10"
                                             whileHover={{ scale: 1.01 }}
                                         >
-                                            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                                                <div className="w-1 h-6 bg-gradient-to-b from-ipl-gold to-ipl-purple rounded-full"></div>
-                                                {formatDate(date)}
-                                            </h3>
+                                    <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                                        <div className="w-1 h-6 bg-gradient-to-b from-ipl-gold to-ipl-purple rounded-full"></div>
+                                        {formatDate(date)}
+                                    </h3>
                                             <StaggeredList className="space-y-4" staggerDelay={0.05}>
-                                                {dateMatches.map((match) => (
+                                        {dateMatches.map((match) => (
                                                     <motion.div
-                                                        key={match.id}
-                                                        className="bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-all duration-200 border border-white/5"
+                                                key={match.id}
+                                                className="bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-all duration-200 border border-white/5"
                                                         whileHover={{ scale: 1.02, backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                                                    >
-                                                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                                                            <div className="flex items-center gap-4">
-                                                                <div className="text-sm text-gray-400 font-medium min-w-[80px]">
-                                                                    {formatTime(match.time)}
-                                                                </div>
+                                            >
+                                                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="text-sm text-gray-400 font-medium min-w-[80px]">
+                                                            {formatTime(match.time)}
+                                                        </div>
 
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className="flex items-center gap-2">
-                                                                        {match.team1.id === '1' ? (
-                                                                          <div className="w-10 h-10 flex items-center justify-center">
-                                                                            <RCBLionLogo className="w-10 h-10" />
-                                                                          </div>
-                                                                        ) : (
-                                                                          <img src={match.team1.logo} alt={match.team1.shortName} className="w-10 h-10 object-contain" />
-                                                                        )}
-                                                                        <span className="text-white font-bold">{match.team1.shortName}</span>
-                                                                    </div>
-                                                                    <span className="text-gray-500 font-bold text-lg">vs</span>
-                                                                    <div className="flex items-center gap-2">
-                                                                        {match.team2.id === '1' ? (
-                                                                          <div className="w-10 h-10 flex items-center justify-center">
-                                                                            <RCBLionLogo className="w-10 h-10" />
-                                                                          </div>
-                                                                        ) : (
-                                                                          <img src={match.team2.logo} alt={match.team2.shortName} className="w-10 h-10 object-contain" />
-                                                                        )}
-                                                                        <span className="text-white font-bold">{match.team2.shortName}</span>
-                                                                    </div>
-                                                                </div>
+                                                        <div className="flex items-center gap-3">
+                                                            <div className="flex items-center gap-2">
+                                                                {match.team1.id === '1' ? (
+                                                                  <div className="w-10 h-10 flex items-center justify-center">
+                                                                    <RCBLionLogo className="w-10 h-10" />
+                                                                  </div>
+                                                                ) : (
+                                                                  <img src={match.team1.logo} alt={match.team1.shortName} className="w-10 h-10 object-contain" />
+                                                                )}
+                                                                <span className="text-white font-bold">{match.team1.shortName}</span>
                                                             </div>
-
-                                                            <div className="flex items-center gap-3 flex-wrap">
-                                                                <div className="text-sm text-gray-400">
-                                                                    📍 {match.venue}
-                                                                </div>
-                                                                {getStatusBadge(match.status)}
-                                                                <div className="flex items-center gap-2">
-                                                                    <button
-                                                                        onClick={() => handleEdit(match)}
-                                                                        className="p-2 text-ipl-gold hover:bg-ipl-gold/10 rounded-lg transition-all duration-200"
-                                                                        title="Edit"
-                                                                    >
-                                                                        <IconEdit className="w-4 h-4" />
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() => handleDelete(match.id)}
-                                                                        className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
-                                                                        title="Delete"
-                                                                    >
-                                                                        <IconTrash className="w-4 h-4" />
-                                                                    </button>
-                                                                </div>
+                                                            <span className="text-gray-500 font-bold text-lg">vs</span>
+                                                            <div className="flex items-center gap-2">
+                                                                {match.team2.id === '1' ? (
+                                                                  <div className="w-10 h-10 flex items-center justify-center">
+                                                                    <RCBLionLogo className="w-10 h-10" />
+                                                                  </div>
+                                                                ) : (
+                                                                  <img src={match.team2.logo} alt={match.team2.shortName} className="w-10 h-10 object-contain" />
+                                                                )}
+                                                                <span className="text-white font-bold">{match.team2.shortName}</span>
                                                             </div>
                                                         </div>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-3 flex-wrap">
+                                                        <div className="text-sm text-gray-400">
+                                                            📍 {match.venue}
+                                                        </div>
+                                                        {getStatusBadge(match.status)}
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                onClick={() => handleEdit(match)}
+                                                                className="p-2 text-ipl-gold hover:bg-ipl-gold/10 rounded-lg transition-all duration-200"
+                                                                title="Edit"
+                                                            >
+                                                                <IconEdit className="w-4 h-4" />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => handleDelete(match.id)}
+                                                                className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
+                                                                title="Delete"
+                                                            >
+                                                                <IconTrash className="w-4 h-4" />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                                     </motion.div>
                                                 ))}
                                             </StaggeredList>
@@ -1355,6 +1459,252 @@ export default function AdminMatches() {
                                     }
                                 />
                             )}
+                        </div>
+                    ) : (
+                        // Analytics View
+                        <div className="space-y-6">
+                            {/* Statistics Dashboard */}
+                            <div className="glass-effect rounded-xl p-6 border border-white/10">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <TrendingUp className="w-6 h-6 text-ipl-gold" />
+                                    <h2 className="text-2xl font-bold text-white">Statistics Dashboard</h2>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                                    <motion.div 
+                                        className="glass-effect rounded-lg p-4 hover:bg-white/5 transition-all"
+                                        whileHover={{ scale: 1.02 }}
+                                    >
+                                        <div className="text-xs text-gray-400 mb-1">Total Matches</div>
+                                        <div className="text-2xl font-bold text-white">{statisticsData.totalMatches}</div>
+                                    </motion.div>
+                                    <motion.div 
+                                        className="glass-effect rounded-lg p-4 hover:bg-white/5 transition-all"
+                                        whileHover={{ scale: 1.02 }}
+                                    >
+                                        <div className="text-xs text-gray-400 mb-1">Avg per Day</div>
+                                        <div className="text-2xl font-bold text-blue-400">{statisticsData.avgMatchesPerDay}</div>
+                                    </motion.div>
+                                    <motion.div 
+                                        className="glass-effect rounded-lg p-4 hover:bg-white/5 transition-all"
+                                        whileHover={{ scale: 1.02 }}
+                                    >
+                                        <div className="text-xs text-gray-400 mb-1">This Week</div>
+                                        <div className="text-2xl font-bold text-purple-400">{statisticsData.upcomingThisWeek}</div>
+                                    </motion.div>
+                                    <motion.div 
+                                        className="glass-effect rounded-lg p-4 hover:bg-white/5 transition-all"
+                                        whileHover={{ scale: 1.02 }}
+                                    >
+                                        <div className="text-xs text-gray-400 mb-1">Completed %</div>
+                                        <div className="text-2xl font-bold text-green-400">{statisticsData.completedPercentage}%</div>
+                                    </motion.div>
+                                    <motion.div 
+                                        className="glass-effect rounded-lg p-4 hover:bg-white/5 transition-all"
+                                        whileHover={{ scale: 1.02 }}
+                                    >
+                                        <div className="text-xs text-gray-400 mb-1">Top Team</div>
+                                        <div className="text-lg font-bold text-ipl-gold">
+                                            {statisticsData.matchesPerTeam[0]?.team || 'N/A'}
+                                        </div>
+                                        <div className="text-xs text-gray-400">
+                                            {statisticsData.matchesPerTeam[0]?.count || 0} matches
+                                        </div>
+                                    </motion.div>
+                                </div>
+                            </div>
+
+                            {/* Interactive Charts */}
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <InteractiveChart
+                                    data={matchesByStatusChart}
+                                    type="bar"
+                                    title="Matches by Status"
+                                    height={250}
+                                />
+                                <InteractiveChart
+                                    data={matchesByMonthChart}
+                                    type="bar"
+                                    title="Matches by Month"
+                                    height={250}
+                                />
+                                <InteractiveChart
+                                    data={matchesByVenueChart}
+                                    type="bar"
+                                    title="Top 10 Venues"
+                                    height={250}
+                                />
+                                <InteractiveChart
+                                    data={matchesByTeamChart}
+                                    type="bar"
+                                    title="Matches by Team Participation"
+                                    height={250}
+                                />
+                                </div>
+
+                            {/* Team Match Matrix */}
+                            <div className="glass-effect rounded-xl p-6 border border-white/10">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <Grid3x3 className="w-6 h-6 text-ipl-gold" />
+                                    <h2 className="text-2xl font-bold text-white">Team Match Matrix</h2>
+                                    <p className="text-sm text-gray-400 ml-auto">Click to filter matches</p>
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <div className="inline-block min-w-full">
+                                        <table className="w-full border-collapse">
+                                            <thead>
+                                                <tr>
+                                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase border-b border-white/10"></th>
+                                                    {teams.map(team => (
+                                                        <th 
+                                                            key={team.id}
+                                                            className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase border-b border-white/10 min-w-[80px]"
+                                                        >
+                                                            {team.shortName}
+                                                        </th>
+                                                    ))}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {teams.map(team1 => (
+                                                    <tr key={team1.id} className="hover:bg-white/5 transition-colors">
+                                                        <td className="px-4 py-3 text-sm font-semibold text-white border-r border-white/10">
+                                                            {team1.shortName}
+                                                        </td>
+                                                        {teams.map(team2 => (
+                                                            <td 
+                                                                key={team2.id}
+                                                                className="px-4 py-3 text-center border-r border-white/10 last:border-r-0"
+                                                            >
+                                                                {team1.id === team2.id ? (
+                                                                    <span className="text-gray-600">-</span>
+                                                                ) : (
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            const team1Matches = matches.filter(m => 
+                                                                                (m.team1.id === team1.id && m.team2.id === team2.id) ||
+                                                                                (m.team1.id === team2.id && m.team2.id === team1.id)
+                                                                            );
+                                                                            if (team1Matches.length > 0) {
+                                                                                setFilters({ ...filters, team: team1.id });
+                                                                                setViewMode('table');
+                                                                            }
+                                                                        }}
+                                                                        className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
+                                                                            teamMatchMatrix[team1.id]?.[team2.id] > 0
+                                                                                ? 'bg-ipl-gold/20 text-ipl-gold hover:bg-ipl-gold/30 cursor-pointer'
+                                                                                : 'text-gray-600 cursor-default'
+                                                                        }`}
+                                                                    >
+                                                                        {teamMatchMatrix[team1.id]?.[team2.id] || 0}
+                                                                    </button>
+                                                                )}
+                                                            </td>
+                                                        ))}
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                        </div>
+                                </div>
+                            </div>
+
+                            {/* Venue Heatmap */}
+                            <div className="glass-effect rounded-xl p-6 border border-white/10">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <MapPin className="w-6 h-6 text-ipl-gold" />
+                                    <h2 className="text-2xl font-bold text-white">Venue Distribution</h2>
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                    {venues.slice(0, 12).map(venue => {
+                                        const venueMatches = matches.filter(m => m.venue === venue);
+                                        const count = venueMatches.length;
+                                        const intensity = Math.min(1, count / 10); // Normalize to 0-1
+                                        return (
+                                            <motion.button
+                                                key={venue}
+                                                onClick={() => {
+                                                    setFilters({ ...filters, venue });
+                                                    setViewMode('table');
+                                                }}
+                                                className="glass-effect rounded-lg p-4 text-left hover:bg-white/10 transition-all border border-white/10"
+                                                whileHover={{ scale: 1.05 }}
+                                                style={{
+                                                    backgroundColor: `rgba(255, 215, 0, ${intensity * 0.2})`,
+                                                    borderColor: `rgba(255, 215, 0, ${intensity * 0.5})`
+                                                }}
+                                            >
+                                                <div className="text-sm font-semibold text-white mb-1 truncate">
+                                                    {venue.split(',')[0]}
+                                                </div>
+                                                <div className="text-xs text-gray-400 mb-2">
+                                                    {venue.split(',')[1]?.trim() || ''}
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-lg font-bold text-ipl-gold">{count}</span>
+                                                    <span className="text-xs text-gray-400">matches</span>
+                                                </div>
+                                            </motion.button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Match Calendar View */}
+                            <div className="glass-effect rounded-xl p-6 border border-white/10">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <CalendarIcon className="w-6 h-6 text-ipl-gold" />
+                                    <h2 className="text-2xl font-bold text-white">Match Calendar</h2>
+                                </div>
+                                <div className="grid grid-cols-7 gap-2">
+                                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                                        <div key={day} className="text-center text-xs font-medium text-gray-400 py-2">
+                                            {day}
+                                        </div>
+                                    ))}
+                                    {(() => {
+                                        const calendarDays: JSX.Element[] = [];
+                                        const now = new Date();
+                                        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+                                        const startDate = new Date(firstDay);
+                                        startDate.setDate(startDate.getDate() - startDate.getDay());
+
+                                        for (let i = 0; i < 42; i++) {
+                                            const currentDate = new Date(startDate);
+                                            currentDate.setDate(startDate.getDate() + i);
+                                            const dateStr = currentDate.toISOString().split('T')[0];
+                                            const dayMatches = matches.filter(m => m.date === dateStr);
+                                            const isCurrentMonth = currentDate.getMonth() === now.getMonth();
+                                            
+                                            calendarDays.push(
+                                                <motion.button
+                                                    key={i}
+                                                    onClick={() => {
+                                                        if (dayMatches.length > 0) {
+                                                            setFilters({ ...filters, dateFrom: dateStr, dateTo: dateStr });
+                                                            setViewMode('table');
+                                                        }
+                                                    }}
+                                                    className={`p-2 rounded-lg text-sm transition-all ${
+                                                        !isCurrentMonth 
+                                                            ? 'text-gray-600' 
+                                                            : dayMatches.length > 0
+                                                            ? 'bg-ipl-gold/20 text-ipl-gold border border-ipl-gold/30 hover:bg-ipl-gold/30'
+                                                            : 'text-gray-400 hover:bg-white/5'
+                                                    }`}
+                                                    whileHover={dayMatches.length > 0 ? { scale: 1.1 } : {}}
+                                                    disabled={dayMatches.length === 0}
+                                                >
+                                                    <div>{currentDate.getDate()}</div>
+                                                    {dayMatches.length > 0 && (
+                                                        <div className="text-xs mt-1 font-bold">{dayMatches.length}</div>
+                                                    )}
+                                                </motion.button>
+                                            );
+                                        }
+                                        return calendarDays;
+                                    })()}
+                </div>
+            </div>
                         </div>
                     )}
 
