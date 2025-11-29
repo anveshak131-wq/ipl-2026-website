@@ -10,8 +10,13 @@ import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { PageTransition, StaggeredList, SkeletonLoader, LoadingSpinner } from '@/components/admin/animations';
 import { EmptyStateIllustration, AnimatedStatusIcon, StatusBadge } from '@/components/admin/icons';
 import { ToastContainer, useToast } from '@/components/admin/Toast';
+import BulkOperationsToolbar from '@/components/admin/BulkOperationsToolbar';
+import BulkEditModal from '@/components/admin/BulkEditModal';
+import BatchDeleteModal from '@/components/admin/BatchDeleteModal';
+import { exportToCSV, exportToJSON, exportToExcel, prepareExportData, formatDateForExport } from '@/lib/admin/exportUtils';
 import { Match, Team } from '@/types';
 import { api } from '@/lib/data';
+import { CheckSquare, Square } from 'lucide-react';
 
 const IconTable = ({ className }: { className?: string }) => (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -96,6 +101,9 @@ export default function AdminMatches() {
     const [formStep, setFormStep] = useState(1);
     const [isVenueDropdownOpen, setIsVenueDropdownOpen] = useState(false);
     const [venueSearchQuery, setVenueSearchQuery] = useState('');
+    const [selectedMatches, setSelectedMatches] = useState<Set<string>>(new Set());
+    const [showBulkEditModal, setShowBulkEditModal] = useState(false);
+    const [showBulkDeleteModal, setShowBulkDeleteModal] = useState(false);
 
     const [filters, setFilters] = useState({
         status: 'all',
@@ -133,6 +141,11 @@ export default function AdminMatches() {
 
         checkAuth();
     }, [router]);
+
+    // Clear selection when filters change
+    useEffect(() => {
+        setSelectedMatches(new Set());
+    }, [filters]);
 
     const fetchInitialData = async () => {
         try {
@@ -199,6 +212,169 @@ export default function AdminMatches() {
         setShowForm(false);
         setFormStep(1);
         setError(null);
+    };
+
+    // Bulk selection handlers
+    const toggleSelectMatch = (matchId: string) => {
+        setSelectedMatches(prev => {
+            const next = new Set(prev);
+            if (next.has(matchId)) {
+                next.delete(matchId);
+            } else {
+                next.add(matchId);
+            }
+            return next;
+        });
+    };
+
+    const toggleSelectAll = () => {
+        if (selectedMatches.size === filteredMatches.length) {
+            setSelectedMatches(new Set());
+        } else {
+            setSelectedMatches(new Set(filteredMatches.map(m => m.id)));
+        }
+    };
+
+    const clearSelection = () => {
+        setSelectedMatches(new Set());
+    };
+
+    // Bulk operations handlers
+    const handleBulkStatusUpdate = async (status: 'upcoming' | 'live' | 'completed') => {
+        if (selectedMatches.size === 0) return;
+
+        try {
+            setIsSubmitting(true);
+            const selectedIds = Array.from(selectedMatches);
+            const updatePromises = selectedIds.map(matchId => {
+                const match = matches.find(m => m.id === matchId);
+                if (!match) return Promise.resolve();
+                return api.updateMatch(matchId, {
+                    date: match.date,
+                    time: match.time,
+                    venue: match.venue,
+                    team1Id: match.team1.id,
+                    team2Id: match.team2.id,
+                    status
+                });
+            });
+
+            await Promise.all(updatePromises);
+            
+            // Update matches in state
+            setMatches(matches.map(match => 
+                selectedMatches.has(match.id) 
+                    ? { ...match, status } 
+                    : match
+            ));
+
+            showSuccess(`${selectedMatches.size} match(es) status updated to ${status}`);
+            clearSelection();
+        } catch (error) {
+            console.error('Failed to update match statuses:', error);
+            showError('Failed to update match statuses');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        if (selectedMatches.size === 0) return;
+
+        try {
+            setIsSubmitting(true);
+            const deletePromises = Array.from(selectedMatches).map(matchId => 
+                api.deleteMatch(matchId)
+            );
+
+            await Promise.all(deletePromises);
+            setMatches(matches.filter(m => !selectedMatches.has(m.id)));
+            showSuccess(`${selectedMatches.size} match(es) deleted successfully`);
+            clearSelection();
+            setShowBulkDeleteModal(false);
+        } catch (error) {
+            console.error('Failed to delete matches:', error);
+            showError('Failed to delete matches');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleBulkExport = (format: 'csv' | 'json' | 'excel') => {
+        if (selectedMatches.size === 0) return;
+
+        const selectedMatchesData = matches.filter(m => selectedMatches.has(m.id));
+        
+        const headers = ['Date', 'Time', 'Team 1', 'Team 2', 'Venue', 'Status'];
+        const rows = selectedMatchesData.map(match => [
+            formatDateForExport(match.date),
+            match.time,
+            match.team1.shortName,
+            match.team2.shortName,
+            match.venue,
+            match.status
+        ]);
+
+        const exportData = { headers, rows, title: 'Matches Export' };
+
+        const timestamp = new Date().toISOString().split('T')[0];
+        const filename = `matches_${timestamp}.${format === 'json' ? 'json' : format === 'excel' ? 'xlsx' : 'csv'}`;
+
+        if (format === 'json') {
+            exportToJSON(selectedMatchesData, filename);
+        } else if (format === 'excel') {
+            exportToExcel(exportData, filename);
+        } else {
+            exportToCSV(exportData, filename);
+        }
+
+        showSuccess(`Exported ${selectedMatches.size} match(es) to ${format.toUpperCase()}`);
+    };
+
+    const handleBulkEdit = async (values: { [key: string]: any }) => {
+        if (selectedMatches.size === 0) return;
+
+        try {
+            setIsSubmitting(true);
+            const updatePromises = Array.from(selectedMatches).map(matchId => {
+                const match = matches.find(m => m.id === matchId);
+                if (!match) return Promise.resolve();
+
+                const updateData: any = {
+                    date: match.date,
+                    time: match.time,
+                    venue: match.venue,
+                    team1Id: match.team1.id,
+                    team2Id: match.team2.id,
+                    status: match.status
+                };
+
+                if (values.status) updateData.status = values.status;
+                if (values.venue) updateData.venue = values.venue;
+                if (values.dateShift && !isNaN(Number(values.dateShift))) {
+                    const currentDate = new Date(match.date);
+                    currentDate.setDate(currentDate.getDate() + Number(values.dateShift));
+                    updateData.date = currentDate.toISOString().split('T')[0];
+                }
+
+                return api.updateMatch(matchId, updateData);
+            });
+
+            await Promise.all(updatePromises);
+            
+            // Refresh matches
+            const updatedMatches = await api.getMatches();
+            setMatches(updatedMatches);
+
+            showSuccess(`${selectedMatches.size} match(es) updated successfully`);
+            clearSelection();
+            setShowBulkEditModal(false);
+        } catch (error) {
+            console.error('Failed to update matches:', error);
+            showError('Failed to update matches');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const handleEdit = (match: Match) => {
@@ -919,10 +1095,42 @@ export default function AdminMatches() {
 
                     {viewMode === 'table' ? (
                         <div className="glass-effect rounded-xl overflow-hidden border border-white/10">
+                            <BulkOperationsToolbar
+                                selectedCount={selectedMatches.size}
+                                totalCount={filteredMatches.length}
+                                onSelectAll={toggleSelectAll}
+                                onDeselectAll={clearSelection}
+                                onBulkEdit={() => setShowBulkEditModal(true)}
+                                onBulkDelete={() => setShowBulkDeleteModal(true)}
+                                onBulkExport={() => {
+                                    // Show export menu or directly export CSV
+                                    handleBulkExport('csv');
+                                }}
+                                onBulkStatusUpdate={(status) => handleBulkStatusUpdate(status as 'upcoming' | 'live' | 'completed')}
+                                statusOptions={[
+                                    { value: 'upcoming', label: 'Set to Scheduled' },
+                                    { value: 'live', label: 'Set to Live' },
+                                    { value: 'completed', label: 'Set to Completed' }
+                                ]}
+                                showSelectAll={true}
+                            />
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead className="bg-white/5">
                                         <tr>
+                                            <th className="px-6 py-4 text-left">
+                                                <button
+                                                    onClick={toggleSelectAll}
+                                                    className="flex items-center"
+                                                    title={selectedMatches.size === filteredMatches.length ? 'Deselect All' : 'Select All'}
+                                                >
+                                                    {selectedMatches.size === filteredMatches.length && filteredMatches.length > 0 ? (
+                                                        <CheckSquare className="w-5 h-5 text-ipl-gold" />
+                                                    ) : (
+                                                        <Square className="w-5 h-5 text-gray-400" />
+                                                    )}
+                                                </button>
+                                            </th>
                                             <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                                                 Date & Time
                                             </th>
@@ -950,6 +1158,14 @@ export default function AdminMatches() {
                                                 transition={{ delay: index * 0.03, duration: 0.3 }}
                                                 whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
                                             >
+                                                <td className="px-6 py-4">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedMatches.has(match.id)}
+                                                        onChange={() => toggleSelectMatch(match.id)}
+                                                        className="w-4 h-4 rounded border-white/20 bg-white/5 text-ipl-gold focus:ring-ipl-gold/20 cursor-pointer"
+                                                    />
+                                                </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="text-sm text-white font-medium">{formatDate(match.date)}</div>
                                                     <div className="text-xs text-gray-400">{formatTime(match.time)}</div>
@@ -1140,6 +1356,49 @@ export default function AdminMatches() {
                             )}
                         </div>
                     )}
+
+                    {/* Bulk Edit Modal */}
+                    <BulkEditModal
+                        isOpen={showBulkEditModal}
+                        onClose={() => setShowBulkEditModal(false)}
+                        onSave={handleBulkEdit}
+                        selectedCount={selectedMatches.size}
+                        title="Bulk Edit Matches"
+                        fields={[
+                            {
+                                name: 'status',
+                                label: 'Status',
+                                type: 'select',
+                                options: [
+                                    { value: 'upcoming', label: 'Scheduled' },
+                                    { value: 'live', label: 'Live' },
+                                    { value: 'completed', label: 'Completed' }
+                                ]
+                            },
+                            {
+                                name: 'venue',
+                                label: 'Venue',
+                                type: 'text',
+                                placeholder: 'Enter new venue...'
+                            },
+                            {
+                                name: 'dateShift',
+                                label: 'Date Shift (days)',
+                                type: 'number',
+                                placeholder: 'e.g., 2 for +2 days, -1 for -1 day'
+                            }
+                        ]}
+                    />
+
+                    {/* Bulk Delete Modal */}
+                    <BatchDeleteModal
+                        isOpen={showBulkDeleteModal}
+                        onClose={() => setShowBulkDeleteModal(false)}
+                        onConfirm={handleBulkDelete}
+                        itemCount={selectedMatches.size}
+                        itemType="matches"
+                        warningMessage="All match data, including scores and statistics, will be permanently deleted."
+                    />
                 </div>
             </PageTransition>
         </div>
