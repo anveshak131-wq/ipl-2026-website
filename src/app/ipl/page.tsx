@@ -29,9 +29,9 @@ import { api } from '@/lib/data';
 import { useLeague } from '@/contexts/LeagueContext';
 import type { Team, Match, News } from '@/types';
 import { useMemo } from 'react';
-import { Sparkles } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 
-export default function WPLHomePage() {
+export default function IPLHomePage() {
   const router = useRouter();
   const { currentLeague, setCurrentLeague } = useLeague();
   const [showTermsModal, setShowTermsModal] = useState(false);
@@ -46,10 +46,10 @@ export default function WPLHomePage() {
   const [hasLiveMatch, setHasLiveMatch] = useState(false);
   const [favoriteTeams, setFavoriteTeams] = useState<string[]>([]);
   
-  // Set league to WPL when page loads
+  // Set league to IPL when page loads
   useEffect(() => {
-    if (currentLeague !== 'wpl') {
-      setCurrentLeague('wpl');
+    if (currentLeague !== 'ipl') {
+      setCurrentLeague('ipl');
     }
   }, [currentLeague, setCurrentLeague]);
   
@@ -102,20 +102,20 @@ export default function WPLHomePage() {
       }
     }
 
-    // Load data for WPL
+    // Load data for IPL
     const loadData = async () => {
       setIsLoading(true);
       try {
-        console.log('Loading WPL data');
+        console.log('Loading IPL data');
         const [teamsData, matchesData, newsData] = await Promise.all([
-          api.getTeams('wpl'),
-          api.getMatches('wpl'),
+          api.getTeams('ipl'),
+          api.getMatches('ipl'),
           api.getNews(),
         ]);
         
         // Filter news by league
         const filteredNews = newsData.filter(item => 
-          !item.league || item.league === 'wpl' || item.league === 'both'
+          !item.league || item.league === 'ipl' || item.league === 'both'
         );
         
         setTeams(teamsData);
@@ -130,7 +130,7 @@ export default function WPLHomePage() {
           setTimeout(() => setShowConfetti(false), 3000);
         }
       } catch (error) {
-        console.error('Error loading WPL data:', error);
+        console.error('Error loading IPL data:', error);
       } finally {
         setIsLoading(false);
       }
@@ -155,7 +155,7 @@ export default function WPLHomePage() {
   const shouldShowModal = isHydrated && showTermsModal;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-purple-950/20 to-gray-950">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-blue-950/20 to-slate-950">
       <AuroraBackground />
       <Navbar />
 
@@ -185,13 +185,13 @@ export default function WPLHomePage() {
       )}
 
       <main className="relative z-10">
-        {/* Modern Hero Section with WPL Branding */}
+        {/* Modern Hero Section with IPL Branding */}
         <section className="relative overflow-hidden">
           <ParallaxSection speed={0.5}>
             <div className="relative min-h-screen flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 via-pink-600/20 to-rose-600/20" />
-              <div className="absolute top-20 left-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-float" />
-              <div className="absolute bottom-20 right-10 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }} />
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-indigo-600/20 to-purple-600/20" />
+              <div className="absolute top-20 left-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-float" />
+              <div className="absolute bottom-20 right-10 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }} />
               
               <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center">
                 <AnimatedSection direction="down" delay={0.1}>
@@ -199,11 +199,11 @@ export default function WPLHomePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
-                    className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30"
+                    className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border border-blue-500/30"
                   >
-                    <Sparkles className="w-5 h-5 text-purple-400" />
-                    <span className="text-sm font-bold text-purple-300 uppercase tracking-wider">
-                      Women's Premier League
+                    <Trophy className="w-5 h-5 text-blue-400" />
+                    <span className="text-sm font-bold text-blue-300 uppercase tracking-wider">
+                      Indian Premier League
                     </span>
                   </motion.div>
 
@@ -213,7 +213,7 @@ export default function WPLHomePage() {
                     transition={{ duration: 0.6, delay: 0.2 }}
                     className="text-6xl md:text-8xl lg:text-9xl font-black text-white mb-6 leading-tight"
                   >
-                    WPL <GradientText gradient="from-purple-400 via-pink-400 to-rose-400" animate>2026</GradientText>
+                    IPL <GradientText gradient="from-blue-400 via-cyan-400 to-indigo-400" animate>2026</GradientText>
                   </motion.h1>
 
                   <motion.p
@@ -222,7 +222,7 @@ export default function WPLHomePage() {
                     transition={{ duration: 0.6, delay: 0.3 }}
                     className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-8"
                   >
-                    The pinnacle of women's T20 cricket. Experience the power, passion, and excellence of WPL 2026.
+                    The world's biggest T20 cricket league. Experience the thrill, passion, and glory of IPL 2026.
                   </motion.p>
 
                   <motion.div
@@ -232,22 +232,22 @@ export default function WPLHomePage() {
                     className="flex flex-wrap justify-center gap-4"
                   >
                     <Link
-                      href="/wpl/teams"
-                      className="px-8 py-4 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 transform hover:scale-105"
+                      href="/teams"
+                      className="px-8 py-4 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 transform hover:scale-105"
                     >
                       Explore Teams
                     </Link>
                     <Link
-                      href="/wpl/matches"
-                      className="px-8 py-4 rounded-xl bg-white/10 text-white font-bold border border-purple-500/50 hover:bg-purple-500/20 transition-all duration-300 transform hover:scale-105"
+                      href="/matches"
+                      className="px-8 py-4 rounded-xl bg-white/10 text-white font-bold border border-blue-500/50 hover:bg-blue-500/20 transition-all duration-300 transform hover:scale-105"
                     >
                       View Matches
                     </Link>
                     <Link
-                      href="/wpl/stats"
-                      className="px-8 py-4 rounded-xl bg-white/10 text-white font-bold border border-pink-500/50 hover:bg-pink-500/20 transition-all duration-300 transform hover:scale-105"
+                      href="/live-score"
+                      className="px-8 py-4 rounded-xl bg-white/10 text-white font-bold border border-cyan-500/50 hover:bg-cyan-500/20 transition-all duration-300 transform hover:scale-105"
                     >
-                      Statistics
+                      Live Scores
                     </Link>
                   </motion.div>
                 </AnimatedSection>
@@ -276,11 +276,11 @@ export default function WPLHomePage() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-4xl md:text-5xl font-black text-white">
-                  WPL <GradientText gradient="from-purple-400 to-pink-400" animate>Teams</GradientText>
+                  IPL <GradientText gradient="from-blue-400 to-cyan-400" animate>Teams</GradientText>
                 </h2>
                 <Link
-                  href="/wpl/teams"
-                  className="text-purple-400 hover:text-pink-400 font-semibold flex items-center gap-2 transition-colors"
+                  href="/teams"
+                  className="text-blue-400 hover:text-cyan-400 font-semibold flex items-center gap-2 transition-colors"
                 >
                   View All
                   <span>→</span>
@@ -299,11 +299,11 @@ export default function WPLHomePage() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-4xl md:text-5xl font-black text-white">
-                  Upcoming <GradientText gradient="from-pink-400 to-rose-400" animate>Matches</GradientText>
+                  Upcoming <GradientText gradient="from-cyan-400 to-blue-400" animate>Matches</GradientText>
                 </h2>
                 <Link
-                  href="/wpl/matches"
-                  className="text-pink-400 hover:text-rose-400 font-semibold flex items-center gap-2 transition-colors"
+                  href="/matches"
+                  className="text-cyan-400 hover:text-blue-400 font-semibold flex items-center gap-2 transition-colors"
                 >
                   View All
                   <span>→</span>
@@ -320,11 +320,11 @@ export default function WPLHomePage() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-4xl md:text-5xl font-black text-white">
-                  League <GradientText gradient="from-purple-400 via-pink-400 to-rose-400" animate>Statistics</GradientText>
+                  League <GradientText gradient="from-blue-400 via-cyan-400 to-indigo-400" animate>Statistics</GradientText>
                 </h2>
                 <Link
-                  href="/wpl/stats"
-                  className="text-purple-400 hover:text-pink-400 font-semibold flex items-center gap-2 transition-colors"
+                  href="/stats"
+                  className="text-blue-400 hover:text-cyan-400 font-semibold flex items-center gap-2 transition-colors"
                 >
                   View All
                   <span>→</span>
@@ -343,11 +343,11 @@ export default function WPLHomePage() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-4xl md:text-5xl font-black text-white">
-                  Latest <GradientText gradient="from-pink-400 to-purple-400" animate>News</GradientText>
+                  Latest <GradientText gradient="from-indigo-400 to-blue-400" animate>News</GradientText>
                 </h2>
                 <Link
                   href="/news"
-                  className="text-pink-400 hover:text-purple-400 font-semibold flex items-center gap-2 transition-colors"
+                  className="text-indigo-400 hover:text-blue-400 font-semibold flex items-center gap-2 transition-colors"
                 >
                   View All
                   <span>→</span>
@@ -371,3 +371,4 @@ export default function WPLHomePage() {
     </div>
   );
 }
+

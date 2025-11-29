@@ -8,6 +8,7 @@ import AuroraBackground from '@/components/ui/AuroraBackground';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Icon from '@/components/ui/Icon';
 import { api } from '@/lib/data';
+import { useLeague } from '@/contexts/LeagueContext';
 import type { Player, Team } from '@/types';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import GradientText from '@/components/ui/GradientText';
@@ -127,6 +128,7 @@ function getBowlingContextLine(p: Player): string {
 }
 
 export default function StatsPage() {
+  const { currentLeague } = useLeague();
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -152,8 +154,8 @@ export default function StatsPage() {
       setError(null);
       try {
         const [playersData, teamsData, settingsData] = await Promise.all([
-          api.getPlayers(),
-          api.getTeams(),
+          api.getPlayers(undefined, currentLeague),
+          api.getTeams(currentLeague),
           api.getSettings().catch(() => null),
         ]);
         setPlayers(playersData || []);
@@ -203,7 +205,7 @@ export default function StatsPage() {
     };
 
     fetchData();
-  }, []);
+  }, [currentLeague]); // Re-fetch when league changes
 
   const computedTopRunScorers = useMemo(() => {
     return [...players]

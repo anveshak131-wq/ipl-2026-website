@@ -1,15 +1,19 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import { useLeague } from '@/contexts/LeagueContext';
 import { Trophy, Sparkles } from 'lucide-react';
 
 export default function LeagueSwitcher() {
+  const router = useRouter();
   const { currentLeague, setCurrentLeague, isIPL, isWPL } = useLeague();
   
   const handleLeagueChange = (league: 'ipl' | 'wpl') => {
     console.log('League switcher clicked:', league);
     setCurrentLeague(league);
+    // Navigate to the respective home page
+    router.push(`/${league}`);
     console.log('League changed to:', league);
   };
 
