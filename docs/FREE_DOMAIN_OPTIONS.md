@@ -41,9 +41,11 @@ The system will automatically:
 - Freenom (.tk, .ml, .ga) - Unreliable, often suspended
 - Free subdomains - Usually blocked by email providers
 
-## Recommended: Use Elastic Email
+## Recommended: Use Elastic Email API
 
-Since you already have Elastic Email configured, **just use it**! No domain needed.
+Since you already have `ELASTIC_EMAIL_API_KEY` configured, **just use it**! No domain needed.
+
+**Important**: Make sure you sign up for **"Email API"** (not Email Marketing or Creator Suite).
 
 ### What Happens:
 

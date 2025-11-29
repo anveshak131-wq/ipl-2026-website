@@ -1,217 +1,84 @@
-# 🚀 Elastic Email Setup Guide
+# Elastic Email Setup Guide
 
-**Your API is ready!** Here's how to activate it in your email system.
+## Which Product to Choose? 📧
 
----
+When signing up for Elastic Email, choose:
 
-## Step 1: Get Your API Key
+### ✅ **Email API** (This is what you need!)
 
-From your Elastic Email dashboard:
-1. Go to **Settings** → **API**
-2. Find your API key (looks like: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`)
-3. Copy it
+**Features**:
+- ✅ API Keys & SMTP relay
+- ✅ RESTful API for sending emails
+- ✅ Perfect for application integration
+- ✅ Free tier: 100 emails/day
 
----
+**This is the correct product for sending emails from your application.**
 
-## Step 2: Add to Cloudflare Pages
+### ❌ Don't Choose:
 
-### Via Cloudflare Dashboard:
+- **Email Marketing** - For newsletters and campaigns (not what you need)
+- **Creator Suite** - For link-in-bio and creative brands (not what you need)
 
-1. Go to **Cloudflare Pages** → Your Project (`ipl-2026-website`)
-2. Click **Settings**
-3. Go to **Environment variables**
-4. Click **Secrets** (for sensitive data)
-5. Click **Add secret**
+## Sign Up Steps
 
-Fill in:
-```
-Variable name: ELASTIC_EMAIL_API_KEY
-Value: [your_api_key_from_step_1]
-Environment: Production (or both if you want it in preview too)
-```
+1. Go to https://elasticemail.com
+2. Click **"Sign Up"** or **"Get Started"**
+3. Look for **"Email API"** product option
+4. Sign up for the **Email API** product
+5. Complete registration
 
-6. Click **Save**
+## Get Your API Key
 
-### Via Wrangler CLI (Alternative):
+1. After signing up, go to **Settings** → **API Keys**
+2. Click **"Create API Key"** or **"New API Key"**
+3. Give it a name (e.g., "SportsUP Email Service")
+4. Copy the API key (looks like: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`)
+5. **Add to Cloudflare Pages Environment Variables**:
+   - Variable name: `ELASTIC_EMAIL_API_KEY`
+   - Value: Your API key (paste it here)
+6. **Save and Redeploy**
 
-```bash
-cd /Users/anvesh/Downloads/sportsup99
+## Free Tier Limits
 
-# Add the secret
-wrangler secret put ELASTIC_EMAIL_API_KEY
+- **100 emails per day** (free tier)
+- Perfect for testing and small projects
+- Upgrade options available if needed
 
-# It will prompt you to paste the API key
-# Paste: [your_api_key]
-# Press Enter
-```
+## How It Works in Your System
 
----
+The system automatically:
+1. Tries Resend first
+2. If Resend fails (domain verification needed), falls back to Elastic Email
+3. Elastic Email sends the email successfully
+4. **No domain verification needed!**
 
-## Step 3: Verify It's Working
+## Testing
 
-### Test Email Send:
-
-```bash
-curl -X POST https://api.elasticemail.com/v2/email/send \
-  -d "apikey=YOUR_API_KEY" \
-  -d "from=noreply@sportsup99.com" \
-  -d "to=your-test@example.com" \
-  -d "subject=Test Email" \
-  -d "bodyHtml=<h1>It works!</h1>"
-```
-
-Should return:
-```json
-{
-  "success": true,
-  "transactionid": "xxxx-xxxx-xxxx"
-}
-```
-
----
-
-## Step 4: (Optional) Set Up Webhooks for Analytics
-
-If you want to track opens, clicks, bounces:
-
-1. In Elastic Email Dashboard: **Settings** → **API** → **Webhooks**
-2. Click **Add Webhook**
-3. Fill in:
-
-```
-URL: https://yourdomain.com/api/email-analytics/webhooks/elastic-email
-Events: 
-  ☑ Sent
-  ☑ Delivered  
-  ☑ Opened
-  ☑ Clicked
-  ☑ Bounced
-  ☑ Unsubscribed
-  ☑ Abuse Report
-```
-
-4. Click **Save**
-
-**Note**: Your domain must be publicly accessible. If you're testing locally, use ngrok:
-```bash
-ngrok http 8787
-# Use the ngrok URL as your webhook endpoint
-```
-
----
-
-## Step 5: Test from Your App
-
-### Send a Test Match Reminder:
-
-```bash
-curl -X POST https://your-sportsup.pages.dev/api/email-service \
-  -H "Content-Type: application/json" \
-  -d '{
-    "action": "send-email",
-    "email": "your-test@example.com",
-    "subject": "Test Email",
-    "html": "<h1>Test from Elastic Email</h1>"
-  }'
-```
-
----
-
-## Your API Permissions ✅
-
-Based on what you shared, you have:
-
-| Permission | Status | What It Does |
-|-----------|--------|-------------|
-| **Send email via HTTP** | ✅ | Can send emails |
-| **View** | ✅ | Can view data |
-| **View & Modify** | ✅ | Can edit settings |
-| **Full access** | ✅ | All permissions granted |
-
-Everything you need is enabled! 🎉
-
----
-
-## Sender Email Address
-
-When sending emails, use:
-```javascript
-from: "noreply@sportsup99.com"
-// or any email you've verified in Elastic Email
-```
-
-To verify a sender email:
-1. Elastic Email Dashboard → **Settings** → **Senders**
-2. Click **Add Sender**
-3. Enter your email (e.g., `noreply@sportsup99.com`)
-4. Verify the email (click link in confirmation email)
-5. Use it in your code
-
----
+1. Make sure `ELASTIC_EMAIL_API_KEY` is set in Cloudflare Pages
+2. Try sending an email from Email Notifications page
+3. Check logs - you should see: `[Email Service] Using Elastic Email API`
+4. Email should be delivered successfully!
 
 ## Troubleshooting
 
-### "Unauthorized" or "Invalid API key"
-- Check API key is copied correctly
-- Verify it's in Cloudflare Secrets (not in the code)
-- Redeploy: `wrangler deploy`
+### API Key Not Working?
+- Make sure you signed up for **Email API** (not Email Marketing)
+- Verify API key is correct in Cloudflare Pages
+- Check Elastic Email dashboard for API key status
 
-### Emails not sending
-- Check Elastic Email dashboard for error logs
-- Verify sender email is verified
-- Check rate limits (free tier has limits)
+### Emails Not Sending?
+- Check daily limit (100 emails/day on free tier)
+- Verify API key is active in Elastic Email dashboard
+- Check Cloudflare Pages logs for error messages
 
-### Webhooks not firing
-- Verify webhook URL is publicly accessible
-- Check Elastic Email webhook logs
-- Make sure endpoint returns 200 OK
+### Need More Emails?
+- Upgrade plan in Elastic Email dashboard
+- Or use multiple email services (Resend + Elastic Email)
 
----
+## Summary
 
-## Pricing
-
-**Elastic Email Free Tier**:
-- ✅ Up to 160 emails/day (free)
-- ✅ Unlimited contacts
-- ✅ Email templates
-- ✅ Basic analytics
-
-**For higher volume**:
-- $15/month = 10,000 emails/month
-- $20/month = 20,000 emails/month
-- etc.
-
----
-
-## Quick Reference
-
-| Setting | Value |
-|---------|-------|
-| API Endpoint | `https://api.elasticemail.com/v2/email/send` |
-| Auth Method | API key in request body |
-| Request Type | POST, form-encoded |
-| Rate Limit | Free: 160/day; Paid: per plan |
-| Webhook Events | Sent, Delivered, Opened, Clicked, Bounced, Unsubscribed, AbuseReport |
-
----
-
-## You're All Set! 🚀
-
-Your email system will now:
-1. Try **Resend** first
-2. If Resend fails → Try **Elastic Email** (now active!)
-3. If Elastic Email fails → Try **SendGrid**
-4. If SendGrid fails → Try **Mailgun**
-
-All automatic failover. No code changes needed!
-
----
-
-**Next Steps**:
-1. ✅ Add API key to Cloudflare (do this now)
-2. ✅ Verify sender email in Elastic Email
-3. ⏳ Deploy: `wrangler deploy`
-4. ⏳ Test with a real email address
-5. ⏳ Monitor dashboard for delivery
-
-Questions? Check the other documentation files!
+**Choose: Email API** ✅
+- Get API key from Settings → API Keys
+- Add to Cloudflare Pages as `ELASTIC_EMAIL_API_KEY`
+- Redeploy
+- Done! No domain needed.
