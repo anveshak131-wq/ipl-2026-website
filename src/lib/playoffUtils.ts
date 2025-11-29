@@ -2,7 +2,7 @@
  * Utility functions for playoff matches
  */
 
-import { Team, League } from '@/types';
+import { Team, League, PlayoffType } from '@/types';
 
 /**
  * Get TBD (To Be Determined) team placeholder
