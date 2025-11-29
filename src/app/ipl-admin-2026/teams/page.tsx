@@ -126,6 +126,17 @@ export default function AdminTeams() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentLeague]);
 
+    // Update formData.league when currentLeague changes (only if not editing)
+    useEffect(() => {
+        if (!editingTeam && showSlideOver) {
+            setFormData(prev => ({
+                ...prev,
+                league: currentLeague
+            }));
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentLeague]);
+
     const handleSort = (field: SortField) => {
         if (sortField === field) {
             setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
@@ -193,11 +204,17 @@ export default function AdminTeams() {
 
         try {
             if (editingTeam) {
+                // When editing, preserve the team's existing league unless explicitly changed
                 const updatedTeam = await api.updateTeam(editingTeam.id, formData);
                 setTeams(teams.map(t => t.id === editingTeam.id ? updatedTeam : t));
                 setSuccess('Team updated successfully');
             } else {
-                const newTeam = await api.createTeam(formData);
+                // When creating, always use currentLeague from context to ensure correct league assignment
+                const teamData = {
+                    ...formData,
+                    league: currentLeague // Force use current league from context
+                };
+                const newTeam = await api.createTeam(teamData);
                 setTeams([...teams, newTeam]);
                 setSuccess('Team created successfully');
             }
@@ -689,15 +706,28 @@ export default function AdminTeams() {
                                             <label className="block text-sm font-medium text-gray-300 mb-2">
                                                 League
                                             </label>
-                                            <select
-                                                value={formData.league}
-                                                onChange={(e) => setFormData({ ...formData, league: e.target.value as 'ipl' | 'wpl' })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all"
-                                                required
-                                            >
-                                                <option value="ipl">IPL (Indian Premier League)</option>
-                                                <option value="wpl">WPL (Women's Premier League)</option>
-                                            </select>
+                                            {editingTeam ? (
+                                                // When editing, allow changing league
+                                                <select
+                                                    value={formData.league}
+                                                    onChange={(e) => setFormData({ ...formData, league: e.target.value as 'ipl' | 'wpl' })}
+                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all"
+                                                    required
+                                                >
+                                                    <option value="ipl">IPL (Indian Premier League)</option>
+                                                    <option value="wpl">WPL (Women's Premier League)</option>
+                                                </select>
+                                            ) : (
+                                                // When creating, show current league as read-only
+                                                <div className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white">
+                                                    <span className="font-medium">
+                                                        {currentLeague === 'wpl' ? 'WPL (Women\'s Premier League)' : 'IPL (Indian Premier League)'}
+                                                    </span>
+                                                    <span className="ml-2 text-xs text-gray-400">
+                                                        (Based on current league selection)
+                                                    </span>
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div>
