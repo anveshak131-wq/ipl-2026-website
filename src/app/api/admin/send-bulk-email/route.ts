@@ -41,11 +41,17 @@ export async function POST(request: NextRequest) {
     const users = usersData.users || [];
 
     // Filter users by recipient IDs and email notifications enabled
+    // Handle both id and email matching since recipientIds can contain either
     const recipients = users.filter(
-      (user: any) =>
-        recipientIds.includes(user.id || user.email) &&
-        user.emailNotificationsEnabled &&
-        !user.unsubscribedAt
+      (user: any) => {
+        const userId = user.id || user.email;
+        const userEmail = user.email;
+        return (
+          (recipientIds.includes(userId) || recipientIds.includes(userEmail)) &&
+          user.emailNotificationsEnabled !== false && // Allow if undefined
+          !user.unsubscribedAt
+        );
+      }
     );
 
     if (recipients.length === 0) {

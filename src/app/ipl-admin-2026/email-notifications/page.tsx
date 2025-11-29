@@ -798,13 +798,24 @@ export default function AdminEmailNotificationsPage() {
         sentAt: new Date(),
       })) || [];
 
-      setEmailLogs((prev) => [...newLogs, ...prev]);
-      localStorage.setItem('email_logs', JSON.stringify([...newLogs, ...emailLogs]));
+      setEmailLogs((prev) => {
+        const updated = [...newLogs, ...prev];
+        localStorage.setItem('email_logs', JSON.stringify(updated));
+        return updated;
+      });
 
-      success(`Emails sent successfully to ${result.sentCount || data.recipientIds.length} user${(result.sentCount || data.recipientIds.length) > 1 ? 's' : ''}`);
+      const sentCount = result.sentCount || 0;
+      const totalCount = result.totalCount || data.recipientIds.length;
+      
+      if (sentCount === 0) {
+        throw new Error('No emails were sent. Please check that users have email notifications enabled and are not unsubscribed.');
+      }
+
+      success(`Emails sent successfully to ${sentCount} of ${totalCount} user${sentCount !== 1 ? 's' : ''}`);
     } catch (e: any) {
       console.error('Failed to send bulk emails:', e);
-      throw e;
+      const errorMessage = e?.message || 'Failed to send emails. Please check your connection and try again.';
+      throw new Error(errorMessage);
     }
   };
 
