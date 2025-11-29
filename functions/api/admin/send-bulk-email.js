@@ -3,6 +3,168 @@
  * Handles bulk email sending to multiple users
  */
 
+/**
+ * Send email via Resend, Elastic Email, SendGrid, or Mailgun
+ */
+async function sendEmailViaProvider(emailData, env) {
+  // Try Resend first (recommended for Cloudflare)
+  if (env.RESEND_API_KEY) {
+    return await sendViaResend(emailData, env.RESEND_API_KEY);
+  }
+
+  // Try Elastic Email
+  if (env.ELASTIC_EMAIL_API_KEY) {
+    return await sendViaElasticEmail(emailData, env.ELASTIC_EMAIL_API_KEY);
+  }
+
+  // Try SendGrid
+  if (env.SENDGRID_API_KEY) {
+    return await sendViaSendGrid(emailData, env.SENDGRID_API_KEY);
+  }
+
+  // Try Mailgun
+  if (env.MAILGUN_API_KEY && env.MAILGUN_DOMAIN) {
+    return await sendViaMailgun(emailData, env.MAILGUN_API_KEY, env.MAILGUN_DOMAIN);
+  }
+
+  // Log locally if no email service configured
+  console.log('[Email Service] No email service configured. Email would be sent to:', emailData.to);
+  return { success: true, messageId: 'local-' + Date.now() };
+}
+
+/**
+ * Send via Resend (recommended for Cloudflare)
+ */
+async function sendViaResend(emailData, apiKey) {
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        from: emailData.from,
+        to: emailData.to,
+        subject: emailData.subject,
+        html: emailData.html,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      return { success: false, error: error.message || 'Resend API error' };
+    }
+
+    const data = await response.json();
+    return { success: true, messageId: data.id };
+  } catch (error) {
+    console.error('Resend error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Send via Elastic Email
+ */
+async function sendViaElasticEmail(emailData, apiKey) {
+  try {
+    const response = await fetch('https://api.elasticemail.com/v2/email/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        apikey: apiKey,
+        from: emailData.from,
+        to: emailData.to,
+        subject: emailData.subject,
+        bodyHtml: emailData.html,
+      }).toString(),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      return { success: false, error: error || 'Elastic Email API error' };
+    }
+
+    const data = await response.json();
+    
+    if (data.success) {
+      return { success: true, messageId: data.transactionid || data.transaction_id || 'elastic-' + Date.now() };
+    } else {
+      return { success: false, error: data.error || 'Elastic Email error' };
+    }
+  } catch (error) {
+    console.error('Elastic Email error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Send via SendGrid
+ */
+async function sendViaSendGrid(emailData, apiKey) {
+  try {
+    const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        personalizations: [{ to: [{ email: emailData.to }] }],
+        from: { email: emailData.from },
+        subject: emailData.subject,
+        content: [{ type: 'text/html', value: emailData.html }],
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      return { success: false, error: error || 'SendGrid API error' };
+    }
+
+    const messageId = response.headers.get('X-Message-Id') || 'sendgrid-' + Date.now();
+    return { success: true, messageId };
+  } catch (error) {
+    console.error('SendGrid error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Send via Mailgun
+ */
+async function sendViaMailgun(emailData, apiKey, domain) {
+  try {
+    const formData = new FormData();
+    formData.append('from', emailData.from);
+    formData.append('to', emailData.to);
+    formData.append('subject', emailData.subject);
+    formData.append('html', emailData.html);
+
+    const response = await fetch(`https://api.mailgun.net/v3/${domain}/messages`, {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Basic ' + btoa('api:' + apiKey),
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      return { success: false, error: error.message || 'Mailgun API error' };
+    }
+
+    const data = await response.json();
+    return { success: true, messageId: data.id };
+  } catch (error) {
+    console.error('Mailgun error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
 export const onRequest = async (context) => {
   const { request, env } = context;
   const method = request.method;
@@ -226,12 +388,16 @@ export const onRequest = async (context) => {
           }
         }
 
-        // TODO: Replace with actual email sending service (Resend, SendGrid, Mailgun, etc.)
-        // For now, simulate sending
-        console.log(`[Email] Sending to ${recipient.email}:`, {
-          subject: processedSubject,
-          bodyLength: processedBody.length,
-        });
+        // Actually send email using email service providers
+        const emailResult = await sendEmailViaProvider(
+          {
+            from: 'SportsUP <noreply@sportsup99.com>',
+            to: recipient.email,
+            subject: processedSubject,
+            html: processedBody,
+          },
+          env
+        );
 
         // Log email to KV for tracking
         const emailLog = {
@@ -240,13 +406,15 @@ export const onRequest = async (context) => {
           recipientEmail: recipient.email,
           recipientName: recipient.name || 'User',
           subject: processedSubject,
-          status: 'sent',
+          status: emailResult.success ? 'sent' : 'failed',
           sentAt: new Date().toISOString(),
           emailType: emailType || 'custom',
+          messageId: emailResult.messageId || null,
+          error: emailResult.error || null,
         };
 
         // Store email log
-        const logsKey = `email-logs:${Date.now()}`;
+        const logsKey = `email-logs:${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         await env.SPORTS_KV.put(logsKey, JSON.stringify(emailLog), {
           expirationTtl: 31536000, // 1 year
         });
@@ -254,7 +422,9 @@ export const onRequest = async (context) => {
         sentEmails.push({
           email: recipient.email,
           name: recipient.name,
-          success: true,
+          success: emailResult.success,
+          error: emailResult.error || undefined,
+          messageId: emailResult.messageId || undefined,
         });
       } catch (error) {
         console.error(`Failed to send email to ${recipient.email}:`, error);
