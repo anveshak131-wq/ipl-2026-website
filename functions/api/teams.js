@@ -165,8 +165,18 @@ async function handleGetRequest(context) {
     
     // Filter by league if specified
     if (league && (league === 'ipl' || league === 'wpl')) {
-      teams = teams.filter(team => team.league === league);
+      teams = teams.filter(team => {
+        // If team doesn't have league property, default to 'ipl' for backward compatibility
+        const teamLeague = team.league || 'ipl';
+        return teamLeague === league;
+      });
     }
+    
+    // Ensure all teams have league property (migration for existing data)
+    teams = teams.map(team => ({
+      ...team,
+      league: team.league || 'ipl' // Default to 'ipl' if missing
+    }));
     
     return new Response(JSON.stringify(teams), {
       status: 200,
@@ -198,7 +208,7 @@ async function handlePostRequest(context) {
   
   try {
     const body = await request.json();
-    const { name, shortName, logo, description, colors, trophies, homeGrounds } = body;
+    const { name, shortName, logo, description, colors, trophies, homeGrounds, league } = body;
     
     // Validate required fields
     if (!name || !shortName || !logo || !description) {
@@ -217,6 +227,7 @@ async function handlePostRequest(context) {
     // Create new team
     const newTeam = {
       id: newId,
+      league: league || 'ipl', // Default to 'ipl' if not specified
       name,
       shortName,
       logo,
@@ -259,7 +270,7 @@ async function handlePutRequest(context) {
   
   try {
     const body = await request.json();
-    const { id, name, shortName, logo, description, colors, trophies, homeGrounds } = body;
+    const { id, name, shortName, logo, description, colors, trophies, homeGrounds, league } = body;
     
     if (!id) {
       return new Response(JSON.stringify({ error: 'Team ID is required' }), {
@@ -289,8 +300,14 @@ async function handlePutRequest(context) {
       ...(description && { description }),
       ...(colors && { colors }),
       ...(trophies !== undefined && { trophies }),
-      ...(homeGrounds !== undefined && { homeGrounds })
+      ...(homeGrounds !== undefined && { homeGrounds }),
+      ...(league && { league }) // Update league if provided
     };
+    
+    // Ensure league property exists (default to existing or 'ipl')
+    if (!updatedTeam.league) {
+      updatedTeam.league = teams[teamIndex].league || 'ipl';
+    }
     
     teams[teamIndex] = updatedTeam;
     
