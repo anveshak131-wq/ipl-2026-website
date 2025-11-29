@@ -8,26 +8,40 @@
  */
 async function sendEmailViaProvider(emailData, env) {
   // Log all available API keys (for debugging - don't log actual keys)
-  const hasResend = !!(env.RESEND_API_KEY && env.RESEND_API_KEY.trim());
-  const hasSendGrid = !!(env.SENDGRID_API_KEY && env.SENDGRID_API_KEY.trim());
-  const hasElastic = !!(env.ELASTIC_EMAIL_API_KEY && env.ELASTIC_EMAIL_API_KEY.trim());
-  const hasMailgun = !!(env.MAILGUN_API_KEY && env.MAILGUN_API_KEY.trim() && env.MAILGUN_DOMAIN);
+  const resendKey = env.RESEND_API_KEY;
+  const sendgridKey = env.SENDGRID_API_KEY;
+  const elasticKey = env.ELASTIC_EMAIL_API_KEY;
+  const mailgunKey = env.MAILGUN_API_KEY;
+  const mailgunDomain = env.MAILGUN_DOMAIN;
+  
+  const hasResend = !!(resendKey && typeof resendKey === 'string' && resendKey.trim().length > 0);
+  const hasSendGrid = !!(sendgridKey && typeof sendgridKey === 'string' && sendgridKey.trim().length > 0);
+  const hasElastic = !!(elasticKey && typeof elasticKey === 'string' && elasticKey.trim().length > 0);
+  const hasMailgun = !!(mailgunKey && typeof mailgunKey === 'string' && mailgunKey.trim().length > 0 && mailgunDomain);
   
   console.log('[Email Service] Available providers:', {
-    Resend: hasResend,
-    SendGrid: hasSendGrid,
-    ElasticEmail: hasElastic,
-    Mailgun: hasMailgun,
+    Resend: hasResend ? `Yes (${resendKey.substring(0, 5)}...)` : 'No',
+    SendGrid: hasSendGrid ? 'Yes (configured)' : 'No',
+    ElasticEmail: hasElastic ? 'Yes' : 'No',
+    Mailgun: hasMailgun ? 'Yes' : 'No',
   });
 
-  // Try Resend first (recommended for Cloudflare)
+  // Try Resend first (recommended for Cloudflare) - MUST be checked first
   if (hasResend) {
-    console.log('[Email Service] Using Resend API (key starts with:', env.RESEND_API_KEY.substring(0, 3), '...)');
-    const result = await sendViaResend(emailData, env.RESEND_API_KEY);
+    const resendKeyTrimmed = resendKey.trim();
+    console.log('[Email Service] Using Resend API (key starts with:', resendKeyTrimmed.substring(0, 5), '...length:', resendKeyTrimmed.length, ')');
+    const result = await sendViaResend(emailData, resendKeyTrimmed);
     if (!result.success) {
       console.error('[Email Service] Resend failed:', result.error);
+      // Don't fall through to other providers - return error so user knows Resend failed
+      return result;
     }
     return result;
+  }
+
+  // WARNING: If Resend is not configured, warn user
+  if (!hasResend && hasSendGrid) {
+    console.warn('[Email Service] WARNING: RESEND_API_KEY not found but SENDGRID_API_KEY is set. Using SendGrid as fallback. For Resend, set RESEND_API_KEY environment variable.');
   }
 
   // Try Elastic Email
@@ -36,10 +50,12 @@ async function sendEmailViaProvider(emailData, env) {
     return await sendViaElasticEmail(emailData, env.ELASTIC_EMAIL_API_KEY);
   }
 
-  // Try SendGrid
-  if (hasSendGrid) {
-    console.log('[Email Service] Using SendGrid API');
-    return await sendViaSendGrid(emailData, env.SENDGRID_API_KEY);
+  // Try SendGrid (only if Resend is not configured)
+  if (hasSendGrid && !hasResend) {
+    console.log('[Email Service] Using SendGrid API (Resend not configured)');
+    return await sendViaSendGrid(emailData, sendgridKey.trim());
+  } else if (hasSendGrid && hasResend) {
+    console.warn('[Email Service] Both RESEND_API_KEY and SENDGRID_API_KEY are configured. Using Resend only. Remove SENDGRID_API_KEY if you only want to use Resend.');
   }
 
   // Try Mailgun
