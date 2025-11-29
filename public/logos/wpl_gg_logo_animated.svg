@@ -1,0 +1,160 @@
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Orange to Gold Gradient -->
+    <linearGradient id="gg-orange-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F97316">
+        <animate attributeName="stop-color" values="#F97316;#FB923C;#F97316" dur="3s" repeatCount="indefinite" />
+      </stop>
+      <stop offset="50%" stop-color="#FB923C" />
+      <stop offset="100%" stop-color="#FFD700">
+        <animate attributeName="stop-color" values="#FFD700;#FFA500;#FFD700" dur="3s" repeatCount="indefinite" />
+      </stop>
+    </linearGradient>
+    
+    <!-- Purple Accent -->
+    <linearGradient id="gg-purple-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B5CF6" />
+      <stop offset="50%" stop-color="#A855F7" />
+      <stop offset="100%" stop-color="#C084FC" />
+    </linearGradient>
+    
+    <!-- Brown/Gold for Lioness -->
+    <linearGradient id="gg-lion-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#D97706" />
+      <stop offset="50%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#FBBF24" />
+    </linearGradient>
+    
+    <!-- Radial Glow -->
+    <radialGradient id="gg-glow-gradient" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#F97316" stop-opacity="0.9" />
+      <stop offset="50%" stop-color="#F97316" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#F97316" stop-opacity="0" />
+    </radialGradient>
+    
+    <!-- Shadow Filter -->
+    <filter id="gg-shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="6" />
+      <feOffset dx="4" dy="4" result="offsetblur" />
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.4" />
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    
+    <!-- Glow Filter -->
+    <filter id="gg-glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur" />
+      <feMerge>
+        <feMergeNode in="coloredBlur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Animated Background Glow -->
+  <circle cx="200" cy="200" r="180" fill="url(#gg-glow-gradient)" opacity="0.6">
+    <animate attributeName="opacity" values="0.6;0.9;0.6" dur="2.5s" repeatCount="indefinite"/>
+    <animateTransform attributeName="transform" type="scale" values="1;1.05;1" dur="2.5s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Outer Ring -->
+  <circle cx="200" cy="200" r="170" fill="none" stroke="url(#gg-orange-gradient)" stroke-width="6" opacity="0.8">
+    <animateTransform attributeName="transform" type="rotate" values="0 200 200;360 200 200" dur="18s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Main Logo Group -->
+  <g transform="translate(200,200)" filter="url(#gg-shadow)">
+    <!-- Shield/Circle Base -->
+    <circle cx="0" cy="-20" r="90" fill="url(#gg-orange-gradient)" filter="url(#gg-glow)" opacity="0.95">
+      <animate attributeName="opacity" values="0.95;1;0.95" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    
+    <!-- Lioness Head (Detailed) -->
+    <g transform="translate(0,-30)">
+      <!-- Mane (Flowing) -->
+      <ellipse cx="0" cy="-20" rx="50" ry="45" fill="url(#gg-lion-gradient)" opacity="0.95">
+        <animate attributeName="ry" values="45;48;45" dur="2.5s" repeatCount="indefinite"/>
+      </ellipse>
+      <ellipse cx="0" cy="-20" rx="45" ry="40" fill="url(#gg-orange-gradient)" opacity="0.9"/>
+      
+      <!-- Face Circle -->
+      <circle cx="0" cy="0" r="40" fill="url(#gg-lion-gradient)" opacity="0.95">
+        <animate attributeName="opacity" values="0.95;1;0.95" dur="2.5s" repeatCount="indefinite"/>
+      </circle>
+      
+      <!-- Eyes (Animated) -->
+      <g>
+        <!-- Left Eye -->
+        <ellipse cx="-12" cy="-8" rx="6" ry="8" fill="#FFFFFF" opacity="0.95"/>
+        <circle cx="-12" cy="-6" r="4" fill="#1F2937" opacity="0.9">
+          <animate attributeName="r" values="4;5;4" dur="1.5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="-11" cy="-5" r="1.5" fill="#FFFFFF" opacity="0.9"/>
+        
+        <!-- Right Eye -->
+        <ellipse cx="12" cy="-8" rx="6" ry="8" fill="#FFFFFF" opacity="0.95"/>
+        <circle cx="12" cy="-6" r="4" fill="#1F2937" opacity="0.9">
+          <animate attributeName="r" values="4;5;4" dur="1.5s" begin="0.2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="13" cy="-5" r="1.5" fill="#FFFFFF" opacity="0.9"/>
+      </g>
+      
+      <!-- Nose -->
+      <ellipse cx="0" cy="5" rx="5" ry="4" fill="#1F2937" opacity="0.9"/>
+      
+      <!-- Mouth -->
+      <path d="M-8,10 Q0,15 8,10" stroke="#1F2937" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.9"/>
+      
+      <!-- Whiskers -->
+      <line x1="-25" y1="2" x2="-35" y2="0" stroke="#1F2937" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+      <line x1="-25" y1="8" x2="-35" y2="8" stroke="#1F2937" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+      <line x1="25" y1="2" x2="35" y2="0" stroke="#1F2937" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+      <line x1="25" y1="8" x2="35" y2="8" stroke="#1F2937" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+    </g>
+    
+    <!-- Roaring Effect Lines (Animated) -->
+    <g transform="translate(60,10)">
+      <line x1="0" y1="0" x2="15" y2="0" stroke="url(#gg-orange-gradient)" stroke-width="3" stroke-linecap="round" opacity="0.8">
+        <animate attributeName="opacity" values="0.8;1;0.8" dur="1.5s" repeatCount="indefinite"/>
+        <animateTransform attributeName="transform" type="translate" values="0,0;3,0;0,0" dur="1.5s" repeatCount="indefinite" additive="sum"/>
+      </line>
+      <line x1="0" y1="-5" x2="12" y2="-5" stroke="url(#gg-orange-gradient)" stroke-width="3" stroke-linecap="round" opacity="0.7">
+        <animate attributeName="opacity" values="0.7;0.9;0.7" dur="1.5s" begin="0.2s" repeatCount="indefinite"/>
+        <animateTransform attributeName="transform" type="translate" values="0,0;2,0;0,0" dur="1.5s" begin="0.2s" repeatCount="indefinite" additive="sum"/>
+      </line>
+      <line x1="0" y1="5" x2="12" y2="5" stroke="url(#gg-orange-gradient)" stroke-width="3" stroke-linecap="round" opacity="0.7">
+        <animate attributeName="opacity" values="0.7;0.9;0.7" dur="1.5s" begin="0.4s" repeatCount="indefinite"/>
+        <animateTransform attributeName="transform" type="translate" values="0,0;2,0;0,0" dur="1.5s" begin="0.4s" repeatCount="indefinite" additive="sum"/>
+      </line>
+    </g>
+    <g transform="translate(-60,10)">
+      <line x1="0" y1="0" x2="-15" y2="0" stroke="url(#gg-orange-gradient)" stroke-width="3" stroke-linecap="round" opacity="0.8">
+        <animate attributeName="opacity" values="0.8;1;0.8" dur="1.5s" begin="0.1s" repeatCount="indefinite"/>
+        <animateTransform attributeName="transform" type="translate" values="0,0;-3,0;0,0" dur="1.5s" begin="0.1s" repeatCount="indefinite" additive="sum"/>
+      </line>
+      <line x1="0" y1="-5" x2="-12" y2="-5" stroke="url(#gg-orange-gradient)" stroke-width="3" stroke-linecap="round" opacity="0.7">
+        <animate attributeName="opacity" values="0.7;0.9;0.7" dur="1.5s" begin="0.3s" repeatCount="indefinite"/>
+        <animateTransform attributeName="transform" type="translate" values="0,0;-2,0;0,0" dur="1.5s" begin="0.3s" repeatCount="indefinite" additive="sum"/>
+      </line>
+      <line x1="0" y1="5" x2="-12" y2="5" stroke="url(#gg-orange-gradient)" stroke-width="3" stroke-linecap="round" opacity="0.7">
+        <animate attributeName="opacity" values="0.7;0.9;0.7" dur="1.5s" begin="0.5s" repeatCount="indefinite"/>
+        <animateTransform attributeName="transform" type="translate" values="0,0;-2,0;0,0" dur="1.5s" begin="0.5s" repeatCount="indefinite" additive="sum"/>
+      </line>
+    </g>
+    
+    <!-- GG Text -->
+    <text x="0" y="80" text-anchor="middle" fill="#FFFFFF" font-size="20" font-weight="bold" font-family="Arial, sans-serif" opacity="0.95" filter="url(#gg-glow)">GG</text>
+    
+    <!-- Decorative Stars -->
+    <path d="M-100,-100 L-98,-92 L-100,-90 L-102,-92 Z" fill="url(#gg-purple-gradient)" opacity="0.8">
+      <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite"/>
+    </path>
+    <path d="M100,-100 L102,-92 L100,-90 L98,-92 Z" fill="url(#gg-purple-gradient)" opacity="0.8">
+      <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" begin="0.5s" repeatCount="indefinite"/>
+    </path>
+  </g>
+</svg>

@@ -120,26 +120,35 @@ export default function TeamsShowcase() {
                   transition={{ duration: 0.45 }}
                 >
                   <div className="absolute inset-0 bg-white/20 rounded-full blur-md transition-all duration-500" />
-                  {getAnimatedLogoPath(team.id).endsWith('.json') ? (
-                    <div className="relative w-full h-full">
-                      <RCBLottie className="w-full h-full" />
-                    </div>
-                  ) : getAnimatedLogoPath(team.id).endsWith('rcb_logo_premium.svg') ? (
-                    <div className="relative w-full h-full flex items-center justify-center">
-                      <RCBLionLogo className="w-full h-full" />
-                    </div>
-                  ) : (
-                    <motion.img 
-                      src={getAnimatedLogoPath(team.id)} 
-                      alt={team.shortName}
-                      className="relative w-full h-full object-contain drop-shadow-2xl"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = getLogoPath(team.id);
-                      }}
-                      initial={{ scale: 1 }}
-                      transition={{ duration: 0.45 }}
-                    />
-                  )}
+                  {(() => {
+                    const logoPath = getAnimatedLogoPath(team.id, team.shortName, team.league);
+                    if (logoPath.endsWith('.json')) {
+                      return (
+                        <div className="relative w-full h-full">
+                          <RCBLottie className="w-full h-full" />
+                        </div>
+                      );
+                    } else if (logoPath.endsWith('rcb_logo_premium.svg')) {
+                      return (
+                        <div className="relative w-full h-full flex items-center justify-center">
+                          <RCBLionLogo className="w-full h-full" />
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <motion.img 
+                          src={logoPath} 
+                          alt={team.shortName}
+                          className="relative w-full h-full object-contain drop-shadow-2xl"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = getLogoPath(team.id);
+                          }}
+                          initial={{ scale: 1 }}
+                          transition={{ duration: 0.45 }}
+                        />
+                      );
+                    }
+                  })()}
                 </motion.div>
 
                 {/* Team Name */}

@@ -7,6 +7,7 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import { Team } from '@/types';
 import { api } from '@/lib/data';
+import { wplTeams } from '@/data/wpl-teams';
 import { getAnimatedLogoPath } from '@/lib/logoUtils';
 import RCBLottie from '@/components/ui/RCBLottie';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
@@ -311,6 +312,40 @@ export default function AdminTeams() {
         });
     };
 
+    const handleAddAllWPLTeams = async () => {
+        if (!confirm('This will add all 5 WPL teams with their logos, colors, and descriptions. Continue?')) return;
+        
+        setIsSubmitting(true);
+        setError(null);
+        const results: string[] = [];
+
+        try {
+            for (const team of wplTeams) {
+                try {
+                    const teamData = {
+                        ...team,
+                        league: 'wpl' // Ensure WPL league
+                    };
+                    const newTeam = await api.createTeam(teamData);
+                    results.push(`✅ ${newTeam.name}`);
+                } catch (err: any) {
+                    results.push(`❌ ${team.name}: ${err?.message || 'Failed'}`);
+                }
+            }
+            
+            // Refresh teams list
+            await fetchTeams();
+            
+            setSuccess(`WPL teams added! ${results.join(', ')}`);
+            setTimeout(() => setSuccess(null), 8000);
+        } catch (err) {
+            setError('Failed to add some WPL teams. Check console for details.');
+            console.error('WPL teams addition error:', err);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     if (authLoading) {
         return (
             <div className="flex min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
@@ -350,16 +385,33 @@ export default function AdminTeams() {
                             <h1 className="text-3xl lg:text-4xl font-bold text-white mb-2">
                                 Teams
                             </h1>
-                            <p className="text-gray-400">Manage IPL 2026 teams</p>
+                            <p className="text-gray-400">
+                                Manage {currentLeague === 'wpl' ? 'WPL' : 'IPL'} 2026 teams
+                            </p>
                         </div>
-                        <button
-                            onClick={handleAddTeam}
-                            className="group relative px-6 py-3 bg-gradient-to-r from-purple-600 via-purple-500 to-pink-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2"
-                            disabled={isSubmitting}
-                        >
-                            <PlusIcon className="w-5 h-5" />
-                            Add Team
-                        </button>
+                        <div className="flex items-center gap-3">
+                            {currentLeague === 'wpl' && teams.filter(t => t.league === 'wpl').length === 0 && (
+                                <button
+                                    onClick={handleAddAllWPLTeams}
+                                    className="group relative px-5 py-3 bg-gradient-to-r from-purple-600 via-pink-500 to-rose-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2"
+                                    disabled={isSubmitting}
+                                    title="Add all 5 WPL teams at once"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    Add All WPL Teams
+                                </button>
+                            )}
+                            <button
+                                onClick={handleAddTeam}
+                                className="group relative px-6 py-3 bg-gradient-to-r from-purple-600 via-purple-500 to-pink-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2"
+                                disabled={isSubmitting}
+                            >
+                                <PlusIcon className="w-5 h-5" />
+                                Add Team
+                            </button>
+                        </div>
                     </div>
 
                     {selectedTeams.size > 0 && (

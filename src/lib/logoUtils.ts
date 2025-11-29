@@ -1,5 +1,6 @@
 // Helper function to get animated logo path for teams
 // Team ID mapping:
+// IPL Teams:
 // '1' = RCB (Royal Challengers Bengaluru)
 // '2' = MI (Mumbai Indians)
 // '3' = SRH (Sunrisers Hyderabad)
@@ -10,7 +11,30 @@
 // '8' = RR (Rajasthan Royals)
 // '9' = KKR (Kolkata Knight Riders)
 // '10' = CSK (Chennai Super Kings)
-export function getAnimatedLogoPath(teamId: string): string {
+// WPL Teams (by shortName):
+// 'MI-W' = Mumbai Indians (WPL)
+// 'RCB-W' = Royal Challengers Bengaluru (WPL)
+// 'DC-W' = Delhi Capitals (WPL)
+// 'GG' = Gujarat Giants (WPL)
+// 'UPW' = UP Warriorz (WPL)
+export function getAnimatedLogoPath(teamId: string, shortName?: string, league?: 'ipl' | 'wpl'): string {
+  // Check if it's a WPL team (by league or shortName pattern)
+  const isWPL = league === 'wpl' || shortName?.includes('-W') || shortName === 'GG' || shortName === 'UPW';
+  
+  if (isWPL && shortName) {
+    const wplLogoMap: { [key: string]: string } = {
+      'MI-W': 'wpl_mi_logo_animated.svg',
+      'RCB-W': 'wpl_rcb_logo_animated.svg',
+      'DC-W': 'wpl_dc_logo_animated.svg',
+      'GG': 'wpl_gg_logo_animated.svg',
+      'UPW': 'wpl_upw_logo_animated.svg',
+    };
+    
+    if (wplLogoMap[shortName]) {
+      return `/logos/${wplLogoMap[shortName]}`;
+    }
+  }
+  
   const logoMap: { [key: string]: string } = {
     // RCB uses the premium animated logo SVG in /public/logos
     '1': 'rcb_logo_premium.svg',       // RCB
