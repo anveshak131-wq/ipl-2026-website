@@ -43,12 +43,20 @@ The email notifications system allows admins to:
 
 You need to integrate an email service provider. Choose one:
 
-#### Option A: Resend (Recommended)
+#### Option A: Resend (Recommended for Cloudflare)
 1. Sign up at https://resend.com
-2. Get your API key
-3. Add to environment variables:
-   ```bash
-   RESEND_API_KEY=re_xxxxxxxxxxxxx
+2. Get your API key from dashboard
+3. **In Cloudflare Pages Dashboard**:
+   - Go to: Workers & Pages → Your Project → Settings → Environment Variables
+   - Add new variable:
+     - Variable name: `RESEND_API_KEY`
+     - Value: `re_xxxxxxxxxxxxx` (your actual API key)
+   - Save and redeploy
+   
+   Or via wrangler.toml (for local testing):
+   ```toml
+   [env.production.vars]
+   RESEND_API_KEY = "re_xxxxxxxxxxxxx"
    ```
 
 #### Option B: SendGrid

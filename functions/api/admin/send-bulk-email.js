@@ -27,9 +27,13 @@ async function sendEmailViaProvider(emailData, env) {
     return await sendViaMailgun(emailData, env.MAILGUN_API_KEY, env.MAILGUN_DOMAIN);
   }
 
-  // Log locally if no email service configured
-  console.log('[Email Service] No email service configured. Email would be sent to:', emailData.to);
-  return { success: true, messageId: 'local-' + Date.now() };
+  // No email service configured - return error so admin knows to configure one
+  console.error('[Email Service] No email service API key configured. Please configure RESEND_API_KEY, ELASTIC_EMAIL_API_KEY, SENDGRID_API_KEY, or MAILGUN_API_KEY in Cloudflare Pages environment variables.');
+  return { 
+    success: false, 
+    error: 'Email service not configured. Please configure an email service API key (Resend, Elastic Email, SendGrid, or Mailgun) in Cloudflare Pages environment variables.',
+    messageId: null
+  };
 }
 
 /**
@@ -438,15 +442,42 @@ export const onRequest = async (context) => {
     }
 
     const successCount = sentEmails.filter((e) => e.success).length;
+    const failedCount = sentEmails.filter((e) => !e.success).length;
 
+    // Check if no email service is configured (all failed with same error)
+    const allFailedWithConfigError = failedCount === recipients.length && 
+      sentEmails.every(e => !e.success && e.error && e.error.includes('not configured'));
+
+    if (allFailedWithConfigError) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Email service not configured. Please configure an email service API key (Resend, Elastic Email, SendGrid, or Mailgun) in Cloudflare Pages environment variables.',
+          sentCount: 0,
+          totalCount: recipients.length,
+          failedCount: failedCount,
+          sentEmails,
+        }),
+        { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
+
+    // Return success even if some failed, but include details
     return new Response(
       JSON.stringify({
-        success: true,
+        success: successCount > 0,
         sentCount: successCount,
         totalCount: recipients.length,
+        failedCount: failedCount,
         sentEmails,
+        message: successCount === recipients.length 
+          ? `All ${successCount} email(s) sent successfully!`
+          : `Sent ${successCount} email(s). ${failedCount} failed.`,
       }),
-      { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      { 
+        status: successCount > 0 ? 200 : 500, 
+        headers: { 'Content-Type': 'application/json', ...corsHeaders } 
+      }
     );
   } catch (error) {
     console.error('Bulk email send error:', error);
