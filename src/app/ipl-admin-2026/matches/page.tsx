@@ -23,6 +23,7 @@ import {
     getMatchNumberDisplay
 } from '@/lib/matchNumberUtils';
 import { PlayoffType } from '@/types';
+import { getTBDTeam, getPlayoffMatchDetails, getPlayoffTypes } from '@/lib/playoffUtils';
 import { 
     exportToCSV, 
     exportToJSON, 
@@ -1249,7 +1250,7 @@ export default function AdminMatches() {
                                     </div>
                                 </div>
                             <div className="flex items-center gap-3">
-                                <button
+                            <button
                                     onClick={() => {
                                         setShowPlayoffForm(true);
                                         setShowForm(false);
@@ -1265,11 +1266,11 @@ export default function AdminMatches() {
                                         setShowForm(true);
                                         setShowPlayoffForm(false);
                                     }}
-                                    className="ipl-button flex items-center gap-2"
-                                >
-                                    <IconPlus className="w-5 h-5" />
-                                    Create Match
-                                </button>
+                                className="ipl-button flex items-center gap-2"
+                            >
+                                <IconPlus className="w-5 h-5" />
+                                Create Match
+                            </button>
                             </div>
                             </div>
                             <a
@@ -1827,6 +1828,246 @@ export default function AdminMatches() {
                                         </div>
                                     </div>
                                 )}
+                            </form>
+                        </div>
+                    )}
+
+                    {showPlayoffForm && (
+                        <div className="glass-effect rounded-xl p-8 mb-8 border border-purple-500/30">
+                            <div className="flex justify-between items-center mb-6">
+                                <div>
+                                    <h2 className="text-2xl font-bold text-white">
+                                        Create Playoff Match
+                                    </h2>
+                                    <p className="text-gray-400 text-sm mt-1">Fixed dates, times, and venues for playoff matches</p>
+                                </div>
+                                <button onClick={resetForm} className="text-gray-400 hover:text-white transition-colors">
+                                    <IconX className="w-6 h-6" />
+                                </button>
+                            </div>
+
+                            {error && (
+                                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400">
+                                    {error}
+                                </div>
+                            )}
+
+                            <form onSubmit={async (e) => {
+                                e.preventDefault();
+                                if (!selectedPlayoffType) {
+                                    setError('Please select a playoff type');
+                                    return;
+                                }
+
+                                try {
+                                    setIsSubmitting(true);
+                                    setError(null);
+
+                                    const playoffDetails = getPlayoffMatchDetails(selectedPlayoffType, currentLeague);
+                                    if (!playoffDetails) {
+                                        setError('Invalid playoff type');
+                                        return;
+                                    }
+
+                                    // Create TBD teams
+                                    const team1 = getTBDTeam(currentLeague, playoffDetails.team1Label);
+                                    const team2 = getTBDTeam(currentLeague, playoffDetails.team2Label);
+
+                                    // Create teams in the system if they don't exist
+                                    let team1Id = team1.id;
+                                    let team2Id = team2.id;
+
+                                    // Check if TBD teams already exist, if not create them
+                                    const existingTeam1 = teams.find(t => t.id === team1Id || (t.name === team1.name && t.league === currentLeague));
+                                    const existingTeam2 = teams.find(t => t.id === team2Id || (t.name === team2.name && t.league === currentLeague));
+
+                                    if (!existingTeam1) {
+                                        try {
+                                            const createdTeam1 = await api.createTeam({
+                                                league: currentLeague,
+                                                name: team1.name,
+                                                shortName: team1.shortName,
+                                                logo: team1.logo,
+                                                description: team1.description,
+                                                colors: team1.colors,
+                                                trophies: [],
+                                                homeGrounds: []
+                                            });
+                                            team1Id = createdTeam1.id;
+                                        } catch (err: any) {
+                                            console.warn('Team 1 may already exist or creation failed:', err);
+                                            // Try to find by name if creation failed
+                                            const foundTeam = teams.find(t => t.name === team1.name && t.league === currentLeague);
+                                            if (foundTeam) {
+                                                team1Id = foundTeam.id;
+                                            } else {
+                                                throw new Error(`Failed to create or find team 1: ${err?.message || 'Unknown error'}`);
+                                            }
+                                        }
+                                    } else {
+                                        team1Id = existingTeam1.id;
+                                    }
+
+                                    if (!existingTeam2) {
+                                        try {
+                                            const createdTeam2 = await api.createTeam({
+                                                league: currentLeague,
+                                                name: team2.name,
+                                                shortName: team2.shortName,
+                                                logo: team2.logo,
+                                                description: team2.description,
+                                                colors: team2.colors,
+                                                trophies: [],
+                                                homeGrounds: []
+                                            });
+                                            team2Id = createdTeam2.id;
+                                        } catch (err: any) {
+                                            console.warn('Team 2 may already exist or creation failed:', err);
+                                            // Try to find by name if creation failed
+                                            const foundTeam = teams.find(t => t.name === team2.name && t.league === currentLeague);
+                                            if (foundTeam) {
+                                                team2Id = foundTeam.id;
+                                            } else {
+                                                throw new Error(`Failed to create or find team 2: ${err?.message || 'Unknown error'}`);
+                                            }
+                                        }
+                                    } else {
+                                        team2Id = existingTeam2.id;
+                                    }
+
+                                    // Create the playoff match
+                                    const matchData = {
+                                        date: playoffDetails.date,
+                                        time: playoffDetails.time,
+                                        venue: playoffDetails.venue,
+                                        team1Id: team1Id,
+                                        team2Id: team2Id,
+                                        status: 'upcoming' as const,
+                                        league: currentLeague,
+                                        playoffType: selectedPlayoffType
+                                    };
+
+                                    const newMatch = await api.createMatch(matchData);
+                                    
+                                    // Refresh teams list to get updated IDs
+                                    const updatedTeams = await api.getTeams(currentLeague);
+                                    setTeams(updatedTeams);
+                                    
+                                    // Recalculate all match numbers after creation
+                                    const allMatches = [...matches, newMatch];
+                                    const matchesWithNumbers = recalculateMatchNumbers(allMatches);
+                                    setMatches(matchesWithNumbers);
+                                    
+                                    showSuccess(`${playoffDetails.title} match created successfully`);
+                                    resetForm();
+                                } catch (error: any) {
+                                    console.error('Failed to create playoff match:', error);
+                                    setError(error?.message || 'Failed to create playoff match');
+                                } finally {
+                                    setIsSubmitting(false);
+                                }
+                            }}>
+                                <div className="space-y-6">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                            Playoff Type <span className="text-red-400">*</span>
+                                        </label>
+                                        <select
+                                            value={selectedPlayoffType || ''}
+                                            onChange={(e) => {
+                                                const playoffType = e.target.value as PlayoffType;
+                                                setSelectedPlayoffType(playoffType);
+                                                if (playoffType) {
+                                                    const details = getPlayoffMatchDetails(playoffType, currentLeague);
+                                                    if (details) {
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            date: details.date,
+                                                            time: details.time,
+                                                            venue: details.venue,
+                                                            playoffType: playoffType
+                                                        }));
+                                                    }
+                                                }
+                                            }}
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition-colors"
+                                            required
+                                        >
+                                            <option value="">Select playoff type...</option>
+                                            {getPlayoffTypes().map(type => (
+                                                <option key={type.value || 'none'} value={type.value || ''} className="bg-gray-900 text-white">
+                                                    {type.label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {selectedPlayoffType && (() => {
+                                        const details = getPlayoffMatchDetails(selectedPlayoffType, currentLeague);
+                                        if (!details) return null;
+                                        return (
+                                            <>
+                                                <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 space-y-3">
+                                                    <div className="flex items-center gap-2 text-purple-300 font-semibold">
+                                                        <Calendar className="w-5 h-5" />
+                                                        <span>Match Details (Fixed)</span>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-4 text-sm">
+                                                        <div>
+                                                            <span className="text-gray-400">Date:</span>
+                                                            <span className="text-white ml-2 font-medium">{details.date}</span>
+                                                        </div>
+                                                        <div>
+                                                            <span className="text-gray-400">Time:</span>
+                                                            <span className="text-white ml-2 font-medium">{details.time}</span>
+                                                        </div>
+                                                        <div className="col-span-2">
+                                                            <span className="text-gray-400">Venue:</span>
+                                                            <span className="text-white ml-2 font-medium">{details.venue}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 space-y-3">
+                                                    <div className="flex items-center gap-2 text-blue-300 font-semibold">
+                                                        <Users className="w-5 h-5" />
+                                                        <span>Teams (To Be Determined)</span>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-4 text-sm">
+                                                        <div>
+                                                            <span className="text-gray-400">Team 1:</span>
+                                                            <span className="text-white ml-2 font-medium">{details.team1Label}</span>
+                                                        </div>
+                                                        <div>
+                                                            <span className="text-gray-400">Team 2:</span>
+                                                            <span className="text-white ml-2 font-medium">{details.team2Label}</span>
+                                                        </div>
+                                                    </div>
+                                                    <p className="text-xs text-gray-400 mt-2">
+                                                        Teams will be determined based on league standings. You can update them later.
+                                                    </p>
+                                                </div>
+                                            </>
+                                        );
+                                    })()}
+
+                                    <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+                                        <button
+                                            type="button"
+                                            onClick={resetForm}
+                                            className="glass-effect text-white font-semibold py-3 px-6 rounded-lg hover:bg-white/10 transition-all duration-200"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <button
+                                            type="submit"
+                                            disabled={isSubmitting || !selectedPlayoffType}
+                                            className="ipl-button bg-purple-600 hover:bg-purple-700 disabled:opacity-50"
+                                        >
+                                            {isSubmitting ? 'Creating...' : 'Create Playoff Match'}
+                                        </button>
+                                    </div>
+                                </div>
                             </form>
                         </div>
                     )}
