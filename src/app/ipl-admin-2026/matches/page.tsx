@@ -132,7 +132,7 @@ export default function AdminMatches() {
         venue: '',
         team1Id: '',
         team2Id: '',
-        status: 'upcoming' as 'upcoming' | 'live' | 'completed'
+        status: 'upcoming' as 'upcoming' | 'live' | 'completed' | 'cancelled'
     });
 
     useEffect(() => {
@@ -159,6 +159,82 @@ export default function AdminMatches() {
     useEffect(() => {
         setSelectedMatches(new Set());
     }, [filters]);
+
+    // Automatic status update based on match time
+    useEffect(() => {
+        const updateMatchStatuses = async () => {
+            const now = new Date();
+            const updates: { matchId: string; newStatus: 'upcoming' | 'live' }[] = [];
+
+            matches.forEach(match => {
+                // Skip if match is already completed or cancelled (manual status)
+                if (match.status === 'completed' || match.status === 'cancelled') {
+                    return;
+                }
+
+                try {
+                    const [hours, minutes] = match.time.split(':').map(Number);
+                    const matchDate = new Date(match.date);
+                    matchDate.setHours(hours, minutes || 0, 0, 0);
+                    
+                    // Calculate 30 minutes before match
+                    const thirtyMinutesBefore = new Date(matchDate.getTime() - 30 * 60 * 1000);
+                    
+                    // If current time is 30 minutes before match or later, and match hasn't started yet (within 4 hours)
+                    const fourHoursAfter = new Date(matchDate.getTime() + 4 * 60 * 60 * 1000);
+                    
+                    if (now >= thirtyMinutesBefore && now <= fourHoursAfter) {
+                        // Should be live
+                        if (match.status !== 'live') {
+                            updates.push({ matchId: match.id, newStatus: 'live' });
+                        }
+                    } else if (now < thirtyMinutesBefore) {
+                        // Should be upcoming
+                        if (match.status !== 'upcoming') {
+                            updates.push({ matchId: match.id, newStatus: 'upcoming' });
+                        }
+                    }
+                } catch (error) {
+                    console.error(`Error processing match ${match.id}:`, error);
+                }
+            });
+
+            // Apply updates
+            if (updates.length > 0) {
+                try {
+                    const updatePromises = updates.map(({ matchId, newStatus }) => {
+                        const match = matches.find(m => m.id === matchId);
+                        if (!match) return Promise.resolve();
+                        
+                        return api.updateMatch(matchId, {
+                            date: match.date,
+                            time: match.time,
+                            venue: match.venue,
+                            team1Id: match.team1.id,
+                            team2Id: match.team2.id,
+                            status: newStatus
+                        });
+                    });
+
+                    await Promise.all(updatePromises);
+                    
+                    // Refresh matches
+                    const updatedMatches = await api.getMatches();
+                    setMatches(updatedMatches);
+                } catch (error) {
+                    console.error('Failed to update match statuses:', error);
+                }
+            }
+        };
+
+        // Run immediately
+        updateMatchStatuses();
+
+        // Then run every minute
+        const interval = setInterval(updateMatchStatuses, 60 * 1000);
+
+        return () => clearInterval(interval);
+    }, [matches]);
 
     const fetchInitialData = async () => {
         try {
@@ -631,8 +707,63 @@ export default function AdminMatches() {
                 return <StatusBadge status="live" label="Live" />;
             case 'completed':
                 return <StatusBadge status="success" label="Completed" />;
+            case 'cancelled':
+                return <StatusBadge status="error" label="Cancelled" />;
             default:
                 return <StatusBadge status="pending" label="Scheduled" />;
+        }
+    };
+
+    // Manual status update handlers
+    const handleMarkAsCompleted = async (matchId: string) => {
+        try {
+            setIsSubmitting(true);
+            const match = matches.find(m => m.id === matchId);
+            if (!match) return;
+
+            await api.updateMatch(matchId, {
+                date: match.date,
+                time: match.time,
+                venue: match.venue,
+                team1Id: match.team1.id,
+                team2Id: match.team2.id,
+                status: 'completed'
+            });
+
+            const updatedMatches = await api.getMatches();
+            setMatches(updatedMatches);
+            showSuccess('Match marked as completed');
+        } catch (error) {
+            console.error('Failed to update match status:', error);
+            showError('Failed to update match status');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleMarkAsCancelled = async (matchId: string) => {
+        try {
+            setIsSubmitting(true);
+            const match = matches.find(m => m.id === matchId);
+            if (!match) return;
+
+            await api.updateMatch(matchId, {
+                date: match.date,
+                time: match.time,
+                venue: match.venue,
+                team1Id: match.team1.id,
+                team2Id: match.team2.id,
+                status: 'cancelled'
+            });
+
+            const updatedMatches = await api.getMatches();
+            setMatches(updatedMatches);
+            showSuccess('Match marked as cancelled');
+        } catch (error) {
+            console.error('Failed to update match status:', error);
+            showError('Failed to update match status');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -853,13 +984,13 @@ export default function AdminMatches() {
                                         </div>
                                     </div>
                                 </div>
-                                <button
-                                    onClick={() => setShowForm(true)}
-                                    className="ipl-button flex items-center gap-2"
-                                >
-                                    <IconPlus className="w-5 h-5" />
-                                    Create Match
-                                </button>
+                            <button
+                                onClick={() => setShowForm(true)}
+                                className="ipl-button flex items-center gap-2"
+                            >
+                                <IconPlus className="w-5 h-5" />
+                                Create Match
+                            </button>
                             </div>
                             <a
                                 href="/matches"
@@ -1318,12 +1449,13 @@ export default function AdminMatches() {
                                                     <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
                                                     <select
                                                         value={formData.status}
-                                                        onChange={(e) => setFormData({ ...formData, status: e.target.value as 'upcoming' | 'live' | 'completed' })}
+                                                        onChange={(e) => setFormData({ ...formData, status: e.target.value as 'upcoming' | 'live' | 'completed' | 'cancelled' })}
                                                         className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ipl-gold transition-colors"
                                                     >
                                                         <option value="upcoming">Scheduled</option>
                                                         <option value="live">Live</option>
                                                         <option value="completed">Completed</option>
+                                                        <option value="cancelled">Cancelled</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -1468,7 +1600,57 @@ export default function AdminMatches() {
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    {getStatusBadge(match.status)}
+                                                    <div className="flex items-center gap-3">
+                                                        {getStatusBadge(match.status)}
+                                                        <div className="flex items-center gap-2 ml-2">
+                                                            <label className="flex items-center gap-2 cursor-pointer group">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={match.status === 'completed'}
+                                                                    onChange={() => {
+                                                                        if (match.status === 'completed') {
+                                                                            // Uncheck - revert to automatic status
+                                                                            const [hours, minutes] = match.time.split(':').map(Number);
+                                                                            const matchDate = new Date(match.date);
+                                                                            matchDate.setHours(hours, minutes || 0, 0, 0);
+                                                                            const thirtyMinutesBefore = new Date(matchDate.getTime() - 30 * 60 * 1000);
+                                                                            const now = new Date();
+                                                                            const newStatus = now >= thirtyMinutesBefore ? 'live' : 'upcoming';
+                                                                            handleBulkStatusUpdate(newStatus);
+                                                                        } else {
+                                                                            handleMarkAsCompleted(match.id);
+                                                                        }
+                                                                    }}
+                                                                    className="w-4 h-4 rounded border-white/20 bg-white/5 text-green-500 focus:ring-green-500/20 cursor-pointer"
+                                                                    disabled={isSubmitting}
+                                                                />
+                                                                <span className="text-xs text-gray-400 group-hover:text-green-400 transition-colors">Completed</span>
+                                                            </label>
+                                                            <label className="flex items-center gap-2 cursor-pointer group">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={match.status === 'cancelled'}
+                                                                    onChange={() => {
+                                                                        if (match.status === 'cancelled') {
+                                                                            // Uncheck - revert to automatic status
+                                                                            const [hours, minutes] = match.time.split(':').map(Number);
+                                                                            const matchDate = new Date(match.date);
+                                                                            matchDate.setHours(hours, minutes || 0, 0, 0);
+                                                                            const thirtyMinutesBefore = new Date(matchDate.getTime() - 30 * 60 * 1000);
+                                                                            const now = new Date();
+                                                                            const newStatus = now >= thirtyMinutesBefore ? 'live' : 'upcoming';
+                                                                            handleBulkStatusUpdate(newStatus);
+                                                                        } else {
+                                                                            handleMarkAsCancelled(match.id);
+                                                                        }
+                                                                    }}
+                                                                    className="w-4 h-4 rounded border-white/20 bg-white/5 text-red-500 focus:ring-red-500/20 cursor-pointer"
+                                                                    disabled={isSubmitting}
+                                                                />
+                                                                <span className="text-xs text-gray-400 group-hover:text-red-400 transition-colors">Cancelled</span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="flex items-center gap-2">
@@ -1623,7 +1805,55 @@ export default function AdminMatches() {
                                                         <div className="text-sm text-gray-400">
                                                             📍 {match.venue}
                                                         </div>
-                                                        {getStatusBadge(match.status)}
+                                                        <div className="flex items-center gap-3">
+                                                            {getStatusBadge(match.status)}
+                                                            <div className="flex items-center gap-2 ml-2">
+                                                                <label className="flex items-center gap-2 cursor-pointer group">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={match.status === 'completed'}
+                                                                        onChange={() => {
+                                                                            if (match.status === 'completed') {
+                                                                                const [hours, minutes] = match.time.split(':').map(Number);
+                                                                                const matchDate = new Date(match.date);
+                                                                                matchDate.setHours(hours, minutes || 0, 0, 0);
+                                                                                const thirtyMinutesBefore = new Date(matchDate.getTime() - 30 * 60 * 1000);
+                                                                                const now = new Date();
+                                                                                const newStatus = now >= thirtyMinutesBefore ? 'live' : 'upcoming';
+                                                                                handleBulkStatusUpdate(newStatus);
+                                                                            } else {
+                                                                                handleMarkAsCompleted(match.id);
+                                                                            }
+                                                                        }}
+                                                                        className="w-4 h-4 rounded border-white/20 bg-white/5 text-green-500 focus:ring-green-500/20 cursor-pointer"
+                                                                        disabled={isSubmitting}
+                                                                    />
+                                                                    <span className="text-xs text-gray-400 group-hover:text-green-400 transition-colors">Completed</span>
+                                                                </label>
+                                                                <label className="flex items-center gap-2 cursor-pointer group">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={match.status === 'cancelled'}
+                                                                        onChange={() => {
+                                                                            if (match.status === 'cancelled') {
+                                                                                const [hours, minutes] = match.time.split(':').map(Number);
+                                                                                const matchDate = new Date(match.date);
+                                                                                matchDate.setHours(hours, minutes || 0, 0, 0);
+                                                                                const thirtyMinutesBefore = new Date(matchDate.getTime() - 30 * 60 * 1000);
+                                                                                const now = new Date();
+                                                                                const newStatus = now >= thirtyMinutesBefore ? 'live' : 'upcoming';
+                                                                                handleBulkStatusUpdate(newStatus);
+                                                                            } else {
+                                                                                handleMarkAsCancelled(match.id);
+                                                                            }
+                                                                        }}
+                                                                        className="w-4 h-4 rounded border-white/20 bg-white/5 text-red-500 focus:ring-red-500/20 cursor-pointer"
+                                                                        disabled={isSubmitting}
+                                                                    />
+                                                                    <span className="text-xs text-gray-400 group-hover:text-red-400 transition-colors">Cancelled</span>
+                                                                </label>
+                                                            </div>
+                                                        </div>
                                                         <div className="flex items-center gap-2">
                                                             <button
                                                                 onClick={() => handleEdit(match)}

@@ -56,7 +56,7 @@ export interface Match {
   venue: string;
   team1: Team;
   team2: Team;
-  status: 'upcoming' | 'live' | 'completed';
+  status: 'upcoming' | 'live' | 'completed' | 'cancelled';
   result?: string;
   score?: {
     team1: {
