@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLeague } from '@/contexts/LeagueContext';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import { Team } from '@/types';
@@ -57,6 +58,7 @@ const PlusIcon = ({ className }: { className?: string }) => (
 
 export default function AdminTeams() {
     const router = useRouter();
+    const { currentLeague } = useLeague();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [teams, setTeams] = useState<Team[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -106,7 +108,8 @@ export default function AdminTeams() {
 
     const fetchTeams = async () => {
         try {
-            const teamsData = await api.getTeams();
+            setIsLoading(true);
+            const teamsData = await api.getTeams(currentLeague);
             setTeams(teamsData);
         } catch (error) {
             console.error('Failed to fetch teams:', error);
@@ -114,6 +117,14 @@ export default function AdminTeams() {
             setIsLoading(false);
         }
     };
+
+    // Refetch teams when league changes
+    useEffect(() => {
+        if (isAuthenticated) {
+            fetchTeams();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentLeague]);
 
     const handleSort = (field: SortField) => {
         if (sortField === field) {
@@ -147,7 +158,7 @@ export default function AdminTeams() {
             shortName: '',
             logo: '',
             description: '',
-            league: 'ipl',
+            league: currentLeague, // Use current league from context
             colors: {
                 primary: '#6B46C1',
                 secondary: '#FFD700'

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLeague } from '@/contexts/LeagueContext';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import ModernDialog from '@/components/admin/ModernDialog';
 import { Player, Team } from '@/types';
@@ -70,6 +71,7 @@ const BATTING_STYLES = [
 
 export default function AdminPlayers() {
   const router = useRouter();
+  const { currentLeague } = useLeague();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -116,7 +118,7 @@ export default function AdminPlayers() {
     name: '',
     role: 'Batsman',
     teamId: '',
-    league: 'ipl',
+    league: currentLeague, // Use current league from context
     age: '',
     dateOfBirth: '',
     nationality: '',
@@ -181,8 +183,9 @@ export default function AdminPlayers() {
 
   const fetchData = async () => {
     try {
-      const playersData = await api.getPlayers();
-      const teamsData = await api.getTeams();
+      setIsLoading(true);
+      const playersData = await api.getPlayers(undefined, currentLeague);
+      const teamsData = await api.getTeams(currentLeague);
       setPlayers(playersData);
       setTeams(teamsData);
     } catch (error) {
@@ -192,6 +195,14 @@ export default function AdminPlayers() {
     }
   };
 
+  // Refetch data when league changes
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentLeague]);
+
   const handleAddPlayer = () => {
     setEditingPlayer(null);
     setLastCalculatedAge(''); // Reset calculated age when adding new player
@@ -199,7 +210,7 @@ export default function AdminPlayers() {
       name: '',
       role: 'Batsman',
       teamId: '',
-      league: 'ipl',
+      league: currentLeague, // Use current league from context
       age: '',
       dateOfBirth: '',
       nationality: '',

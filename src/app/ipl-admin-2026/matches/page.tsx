@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLeague } from '@/contexts/LeagueContext';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, Zap, CheckCircle2, Users, TrendingUp, CheckSquare, Square, BarChart3, Calendar as CalendarIcon, MapPin, Grid3x3, Copy, ExternalLink } from 'lucide-react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
@@ -98,6 +99,7 @@ const IPL_VENUES = [
 
 export default function AdminMatches() {
     const router = useRouter();
+    const { currentLeague } = useLeague();
     const { toasts, success: showSuccess, error: showError, closeToast } = useToast();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [matches, setMatches] = useState<Match[]>([]);
@@ -132,7 +134,7 @@ export default function AdminMatches() {
         team1Id: '',
         team2Id: '',
         status: 'upcoming' as 'upcoming' | 'live' | 'completed' | 'cancelled',
-        league: 'ipl' as 'ipl' | 'wpl'
+        league: 'ipl' as 'ipl' | 'wpl' // Will be set from currentLeague when adding
     });
 
     useEffect(() => {
@@ -227,7 +229,7 @@ export default function AdminMatches() {
                     await Promise.all(updatePromises);
                     
                     // Refresh matches
-                    const updatedMatches = await api.getMatches();
+                    const updatedMatches = await api.getMatches(currentLeague);
                     setMatches(updatedMatches);
                 } catch (error) {
                     console.error('Failed to update match statuses:', error);
@@ -247,9 +249,10 @@ export default function AdminMatches() {
 
     const fetchInitialData = async () => {
         try {
+            setIsLoading(true);
             const [matchesData, teamsData] = await Promise.all([
-                api.getMatches(),
-                api.getTeams()
+                api.getMatches(currentLeague),
+                api.getTeams(currentLeague)
             ]);
             setMatches(matchesData);
             setTeams(teamsData);
@@ -260,6 +263,14 @@ export default function AdminMatches() {
             setIsLoading(false);
         }
     };
+
+    // Refetch data when league changes
+    useEffect(() => {
+        if (isAuthenticated) {
+            fetchInitialData();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentLeague]);
 
     const venues = useMemo(() => {
       const uniqueVenues = Array.from(new Set(matches.map(m => m.venue)));
@@ -630,7 +641,7 @@ export default function AdminMatches() {
             await Promise.all(updatePromises);
             
             // Refresh matches
-            const updatedMatches = await api.getMatches();
+            const updatedMatches = await api.getMatches(currentLeague);
             setMatches(updatedMatches);
 
             showSuccess(`${selectedMatches.size} match(es) updated successfully`);
@@ -694,12 +705,18 @@ export default function AdminMatches() {
             setIsSubmitting(true);
             setError(null);
 
+            // Ensure league is set from currentLeague context
+            const matchData = {
+                ...formData,
+                league: currentLeague
+            };
+
             if (editingId) {
-                const updatedMatch = await api.updateMatch(editingId, formData);
+                const updatedMatch = await api.updateMatch(editingId, matchData);
                 setMatches(matches.map(m => m.id === editingId ? updatedMatch : m));
                 showSuccess('Match updated successfully');
             } else {
-                const newMatch = await api.createMatch(formData);
+                const newMatch = await api.createMatch(matchData);
                 setMatches([...matches, newMatch]);
                 showSuccess('Match created successfully');
             }
@@ -743,7 +760,7 @@ export default function AdminMatches() {
                 league: match.league
             });
 
-            const updatedMatches = await api.getMatches();
+            const updatedMatches = await api.getMatches(currentLeague);
             setMatches(updatedMatches);
             showSuccess('Match marked as completed');
         } catch (error) {
@@ -770,7 +787,7 @@ export default function AdminMatches() {
                 league: match.league
             });
 
-            const updatedMatches = await api.getMatches();
+            const updatedMatches = await api.getMatches(currentLeague);
             setMatches(updatedMatches);
             showSuccess('Match marked as cancelled');
         } catch (error) {

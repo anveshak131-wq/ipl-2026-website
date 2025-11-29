@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import { LeagueProvider } from '@/contexts/LeagueContext';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import GlobalSearch from '@/components/admin/GlobalSearch';
 import AdminDashboard from './dashboard/page';
@@ -140,12 +141,14 @@ export default function AdminRouter() {
   };
 
   return (
-    <div className="flex min-h-screen bg-ipl-dark">
-      <AdminSidebar currentPage={pathname} />
-      <div className="flex-1">
-        {renderPage()}
+    <LeagueProvider>
+      <div className="flex min-h-screen bg-ipl-dark">
+        <AdminSidebar currentPage={pathname} />
+        <div className="flex-1">
+          {renderPage()}
+        </div>
+        <GlobalSearch />
       </div>
-      <GlobalSearch />
-    </div>
+    </LeagueProvider>
   );
 }

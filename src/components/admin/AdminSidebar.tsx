@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import IPLLogo from '../ui/IPLLogo';
+import AdminLeagueSwitcher from './AdminLeagueSwitcher';
 import { Search, X, Clock, Command, ChevronDown, ChevronRight, Bell } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -601,6 +602,16 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
               </button>
             )}
           </div>
+        </div>
+      )}
+
+      {/* League Switcher */}
+      {!collapsed && (
+        <div className="p-4 border-b border-[#2A3440]">
+          <div className="mb-2">
+            <span className="text-xs font-semibold text-[#AEBAC7] uppercase tracking-wider">League</span>
+          </div>
+          <AdminLeagueSwitcher />
         </div>
       )}
 

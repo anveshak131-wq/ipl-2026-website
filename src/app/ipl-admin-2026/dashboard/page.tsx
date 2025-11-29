@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLeague } from '@/contexts/LeagueContext';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { TrendingUp, Users, MessageSquare, Activity, Calendar, Eye, BarChart3, Zap, ArrowUpRight, Clock } from 'lucide-react';
 
@@ -32,6 +33,7 @@ interface TimeOfDayBuckets {
 
 export default function AdminDashboard() {
   const router = useRouter();
+  const { currentLeague } = useLeague();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats>({
@@ -201,10 +203,10 @@ export default function AdminDashboard() {
 
       setTimeOfDayBuckets(buckets);
 
-      // Fetch matches
+      // Fetch matches (with league filter)
       let matches: any[] = [];
       try {
-        const matchesRes = await fetch('/api/matches');
+        const matchesRes = await fetch(`/api/matches?league=${currentLeague}`);
         matches = await matchesRes.ok ? await matchesRes.json() : [];
         setApiStatus(prev => ({ ...prev, matches: 'ok' }));
       } catch (err) {
