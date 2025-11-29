@@ -8,6 +8,8 @@ import { Calendar, Clock, Zap, CheckCircle2, Users, TrendingUp, CheckSquare, Squ
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
+import RCBLottie from '@/components/ui/RCBLottie';
+import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import { PageTransition, StaggeredList, SkeletonLoader, LoadingSpinner } from '@/components/admin/animations';
 import { EmptyStateIllustration, AnimatedStatusIcon, StatusBadge } from '@/components/admin/icons';
 import { ToastContainer, useToast } from '@/components/admin/Toast';
@@ -1773,24 +1775,66 @@ export default function AdminMatches() {
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-3">
                                                         <div className="flex items-center gap-2">
-                                                            {match.team1.id === '1' ? (
-                                                              <div className="w-8 h-8 flex items-center justify-center">
-                                                                <RCBLionLogo className="w-8 h-8" />
-                                                              </div>
-                                                            ) : (
-                                                              <img src={match.team1.logo} alt={match.team1.shortName} className="w-8 h-8 object-contain" />
-                                                            )}
+                                                            {(() => {
+                                                                const team1League = match.team1.league || match.league || 'ipl';
+                                                                const animatedPath1 = getAnimatedLogoPath(match.team1.id, match.team1.shortName, team1League);
+                                                                if (animatedPath1.endsWith('rcb_logo_premium.svg')) {
+                                                                    return (
+                                                                        <div className="w-8 h-8 flex items-center justify-center">
+                                                                            <RCBLionLogo className="w-8 h-8" />
+                                                                        </div>
+                                                                    );
+                                                                }
+                                                                if (animatedPath1.endsWith('.json')) {
+                                                                    return (
+                                                                        <div className="w-8 h-8 flex items-center justify-center">
+                                                                            <RCBLottie className="w-8 h-8" />
+                                                                        </div>
+                                                                    );
+                                                                }
+                                                                return (
+                                                                    <img 
+                                                                        src={animatedPath1} 
+                                                                        alt={match.team1.shortName} 
+                                                                        className="w-8 h-8 object-contain"
+                                                                        onError={(e) => {
+                                                                            (e.target as HTMLImageElement).src = match.team1.logo || getLogoPath(match.team1.id);
+                                                                        }}
+                                                                    />
+                                                                );
+                                                            })()}
                                                             <span className="text-white font-semibold">{match.team1.shortName}</span>
                                                         </div>
                                                         <span className="text-gray-500 font-bold">vs</span>
                                                         <div className="flex items-center gap-2">
-                                                            {match.team2.id === '1' ? (
-                                                              <div className="w-8 h-8 flex items-center justify-center">
-                                                                <RCBLionLogo className="w-8 h-8" />
-                                                              </div>
-                                                            ) : (
-                                                              <img src={match.team2.logo} alt={match.team2.shortName} className="w-8 h-8 object-contain" />
-                                                            )}
+                                                            {(() => {
+                                                                const team2League = match.team2.league || match.league || 'ipl';
+                                                                const animatedPath2 = getAnimatedLogoPath(match.team2.id, match.team2.shortName, team2League);
+                                                                if (animatedPath2.endsWith('rcb_logo_premium.svg')) {
+                                                                    return (
+                                                                        <div className="w-8 h-8 flex items-center justify-center">
+                                                                            <RCBLionLogo className="w-8 h-8" />
+                                                                        </div>
+                                                                    );
+                                                                }
+                                                                if (animatedPath2.endsWith('.json')) {
+                                                                    return (
+                                                                        <div className="w-8 h-8 flex items-center justify-center">
+                                                                            <RCBLottie className="w-8 h-8" />
+                                                                        </div>
+                                                                    );
+                                                                }
+                                                                return (
+                                                                    <img 
+                                                                        src={animatedPath2} 
+                                                                        alt={match.team2.shortName} 
+                                                                        className="w-8 h-8 object-contain"
+                                                                        onError={(e) => {
+                                                                            (e.target as HTMLImageElement).src = match.team2.logo || getLogoPath(match.team2.id);
+                                                                        }}
+                                                                    />
+                                                                );
+                                                            })()}
                                                             <span className="text-white font-semibold">{match.team2.shortName}</span>
                                                         </div>
                                                     </div>
@@ -1979,24 +2023,66 @@ export default function AdminMatches() {
 
                                                         <div className="flex items-center gap-3">
                                                             <div className="flex items-center gap-2">
-                                                                {match.team1.id === '1' ? (
-                                                                  <div className="w-10 h-10 flex items-center justify-center">
-                                                                    <RCBLionLogo className="w-10 h-10" />
-                                                                  </div>
-                                                                ) : (
-                                                                  <img src={match.team1.logo} alt={match.team1.shortName} className="w-10 h-10 object-contain" />
-                                                                )}
+                                                                {(() => {
+                                                                    const team1League = match.team1.league || match.league || 'ipl';
+                                                                    const animatedPath1 = getAnimatedLogoPath(match.team1.id, match.team1.shortName, team1League);
+                                                                    if (animatedPath1.endsWith('rcb_logo_premium.svg')) {
+                                                                        return (
+                                                                            <div className="w-10 h-10 flex items-center justify-center">
+                                                                                <RCBLionLogo className="w-10 h-10" />
+                                                                            </div>
+                                                                        );
+                                                                    }
+                                                                    if (animatedPath1.endsWith('.json')) {
+                                                                        return (
+                                                                            <div className="w-10 h-10 flex items-center justify-center">
+                                                                                <RCBLottie className="w-10 h-10" />
+                                                                            </div>
+                                                                        );
+                                                                    }
+                                                                    return (
+                                                                        <img 
+                                                                            src={animatedPath1} 
+                                                                            alt={match.team1.shortName} 
+                                                                            className="w-10 h-10 object-contain"
+                                                                            onError={(e) => {
+                                                                                (e.target as HTMLImageElement).src = match.team1.logo || getLogoPath(match.team1.id);
+                                                                            }}
+                                                                        />
+                                                                    );
+                                                                })()}
                                                                 <span className="text-white font-bold">{match.team1.shortName}</span>
                                                             </div>
                                                             <span className="text-gray-500 font-bold text-lg">vs</span>
                                                             <div className="flex items-center gap-2">
-                                                                {match.team2.id === '1' ? (
-                                                                  <div className="w-10 h-10 flex items-center justify-center">
-                                                                    <RCBLionLogo className="w-10 h-10" />
-                                                                  </div>
-                                                                ) : (
-                                                                  <img src={match.team2.logo} alt={match.team2.shortName} className="w-10 h-10 object-contain" />
-                                                                )}
+                                                                {(() => {
+                                                                    const team2League = match.team2.league || match.league || 'ipl';
+                                                                    const animatedPath2 = getAnimatedLogoPath(match.team2.id, match.team2.shortName, team2League);
+                                                                    if (animatedPath2.endsWith('rcb_logo_premium.svg')) {
+                                                                        return (
+                                                                            <div className="w-10 h-10 flex items-center justify-center">
+                                                                                <RCBLionLogo className="w-10 h-10" />
+                                                                            </div>
+                                                                        );
+                                                                    }
+                                                                    if (animatedPath2.endsWith('.json')) {
+                                                                        return (
+                                                                            <div className="w-10 h-10 flex items-center justify-center">
+                                                                                <RCBLottie className="w-10 h-10" />
+                                                                            </div>
+                                                                        );
+                                                                    }
+                                                                    return (
+                                                                        <img 
+                                                                            src={animatedPath2} 
+                                                                            alt={match.team2.shortName} 
+                                                                            className="w-10 h-10 object-contain"
+                                                                            onError={(e) => {
+                                                                                (e.target as HTMLImageElement).src = match.team2.logo || getLogoPath(match.team2.id);
+                                                                            }}
+                                                                        />
+                                                                    );
+                                                                })()}
                                                                 <span className="text-white font-bold">{match.team2.shortName}</span>
                                                             </div>
                                                         </div>

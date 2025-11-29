@@ -120,8 +120,12 @@ export default function MatchesPage() {
           {/* Header */}
           <div className="mb-12 animate-slide-up">
             <div className="inline-flex items-center space-x-2 mb-4">
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2 backdrop-blur-sm hover:bg-white/15 transition-all duration-300 hover:scale-105 cursor-default animate-bounce-in">
-                <Icon name="cricket" size={16} /> MATCH SCHEDULE
+              <span className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-2 backdrop-blur-sm hover:scale-105 cursor-default animate-bounce-in transition-all duration-300 ${
+                currentLeague === 'wpl' 
+                  ? 'bg-purple-500/20 border-purple-500/30 text-purple-300 hover:bg-purple-500/30'
+                  : 'bg-white/10 border-white/20 text-ipl-gold hover:bg-white/15'
+              }`}>
+                <Icon name="cricket" size={16} /> {currentLeague === 'wpl' ? 'WPL' : 'IPL'} MATCH SCHEDULE
               </span>
             </div>
             <motion.h1 
@@ -136,7 +140,11 @@ export default function MatchesPage() {
                 backgroundClip: 'text',
               }}
             >
-              IPL 2026 <GradientText gradient="from-indigo-400 via-purple-400 to-pink-400" animate>Fixtures</GradientText>
+              {currentLeague === 'wpl' ? (
+                <>WPL 2026 <GradientText gradient="from-purple-400 via-pink-400 to-rose-400" animate>Fixtures</GradientText></>
+              ) : (
+                <>IPL 2026 <GradientText gradient="from-indigo-400 via-purple-400 to-pink-400" animate>Fixtures</GradientText></>
+              )}
             </motion.h1>
             <motion.p 
               className="text-slate-200 text-lg max-w-2xl leading-relaxed"
@@ -144,7 +152,10 @@ export default function MatchesPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              Live scores, upcoming matches, and detailed fixtures for the entire IPL 2026 season
+              {currentLeague === 'wpl' 
+                ? 'Live scores, upcoming matches, and detailed fixtures for the entire WPL 2026 season'
+                : 'Live scores, upcoming matches, and detailed fixtures for the entire IPL 2026 season'
+              }
             </motion.p>
           </div>
 
