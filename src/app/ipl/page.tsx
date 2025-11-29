@@ -260,10 +260,7 @@ export default function IPLHomePage() {
         {!isLoading && (
           <AnimatedSection direction="up" delay={0.5}>
             <QuickStatsWidget 
-              teams={teams.length}
-              matches={matches.length}
-              liveMatches={liveMatchCount}
-              nextMatch={nextMatch}
+              matches={matches}
             />
           </AnimatedSection>
         )}
