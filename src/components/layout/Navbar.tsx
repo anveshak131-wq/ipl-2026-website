@@ -62,6 +62,8 @@ export default function Navbar() {
     { href: '/news', label: 'News', emoji: 'fire' },
     // Analytics & Insights
     { href: '/stats', label: 'Stats', emoji: 'chart' },
+    // WPL Section
+    { href: '/wpl', label: 'WPL', emoji: 'sparkles' },
     // Predictions temporarily removed - will be added back when improved
     // { href: '/predictions', label: 'Predictions', emoji: 'target' },
   ];
