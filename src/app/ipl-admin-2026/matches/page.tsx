@@ -97,6 +97,12 @@ const IPL_VENUES = [
     'ACA Stadium, Barsapara'
 ];
 
+// Official WPL Venues (2026 Season)
+const WPL_VENUES = [
+    'Dr. DY Patil Sports Academy, Navi Mumbai',
+    'BCA Stadium, Kotambi (Vadodara)'
+];
+
 export default function AdminMatches() {
     const router = useRouter();
     const { currentLeague } = useLeague();
@@ -136,6 +142,15 @@ export default function AdminMatches() {
         status: 'upcoming' as 'upcoming' | 'live' | 'completed' | 'cancelled',
         league: 'ipl' as 'ipl' | 'wpl' // Will be set from currentLeague when adding
     });
+
+    // Update formData.league and reset venue when league changes
+    useEffect(() => {
+        setFormData(prev => ({
+            ...prev,
+            league: currentLeague,
+            venue: currentLeague === 'wpl' ? '' : prev.venue // Reset venue when switching to WPL
+        }));
+    }, [currentLeague]);
 
     useEffect(() => {
         const checkAuth = () => {
@@ -1535,32 +1550,57 @@ export default function AdminMatches() {
                                            <h3 className="text-lg font-semibold text-white mb-4">Venue & Status</h3>
                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                <div className="md:col-span-2 relative">
-                                                   <label className="block text-sm font-medium text-gray-300 mb-2">Venue</label>
-                                                   <div className="relative">
-                                                       <input
-                                                           type="text"
+                                                   <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                       Venue
+                                                       {currentLeague === 'wpl' && (
+                                                           <span className="ml-2 text-xs text-purple-300">(WPL 2026 venues only)</span>
+                                                       )}
+                                                   </label>
+                                                   {currentLeague === 'wpl' ? (
+                                                       // WPL: Dropdown with only 2 venues
+                                                       <select
                                                            value={formData.venue}
                                                            onChange={(e) => {
                                                                setFormData({ ...formData, venue: e.target.value });
-                                                               setVenueSearchQuery(e.target.value);
                                                            }}
-                                                           onFocus={() => setVenueSearchQuery(formData.venue)}
-                                                           className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 pr-10 text-white focus:outline-none focus:border-ipl-gold transition-colors"
-                                                           placeholder="Search or select venue..."
+                                                           className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition-colors"
                                                            required
-                                                       />
-                                                       <svg 
-                                                           className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
-                                                           fill="none" 
-                                                           stroke="currentColor" 
-                                                           viewBox="0 0 24 24"
                                                        >
-                                                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                                       </svg>
-                                                   </div>
+                                                           <option value="">Select a venue...</option>
+                                                           {WPL_VENUES.map((venue, index) => (
+                                                               <option key={index} value={venue} className="bg-gray-900 text-white">
+                                                                   {venue}
+                                                               </option>
+                                                           ))}
+                                                       </select>
+                                                   ) : (
+                                                       // IPL: Autocomplete input
+                                                       <div className="relative">
+                                                           <input
+                                                               type="text"
+                                                               value={formData.venue}
+                                                               onChange={(e) => {
+                                                                   setFormData({ ...formData, venue: e.target.value });
+                                                                   setVenueSearchQuery(e.target.value);
+                                                               }}
+                                                               onFocus={() => setVenueSearchQuery(formData.venue)}
+                                                               className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 pr-10 text-white focus:outline-none focus:border-ipl-gold transition-colors"
+                                                               placeholder="Search or select venue..."
+                                                               required
+                                                           />
+                                                           <svg 
+                                                               className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+                                                               fill="none" 
+                                                               stroke="currentColor" 
+                                                               viewBox="0 0 24 24"
+                                                           >
+                                                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                                           </svg>
+                                                       </div>
+                                                   )}
                                                    
-                                                   {/* Venue Suggestions Dropdown */}
-                                                   {venueSearchQuery && (
+                                                   {/* Venue Suggestions Dropdown (IPL only) */}
+                                                   {currentLeague === 'ipl' && venueSearchQuery && (
                                                        <div className="absolute z-20 w-full mt-2 glass-effect rounded-lg shadow-xl border border-white/10 max-h-[300px] overflow-y-auto scrollbar-thin scrollbar-thumb-ipl-gold/50 scrollbar-track-white/5">
                                                            {IPL_VENUES
                                                                .filter(venue => 
