@@ -1935,11 +1935,11 @@ export default function AdminMatches() {
                                         team2Id = existingTeam2.id;
                                     }
 
-                                    // Create the playoff match
+                                    // Create the playoff match (use formData values if set, otherwise use defaults)
                                     const matchData = {
-                                        date: playoffDetails.date,
-                                        time: playoffDetails.time,
-                                        venue: playoffDetails.venue,
+                                        date: formData.date || playoffDetails.date,
+                                        time: formData.time || playoffDetails.time,
+                                        venue: formData.venue || playoffDetails.venue,
                                         team1Id: team1Id,
                                         team2Id: team2Id,
                                         status: 'upcoming' as const,
@@ -2007,25 +2007,94 @@ export default function AdminMatches() {
                                         if (!details) return null;
                                         return (
                                             <>
-                                                <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 space-y-3">
+                                                <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-4 space-y-4">
                                                     <div className="flex items-center gap-2 text-purple-300 font-semibold">
                                                         <Calendar className="w-5 h-5" />
-                                                        <span>Match Details (Fixed)</span>
+                                                        <span>Match Details (Editable)</span>
                                                     </div>
-                                                    <div className="grid grid-cols-2 gap-4 text-sm">
-                                                        <div>
-                                                            <span className="text-gray-400">Date:</span>
-                                                            <span className="text-white ml-2 font-medium">{details.date}</span>
-                                                        </div>
-                                                        <div>
-                                                            <span className="text-gray-400">Time:</span>
-                                                            <span className="text-white ml-2 font-medium">{details.time}</span>
-                                                        </div>
-                                                        <div className="col-span-2">
-                                                            <span className="text-gray-400">Venue:</span>
-                                                            <span className="text-white ml-2 font-medium">{details.venue}</span>
-                                                        </div>
+                                                    
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                            Date <span className="text-red-400">*</span>
+                                                        </label>
+                                                        <input
+                                                            type="date"
+                                                            value={formData.date || details.date}
+                                                            onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
+                                                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition-colors"
+                                                            required
+                                                        />
                                                     </div>
+
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                            Time <span className="text-red-400">*</span>
+                                                        </label>
+                                                        {currentLeague === 'wpl' ? (
+                                                            <select
+                                                                value={formData.time || details.time}
+                                                                onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
+                                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition-colors"
+                                                                required
+                                                            >
+                                                                <option value="">Select a time...</option>
+                                                                {WPL_TIMES.map((timeOption, index) => (
+                                                                    <option key={index} value={timeOption.ist} className="bg-gray-900 text-white">
+                                                                        {timeOption.display}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        ) : (
+                                                            <input
+                                                                type="time"
+                                                                value={formData.time || details.time}
+                                                                onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
+                                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition-colors"
+                                                                required
+                                                            />
+                                                        )}
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                                                            Venue <span className="text-red-400">*</span>
+                                                        </label>
+                                                        {currentLeague === 'wpl' ? (
+                                                            <select
+                                                                value={formData.venue || details.venue}
+                                                                onChange={(e) => setFormData(prev => ({ ...prev, venue: e.target.value }))}
+                                                                className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 transition-colors"
+                                                                required
+                                                            >
+                                                                <option value="">Select a venue...</option>
+                                                                {WPL_VENUES.map((venue, index) => (
+                                                                    <option key={index} value={venue} className="bg-gray-900 text-white">
+                                                                        {venue}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                        ) : (
+                                                            <div className="relative">
+                                                                <input
+                                                                    type="text"
+                                                                    value={formData.venue || details.venue}
+                                                                    onChange={(e) => {
+                                                                        setFormData(prev => ({ ...prev, venue: e.target.value }));
+                                                                        setVenueSearchQuery(e.target.value);
+                                                                    }}
+                                                                    onFocus={() => setVenueSearchQuery(formData.venue || details.venue)}
+                                                                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 pr-10 text-white focus:outline-none focus:border-purple-500 transition-colors"
+                                                                    placeholder="Enter or select venue..."
+                                                                    required
+                                                                />
+                                                                <MapPin className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    
+                                                    <p className="text-xs text-purple-300 mt-2">
+                                                        💡 Default values are pre-filled, but you can edit them as needed.
+                                                    </p>
                                                 </div>
 
                                                 <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 space-y-3">

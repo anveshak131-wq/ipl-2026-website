@@ -82,37 +82,38 @@ export function getPlayoffMatchDetails(playoffType: PlayoffType, league: League)
   };
 
   // WPL Playoff venues and times
+  // WPL Structure: 2nd vs 3rd in Eliminator, Winner vs 1st in Final
   const wplPlayoffs = {
     qualifier1: {
-      date: '2026-03-15', // Adjust based on season
-      time: '19:30',
-      venue: 'Dr. DY Patil Sports Academy, Navi Mumbai',
+      date: '2026-03-15', // Adjust based on season - can be edited manually
+      time: '19:30', // Can be edited manually
+      venue: 'Dr. DY Patil Sports Academy, Navi Mumbai', // Can be edited manually
       team1Label: '1st Place',
       team2Label: '2nd Place',
       title: 'Qualifier 1'
     },
     eliminator: {
-      date: '2026-03-16',
-      time: '19:30',
-      venue: 'Dr. DY Patil Sports Academy, Navi Mumbai',
-      team1Label: '3rd Place',
-      team2Label: '4th Place',
+      date: '2026-03-16', // Can be edited manually in admin
+      time: '19:30', // Can be edited manually in admin
+      venue: 'Dr. DY Patil Sports Academy, Navi Mumbai', // Can be edited manually in admin
+      team1Label: '2nd Place',
+      team2Label: '3rd Place',
       title: 'Eliminator'
     },
     qualifier2: {
-      date: '2026-03-18',
-      time: '19:30',
-      venue: 'Dr. DY Patil Sports Academy, Navi Mumbai',
+      date: '2026-03-18', // Can be edited manually
+      time: '19:30', // Can be edited manually
+      venue: 'Dr. DY Patil Sports Academy, Navi Mumbai', // Can be edited manually
       team1Label: 'Loser of Qualifier 1',
       team2Label: 'Winner of Eliminator',
       title: 'Qualifier 2'
     },
     final: {
-      date: '2026-03-20',
-      time: '19:30',
-      venue: 'Dr. DY Patil Sports Academy, Navi Mumbai',
-      team1Label: 'Winner of Qualifier 1',
-      team2Label: 'Winner of Qualifier 2',
+      date: '2026-03-20', // Can be edited manually in admin
+      time: '19:30', // Can be edited manually in admin
+      venue: 'Dr. DY Patil Sports Academy, Navi Mumbai', // Can be edited manually in admin
+      team1Label: '1st Place',
+      team2Label: 'Winner of Eliminator',
       title: 'Final'
     }
   };
