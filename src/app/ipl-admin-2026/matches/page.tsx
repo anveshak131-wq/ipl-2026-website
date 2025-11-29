@@ -14,10 +14,22 @@ import BulkOperationsToolbar from '@/components/admin/BulkOperationsToolbar';
 import BulkEditModal from '@/components/admin/BulkEditModal';
 import BatchDeleteModal from '@/components/admin/BatchDeleteModal';
 import InteractiveChart, { ChartDataPoint } from '@/components/admin/InteractiveChart';
-import { exportToCSV, exportToJSON, exportToExcel, prepareExportData, formatDateForExport } from '@/lib/admin/exportUtils';
+import { 
+    exportToCSV, 
+    exportToJSON, 
+    exportToExcel, 
+    exportToICal,
+    exportToGoogleCalendar,
+    exportToOutlookCalendar,
+    generateICalFeedUrl,
+    copyICalFeedUrl,
+    CalendarEvent,
+    prepareExportData, 
+    formatDateForExport 
+} from '@/lib/admin/exportUtils';
 import { Match, Team } from '@/types';
 import { api } from '@/lib/data';
-import { CheckSquare, Square, BarChart3, Calendar as CalendarIcon, MapPin, Grid3x3, TrendingUp } from 'lucide-react';
+import { CheckSquare, Square, BarChart3, Calendar as CalendarIcon, MapPin, Grid3x3, TrendingUp, Calendar, Copy, ExternalLink } from 'lucide-react';
 
 const IconTable = ({ className }: { className?: string }) => (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -394,10 +406,34 @@ export default function AdminMatches() {
         }
     };
 
-    const handleBulkExport = (format: 'csv' | 'json' | 'excel') => {
+    const handleBulkExport = (format: 'csv' | 'json' | 'excel' | 'ical') => {
         if (selectedMatches.size === 0) return;
 
         const selectedMatchesData = matches.filter(m => selectedMatches.has(m.id));
+        
+        if (format === 'ical') {
+            const calendarEvents: CalendarEvent[] = selectedMatchesData.map(match => {
+                const [hours, minutes] = match.time.split(':');
+                const startDate = new Date(match.date);
+                startDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                const endDate = new Date(startDate);
+                endDate.setHours(endDate.getHours() + 3); // 3 hour match duration
+
+                return {
+                    title: `${match.team1.shortName} vs ${match.team2.shortName}`,
+                    description: `IPL 2026 Match\\nVenue: ${match.venue}\\nStatus: ${match.status}`,
+                    location: match.venue,
+                    startDate,
+                    endDate,
+                };
+            });
+
+            const timestamp = new Date().toISOString().split('T')[0];
+            const filename = `ipl_matches_${timestamp}.ics`;
+            exportToICal(calendarEvents, filename);
+            showSuccess(`Exported ${selectedMatches.size} match(es) to iCal file`);
+            return;
+        }
         
         const headers = ['Date', 'Time', 'Team 1', 'Team 2', 'Venue', 'Status'];
         const rows = selectedMatchesData.map(match => [
@@ -424,6 +460,56 @@ export default function AdminMatches() {
 
         showSuccess(`Exported ${selectedMatches.size} match(es) to ${format.toUpperCase()}`);
     };
+
+    // Calendar export handlers
+    const handleExportToGoogleCalendar = (match: Match) => {
+        const [hours, minutes] = match.time.split(':');
+        const startDate = new Date(match.date);
+        startDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+        const endDate = new Date(startDate);
+        endDate.setHours(endDate.getHours() + 3);
+
+        exportToGoogleCalendar({
+            title: `${match.team1.shortName} vs ${match.team2.shortName}`,
+            description: `IPL 2026 Match\nVenue: ${match.venue}\nStatus: ${match.status}`,
+            location: match.venue,
+            startDate,
+            endDate,
+        });
+    };
+
+    const handleExportToOutlookCalendar = (match: Match) => {
+        const [hours, minutes] = match.time.split(':');
+        const startDate = new Date(match.date);
+        startDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+        const endDate = new Date(startDate);
+        endDate.setHours(endDate.getHours() + 3);
+
+        exportToOutlookCalendar({
+            title: `${match.team1.shortName} vs ${match.team2.shortName}`,
+            description: `IPL 2026 Match\nVenue: ${match.venue}\nStatus: ${match.status}`,
+            location: match.venue,
+            startDate,
+            endDate,
+        });
+    };
+
+    const handleCopyICalFeedUrl = async () => {
+        try {
+            await copyICalFeedUrl({
+                team: filters.team !== 'all' ? filters.team : undefined,
+                status: filters.status !== 'all' ? filters.status : undefined,
+            });
+            showSuccess('iCal feed URL copied to clipboard!');
+        } catch (error) {
+            showError('Failed to copy URL to clipboard');
+        }
+    };
+
+    const iCalFeedUrl = generateICalFeedUrl({
+        team: filters.team !== 'all' ? filters.team : undefined,
+        status: filters.status !== 'all' ? filters.status : undefined,
+    });
 
     const handleBulkEdit = async (values: { [key: string]: any }) => {
         if (selectedMatches.size === 0) return;
@@ -700,13 +786,81 @@ export default function AdminMatches() {
                                 <IconFilter className="w-5 h-5" />
                             </button>
 
-                            <button
-                                onClick={() => setShowForm(true)}
-                                className="ipl-button flex items-center gap-2"
-                            >
-                                <IconPlus className="w-5 h-5" />
-                                Create Match
-                            </button>
+                            <div className="flex items-center gap-3">
+                                {/* Calendar Export Dropdown */}
+                                <div className="relative group">
+                                    <button
+                                        className="glass-effect px-4 py-2.5 rounded-lg text-gray-300 hover:text-white font-semibold hover:bg-white/10 transition-all duration-200 flex items-center gap-2"
+                                    >
+                                        <Calendar className="w-5 h-5" />
+                                        <span className="hidden sm:inline">Calendar</span>
+                                    </button>
+                                    <div className="absolute right-0 top-full mt-2 w-72 glass-effect rounded-lg border border-white/10 p-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 shadow-xl">
+                                        <div className="space-y-1">
+                                            <button
+                                                onClick={() => {
+                                                    const events: CalendarEvent[] = filteredMatches.map(match => {
+                                                        const [hours, minutes] = match.time.split(':');
+                                                        const startDate = new Date(match.date);
+                                                        startDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                                                        const endDate = new Date(startDate);
+                                                        endDate.setHours(endDate.getHours() + 3);
+                                                        return {
+                                                            title: `${match.team1.shortName} vs ${match.team2.shortName}`,
+                                                            description: `IPL 2026 Match\\nVenue: ${match.venue}\\nStatus: ${match.status}`,
+                                                            location: match.venue,
+                                                            startDate,
+                                                            endDate,
+                                                        };
+                                                    });
+                                                    const timestamp = new Date().toISOString().split('T')[0];
+                                                    exportToICal(events, `ipl_matches_${timestamp}.ics`);
+                                                    showSuccess(`Exported ${filteredMatches.length} match(es) to iCal file`);
+                                                }}
+                                                className="w-full text-left px-4 py-2 rounded-lg hover:bg-white/10 text-gray-300 hover:text-white transition-all flex items-center gap-2"
+                                            >
+                                                <Calendar className="w-4 h-4" />
+                                                <span>Download iCal File</span>
+                                            </button>
+                                            <button
+                                                onClick={handleCopyICalFeedUrl}
+                                                className="w-full text-left px-4 py-2 rounded-lg hover:bg-white/10 text-gray-300 hover:text-white transition-all flex items-center gap-2"
+                                            >
+                                                <Copy className="w-4 h-4" />
+                                                <span>Copy iCal Feed URL</span>
+                                            </button>
+                                            <div className="border-t border-white/10 my-1"></div>
+                                            <div className="px-4 py-2 text-xs text-gray-400">
+                                                <div className="font-semibold mb-1 text-white">Subscribe via URL:</div>
+                                                <div className="break-all text-xs bg-black/30 p-2 rounded font-mono text-gray-300">
+                                                    {iCalFeedUrl}
+                                                </div>
+                                                <button
+                                                    onClick={async () => {
+                                                        try {
+                                                            await navigator.clipboard.writeText(iCalFeedUrl);
+                                                            showSuccess('iCal feed URL copied!');
+                                                        } catch (error) {
+                                                            showError('Failed to copy URL');
+                                                        }
+                                                    }}
+                                                    className="mt-2 text-xs text-ipl-gold hover:text-ipl-purple transition-colors flex items-center gap-1"
+                                                >
+                                                    <Copy className="w-3 h-3" />
+                                                    <span>Copy URL</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setShowForm(true)}
+                                    className="ipl-button flex items-center gap-2"
+                                >
+                                    <IconPlus className="w-5 h-5" />
+                                    Create Match
+                                </button>
+                            </div>
                             <a
                                 href="/matches"
                                 target="_blank"
@@ -1207,8 +1361,17 @@ export default function AdminMatches() {
                                 onBulkEdit={() => setShowBulkEditModal(true)}
                                 onBulkDelete={() => setShowBulkDeleteModal(true)}
                                 onBulkExport={() => {
-                                    // Show export menu or directly export CSV
-                                    handleBulkExport('csv');
+                                    // Show export format menu
+                                    const format = prompt('Select export format:\n1. CSV\n2. JSON\n3. Excel\n4. iCal\n\nEnter 1-4:');
+                                    if (format === '1') {
+                                        handleBulkExport('csv');
+                                    } else if (format === '2') {
+                                        handleBulkExport('json');
+                                    } else if (format === '3') {
+                                        handleBulkExport('excel');
+                                    } else if (format === '4') {
+                                        handleBulkExport('ical');
+                                    }
                                 }}
                                 onBulkStatusUpdate={(status) => handleBulkStatusUpdate(status as 'upcoming' | 'live' | 'completed')}
                                 statusOptions={[
@@ -1309,6 +1472,54 @@ export default function AdminMatches() {
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="flex items-center gap-2">
+                                                        <div className="relative group">
+                                                            <button
+                                                                className="p-2 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all duration-200 disabled:opacity-50"
+                                                                disabled={isSubmitting}
+                                                                title="Export to Calendar"
+                                                            >
+                                                                <Calendar className="w-4 h-4" />
+                                                            </button>
+                                                            <div className="absolute right-0 top-full mt-1 w-56 glass-effect rounded-lg border border-white/10 p-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                                                <button
+                                                                    onClick={() => handleExportToGoogleCalendar(match)}
+                                                                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 text-gray-300 hover:text-white transition-all flex items-center gap-2 text-sm"
+                                                                >
+                                                                    <ExternalLink className="w-4 h-4" />
+                                                                    <span>Google Calendar</span>
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleExportToOutlookCalendar(match)}
+                                                                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 text-gray-300 hover:text-white transition-all flex items-center gap-2 text-sm"
+                                                                >
+                                                                    <ExternalLink className="w-4 h-4" />
+                                                                    <span>Outlook Calendar</span>
+                                                                </button>
+                                                                <div className="border-t border-white/10 my-1"></div>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        const [hours, minutes] = match.time.split(':');
+                                                                        const startDate = new Date(match.date);
+                                                                        startDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                                                                        const endDate = new Date(startDate);
+                                                                        endDate.setHours(endDate.getHours() + 3);
+                                                                        const event: CalendarEvent = {
+                                                                            title: `${match.team1.shortName} vs ${match.team2.shortName}`,
+                                                                            description: `IPL 2026 Match\\nVenue: ${match.venue}\\nStatus: ${match.status}`,
+                                                                            location: match.venue,
+                                                                            startDate,
+                                                                            endDate,
+                                                                        };
+                                                                        exportToICal([event], `match_${match.id}.ics`);
+                                                                        showSuccess('Match exported to iCal file');
+                                                                    }}
+                                                                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 text-gray-300 hover:text-white transition-all flex items-center gap-2 text-sm"
+                                                                >
+                                                                    <Calendar className="w-4 h-4" />
+                                                                    <span>Download iCal</span>
+                                                                </button>
+                                                            </div>
+                                                        </div>
                                                         <button
                                                             onClick={() => handleEdit(match)}
                                                             className="p-2 text-ipl-gold hover:bg-ipl-gold/10 rounded-lg transition-all duration-200 disabled:opacity-50"
@@ -1459,7 +1670,7 @@ export default function AdminMatches() {
                                     }
                                 />
                             )}
-                        </div>
+                                    </div>
                     ) : (
                         // Analytics View
                         <div className="space-y-6">

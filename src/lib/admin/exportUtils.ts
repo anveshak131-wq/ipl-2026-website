@@ -186,3 +186,154 @@ export function formatDateTimeForExport(date: string | Date): string {
   });
 }
 
+/**
+ * Calendar Export Interfaces
+ */
+export interface CalendarEvent {
+  title: string;
+  description: string;
+  location: string;
+  startDate: Date;
+  endDate: Date;
+  allDay?: boolean;
+}
+
+/**
+ * Generate iCal (ICS) format content
+ */
+export function generateICalContent(events: CalendarEvent[]): string {
+  const formatDate = (date: Date): string => {
+    return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  };
+
+  const escapeText = (text: string): string => {
+    return text
+      .replace(/\\/g, '\\\\')
+      .replace(/;/g, '\\;')
+      .replace(/,/g, '\\,')
+      .replace(/\n/g, '\\n');
+  };
+
+  let ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//SportsUP99//IPL 2026 Matches//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+  ].join('\r\n');
+
+  events.forEach((event) => {
+    const start = formatDate(event.startDate);
+    const end = formatDate(event.endDate);
+    
+    ics += '\r\nBEGIN:VEVENT';
+    ics += `\r\nUID:${Date.now()}-${Math.random().toString(36).substr(2, 9)}@sportsup99.com`;
+    ics += `\r\nDTSTAMP:${formatDate(new Date())}`;
+    ics += `\r\nDTSTART:${start}`;
+    ics += `\r\nDTEND:${end}`;
+    ics += `\r\nSUMMARY:${escapeText(event.title)}`;
+    ics += `\r\nDESCRIPTION:${escapeText(event.description)}`;
+    ics += `\r\nLOCATION:${escapeText(event.location)}`;
+    ics += '\r\nSTATUS:CONFIRMED';
+    ics += '\r\nSEQUENCE:0';
+    ics += '\r\nEND:VEVENT';
+  });
+
+  ics += '\r\nEND:VCALENDAR';
+  return ics;
+}
+
+/**
+ * Export matches to iCal file (.ics)
+ */
+export function exportToICal(events: CalendarEvent[], filename: string = 'matches.ics'): void {
+  const icsContent = generateICalContent(events);
+  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  link.style.visibility = 'hidden';
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Export to Google Calendar
+ */
+export function exportToGoogleCalendar(event: CalendarEvent): void {
+  const formatDate = (date: Date): string => {
+    return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  };
+
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: event.title,
+    dates: `${formatDate(event.startDate)}/${formatDate(event.endDate)}`,
+    details: event.description,
+    location: event.location,
+  });
+
+  window.open(`https://calendar.google.com/calendar/render?${params.toString()}`, '_blank');
+}
+
+/**
+ * Export to Outlook Calendar
+ */
+export function exportToOutlookCalendar(event: CalendarEvent): void {
+  const formatDate = (date: Date): string => {
+    return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  };
+
+  const params = new URLSearchParams({
+    subject: event.title,
+    startdt: event.startDate.toISOString(),
+    enddt: event.endDate.toISOString(),
+    body: event.description,
+    location: event.location,
+  });
+
+  window.open(`https://outlook.live.com/calendar/0/deeplink/compose?${params.toString()}`, '_blank');
+}
+
+/**
+ * Generate iCal feed URL
+ * This assumes an API endpoint exists at /api/calendar/ical
+ */
+export function generateICalFeedUrl(filters?: { team?: string; status?: string }): string {
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const params = new URLSearchParams();
+  
+  if (filters?.team) params.append('team', filters.team);
+  if (filters?.status) params.append('status', filters.status);
+  
+  const queryString = params.toString();
+  return `${baseUrl}/api/calendar/ical${queryString ? `?${queryString}` : ''}`;
+}
+
+/**
+ * Copy iCal feed URL to clipboard
+ */
+export async function copyICalFeedUrl(filters?: { team?: string; status?: string }): Promise<void> {
+  const url = generateICalFeedUrl(filters);
+  try {
+    await navigator.clipboard.writeText(url);
+  } catch (error) {
+    console.error('Failed to copy to clipboard:', error);
+    // Fallback: select and copy
+    const textarea = document.createElement('textarea');
+    textarea.value = url;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    document.body.removeChild(textarea);
+  }
+}
+
