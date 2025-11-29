@@ -2241,18 +2241,28 @@ export default function AdminMatches() {
                                                         <div className="flex items-center gap-2">
                                                             {(() => {
                                                                 const team1League = match.team1.league || match.league || 'ipl';
-                                                                // Use team.logo if available (especially for WPL teams), otherwise get animated path
+                                                                // Prioritize team.logo (especially for TBA/TBD teams)
                                                                 const logoPath = match.team1.logo || getAnimatedLogoPath(match.team1.id, match.team1.shortName, team1League);
-                                                                const animatedPath1 = logoPath;
                                                                 
-                                                                if (animatedPath1.endsWith('rcb_logo_premium.svg')) {
+                                                                // Check for TBA logo
+                                                                if (logoPath && logoPath.includes('tba_logo.svg')) {
+                                                                    return (
+                                                                        <img 
+                                                                            src={logoPath} 
+                                                                            alt="TBA" 
+                                                                            className="w-8 h-8 object-contain"
+                                                                        />
+                                                                    );
+                                                                }
+                                                                
+                                                                if (logoPath.endsWith('rcb_logo_premium.svg')) {
                                                                     return (
                                                               <div className="w-8 h-8 flex items-center justify-center">
                                                                 <RCBLionLogo className="w-8 h-8" />
                                                               </div>
                                                                     );
                                                                 }
-                                                                if (animatedPath1.endsWith('.json')) {
+                                                                if (logoPath.endsWith('.json')) {
                                                                     return (
                                                                         <div className="w-8 h-8 flex items-center justify-center">
                                                                             <RCBLottie className="w-8 h-8" />
@@ -2261,7 +2271,7 @@ export default function AdminMatches() {
                                                                 }
                                                                 return (
                                                                     <img 
-                                                                        src={animatedPath1} 
+                                                                        src={logoPath} 
                                                                         alt={match.team1.shortName || match.team1.name} 
                                                                         className="w-8 h-8 object-contain"
                                                                         onError={(e) => {
@@ -2278,18 +2288,28 @@ export default function AdminMatches() {
                                                         <div className="flex items-center gap-2">
                                                             {(() => {
                                                                 const team2League = match.team2.league || match.league || 'ipl';
-                                                                // Use team.logo if available (especially for WPL teams), otherwise get animated path
+                                                                // Prioritize team.logo (especially for TBA/TBD teams)
                                                                 const logoPath = match.team2.logo || getAnimatedLogoPath(match.team2.id, match.team2.shortName, team2League);
-                                                                const animatedPath2 = logoPath;
                                                                 
-                                                                if (animatedPath2.endsWith('rcb_logo_premium.svg')) {
+                                                                // Check for TBA logo
+                                                                if (logoPath && logoPath.includes('tba_logo.svg')) {
+                                                                    return (
+                                                                        <img 
+                                                                            src={logoPath} 
+                                                                            alt="TBA" 
+                                                                            className="w-8 h-8 object-contain"
+                                                                        />
+                                                                    );
+                                                                }
+                                                                
+                                                                if (logoPath.endsWith('rcb_logo_premium.svg')) {
                                                                     return (
                                                               <div className="w-8 h-8 flex items-center justify-center">
                                                                 <RCBLionLogo className="w-8 h-8" />
                                                               </div>
                                                                     );
                                                                 }
-                                                                if (animatedPath2.endsWith('.json')) {
+                                                                if (logoPath.endsWith('.json')) {
                                                                     return (
                                                                         <div className="w-8 h-8 flex items-center justify-center">
                                                                             <RCBLottie className="w-8 h-8" />
@@ -2298,7 +2318,7 @@ export default function AdminMatches() {
                                                                 }
                                                                 return (
                                                                     <img 
-                                                                        src={animatedPath2} 
+                                                                        src={logoPath} 
                                                                         alt={match.team2.shortName || match.team2.name} 
                                                                         className="w-8 h-8 object-contain"
                                                                         onError={(e) => {
@@ -2499,18 +2519,28 @@ export default function AdminMatches() {
                                                             <div className="flex items-center gap-2">
                                                                 {(() => {
                                                                     const team1League = match.team1.league || match.league || 'ipl';
-                                                                    // Use team.logo if available (especially for WPL teams), otherwise get animated path
+                                                                    // Prioritize team.logo (especially for TBA/TBD teams)
                                                                     const logoPath = match.team1.logo || getAnimatedLogoPath(match.team1.id, match.team1.shortName, team1League);
-                                                                    const animatedPath1 = logoPath;
                                                                     
-                                                                    if (animatedPath1.endsWith('rcb_logo_premium.svg')) {
+                                                                    // Check for TBA logo
+                                                                    if (logoPath && logoPath.includes('tba_logo.svg')) {
+                                                                        return (
+                                                                            <img 
+                                                                                src={logoPath} 
+                                                                                alt="TBA" 
+                                                                                className="w-10 h-10 object-contain"
+                                                                            />
+                                                                        );
+                                                                    }
+                                                                    
+                                                                    if (logoPath.endsWith('rcb_logo_premium.svg')) {
                                                                         return (
                                                                   <div className="w-10 h-10 flex items-center justify-center">
                                                                     <RCBLionLogo className="w-10 h-10" />
                                                                   </div>
                                                                         );
                                                                     }
-                                                                    if (animatedPath1.endsWith('.json')) {
+                                                                    if (logoPath.endsWith('.json')) {
                                                                         return (
                                                                             <div className="w-10 h-10 flex items-center justify-center">
                                                                                 <RCBLottie className="w-10 h-10" />
@@ -2519,7 +2549,7 @@ export default function AdminMatches() {
                                                                     }
                                                                     return (
                                                                         <img 
-                                                                            src={animatedPath1} 
+                                                                            src={logoPath} 
                                                                             alt={match.team1.shortName || match.team1.name} 
                                                                             className="w-10 h-10 object-contain"
                                                                             onError={(e) => {
@@ -2536,18 +2566,28 @@ export default function AdminMatches() {
                                                             <div className="flex items-center gap-2">
                                                                 {(() => {
                                                                     const team2League = match.team2.league || match.league || 'ipl';
-                                                                    // Use team.logo if available (especially for WPL teams), otherwise get animated path
+                                                                    // Prioritize team.logo (especially for TBA/TBD teams)
                                                                     const logoPath = match.team2.logo || getAnimatedLogoPath(match.team2.id, match.team2.shortName, team2League);
-                                                                    const animatedPath2 = logoPath;
                                                                     
-                                                                    if (animatedPath2.endsWith('rcb_logo_premium.svg')) {
+                                                                    // Check for TBA logo
+                                                                    if (logoPath && logoPath.includes('tba_logo.svg')) {
+                                                                        return (
+                                                                            <img 
+                                                                                src={logoPath} 
+                                                                                alt="TBA" 
+                                                                                className="w-10 h-10 object-contain"
+                                                                            />
+                                                                        );
+                                                                    }
+                                                                    
+                                                                    if (logoPath.endsWith('rcb_logo_premium.svg')) {
                                                                         return (
                                                                   <div className="w-10 h-10 flex items-center justify-center">
                                                                     <RCBLionLogo className="w-10 h-10" />
                                                                   </div>
                                                                         );
                                                                     }
-                                                                    if (animatedPath2.endsWith('.json')) {
+                                                                    if (logoPath.endsWith('.json')) {
                                                                         return (
                                                                             <div className="w-10 h-10 flex items-center justify-center">
                                                                                 <RCBLottie className="w-10 h-10" />
@@ -2556,7 +2596,7 @@ export default function AdminMatches() {
                                                                     }
                                                                     return (
                                                                         <img 
-                                                                            src={animatedPath2} 
+                                                                            src={logoPath} 
                                                                             alt={match.team2.shortName || match.team2.name} 
                                                                             className="w-10 h-10 object-contain"
                                                                             onError={(e) => {

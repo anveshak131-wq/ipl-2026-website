@@ -47,6 +47,17 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
   };
 
   const renderTeamLogo = (team: Match['team1']) => {
+    // Prioritize team.logo (especially for TBA/TBD teams)
+    if (team.logo && team.logo.includes('tba_logo.svg')) {
+      return (
+        <img
+          src={team.logo}
+          alt="TBA"
+          className="w-10 h-10 object-contain"
+        />
+      );
+    }
+
     // Get league from team, match, or default to 'ipl'
     const teamLeague = team.league || match.league || 'ipl';
     const teamShortName = team.shortName || '';
@@ -63,7 +74,7 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
 
     return (
       <img
-        src={animatedPath}
+        src={team.logo || animatedPath}
         alt={`${team.shortName} logo`}
         className="w-10 h-10 object-contain"
         onError={(e) => {

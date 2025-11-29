@@ -17,7 +17,7 @@ export function getTBDTeam(league: League, position: string = 'TBD'): Team {
     league,
     name: `${position} Place Team`,
     shortName: position === 'TBD' ? 'TBD' : position,
-    logo: '',
+    logo: '/logos/tba_logo.svg', // Use TBA logo for placeholder teams
     description: `Team to be determined based on league standings`,
     colors: {
       primary: league === 'ipl' ? '#004BA0' : '#9C27B0',
