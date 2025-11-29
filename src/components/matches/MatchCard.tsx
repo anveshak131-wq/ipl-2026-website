@@ -45,7 +45,10 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
   };
 
   const renderTeamLogo = (team: Match['team1']) => {
-    const animatedPath = getAnimatedLogoPath(team.id);
+    // Get league from team, match, or default to 'ipl'
+    const teamLeague = team.league || match.league || 'ipl';
+    const teamShortName = team.shortName || '';
+    const animatedPath = getAnimatedLogoPath(team.id, teamShortName, teamLeague);
     const fallbackPath = team.logo || getLogoPath(team.id);
 
     if (animatedPath.endsWith('.json')) {

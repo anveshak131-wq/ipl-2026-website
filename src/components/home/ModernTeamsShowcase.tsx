@@ -34,7 +34,7 @@ export default function ModernTeamsShowcase({ teams, isLoading = false }: Modern
           onMouseEnter={() => setHoveredTeam(team.id)}
           onMouseLeave={() => setHoveredTeam(null)}
         >
-          <Link href={`/teams/${team.id}`}>
+          <Link href={team.league === 'wpl' ? `/wpl/teams/${team.id}` : `/teams/${team.id}`}>
             <AnimatedCard
               delay={idx}
               hover="scale"
@@ -99,26 +99,36 @@ export default function ModernTeamsShowcase({ teams, isLoading = false }: Modern
                 
                 {/* Actual Logo */}
                 <div className="relative z-10 w-full h-full flex items-center justify-center">
-                  {getAnimatedLogoPath(team.id).endsWith('rcb_logo_premium.svg') ? (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <RCBLionLogo className="w-full h-full" />
-                    </div>
-                  ) : (
-                    <motion.img
-                      src={getAnimatedLogoPath(team.id)}
-                      alt={`${team.shortName} logo`}
-                      className="w-full h-full object-contain drop-shadow-2xl"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = getLogoPath(team.id);
-                      }}
-                      whileHover={{ 
-                        scale: 1.15,
-                        rotate: [0, -5, 5, -5, 0],
-                        filter: "brightness(1.2)"
-                      }}
-                      transition={{ duration: 0.5 }}
-                    />
-                  )}
+                  {(() => {
+                    const animatedPath = getAnimatedLogoPath(team.id, team.shortName, team.league);
+                    if (animatedPath.endsWith('rcb_logo_premium.svg')) {
+                      return (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <RCBLionLogo className="w-full h-full" />
+                        </div>
+                      );
+                    }
+                    if (animatedPath.endsWith('.json')) {
+                      // Handle RCB Lottie animation if needed
+                      return null; // Add RCBLottie component if needed
+                    }
+                    return (
+                      <motion.img
+                        src={animatedPath}
+                        alt={`${team.shortName} logo`}
+                        className="w-full h-full object-contain drop-shadow-2xl"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = getLogoPath(team.id);
+                        }}
+                        whileHover={{ 
+                          scale: 1.15,
+                          rotate: [0, -5, 5, -5, 0],
+                          filter: "brightness(1.2)"
+                        }}
+                        transition={{ duration: 0.5 }}
+                      />
+                    );
+                  })()}
                 </div>
               </motion.div>
 

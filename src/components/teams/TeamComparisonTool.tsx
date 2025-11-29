@@ -88,7 +88,7 @@ export default function TeamComparisonTool({ teams, onClose }: TeamComparisonToo
               {teams.map((team) => {
                 const isSelected = selectedTeams.find(t => t.id === team.id);
                 const canSelect = !isSelected && selectedTeams.length < 3;
-                const animatedLogo = getAnimatedLogoPath(team.id);
+                const animatedLogo = getAnimatedLogoPath(team.id, team.shortName, team.league);
                 const isRCB = animatedLogo.endsWith('rcb_logo_premium.svg');
 
                 return (
@@ -140,15 +140,19 @@ export default function TeamComparisonTool({ teams, onClose }: TeamComparisonToo
                 {selectedTeams.map((team) => (
                   <div key={team.id} className="text-center">
                     <div className="w-16 h-16 mx-auto mb-2 flex items-center justify-center">
-                      {getAnimatedLogoPath(team.id).endsWith('rcb_logo_premium.svg') ? (
-                        <RCBLionLogo className="w-full h-full" />
-                      ) : (
-                        <img
-                          src={getAnimatedLogoPath(team.id)}
-                          alt={team.shortName}
-                          className="w-full h-full object-contain"
-                        />
-                      )}
+                      {(() => {
+                        const logoPath = getAnimatedLogoPath(team.id, team.shortName, team.league);
+                        if (logoPath.endsWith('rcb_logo_premium.svg')) {
+                          return <RCBLionLogo className="w-full h-full" />;
+                        }
+                        return (
+                          <img
+                            src={logoPath}
+                            alt={team.shortName}
+                            className="w-full h-full object-contain"
+                          />
+                        );
+                      })()}
                     </div>
                     <p className="text-sm font-bold text-white">{team.shortName}</p>
                   </div>
