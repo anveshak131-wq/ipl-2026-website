@@ -100,8 +100,12 @@ export default function ModernMatchesGrid({ matches, isLoading = false }: Modern
                 
                 {/* Countdown timer for upcoming matches */}
                 {match.status === 'upcoming' && (
-                  <div className="mb-4">
-                    <CountdownTimer targetDate={match.date} />
+                  <div className="mb-4 py-2">
+                    <CountdownTimer 
+                      targetDate={match.date} 
+                      matchTime={match.time}
+                      className="w-full"
+                    />
                   </div>
                 )}
 

@@ -1,16 +1,16 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Clock } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface CountdownTimerProps {
   targetDate: string | Date;
   onComplete?: () => void;
   className?: string;
+  matchTime?: string; // Optional match time to combine with date
 }
 
-export default function CountdownTimer({ targetDate, onComplete, className = '' }: CountdownTimerProps) {
+export default function CountdownTimer({ targetDate, onComplete, className = '', matchTime }: CountdownTimerProps) {
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -18,12 +18,24 @@ export default function CountdownTimer({ targetDate, onComplete, className = '' 
     seconds: 0,
   });
   const [isExpired, setIsExpired] = useState(false);
+  const [flipKey, setFlipKey] = useState(0);
+  const prevSecondsRef = useRef(0);
 
   useEffect(() => {
     const calculateTimeLeft = () => {
+      let target: Date;
+      
+      if (matchTime && typeof targetDate === 'string') {
+        // Combine date and time (assume IST timezone)
+        const dateTimeString = `${targetDate}T${matchTime}:00+05:30`;
+        target = new Date(dateTimeString);
+      } else {
+        target = new Date(targetDate);
+      }
+      
       const now = new Date().getTime();
-      const target = new Date(targetDate).getTime();
-      const difference = target - now;
+      const targetTime = target.getTime();
+      const difference = targetTime - now;
 
       if (difference <= 0) {
         setIsExpired(true);
@@ -39,58 +51,88 @@ export default function CountdownTimer({ targetDate, onComplete, className = '' 
       };
     };
 
-    setTimeLeft(calculateTimeLeft());
-    const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft());
-    }, 1000);
+    const updateTime = () => {
+      const newTime = calculateTimeLeft();
+      setTimeLeft(newTime);
+      
+      // Trigger flip animation when seconds change
+      if (newTime.seconds !== prevSecondsRef.current) {
+        setFlipKey(prev => prev + 1);
+        prevSecondsRef.current = newTime.seconds;
+      }
+    };
+
+    updateTime();
+    const timer = setInterval(updateTime, 1000);
 
     return () => clearInterval(timer);
-  }, [targetDate, onComplete]);
+  }, [targetDate, matchTime, onComplete]);
 
   if (isExpired) {
     return (
-      <div className={`flex items-center gap-2 text-red-400 font-bold ${className}`}>
-        <Clock className="w-5 h-5" />
+      <div className={`flex items-center justify-center gap-2 text-red-400 font-bold text-sm ${className}`}>
         <span>Match Started!</span>
       </div>
     );
   }
 
-  const TimeUnit = ({ value, label }: { value: number; label: string }) => (
-    <motion.div
-      className="flex flex-col items-center justify-center min-w-[60px]"
-      key={`${label}-${value}`}
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ duration: 0.3 }}
-    >
-      <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-md border border-white/20 rounded-lg px-4 py-3 mb-1">
-        <motion.span
-          className="text-2xl md:text-3xl font-bold text-white tabular-nums"
-          key={value}
-          initial={{ y: -10, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.2 }}
-        >
-          {String(value).padStart(2, '0')}
-        </motion.span>
+  const TimeUnit = ({ value, label, isSeconds = false }: { value: number; label: string; isSeconds?: boolean }) => {
+    const displayValue = String(value).padStart(2, '0');
+    const [isFlipping, setIsFlipping] = useState(false);
+
+    useEffect(() => {
+      if (isSeconds) {
+        setIsFlipping(true);
+        const timer = setTimeout(() => setIsFlipping(false), 300);
+        return () => clearTimeout(timer);
+      }
+    }, [value, isSeconds]);
+
+    return (
+      <div className="flex flex-col items-center justify-center">
+        <div className="relative">
+          <motion.div
+            className="rounded-lg px-3 py-2 bg-gradient-to-br from-purple-900/80 to-purple-950/90 border border-purple-700/30 shadow-lg"
+            style={{
+              minWidth: '48px',
+              textAlign: 'center',
+            }}
+            animate={isFlipping && isSeconds ? {
+              opacity: [1, 0.5, 1],
+              scale: [1, 0.95, 1],
+            } : {}}
+            transition={{ duration: 0.3 }}
+          >
+            <AnimatePresence mode="wait">
+              <motion.span
+                key={`${label}-${value}-${flipKey}`}
+                className="text-xl font-bold text-white tabular-nums block"
+                initial={{ y: -10, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 10, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                {displayValue}
+              </motion.span>
+            </AnimatePresence>
+          </motion.div>
+        </div>
+        <span className="text-[10px] text-gray-400 uppercase tracking-wider mt-1.5 font-semibold">
+          {label}
+        </span>
       </div>
-      <span className="text-xs text-gray-400 uppercase tracking-wider">{label}</span>
-    </motion.div>
-  );
+    );
+  };
 
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
-      <Clock className="w-5 h-5 text-blue-400" />
-      <div className="flex items-center gap-2">
-        <TimeUnit value={timeLeft.days} label="Days" />
-        <span className="text-2xl font-bold text-white/50">:</span>
-        <TimeUnit value={timeLeft.hours} label="Hours" />
-        <span className="text-2xl font-bold text-white/50">:</span>
-        <TimeUnit value={timeLeft.minutes} label="Min" />
-        <span className="text-2xl font-bold text-white/50">:</span>
-        <TimeUnit value={timeLeft.seconds} label="Sec" />
-      </div>
+    <div className={`flex items-center justify-center gap-1.5 ${className}`}>
+      <TimeUnit value={timeLeft.days} label="DAYS" />
+      <span className="text-lg font-bold text-white/40 pb-4">:</span>
+      <TimeUnit value={timeLeft.hours} label="HOURS" />
+      <span className="text-lg font-bold text-white/40 pb-4">:</span>
+      <TimeUnit value={timeLeft.minutes} label="MIN" />
+      <span className="text-lg font-bold text-white/40 pb-4">:</span>
+      <TimeUnit value={timeLeft.seconds} label="SEC" isSeconds={true} />
     </div>
   );
 }

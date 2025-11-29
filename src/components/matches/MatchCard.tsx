@@ -7,6 +7,7 @@ import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import { formatMatchTime } from '@/lib/timeUtils';
 import { getMatchNumberDisplay } from '@/lib/matchNumberUtils';
+import CountdownTimer from '@/components/ui/CountdownTimer';
 
 interface MatchCardProps {
   match: Match;
@@ -145,7 +146,7 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
         </div>
 
         {/* Date and Time */}
-        <div className="flex items-start justify-between">
+        <div className="space-y-3">
           <div>
             <p className="text-white font-bold text-base flex items-center gap-2">
               <CustomEmoji type="calendar" size={14} /> {formatDate(match.date)}
@@ -155,6 +156,17 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
               <span>{formatMatchTime(match.time, match.date)}</span>
             </p>
           </div>
+          
+          {/* Countdown Timer for Upcoming Matches */}
+          {match.status === 'upcoming' && (
+            <div className="pt-2 pb-1">
+              <CountdownTimer 
+                targetDate={match.date} 
+                matchTime={match.time}
+                className="w-full"
+              />
+            </div>
+          )}
         </div>
 
         {/* Teams */}

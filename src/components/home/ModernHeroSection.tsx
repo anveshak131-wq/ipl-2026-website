@@ -117,7 +117,7 @@ export default function ModernHeroSection({
               <p className="text-lg font-bold text-white mb-3">
                 {nextMatch.team1.shortName} vs {nextMatch.team2.shortName}
               </p>
-              <CountdownTimer targetDate={nextMatch.date} />
+              <CountdownTimer targetDate={nextMatch.date} matchTime={nextMatch.time} />
             </motion.div>
           )}
 

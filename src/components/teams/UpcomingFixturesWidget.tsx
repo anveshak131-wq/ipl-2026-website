@@ -109,7 +109,7 @@ export default function UpcomingFixturesWidget({ team, matches: providedMatches 
               </div>
 
               <div className="mt-3 pt-3 border-t border-white/10">
-                <CountdownTimer targetDate={match.date} className="text-xs" />
+                <CountdownTimer targetDate={match.date} matchTime={match.time} className="text-xs" />
               </div>
             </Link>
           </motion.div>
