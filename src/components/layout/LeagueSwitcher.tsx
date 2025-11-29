@@ -5,7 +5,7 @@ import { useLeague } from '@/contexts/LeagueContext';
 import { Trophy, Sparkles } from 'lucide-react';
 
 export default function LeagueSwitcher() {
-  const { currentLeague, setCurrentLeague, isIPL, isWPL } = useLeague();
+  const { setCurrentLeague, isIPL, isWPL } = useLeague();
 
   return (
     <div className="flex items-center gap-2">

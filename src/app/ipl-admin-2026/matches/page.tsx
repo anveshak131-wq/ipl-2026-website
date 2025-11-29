@@ -131,7 +131,8 @@ export default function AdminMatches() {
         venue: '',
         team1Id: '',
         team2Id: '',
-        status: 'upcoming' as 'upcoming' | 'live' | 'completed' | 'cancelled'
+        status: 'upcoming' as 'upcoming' | 'live' | 'completed' | 'cancelled',
+        league: 'ipl' as 'ipl' | 'wpl'
     });
 
     useEffect(() => {
@@ -218,7 +219,8 @@ export default function AdminMatches() {
                             venue: match.venue,
                             team1Id: match.team1.id,
                             team2Id: match.team2.id,
-                            status: newStatus
+                            status: newStatus,
+                            league: match.league
                         });
                     });
 
@@ -395,7 +397,8 @@ export default function AdminMatches() {
             venue: '',
             team1Id: '',
             team2Id: '',
-            status: 'upcoming'
+            status: 'upcoming',
+            league: 'ipl'
         });
         setEditingId(null);
         setShowForm(false);
@@ -444,7 +447,8 @@ export default function AdminMatches() {
                     venue: match.venue,
                     team1Id: match.team1.id,
                     team2Id: match.team2.id,
-                    status
+                    status,
+                    league: match.league
                 });
             });
 
@@ -647,7 +651,8 @@ export default function AdminMatches() {
             venue: match.venue,
             team1Id: match.team1.id,
             team2Id: match.team2.id,
-            status: match.status
+            status: match.status,
+            league: match.league
         });
         setEditingId(match.id);
         setShowForm(true);
@@ -734,7 +739,8 @@ export default function AdminMatches() {
                 venue: match.venue,
                 team1Id: match.team1.id,
                 team2Id: match.team2.id,
-                status: 'completed'
+                status: 'completed',
+                league: match.league
             });
 
             const updatedMatches = await api.getMatches();
@@ -760,7 +766,8 @@ export default function AdminMatches() {
                 venue: match.venue,
                 team1Id: match.team1.id,
                 team2Id: match.team2.id,
-                status: 'cancelled'
+                status: 'cancelled',
+                league: match.league
             });
 
             const updatedMatches = await api.getMatches();
