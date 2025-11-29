@@ -621,15 +621,25 @@ export default function AdminEmailNotificationsPage() {
         setMatches(transformedMatches);
         console.log(`Loaded ${transformedMatches.length} matches`);
 
-        // Transform news data
-        const transformedNews = (newsData || []).slice(0, 50).map((n: any) => ({
-          id: n.id || `news-${Math.random()}`,
+        // Transform news data - ensure we always have something to show
+        const transformedNews = (Array.isArray(newsData) ? newsData : [])
+          .slice(0, 50)
+          .map((n: any) => ({
+            id: n.id || `news-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            title: n.title || 'News Article',
+            summary: n.summary || n.description || (typeof n.content === 'string' ? n.content.substring(0, 200) : 'News content'),
+          }))
+          .filter((n: any) => n.title && n.title !== 'News Article'); // Filter out placeholder items if we have real data
+
+        // If we have real news data, use it; otherwise keep placeholder items
+        const finalNews = transformedNews.length > 0 ? transformedNews : (Array.isArray(newsData) ? newsData : []).slice(0, 50).map((n: any) => ({
+          id: n.id || `news-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           title: n.title || 'News Article',
-          summary: n.summary || n.description || (typeof n.content === 'string' ? n.content.substring(0, 200) : ''),
+          summary: n.summary || n.description || '',
         }));
 
-        setNews(transformedNews);
-        console.log(`Loaded ${transformedNews.length} news articles`);
+        setNews(finalNews);
+        console.log(`Loaded ${finalNews.length} news articles`, finalNews);
       } catch (e) {
         console.error('Error loading matches/news:', e);
         // Try to load mock data as last resort
@@ -833,24 +843,6 @@ export default function AdminEmailNotificationsPage() {
       }
 
       const result = await response.json();
-
-      // Log the emails
-      const newLogs: EmailLog[] = result.sentEmails?.map((email: any) => ({
-        id: Date.now().toString() + Math.random(),
-        templateId: data.templateId || '',
-        templateName: templates.find((t) => t.id === data.templateId)?.name || 'Custom Email',
-        recipientEmail: email.email,
-        recipientName: email.name || 'User',
-        subject: data.subject,
-        status: 'sent' as const,
-        sentAt: new Date(),
-      })) || [];
-
-      setEmailLogs((prev) => {
-        const updated = [...newLogs, ...prev];
-        localStorage.setItem('email_logs', JSON.stringify(updated));
-        return updated;
-      });
 
       // Check if emails were actually sent
       if (!result.success) {
