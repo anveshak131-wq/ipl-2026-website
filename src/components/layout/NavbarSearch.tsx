@@ -40,21 +40,25 @@ export default function NavbarSearch({ onClose }: NavbarSearchProps) {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   // Load all data on mount
   useEffect(() => {
     const loadData = async () => {
       try {
+        setIsLoading(true);
         const [teams, players, matches, news] = await Promise.all([
-          api.getTeams(),
-          api.getPlayers(),
-          api.getMatches(),
-          api.getNews(),
+          api.getTeams().catch(() => []),
+          api.getPlayers().catch(() => []),
+          api.getMatches().catch(() => []),
+          api.getNews().catch(() => []),
         ]);
         setAllData({ teams, players, matches, news });
       } catch (error) {
         console.error('Error loading search data:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     loadData();
@@ -198,9 +202,11 @@ export default function NavbarSearch({ onClose }: NavbarSearchProps) {
           setSelectedIndex((prev) => (prev > 0 ? prev - 1 : results.length - 1));
         } else if (e.key === 'Enter' && results[selectedIndex]) {
           e.preventDefault();
-          router.push(results[selectedIndex].href);
+          const href = results[selectedIndex].href;
           setIsOpen(false);
           setQuery('');
+          setSelectedIndex(0);
+          router.push(href);
           onClose?.();
         }
       }
@@ -220,10 +226,26 @@ export default function NavbarSearch({ onClose }: NavbarSearchProps) {
     }
   }, [selectedIndex]);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+        setQuery('');
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isOpen]);
+
   const handleResultClick = (href: string) => {
-    router.push(href);
     setIsOpen(false);
     setQuery('');
+    setSelectedIndex(0);
+    router.push(href);
     onClose?.();
   };
 
@@ -248,7 +270,7 @@ export default function NavbarSearch({ onClose }: NavbarSearchProps) {
   };
 
   return (
-    <div className="relative flex-1 max-w-2xl mx-2 md:mx-4">
+    <div ref={containerRef} className="relative flex-1 max-w-2xl mx-2 md:mx-4">
       {/* Search Input */}
       <div className="relative">
         <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -274,8 +296,13 @@ export default function NavbarSearch({ onClose }: NavbarSearchProps) {
             setQuery(e.target.value);
             setSelectedIndex(0);
           }}
-          onFocus={() => setIsOpen(true)}
-          placeholder="Search... (Press /)"
+          onFocus={() => {
+            setIsOpen(true);
+            if (query.trim()) {
+              performSearch(query);
+            }
+          }}
+          placeholder="Search teams, players, matches, news..."
           className="w-full pl-10 pr-20 py-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 text-sm"
         />
         {query && (
@@ -308,7 +335,7 @@ export default function NavbarSearch({ onClose }: NavbarSearchProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-full mt-2 w-full bg-[rgba(10,14,39,0.98)] backdrop-blur-2xl border border-white/20 rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-50 max-h-[500px] overflow-y-auto"
+            className="absolute top-full left-0 right-0 mt-2 w-full bg-[rgba(10,14,39,0.98)] backdrop-blur-2xl border border-white/20 rounded-xl shadow-2xl shadow-black/50 overflow-hidden z-[100] max-h-[min(500px,calc(100vh-200px))] overflow-y-auto"
           >
             {isLoading ? (
               <div className="p-8 text-center text-gray-400">
@@ -352,10 +379,33 @@ export default function NavbarSearch({ onClose }: NavbarSearchProps) {
               </div>
             ) : query.trim() ? (
               <div className="p-8 text-center text-gray-400">
-                <p className="text-sm">No results found for "{query}"</p>
+                <svg
+                  className="w-12 h-12 mx-auto mb-3 text-gray-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <p className="text-sm font-medium">No results found for &quot;{query}&quot;</p>
                 <p className="text-xs mt-1 text-gray-500">Try searching for teams, players, matches, or news</p>
               </div>
-            ) : null}
+            ) : (
+              <div className="p-6 text-center text-gray-400">
+                <p className="text-sm">Start typing to search...</p>
+                <div className="mt-4 flex flex-wrap gap-2 justify-center">
+                  <span className="text-xs px-2 py-1 bg-white/5 rounded-full border border-white/10">Teams</span>
+                  <span className="text-xs px-2 py-1 bg-white/5 rounded-full border border-white/10">Players</span>
+                  <span className="text-xs px-2 py-1 bg-white/5 rounded-full border border-white/10">Matches</span>
+                  <span className="text-xs px-2 py-1 bg-white/5 rounded-full border border-white/10">News</span>
+                </div>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
