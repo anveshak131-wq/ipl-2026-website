@@ -485,20 +485,75 @@ export default function AdminMatches() {
     const handleBulkDelete = async () => {
         if (selectedMatches.size === 0) return;
 
+        // Filter out mock matches
+        const realMatches = Array.from(selectedMatches).filter(matchId => {
+            const match = matches.find(m => m.id === matchId);
+            return match && !(match as any)._isMock;
+        });
+
+        const mockMatches = Array.from(selectedMatches).filter(matchId => {
+            const match = matches.find(m => m.id === matchId);
+            return match && (match as any)._isMock;
+        });
+
+        if (mockMatches.length > 0) {
+            showError(`Cannot delete ${mockMatches.length} sample match(es). Only real matches can be deleted.`);
+            // Remove mock matches from selection
+            setSelectedMatches(prev => {
+                const next = new Set(prev);
+                mockMatches.forEach(id => next.delete(id));
+                return next;
+            });
+            setShowBulkDeleteModal(false);
+            return;
+        }
+
+        if (realMatches.length === 0) {
+            showError('No real matches selected for deletion.');
+            setSelectedMatches(new Set());
+            setShowBulkDeleteModal(false);
+            return;
+        }
+
         try {
             setIsSubmitting(true);
-            const deletePromises = Array.from(selectedMatches).map(matchId => 
+            setError(null);
+            setShowBulkDeleteModal(false);
+
+            const deletePromises = realMatches.map(matchId => 
                 api.deleteMatch(matchId)
             );
 
             await Promise.all(deletePromises);
-            setMatches(matches.filter(m => !selectedMatches.has(m.id)));
-            showSuccess(`${selectedMatches.size} match(es) deleted successfully`);
-            clearSelection();
-            setShowBulkDeleteModal(false);
-        } catch (error) {
+            
+            // Remove from local state immediately
+            setMatches(prev => prev.filter(m => !realMatches.includes(m.id)));
+            setSelectedMatches(new Set());
+            
+            // Refresh matches from API
+            try {
+                const updatedMatches = await api.getMatches(currentLeague);
+                setMatches(updatedMatches);
+            } catch (refreshError) {
+                console.warn('Failed to refresh matches after bulk deletion:', refreshError);
+            }
+            
+            showSuccess(`${realMatches.length} match(es) deleted successfully`);
+        } catch (error: any) {
             console.error('Failed to delete matches:', error);
-            showError('Failed to delete matches');
+            let errorMessage = error?.message || 'Failed to delete matches';
+            if (errorMessage.includes('not found') || errorMessage.includes('404')) {
+                errorMessage = 'Some matches were not found. They may have already been deleted.';
+            }
+            showError(errorMessage);
+            
+            // Refresh matches to get current state
+            try {
+                const updatedMatches = await api.getMatches(currentLeague);
+                setMatches(updatedMatches);
+            } catch (refreshError) {
+                console.error('Failed to refresh matches after error:', refreshError);
+            }
         } finally {
             setIsSubmitting(false);
         }
@@ -672,6 +727,13 @@ export default function AdminMatches() {
     };
 
     const handleDelete = async (matchId: string) => {
+        // Check if this is a mock match
+        const match = matches.find(m => m.id === matchId);
+        if (match && (match as any)._isMock) {
+            showError('Cannot delete sample/demo matches. Please create real matches first.');
+            return;
+        }
+
         if (!confirm(`Are you sure you want to delete this match? This action cannot be undone.`)) return;
 
         try {
@@ -701,7 +763,13 @@ export default function AdminMatches() {
             showSuccess('Match deleted successfully');
         } catch (error: any) {
             console.error('Failed to delete match:', error);
-            const errorMessage = error?.message || 'Failed to delete match. Please try again.';
+            let errorMessage = error?.message || 'Failed to delete match. Please try again.';
+            
+            // Provide more helpful error message for 404
+            if (errorMessage.includes('not found') || errorMessage.includes('404')) {
+                errorMessage = 'Match not found. It may have already been deleted or is a sample match.';
+            }
+            
             showError(errorMessage);
             setError(errorMessage);
             
@@ -1774,8 +1842,8 @@ export default function AdminMatches() {
                                                         <button
                                                             onClick={() => handleDelete(match.id)}
                                                             className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 disabled:opacity-50"
-                                                            disabled={isSubmitting}
-                                                            title="Delete Match"
+                                                            disabled={isSubmitting || (match as any)._isMock}
+                                                            title={(match as any)._isMock ? 'Cannot delete sample match' : 'Delete Match'}
                                                         >
                                                             <IconTrash className="w-4 h-4" />
                                                         </button>
@@ -1925,9 +1993,11 @@ export default function AdminMatches() {
                                                             </button>
                                                             <button
                                                                 onClick={() => handleDelete(match.id)}
+                                                            disabled={isSubmitting || (match as any)._isMock}
+                                                            title={(match as any)._isMock ? 'Cannot delete sample match' : 'Delete Match'}
                                                                 className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 disabled:opacity-50"
-                                                                disabled={isSubmitting}
-                                                                title="Delete"
+                                                                disabled={isSubmitting || (match as any)._isMock}
+                                                                title={(match as any)._isMock ? 'Cannot delete sample match' : 'Delete'}
                                                             >
                                                                 <IconTrash className="w-4 h-4" />
                                                             </button>

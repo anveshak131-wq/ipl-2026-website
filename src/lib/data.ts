@@ -380,10 +380,12 @@ export const api = {
       }
       let matches = await response.json();
       
-      // If API returns empty array, use fallback mock data
+      // If API returns empty array, use fallback mock data but mark them as mock
       if (!matches || matches.length === 0) {
         console.log('API: No matches returned, using fallback mock data');
-        return league ? mockMatches.filter(match => match.league === league) : mockMatches;
+        const mockData = league ? mockMatches.filter(match => match.league === league) : mockMatches;
+        // Mark mock matches so we know they're not deletable
+        return mockData.map(match => ({ ...match, _isMock: true }));
       }
       
       // Ensure all matches have league property (migration for existing data)
@@ -403,8 +405,9 @@ export const api = {
       return matches;
     } catch (error) {
       console.error('Error fetching matches:', error);
-      // Fallback to mock data if API fails
-      return league ? mockMatches.filter(match => match.league === league) : mockMatches;
+      // Fallback to mock data if API fails, mark as mock
+      const mockData = league ? mockMatches.filter(match => match.league === league) : mockMatches;
+      return mockData.map(match => ({ ...match, _isMock: true }));
     }
   },
   
