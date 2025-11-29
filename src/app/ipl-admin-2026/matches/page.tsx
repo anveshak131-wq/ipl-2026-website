@@ -22,6 +22,7 @@ import {
     recalculateMatchNumbers,
     getMatchNumberDisplay
 } from '@/lib/matchNumberUtils';
+import { PlayoffType } from '@/types';
 import { 
     exportToCSV, 
     exportToJSON, 
@@ -157,8 +158,12 @@ export default function AdminMatches() {
         team1Id: '',
         team2Id: '',
         status: 'upcoming' as 'upcoming' | 'live' | 'completed' | 'cancelled',
-        league: 'ipl' as 'ipl' | 'wpl' // Will be set from currentLeague when adding
+        league: 'ipl' as 'ipl' | 'wpl', // Will be set from currentLeague when adding
+        playoffType: null as PlayoffType
     });
+
+    const [showPlayoffForm, setShowPlayoffForm] = useState(false);
+    const [selectedPlayoffType, setSelectedPlayoffType] = useState<PlayoffType>(null);
 
     // Update formData.league and reset venue/time when league changes
     useEffect(() => {
@@ -444,10 +449,13 @@ export default function AdminMatches() {
             team1Id: '',
             team2Id: '',
             status: 'upcoming',
-            league: 'ipl'
+            league: 'ipl',
+            playoffType: null
         });
         setEditingId(null);
         setShowForm(false);
+        setShowPlayoffForm(false);
+        setSelectedPlayoffType(null);
         setFormStep(1);
         setError(null);
     };
@@ -775,7 +783,8 @@ export default function AdminMatches() {
             team1Id: match.team1.id,
             team2Id: match.team2.id,
             status: match.status,
-            league: match.league
+            league: match.league,
+            playoffType: match.playoffType || null
         });
         setEditingId(match.id);
         setShowForm(true);
@@ -1239,13 +1248,29 @@ export default function AdminMatches() {
                                         </div>
                                     </div>
                                 </div>
-                            <button
-                                onClick={() => setShowForm(true)}
-                                className="ipl-button flex items-center gap-2"
-                            >
-                                <IconPlus className="w-5 h-5" />
-                                Create Match
-                            </button>
+                            <div className="flex items-center gap-3">
+                                <button
+                                    onClick={() => {
+                                        setShowPlayoffForm(true);
+                                        setShowForm(false);
+                                    }}
+                                    className="ipl-button flex items-center gap-2 bg-purple-600 hover:bg-purple-700"
+                                    title="Create playoff match (Eliminator, Final, etc.)"
+                                >
+                                    <IconPlus className="w-5 h-5" />
+                                    Create Playoff Match
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setShowForm(true);
+                                        setShowPlayoffForm(false);
+                                    }}
+                                    className="ipl-button flex items-center gap-2"
+                                >
+                                    <IconPlus className="w-5 h-5" />
+                                    Create Match
+                                </button>
+                            </div>
                             </div>
                             <a
                                 href="/matches"

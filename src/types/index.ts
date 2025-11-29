@@ -53,6 +53,8 @@ export interface Player {
   };
 }
 
+export type PlayoffType = 'qualifier1' | 'eliminator' | 'qualifier2' | 'final' | null;
+
 export interface Match {
   id: string;
   league: League; // IPL or WPL
@@ -64,6 +66,7 @@ export interface Match {
   status: 'upcoming' | 'live' | 'completed' | 'cancelled';
   result?: string;
   matchNumber?: string; // Auto-generated based on date and time ordering (e.g., "IPL-001", "WPL-001")
+  playoffType?: PlayoffType; // Type of playoff match (null for regular matches)
   score?: {
     team1: {
       runs: number;
