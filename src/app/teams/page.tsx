@@ -72,35 +72,64 @@ function TeamsPageContent() {
         const fetchTeams = async () => {
             setIsLoading(true);
             console.log('Teams page: Fetching teams for league:', currentLeague);
+            console.log('Teams page: Current teams state:', teams.length);
             try {
                 const [teamsData, playersData, matchesData] = await Promise.all([
                     api.getTeams(currentLeague),
-                    api.getPlayers(undefined, currentLeague).catch(() => []), // Fallback to empty array on error
-                    api.getMatches(currentLeague).catch(() => []) // Fetch matches for performance calculation
+                    api.getPlayers(undefined, currentLeague).catch((e) => {
+                        console.warn('Failed to fetch players:', e);
+                        return [];
+                    }),
+                    api.getMatches(currentLeague).catch((e) => {
+                        console.warn('Failed to fetch matches:', e);
+                        return [];
+                    })
                 ]);
 
                 console.log(`Teams page: Loaded ${teamsData.length} teams, ${playersData.length} players, ${matchesData.length} matches for ${currentLeague}`);
+                console.log('Teams page: Teams data:', teamsData);
+
+                if (teamsData.length === 0) {
+                    console.warn('Teams page: No teams returned! Check API or fallback data.');
+                }
 
                 const teamsWithPlayers = teamsData.map(team => ({
                     ...team,
                     players: (playersData || []).filter(player => player.teamId === team.id)
                 }));
 
+                console.log('Teams page: Setting teams state with', teamsWithPlayers.length, 'teams');
                 setTeams(teamsWithPlayers);
                 setMatches(matchesData || []);
             } catch (error) {
-                console.error('Failed to fetch teams:', error);
+                console.error('Teams page: Error in fetchTeams:', error);
                 // Still try to display teams even if players fail
                 try {
                     const teamsData = await api.getTeams(currentLeague);
                     console.log(`Teams page: Fallback - Loaded ${teamsData.length} teams for ${currentLeague}`);
+                    if (teamsData.length === 0) {
+                        console.error('Teams page: Even fallback returned 0 teams!');
+                    }
                     setTeams(teamsData.map(team => ({ ...team, players: [] })));
                 } catch (err) {
-                    console.error('Failed to fetch teams:', err);
+                    console.error('Teams page: Complete failure:', err);
+                    setTeams([]); // Set empty array so UI shows "no teams" message
                 }
             } finally {
                 setIsLoading(false);
             }
+        };
+
+        fetchTeams();
+    }, [currentLeague]); // Re-fetch when league changes
+
+    // Debug: Log when teams state changes
+    useEffect(() => {
+        console.log('Teams page: Teams state updated. Count:', teams.length);
+        if (teams.length > 0) {
+            console.log('Teams page: First team:', teams[0]);
+        }
+    }, [teams]);
         };
 
         fetchTeams();

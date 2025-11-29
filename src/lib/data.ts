@@ -309,17 +309,23 @@ export const api = {
   getTeams: async (league?: 'ipl' | 'wpl'): Promise<Team[]> => {
     try {
       const url = league ? `/api/teams?league=${league}` : '/api/teams';
+      console.log('API: Fetching teams from:', url);
       const response = await fetch(url);
+      console.log('API: Response status:', response.status, response.ok);
       if (!response.ok) {
-        throw new Error('Failed to fetch teams');
+        throw new Error(`Failed to fetch teams: ${response.status} ${response.statusText}`);
       }
       const teams = await response.json();
-      // Filter by league if specified
-      return league ? teams.filter((team: Team) => team.league === league) : teams;
+      console.log('API: Received teams:', teams.length, 'teams');
+      // Filter by league if specified (double check in case API didn't filter)
+      const filtered = league ? teams.filter((team: Team) => team.league === league) : teams;
+      console.log('API: After filtering by league:', filtered.length, 'teams for', league || 'all');
+      return filtered;
     } catch (error) {
-      console.error('Error fetching teams:', error);
+      console.error('API: Error fetching teams, using fallback:', error);
       // Fallback to mock data if API fails
       const fallback = league ? mockTeams.filter(team => team.league === league) : mockTeams;
+      console.log('API: Using fallback data:', fallback.length, 'teams for', league || 'all');
       return fallback;
     }
   },
