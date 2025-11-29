@@ -2,9 +2,14 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
+import { Calendar, Clock, Zap, CheckCircle2, Users, TrendingUp } from 'lucide-react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
+import { PageTransition, StaggeredList, SkeletonLoader, LoadingSpinner } from '@/components/admin/animations';
+import { EmptyStateIllustration, AnimatedStatusIcon, StatusBadge } from '@/components/admin/icons';
+import { ToastContainer, useToast } from '@/components/admin/Toast';
 import { Match, Team } from '@/types';
 import { api } from '@/lib/data';
 
@@ -76,6 +81,7 @@ const IPL_VENUES = [
 
 export default function AdminMatches() {
     const router = useRouter();
+    const { toasts, success: showSuccess, error: showError, closeToast } = useToast();
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [matches, setMatches] = useState<Match[]>([]);
     const [teams, setTeams] = useState<Team[]>([]);
@@ -87,7 +93,6 @@ export default function AdminMatches() {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState<string | null>(null);
     const [formStep, setFormStep] = useState(1);
     const [isVenueDropdownOpen, setIsVenueDropdownOpen] = useState(false);
     const [venueSearchQuery, setVenueSearchQuery] = useState('');
@@ -219,11 +224,10 @@ export default function AdminMatches() {
             setError(null);
             await api.deleteMatch(matchId);
             setMatches(matches.filter(m => m.id !== matchId));
-            setSuccess('Match deleted successfully');
-            setTimeout(() => setSuccess(null), 3000);
+            showSuccess('Match deleted successfully');
         } catch (error) {
             console.error('Failed to delete match:', error);
-            setError('Failed to delete match');
+            showError('Failed to delete match');
         } finally {
             setIsSubmitting(false);
         }
@@ -249,15 +253,14 @@ export default function AdminMatches() {
             if (editingId) {
                 const updatedMatch = await api.updateMatch(editingId, formData);
                 setMatches(matches.map(m => m.id === editingId ? updatedMatch : m));
-                setSuccess('Match updated successfully');
+                showSuccess('Match updated successfully');
             } else {
                 const newMatch = await api.createMatch(formData);
                 setMatches([...matches, newMatch]);
-                setSuccess('Match created successfully');
+                showSuccess('Match created successfully');
             }
 
             resetForm();
-            setTimeout(() => setSuccess(null), 3000);
         } catch (error) {
             console.error('Failed to save match:', error);
             setError(editingId ? 'Failed to update match' : 'Failed to create match');
@@ -269,24 +272,11 @@ export default function AdminMatches() {
     const getStatusBadge = (status: string) => {
         switch (status) {
             case 'live':
-                return (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-ipl-accent/20 to-purple-500/20 text-ipl-accent border border-ipl-accent/30">
-                        <span className="w-2 h-2 bg-ipl-accent rounded-full animate-pulse"></span>
-                        Live
-                    </span>
-                );
+                return <StatusBadge status="live" label="Live" />;
             case 'completed':
-                return (
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-500/20 text-green-400 border border-green-500/30">
-                        Completed
-                    </span>
-                );
+                return <StatusBadge status="success" label="Completed" />;
             default:
-                return (
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30">
-                        Scheduled
-                    </span>
-                );
+                return <StatusBadge status="pending" label="Scheduled" />;
         }
     };
 
@@ -313,7 +303,7 @@ export default function AdminMatches() {
             <div className="flex min-h-screen bg-[#0B0F13]">
                 <AuroraBackground />
                 <div className="flex-1 flex items-center justify-center">
-                    <div className="text-white">Loading...</div>
+                    <LoadingSpinner size="lg" color="#FFD700" />
                 </div>
             </div>
         );
@@ -328,8 +318,35 @@ export default function AdminMatches() {
             <div className="flex min-h-screen bg-[#0B0F13]">
                 <AuroraBackground />
                 <AdminSidebar currentPage="/ipl-admin-2026/matches" />
-                <div className="flex-1 flex items-center justify-center">
-                    <div className="text-white">Loading matches...</div>
+                <div className="flex-1 relative z-10 p-8">
+                    <div className="space-y-6">
+                        {/* Header skeleton */}
+                        <div className="space-y-4">
+                            <SkeletonLoader height="2rem" width="12rem" />
+                            <SkeletonLoader height="1rem" width="8rem" />
+                        </div>
+                        
+                        {/* Stats cards skeleton */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {[1, 2, 3, 4].map((i) => (
+                                <div key={i} className="glass-effect rounded-xl p-4">
+                                    <SkeletonLoader height="0.75rem" width="6rem" className="mb-2" />
+                                    <SkeletonLoader height="2rem" width="4rem" />
+                                </div>
+                            ))}
+                        </div>
+                        
+                        {/* Table skeleton */}
+                        <div className="glass-effect rounded-xl p-6">
+                            <div className="space-y-4">
+                                {[1, 2, 3, 4, 5].map((i) => (
+                                    <div key={i} className="flex gap-4">
+                                        <SkeletonLoader height="3rem" width="100%" />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         );
@@ -339,20 +356,10 @@ export default function AdminMatches() {
         <div className="flex min-h-screen bg-[#0B0F13]">
             <AuroraBackground />
             <AdminSidebar currentPage="/ipl-admin-2026/matches" />
+            <ToastContainer toasts={toasts} onClose={closeToast} />
 
-            <div className="flex-1 relative z-10">
+            <PageTransition className="flex-1 relative z-10">
                 <div className="p-8">
-                    {success && (
-                        <div className="mb-6 p-4 bg-green-500/10 border border-green-500/30 rounded-lg text-green-400 backdrop-blur-sm">
-                            {success}
-                        </div>
-                    )}
-
-                    {error && !showForm && (
-                        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 backdrop-blur-sm">
-                            {error}
-                        </div>
-                    )}
 
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
                         <div>
@@ -432,24 +439,52 @@ export default function AdminMatches() {
                     </div>
 
                     {/* Global status summary */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                        <div className="glass-effect rounded-xl p-4">
-                            <div className="text-xs text-gray-400 mb-1">Total matches</div>
+                    <StaggeredList className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" staggerDelay={0.1}>
+                        <motion.div 
+                            className="glass-effect rounded-xl p-4 hover:bg-white/5 transition-all duration-200 cursor-pointer"
+                            onClick={() => setFilters({ ...filters, status: 'all' })}
+                            whileHover={{ scale: 1.02 }}
+                        >
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="text-xs text-gray-400">Total matches</div>
+                                <Calendar className="w-4 h-4 text-gray-400" />
+                            </div>
                             <div className="text-2xl font-bold text-white">{statusCounts.total}</div>
-                        </div>
-                        <div className="glass-effect rounded-xl p-4">
-                            <div className="text-xs text-gray-400 mb-1">Upcoming</div>
+                        </motion.div>
+                        <motion.div 
+                            className="glass-effect rounded-xl p-4 hover:bg-white/5 transition-all duration-200 cursor-pointer"
+                            onClick={() => setFilters({ ...filters, status: 'upcoming' })}
+                            whileHover={{ scale: 1.02 }}
+                        >
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="text-xs text-gray-400">Upcoming</div>
+                                <Clock className="w-4 h-4 text-blue-400" />
+                            </div>
                             <div className="text-2xl font-bold text-blue-400">{statusCounts.upcoming}</div>
-                        </div>
-                        <div className="glass-effect rounded-xl p-4">
-                            <div className="text-xs text-gray-400 mb-1">Live</div>
+                        </motion.div>
+                        <motion.div 
+                            className="glass-effect rounded-xl p-4 hover:bg-white/5 transition-all duration-200 cursor-pointer"
+                            onClick={() => setFilters({ ...filters, status: 'live' })}
+                            whileHover={{ scale: 1.02 }}
+                        >
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="text-xs text-gray-400">Live</div>
+                                <Zap className="w-4 h-4 text-ipl-accent" />
+                            </div>
                             <div className="text-2xl font-bold text-ipl-accent">{statusCounts.live}</div>
-                        </div>
-                        <div className="glass-effect rounded-xl p-4">
-                            <div className="text-xs text-gray-400 mb-1">Completed</div>
+                        </motion.div>
+                        <motion.div 
+                            className="glass-effect rounded-xl p-4 hover:bg-white/5 transition-all duration-200 cursor-pointer"
+                            onClick={() => setFilters({ ...filters, status: 'completed' })}
+                            whileHover={{ scale: 1.02 }}
+                        >
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="text-xs text-gray-400">Completed</div>
+                                <CheckCircle2 className="w-4 h-4 text-green-400" />
+                            </div>
                             <div className="text-2xl font-bold text-green-400">{statusCounts.completed}</div>
-                        </div>
-                    </div>
+                        </motion.div>
+                    </StaggeredList>
 
                     {/* Venue Filter Dropdown */}
                     <div className="mb-6 relative max-w-xs">
@@ -906,8 +941,15 @@ export default function AdminMatches() {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-white/5">
-                                        {filteredMatches.map((match) => (
-                                            <tr key={match.id} className="hover:bg-white/5 transition-colors">
+                                        {filteredMatches.map((match, index) => (
+                                            <motion.tr 
+                                                key={match.id} 
+                                                className="hover:bg-white/5 transition-colors"
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ delay: index * 0.03, duration: 0.3 }}
+                                                whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
+                                            >
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="text-sm text-white font-medium">{formatDate(match.date)}</div>
                                                     <div className="text-xs text-gray-400">{formatTime(match.time)}</div>
@@ -965,31 +1007,53 @@ export default function AdminMatches() {
                                                         </button>
                                                     </div>
                                                 </td>
-                                            </tr>
+                                            </motion.tr>
                                         ))}
                                     </tbody>
                                 </table>
                             </div>
 
                             {filteredMatches.length === 0 && (
-                                <div className="text-center py-12">
-                                    <p className="text-gray-400">No matches found</p>
-                                </div>
+                                <EmptyStateIllustration
+                                    type="matches"
+                                    title="No matches found"
+                                    description={
+                                        Object.values(filters).some(v => v !== 'all' && v !== '') 
+                                            ? "Try adjusting your filters to see more matches."
+                                            : "Get started by creating your first match."
+                                    }
+                                    action={
+                                        Object.values(filters).some(v => v !== 'all' && v !== '')
+                                            ? {
+                                                label: "Clear Filters",
+                                                onClick: () => setFilters({ status: 'all', dateFrom: '', dateTo: '', team: 'all', venue: 'all' })
+                                            }
+                                            : {
+                                                label: "Create Match",
+                                                onClick: () => setShowForm(true)
+                                            }
+                                    }
+                                />
                             )}
                         </div>
                     ) : (
-                        <div className="space-y-6">
+                        <StaggeredList className="space-y-6" staggerDelay={0.1}>
                             {matchesByDate.map(([date, dateMatches]) => (
-                                <div key={date} className="glass-effect rounded-xl p-6 border border-white/10">
+                                <motion.div 
+                                    key={date} 
+                                    className="glass-effect rounded-xl p-6 border border-white/10"
+                                    whileHover={{ scale: 1.01 }}
+                                >
                                     <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
                                         <div className="w-1 h-6 bg-gradient-to-b from-ipl-gold to-ipl-purple rounded-full"></div>
                                         {formatDate(date)}
                                     </h3>
-                                    <div className="space-y-4">
+                                    <StaggeredList className="space-y-4" staggerDelay={0.05}>
                                         {dateMatches.map((match) => (
-                                            <div
+                                            <motion.div
                                                 key={match.id}
                                                 className="bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-all duration-200 border border-white/5"
+                                                whileHover={{ scale: 1.02, backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                                             >
                                                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                                                     <div className="flex items-center gap-4">
@@ -1045,21 +1109,39 @@ export default function AdminMatches() {
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </motion.div>
                                         ))}
-                                    </div>
-                                </div>
+                                    </StaggeredList>
+                                </motion.div>
                             ))}
+                        </StaggeredList>
 
                             {matchesByDate.length === 0 && (
-                                <div className="glass-effect rounded-xl p-12 text-center border border-white/10">
-                                    <p className="text-gray-400">No matches found</p>
-                                </div>
+                                <EmptyStateIllustration
+                                    type="matches"
+                                    title="No matches found"
+                                    description={
+                                        Object.values(filters).some(v => v !== 'all' && v !== '') 
+                                            ? "Try adjusting your filters to see more matches."
+                                            : "Get started by creating your first match."
+                                    }
+                                    action={
+                                        Object.values(filters).some(v => v !== 'all' && v !== '')
+                                            ? {
+                                                label: "Clear Filters",
+                                                onClick: () => setFilters({ status: 'all', dateFrom: '', dateTo: '', team: 'all', venue: 'all' })
+                                            }
+                                            : {
+                                                label: "Create Match",
+                                                onClick: () => setShowForm(true)
+                                            }
+                                    }
+                                />
                             )}
                         </div>
                     )}
                 </div>
-            </div>
+            </PageTransition>
         </div>
     );
 }
