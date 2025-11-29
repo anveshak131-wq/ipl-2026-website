@@ -130,10 +130,6 @@ function TeamsPageContent() {
             console.log('Teams page: First team:', teams[0]);
         }
     }, [teams]);
-        };
-
-        fetchTeams();
-    }, [currentLeague]); // Re-fetch when league changes
 
     const toggleFavorite = (teamId: string) => {
         const newFavorites = favorites.includes(teamId)
