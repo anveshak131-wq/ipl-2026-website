@@ -26,11 +26,13 @@ import TrendingNews from '@/components/home/TrendingNews';
 import { TeamsSkeleton, MatchesSkeleton, NewsSkeleton, StatsSkeleton } from '@/components/home/HomePageSkeletons';
 import { useRouter } from "next/navigation";
 import { api } from '@/lib/data';
+import { useLeague } from '@/contexts/LeagueContext';
 import type { Team, Match, News } from '@/types';
 import { useMemo } from 'react';
 
 export default function Home() {
   const router = useRouter();
+  const { currentLeague } = useLeague();
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [lastAcceptanceDate, setLastAcceptanceDate] = useState<string | null>(null);
   const [needsReAcceptance, setNeedsReAcceptance] = useState(false);
@@ -95,17 +97,23 @@ export default function Home() {
       }
     }
 
-    // Load data
+    // Load data based on current league
     const loadData = async () => {
       try {
         const [teamsData, matchesData, newsData] = await Promise.all([
-          api.getTeams(),
-          api.getMatches(),
+          api.getTeams(currentLeague),
+          api.getMatches(currentLeague),
           api.getNews(),
         ]);
+        
+        // Filter news by league (news can be 'ipl', 'wpl', or 'both')
+        const filteredNews = newsData.filter(item => 
+          !item.league || item.league === currentLeague || item.league === 'both'
+        );
+        
         setTeams(teamsData);
         setMatches(matchesData);
-        setNews(newsData);
+        setNews(filteredNews);
 
         // Check if there's a live match
         const liveMatch = matchesData.some((match) => match.status === 'live');
@@ -123,7 +131,7 @@ export default function Home() {
     };
 
     loadData();
-  }, []);
+  }, [currentLeague]); // Re-fetch when league changes
 
   const handleAcceptTerms = () => {
     setShowTermsModal(false);

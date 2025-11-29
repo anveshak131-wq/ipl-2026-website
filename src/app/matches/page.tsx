@@ -8,6 +8,7 @@ import MatchCard from '@/components/matches/MatchCard';
 import ModernMatchesGrid from '@/components/home/ModernMatchesGrid';
 import { Match } from '@/types';
 import { api } from '@/lib/data';
+import { useLeague } from '@/contexts/LeagueContext';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Icon from '@/components/ui/Icon';
 import AuroraBackground from '@/components/ui/AuroraBackground';
@@ -15,6 +16,7 @@ import AnimatedSection from '@/components/ui/AnimatedSection';
 import GradientText from '@/components/ui/GradientText';
 
 export default function MatchesPage() {
+  const { currentLeague } = useLeague();
   const [matches, setMatches] = useState<Match[]>([]);
   const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -23,7 +25,7 @@ export default function MatchesPage() {
   useEffect(() => {
     const fetchMatches = async () => {
       try {
-        const matchesData = await api.getMatches();
+        const matchesData = await api.getMatches(currentLeague);
         setMatches(matchesData);
         setFilteredMatches(matchesData);
       } catch (error) {
@@ -34,7 +36,7 @@ export default function MatchesPage() {
     };
 
     fetchMatches();
-  }, []);
+  }, [currentLeague]); // Re-fetch when league changes
 
   useEffect(() => {
     if (filter === 'all') {

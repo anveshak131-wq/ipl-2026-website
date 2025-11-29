@@ -6,6 +6,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { News } from '@/types';
 import { api } from '@/lib/data';
+import { useLeague } from '@/contexts/LeagueContext';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Icon from '@/components/ui/Icon';
 import AuroraBackground from '@/components/ui/AuroraBackground';
@@ -15,6 +16,7 @@ import GlassCard from '@/components/ui/GlassCard';
 import GradientText from '@/components/ui/GradientText';
 
 export default function NewsPage() {
+  const { currentLeague } = useLeague();
   const [news, setNews] = useState<News[]>([]);
   const [filteredNews, setFilteredNews] = useState<News[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,8 +29,12 @@ export default function NewsPage() {
     const fetchNews = async () => {
       try {
         const newsData = await api.getNews();
-        setNews(newsData);
-        setFilteredNews(newsData);
+        // Filter news by league (news can be 'ipl', 'wpl', or 'both')
+        const filtered = newsData.filter(item => 
+          !item.league || item.league === currentLeague || item.league === 'both'
+        );
+        setNews(filtered);
+        setFilteredNews(filtered);
       } catch (error) {
         console.error('Failed to fetch news:', error);
       } finally {
@@ -37,7 +43,7 @@ export default function NewsPage() {
     };
 
     fetchNews();
-  }, []);
+  }, [currentLeague]); // Re-fetch when league changes
 
   useEffect(() => {
     let filtered = news;
