@@ -480,7 +480,7 @@ export default function Home() {
                   </Link>
                 </div>
               </AnimatedSection>
-              <ModernNewsSection news={news.slice(0, 6)} />
+              <ModernNewsSection articles={news.slice(0, 6)} />
             </div>
           </section>
         ) : null}

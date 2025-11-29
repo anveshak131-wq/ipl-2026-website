@@ -350,7 +350,7 @@ export default function IPLHomePage() {
                   <span>→</span>
                 </Link>
               </div>
-              <ModernNewsSection news={news.slice(0, 6)} />
+              <ModernNewsSection articles={news.slice(0, 6)} />
             </div>
           </AnimatedSection>
         ) : null}
