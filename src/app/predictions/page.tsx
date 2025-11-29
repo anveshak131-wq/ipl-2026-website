@@ -1,17 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { Match } from '@/types';
-import { api } from '@/lib/data';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import Icon from '@/components/ui/Icon';
 import AuroraBackground from '@/components/ui/AuroraBackground';
-import AnimatedSection from '@/components/ui/AnimatedSection';
-import GradientText from '@/components/ui/GradientText';
-import GlassCard from '@/components/ui/GlassCard';
 import CustomEmoji from '@/components/emoji/CustomEmoji';
 
 interface Prediction {
@@ -252,569 +246,49 @@ function buildPredictionFromToss(
 }
 
 export default function PredictionsPage() {
-  const [matches, setMatches] = useState<Match[]>([]);
-  const [predictions, setPredictions] = useState<Map<string, Prediction>>(new Map());
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedMatch, setSelectedMatch] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<PredictionsTabKey>('upcoming');
-  const [selectedTeamFilter, setSelectedTeamFilter] = useState<string>('ALL');
-  const [selectedVenueFilter, setSelectedVenueFilter] = useState<string>('ALL');
+  const router = useRouter();
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [matchesData, settingsData] = await Promise.all([
-          api.getMatches(),
-          api.getSettings().catch(() => ({})),
-        ]);
+    // Redirect to home page - predictions page is temporarily unavailable
+    router.replace('/');
+  }, [router]);
 
-        const upcoming = matchesData.filter((m) => m.status === 'upcoming');
-        setMatches(upcoming);
-
-        let tossSnapshot: TossAnalyticsSnapshot | null = null;
-        if (settingsData && (settingsData as any).publishedStats?.tossAnalytics) {
-          tossSnapshot = (settingsData as any).publishedStats
-            .tossAnalytics as TossAnalyticsSnapshot;
-        }
-
-        const tossIndex = buildTossIndex(tossSnapshot);
-
-        const nextPredictions = new Map<string, Prediction>();
-        upcoming.forEach((match) => {
-          const prediction = buildPredictionFromToss(match, tossIndex);
-          nextPredictions.set(match.id, prediction);
-        });
-
-        setPredictions(nextPredictions);
-      } catch (error) {
-        console.error('Failed to fetch data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen">
-        <Navbar />
-        <div className="flex items-center justify-center h-96">
-          <LoadingSpinner size="lg" />
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
-  const uniqueTeams = Array.from(
-    new Set(
-      matches.flatMap((m) => [m.team1.shortName, m.team2.shortName]).filter(Boolean),
-    ),
-  ).sort((a, b) => a.localeCompare(b));
-
-  const uniqueVenues = Array.from(
-    new Set(matches.map((m) => m.venue).filter((v): v is string => Boolean(v))),
-  ).sort((a, b) => a.localeCompare(b));
-
-  const todayLabel = new Date().toDateString();
-
-  const filteredMatches = matches.filter((match) => {
-    if (activeTab === 'today') {
-      const d = new Date(match.date);
-      if (d.toDateString() !== todayLabel) return false;
-    }
-
-    if (activeTab === 'byTeam' && selectedTeamFilter !== 'ALL') {
-      const code = selectedTeamFilter.toUpperCase();
-      const t1 = match.team1.shortName.toUpperCase();
-      const t2 = match.team2.shortName.toUpperCase();
-      if (t1 !== code && t2 !== code) return false;
-    }
-
-    if (activeTab === 'byVenue' && selectedVenueFilter !== 'ALL') {
-      if (match.venue !== selectedVenueFilter) return false;
-    }
-
-    return true;
-  });
-
-  const selectedPrediction = selectedMatch ? predictions.get(selectedMatch) : null;
-
-  const matchesHeadingLabel =
-    activeTab === 'today'
-      ? "Today's Matches"
-      : activeTab === 'byTeam'
-      ? 'Matches by Team'
-      : activeTab === 'byVenue'
-      ? 'Matches by Venue'
-      : 'Upcoming Matches';
-
+  // Show a brief message before redirect
   return (
     <div className="min-h-screen">
       <Navbar />
-
       <main className="relative py-16 min-h-screen overflow-hidden section-match-bg">
         <AuroraBackground />
-        
-        {/* Enhanced Floating Animated Orbs */}
-        <motion.div 
-          className="absolute top-20 right-20 w-96 h-96 rounded-full blur-3xl"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.2), transparent)',
-          }}
-          animate={{
-            y: [0, -30, 0],
-            x: [0, 20, 0],
-            scale: [1, 1.1, 1],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        <motion.div 
-          className="absolute top-40 left-20 w-80 h-80 rounded-full blur-3xl"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(245, 158, 11, 0.25), rgba(236, 72, 153, 0.15), transparent)',
-          }}
-          animate={{
-            y: [0, 30, 0],
-            x: [0, -20, 0],
-            scale: [1, 1.15, 1],
-          }}
-          transition={{
-            duration: 10,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 2
-          }}
-        />
-        <motion.div 
-          className="absolute bottom-20 right-1/3 w-72 h-72 rounded-full blur-3xl"
-          style={{ 
-            background: 'radial-gradient(circle, rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.15), transparent)',
-          }}
-          animate={{
-            y: [0, -20, 0],
-            x: [0, 15, 0],
-            scale: [1, 1.2, 1],
-          }}
-          transition={{
-            duration: 12,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 4
-          }}
-        />
-        
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <AnimatedSection direction="down" delay={0.1}>
-            <motion.div 
-              className="mb-12"
-              initial={{ opacity: 0, y: -30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center justify-center min-h-[60vh] text-center"
+          >
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity, repeatDelay: 2 }}
+              className="mb-6"
             >
-              <motion.div 
-                className="inline-flex items-center space-x-2 mb-4"
-                whileHover={{ scale: 1.05 }}
-              >
-                <span className="px-3 py-1 rounded-full text-xs font-bold glass-effect text-amber-300 flex items-center gap-2 hover:bg-white/20 transition-all duration-300 cursor-default">
-                  <Icon name="target" size={16} /> AI PREDICTIONS
-                </span>
-              </motion.div>
-              <motion.h1 
-                className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-              >
-                AI Match <GradientText gradient="from-blue-400 via-purple-400 to-pink-400" animate>Predictions</GradientText>
-              </motion.h1>
-              <motion.p 
-                className="text-gray-300 text-lg max-w-2xl"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-              >
-                Intelligent match analysis and AI-powered win probability predictions for upcoming IPL fixtures
-              </motion.p>
+              <CustomEmoji type="target" size={80} animate={true} />
             </motion.div>
-          </AnimatedSection>
-
-          {/* Contextual sub-navigation for predictions */}
-          <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div className="inline-flex items-center gap-1 bg-black/40 border border-white/10 rounded-full px-2 py-1 overflow-x-auto no-scrollbar">
-              {[
-                { key: 'upcoming' as PredictionsTabKey, label: 'Upcoming' },
-                { key: 'today' as PredictionsTabKey, label: 'Today' },
-                { key: 'byTeam' as PredictionsTabKey, label: 'By Team' },
-                { key: 'byVenue' as PredictionsTabKey, label: 'By Venue' },
-              ].map((tab) => (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => {
-                    setActiveTab(tab.key);
-                    if (tab.key !== 'byTeam') setSelectedTeamFilter('ALL');
-                    if (tab.key !== 'byVenue') setSelectedVenueFilter('ALL');
-                  }}
-                  className={`px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 whitespace-nowrap transition-colors
-                    ${
-                      activeTab === tab.key
-                        ? 'bg-gradient-to-r from-ipl-blue-dark to-ipl-purple text-white shadow-sm shadow-ipl-purple/40 border border-ipl-gold/40'
-                        : 'bg-transparent text-gray-300 border border-transparent hover:border-white/20 hover:bg-white/5'
-                    }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-            <p className="text-[11px] text-gray-400 md:text-right">
-              Filter upcoming fixtures by day, team, or venue to focus predictions on what matters
-              most to you.
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              Predictions Coming Soon
+            </h1>
+            <p className="text-gray-300 text-lg mb-6 max-w-md">
+              We're working on improving the predictions feature. It will be back soon with better AI-powered insights!
             </p>
-          </div>
-
-          {/* Beta Notice */}
-          <div className="mb-8 p-4 rounded-xl bg-gradient-to-r from-ipl-purple/20 to-ipl-gold/20 border border-ipl-gold/30">
-            <p className="text-sm text-gray-300">
-              <span className="font-semibold text-ipl-gold inline-flex items-center gap-2">
-                <CustomEmoji type="warning" size={20} animate={true} />
-                Beta Feature:
-              </span> These predictions are AI-generated insights for entertainment purposes. Actual match outcomes may vary significantly.
-            </p>
-          </div>
-
-          {/* Main Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Matches List */}
-            <div className="lg:col-span-1">
-              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 p-6 sticky top-8">
-                <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
-                  <Icon name="cricket" size={20} /> {matchesHeadingLabel}
-                </h2>
-
-                {activeTab === 'byTeam' && uniqueTeams.length > 0 && (
-                  <div className="mb-3 text-[11px] text-gray-300">
-                    <label className="block mb-1">Filter by team</label>
-                    <select
-                      value={selectedTeamFilter}
-                      onChange={(e) => setSelectedTeamFilter(e.target.value)}
-                      className="w-full bg-black/50 border border-white/15 rounded-lg px-3 py-1.5 text-[11px] text-white focus:outline-none focus:ring-2 focus:ring-ipl-gold/40"
-                    >
-                      <option value="ALL">All teams</option>
-                      {uniqueTeams.map((code) => (
-                        <option key={code} value={code}>
-                          {code}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                {activeTab === 'byVenue' && uniqueVenues.length > 0 && (
-                  <div className="mb-3 text-[11px] text-gray-300">
-                    <label className="block mb-1">Filter by venue</label>
-                    <select
-                      value={selectedVenueFilter}
-                      onChange={(e) => setSelectedVenueFilter(e.target.value)}
-                      className="w-full bg-black/50 border border-white/15 rounded-lg px-3 py-1.5 text-[11px] text-white focus:outline-none focus:ring-2 focus:ring-ipl-gold/40"
-                    >
-                      <option value="ALL">All venues</option>
-                      {uniqueVenues.map((venue) => (
-                        <option key={venue} value={venue}>
-                          {venue}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {filteredMatches.length > 0 ? (
-                    filteredMatches.map((match) => (
-                      <button
-                        key={match.id}
-                        onClick={() => setSelectedMatch(match.id)}
-                        className={`w-full p-4 rounded-lg transition-all duration-300 text-left ${
-                          selectedMatch === match.id
-                            ? 'bg-gradient-to-r from-ipl-blue-dark to-ipl-purple text-white shadow-lg shadow-ipl-purple/30 transform scale-105'
-                            : 'bg-gradient-to-r from-white/10 to-white/5 border border-white/10 text-gray-300 hover:text-white hover:border-ipl-gold/50 hover:bg-white/20 hover:scale-105'
-                        }`}
-                      >
-                        <div className="font-bold mb-1 text-sm">
-                          {match.team1.shortName} <span className="text-xs mx-1">vs</span> {match.team2.shortName}
-                        </div>
-                        <div className="text-xs opacity-75">
-                          {new Date(match.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </div>
-                      </button>
-                    ))
-                  ) : (
-                    <div className="text-center py-8">
-                      <p className="text-gray-400 text-sm">
-                        No upcoming matches
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Prediction Details */}
-            <div className="lg:col-span-2">
-              <AnimatePresence mode="wait">
-                {selectedPrediction && selectedMatch ? (
-                  <motion.div 
-                    key={selectedMatch}
-                    initial={{ opacity: 0, x: 50 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -50 }}
-                    transition={{ duration: 0.5 }}
-                    className="space-y-6"
-                  >
-                    {/* Match Header */}
-                    {matches.find(m => m.id === selectedMatch) && (
-                      <GlassCard hover delay={0.1}>
-                        <div className="p-8">
-                      {/* Animated background on hover */}
-                      <div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-300">
-                        <div className="absolute inset-0 bg-gradient-to-br from-ipl-gold/10 to-ipl-purple/10" />
-                      </div>
-
-                      {(() => {
-                        const match = matches.find(m => m.id === selectedMatch)!;
-                        return (
-                          <div className="relative">
-                            <div className="flex items-center justify-between mb-6">
-                              <div className="text-center flex-1">
-                                <div className="text-3xl font-black text-white mb-2">
-                                  {match.team1.shortName}
-                                </div>
-                                <p className="text-gray-400 text-sm font-semibold">
-                                  {match.team1.name}
-                                </p>
-                              </div>
-
-                              <div className="px-6">
-                                <div className="text-2xl font-bold text-ipl-gold">
-                                  VS
-                                </div>
-                              </div>
-
-                              <div className="text-center flex-1">
-                                <div className="text-3xl font-black text-white mb-2">
-                                  {match.team2.shortName}
-                                </div>
-                                <p className="text-gray-400 text-sm font-semibold">
-                                  {match.team2.name}
-                                </p>
-                              </div>
-                            </div>
-
-                            <div className="pt-6 border-t border-white/10 text-center space-y-1">
-                              <p className="text-gray-300 font-semibold">
-                                {new Date(match.date).toLocaleDateString('en-US', {
-                                  weekday: 'long',
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric'
-                                })}
-                              </p>
-                              <p className="text-gray-400 text-sm">
-                                {match.venue}
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      })()}
-                        </div>
-                      </GlassCard>
-                    )}
-
-                    {/* Win Probability */}
-                    <GlassCard hover delay={0.2}>
-                      <div className="p-8">
-                    <h3 className="text-2xl font-black text-white mb-8 flex items-center gap-2">
-                      <Icon name="stats" size={24} /> Win Probability
-                    </h3>
-
-                    {(() => {
-                      const match = matches.find(m => m.id === selectedMatch)!;
-                      return (
-                        <div className="space-y-8">
-                          {/* Team 1 */}
-                          <div>
-                            <div className="flex justify-between items-center mb-3">
-                              <span className="text-white font-bold text-lg">
-                                {match.team1.shortName}
-                              </span>
-                              <span className="text-ipl-gold font-black text-2xl">
-                                {selectedPrediction.team1WinProbability.toFixed(1)}%
-                              </span>
-                            </div>
-                            <div className="w-full bg-white/10 rounded-full h-4 overflow-hidden border border-white/20">
-                              <div
-                                className="bg-gradient-to-r from-ipl-purple to-ipl-gold h-full transition-all duration-500 rounded-full shadow-lg shadow-ipl-purple/50"
-                                style={{
-                                  width: `${selectedPrediction.team1WinProbability}%`
-                                }}
-                              />
-                            </div>
-                          </div>
-
-                          {/* Team 2 */}
-                          <div>
-                            <div className="flex justify-between items-center mb-3">
-                              <span className="text-white font-bold text-lg">
-                                {match.team2.shortName}
-                              </span>
-                              <span className="text-ipl-gold font-black text-2xl">
-                                {selectedPrediction.team2WinProbability.toFixed(1)}%
-                              </span>
-                            </div>
-                            <div className="w-full bg-white/10 rounded-full h-4 overflow-hidden border border-white/20">
-                              <div
-                                className="bg-gradient-to-r from-ipl-gold to-ipl-purple h-full transition-all duration-500 rounded-full shadow-lg shadow-ipl-gold/50"
-                                style={{
-                                  width: `${selectedPrediction.team2WinProbability}%`
-                                }}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })()}
-                  </div>
-
-                  {/* Prediction */}
-                  <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 p-8">
-                    <h3 className="text-2xl font-black text-white mb-6 flex items-center gap-2">
-                      <Icon name="target" size={24} /> Prediction
-                    </h3>
-
-                    <div className="mb-8 p-6 rounded-xl bg-gradient-to-r from-ipl-gold/20 to-ipl-purple/20 border border-ipl-gold/40">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-gray-400 text-sm font-semibold mb-2">
-                            Predicted Winner
-                          </p>
-                          <p className="text-3xl font-black text-ipl-gold">
-                            {selectedPrediction.predictedWinner}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-gray-400 text-sm font-semibold mb-2">
-                            Confidence Level
-                          </p>
-                          <p className="text-3xl font-black text-white">
-                            {selectedPrediction.confidence.toFixed(1)}%
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                        <p className="text-gray-300 leading-relaxed text-base">
-                          {selectedPrediction.analysis}
-                        </p>
-                      </div>
-                    </GlassCard>
-
-                    {/* Key Factors */}
-                    <GlassCard hover delay={0.3}>
-                      <div className="p-8">
-                        <h3 className="text-2xl font-black text-white mb-6">
-                          🔍 Key Factors
-                        </h3>
-
-                        <motion.div 
-                          className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                          initial="hidden"
-                          animate="visible"
-                          variants={{
-                            visible: {
-                              transition: {
-                                staggerChildren: 0.1,
-                              },
-                            },
-                          }}
-                        >
-                          {selectedPrediction.keyFactors.map((factor, index) => (
-                            <motion.div
-                              key={index}
-                              initial={{ opacity: 0, x: -20 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ duration: 0.4, delay: index * 0.1 }}
-                              whileHover={{ scale: 1.05, x: 5 }}
-                              className="p-4 rounded-xl bg-gradient-to-r from-white/10 to-white/5 border border-white/20 hover:border-ipl-gold/50 transition-all duration-300 flex items-center space-x-3 group cursor-pointer hover:bg-white/15"
-                            >
-                              <motion.div 
-                                className="w-3 h-3 bg-gradient-to-r from-ipl-gold to-ipl-purple rounded-full"
-                                whileHover={{ scale: 1.5, rotate: 180 }}
-                                transition={{ duration: 0.3 }}
-                              />
-                              <span className="text-gray-300 font-semibold text-sm group-hover:text-white transition-colors duration-300">
-                                {factor}
-                              </span>
-                            </motion.div>
-                          ))}
-                        </motion.div>
-                      </div>
-                    </GlassCard>
-
-                    {/* Disclaimer */}
-                    <motion.div 
-                      className="p-4 rounded-xl bg-gradient-to-r from-red-500/20 to-red-500/10 border border-red-500/30"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.4 }}
-                    >
-                      <p className="text-xs text-gray-300 leading-relaxed">
-                        <span className="font-bold text-red-400 inline-flex items-center gap-2">
-                          <CustomEmoji type="warning" size={18} animate={true} />
-                          Disclaimer:
-                        </span> These predictions are AI-generated and are for entertainment purposes only. They are not guaranteed to be accurate and should not be used for betting or financial decisions.
-                      </p>
-                    </motion.div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="no-selection"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.5 }}
-                    className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 p-12 text-center"
-                  >
-                    <svg
-                      className="w-16 h-16 mx-auto mb-4 text-gray-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <p className="text-gray-300 text-lg font-semibold">
-                      Select a match to view AI predictions
-                    </p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => router.push('/')}
+              className="px-6 py-3 bg-gradient-to-r from-ipl-gold to-ipl-purple rounded-lg text-white font-semibold hover:from-ipl-gold/90 hover:to-ipl-purple/90 transition-all duration-200 shadow-lg shadow-ipl-gold/20"
+            >
+              Go to Home
+            </motion.button>
+          </motion.div>
         </div>
       </main>
-
       <Footer />
     </div>
   );

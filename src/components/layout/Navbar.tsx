@@ -62,7 +62,8 @@ export default function Navbar() {
     { href: '/news', label: 'News', emoji: 'fire' },
     // Analytics & Insights
     { href: '/stats', label: 'Stats', emoji: 'chart' },
-    { href: '/predictions', label: 'Predictions', emoji: 'target' },
+    // Predictions temporarily removed - will be added back when improved
+    // { href: '/predictions', label: 'Predictions', emoji: 'target' },
   ];
 
   const secondaryNavItems: NavItem[] = [
@@ -74,14 +75,16 @@ export default function Navbar() {
 
   const getNavBadgeLabel = (href: string): string | null => {
     if (href === '/stats') return 'Numbers';
-    if (href === '/predictions') return 'AI Picks';
+    // Predictions temporarily removed
+    // if (href === '/predictions') return 'AI Picks';
     return null;
   };
 
   const getNavTooltip = (href: string): string | null => {
     if (href === '/stats') return 'Leaderboards, records, and team comparisons';
-    if (href === '/predictions')
-      return 'AI-powered match win chances & toss insights';
+    // Predictions temporarily removed
+    // if (href === '/predictions')
+    //   return 'AI-powered match win chances & toss insights';
     return null;
   };
 
