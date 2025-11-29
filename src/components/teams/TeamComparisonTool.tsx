@@ -170,18 +170,26 @@ export default function TeamComparisonTool({ teams, onClose }: TeamComparisonToo
                     {stat?.label === 'Squad Size' && <Users className="w-4 h-4" />}
                     {stat?.label}
                   </div>
-                  {stat?.values.map((item, idx) => {
-                    const isBest = idx === 0 && stat?.values.length > 1;
+                  {selectedTeams.map((team) => {
+                    // Find the value for this specific team (maintain column order)
+                    const teamValue = stat?.values.find(item => item.team.id === team.id);
+                    if (!teamValue) return null;
+                    
+                    // Check if this team has the best value (only for numeric comparisons)
+                    const isBest = stat?.label !== 'Team Name' && 
+                                   stat?.values.length > 1 && 
+                                   stat?.values[0].team.id === team.id;
+                    
                     return (
                       <div
-                        key={item.team.id}
+                        key={team.id}
                         className={`text-center p-2 rounded-lg ${
                           isBest ? 'bg-green-500/20 border border-green-500/50' : 'bg-white/5'
                         }`}
                       >
                         <div className="flex items-center justify-center gap-2">
                           {isBest && <TrendingUp className="w-4 h-4 text-green-400" />}
-                          <span className="font-bold text-white">{String(item.value)}</span>
+                          <span className="font-bold text-white">{String(teamValue.value)}</span>
                         </div>
                       </div>
                     );
