@@ -322,9 +322,9 @@ export default function AdminTeams() {
         try {
             for (const team of wplTeams) {
                 try {
-                    const teamData = {
+                    const teamData: Omit<Team, 'id' | 'players'> = {
                         ...team,
-                        league: 'wpl' // Ensure WPL league
+                        league: 'wpl' as const // Ensure WPL league with proper type
                     };
                     const newTeam = await api.createTeam(teamData);
                     results.push(`✅ ${newTeam.name}`);
