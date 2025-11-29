@@ -11,10 +11,11 @@ export default function LeagueSwitcher() {
   
   const handleLeagueChange = (league: 'ipl' | 'wpl') => {
     console.log('League switcher clicked:', league);
+    // Update league context first
     setCurrentLeague(league);
-    // Navigate to the respective home page
+    // Always navigate to the respective home page
     router.push(`/${league}`);
-    console.log('League changed to:', league);
+    console.log('Navigating to:', `/${league}`);
   };
 
   return (
