@@ -134,7 +134,7 @@ function getTeamById(teamId, teams) {
 
 // Helper function to format match with full team objects
 function formatMatch(match, teams) {
-  // If match already has full team objects, use them
+  // If match already has full team objects, use them (preserve logo property)
   if (match.team1 && match.team1.name && match.team1.shortName) {
     return {
       id: match.id,
@@ -142,9 +142,14 @@ function formatMatch(match, teams) {
       date: match.date,
       time: match.time,
       venue: match.venue,
-      team1: match.team1,
-      team2: match.team2,
-      status: match.status
+      team1: match.team1, // Preserve full team object including logo
+      team2: match.team2, // Preserve full team object including logo
+      status: match.status,
+      result: match.result,
+      score: match.score,
+      matchNumber: match.matchNumber,
+      playoffType: match.playoffType,
+      _isMock: match._isMock
     };
   }
   
@@ -166,7 +171,10 @@ function formatMatch(match, teams) {
     date: match.date,
     time: match.time,
     venue: match.venue,
-    team1: team1 || { 
+    team1: team1 ? {
+      ...team1, // Preserve all team properties including logo
+      players: team1.players || []
+    } : { 
       id: match.team1Id, 
       shortName: `Team ${match.team1Id}`, 
       name: `Team ${match.team1Id}`, 
@@ -175,7 +183,10 @@ function formatMatch(match, teams) {
       colors: { primary: '#6B7280', secondary: '#9CA3AF' },
       players: []
     },
-    team2: team2 || { 
+    team2: team2 ? {
+      ...team2, // Preserve all team properties including logo
+      players: team2.players || []
+    } : { 
       id: match.team2Id, 
       shortName: `Team ${match.team2Id}`, 
       name: `Team ${match.team2Id}`, 
@@ -184,7 +195,12 @@ function formatMatch(match, teams) {
       colors: { primary: '#6B7280', secondary: '#9CA3AF' },
       players: []
     },
-    status: match.status
+    status: match.status,
+    result: match.result,
+    score: match.score,
+    matchNumber: match.matchNumber,
+    playoffType: match.playoffType,
+    _isMock: match._isMock
   };
 }
 

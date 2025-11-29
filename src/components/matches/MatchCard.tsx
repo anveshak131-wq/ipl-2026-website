@@ -47,22 +47,41 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
   };
 
   const renderTeamLogo = (team: Match['team1']) => {
-    // Prioritize team.logo (especially for TBA/TBD teams)
-    if (team.logo && team.logo.includes('tba_logo.svg')) {
-      return (
-        <img
-          src={team.logo}
-          alt="TBA"
-          className="w-10 h-10 object-contain"
-        />
-      );
+    // ALWAYS prioritize team.logo first (especially for TBA/TBD teams)
+    if (team.logo) {
+      // Check for TBA logo
+      if (team.logo.includes('tba_logo.svg')) {
+        return (
+          <img
+            src={team.logo}
+            alt="TBA"
+            className="w-10 h-10 object-contain"
+          />
+        );
+      }
+      // If team has a logo, use it directly (unless it's a special case)
+      if (!team.logo.endsWith('.json') && !team.logo.includes('rcb_logo_premium.svg')) {
+        return (
+          <img
+            src={team.logo}
+            alt={`${team.shortName} logo`}
+            className="w-10 h-10 object-contain"
+            onError={(e) => {
+              // Fallback to animated path if team.logo fails
+              const teamLeague = team.league || match.league || 'ipl';
+              const animatedPath = getAnimatedLogoPath(team.id, team.shortName || '', teamLeague);
+              (e.target as HTMLImageElement).src = animatedPath;
+            }}
+          />
+        );
+      }
     }
 
     // Get league from team, match, or default to 'ipl'
     const teamLeague = team.league || match.league || 'ipl';
     const teamShortName = team.shortName || '';
     const animatedPath = getAnimatedLogoPath(team.id, teamShortName, teamLeague);
-    const fallbackPath = team.logo || getLogoPath(team.id);
+    const fallbackPath = getLogoPath(team.id);
 
     if (animatedPath.endsWith('.json')) {
       return <RCBLottie className="w-10 h-10" />;
@@ -74,7 +93,7 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
 
     return (
       <img
-        src={team.logo || animatedPath}
+        src={animatedPath}
         alt={`${team.shortName} logo`}
         className="w-10 h-10 object-contain"
         onError={(e) => {
