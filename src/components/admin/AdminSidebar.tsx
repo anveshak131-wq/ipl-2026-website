@@ -35,7 +35,8 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
   const [adminName, setAdminName] = useState('Admin User');
   const [adminEmail, setAdminEmail] = useState('admin@ipl2026.com');
   const [searchQuery, setSearchQuery] = useState('');
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['Dashboard', 'Management', 'Content', 'Live', 'Settings']));
+  // Only expand Dashboard and Management by default for cleaner look
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(['Dashboard', 'Management']));
   const [recentPages, setRecentPages] = useState<RecentPage[]>([]);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [pendingCounts, setPendingCounts] = useState<{ [key: string]: number }>({});
@@ -297,8 +298,9 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [collapsed]);
 
+  // Consolidated menu groups for cleaner navigation
   const menuGroups: { [key: string]: MenuItem[] } = {
-    Dashboard: [
+    Main: [
       {
         href: '/ipl-admin-2026/dashboard',
         label: 'Dashboard',
@@ -307,11 +309,9 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
           </svg>
         ),
-        group: 'Dashboard',
+        group: 'Main',
         shortcut: 'D',
       },
-    ],
-    Management: [
       {
         href: '/ipl-admin-2026/teams',
         label: 'Teams',
@@ -320,7 +320,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
         ),
-        group: 'Management',
+        group: 'Main',
         shortcut: 'T',
       },
       {
@@ -331,7 +331,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
           </svg>
         ),
-        group: 'Management',
+        group: 'Main',
         shortcut: 'M',
       },
       {
@@ -342,31 +342,22 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
         ),
-        group: 'Management',
+        group: 'Main',
         shortcut: 'P',
-      },
-      {
-        href: '/ipl-admin-2026/coaches',
-        label: 'Coaching Staff',
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-          </svg>
-        ),
-        group: 'Management',
-      },
-      {
-        href: '/ipl-admin-2026/key-players',
-        label: 'Key Players',
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.802 2.036a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.802-2.036a1 1 0 00-1.176 0l-2.802 2.036c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-          </svg>
-        ),
-        group: 'Management',
       },
     ],
     Content: [
+      {
+        href: '/ipl-admin-2026/content',
+        label: 'Content',
+        icon: (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h10M4 14h6m-2 4h12" />
+          </svg>
+        ),
+        group: 'Content',
+        shortcut: 'C',
+      },
       {
         href: '/ipl-admin-2026/news',
         label: 'News',
@@ -379,58 +370,17 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         shortcut: 'N',
       },
       {
-        href: '/ipl-admin-2026/dataset-manager',
-        label: 'Data Lab (Edit)',
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5h10M11 9h10M11 13h4M11 17h2M4 5h.01M4 9h.01M4 13h.01M4 17h.01M7 5h.01M7 9h.01M7 13h.01M7 17h.01" />
-          </svg>
-        ),
-        group: 'Content',
-      },
-      {
-        href: '/ipl-admin-2026/datasets',
-        label: 'Data Lab (CSV)',
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h10M4 18h6" />
-          </svg>
-        ),
-        group: 'Content',
-      },
-      {
-        href: '/ipl-admin-2026/ml-lab',
-        label: 'ML Lab',
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12a7 7 0 0114 0 7 7 0 01-14 0zm7-5v10m-4-5h8" />
-          </svg>
-        ),
-        group: 'Content',
-      },
-      {
-        href: '/ipl-admin-2026/content',
-        label: 'Content Hub',
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h10M4 14h6m-2 4h12" />
-          </svg>
-        ),
-        group: 'Content',
-        shortcut: 'C',
-      },
-      {
         href: '/ipl-admin-2026/stats',
-        label: 'Stats Hub',
+        label: 'Statistics',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h10M4 14h6m-2 4h12" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
         ),
         group: 'Content',
       },
     ],
-    Live: [
+    Tools: [
       {
         href: '/ipl-admin-2026/live-score',
         label: 'Live Score',
@@ -439,7 +389,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         ),
-        group: 'Live',
+        group: 'Tools',
         shortcut: 'L',
       },
       {
@@ -450,19 +400,18 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5-2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         ),
-        group: 'Live',
+        group: 'Tools',
         badge: pendingCounts.moderation,
-        shortcut: 'R',
       },
       {
-        href: '/ipl-admin-2026/engagement',
-        label: 'Engagement',
+        href: '/ipl-admin-2026/dataset-manager',
+        label: 'Data Lab',
         icon: (
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5h10M11 9h10M11 13h4M11 17h2M4 5h.01M4 9h.01M4 13h.01M4 17h.01M7 5h.01M7 9h.01M7 13h.01M7 17h.01" />
           </svg>
         ),
-        group: 'Live',
+        group: 'Tools',
       },
     ],
     Settings: [
@@ -477,26 +426,6 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         ),
         group: 'Settings',
         shortcut: 'S',
-      },
-      {
-        href: '/ipl-admin-2026/email-notifications',
-        label: 'Email Notifications',
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
-        ),
-        group: 'Settings',
-      },
-      {
-        href: '/ipl-admin-2026/legal',
-        label: 'Legal Pages',
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h8M8 11h6m-6 4h4M6 5a2 2 0 00-2 2v10.5A1.5 1.5 0 005.5 19H18a1 1 0 001-1V7a2 2 0 00-2-2H6z" />
-          </svg>
-        ),
-        group: 'Settings',
       },
     ],
   };
@@ -565,79 +494,74 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
 
   const SidebarContent = () => (
     <>
-      {/* Header */}
-      <div className={`p-6 border-b border-[#2A3440] ${collapsed ? 'px-4' : ''}`}>
-        <div className={`flex items-center ${collapsed ? 'justify-center' : 'space-x-3'} transition-all duration-300`}>
+      {/* Header - More compact */}
+      <div className={`px-4 py-3 border-b border-[#2A3440] ${collapsed ? 'px-3' : ''}`}>
+        <div className={`flex items-center ${collapsed ? 'justify-center' : 'space-x-2.5'} transition-all duration-300`}>
           <div className="relative flex items-center justify-center">
             <IPLLogo size="sm" animated />
           </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="text-[#E6EDF3] font-bold text-lg leading-tight">SportsUP18</span>
-              <span className="text-[#AEBAC7] text-xs">Admin Panel</span>
+              <span className="text-[#E6EDF3] font-bold text-base leading-tight">SportsUP18</span>
+              <span className="text-[#6B7280] text-[10px]">Admin</span>
             </div>
           )}
         </div>
       </div>
 
-      {/* Search */}
+      {/* Search - More compact */}
       {!collapsed && (
-        <div className="p-4 border-b border-[#2A3440]">
+        <div className="px-3 py-2 border-b border-[#2A3440]">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#AEBAC7]" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#6B7280]" />
             <input
               id="sidebar-search"
               type="text"
-              placeholder="Search menu... (⌘K)"
+              placeholder="Search... (⌘K)"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-8 py-2 bg-[#141A22] border border-[#2A3440] rounded-lg text-[#E6EDF3] text-sm placeholder-[#6B7280] focus:outline-none focus:ring-2 focus:ring-[#2F6FED] focus:border-transparent transition-all"
+              className="w-full pl-8 pr-7 py-1.5 bg-[#141A22] border border-[#2A3440] rounded-lg text-[#E6EDF3] text-xs placeholder-[#6B7280] focus:outline-none focus:ring-1 focus:ring-[#2F6FED] focus:border-transparent transition-all"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#AEBAC7] hover:text-[#E6EDF3] transition-colors"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#AEBAC7] transition-colors"
               >
-                <X className="w-4 h-4" />
+                <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
         </div>
       )}
 
-      {/* League Switcher */}
+      {/* League Switcher - More compact */}
       {!collapsed && (
-        <div className="p-4 border-b border-[#2A3440]">
-          <div className="mb-2">
-            <span className="text-xs font-semibold text-[#AEBAC7] uppercase tracking-wider">League</span>
-          </div>
+        <div className="px-3 py-2 border-b border-[#2A3440]">
           <AdminLeagueSwitcher />
         </div>
       )}
 
-      {/* Recent Pages */}
-      {!collapsed && recentPages.length > 0 && !searchQuery && (
-        <div className="p-4 border-b border-[#2A3440]">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-[#AEBAC7]" />
-              <span className="text-xs font-semibold text-[#AEBAC7] uppercase tracking-wider">Recent</span>
-            </div>
+      {/* Recent Pages - Only show when searching or collapsed */}
+      {!collapsed && recentPages.length > 0 && searchQuery && (
+        <div className="px-4 py-2 border-b border-[#2A3440]">
+          <div className="flex items-center gap-2 mb-2">
+            <Clock className="w-3 h-3 text-[#6B7280]" />
+            <span className="text-xs text-[#6B7280]">Recent</span>
           </div>
-          <div className="space-y-1">
-            {recentPages.map((page) => {
+          <div className="space-y-0.5">
+            {recentPages.slice(0, 3).map((page) => {
               const isActive = currentPage === page.href || (!!currentPage && currentPage.startsWith(page.href + '/'));
               return (
                 <button
                   key={page.href}
                   onClick={() => handleNavigation(page.href)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
+                  className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-all duration-200 ${
                     isActive
                       ? 'bg-[#1A2332] text-[#E6EDF3]'
                       : 'text-[#AEBAC7] hover:text-[#E6EDF3] hover:bg-[#141A22]'
                   }`}
                 >
-                  <span className={isActive ? 'text-[#2F6FED]' : ''}>
+                  <span className={isActive ? 'text-[#2F6FED]' : 'text-[#6B7280]'}>
                     {renderIconFromType(page.iconType)}
                   </span>
                   <span className="flex-1 text-left truncate">{page.label}</span>
@@ -649,7 +573,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
       )}
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-6 overflow-y-auto">
+      <nav className="flex-1 px-3 py-2 space-y-3 overflow-y-auto">
         {Object.entries(filteredMenuGroups).map(([groupName, items]) => {
           const isExpanded = expandedGroups.has(groupName);
           const hasActiveItem = items.some(
@@ -657,20 +581,68 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
               currentPage === item.href || (!!currentPage && currentPage.startsWith(item.href + '/'))
           );
 
+          // For "Main" group, always show items (no collapse)
+          if (groupName === 'Main') {
+            return (
+              <div key={groupName} className="space-y-0.5">
+                {items.map((item) => {
+                  const isActive =
+                    currentPage === item.href ||
+                    (!!currentPage && currentPage.startsWith(item.href + '/'));
+                  return (
+                    <button
+                      key={item.href}
+                      onClick={() => handleNavigation(item.href)}
+                      className={`w-full group relative flex items-center ${collapsed ? 'justify-center px-2' : 'space-x-2.5 px-2.5'} py-2 rounded-lg transition-all duration-200 ${
+                        isActive
+                          ? 'bg-[#1A2332] text-[#E6EDF3]'
+                          : 'text-[#AEBAC7] hover:text-[#E6EDF3] hover:bg-[#141A22]'
+                      }`}
+                      title={collapsed ? item.label : undefined}
+                    >
+                      {isActive && !collapsed && (
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-[#2F6FED] rounded-r-full" />
+                      )}
+                      <span className={`relative flex-shrink-0 ${isActive ? 'text-[#2F6FED]' : ''} transition-colors`}>
+                        {item.icon}
+                        {item.badge !== undefined && item.badge > 0 && (
+                          <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border border-[#0B0F13]">
+                            {item.badge > 9 ? '9+' : item.badge}
+                          </span>
+                        )}
+                      </span>
+                      {!collapsed && (
+                        <>
+                          <span className="font-medium text-sm flex-1 text-left">{item.label}</span>
+                          {item.shortcut && (
+                            <kbd className="px-1 py-0.5 text-[10px] font-semibold text-[#6B7280] bg-[#141A22] border border-[#2A3440] rounded">
+                              {item.shortcut}
+                            </kbd>
+                          )}
+                        </>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          }
+
+          // For other groups, show collapsible sections
           return (
             <div key={groupName}>
               {!collapsed && (
                 <button
                   onClick={() => toggleGroup(groupName)}
-                  className="w-full flex items-center justify-between px-3 mb-2 group"
+                  className="w-full flex items-center justify-between px-2.5 py-1.5 mb-1 group hover:bg-[#141A22] rounded transition-colors"
                 >
-                  <span className="text-xs font-semibold text-[#AEBAC7] uppercase tracking-wider group-hover:text-[#E6EDF3] transition-colors">
+                  <span className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider group-hover:text-[#AEBAC7] transition-colors">
                     {groupName}
                   </span>
                   {isExpanded ? (
-                    <ChevronDown className="w-4 h-4 text-[#AEBAC7] group-hover:text-[#E6EDF3] transition-colors" />
+                    <ChevronDown className="w-3 h-3 text-[#6B7280] group-hover:text-[#AEBAC7] transition-colors" />
                   ) : (
-                    <ChevronRight className="w-4 h-4 text-[#AEBAC7] group-hover:text-[#E6EDF3] transition-colors" />
+                    <ChevronRight className="w-3 h-3 text-[#6B7280] group-hover:text-[#AEBAC7] transition-colors" />
                   )}
                 </button>
               )}
@@ -681,7 +653,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="space-y-1 overflow-hidden"
+                    className="space-y-0.5 overflow-hidden"
                   >
                     {items.map((item) => {
                       const isActive =
@@ -691,20 +663,20 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
                         <button
                           key={item.href}
                           onClick={() => handleNavigation(item.href)}
-                          className={`w-full group relative flex items-center ${collapsed ? 'justify-center px-3' : 'space-x-3 px-3'} py-3 rounded-lg transition-all duration-200 ${
+                          className={`w-full group relative flex items-center ${collapsed ? 'justify-center px-2' : 'space-x-2.5 px-2.5'} py-2 rounded-lg transition-all duration-200 ${
                             isActive
                               ? 'bg-[#1A2332] text-[#E6EDF3]'
                               : 'text-[#AEBAC7] hover:text-[#E6EDF3] hover:bg-[#141A22]'
                           }`}
                           title={collapsed ? item.label : undefined}
                         >
-                          {isActive && (
-                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-[#2F6FED] rounded-r-full shadow-lg shadow-blue-500/50" />
+                          {isActive && !collapsed && (
+                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-[#2F6FED] rounded-r-full" />
                           )}
-                          <span className={`relative ${isActive ? 'text-[#2F6FED]' : ''} transition-colors`}>
+                          <span className={`relative flex-shrink-0 ${isActive ? 'text-[#2F6FED]' : ''} transition-colors`}>
                             {item.icon}
                             {item.badge !== undefined && item.badge > 0 && (
-                              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-[#0B0F13]">
+                              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border border-[#0B0F13]">
                                 {item.badge > 9 ? '9+' : item.badge}
                               </span>
                             )}
@@ -713,7 +685,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
                             <>
                               <span className="font-medium text-sm flex-1 text-left">{item.label}</span>
                               {item.shortcut && (
-                                <kbd className="px-1.5 py-0.5 text-xs font-semibold text-[#6B7280] bg-[#141A22] border border-[#2A3440] rounded">
+                                <kbd className="px-1 py-0.5 text-[10px] font-semibold text-[#6B7280] bg-[#141A22] border border-[#2A3440] rounded">
                                   {item.shortcut}
                                 </kbd>
                               )}
@@ -730,21 +702,17 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         })}
       </nav>
 
-      {/* Keyboard Shortcuts Help */}
+      {/* Keyboard Shortcuts Help - Hidden by default, only show on hover/focus */}
       {!collapsed && (
-        <div className="p-4 border-t border-[#2A3440]">
+        <div className="px-3 py-2 border-t border-[#2A3440] opacity-0 hover:opacity-100 transition-opacity group">
           <button
             onClick={() => setShowShortcuts(!showShortcuts)}
-            className="w-full flex items-center justify-between px-3 py-2 text-[#AEBAC7] hover:text-[#E6EDF3] hover:bg-[#141A22] rounded-lg transition-all duration-200"
+            className="w-full flex items-center justify-between px-2 py-1.5 text-[#6B7280] hover:text-[#AEBAC7] hover:bg-[#141A22] rounded transition-all duration-200"
+            title="Keyboard shortcuts"
           >
-            <div className="flex items-center gap-2">
-              <Command className="w-4 h-4" />
-              <span className="text-xs font-medium">Shortcuts</span>
-            </div>
-            {showShortcuts ? (
-              <ChevronDown className="w-4 h-4" />
-            ) : (
-              <ChevronRight className="w-4 h-4" />
+            <Command className="w-3.5 h-3.5" />
+            {showShortcuts && (
+              <ChevronDown className="w-3 h-3" />
             )}
           </button>
           <AnimatePresence>
@@ -753,25 +721,15 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                className="mt-2 space-y-2 overflow-hidden"
+                className="mt-1.5 space-y-1 overflow-hidden"
               >
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-[#AEBAC7]">Search</span>
-                  <kbd className="px-2 py-1 bg-[#141A22] border border-[#2A3440] rounded text-[#E6EDF3]">
-                    ⌘K
-                  </kbd>
+                <div className="flex items-center justify-between text-[10px] px-2">
+                  <span className="text-[#6B7280]">⌘K</span>
+                  <span className="text-[#6B7280]">Search</span>
                 </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-[#AEBAC7]">Toggle Sidebar</span>
-                  <kbd className="px-2 py-1 bg-[#141A22] border border-[#2A3440] rounded text-[#E6EDF3]">
-                    ⌘B
-                  </kbd>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-[#AEBAC7]">Dashboard</span>
-                  <kbd className="px-2 py-1 bg-[#141A22] border border-[#2A3440] rounded text-[#E6EDF3]">
-                    D
-                  </kbd>
+                <div className="flex items-center justify-between text-[10px] px-2">
+                  <span className="text-[#6B7280]">⌘B</span>
+                  <span className="text-[#6B7280]">Toggle</span>
                 </div>
               </motion.div>
             )}
@@ -780,54 +738,51 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
       )}
 
       {/* User Profile & Actions */}
-      <div className={`p-4 border-t border-[#2A3440] space-y-3 ${collapsed ? 'px-2' : ''}`}>
+      <div className={`px-3 py-2 border-t border-[#2A3440] space-y-2 ${collapsed ? 'px-2' : ''}`}>
+        {/* Collapse button - more compact */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className={`w-full flex items-center ${collapsed ? 'justify-center px-3' : 'space-x-3 px-3'} py-3 rounded-lg text-[#AEBAC7] hover:text-[#E6EDF3] hover:bg-[#141A22] transition-all duration-200`}
+          className={`w-full flex items-center ${collapsed ? 'justify-center px-2' : 'justify-end px-2'} py-1.5 rounded text-[#6B7280] hover:text-[#AEBAC7] hover:bg-[#141A22] transition-all duration-200`}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           <svg
-            className={`w-5 h-5 transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`}
+            className={`w-4 h-4 transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
           </svg>
-          {!collapsed && <span className="font-medium text-sm">Collapse</span>}
         </button>
 
-        {/* Enhanced User Profile */}
-        <div className={`${collapsed ? 'px-3' : 'px-3'} py-3 rounded-lg bg-[#141A22] backdrop-blur-xl border border-[#2A3440]`}>
-          <div className={`flex items-center ${collapsed ? 'justify-center' : 'space-x-3'}`}>
+        {/* Compact User Profile */}
+        <div className={`${collapsed ? 'px-2' : 'px-2'} py-2 rounded-lg bg-[#141A22] border border-[#2A3440]`}>
+          <div className={`flex items-center ${collapsed ? 'justify-center' : 'space-x-2'}`}>
             <div className="relative">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#2F6FED] to-[#7B61FF] flex items-center justify-center text-white font-semibold text-sm shadow-lg">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#2F6FED] to-[#7B61FF] flex items-center justify-center text-white font-semibold text-xs shadow-lg">
                 {adminInitials}
               </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-[#141A22] rounded-full"></div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-500 border border-[#141A22] rounded-full"></div>
             </div>
             {!collapsed && (
               <div className="flex-1 min-w-0">
-                <div className="text-[#E6EDF3] font-medium text-sm truncate">{adminName}</div>
-                <div className="text-[#AEBAC7] text-xs truncate">{adminEmail}</div>
-                <div className="flex items-center gap-1 mt-1">
-                  <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                  <span className="text-[10px] text-[#6B7280]">Online</span>
-                </div>
+                <div className="text-[#E6EDF3] font-medium text-xs truncate">{adminName}</div>
+                <div className="text-[#6B7280] text-[10px] truncate">{adminEmail}</div>
               </div>
             )}
           </div>
         </div>
 
+        {/* Compact Logout */}
         <button
           onClick={handleLogout}
-          className={`w-full flex items-center ${collapsed ? 'justify-center px-3' : 'space-x-3 px-3'} py-3 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all duration-200`}
+          className={`w-full flex items-center ${collapsed ? 'justify-center px-2' : 'space-x-2 px-2'} py-1.5 rounded text-red-400/70 hover:text-red-300 hover:bg-red-500/10 transition-all duration-200`}
           title={collapsed ? 'Logout' : undefined}
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
-          {!collapsed && <span className="font-medium text-sm">Logout</span>}
+          {!collapsed && <span className="font-medium text-xs">Logout</span>}
         </button>
       </div>
     </>
