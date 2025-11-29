@@ -172,13 +172,13 @@ export default function TeamComparisonTool({ teams, onClose }: TeamComparisonToo
                   </div>
                   {selectedTeams.map((team) => {
                     // Find the value for this specific team (maintain column order)
-                    const teamValue = stat?.values.find(item => item.team.id === team.id);
-                    if (!teamValue) return null;
+                    const teamValue = stat?.values?.find(item => item.team.id === team.id);
+                    if (!teamValue || !stat?.values) return null;
                     
                     // Check if this team has the best value (only for numeric comparisons)
-                    const isBest = stat?.label !== 'Team Name' && 
-                                   stat?.values.length > 1 && 
-                                   stat?.values[0].team.id === team.id;
+                    const isBest = stat.label !== 'Team Name' && 
+                                   stat.values.length > 1 && 
+                                   stat.values[0]?.team.id === team.id;
                     
                     return (
                       <div
