@@ -555,21 +555,40 @@ export default function AdminEmailNotificationsPage() {
     const loadMatchesAndNews = async () => {
       setIsLoadingMatches(true);
       try {
-        const [matchesData, newsData] = await Promise.all([
-          api.getMatches().catch(() => []),
-          api.getNews().catch(() => []),
-        ]);
+        // Fetch matches with fallback to mock data
+        let matchesData: any[] = [];
+        try {
+          const fetchedMatches = await api.getMatches();
+          matchesData = Array.isArray(fetchedMatches) 
+            ? fetchedMatches 
+            : (fetchedMatches && typeof fetchedMatches === 'object' && 'matches' in fetchedMatches && Array.isArray((fetchedMatches as any).matches))
+              ? (fetchedMatches as any).matches
+              : [];
+        } catch (error) {
+          console.warn('Failed to fetch matches from API, using mock data:', error);
+          // Import mock data as fallback
+          const { mockMatches } = await import('@/lib/data');
+          matchesData = mockMatches || [];
+        }
+
+        // Fetch news with fallback to mock data
+        let newsData: any[] = [];
+        try {
+          newsData = await api.getNews();
+          if (!Array.isArray(newsData)) {
+            newsData = [];
+          }
+        } catch (error) {
+          console.warn('Failed to fetch news from API, using mock data:', error);
+          // Import mock data as fallback
+          const { mockNews } = await import('@/lib/data');
+          newsData = mockNews || [];
+        }
 
         // Transform matches to the format expected by the modal
         // Match structure from API: { id, date, time, venue, team1: Team, team2: Team, status }
         // Include ALL matches (completed, live, upcoming) for maximum flexibility
-        // Handle both array response and object with matches property
-        const allMatches: any[] = Array.isArray(matchesData) 
-          ? matchesData 
-          : (matchesData && typeof matchesData === 'object' && 'matches' in matchesData && Array.isArray((matchesData as any).matches))
-            ? (matchesData as any).matches
-            : [];
-        const transformedMatches = (allMatches || [])
+        const transformedMatches = (matchesData || [])
           .map((m: any) => {
             // Handle both Team objects and string team names
             const team1Name = typeof m.team1 === 'object' 
@@ -600,18 +619,41 @@ export default function AdminEmailNotificationsPage() {
           });
 
         setMatches(transformedMatches);
+        console.log(`Loaded ${transformedMatches.length} matches`);
 
         // Transform news data
         const transformedNews = (newsData || []).slice(0, 50).map((n: any) => ({
-          id: n.id,
+          id: n.id || `news-${Math.random()}`,
           title: n.title || 'News Article',
-          summary: n.summary || n.description || n.content?.substring(0, 200) || '',
+          summary: n.summary || n.description || (typeof n.content === 'string' ? n.content.substring(0, 200) : ''),
         }));
 
         setNews(transformedNews);
+        console.log(`Loaded ${transformedNews.length} news articles`);
       } catch (e) {
         console.error('Error loading matches/news:', e);
-        // Don't show error toast to avoid flickering
+        // Try to load mock data as last resort
+        try {
+          const { mockMatches, mockNews } = await import('@/lib/data');
+          const transformedMatches = (mockMatches || []).map((m: any) => ({
+            id: m.id || `match-${Math.random()}`,
+            team1: typeof m.team1 === 'object' ? (m.team1?.name || m.team1?.shortName || 'Team 1') : (m.team1 || 'Team 1'),
+            team2: typeof m.team2 === 'object' ? (m.team2?.name || m.team2?.shortName || 'Team 2') : (m.team2 || 'Team 2'),
+            date: m.time ? `${m.date}T${m.time}` : (m.date || new Date().toISOString()),
+            venue: m.venue || 'TBD',
+            status: m.status || 'upcoming',
+          }));
+          setMatches(transformedMatches);
+          
+          const transformedNews = (mockNews || []).map((n: any) => ({
+            id: n.id || `news-${Math.random()}`,
+            title: n.title || 'News Article',
+            summary: n.summary || n.description || '',
+          }));
+          setNews(transformedNews);
+        } catch (mockError) {
+          console.error('Failed to load mock data:', mockError);
+        }
       } finally {
         setIsLoadingMatches(false);
       }
@@ -810,17 +852,51 @@ export default function AdminEmailNotificationsPage() {
         return updated;
       });
 
+      // Check if emails were actually sent
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to send emails');
+      }
+
       const sentCount = result.sentCount || 0;
       const totalCount = result.totalCount || data.recipientIds.length;
-      
+      const failedCount = totalCount - sentCount;
+
+      // Update email logs with proper status
+      const newLogs: EmailLog[] = (result.sentEmails || []).map((email: any) => ({
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        templateId: data.templateId || '',
+        templateName: templates.find((t) => t.id === data.templateId)?.name || 'Custom Email',
+        recipientEmail: email.email,
+        recipientName: email.name || 'User',
+        subject: data.subject,
+        status: email.success ? ('sent' as const) : ('failed' as const),
+        sentAt: new Date(),
+        error: email.error || undefined,
+      }));
+
+      if (newLogs.length > 0) {
+        setEmailLogs((prev) => {
+          const updated = [...newLogs, ...prev];
+          localStorage.setItem('email_logs', JSON.stringify(updated));
+          return updated;
+        });
+      }
+
       if (sentCount === 0) {
         throw new Error('No emails were sent. Please check that users have email notifications enabled and are not unsubscribed.');
       }
 
-      success(`Emails sent successfully to ${sentCount} of ${totalCount} user${sentCount !== 1 ? 's' : ''}`);
+      // Show success message with details
+      const message = failedCount > 0
+        ? `Emails sent successfully to ${sentCount} user${sentCount > 1 ? 's' : ''}. ${failedCount} failed.`
+        : `Emails sent successfully to ${sentCount} user${sentCount > 1 ? 's' : ''}!`;
+      success(message);
+      
+      setSelectedUsers(new Set()); // Clear selection after sending
     } catch (e: any) {
       console.error('Failed to send bulk emails:', e);
-      const errorMessage = e?.message || 'Failed to send emails. Please check your connection and try again.';
+      const errorMessage = e?.message || e?.error || 'Failed to send emails. Please check your connection and try again.';
+      showError(errorMessage);
       throw new Error(errorMessage);
     }
   };

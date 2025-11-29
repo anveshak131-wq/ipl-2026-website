@@ -463,7 +463,7 @@ export default function Navbar() {
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               >
                 <AnimatePresence mode="wait">
-                  {isMenuOpen ? (
+                {isMenuOpen ? (
                     <motion.path
                       key="close"
                       initial={{ opacity: 0, pathLength: 0 }}
