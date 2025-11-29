@@ -50,14 +50,17 @@ You need to integrate an email service provider. Choose one:
    - Go to: Workers & Pages → Your Project → Settings → Environment Variables
    - Add new variable:
      - Variable name: `RESEND_API_KEY`
-     - Value: `re_xxxxxxxxxxxxx` (your actual API key)
+     - Value: `re_xxxxxxxxxxxxx` (your actual API key - starts with "re_")
+   - **Optional**: Add `RESEND_FROM_ADDRESS` to use a custom "from" address:
+     - Variable name: `RESEND_FROM_ADDRESS`
+     - Value: `SportsUP <noreply@yourdomain.com>` (must be verified domain)
+     - **Note**: If not set, defaults to `onboarding@resend.dev` (works without domain verification)
    - Save and redeploy
    
-   Or via wrangler.toml (for local testing):
-   ```toml
-   [env.production.vars]
-   RESEND_API_KEY = "re_xxxxxxxxxxxxx"
-   ```
+   **Important Notes**:
+   - Resend API key must start with `re_`
+   - Without `RESEND_FROM_ADDRESS`, emails will be sent from `onboarding@resend.dev` (works for testing)
+   - To use your own domain, verify it in Resend dashboard first, then set `RESEND_FROM_ADDRESS`
 
 #### Option B: SendGrid
 1. Sign up at https://sendgrid.com

@@ -9,6 +9,7 @@
 async function sendEmailViaProvider(emailData, env) {
   // Try Resend first (recommended for Cloudflare)
   if (env.RESEND_API_KEY) {
+    console.log('[Email Service] Using Resend API');
     return await sendViaResend(emailData, env.RESEND_API_KEY);
   }
 
@@ -412,10 +413,24 @@ export const onRequest = async (context) => {
           }
         }
 
+        // Determine the "from" address based on configured email service
+        // For Resend, use the verified domain or onboarding domain
+        let fromAddress = 'SportsUP <noreply@sportsup99.com>';
+        
+        // If RESEND_FROM_ADDRESS is configured, use it (e.g., "onboarding@resend.dev" or your verified domain)
+        if (env.RESEND_FROM_ADDRESS) {
+          fromAddress = env.RESEND_FROM_ADDRESS;
+        } else if (env.RESEND_API_KEY) {
+          // Default Resend onboarding email (works without domain verification)
+          fromAddress = 'SportsUP <onboarding@resend.dev>';
+        } else if (env.MAILGUN_DOMAIN) {
+          fromAddress = `SportsUP <noreply@${env.MAILGUN_DOMAIN.replace('mg.', '')}>`;
+        }
+
         // Actually send email using email service providers
         const emailResult = await sendEmailViaProvider(
           {
-            from: 'SportsUP <noreply@sportsup99.com>',
+            from: fromAddress,
             to: recipient.email,
             subject: processedSubject,
             html: processedBody,
