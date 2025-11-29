@@ -672,22 +672,46 @@ export default function AdminMatches() {
     };
 
     const handleDelete = async (matchId: string) => {
-        if (!confirm('Are you sure you want to delete this match?')) return;
+        if (!confirm(`Are you sure you want to delete this match? This action cannot be undone.`)) return;
 
         try {
             setIsSubmitting(true);
             setError(null);
+            
+            console.log(`Attempting to delete match with ID: ${matchId}`);
             await api.deleteMatch(matchId);
+            console.log(`Match ${matchId} deleted successfully`);
+            
+            // Remove from local state immediately for better UX
+            setMatches(prev => prev.filter(m => m.id !== matchId));
+            setSelectedMatches(prev => {
+                const next = new Set(prev);
+                next.delete(matchId);
+                return next;
+            });
             
             // Refresh matches from API to ensure consistency
-            const updatedMatches = await api.getMatches(currentLeague);
-            setMatches(updatedMatches);
+            try {
+                const updatedMatches = await api.getMatches(currentLeague);
+                setMatches(updatedMatches);
+            } catch (refreshError) {
+                console.warn('Failed to refresh matches after deletion, but deletion was successful:', refreshError);
+            }
             
             showSuccess('Match deleted successfully');
         } catch (error: any) {
             console.error('Failed to delete match:', error);
             const errorMessage = error?.message || 'Failed to delete match. Please try again.';
             showError(errorMessage);
+            setError(errorMessage);
+            
+            // Refresh matches to get current state
+            try {
+                const updatedMatches = await api.getMatches(currentLeague);
+                setMatches(updatedMatches);
+            } catch (refreshError) {
+                console.error('Failed to refresh matches after error:', refreshError);
+            }
         } finally {
             setIsSubmitting(false);
         }
@@ -1901,7 +1925,8 @@ export default function AdminMatches() {
                                                             </button>
                                                             <button
                                                                 onClick={() => handleDelete(match.id)}
-                                                                className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200"
+                                                                className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 disabled:opacity-50"
+                                                                disabled={isSubmitting}
                                                                 title="Delete"
                                                             >
                                                                 <IconTrash className="w-4 h-4" />

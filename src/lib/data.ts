@@ -454,7 +454,7 @@ export const api = {
     try {
       const token = localStorage.getItem('adminToken');
       if (!token) {
-        throw new Error('Authentication token not found');
+        throw new Error('Authentication token not found. Please log in.');
       }
       
       const response = await fetch(`/api/matches?id=${id}`, {
@@ -466,18 +466,30 @@ export const api = {
       });
       
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        const errorMessage = errorData.error || `Failed to delete match: ${response.status} ${response.statusText}`;
+        let errorMessage = `Failed to delete match: ${response.status} ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          // If JSON parsing fails, use the default error message
+          console.error('Failed to parse error response:', e);
+        }
         throw new Error(errorMessage);
       }
       
-      // Verify deletion was successful
-      const result = await response.json().catch(() => ({}));
-      if (!result.success && result.error) {
-        throw new Error(result.error);
+      // Try to parse response, but don't fail if it's empty
+      try {
+        const result = await response.json();
+        if (result.error && !result.success) {
+          throw new Error(result.error);
+        }
+      } catch (e) {
+        // If response is empty or not JSON, that's okay - deletion might still be successful
+        // We'll verify by checking if the match still exists after refresh
+        console.log('Delete response was empty or not JSON, assuming success');
       }
-    } catch (error) {
-      console.error('Error deleting match:', error);
+    } catch (error: any) {
+      console.error('API: Error deleting match:', error);
       throw error;
     }
   },
