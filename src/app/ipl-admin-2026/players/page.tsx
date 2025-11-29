@@ -84,6 +84,7 @@ export default function AdminPlayers() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [lastCalculatedAge, setLastCalculatedAge] = useState<string>('');
   const [formData, setFormData] = useState<{
     name: string;
     role: 'Batsman' | 'Bowler' | 'All-rounder' | 'Wicket-keeper';
@@ -148,6 +149,34 @@ export default function AdminPlayers() {
     fetchData();
   }, [router]);
 
+  // Auto-calculate age when date of birth is entered or changed
+  useEffect(() => {
+    if (formData.dateOfBirth && isValidDate(formData.dateOfBirth, 'DD/MM/YYYY')) {
+      try {
+        const dateOfBirthISO = parseDateDDMMYYYY(formData.dateOfBirth);
+        if (dateOfBirthISO) {
+          const calculatedAge = calculateAge(dateOfBirthISO);
+          const calculatedAgeStr = calculatedAge.toString();
+          
+          // Only auto-update age if:
+          // 1. Age field is empty, OR
+          // 2. Age matches the last calculated value (meaning it was auto-calculated before)
+          // This allows admin to manually override by typing a different age
+          if (!formData.age || formData.age === '' || formData.age === lastCalculatedAge) {
+            setFormData(prev => ({ ...prev, age: calculatedAgeStr }));
+            setLastCalculatedAge(calculatedAgeStr);
+          }
+        }
+      } catch (error) {
+        console.error('Error calculating age from date of birth:', error);
+      }
+    } else if (!formData.dateOfBirth) {
+      // Reset last calculated age when DOB is cleared
+      setLastCalculatedAge('');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.dateOfBirth]);
+
   const fetchData = async () => {
     try {
       const playersData = await api.getPlayers();
@@ -163,6 +192,7 @@ export default function AdminPlayers() {
 
   const handleAddPlayer = () => {
     setEditingPlayer(null);
+    setLastCalculatedAge(''); // Reset calculated age when adding new player
     setFormData({
       name: '',
       role: 'Batsman',
@@ -210,12 +240,22 @@ export default function AdminPlayers() {
         ? calculateBowlingAverage(player.stats.economy, player.stats.wickets, player.stats.matches)
         : 0);
     
+    // If player has DOB, calculate age and set it as last calculated
+    // Otherwise, reset last calculated age
+    const dobFormatted = player.dateOfBirth ? formatDateDDMMYYYY(player.dateOfBirth) : '';
+    if (dobFormatted && isValidDate(dobFormatted, 'DD/MM/YYYY')) {
+      const calculatedAge = calculateAge(parseDateDDMMYYYY(dobFormatted));
+      setLastCalculatedAge(calculatedAge.toString());
+    } else {
+      setLastCalculatedAge('');
+    }
+    
     setFormData({
       name: player.name,
       role: player.role,
       teamId: player.teamId,
       age: player.age.toString(),
-      dateOfBirth: player.dateOfBirth ? formatDateDDMMYYYY(player.dateOfBirth) : '',
+      dateOfBirth: dobFormatted,
       nationality: player.nationality,
       jerseyNumber: player.jerseyNumber ? player.jerseyNumber.toString() : '',
       isCaptain: player.isCaptain || false,
@@ -1099,12 +1139,23 @@ export default function AdminPlayers() {
                         <input
                           type="number"
                           value={formData.age}
-                          onChange={(e) => setFormData({...formData, age: e.target.value})}
+                          onChange={(e) => {
+                            // When admin manually changes age, clear the last calculated age
+                            // so it won't be auto-overwritten
+                            if (e.target.value !== lastCalculatedAge) {
+                              setLastCalculatedAge('');
+                            }
+                            setFormData({...formData, age: e.target.value});
+                          }}
                           className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
                           placeholder="Enter age"
                           required
                         />
-                        <p className="text-xs text-gray-500 mt-1">If DOB is provided, age auto-calculates</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {formData.dateOfBirth && isValidDate(formData.dateOfBirth, 'DD/MM/YYYY')
+                            ? 'Auto-calculated from date of birth (you can manually change if needed)'
+                            : 'Enter age manually or provide date of birth to auto-calculate'}
+                        </p>
                       </div>
 
                       <div>
@@ -1114,11 +1165,17 @@ export default function AdminPlayers() {
                         <input
                           type="text"
                           value={formData.dateOfBirth}
-                          onChange={(e) => setFormData({...formData, dateOfBirth: e.target.value})}
+                          onChange={(e) => {
+                            setFormData({...formData, dateOfBirth: e.target.value});
+                          }}
                           className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
                           placeholder="DD/MM/YYYY (optional)"
                         />
-                        <p className="text-xs text-gray-500 mt-1">Optional: If provided, age will auto-increment on birthday</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {formData.dateOfBirth && isValidDate(formData.dateOfBirth, 'DD/MM/YYYY') 
+                            ? `Age automatically calculated: ${calculateAge(parseDateDDMMYYYY(formData.dateOfBirth))} years` 
+                            : 'Optional: If provided, age will be automatically calculated'}
+                        </p>
                       </div>
 
                       <div>
