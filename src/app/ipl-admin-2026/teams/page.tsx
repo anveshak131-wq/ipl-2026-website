@@ -542,10 +542,21 @@ export default function AdminTeams() {
                                                         <div className="flex items-center gap-3">
                                                             <div
                                                                 className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-lg"
-                                                                style={{ background: `linear-gradient(135deg, ${team.colors.primary} 0%, ${team.colors.secondary} 100%)` }}
+                                                                style={{ 
+                                                                    background: team.colors?.primary && team.colors?.secondary
+                                                                        ? `linear-gradient(135deg, ${team.colors.primary} 0%, ${team.colors.secondary} 100%)`
+                                                                        : 'linear-gradient(135deg, #6B7280 0%, #4B5563 100%)'
+                                                                }}
                                                             >
                                                                 {(() => {
-                                                                    const anim = getAnimatedLogoPath(team.id);
+                                                                    // Use team.logo if available, otherwise try to get animated logo
+                                                                    if (team.logo) {
+                                                                        return (
+                                                                            <img src={team.logo} alt={team.name} className="w-8 h-8 object-contain" />
+                                                                        );
+                                                                    }
+                                                                    
+                                                                    const anim = getAnimatedLogoPath(team.id, team.shortName, team.league);
                                                                     if (anim.endsWith('.json')) {
                                                                         return (
                                                                             <div className="w-8 h-8">
@@ -562,11 +573,15 @@ export default function AdminTeams() {
                                                                         );
                                                                     }
 
-                                                                    return team.logo ? (
-                                                                        <img src={team.logo} alt={team.name} className="w-8 h-8 object-contain" />
-                                                                    ) : (
-                                                                        team.shortName.substring(0, 2)
-                                                                    );
+                                                                    // If we have an animated logo path, use it
+                                                                    if (anim && anim !== '/logos/rcb_logo_animated.svg') {
+                                                                        return (
+                                                                            <img src={anim} alt={team.name} className="w-8 h-8 object-contain" />
+                                                                        );
+                                                                    }
+
+                                                                    // Fallback to short name
+                                                                    return team.shortName.substring(0, 2);
                                                                 })()}
                                                             </div>
                                                             <span className="font-semibold text-white">{team.name}</span>
@@ -579,21 +594,29 @@ export default function AdminTeams() {
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         <div className="flex items-center gap-2">
-                                                            <div
-                                                                className="w-6 h-6 rounded border-2 border-white/20 shadow-sm"
-                                                                style={{ backgroundColor: team.colors.primary }}
-                                                                title={team.colors.primary}
-                                                            />
-                                                            <div
-                                                                className="w-6 h-6 rounded border-2 border-white/20 shadow-sm"
-                                                                style={{ backgroundColor: team.colors.secondary }}
-                                                                title={team.colors.secondary}
-                                                            />
+                                                            {team.colors?.primary ? (
+                                                                <div
+                                                                    className="w-6 h-6 rounded border-2 border-white/20 shadow-sm"
+                                                                    style={{ backgroundColor: team.colors.primary }}
+                                                                    title={team.colors.primary}
+                                                                />
+                                                            ) : (
+                                                                <div className="w-6 h-6 rounded border-2 border-white/20 shadow-sm bg-gray-500" title="No color set" />
+                                                            )}
+                                                            {team.colors?.secondary ? (
+                                                                <div
+                                                                    className="w-6 h-6 rounded border-2 border-white/20 shadow-sm"
+                                                                    style={{ backgroundColor: team.colors.secondary }}
+                                                                    title={team.colors.secondary}
+                                                                />
+                                                            ) : (
+                                                                <div className="w-6 h-6 rounded border-2 border-white/20 shadow-sm bg-gray-400" title="No color set" />
+                                                            )}
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         <p className="text-sm text-gray-400 line-clamp-1 max-w-xs">
-                                                            {team.description}
+                                                            {team.description || <span className="text-gray-500 italic">No description</span>}
                                                         </p>
                                                     </td>
                                                     <td className="px-6 py-4 text-right">
@@ -634,10 +657,21 @@ export default function AdminTeams() {
                                                 />
                                                 <div
                                                     className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold shadow-lg flex-shrink-0"
-                                                    style={{ background: `linear-gradient(135deg, ${team.colors.primary} 0%, ${team.colors.secondary} 100%)` }}
+                                                    style={{ 
+                                                        background: team.colors?.primary && team.colors?.secondary
+                                                            ? `linear-gradient(135deg, ${team.colors.primary} 0%, ${team.colors.secondary} 100%)`
+                                                            : 'linear-gradient(135deg, #6B7280 0%, #4B5563 100%)'
+                                                    }}
                                                 >
                                                     {(() => {
-                                                        const anim = getAnimatedLogoPath(team.id);
+                                                        // Use team.logo if available, otherwise try to get animated logo
+                                                        if (team.logo) {
+                                                            return (
+                                                                <img src={team.logo} alt={team.name} className="w-10 h-10 object-contain" />
+                                                            );
+                                                        }
+                                                        
+                                                        const anim = getAnimatedLogoPath(team.id, team.shortName, team.league);
                                                         if (anim.endsWith('.json')) {
                                                             return (
                                                                 <div className="w-10 h-10">
@@ -654,11 +688,15 @@ export default function AdminTeams() {
                                                             );
                                                         }
 
-                                                        return team.logo ? (
-                                                            <img src={team.logo} alt={team.name} className="w-10 h-10 object-contain" />
-                                                        ) : (
-                                                            team.shortName.substring(0, 2)
-                                                        );
+                                                        // If we have an animated logo path, use it
+                                                        if (anim && anim !== '/logos/rcb_logo_animated.svg') {
+                                                            return (
+                                                                <img src={anim} alt={team.name} className="w-10 h-10 object-contain" />
+                                                            );
+                                                        }
+
+                                                        // Fallback to short name
+                                                        return team.shortName.substring(0, 2);
                                                     })()}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
@@ -668,17 +706,29 @@ export default function AdminTeams() {
                                                     </span>
                                                 </div>
                                             </div>
-                                            <p className="text-sm text-gray-400 mb-3 line-clamp-2">{team.description}</p>
+                                            <p className="text-sm text-gray-400 mb-3 line-clamp-2">
+                                                {team.description || <span className="text-gray-500 italic">No description</span>}
+                                            </p>
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-2">
-                                                    <div
-                                                        className="w-6 h-6 rounded border-2 border-white/20"
-                                                        style={{ backgroundColor: team.colors.primary }}
-                                                    />
-                                                    <div
-                                                        className="w-6 h-6 rounded border-2 border-white/20"
-                                                        style={{ backgroundColor: team.colors.secondary }}
-                                                    />
+                                                    {team.colors?.primary ? (
+                                                        <div
+                                                            className="w-6 h-6 rounded border-2 border-white/20"
+                                                            style={{ backgroundColor: team.colors.primary }}
+                                                            title={team.colors.primary}
+                                                        />
+                                                    ) : (
+                                                        <div className="w-6 h-6 rounded border-2 border-white/20 bg-gray-500" title="No color set" />
+                                                    )}
+                                                    {team.colors?.secondary ? (
+                                                        <div
+                                                            className="w-6 h-6 rounded border-2 border-white/20"
+                                                            style={{ backgroundColor: team.colors.secondary }}
+                                                            title={team.colors.secondary}
+                                                        />
+                                                    ) : (
+                                                        <div className="w-6 h-6 rounded border-2 border-white/20 bg-gray-400" title="No color set" />
+                                                    )}
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     <button
