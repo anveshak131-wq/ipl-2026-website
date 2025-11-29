@@ -562,11 +562,9 @@ export default function AdminEmailNotificationsPage() {
 
         // Transform matches to the format expected by the modal
         // Match structure from API: { id, date, time, venue, team1: Team, team2: Team, status }
-        const transformedMatches = (matchesData || [])
-          .filter((m: any) => {
-            // Only include upcoming or scheduled matches
-            return m.status === 'upcoming' || m.status === 'scheduled' || !m.status;
-          })
+        // Include ALL matches (completed, live, upcoming) for maximum flexibility
+        const allMatches = Array.isArray(matchesData) ? matchesData : (matchesData?.matches || []);
+        const transformedMatches = (allMatches || [])
           .map((m: any) => {
             // Handle both Team objects and string team names
             const team1Name = typeof m.team1 === 'object' 
@@ -583,7 +581,7 @@ export default function AdminEmailNotificationsPage() {
               : (m.date || m.matchDate || new Date().toISOString());
 
             return {
-              id: m.id,
+              id: m.id || `${team1Name}-vs-${team2Name}-${matchDate}`,
               team1: team1Name,
               team2: team2Name,
               date: matchDate,
@@ -592,8 +590,8 @@ export default function AdminEmailNotificationsPage() {
             };
           })
           .sort((a: any, b: any) => {
-            // Sort by date, upcoming first
-            return new Date(a.date).getTime() - new Date(b.date).getTime();
+            // Sort by date, most recent first
+            return new Date(b.date).getTime() - new Date(a.date).getTime();
           });
 
         setMatches(transformedMatches);
@@ -776,7 +774,10 @@ export default function AdminEmailNotificationsPage() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          newsData: news, // Pass news data so API can use actual news content
+        }),
       });
 
       if (!response.ok) {

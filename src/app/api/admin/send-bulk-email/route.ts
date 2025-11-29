@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { templateId, subject, body: emailBody, recipientIds, emailType, matchId, newsId } = body;
+    const { templateId, subject, body: emailBody, recipientIds, emailType, matchId, newsId, newsData } = body;
 
     if (!subject || !emailBody || !recipientIds || recipientIds.length === 0) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -91,9 +91,13 @@ export async function POST(request: NextRequest) {
         let processedBody = emailBody;
         let processedSubject = subject;
 
+        // Get logo URL (use absolute URL for emails)
+        const logoUrl = `${request.nextUrl.origin}/logos/sportsup18_logo_round.svg`;
+        
         // Replace common variables
         processedBody = processedBody.replace(/\{\{userName\}\}/g, recipient.name || 'User');
         processedBody = processedBody.replace(/\{\{userEmail\}\}/g, recipient.email);
+        processedBody = processedBody.replace(/\{\{logoUrl\}\}/g, logoUrl);
         processedSubject = processedSubject.replace(/\{\{userName\}\}/g, recipient.name || 'User');
         processedSubject = processedSubject.replace(/\{\{userEmail\}\}/g, recipient.email);
 
@@ -106,9 +110,46 @@ export async function POST(request: NextRequest) {
 
         // If news email, add news-specific variables
         if (emailType === 'news' && newsId) {
-          // In production, fetch news details from your database
-          processedBody = processedBody.replace(/\{\{newsTitle\}\}/g, 'Latest News');
-          processedBody = processedBody.replace(/\{\{newsSummary\}\}/g, '');
+          // Use newsData if provided, otherwise use placeholders
+          const newsItem = newsData?.find((n: any) => n.id === newsId);
+          const newsTitle = newsItem?.title || 'Latest Cricket News';
+          const newsSummary = newsItem?.summary || newsItem?.description || 'Stay updated with the latest cricket news and updates!';
+          processedBody = processedBody.replace(/\{\{newsTitle\}\}/g, newsTitle);
+          processedBody = processedBody.replace(/\{\{newsSummary\}\}/g, newsSummary);
+        }
+        
+        // Ensure logo is ALWAYS included in ALL emails (HTML or plain text)
+        // Reference: Professional email templates from Mailchimp, SendGrid, Litmus
+        if (processedBody.includes('<!DOCTYPE') || processedBody.includes('<html>')) {
+          // HTML email - ensure logo is present at the top
+          if (!processedBody.includes('<img') || (!processedBody.includes(logoUrl) && !processedBody.includes('{{logoUrl}}'))) {
+            // Professional email header with logo
+            const logoHtml = `<div style="text-align: center; margin-bottom: 30px; padding: 30px 20px; background: linear-gradient(135deg, #0D1120 0%, #1A2035 100%); border-radius: 12px 12px 0 0;">
+  <img src="${logoUrl}" alt="SportsUP Logo" style="max-width: 200px; height: auto; display: block; margin: 0 auto;" />
+</div>`;
+            
+            // Insert logo after opening body tag or at the very beginning
+            if (processedBody.includes('<body')) {
+              processedBody = processedBody.replace(
+                /<body[^>]*>/i,
+                `$&${logoHtml}`
+              );
+            } else {
+              processedBody = logoHtml + processedBody;
+            }
+          }
+        } else {
+          // Plain text email - add professional logo header
+          const logoHeader = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     🏏 SPORTSUP - Your Cricket Destination 🏏
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+[View Logo: ${logoUrl}]
+
+`;
+          if (!processedBody.startsWith('━━') && !processedBody.includes(logoUrl)) {
+            processedBody = logoHeader + processedBody;
+          }
         }
 
         // In production, integrate with your email service (SendGrid, AWS SES, etc.)

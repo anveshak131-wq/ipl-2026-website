@@ -136,29 +136,49 @@ export default function BulkEmailSendModal({
       timeMessage = 'very soon';
     }
     
-    return `Dear {{userName}},
-
-Get ready for an electrifying cricket match! ${match.team1} will face off against ${match.team2} ${timeMessage}.
-
-📅 **Match Details:**
-• **Teams:** ${match.team1} vs ${match.team2}
-• **Date & Time:** ${formattedDate}
-• **Venue:** ${match.venue}
-• **Status:** ${match.status || 'Upcoming'}
-
-🎯 **What to Expect:**
-This promises to be an exciting encounter between two competitive teams. Don't miss out on the live action, thrilling moments, and nail-biting finishes!
-
-📺 **How to Watch:**
-Tune in to catch all the action live. Whether you're supporting {{teamName}} or just love great cricket, this is a match you won't want to miss.
-
-Stay connected for live updates, scores, and highlights!
-
-Best regards,
-The SportsUP Team
-
----
-*You can customize this email using variables: {{userName}}, {{userEmail}}, {{teamName}}, {{matchDate}}, {{matchTime}}, {{venue}}, and {{opponent}}*`;
+    return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="text-align: center; margin-bottom: 30px;">
+    <img src="{{logoUrl}}" alt="SportsUP Logo" style="max-width: 200px; height: auto;" />
+  </div>
+  
+  <h2 style="color: #0066FF; margin-top: 30px;">Match Alert!</h2>
+  
+  <p>Dear {{userName}},</p>
+  
+  <p>Get ready for an electrifying cricket match! <strong>${match.team1}</strong> will face off against <strong>${match.team2}</strong> ${timeMessage}.</p>
+  
+  <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+    <h3 style="margin-top: 0; color: #0066FF;">📅 Match Details:</h3>
+    <ul style="list-style: none; padding: 0;">
+      <li style="margin: 8px 0;"><strong>Teams:</strong> ${match.team1} vs ${match.team2}</li>
+      <li style="margin: 8px 0;"><strong>Date & Time:</strong> ${formattedDate}</li>
+      <li style="margin: 8px 0;"><strong>Venue:</strong> ${match.venue}</li>
+      <li style="margin: 8px 0;"><strong>Status:</strong> ${match.status || 'Upcoming'}</li>
+    </ul>
+  </div>
+  
+  <p><strong>🎯 What to Expect:</strong></p>
+  <p>This promises to be an exciting encounter between two competitive teams. Don't miss out on the live action, thrilling moments, and nail-biting finishes!</p>
+  
+  <p><strong>📺 How to Watch:</strong></p>
+  <p>Tune in to catch all the action live. Whether you're supporting {{teamName}} or just love great cricket, this is a match you won't want to miss.</p>
+  
+  <p>Stay connected for live updates, scores, and highlights!</p>
+  
+  <p>Best regards,<br>The SportsUP Team</p>
+  
+  <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+  <p style="font-size: 12px; color: #666;">
+    *You can customize this email using variables: {{userName}}, {{userEmail}}, {{teamName}}, {{matchDate}}, {{matchTime}}, {{venue}}, and {{opponent}}*
+  </p>
+</body>
+</html>`;
   };
 
   const handleMatchSelect = (matchId: string) => {
@@ -179,10 +199,55 @@ The SportsUP Team
     const newsItem = news.find((n) => n.id === newsId);
     if (newsItem) {
       setSelectedNews(newsId);
-      // Auto-fill subject and body for news
-      setSubject(`Latest Update: ${newsItem.title}`);
-      setBody(`${newsItem.title}\n\n${newsItem.summary}\n\nRead more on our website!`);
+      // Auto-fill subject and body for news with professional formatting
+      const professionalSubject = generateProfessionalNewsSubject(newsItem);
+      const professionalBody = generateProfessionalNewsBody(newsItem);
+      setSubject(professionalSubject);
+      setBody(professionalBody);
     }
+  };
+
+  const generateProfessionalNewsSubject = (newsItem: { title: string; summary: string }) => {
+    const subjects = [
+      `📰 ${newsItem.title}`,
+      `🔥 Latest: ${newsItem.title}`,
+      `⚡ Breaking: ${newsItem.title}`,
+      `📢 Update: ${newsItem.title}`,
+      `🎯 Don't Miss: ${newsItem.title}`,
+    ];
+    return subjects[Math.floor(Math.random() * subjects.length)];
+  };
+
+  const generateProfessionalNewsBody = (newsItem: { title: string; summary: string }) => {
+    return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="text-align: center; margin-bottom: 30px;">
+    <img src="{{logoUrl}}" alt="SportsUP Logo" style="max-width: 200px; height: auto;" />
+  </div>
+  
+  <h2 style="color: #0066FF; margin-top: 30px;">${newsItem.title}</h2>
+  
+  <p>Dear {{userName}},</p>
+  
+  <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+    <p style="margin: 0; font-size: 16px;">${newsItem.summary}</p>
+  </div>
+  
+  <p>Read the full article and stay updated with the latest cricket news, insights, and updates!</p>
+  
+  <p>Best regards,<br>The SportsUP Team</p>
+  
+  <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+  <p style="font-size: 12px; color: #666;">
+    *You can customize this email using variables: {{userName}}, {{userEmail}}*
+  </p>
+</body>
+</html>`;
   };
 
   const handleSend = async () => {
@@ -344,7 +409,7 @@ The SportsUP Team
               <label className="block text-sm font-medium text-[#E6EDF3] mb-2">Select Match</label>
               {matches.length === 0 ? (
                 <div className="px-4 py-3 bg-[#141A22] border border-[#2A3440] rounded-lg text-[#AEBAC7] text-sm">
-                  No upcoming matches found. Please check back later or create matches in the Matches admin page.
+                  No matches found. Please check back later or create matches in the Matches admin page.
                 </div>
               ) : (
                 <select
@@ -363,7 +428,7 @@ The SportsUP Team
                     });
                     return (
                       <option key={match.id} value={match.id}>
-                        {match.team1} vs {match.team2} - {formattedDate} ({match.venue})
+                        {match.status === 'completed' ? '✓ ' : match.status === 'live' ? '🔴 LIVE ' : '⏰ '}{match.team1} vs {match.team2} - {formattedDate} ({match.venue})
                       </option>
                     );
                   })}
@@ -376,18 +441,24 @@ The SportsUP Team
           {emailType === 'news' && (
             <div className="mb-4">
               <label className="block text-sm font-medium text-[#E6EDF3] mb-2">Select News</label>
-              <select
-                value={selectedNews}
-                onChange={(e) => handleNewsSelect(e.target.value)}
-                className="w-full px-4 py-2 bg-[#141A22] border border-[#2A3440] rounded-lg text-[#E6EDF3] focus:outline-none focus:ring-2 focus:ring-[#2F6FED]"
-              >
-                <option value="">Select a news article...</option>
-                {news.map((newsItem) => (
-                  <option key={newsItem.id} value={newsItem.id}>
-                    {newsItem.title}
-                  </option>
-                ))}
-              </select>
+              {news.length === 0 ? (
+                <div className="px-4 py-3 bg-[#141A22] border border-[#2A3440] rounded-lg text-[#AEBAC7] text-sm">
+                  No news articles found. Please add news articles in the Content admin page.
+                </div>
+              ) : (
+                <select
+                  value={selectedNews}
+                  onChange={(e) => handleNewsSelect(e.target.value)}
+                  className="w-full px-4 py-2 bg-[#141A22] border border-[#2A3440] rounded-lg text-[#E6EDF3] focus:outline-none focus:ring-2 focus:ring-[#2F6FED]"
+                >
+                  <option value="">Select a news article...</option>
+                  {news.map((newsItem) => (
+                    <option key={newsItem.id} value={newsItem.id}>
+                      {newsItem.title.length > 60 ? `${newsItem.title.substring(0, 60)}...` : newsItem.title}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
           )}
 
