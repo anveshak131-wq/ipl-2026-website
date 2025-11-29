@@ -99,12 +99,16 @@ export default function Home() {
 
     // Load data based on current league
     const loadData = async () => {
+      setIsLoading(true); // Set loading when league changes
       try {
+        console.log('Loading data for league:', currentLeague);
         const [teamsData, matchesData, newsData] = await Promise.all([
           api.getTeams(currentLeague),
           api.getMatches(currentLeague),
           api.getNews(),
         ]);
+        
+        console.log(`Loaded ${teamsData.length} teams, ${matchesData.length} matches, ${newsData.length} news items for ${currentLeague}`);
         
         // Filter news by league (news can be 'ipl', 'wpl', or 'both')
         const filteredNews = newsData.filter(item => 
@@ -225,12 +229,12 @@ export default function Home() {
                 <h2 className="text-3xl md:text-4xl font-bold text-white mb-3 tracking-tight">
                   <GradientText gradient="from-blue-400 via-purple-400 to-pink-400" animate>
                     {favoriteTeams.length > 0 ? 'Your Favorite Teams' : 'Iconic Teams'}
-                  </GradientText> of IPL 2026
+                  </GradientText> of {currentLeague === 'wpl' ? 'WPL 2026' : 'IPL 2026'}
                 </h2>
                 <p className="text-gray-300 text-lg md:text-xl max-w-2xl">
                   {favoriteTeams.length > 0 
-                    ? 'Your favorite teams and all others competing in the Indian Premier League.'
-                    : 'Explore all 10 teams competing in the Indian Premier League with their squads, stats, and more.'
+                    ? `Your favorite teams and all others competing in the ${currentLeague === 'wpl' ? 'Women\'s Premier League' : 'Indian Premier League'}.`
+                    : `Explore all teams competing in the ${currentLeague === 'wpl' ? 'Women\'s Premier League' : 'Indian Premier League'} with their squads, stats, and more.`
                   }
                 </p>
               </motion.div>
@@ -238,6 +242,20 @@ export default function Home() {
             {isLoading ? (
               <div className="max-w-7xl mx-auto px-4 md:px-6">
                 <TeamsSkeleton />
+              </div>
+            ) : teams.length === 0 ? (
+              <div className="max-w-7xl mx-auto px-4 md:px-6 text-center py-20">
+                <div className="bg-white/5 rounded-2xl p-12 border border-white/10">
+                  <h3 className="text-2xl font-bold text-white mb-4">
+                    No {currentLeague === 'wpl' ? 'WPL' : 'IPL'} Teams Available
+                  </h3>
+                  <p className="text-gray-400 text-lg mb-6">
+                    {currentLeague === 'wpl' 
+                      ? 'WPL teams haven\'t been added yet. Please check back later or add teams in the admin panel.'
+                      : 'IPL teams haven\'t been added yet. Please check back later or add teams in the admin panel.'
+                    }
+                  </p>
+                </div>
               </div>
             ) : (
               <ModernTeamsShowcase teams={teams} isLoading={false} />
@@ -253,7 +271,7 @@ export default function Home() {
                 <span className="gradient-text">Key Statistics</span>
               </h2>
               <p className="text-gray-300 text-lg md:text-xl max-w-2xl">
-                Discover the numbers behind IPL 2026.
+                Discover the numbers behind {currentLeague === 'wpl' ? 'WPL 2026' : 'IPL 2026'}.
               </p>
             </div>
           </div>
@@ -290,6 +308,20 @@ export default function Home() {
             </div>
             {isLoading ? (
               <MatchesSkeleton />
+            ) : matches.length === 0 ? (
+              <div className="text-center py-20">
+                <div className="bg-white/5 rounded-2xl p-12 border border-white/10">
+                  <h3 className="text-2xl font-bold text-white mb-4">
+                    No {currentLeague === 'wpl' ? 'WPL' : 'IPL'} Matches Available
+                  </h3>
+                  <p className="text-gray-400 text-lg">
+                    {currentLeague === 'wpl' 
+                      ? 'WPL matches haven\'t been scheduled yet. Please check back later or add matches in the admin panel.'
+                      : 'IPL matches haven\'t been scheduled yet. Please check back later or add matches in the admin panel.'
+                    }
+                  </p>
+                </div>
+              </div>
             ) : (
               <ModernMatchesGrid matches={favoriteTeams.length > 0 ? personalizedMatches : matches} isLoading={false} />
             )}
@@ -318,7 +350,7 @@ export default function Home() {
                 Latest <span className="gradient-text">News</span> & Updates
               </h2>
               <p className="text-gray-300 text-lg md:text-xl max-w-2xl">
-                Stay updated with the latest news, highlights, and stories from the IPL.
+                Stay updated with the latest news, highlights, and stories from the {currentLeague === 'wpl' ? 'WPL' : 'IPL'}.
               </p>
             </div>
             {isLoading ? (

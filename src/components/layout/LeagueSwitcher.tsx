@@ -5,13 +5,19 @@ import { useLeague } from '@/contexts/LeagueContext';
 import { Trophy, Sparkles } from 'lucide-react';
 
 export default function LeagueSwitcher() {
-  const { setCurrentLeague, isIPL, isWPL } = useLeague();
+  const { currentLeague, setCurrentLeague, isIPL, isWPL } = useLeague();
+  
+  const handleLeagueChange = (league: 'ipl' | 'wpl') => {
+    console.log('League switcher clicked:', league);
+    setCurrentLeague(league);
+    console.log('League changed to:', league);
+  };
 
   return (
     <div className="flex items-center gap-2">
       {/* IPL Button */}
       <motion.button
-        onClick={() => setCurrentLeague('ipl')}
+        onClick={() => handleLeagueChange('ipl')}
         className={`
           relative px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300
           flex items-center gap-2 whitespace-nowrap overflow-hidden group
@@ -45,7 +51,7 @@ export default function LeagueSwitcher() {
 
       {/* WPL Button */}
       <motion.button
-        onClick={() => setCurrentLeague('wpl')}
+        onClick={() => handleLeagueChange('wpl')}
         className={`
           relative px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300
           flex items-center gap-2 whitespace-nowrap overflow-hidden group
