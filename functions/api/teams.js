@@ -16,6 +16,7 @@ function verifyAdminToken(request) {
 const defaultTeams = [
   {
     id: '1',
+    league: 'ipl',
     name: 'Royal Challengers Bengaluru',
     shortName: 'RCB',
     logo: '/logos/rcb_logo_new.svg',
@@ -26,6 +27,7 @@ const defaultTeams = [
   },
   {
     id: '2',
+    league: 'ipl',
     name: 'Mumbai Indians',
     shortName: 'MI',
     logo: '/logos/mi_logo_new.svg',
@@ -42,6 +44,7 @@ const defaultTeams = [
   },
   {
     id: '3',
+    league: 'ipl',
     name: 'Sunrisers Hyderabad',
     shortName: 'SRH',
     logo: '/logos/srh_logo_new.svg',
@@ -54,6 +57,7 @@ const defaultTeams = [
   },
   {
     id: '4',
+    league: 'ipl',
     name: 'Gujarat Titans',
     shortName: 'GT',
     logo: '/logos/gt_logo_new.svg',
@@ -66,6 +70,7 @@ const defaultTeams = [
   },
   {
     id: '5',
+    league: 'ipl',
     name: 'Punjab Kings',
     shortName: 'PBKS',
     logo: '/logos/kxip_logo_new.svg',
@@ -76,6 +81,7 @@ const defaultTeams = [
   },
   {
     id: '6',
+    league: 'ipl',
     name: 'Delhi Capitals',
     shortName: 'DC',
     logo: '/logos/dc_logo_new.svg',
@@ -86,6 +92,7 @@ const defaultTeams = [
   },
   {
     id: '7',
+    league: 'ipl',
     name: 'Lucknow Super Giants',
     shortName: 'LSG',
     logo: '/logos/lsg_logo_new.svg',
@@ -96,6 +103,7 @@ const defaultTeams = [
   },
   {
     id: '8',
+    league: 'ipl',
     name: 'Rajasthan Royals',
     shortName: 'RR',
     logo: '/logos/rr_logo_new.svg',
@@ -108,6 +116,7 @@ const defaultTeams = [
   },
   {
     id: '9',
+    league: 'ipl',
     name: 'Kolkata Knight Riders',
     shortName: 'KKR',
     logo: '/logos/kkr_logo_new.svg',
@@ -121,6 +130,7 @@ const defaultTeams = [
   },
   {
     id: '10',
+    league: 'ipl',
     name: 'Chennai Super Kings',
     shortName: 'CSK',
     logo: '/logos/csk_logo_new.svg',
@@ -138,15 +148,24 @@ const defaultTeams = [
 
 // GET - Retrieve all teams
 async function handleGetRequest(context) {
-  const { env } = context;
+  const { env, request } = context;
   
   try {
+    // Get league query parameter
+    const url = new URL(request.url);
+    const league = url.searchParams.get('league');
+    
     // Try to get teams from KV storage
     let teams = await env.IPL_CACHE.get('teams', 'json');
     
     // Fallback to default teams if KV storage is empty
     if (!teams) {
       teams = defaultTeams;
+    }
+    
+    // Filter by league if specified
+    if (league && (league === 'ipl' || league === 'wpl')) {
+      teams = teams.filter(team => team.league === league);
     }
     
     return new Response(JSON.stringify(teams), {
