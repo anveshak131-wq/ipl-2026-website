@@ -56,11 +56,31 @@ async function sendViaResend(emailData, apiKey) {
     });
 
     if (!response.ok) {
-      const error = await response.json();
-      return { success: false, error: error.message || 'Resend API error' };
+      let errorMessage = 'Resend API error';
+      try {
+        const error = await response.json();
+        errorMessage = error.message || error.error || JSON.stringify(error);
+      } catch (e) {
+        try {
+          const text = await response.text();
+          errorMessage = text || `HTTP ${response.status}`;
+        } catch (e2) {
+          errorMessage = `HTTP ${response.status}`;
+        }
+      }
+      console.error('[Resend] Failed to send email:', {
+        to: emailData.to,
+        status: response.status,
+        error: errorMessage,
+      });
+      return { success: false, error: errorMessage };
     }
 
     const data = await response.json();
+    console.log('[Resend] Email sent successfully:', {
+      to: emailData.to,
+      messageId: data.id,
+    });
     return { success: true, messageId: data.id };
   } catch (error) {
     console.error('Resend error:', error);
