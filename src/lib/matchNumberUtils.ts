@@ -76,11 +76,40 @@ export function recalculateMatchNumbers(matches: Match[]): Match[] {
 }
 
 /**
+ * Get playoff type display name
+ * @param playoffType - The playoff type
+ * @returns Formatted playoff type string
+ */
+function getPlayoffTypeDisplay(playoffType: Match['playoffType']): string {
+  if (!playoffType) return '';
+  
+  const playoffTypeMap: { [key: string]: string } = {
+    'qualifier1': 'Qualifier 1',
+    'eliminator': 'Eliminator',
+    'qualifier2': 'Qualifier 2',
+    'final': 'Final'
+  };
+  
+  return playoffTypeMap[playoffType] || '';
+}
+
+/**
  * Get match number for display
  * @param match - The match
- * @returns Formatted match number string
+ * @returns Formatted match number string with playoff type if applicable
  */
 export function getMatchNumberDisplay(match: Match): string {
-  return match.matchNumber || 'TBD';
+  const matchNumber = match.matchNumber || '';
+  const playoffType = getPlayoffTypeDisplay(match.playoffType);
+  
+  if (playoffType && matchNumber) {
+    return `${matchNumber} - ${playoffType}`;
+  } else if (playoffType) {
+    return playoffType;
+  } else if (matchNumber) {
+    return matchNumber;
+  }
+  
+  return 'TBD';
 }
 

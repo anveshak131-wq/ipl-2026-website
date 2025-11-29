@@ -131,11 +131,17 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
           <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(match.status)}`}>
             {getStatusText(match.status)}
           </span>
-          {match.matchNumber && (
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-ipl-gold/20 text-ipl-gold border border-ipl-gold/30">
-              {getMatchNumberDisplay(match)}
-            </span>
-          )}
+          {(() => {
+            const matchNumberDisplay = getMatchNumberDisplay(match);
+            if (matchNumberDisplay && matchNumberDisplay !== 'TBD') {
+              return (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-ipl-gold/20 text-ipl-gold border border-ipl-gold/30">
+                  {matchNumberDisplay}
+                </span>
+              );
+            }
+            return null;
+          })()}
         </div>
 
         {/* Date and Time */}
