@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import SportsUP18LogoWithText from '../branding/SportsUP18LogoWithText';
 import SportsUP18Logo from '../branding/SportsUP18Logo';
 import Emoji from '../emoji/Emoji';
-import NavbarSearch from './NavbarSearch';
 
 type NavEmojiName = 'cricket' | 'chart' | 'news' | 'glove' | 'target' | 'trophy' | 'sparkles' | 'people' | 'fire' | 'star' | 'cricket-bat' | 'lightning' | 'clock' | 'venue';
 
@@ -153,9 +152,6 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex flex-1 items-center justify-end gap-4 ml-8">
-            {/* Search Bar - Moved before nav items for better discoverability */}
-            <NavbarSearch />
-            
             {/* Primary Nav - Reorganized with visual grouping */}
             <div className="flex items-center gap-2">
               {/* Group 1: Real-time & Core (Highlighted) */}
@@ -507,11 +503,6 @@ export default function Navbar() {
             className="md:hidden overflow-hidden bg-[rgba(10,14,39,0.95)] backdrop-blur-2xl border-t border-blue-500/20"
           >
             <div className="px-4 pt-4 pb-4 space-y-4">
-            {/* Mobile Search */}
-            <div className="pb-3 border-b border-white/10">
-              <NavbarSearch onClose={() => setIsMenuOpen(false)} />
-            </div>
-            
             {/* Group 1: Real-time & Core (Highlighted) */}
             <motion.div
               className="space-y-2"
