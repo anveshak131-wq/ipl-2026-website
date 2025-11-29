@@ -214,16 +214,33 @@ export default function AdminTeams() {
                     ...formData,
                     league: currentLeague // Force use current league from context
                 };
+                
+                console.log('Creating team with league:', currentLeague, 'Team data:', teamData);
+                
                 const newTeam = await api.createTeam(teamData);
-                setTeams([...teams, newTeam]);
-                setSuccess('Team created successfully');
+                
+                // Refresh teams list to ensure we have the latest data
+                const refreshedTeams = await api.getTeams(currentLeague);
+                setTeams(refreshedTeams);
+                
+                setSuccess(`Team created successfully in ${currentLeague.toUpperCase()}`);
             }
 
             setShowSlideOver(false);
             setTimeout(() => setSuccess(null), 3000);
-        } catch (err) {
-            setError(editingTeam ? 'Failed to update team' : 'Failed to create team');
+        } catch (err: any) {
+            const errorMessage = err?.message || (editingTeam ? 'Failed to update team' : 'Failed to create team');
+            setError(errorMessage);
             console.error('Team submission error:', err);
+            
+            // Log additional details for debugging
+            if (err?.message) {
+                console.error('Error details:', {
+                    message: err.message,
+                    currentLeague,
+                    formData: { ...formData, league: currentLeague }
+                });
+            }
         } finally {
             setIsSubmitting(false);
         }

@@ -560,6 +560,12 @@ export const api = {
   createTeam: async (team: Omit<Team, 'id' | 'players'>): Promise<Team> => {
     try {
       const token = localStorage.getItem('adminToken');
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
+      
+      console.log('Creating team with data:', { ...team, league: team.league });
+      
       const response = await fetch('/api/teams', {
         method: 'POST',
         headers: {
@@ -568,10 +574,17 @@ export const api = {
         },
         body: JSON.stringify(team)
       });
+      
       if (!response.ok) {
-        throw new Error('Failed to create team');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        const errorMessage = errorData.error || `Failed to create team: ${response.status} ${response.statusText}`;
+        console.error('API error response:', errorData);
+        throw new Error(errorMessage);
       }
-      return await response.json();
+      
+      const createdTeam = await response.json();
+      console.log('Team created successfully:', createdTeam);
+      return createdTeam;
     } catch (error) {
       console.error('Error creating team:', error);
       throw error;

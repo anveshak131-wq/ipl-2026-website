@@ -210,9 +210,17 @@ async function handlePostRequest(context) {
     const body = await request.json();
     const { name, shortName, logo, description, colors, trophies, homeGrounds, league } = body;
     
-    // Validate required fields
-    if (!name || !shortName || !logo || !description) {
-      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
+    // Validate required fields (logo is optional)
+    if (!name || !shortName || !description) {
+      return new Response(JSON.stringify({ error: 'Missing required fields: name, shortName, and description are required' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
+    // Validate league value
+    if (league && league !== 'ipl' && league !== 'wpl') {
+      return new Response(JSON.stringify({ error: 'Invalid league value. Must be "ipl" or "wpl"' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });
@@ -221,21 +229,30 @@ async function handlePostRequest(context) {
     // Get existing teams
     let teams = await env.IPL_CACHE.get('teams', 'json') || defaultTeams;
     
+    // Ensure all existing teams have league property
+    teams = teams.map(t => ({
+      ...t,
+      league: t.league || 'ipl'
+    }));
+    
     // Generate new ID
     const newId = String(Math.max(...teams.map(t => parseInt(t.id) || 0), 0) + 1);
     
-    // Create new team
+    // Create new team with proper league assignment
     const newTeam = {
       id: newId,
-      league: league || 'ipl', // Default to 'ipl' if not specified
-      name,
-      shortName,
-      logo,
-      description,
-      colors: colors || { primary: '#6B46C1', secondary: '#FFD700' },
+      league: league || 'ipl', // Use provided league or default to 'ipl'
+      name: name.trim(),
+      shortName: shortName.trim().toUpperCase(),
+      logo: logo || '/logos/default-team.svg', // Default logo if not provided
+      description: description.trim(),
+      colors: colors || { primary: league === 'wpl' ? '#9333EA' : '#6B46C1', secondary: league === 'wpl' ? '#EC4899' : '#FFD700' },
       trophies: trophies || [],
-      homeGrounds: homeGrounds || []
+      homeGrounds: homeGrounds || [],
+      players: [] // Initialize empty players array
     };
+    
+    console.log(`Creating new team: ${newTeam.name} (${newTeam.shortName}) for league: ${newTeam.league}`);
     
     // Add to teams array
     teams.push(newTeam);
@@ -243,13 +260,15 @@ async function handlePostRequest(context) {
     // Save to KV
     await env.IPL_CACHE.put('teams', JSON.stringify(teams));
     
+    console.log(`Team created successfully. Total teams: ${teams.length}, WPL teams: ${teams.filter(t => t.league === 'wpl').length}`);
+    
     return new Response(JSON.stringify(newTeam), {
       status: 201,
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (error) {
     console.error('Error creating team:', error);
-    return new Response(JSON.stringify({ error: 'Failed to create team' }), {
+    return new Response(JSON.stringify({ error: `Failed to create team: ${error.message}` }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
     });
