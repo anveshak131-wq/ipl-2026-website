@@ -169,8 +169,15 @@ async function sendViaElasticEmail(emailData, apiKey) {
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      return { success: false, error: error || 'Elastic Email API error' };
+      let errorText = await response.text();
+      let errorMessage = errorText || 'Elastic Email API error';
+      
+      // Check for test account limitation
+      if (errorText && errorText.includes('For testing purposes you can only send emails to')) {
+        errorMessage = `Elastic Email Test Account Limitation: ${errorText}. To send to all recipients, you need to upgrade your Elastic Email plan. See docs/ELASTIC_EMAIL_SETUP.md for details.`;
+      }
+      
+      return { success: false, error: errorMessage };
     }
 
     const data = await response.json();
@@ -178,7 +185,14 @@ async function sendViaElasticEmail(emailData, apiKey) {
     if (data.success) {
       return { success: true, messageId: data.transactionid || data.transaction_id || 'elastic-' + Date.now() };
     } else {
-      return { success: false, error: data.error || 'Elastic Email error' };
+      let errorMessage = data.error || 'Elastic Email error';
+      
+      // Check for test account limitation in error response
+      if (errorMessage.includes('For testing purposes you can only send emails to')) {
+        errorMessage = `Elastic Email Test Account Limitation: ${errorMessage}. To send to all recipients, you need to upgrade your Elastic Email plan. See docs/ELASTIC_EMAIL_SETUP.md for details.`;
+      }
+      
+      return { success: false, error: errorMessage };
     }
   } catch (error) {
     console.error('Elastic Email error:', error);

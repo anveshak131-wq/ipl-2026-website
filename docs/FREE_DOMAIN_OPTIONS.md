@@ -4,22 +4,32 @@
 
 Resend requires domain verification to send emails to all users. Without a domain, you can only send test emails to your account owner email.
 
-## Solution: Use Elastic Email (No Domain Required!)
+## ⚠️ Important: Both Services Have Limitations
 
-**Good News**: You already have `ELASTIC_EMAIL_API_KEY` configured! Elastic Email **doesn't require domain verification**.
+**Resend**: Requires domain verification to send to all users (free tier)
+**Elastic Email**: Requires paid plan to send to all users (free tier only allows account owner email)
 
-### How It Works:
+### Solution Options:
 
-The system will automatically:
-1. Try Resend first
-2. If Resend fails due to domain verification, automatically fall back to Elastic Email
-3. Elastic Email works without any domain verification!
+#### Option 1: Buy a Cheap Domain (Recommended - One-time $0.88/year)
+- Buy domain from Namecheap (~$0.88/year for .xyz domains)
+- Verify domain in Resend
+- Send unlimited emails (within free tier)
+
+#### Option 2: Upgrade Elastic Email (Monthly cost)
+- Upgrade to paid Elastic Email plan (~$9-15/month)
+- Can send to all users
+
+#### Option 3: Use Test Mode (Limited)
+- Send emails only to your account owner email for testing
+- Not suitable for production
 
 ### Current Status:
 
-✅ Your `ELASTIC_EMAIL_API_KEY` is already configured in Cloudflare Pages
-✅ The code automatically falls back to Elastic Email if Resend fails
-✅ No action needed - it will work automatically!
+The system automatically:
+1. Tries Resend first
+2. Falls back to Elastic Email if Resend fails
+3. Both have free tier limitations
 
 ## Free Domain Options (If You Want to Use Resend)
 

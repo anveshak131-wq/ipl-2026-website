@@ -1,4 +1,4 @@
-# Elastic Email Setup Guide
+# Elastic Email Setup guide
 
 ## Which Product to Choose? 📧
 
@@ -38,11 +38,33 @@ When signing up for Elastic Email, choose:
    - Value: Your API key (paste it here)
 6. **Save and Redeploy**
 
-## Free Tier Limits
+## Free Tier Limits & Limitations ⚠️
 
-- **100 emails per day** (free tier)
-- Perfect for testing and small projects
-- Upgrade options available if needed
+### Test Account Limitation
+
+**IMPORTANT**: Elastic Email's free/test account has the same limitation as Resend:
+- ❌ Can only send emails to your account owner email (the email you used to sign up)
+- ✅ To send to **all recipients**, you need to **upgrade to a paid plan**
+
+### Upgrade Options
+
+1. **Go to Elastic Email Dashboard** → Billing/Pricing
+2. **Choose a plan** (usually starts at $9-15/month)
+3. **Upgrade your account**
+4. After upgrade, you can send to any email address
+
+### Alternative Solutions
+
+If you don't want to pay, you can:
+
+**Option 1: Use Resend with Domain Verification** (One-time domain cost: $0.88-$10/year)
+- Buy a cheap domain (e.g., Namecheap: $0.88/year)
+- Verify domain in Resend
+- Send unlimited emails (within free tier limits)
+
+**Option 2: Test with Account Owner Email**
+- For testing: Send emails to your account owner email only
+- For production: Upgrade Elastic Email or verify domain in Resend
 
 ## How It Works in Your System
 
