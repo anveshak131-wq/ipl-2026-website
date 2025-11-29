@@ -6,6 +6,7 @@ import RCBLottie from '@/components/ui/RCBLottie';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import { formatMatchTime } from '@/lib/timeUtils';
+import { getMatchNumberDisplay } from '@/lib/matchNumberUtils';
 
 interface MatchCardProps {
   match: Match;
@@ -84,11 +85,16 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
 
       {/* Content */}
       <div className="relative p-6 md:p-8 space-y-4">
-        {/* Status Badge */}
-        <div className="flex justify-start">
+        {/* Status Badge and Match Number */}
+        <div className="flex justify-between items-center">
           <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(match.status)}`}>
             {getStatusText(match.status)}
           </span>
+          {match.matchNumber && (
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-ipl-gold/20 text-ipl-gold border border-ipl-gold/30">
+              {getMatchNumberDisplay(match)}
+            </span>
+          )}
         </div>
 
         {/* Date and Time */}

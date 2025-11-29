@@ -18,6 +18,11 @@ import BulkEditModal from '@/components/admin/BulkEditModal';
 import BatchDeleteModal from '@/components/admin/BatchDeleteModal';
 import InteractiveChart, { ChartDataPoint } from '@/components/admin/InteractiveChart';
 import { 
+    generateMatchNumber,
+    recalculateMatchNumbers,
+    getMatchNumberDisplay
+} from '@/lib/matchNumberUtils';
+import { 
     exportToCSV, 
     exportToJSON, 
     exportToExcel, 
@@ -282,7 +287,9 @@ export default function AdminMatches() {
                 api.getMatches(currentLeague),
                 api.getTeams(currentLeague)
             ]);
-            setMatches(matchesData);
+            // Recalculate match numbers based on date/time ordering
+            const matchesWithNumbers = recalculateMatchNumbers(matchesData);
+            setMatches(matchesWithNumbers);
             setTeams(teamsData);
         } catch (error) {
             console.error('Failed to fetch data:', error);
@@ -570,10 +577,11 @@ export default function AdminMatches() {
             setMatches(prev => prev.filter(m => !selectedMatches.has(m.id)));
             setSelectedMatches(new Set());
             
-            // Refresh matches from API
+            // Refresh matches from API and recalculate match numbers
             try {
                 const updatedMatches = await api.getMatches(currentLeague);
-                setMatches(updatedMatches);
+                const matchesWithNumbers = recalculateMatchNumbers(updatedMatches);
+                setMatches(matchesWithNumbers);
             } catch (refreshError) {
                 console.warn('Failed to refresh matches after bulk deletion:', refreshError);
             }
@@ -776,6 +784,58 @@ export default function AdminMatches() {
     };
 
     const handleDelete = async (matchId: string) => {
+        // Check if it's a mock match
+        const match = matches.find(m => m.id === matchId);
+        if (match && (match as any)._isMock) {
+            // Remove from local state only
+            const updatedMatches = matches.filter(m => m.id !== matchId);
+            const matchesWithNumbers = recalculateMatchNumbers(updatedMatches);
+            setMatches(matchesWithNumbers);
+            showSuccess('Sample match removed');
+            return;
+        }
+
+        if (!confirm('Are you sure you want to delete this match?')) return;
+
+        try {
+            setIsSubmitting(true);
+            setError(null);
+            await api.deleteMatch(matchId);
+            
+            // Remove from local state
+            const updatedMatches = matches.filter(m => m.id !== matchId);
+            setMatches(updatedMatches);
+            setSelectedMatches(prev => {
+                const next = new Set(prev);
+                next.delete(matchId);
+                return next;
+            });
+            
+            // Recalculate match numbers after deletion
+            const matchesWithNumbers = recalculateMatchNumbers(updatedMatches);
+            setMatches(matchesWithNumbers);
+            
+            showSuccess('Match deleted successfully');
+        } catch (error: any) {
+            console.error('Failed to delete match:', error);
+            const errorMessage = error?.message || 'Failed to delete match';
+            showError(errorMessage);
+            
+            // Refresh matches to get current state and recalculate match numbers
+            try {
+                const refreshedMatches = await api.getMatches(currentLeague);
+                const matchesWithNumbers = recalculateMatchNumbers(refreshedMatches);
+                setMatches(matchesWithNumbers);
+                matchesRef.current = matchesWithNumbers;
+            } catch (refreshError) {
+                console.error('Failed to refresh matches after error:', refreshError);
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const handleDeleteOld = async (matchId: string) => {
         const match = matches.find(m => m.id === matchId);
         const isMockMatch = match && (match as any)._isMock;
 
@@ -870,11 +930,17 @@ export default function AdminMatches() {
 
             if (editingId) {
                 const updatedMatch = await api.updateMatch(editingId, matchData);
-                setMatches(matches.map(m => m.id === editingId ? updatedMatch : m));
+                // Recalculate all match numbers after update
+                const allMatches = matches.map(m => m.id === editingId ? updatedMatch : m);
+                const matchesWithNumbers = recalculateMatchNumbers(allMatches);
+                setMatches(matchesWithNumbers);
                 showSuccess('Match updated successfully');
             } else {
                 const newMatch = await api.createMatch(matchData);
-                setMatches([...matches, newMatch]);
+                // Recalculate all match numbers after creation
+                const allMatches = [...matches, newMatch];
+                const matchesWithNumbers = recalculateMatchNumbers(allMatches);
+                setMatches(matchesWithNumbers);
                 showSuccess('Match created successfully');
             }
 
@@ -918,7 +984,8 @@ export default function AdminMatches() {
             });
 
             const updatedMatches = await api.getMatches(currentLeague);
-            setMatches(updatedMatches);
+            const matchesWithNumbers = recalculateMatchNumbers(updatedMatches);
+            setMatches(matchesWithNumbers);
             showSuccess('Match marked as completed');
         } catch (error) {
             console.error('Failed to update match status:', error);
@@ -1788,6 +1855,9 @@ export default function AdminMatches() {
                                                 </button>
                                             </th>
                                             <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                                Match #
+                                            </th>
+                                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                                                 Date & Time
                                             </th>
                                             <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
@@ -1821,6 +1891,11 @@ export default function AdminMatches() {
                                                         onChange={() => toggleSelectMatch(match.id)}
                                                         className="w-4 h-4 rounded border-white/20 bg-white/5 text-ipl-gold focus:ring-ipl-gold/20 cursor-pointer"
                                                     />
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="text-sm font-bold text-ipl-gold">
+                                                        {getMatchNumberDisplay(match)}
+                                                    </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="text-sm text-white font-medium">{formatDate(match.date)}</div>

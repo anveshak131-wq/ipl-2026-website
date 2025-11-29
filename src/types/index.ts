@@ -63,6 +63,7 @@ export interface Match {
   team2: Team;
   status: 'upcoming' | 'live' | 'completed' | 'cancelled';
   result?: string;
+  matchNumber?: string; // Auto-generated based on date and time ordering (e.g., "IPL-001", "WPL-001")
   score?: {
     team1: {
       runs: number;
