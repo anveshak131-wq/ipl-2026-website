@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, Zap, CheckCircle2, Users, TrendingUp } from 'lucide-react';
+import { Calendar, Clock, Zap, CheckCircle2, Users, TrendingUp, CheckSquare, Square, BarChart3, Calendar as CalendarIcon, MapPin, Grid3x3, Copy, ExternalLink } from 'lucide-react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
@@ -29,7 +29,6 @@ import {
 } from '@/lib/admin/exportUtils';
 import { Match, Team } from '@/types';
 import { api } from '@/lib/data';
-import { CheckSquare, Square, BarChart3, Calendar as CalendarIcon, MapPin, Grid3x3, TrendingUp, Calendar, Copy, ExternalLink } from 'lucide-react';
 
 const IconTable = ({ className }: { className?: string }) => (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -160,13 +159,20 @@ export default function AdminMatches() {
         setSelectedMatches(new Set());
     }, [filters]);
 
+    // Use ref to store current matches to avoid dependency issues
+    const matchesRef = useRef<Match[]>([]);
+    useEffect(() => {
+        matchesRef.current = matches;
+    }, [matches]);
+
     // Automatic status update based on match time
     useEffect(() => {
         const updateMatchStatuses = async () => {
+            const currentMatches = matchesRef.current;
             const now = new Date();
             const updates: { matchId: string; newStatus: 'upcoming' | 'live' }[] = [];
 
-            matches.forEach(match => {
+            currentMatches.forEach(match => {
                 // Skip if match is already completed or cancelled (manual status)
                 if (match.status === 'completed' || match.status === 'cancelled') {
                     return;
@@ -203,7 +209,7 @@ export default function AdminMatches() {
             if (updates.length > 0) {
                 try {
                     const updatePromises = updates.map(({ matchId, newStatus }) => {
-                        const match = matches.find(m => m.id === matchId);
+                        const match = currentMatches.find(m => m.id === matchId);
                         if (!match) return Promise.resolve();
                         
                         return api.updateMatch(matchId, {
@@ -234,7 +240,8 @@ export default function AdminMatches() {
         const interval = setInterval(updateMatchStatuses, 60 * 1000);
 
         return () => clearInterval(interval);
-    }, [matches]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Run once on mount, then check every minute
 
     const fetchInitialData = async () => {
         try {
@@ -1484,6 +1491,7 @@ export default function AdminMatches() {
                     )}
 
                     {viewMode === 'table' ? (
+                        // Table View
                         <div className="glass-effect rounded-xl overflow-hidden border border-white/10">
                             <BulkOperationsToolbar
                                 selectedCount={selectedMatches.size}
@@ -1749,7 +1757,7 @@ export default function AdminMatches() {
                                 />
                             )}
                         </div>
-                    ) : (
+                    ) : viewMode === 'timeline' ? (
                         <div className="space-y-6">
                             {matchesByDate.length > 0 ? (
                                 <StaggeredList className="space-y-6" staggerDelay={0.1}>
@@ -1900,7 +1908,7 @@ export default function AdminMatches() {
                                     }
                                 />
                             )}
-                                    </div>
+                        </div>
                     ) : (
                         // Analytics View
                         <div className="space-y-6">
