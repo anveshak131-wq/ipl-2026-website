@@ -485,7 +485,7 @@ export default function AdminMatches() {
     const handleBulkDelete = async () => {
         if (selectedMatches.size === 0) return;
 
-        // Filter out mock matches
+        // Separate mock matches and real matches
         const realMatches = Array.from(selectedMatches).filter(matchId => {
             const match = matches.find(m => m.id === matchId);
             return match && !(match as any)._isMock;
@@ -496,17 +496,26 @@ export default function AdminMatches() {
             return match && (match as any)._isMock;
         });
 
-        if (mockMatches.length > 0) {
-            showError(`Cannot delete ${mockMatches.length} sample match(es). Only real matches can be deleted.`);
-            // Remove mock matches from selection
-            setSelectedMatches(prev => {
-                const next = new Set(prev);
-                mockMatches.forEach(id => next.delete(id));
-                return next;
-            });
+        // If only mock matches are selected, just remove them from local state
+        if (realMatches.length === 0 && mockMatches.length > 0) {
+            setMatches(prev => prev.filter(m => !selectedMatches.has(m.id)));
+            setSelectedMatches(new Set());
             setShowBulkDeleteModal(false);
+            showSuccess(`${mockMatches.length} sample match(es) removed from view`);
             return;
         }
+
+        // If both types are selected, confirm deletion
+        const totalCount = selectedMatches.size;
+        const mockCount = mockMatches.length;
+        const realCount = realMatches.length;
+        
+        let confirmMessage = `Are you sure you want to delete ${totalCount} match(es)?`;
+        if (mockCount > 0 && realCount > 0) {
+            confirmMessage = `Are you sure you want to delete ${realCount} real match(es) and remove ${mockCount} sample match(es)?`;
+        }
+        
+        if (!confirm(confirmMessage)) return;
 
         if (realMatches.length === 0) {
             showError('No real matches selected for deletion.');
@@ -520,14 +529,17 @@ export default function AdminMatches() {
             setError(null);
             setShowBulkDeleteModal(false);
 
-            const deletePromises = realMatches.map(matchId => 
-                api.deleteMatch(matchId)
-            );
+            // Delete real matches from backend
+            if (realMatches.length > 0) {
+                const deletePromises = realMatches.map(matchId => 
+                    api.deleteMatch(matchId)
+                );
 
-            await Promise.all(deletePromises);
+                await Promise.all(deletePromises);
+            }
             
-            // Remove from local state immediately
-            setMatches(prev => prev.filter(m => !realMatches.includes(m.id)));
+            // Remove both real and mock matches from local state
+            setMatches(prev => prev.filter(m => !selectedMatches.has(m.id)));
             setSelectedMatches(new Set());
             
             // Refresh matches from API
@@ -538,7 +550,16 @@ export default function AdminMatches() {
                 console.warn('Failed to refresh matches after bulk deletion:', refreshError);
             }
             
-            showSuccess(`${realMatches.length} match(es) deleted successfully`);
+            // Show success message
+            let successMessage = '';
+            if (realMatches.length > 0 && mockMatches.length > 0) {
+                successMessage = `${realMatches.length} real match(es) deleted and ${mockMatches.length} sample match(es) removed`;
+            } else if (realMatches.length > 0) {
+                successMessage = `${realMatches.length} match(es) deleted successfully`;
+            } else if (mockMatches.length > 0) {
+                successMessage = `${mockMatches.length} sample match(es) removed`;
+            }
+            showSuccess(successMessage);
         } catch (error: any) {
             console.error('Failed to delete matches:', error);
             let errorMessage = error?.message || 'Failed to delete matches';
@@ -727,19 +748,30 @@ export default function AdminMatches() {
     };
 
     const handleDelete = async (matchId: string) => {
-        // Check if this is a mock match
         const match = matches.find(m => m.id === matchId);
-        if (match && (match as any)._isMock) {
-            showError('Cannot delete sample/demo matches. Please create real matches first.');
-            return;
-        }
+        const isMockMatch = match && (match as any)._isMock;
 
-        if (!confirm(`Are you sure you want to delete this match? This action cannot be undone.`)) return;
+        if (!confirm(`Are you sure you want to delete this ${isMockMatch ? 'sample' : ''} match? This action cannot be undone.`)) return;
 
         try {
             setIsSubmitting(true);
             setError(null);
             
+            // If it's a mock match, just remove it from local state (it doesn't exist in backend)
+            if (isMockMatch) {
+                console.log(`Removing mock match with ID: ${matchId} from local state`);
+                setMatches(prev => prev.filter(m => m.id !== matchId));
+                setSelectedMatches(prev => {
+                    const next = new Set(prev);
+                    next.delete(matchId);
+                    return next;
+                });
+                showSuccess('Sample match removed from view');
+                setIsSubmitting(false);
+                return;
+            }
+
+            // For real matches, delete from backend
             console.log(`Attempting to delete match with ID: ${matchId}`);
             await api.deleteMatch(matchId);
             console.log(`Match ${matchId} deleted successfully`);
@@ -767,7 +799,7 @@ export default function AdminMatches() {
             
             // Provide more helpful error message for 404
             if (errorMessage.includes('not found') || errorMessage.includes('404')) {
-                errorMessage = 'Match not found. It may have already been deleted or is a sample match.';
+                errorMessage = 'Match not found. It may have already been deleted.';
             }
             
             showError(errorMessage);
@@ -1841,8 +1873,8 @@ export default function AdminMatches() {
                                                         </button>
                                                         <button
                                                             onClick={() => handleDelete(match.id)}
-                                                            disabled={isSubmitting || (match as any)._isMock}
-                                                            title={(match as any)._isMock ? 'Cannot delete sample match' : 'Delete Match'}
+                                                            disabled={isSubmitting}
+                                                            title={(match as any)._isMock ? 'Remove sample match' : 'Delete Match'}
                                                             className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 disabled:opacity-50"
                                                         >
                                                             <IconTrash className="w-4 h-4" />
@@ -1993,8 +2025,8 @@ export default function AdminMatches() {
                                                             </button>
                                                             <button
                                                                 onClick={() => handleDelete(match.id)}
-                                                                disabled={isSubmitting || (match as any)._isMock}
-                                                                title={(match as any)._isMock ? 'Cannot delete sample match' : 'Delete Match'}
+                                                                disabled={isSubmitting}
+                                                                title={(match as any)._isMock ? 'Remove sample match' : 'Delete Match'}
                                                                 className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 disabled:opacity-50"
                                                             >
                                                                 <IconTrash className="w-4 h-4" />

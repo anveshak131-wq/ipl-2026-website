@@ -365,13 +365,36 @@ export default function AdminTeams() {
 
             // Update each existing WPL team with data from wpl-teams.ts
             for (const existingTeam of currentWPLTeams) {
-                // Find matching team data by shortName
-                const teamData = wplTeams.find(t => 
+                // Try multiple matching strategies
+                let teamData = wplTeams.find(t => 
                     t.shortName.toUpperCase() === existingTeam.shortName.toUpperCase()
                 );
 
+                // If exact shortName match fails, try matching by name (more flexible)
+                if (!teamData) {
+                    teamData = wplTeams.find(t => {
+                        const existingName = existingTeam.name.toUpperCase();
+                        const wplName = t.name.toUpperCase();
+                        // Check if names match (with or without "(WPL)" suffix)
+                        return existingName.includes(wplName.replace(' (WPL)', '')) || 
+                               wplName.includes(existingName.replace(' (WPL)', ''));
+                    });
+                }
+
+                // If still no match, try partial shortName matching (e.g., "MI" matches "MI-W")
+                if (!teamData) {
+                    teamData = wplTeams.find(t => {
+                        const existingShort = existingTeam.shortName.toUpperCase();
+                        const wplShort = t.shortName.toUpperCase();
+                        // Check if one contains the other (e.g., "MI" in "MI-W" or vice versa)
+                        return existingShort.includes(wplShort.replace('-W', '')) ||
+                               wplShort.includes(existingShort.replace('-W', ''));
+                    });
+                }
+
                 if (teamData) {
                     try {
+                        console.log(`Updating team: ${existingTeam.name} (${existingTeam.shortName}) with data from ${teamData.name} (${teamData.shortName})`);
                         // Update the team with new logo, colors, and description
                         const updatedTeam = await api.updateTeam(existingTeam.id, {
                             name: teamData.name,
@@ -385,10 +408,12 @@ export default function AdminTeams() {
                         });
                         results.push(`✅ Updated ${updatedTeam.name}`);
                     } catch (err: any) {
+                        console.error(`Error updating ${existingTeam.name}:`, err);
                         results.push(`❌ ${existingTeam.name}: ${err?.message || 'Failed to update'}`);
                     }
                 } else {
-                    results.push(`⚠️ ${existingTeam.name}: No matching data found in wpl-teams.ts`);
+                    console.warn(`No match found for team: ${existingTeam.name} (${existingTeam.shortName})`);
+                    results.push(`⚠️ ${existingTeam.name} (${existingTeam.shortName}): No matching data found in wpl-teams.ts`);
                 }
             }
             
