@@ -17,7 +17,7 @@ interface BulkEmailSendModalProps {
     emailType: 'match' | 'news' | 'custom';
     matchId?: string;
     newsId?: string;
-  }) => Promise<void>;
+  }) => Promise<{ success: boolean; sentCount?: number; totalCount?: number; failedCount?: number; error?: string }>;
   templates: EmailTemplate[];
   selectedUserIds: string[];
   selectedUserEmails: string[];
@@ -273,7 +273,7 @@ export default function BulkEmailSendModal({
 
     try {
       setIsSending(true);
-      await onSend({
+      const result = await onSend({
         templateId: selectedTemplate || undefined,
         subject: subject.trim(),
         body: body.trim(),
@@ -282,17 +282,26 @@ export default function BulkEmailSendModal({
         matchId: emailType === 'match' ? selectedMatch : undefined,
         newsId: emailType === 'news' ? selectedNews : undefined,
       });
-      success(`Email sent to ${selectedUserIds.length} user${selectedUserIds.length > 1 ? 's' : ''}`);
-      onClose();
-      // Reset form
-      setEmailType('custom');
-      setSelectedTemplate('');
-      setSelectedMatch('');
-      setSelectedNews('');
-      setSubject('');
-      setBody('');
+      
+      // Check if sending was successful
+      if (result && result.success !== false) {
+        // Success - close modal and reset form
+        onClose();
+        // Reset form
+        setEmailType('custom');
+        setSelectedTemplate('');
+        setSelectedMatch('');
+        setSelectedNews('');
+        setSubject('');
+        setBody('');
+      } else if (result && result.error) {
+        // Error returned in result
+        showError(result.error);
+      }
     } catch (e: any) {
-      showError(e?.message || 'Failed to send emails');
+      console.error('Email send error:', e);
+      const errorMessage = e?.message || 'Failed to send emails. Please try again.';
+      showError(errorMessage);
     } finally {
       setIsSending(false);
     }

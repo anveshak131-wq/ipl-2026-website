@@ -885,11 +885,15 @@ export default function AdminEmailNotificationsPage() {
       success(message);
       
       setSelectedUsers(new Set()); // Clear selection after sending
+      
+      // Return success result
+      return { success: true, sentCount, totalCount, failedCount };
     } catch (e: any) {
       console.error('Failed to send bulk emails:', e);
       const errorMessage = e?.message || e?.error || 'Failed to send emails. Please check your connection and try again.';
       showError(errorMessage);
-      throw new Error(errorMessage);
+      // Return error result instead of throwing to prevent unhandled promise rejection
+      return { success: false, error: errorMessage };
     }
   };
 
