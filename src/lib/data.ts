@@ -304,41 +304,79 @@ export const api = {
   getPlayers: async (teamId?: string, league?: 'ipl' | 'wpl'): Promise<Player[]> => {
     try {
       const url = league ? `/api/players?league=${league}` : '/api/players';
+      console.log('API: Fetching players from:', url);
       const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error('Failed to fetch players');
-      }
-      let players = await response.json();
+      console.log('API: Players response status:', response.status, response.ok);
       
-      // If API returns empty array, use fallback mock data
+      if (!response.ok) {
+        console.error('API: Failed to fetch players, status:', response.status);
+        throw new Error(`Failed to fetch players: ${response.status}`);
+      }
+      
+      let players = await response.json();
+      console.log('API: Received players:', players?.length || 0, 'players');
+      console.log('API: Players data:', players);
+      
+      // Don't use fallback mock data - return empty array if no players in KV
       if (!players || players.length === 0) {
-        console.log('API: No players returned, using fallback mock data');
-        let fallback = league ? mockPlayers.filter(p => p.league === league) : mockPlayers;
-        fallback = teamId ? fallback.filter(p => p.teamId === teamId) : fallback;
-        return teamId ? sortPlayersByRoleAndAge(fallback) : fallback;
+        console.log('API: No players returned from KV storage for league:', league);
+        return [];
       }
       
       // Ensure all players have league property (migration for existing data)
       players = players.map((p: Player) => ({
         ...p,
-        league: p.league || 'ipl' // Default to 'ipl' if missing
+        league: p.league || 'ipl', // Default to 'ipl' if missing
+        // Ensure teamId is a string for consistent comparison
+        teamId: String(p.teamId)
       }));
+      
+      console.log('API: After mapping, players count:', players.length);
+      console.log('API: Sample players after mapping:', players.slice(0, 3).map(p => ({
+        id: p.id,
+        name: p.name,
+        teamId: p.teamId,
+        teamIdType: typeof p.teamId,
+        league: p.league,
+        leagueType: typeof p.league
+      })));
+      
       // Filter by league if specified
       if (league) {
+        const beforeFilter = players.length;
         players = players.filter((p: Player) => {
           const playerLeague = p.league || 'ipl';
-          return playerLeague === league;
+          const matches = playerLeague === league;
+          if (!matches && beforeFilter < 20) {
+            console.log(`API: Player filtered out by league:`, {
+              name: p.name,
+              playerLeague,
+              requestedLeague: league
+            });
+          }
+          return matches;
         });
+        console.log(`API: After filtering by league '${league}':`, beforeFilter, '->', players.length);
+        if (players.length === 0 && beforeFilter > 0) {
+          console.warn(`⚠️ No players match league '${league}'. Available leagues:`, 
+            [...new Set(playersData.map((p: any) => p.league || 'ipl'))]);
+        }
       }
+      
       // Filter by team if specified
-      const list = teamId ? players.filter((p: Player) => p.teamId === teamId) : players;
-      return teamId ? sortPlayersByRoleAndAge(list) : list;
+      if (teamId) {
+        const beforeTeamFilter = players.length;
+        players = players.filter((p: Player) => p.teamId === teamId);
+        console.log(`API: After filtering by teamId '${teamId}':`, beforeTeamFilter, '->', players.length);
+      }
+      
+      const finalList = teamId ? sortPlayersByRoleAndAge(players) : players;
+      console.log('API: Final players list:', finalList.length, 'players');
+      return finalList;
     } catch (error) {
-      console.error('Error fetching players:', error);
-      // Fallback to mock data if API fails
-      let fallback = league ? mockPlayers.filter(p => p.league === league) : mockPlayers;
-      fallback = teamId ? fallback.filter(p => p.teamId === teamId) : fallback;
-      return teamId ? sortPlayersByRoleAndAge(fallback) : fallback;
+      console.error('API: Error fetching players:', error);
+      // Return empty array instead of fallback - let the user know there are no players
+      return [];
     }
   },
   

@@ -64,6 +64,12 @@ export default function TestLiveScorePage() {
         total: playersData.length,
         league: currentLeague,
         playersByLeague: playersData.filter(p => p.league === currentLeague).length,
+        allPlayers: playersData.map(p => ({
+          id: p.id,
+          name: p.name,
+          teamId: p.teamId,
+          league: p.league
+        })),
         samplePlayer: playersData[0] ? {
           id: playersData[0].id,
           name: playersData[0].name,
@@ -73,6 +79,11 @@ export default function TestLiveScorePage() {
           teamIdType: typeof playersData[0].teamId
         } : null
       });
+      
+      if (playersData.length === 0) {
+        console.warn('⚠️ No players found in KV storage for league:', currentLeague);
+        console.warn('Please ensure players are added in the admin players page and refresh.');
+      }
 
       // Auto-select first upcoming or live match (only if no match is currently selected)
       setSelectedMatchId(prev => {

@@ -58,19 +58,38 @@ export default function Playing11Page() {
       setTeams(teamsData);
       
       // Debug: Log players data from KV
-      console.log('Players loaded from KV:', {
-        total: playersData.length,
-        league: currentLeague,
-        playersByLeague: playersData.filter(p => p.league === currentLeague).length,
-        samplePlayer: playersData[0] ? {
-          id: playersData[0].id,
-          name: playersData[0].name,
-          teamId: playersData[0].teamId,
-          league: playersData[0].league,
-          idType: typeof playersData[0].id,
-          teamIdType: typeof playersData[0].teamId
-        } : null
+      console.log('=== PLAYERS LOADED FROM KV (playing-11) ===');
+      console.log('Total players loaded:', playersData.length);
+      console.log('Current league:', currentLeague);
+      console.log('All players:', playersData.map(p => ({
+        id: p.id,
+        name: p.name,
+        teamId: p.teamId,
+        teamIdType: typeof p.teamId,
+        league: p.league,
+        leagueType: typeof p.league
+      })));
+      
+      const playersByLeague = playersData.filter(p => {
+        const playerLeague = p.league || 'ipl';
+        return playerLeague === currentLeague;
       });
+      console.log(`Players for ${currentLeague}:`, playersByLeague.length);
+      console.log('Players by league:', playersByLeague.map(p => ({
+        id: p.id,
+        name: p.name,
+        teamId: p.teamId,
+        league: p.league
+      })));
+      
+      if (playersData.length === 0) {
+        console.warn('⚠️ No players found in KV storage at all!');
+        console.warn('Please check if players exist in Workers KV storage.');
+      } else if (playersByLeague.length === 0) {
+        console.warn(`⚠️ No players found for league: ${currentLeague}`);
+        const uniqueLeagues = Array.from(new Set(playersData.map(p => p.league || 'ipl')));
+        console.warn('Players in KV have leagues:', uniqueLeagues);
+      }
 
       // Auto-select first upcoming match if none selected (preserve current selection if it exists)
       setSelectedMatchId(prev => {
@@ -141,31 +160,55 @@ export default function Playing11Page() {
       console.log('No selected match for team1Players');
       return [];
     }
+    
+    console.log('=== FILTERING TEAM 1 PLAYERS ===');
+    console.log('Selected match:', {
+      id: selectedMatch.id,
+      team1Id: selectedMatch.team1.id,
+      team1IdType: typeof selectedMatch.team1.id,
+      team1Name: selectedMatch.team1.name,
+      league: selectedMatch.league,
+      leagueType: typeof selectedMatch.league
+    });
+    console.log('Total players available:', players.length);
+    
     // Filter by teamId and league to get all squad players
+    // Try both string and number comparison for teamId
     const filtered = players.filter(p => {
-      const matchesTeam = p.teamId === selectedMatch.team1.id;
-      const matchesLeague = p.league === selectedMatch.league;
+      const playerTeamId = String(p.teamId);
+      const matchTeamId = String(selectedMatch.team1.id);
+      const playerLeague = p.league || 'ipl';
+      const matchLeague = selectedMatch.league || 'ipl';
+      
+      const matchesTeam = playerTeamId === matchTeamId;
+      const matchesLeague = playerLeague === matchLeague;
+      
       if (!matchesTeam || !matchesLeague) {
         console.log('Player filtered out:', {
           playerName: p.name,
           playerTeamId: p.teamId,
+          playerTeamIdString: playerTeamId,
           matchTeamId: selectedMatch.team1.id,
-          playerLeague: p.league,
-          matchLeague: selectedMatch.league,
+          matchTeamIdString: matchTeamId,
+          playerLeague: playerLeague,
+          matchLeague: matchLeague,
           matchesTeam,
           matchesLeague
         });
       }
       return matchesTeam && matchesLeague;
     });
-    console.log('Team 1 players filtered:', {
+    
+    console.log('Team 1 players filtered result:', {
       totalPlayers: players.length,
       team1Id: selectedMatch.team1.id,
+      team1IdString: String(selectedMatch.team1.id),
       league: selectedMatch.league,
       filteredCount: filtered.length,
       playerIds: filtered.map(p => p.id),
       playerNames: filtered.map(p => p.name)
     });
+    
     return filtered;
   }, [players, selectedMatch]);
 
@@ -174,31 +217,55 @@ export default function Playing11Page() {
       console.log('No selected match for team2Players');
       return [];
     }
+    
+    console.log('=== FILTERING TEAM 2 PLAYERS ===');
+    console.log('Selected match:', {
+      id: selectedMatch.id,
+      team2Id: selectedMatch.team2.id,
+      team2IdType: typeof selectedMatch.team2.id,
+      team2Name: selectedMatch.team2.name,
+      league: selectedMatch.league,
+      leagueType: typeof selectedMatch.league
+    });
+    console.log('Total players available:', players.length);
+    
     // Filter by teamId and league to get all squad players
+    // Try both string and number comparison for teamId
     const filtered = players.filter(p => {
-      const matchesTeam = p.teamId === selectedMatch.team2.id;
-      const matchesLeague = p.league === selectedMatch.league;
+      const playerTeamId = String(p.teamId);
+      const matchTeamId = String(selectedMatch.team2.id);
+      const playerLeague = p.league || 'ipl';
+      const matchLeague = selectedMatch.league || 'ipl';
+      
+      const matchesTeam = playerTeamId === matchTeamId;
+      const matchesLeague = playerLeague === matchLeague;
+      
       if (!matchesTeam || !matchesLeague) {
         console.log('Player filtered out:', {
           playerName: p.name,
           playerTeamId: p.teamId,
+          playerTeamIdString: playerTeamId,
           matchTeamId: selectedMatch.team2.id,
-          playerLeague: p.league,
-          matchLeague: selectedMatch.league,
+          matchTeamIdString: matchTeamId,
+          playerLeague: playerLeague,
+          matchLeague: matchLeague,
           matchesTeam,
           matchesLeague
         });
       }
       return matchesTeam && matchesLeague;
     });
-    console.log('Team 2 players filtered:', {
+    
+    console.log('Team 2 players filtered result:', {
       totalPlayers: players.length,
       team2Id: selectedMatch.team2.id,
+      team2IdString: String(selectedMatch.team2.id),
       league: selectedMatch.league,
       filteredCount: filtered.length,
       playerIds: filtered.map(p => p.id),
       playerNames: filtered.map(p => p.name)
     });
+    
     return filtered;
   }, [players, selectedMatch]);
 
@@ -459,42 +526,74 @@ export default function Playing11Page() {
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {team1Players.map((player) => {
-                    const isSelected = team1Playing11.includes(player.id);
-                    return (
+                  {team1Players.length === 0 ? (
+                    <div className="col-span-full text-center py-8 px-4 rounded-xl border-2 border-dashed" style={isWPL ? {
+                      background: WPLColors.purpleRGBA[10],
+                      borderColor: WPLColors.purpleRGBA[30],
+                    } : {
+                      background: 'rgba(30, 41, 59, 0.2)',
+                      borderColor: 'rgba(255, 255, 255, 0.1)',
+                    }}>
+                      <AlertCircle className="w-12 h-12 mx-auto mb-3" style={{ color: isWPL ? WPLColors.pink : '#60A5FA' }} />
+                      <p className="text-lg font-semibold text-white mb-2">No Players Found</p>
+                      <p className="text-sm mb-4" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
+                        No players found for {selectedMatch.team1.name} in {currentLeague.toUpperCase()}.
+                      </p>
+                      <p className="text-xs mb-4" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
+                        Please add players in the <strong>Admin Players</strong> page and ensure they are assigned to this team.
+                      </p>
                       <button
-                        key={player.id}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          console.log('Button clicked for player:', player.name, player.id);
-                          togglePlayer('team1', player.id);
-                        }}
-                        type="button"
+                        onClick={() => loadData(true)}
                         className={`
-                          p-4 rounded-xl border-2 transition-all text-left cursor-pointer
-                          ${isSelected
-                            ? isWPL
-                              ? 'bg-purple-600/30 border-purple-500/50'
-                              : 'bg-blue-600/30 border-blue-500/50'
-                            : 'bg-slate-700/50 border-slate-600/50 hover:border-slate-500/50'
+                          px-4 py-2 rounded-lg font-semibold transition-all
+                          ${isWPL
+                            ? 'bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300'
+                            : 'bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-300'
                           }
                         `}
-                        style={{ position: 'relative', zIndex: 10 }}
                       >
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="font-semibold text-white">{player.name}</div>
-                          {isSelected && (
-                            <CheckCircle2 className="w-5 h-5" style={{ color: isWPL ? WPLColors.pink : '#60A5FA' }} />
-                          )}
-                        </div>
-                        <div className="text-xs" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
-                          {player.role} • #{player.jerseyNumber}
-                          {player.isCaptain && ' • Captain'}
-                        </div>
+                        <RefreshCw className="w-4 h-4 inline mr-2" />
+                        Refresh Players
                       </button>
-                    );
-                  })}
+                    </div>
+                  ) : (
+                    team1Players.map((player) => {
+                      const isSelected = team1Playing11.includes(player.id);
+                      return (
+                        <button
+                          key={player.id}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            console.log('Button clicked for player:', player.name, player.id);
+                            togglePlayer('team1', player.id);
+                          }}
+                          type="button"
+                          className={`
+                            p-4 rounded-xl border-2 transition-all text-left cursor-pointer
+                            ${isSelected
+                              ? isWPL
+                                ? 'bg-purple-600/30 border-purple-500/50'
+                                : 'bg-blue-600/30 border-blue-500/50'
+                              : 'bg-slate-700/50 border-slate-600/50 hover:border-slate-500/50'
+                            }
+                          `}
+                          style={{ position: 'relative', zIndex: 10 }}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="font-semibold text-white">{player.name}</div>
+                            {isSelected && (
+                              <CheckCircle2 className="w-5 h-5" style={{ color: isWPL ? WPLColors.pink : '#60A5FA' }} />
+                            )}
+                          </div>
+                          <div className="text-xs" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
+                            {player.role} • #{player.jerseyNumber}
+                            {player.isCaptain && ' • Captain'}
+                          </div>
+                        </button>
+                      );
+                    })
+                  )}
                 </div>
               </div>
 
@@ -531,42 +630,74 @@ export default function Playing11Page() {
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {team2Players.map((player) => {
-                    const isSelected = team2Playing11.includes(player.id);
-                    return (
+                  {team2Players.length === 0 ? (
+                    <div className="col-span-full text-center py-8 px-4 rounded-xl border-2 border-dashed" style={isWPL ? {
+                      background: WPLColors.purpleRGBA[10],
+                      borderColor: WPLColors.purpleRGBA[30],
+                    } : {
+                      background: 'rgba(30, 41, 59, 0.2)',
+                      borderColor: 'rgba(255, 255, 255, 0.1)',
+                    }}>
+                      <AlertCircle className="w-12 h-12 mx-auto mb-3" style={{ color: isWPL ? WPLColors.pink : '#60A5FA' }} />
+                      <p className="text-lg font-semibold text-white mb-2">No Players Found</p>
+                      <p className="text-sm mb-4" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
+                        No players found for {selectedMatch.team2.name} in {currentLeague.toUpperCase()}.
+                      </p>
+                      <p className="text-xs mb-4" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
+                        Please add players in the <strong>Admin Players</strong> page and ensure they are assigned to this team.
+                      </p>
                       <button
-                        key={player.id}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          console.log('Button clicked for player:', player.name, player.id);
-                          togglePlayer('team2', player.id);
-                        }}
-                        type="button"
+                        onClick={() => loadData(true)}
                         className={`
-                          p-4 rounded-xl border-2 transition-all text-left cursor-pointer
-                          ${isSelected
-                            ? isWPL
-                              ? 'bg-purple-600/30 border-purple-500/50'
-                              : 'bg-blue-600/30 border-blue-500/50'
-                            : 'bg-slate-700/50 border-slate-600/50 hover:border-slate-500/50'
+                          px-4 py-2 rounded-lg font-semibold transition-all
+                          ${isWPL
+                            ? 'bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300'
+                            : 'bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-300'
                           }
                         `}
-                        style={{ position: 'relative', zIndex: 10 }}
                       >
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="font-semibold text-white">{player.name}</div>
-                          {isSelected && (
-                            <CheckCircle2 className="w-5 h-5" style={{ color: isWPL ? WPLColors.pink : '#60A5FA' }} />
-                          )}
-                        </div>
-                        <div className="text-xs" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
-                          {player.role} • #{player.jerseyNumber}
-                          {player.isCaptain && ' • Captain'}
-                        </div>
+                        <RefreshCw className="w-4 h-4 inline mr-2" />
+                        Refresh Players
                       </button>
-                    );
-                  })}
+                    </div>
+                  ) : (
+                    team2Players.map((player) => {
+                      const isSelected = team2Playing11.includes(player.id);
+                      return (
+                        <button
+                          key={player.id}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            console.log('Button clicked for player:', player.name, player.id);
+                            togglePlayer('team2', player.id);
+                          }}
+                          type="button"
+                          className={`
+                            p-4 rounded-xl border-2 transition-all text-left cursor-pointer
+                            ${isSelected
+                              ? isWPL
+                                ? 'bg-purple-600/30 border-purple-500/50'
+                                : 'bg-blue-600/30 border-blue-500/50'
+                              : 'bg-slate-700/50 border-slate-600/50 hover:border-slate-500/50'
+                            }
+                          `}
+                          style={{ position: 'relative', zIndex: 10 }}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="font-semibold text-white">{player.name}</div>
+                            {isSelected && (
+                              <CheckCircle2 className="w-5 h-5" style={{ color: isWPL ? WPLColors.pink : '#60A5FA' }} />
+                            )}
+                          </div>
+                          <div className="text-xs" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
+                            {player.role} • #{player.jerseyNumber}
+                            {player.isCaptain && ' • Captain'}
+                          </div>
+                        </button>
+                      );
+                    })
+                  )}
                 </div>
               </div>
 
