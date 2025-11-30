@@ -332,7 +332,7 @@ export const api = {
       }));
       
       console.log('API: After mapping, players count:', players.length);
-      console.log('API: Sample players after mapping:', players.slice(0, 3).map(p => ({
+      console.log('API: Sample players after mapping:', players.slice(0, 3).map((p: Player) => ({
         id: p.id,
         name: p.name,
         teamId: p.teamId,
@@ -358,8 +358,8 @@ export const api = {
         });
         console.log(`API: After filtering by league '${league}':`, beforeFilter, '->', players.length);
         if (players.length === 0 && beforeFilter > 0) {
-          console.warn(`⚠️ No players match league '${league}'. Available leagues:`, 
-            [...new Set(playersData.map((p: any) => p.league || 'ipl'))]);
+          const uniqueLeagues = Array.from(new Set(playersData.map((p: any) => p.league || 'ipl')));
+          console.warn(`⚠️ No players match league '${league}'. Available leagues:`, uniqueLeagues);
         }
       }
       
