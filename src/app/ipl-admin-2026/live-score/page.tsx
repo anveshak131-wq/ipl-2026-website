@@ -11,6 +11,8 @@ import { LoadingSpinner } from '@/components/admin/animations';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 import { useLeague } from '@/contexts/LeagueContext';
 import { WPLColors } from '@/lib/wplColors';
+import MatchStatusBadge from '@/components/admin/live-score/MatchStatusBadge';
+import AutoSaveIndicator from '@/components/admin/live-score/AutoSaveIndicator';
 
 export default function AdminLiveScorePage() {
   const router = useRouter();
@@ -194,34 +196,33 @@ export default function AdminLiveScorePage() {
           {/* Header */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-4">
-            <div>
-                <h1 
-                  className="text-4xl font-bold mb-2"
-                  style={{
-                    background: headerGradient,
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                  }}
-                >
-                  Live Score Management
-                </h1>
-                <p style={{ color: isWPL ? WPLColors.textSecondary : '#9CA3AF' }}>
-                  Record ball-by-ball updates. All changes save automatically.
-                </p>
+              <div>
+                <div className="flex items-center gap-4 mb-2">
+                  <h1 
+                    className="text-4xl font-bold"
+                    style={{
+                      background: headerGradient,
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      backgroundClip: 'text',
+                    }}
+                  >
+                    Live Score Management
+                  </h1>
+                  {selectedMatch && (
+                    <MatchStatusBadge 
+                      status={selectedMatch.status} 
+                      league={currentLeague}
+                    />
+                  )}
+                </div>
+                <div className="flex items-center gap-4">
+                  <p style={{ color: isWPL ? WPLColors.textSecondary : '#9CA3AF' }}>
+                    Record ball-by-ball updates. All changes save automatically.
+                  </p>
+                  <AutoSaveIndicator status={saveStatus} league={currentLeague} />
+                </div>
               </div>
-              {saveStatus === 'saved' && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
-                  <CheckCircle2 className="w-5 h-5 text-green-400" />
-                  <span className="text-green-400 font-semibold">Saved!</span>
-                </div>
-              )}
-              {saveStatus === 'error' && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg">
-                  <AlertCircle className="w-5 h-5 text-red-400" />
-                  <span className="text-red-400 font-semibold">Save Failed</span>
-                </div>
-              )}
             </div>
 
             {/* Match Selector */}

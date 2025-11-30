@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import BallEntryButton from './BallEntryButton';
 import ScoreDisplay from './ScoreDisplay';
 import CurrentOverDisplay from './CurrentOverDisplay';
+import OverProgressBar from './OverProgressBar';
 import PlayerStats from './PlayerStats';
 import WicketModal from './WicketModal';
 import { useLiveScore, BallEvent } from '@/hooks/useLiveScore';
@@ -59,7 +60,7 @@ export default function BallEntryPanel({
     initialBowler,
   });
 
-  const handleBallClick = (value: number | string) => {
+  const handleBallClick = useCallback((value: number | string) => {
     if (value === 'W') {
       setShowWicketModal(true);
       return;
@@ -70,7 +71,53 @@ export default function BallEntryPanel({
       runs: typeof value === 'number' ? value : 0,
       timestamp: Date.now(),
     });
-  };
+  }, [recordBall]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input or modal is open
+      if (
+        e.target instanceof HTMLInputElement || 
+        e.target instanceof HTMLTextAreaElement ||
+        e.target instanceof HTMLSelectElement ||
+        showWicketModal ||
+        showPlayerSelector
+      ) {
+        return;
+      }
+
+      // Number keys 0-6
+      if (e.key >= '0' && e.key <= '6' && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        const value = parseInt(e.key);
+        handleBallClick(value);
+      }
+      // W for wicket
+      else if (e.key.toLowerCase() === 'w' && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        handleBallClick('W');
+      }
+      // N for no-ball
+      else if (e.key.toLowerCase() === 'n' && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        handleBallClick('NB');
+      }
+      // D for wide
+      else if (e.key.toLowerCase() === 'd' && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        handleBallClick('WD');
+      }
+      // U for undo
+      else if (e.key.toLowerCase() === 'u' && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey && canUndo) {
+        e.preventDefault();
+        undo();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [canUndo, undo, showWicketModal, showPlayerSelector, handleBallClick]);
 
   const handleWicketConfirm = (dismissalType: string, fielderName?: string) => {
     recordWicket(dismissalType, fielderName);
@@ -130,12 +177,15 @@ export default function BallEntryPanel({
   return (
     <div className="space-y-6">
       {/* Match Info */}
-      <CurrentOverDisplay
-        over={state.currentOver}
-        innings={state.innings}
-        battingTeam={battingTeam.name}
-        league={league}
-      />
+      <div className="space-y-4">
+        <CurrentOverDisplay
+          over={state.currentOver}
+          innings={state.innings}
+          battingTeam={battingTeam.name}
+          league={league}
+        />
+        <OverProgressBar currentOver={state.currentOver} league={league} />
+      </div>
 
       {/* Score Display */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
