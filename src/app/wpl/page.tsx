@@ -705,7 +705,12 @@ export default function WPLHomePage() {
                   </Link>
                 </div>
               </AnimatedSection>
-              <ModernStatsSection />
+              <ModernStatsSection 
+                totalMatches={matches.length}
+                totalTeams={teams.length}
+                activePlayers="100+"
+                fanEngagement="500K+"
+              />
             </div>
           </section>
         )}

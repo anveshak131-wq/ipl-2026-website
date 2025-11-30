@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { TrendingUp, Users, Zap, Trophy } from 'lucide-react';
+import { useLeague } from '@/contexts/LeagueContext';
 
 interface StatItem {
   icon: React.ReactNode;
@@ -11,43 +12,105 @@ interface StatItem {
   color: string;
 }
 
-export default function ModernStatsSection() {
+interface ModernStatsSectionProps {
+  totalMatches?: number;
+  totalTeams?: number;
+  activePlayers?: string;
+  fanEngagement?: string;
+}
+
+export default function ModernStatsSection({ 
+  totalMatches, 
+  totalTeams, 
+  activePlayers, 
+  fanEngagement 
+}: ModernStatsSectionProps = {}) {
+  const { currentLeague } = useLeague();
   const [stats, setStats] = useState<StatItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     setIsLoaded(true);
-    setStats([
-      {
-        icon: <Trophy className="w-6 h-6" />,
-        label: 'Total Matches',
-        value: '74',
-        change: '+12 this season',
-        color: 'from-yellow-500 to-orange-500',
-      },
-      {
-        icon: <Users className="w-6 h-6" />,
-        label: 'Active Players',
-        value: '500+',
-        change: 'Across 10 teams',
-        color: 'from-blue-500 to-cyan-500',
-      },
-      {
-        icon: <Zap className="w-6 h-6" />,
-        label: 'Live Updates',
-        value: 'Real-time',
-        change: 'Every second',
-        color: 'from-purple-500 to-pink-500',
-      },
-      {
-        icon: <TrendingUp className="w-6 h-6" />,
-        label: 'Fan Engagement',
-        value: '1M+',
-        change: 'Growing daily',
-        color: 'from-green-500 to-emerald-500',
-      },
-    ]);
-  }, []);
+    
+    // Default values based on league
+    const isWPL = currentLeague === 'wpl';
+    const defaultMatches = isWPL ? 22 : 74;
+    const defaultTeams = isWPL ? 5 : 10;
+    const defaultPlayers = isWPL ? '100+' : '500+';
+    const defaultEngagement = isWPL ? '500K+' : '1M+';
+    
+    // Use props if provided, otherwise use defaults
+    const matches = totalMatches ?? defaultMatches;
+    const teams = totalTeams ?? defaultTeams;
+    const players = activePlayers ?? defaultPlayers;
+    const engagement = fanEngagement ?? defaultEngagement;
+    
+    if (isWPL) {
+      // WPL-specific stats with purple/pink theme
+      setStats([
+        {
+          icon: <Trophy className="w-6 h-6" />,
+          label: 'Total Matches',
+          value: matches.toString(),
+          change: 'T20 format',
+          color: 'from-purple-500 to-pink-500',
+        },
+        {
+          icon: <Users className="w-6 h-6" />,
+          label: 'Active Players',
+          value: players,
+          change: `Across ${teams} teams`,
+          color: 'from-pink-500 to-rose-500',
+        },
+        {
+          icon: <Zap className="w-6 h-6" />,
+          label: 'Live Updates',
+          value: 'Real-time',
+          change: 'Every second',
+          color: 'from-rose-500 to-purple-500',
+        },
+        {
+          icon: <TrendingUp className="w-6 h-6" />,
+          label: 'Fan Engagement',
+          value: engagement,
+          change: 'Growing daily',
+          color: 'from-violet-500 to-fuchsia-500',
+        },
+      ]);
+    } else {
+      // IPL-specific stats
+      setStats([
+        {
+          icon: <Trophy className="w-6 h-6" />,
+          label: 'Total Matches',
+          value: matches.toString(),
+          change: '+12 this season',
+          color: 'from-yellow-500 to-orange-500',
+        },
+        {
+          icon: <Users className="w-6 h-6" />,
+          label: 'Active Players',
+          value: players,
+          change: `Across ${teams} teams`,
+          color: 'from-blue-500 to-cyan-500',
+        },
+        {
+          icon: <Zap className="w-6 h-6" />,
+          label: 'Live Updates',
+          value: 'Real-time',
+          change: 'Every second',
+          color: 'from-purple-500 to-pink-500',
+        },
+        {
+          icon: <TrendingUp className="w-6 h-6" />,
+          label: 'Fan Engagement',
+          value: engagement,
+          change: 'Growing daily',
+          color: 'from-green-500 to-emerald-500',
+        },
+      ]);
+    }
+  }, [currentLeague, totalMatches, totalTeams, activePlayers, fanEngagement]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
