@@ -861,62 +861,66 @@ export default function AdminPlayers() {
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                       DOB (DD/MM/YYYY)
                     </th>
-                    <th className="px-6 py-4 text-left">
-                      <button
-                        onClick={() => handleSort('runs')}
-                        className="flex items-center gap-2 text-xs font-medium text-gray-400 uppercase tracking-wider hover:text-white transition-colors"
-                      >
-                        Runs
-                        {sortField === 'runs' && (
-                          sortDirection === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />
-                        )}
-                      </button>
-                    </th>
-                    <th className="px-6 py-4 text-left">
-                      <button
-                        onClick={() => handleSort('wickets')}
-                        className="flex items-center gap-2 text-xs font-medium text-gray-400 uppercase tracking-wider hover:text-white transition-colors"
-                      >
-                        Wickets
-                        {sortField === 'wickets' && (
-                          sortDirection === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />
-                        )}
-                      </button>
-                    </th>
-                    <th className="px-6 py-4 text-left">
-                      <button
-                        onClick={() => handleSort('battingAverage')}
-                        className="flex items-center gap-2 text-xs font-medium text-gray-400 uppercase tracking-wider hover:text-white transition-colors"
-                      >
-                        Batting Avg
-                        {sortField === 'battingAverage' && (
-                          sortDirection === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />
-                        )}
-                      </button>
-                    </th>
-                    <th className="px-6 py-4 text-left">
-                      <button
-                        onClick={() => handleSort('bowlingAverage')}
-                        className="flex items-center gap-2 text-xs font-medium text-gray-400 uppercase tracking-wider hover:text-white transition-colors"
-                      >
-                        Bowling Avg
-                        {sortField === 'bowlingAverage' && (
-                          sortDirection === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />
-                        )}
-                      </button>
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      SR
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      4s/6s
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      50s/100s
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      BBM
-                    </th>
+                    {currentLeague !== 'wpl' && (
+                      <>
+                        <th className="px-6 py-4 text-left">
+                          <button
+                            onClick={() => handleSort('runs')}
+                            className="flex items-center gap-2 text-xs font-medium text-gray-400 uppercase tracking-wider hover:text-white transition-colors"
+                          >
+                            Runs
+                            {sortField === 'runs' && (
+                              sortDirection === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />
+                            )}
+                          </button>
+                        </th>
+                        <th className="px-6 py-4 text-left">
+                          <button
+                            onClick={() => handleSort('wickets')}
+                            className="flex items-center gap-2 text-xs font-medium text-gray-400 uppercase tracking-wider hover:text-white transition-colors"
+                          >
+                            Wickets
+                            {sortField === 'wickets' && (
+                              sortDirection === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />
+                            )}
+                          </button>
+                        </th>
+                        <th className="px-6 py-4 text-left">
+                          <button
+                            onClick={() => handleSort('battingAverage')}
+                            className="flex items-center gap-2 text-xs font-medium text-gray-400 uppercase tracking-wider hover:text-white transition-colors"
+                          >
+                            Batting Avg
+                            {sortField === 'battingAverage' && (
+                              sortDirection === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />
+                            )}
+                          </button>
+                        </th>
+                        <th className="px-6 py-4 text-left">
+                          <button
+                            onClick={() => handleSort('bowlingAverage')}
+                            className="flex items-center gap-2 text-xs font-medium text-gray-400 uppercase tracking-wider hover:text-white transition-colors"
+                          >
+                            Bowling Avg
+                            {sortField === 'bowlingAverage' && (
+                              sortDirection === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />
+                            )}
+                          </button>
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                          SR
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                          4s/6s
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                          50s/100s
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                          BBM
+                        </th>
+                      </>
+                    )}
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                       Actions
                     </th>
@@ -975,36 +979,40 @@ export default function AdminPlayers() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                           {player.dateOfBirth ? formatDateDDMMYYYY(player.dateOfBirth) : '-'}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-ipl-gold font-bold">
-                          {player.stats.runs}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-400 font-bold">
-                          {player.stats.wickets}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-purple-400 font-semibold">
-                          {player.stats.average.toFixed(2)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
-                          {(() => {
-                            const bowlingAvg = player.stats.bowlingAverage ?? 
-                              (player.stats.wickets > 0 
-                                ? calculateBowlingAverage(player.stats.economy, player.stats.wickets, player.stats.matches)
-                                : 0);
-                            return bowlingAvg > 0 ? bowlingAvg.toFixed(2) : '-';
-                          })()}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
-                          {player.stats.strikeRate.toFixed(2)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
-                          {player.stats.fours}/{player.stats.sixes}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
-                          {player.stats.fifties}/{player.stats.hundreds}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
-                          {player.stats.bestBowling || '-'}
-                        </td>
+                        {currentLeague !== 'wpl' && (
+                          <>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-ipl-gold font-bold">
+                              {player.stats.runs}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-400 font-bold">
+                              {player.stats.wickets}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-purple-400 font-semibold">
+                              {player.stats.average.toFixed(2)}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
+                              {(() => {
+                                const bowlingAvg = player.stats.bowlingAverage ?? 
+                                  (player.stats.wickets > 0 
+                                    ? calculateBowlingAverage(player.stats.economy, player.stats.wickets, player.stats.matches)
+                                    : 0);
+                                return bowlingAvg > 0 ? bowlingAvg.toFixed(2) : '-';
+                              })()}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
+                              {player.stats.strikeRate.toFixed(2)}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
+                              {player.stats.fours}/{player.stats.sixes}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
+                              {player.stats.fifties}/{player.stats.hundreds}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
+                              {player.stats.bestBowling || '-'}
+                            </td>
+                          </>
+                        )}
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                           <div className="flex space-x-2">
                             <button 
@@ -1025,7 +1033,7 @@ export default function AdminPlayers() {
                     );
                   }) : (
                     <tr>
-                      <td colSpan={12} className="px-6 py-12 text-center">
+                      <td colSpan={currentLeague === 'wpl' ? 7 : 12} className="px-6 py-12 text-center">
                         <div className="flex flex-col items-center justify-center">
                           <svg className="w-16 h-16 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1299,10 +1307,11 @@ export default function AdminPlayers() {
 
                     </div>
 
-                    {/* Stats */}
-                    <div>
-                      <h3 className="text-lg font-semibold text-white mb-4">Player Statistics</h3>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {/* Stats - Only show for IPL */}
+                    {formData.league !== 'wpl' && (
+                      <div>
+                        <h3 className="text-lg font-semibold text-white mb-4">Player Statistics</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
                             Matches
@@ -1466,6 +1475,7 @@ export default function AdminPlayers() {
                         </div>
                       </div>
                     </div>
+                    )}
             </form>
           </ModernDialog>
         </div>

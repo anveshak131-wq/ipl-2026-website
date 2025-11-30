@@ -214,11 +214,20 @@ async function handleGetRequest(context) {
     const league = url.searchParams.get('league');
     
     // Try to get matches from KV storage
-    let matches = await env.IPL_CACHE.get('matches', 'json');
+    const kvMatches = await env.IPL_CACHE.get('matches', 'json');
     
-    // Fallback to default matches if KV storage is empty
-    if (!matches) {
+    // Check if KV key exists (even if empty array)
+    const kvExists = await env.IPL_CACHE.get('matches');
+    
+    let matches;
+    // Only use defaultMatches if KV key doesn't exist at all (first time initialization)
+    // If KV exists but is empty array, use empty array (user has deleted all matches)
+    if (kvExists === null) {
+      // KV key doesn't exist - first time, use default matches
       matches = defaultMatches;
+    } else {
+      // KV key exists - use what's in KV (even if empty array)
+      matches = kvMatches || [];
     }
     
     // Ensure all matches have league property (migration for existing data)
@@ -285,8 +294,19 @@ async function handlePostRequest(context) {
       });
     }
     
-    // Get existing matches
-    let matches = await env.IPL_CACHE.get('matches', 'json') || defaultMatches;
+    // Get existing matches from KV
+    let matches = await env.IPL_CACHE.get('matches', 'json');
+    
+    // Check if KV key exists
+    const kvExists = await env.IPL_CACHE.get('matches');
+    
+    // Only use defaultMatches if KV key doesn't exist at all (first time)
+    // If KV exists but is empty, use empty array
+    if (kvExists === null) {
+      matches = defaultMatches;
+    } else {
+      matches = matches || [];
+    }
     
     // Generate new ID
     const newId = String(Math.max(...matches.map(m => parseInt(m.id) || 0), 0) + 1);
@@ -351,8 +371,19 @@ async function handlePutRequest(context) {
       });
     }
     
-    // Get existing matches
-    let matches = await env.IPL_CACHE.get('matches', 'json') || defaultMatches;
+    // Get existing matches from KV
+    let matches = await env.IPL_CACHE.get('matches', 'json');
+    
+    // Check if KV key exists
+    const kvExists = await env.IPL_CACHE.get('matches');
+    
+    // Only use defaultMatches if KV key doesn't exist at all (first time)
+    // If KV exists but is empty, use empty array
+    if (kvExists === null) {
+      matches = defaultMatches;
+    } else {
+      matches = matches || [];
+    }
     
     // Find and update match
     const matchIndex = matches.findIndex(m => m.id === id);
@@ -427,8 +458,19 @@ async function handleDeleteRequest(context) {
       });
     }
     
-    // Get existing matches
-    let matches = await env.IPL_CACHE.get('matches', 'json') || defaultMatches;
+    // Get existing matches from KV
+    let matches = await env.IPL_CACHE.get('matches', 'json');
+    
+    // Check if KV key exists
+    const kvExists = await env.IPL_CACHE.get('matches');
+    
+    // Only use defaultMatches if KV key doesn't exist at all (first time)
+    // If KV exists but is empty, use empty array
+    if (kvExists === null) {
+      matches = defaultMatches;
+    } else {
+      matches = matches || [];
+    }
     
     // Ensure all matches have league property
     matches = matches.map(m => ({
