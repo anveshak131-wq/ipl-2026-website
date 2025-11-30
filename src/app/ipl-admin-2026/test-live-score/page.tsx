@@ -114,23 +114,35 @@ export default function TestLiveScorePage() {
     console.log('togglePlayer called:', { team, playerId });
     if (team === 'team1') {
       setTeam1Playing11(prev => {
-        const newList = prev.includes(playerId)
-          ? prev.filter(id => id !== playerId)
-          : prev.length >= 11
-            ? (alert('Maximum 11 players allowed for Team 1'), prev)
-            : [...prev, playerId];
-        console.log('Team 1 playing 11 updated:', newList);
-        return newList;
+        if (prev.includes(playerId)) {
+          const newList = prev.filter(id => id !== playerId);
+          console.log('Team 1 playing 11 updated:', newList);
+          return newList;
+        } else {
+          if (prev.length >= 11) {
+            alert('Maximum 11 players allowed for Team 1');
+            return prev;
+          }
+          const newList = [...prev, playerId];
+          console.log('Team 1 playing 11 updated:', newList);
+          return newList;
+        }
       });
     } else {
       setTeam2Playing11(prev => {
-        const newList = prev.includes(playerId)
-          ? prev.filter(id => id !== playerId)
-          : prev.length >= 11
-            ? (alert('Maximum 11 players allowed for Team 2'), prev)
-            : [...prev, playerId];
-        console.log('Team 2 playing 11 updated:', newList);
-        return newList;
+        if (prev.includes(playerId)) {
+          const newList = prev.filter(id => id !== playerId);
+          console.log('Team 2 playing 11 updated:', newList);
+          return newList;
+        } else {
+          if (prev.length >= 11) {
+            alert('Maximum 11 players allowed for Team 2');
+            return prev;
+          }
+          const newList = [...prev, playerId];
+          console.log('Team 2 playing 11 updated:', newList);
+          return newList;
+        }
       });
     }
   };
