@@ -3,8 +3,7 @@ import {
   MatchState, 
   initializeMatchState, 
   shouldAutoTransitionInnings,
-  transitionState,
-  MatchStateType
+  transitionState
 } from '@/lib/matchStateMachine';
 
 export interface BallEvent {

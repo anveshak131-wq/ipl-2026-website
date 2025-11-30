@@ -11,8 +11,6 @@ import { Team, League, PlayoffType } from '@/types';
  * @returns A placeholder team object
  */
 export function getTBDTeam(league: League, position: string = 'TBD'): Team {
-  const leagueName = league.toUpperCase();
-  
   // For WPL, clarify that these are placeholders from the original 5 teams
   const description = league === 'wpl' 
     ? `Placeholder - Will be replaced with one of the 5 WPL teams based on points table standings after league stage`

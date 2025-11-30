@@ -2,7 +2,7 @@
  * Utility functions for generating match numbers based on date and time
  */
 
-import { Match, League } from '@/types';
+import { Match } from '@/types';
 
 /**
  * Generate match number for a match based on its position in chronological order

@@ -11,7 +11,7 @@ import {
   isStateLocked,
   canTransition
 } from '@/lib/matchStateMachine';
-import { CheckCircle2, Lock, ChevronRight, AlertCircle } from 'lucide-react';
+import { Lock, ChevronRight, AlertCircle } from 'lucide-react';
 import { WPLColors } from '@/lib/wplColors';
 
 interface MatchStateManagerProps {
@@ -91,7 +91,7 @@ export default function MatchStateManager({
 
     // Direct transition for other states
     try {
-      const newState = transitionState(matchState, targetState);
+      const newState = transitionState(matchState, targetState, undefined);
       onStateChange(newState);
     } catch (error) {
       alert(error instanceof Error ? error.message : 'Failed to transition state');
@@ -132,33 +132,32 @@ export default function MatchStateManager({
     if (!pendingState) return;
 
     try {
-      let newState = transitionState(matchState, pendingState);
+      let newState: MatchState;
 
       // If transitioning to break, calculate target
       if (pendingState === 'break' && currentInnings === 1) {
         const battingTeam = matchState.innings1?.battingTeam || 'team1';
-        const target = battingTeam === 'team1' 
-          ? (matchState.innings1?.target || 0) 
-          : (matchState.innings1?.target || 0);
-        
-        // Get actual runs from current innings
+        // Get actual runs from current innings (should come from live score state)
         const currentRuns = battingTeam === 'team1' 
           ? (matchState.innings1?.target || 0) // This should come from live score
           : (matchState.innings1?.target || 0);
 
-        newState = transitionState(newState, 'break', {
+        newState = transitionState(matchState, 'break', {
           target: currentRuns + 1, // Target is runs + 1
         });
       }
-
       // If transitioning to innings 2, determine batting team
-      if (pendingState === 'innings-2') {
+      else if (pendingState === 'innings-2') {
         const innings1BattingTeam = matchState.innings1?.battingTeam || 'team1';
         const innings2BattingTeam = innings1BattingTeam === 'team1' ? 'team2' : 'team1';
         
-        newState = transitionState(newState, 'innings-2', {
+        newState = transitionState(matchState, 'innings-2', {
           battingTeam: innings2BattingTeam,
         });
+      }
+      // For other transitions
+      else {
+        newState = transitionState(matchState, pendingState, undefined);
       }
 
       onStateChange(newState);
@@ -207,7 +206,9 @@ export default function MatchStateManager({
                   {currentDisplay.label}
                 </h3>
                 {!canEdit && (
-                  <Lock className="w-4 h-4 text-gray-400" title="This state is locked" />
+                  <span title="This state is locked">
+                    <Lock className="w-4 h-4 text-gray-400" />
+                  </span>
                 )}
               </div>
               <p className="text-sm text-gray-400">{currentDisplay.description}</p>
@@ -229,7 +230,6 @@ export default function MatchStateManager({
             const display = getStateDisplay(state);
             const isCurrent = state === matchState.currentState;
             const isCompleted = matchState.lockedStates.includes(state);
-            const isFuture = !isCurrent && !isCompleted;
 
             return (
               <div key={state} className="flex items-center gap-2 flex-shrink-0">

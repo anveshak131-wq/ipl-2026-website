@@ -114,7 +114,11 @@ export function canTransition(
 export function transitionState(
   matchState: MatchState,
   targetState: MatchStateType,
-  data?: any
+  data?: {
+    toss?: { winner: 'team1' | 'team2'; decision: 'bat' | 'bowl' };
+    battingTeam?: 'team1' | 'team2';
+    target?: number;
+  }
 ): MatchState {
   const transition = canTransition(matchState.currentState, targetState, matchState);
   
