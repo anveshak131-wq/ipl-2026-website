@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import IPLLogo from '../ui/IPLLogo';
 import AdminLeagueSwitcher from './AdminLeagueSwitcher';
+import { useLeague } from '@/contexts/LeagueContext';
 import { Search, X, Clock, Command, ChevronDown, ChevronRight, Bell } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -30,6 +31,7 @@ interface RecentPage {
 export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const { currentLeague } = useLeague();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [adminName, setAdminName] = useState('Admin User');
@@ -299,7 +301,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
   }, [collapsed]);
 
   // Consolidated menu groups for cleaner navigation
-  const menuGroups: { [key: string]: MenuItem[] } = {
+  const menuGroups: { [key: string]: MenuItem[] } = useMemo(() => ({
     Main: [
       {
         href: '/ipl-admin-2026/dashboard',
@@ -369,7 +371,8 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         group: 'Content',
         shortcut: 'N',
       },
-      {
+      // Statistics - only show for IPL, not WPL
+      ...(currentLeague !== 'wpl' ? [{
         href: '/ipl-admin-2026/stats',
         label: 'Statistics',
         icon: (
@@ -378,7 +381,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
           </svg>
         ),
         group: 'Content',
-      },
+      }] : []),
     ],
     Tools: [
       {
@@ -428,7 +431,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         shortcut: 'S',
       },
     ],
-  };
+  }), [currentLeague]);
 
   const findMenuItemByHref = (href: string): MenuItem | null => {
     for (const items of Object.values(menuGroups)) {

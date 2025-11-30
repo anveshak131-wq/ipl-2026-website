@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -129,6 +130,28 @@ function getBowlingContextLine(p: Player): string {
 
 export default function StatsPage() {
   const { currentLeague } = useLeague();
+  const router = useRouter();
+  
+  // Redirect WPL users away from stats page
+  useEffect(() => {
+    if (currentLeague === 'wpl') {
+      router.push('/');
+    }
+  }, [currentLeague, router]);
+  
+  // Don't render stats page for WPL
+  if (currentLeague === 'wpl') {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="flex items-center justify-center h-96">
+          <LoadingSpinner size="lg" />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+  
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState(true);

@@ -8,6 +8,7 @@ import SportsUP18LogoWithText from '../branding/SportsUP18LogoWithText';
 import SportsUP18Logo from '../branding/SportsUP18Logo';
 import Emoji from '../emoji/Emoji';
 import LeagueSwitcher from './LeagueSwitcher';
+import { useLeague } from '@/contexts/LeagueContext';
 
 type NavEmojiName = 'cricket' | 'chart' | 'news' | 'glove' | 'target' | 'trophy' | 'sparkles' | 'people' | 'fire' | 'star' | 'cricket-bat' | 'lightning' | 'clock' | 'venue';
 
@@ -18,6 +19,7 @@ interface NavItem {
 }
 
 export default function Navbar() {
+  const { currentLeague } = useLeague();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -60,8 +62,8 @@ export default function Navbar() {
     // Explore & Discover
     { href: '/teams', label: 'Teams', emoji: 'trophy' },
     { href: '/news', label: 'News', emoji: 'fire' },
-    // Analytics & Insights
-    { href: '/stats', label: 'Stats', emoji: 'chart' },
+    // Analytics & Insights (only for IPL, not WPL)
+    ...(currentLeague !== 'wpl' ? [{ href: '/stats', label: 'Stats', emoji: 'chart' as NavEmojiName }] : []),
     // Predictions temporarily removed - will be added back when improved
     // { href: '/predictions', label: 'Predictions', emoji: 'target' },
   ];
