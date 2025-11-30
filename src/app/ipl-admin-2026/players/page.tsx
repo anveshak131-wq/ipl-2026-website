@@ -566,10 +566,62 @@ export default function AdminPlayers() {
   };
 
   // Apply search filter
-  const searchFilteredPlayers = filteredPlayers.filter(player =>
+  let searchFilteredPlayers = filteredPlayers.filter(player =>
     player.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     player.nationality.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  
+  // Safety check: Double-filter by team to ensure no players slip through
+  if (selectedTeam !== 'all') {
+    const beforeSafetyCheck = searchFilteredPlayers.length;
+    
+    // Check for duplicate Ellyse Perry entries
+    const ellyseEntries = players.filter(p => p.name === 'Ellyse Perry');
+    if (ellyseEntries.length > 1) {
+      console.error('❌ FOUND MULTIPLE Ellyse Perry entries!', ellyseEntries.length);
+      ellyseEntries.forEach((entry, idx) => {
+        console.error(`  Entry ${idx + 1}:`, {
+          id: entry.id,
+          teamId: entry.teamId,
+          teamIdType: typeof entry.teamId,
+          team: teams.find(t => String(t.id) === String(entry.teamId))?.name
+        });
+      });
+    }
+    
+    searchFilteredPlayers = searchFilteredPlayers.filter(player => {
+      if (!player.teamId) return false;
+      const matches = String(player.teamId).trim() === String(selectedTeam).trim();
+      
+      // Extra check for Ellyse Perry
+      if (player.name === 'Ellyse Perry' && !matches) {
+        console.error('❌ Ellyse Perry in searchFilteredPlayers but does not match selected team!');
+        console.error('  Player TeamId:', player.teamId, typeof player.teamId);
+        console.error('  Selected Team:', selectedTeam, typeof selectedTeam);
+        console.error('  Match:', matches);
+        return false; // Force exclude
+      }
+      
+      return matches;
+    });
+    
+    // Debug: Check if Ellyse Perry is in the final list
+    const ellyseInFinal = searchFilteredPlayers.some(p => p.name === 'Ellyse Perry');
+    if (ellyseInFinal) {
+      const ellyse = searchFilteredPlayers.find(p => p.name === 'Ellyse Perry');
+      console.error('❌ ERROR: Ellyse Perry found in final render list!');
+      console.error('  Selected Team:', selectedTeam);
+      console.error('  Her TeamId:', ellyse?.teamId);
+      console.error('  Her ID:', ellyse?.id);
+      console.error('  This should not happen!');
+      // Force remove her
+      searchFilteredPlayers = searchFilteredPlayers.filter(p => p.name !== 'Ellyse Perry' || String(p.teamId) === String(selectedTeam));
+    }
+    
+    if (beforeSafetyCheck !== searchFilteredPlayers.length) {
+      console.warn('⚠️ Safety check removed', beforeSafetyCheck - searchFilteredPlayers.length, 'players that did not match team filter');
+    }
+  }
 
   if (!isAuthenticated) {
     return null;
@@ -976,10 +1028,24 @@ export default function AdminPlayers() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {searchFilteredPlayers.length > 0 ? searchFilteredPlayers.map((player, idx) => {
+                  {searchFilteredPlayers.length > 0 ? searchFilteredPlayers
+                    .filter(player => {
+                      // Final safety check: If a team is selected, ensure player matches
+                      if (selectedTeam !== 'all' && player.teamId) {
+                        const matches = String(player.teamId).trim() === String(selectedTeam).trim();
+                        if (!matches && player.name === 'Ellyse Perry') {
+                          console.error('🚨 CRITICAL: Ellyse Perry passed through all filters! Removing now.');
+                          console.error('  Player TeamId:', player.teamId, 'Selected:', selectedTeam);
+                          return false;
+                        }
+                        return matches;
+                      }
+                      return true;
+                    })
+                    .map((player, idx) => {
                     const team = teams.find(t => String(t.id) === String(player.teamId));
                     return (
-                      <tr key={`${player.id}-${player.teamId}-${player.jerseyNumber}`} className="hover:bg-white/5">
+                      <tr key={`${player.id}-${player.teamId}-${selectedTeam}-${idx}`} className="hover:bg-white/5">
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <div className="flex items-center space-x-3">
                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-ipl-gold to-ipl-purple flex items-center justify-center text-white font-bold text-xs">
