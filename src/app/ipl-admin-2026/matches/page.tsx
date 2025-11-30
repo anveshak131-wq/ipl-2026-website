@@ -2240,10 +2240,10 @@ export default function AdminMatches() {
                                 showSelectAll={true}
                             />
                             <div className="overflow-x-auto">
-                                <table className="w-full">
+                                <table className="w-full" style={{ tableLayout: 'auto', minWidth: '1000px' }}>
                                     <thead className="bg-white/5">
                                         <tr>
-                                            <th className="px-6 py-4 text-left">
+                                            <th className="px-4 py-4 text-left" style={{ width: '48px' }}>
                                                 <button
                                                     onClick={toggleSelectAll}
                                                     className="flex items-center"
@@ -2256,22 +2256,22 @@ export default function AdminMatches() {
                                                     )}
                                                 </button>
                                             </th>
-                                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                            <th className="px-4 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '120px', minWidth: '120px' }}>
                                                 Match #
                                             </th>
-                                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                            <th className="px-4 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '160px', minWidth: '160px' }}>
                                                 Date & Time
                                             </th>
-                                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                            <th className="px-4 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ minWidth: '350px' }}>
                                                 Match
                                             </th>
-                                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                            <th className="px-4 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '180px', minWidth: '180px' }}>
                                                 Venue
                                             </th>
-                                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                            <th className="px-4 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '200px', minWidth: '200px' }}>
                                                 Status
                                             </th>
-                                            <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                                            <th className="px-4 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider" style={{ width: '180px', minWidth: '180px' }}>
                                                 Actions
                                             </th>
                                         </tr>
@@ -2286,7 +2286,7 @@ export default function AdminMatches() {
                                                 transition={{ delay: index * 0.03, duration: 0.3 }}
                                                 whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.05)' }}
                                             >
-                                                <td className="px-6 py-4">
+                                                <td className="px-4 py-4" style={{ width: '48px' }}>
                                                     <input
                                                         type="checkbox"
                                                         checked={selectedMatches.has(match.id)}
@@ -2294,16 +2294,16 @@ export default function AdminMatches() {
                                                         className="w-4 h-4 rounded border-white/20 bg-white/5 text-ipl-gold focus:ring-ipl-gold/20 cursor-pointer"
                                                     />
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                <td className="px-4 py-4 whitespace-nowrap" style={{ width: '120px' }}>
                                                     <div className="text-sm font-bold text-ipl-gold">
                                                         {getMatchNumberDisplay(match, matches)}
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                <td className="px-4 py-4 whitespace-nowrap" style={{ width: '160px' }}>
                                                     <div className="text-sm text-white font-medium">{formatDate(match.date)}</div>
                                                     <div className="text-xs text-gray-400">{formatTime(match.time)}</div>
                                                 </td>
-                                                <td className="px-6 py-4">
+                                                <td className="px-4 py-4" style={{ minWidth: '350px' }}>
                                                     {/* WPL Playoff Helper Text */}
                                                     {match.league === 'wpl' && match.playoffType && 
                                                      (match.team1.id.includes('tbd-') || match.team2.id.includes('tbd-') || 
@@ -2513,15 +2513,15 @@ export default function AdminMatches() {
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="text-sm text-gray-300 max-w-xs truncate">
+                                                <td className="px-4 py-4" style={{ width: '180px' }}>
+                                                    <div className="text-sm text-gray-300 truncate" title={match.venue}>
                                                         {match.venue}
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex items-center gap-3">
+                                                <td className="px-4 py-4" style={{ width: '200px' }}>
+                                                    <div className="flex items-center gap-2 flex-wrap">
                                                         {getStatusBadge(match.status)}
-                                                        <div className="flex items-center gap-2 ml-2">
+                                                        <div className="flex items-center gap-1 flex-wrap">
                                                             <label className="flex items-center gap-2 cursor-pointer group">
                                                                 <input
                                                                     type="checkbox"
@@ -2571,8 +2571,8 @@ export default function AdminMatches() {
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="flex items-center gap-2">
+                                                <td className="px-4 py-4 whitespace-nowrap" style={{ width: '180px' }}>
+                                                    <div className="flex items-center gap-2 flex-wrap">
                                                         <div className="relative group">
                                                             <button
                                                                 className="p-2 text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all duration-200 disabled:opacity-50"
