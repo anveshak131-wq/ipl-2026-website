@@ -449,11 +449,24 @@ export default function AdminPlayers() {
   };
 
   // Filter and sort players
+  // Debug: Log current filter state
+  if (selectedTeam !== 'all') {
+    console.log('🔍 Filtering players by team:', {
+      selectedTeam,
+      selectedTeamType: typeof selectedTeam,
+      totalPlayers: players.length,
+      teamsAvailable: teams.map(t => ({ id: t.id, name: t.name, idType: typeof t.id }))
+    });
+  }
+  
   let filteredPlayers = selectedTeam === 'all' 
     ? players 
     : players.filter(player => {
         // Only show players with a valid teamId when a specific team is selected
         if (!player.teamId) {
+          if (player.name === 'Ellyse Perry') {
+            console.log('❌ Ellyse Perry has no teamId, excluding from results');
+          }
           return false; // Exclude players without a teamId
         }
         
@@ -473,12 +486,24 @@ export default function AdminPlayers() {
             selectedTeamIdType: typeof selectedTeam,
             selectedTeamIdString: selectedTeamId,
             matches,
-            willShow: matches
+            willShow: matches,
+            allTeams: teams.map(t => ({ id: t.id, name: t.name, idType: typeof t.id }))
           });
+          console.log('🔍 Full player object:', JSON.stringify(player, null, 2));
         }
         
         return matches;
       });
+  
+  // Debug: Log filtered results
+  if (selectedTeam !== 'all') {
+    console.log('🔍 Filter results:', {
+      selectedTeam,
+      filteredCount: filteredPlayers.length,
+      totalCount: players.length,
+      ellyseInResults: filteredPlayers.some(p => p.name === 'Ellyse Perry')
+    });
+  }
 
   // Apply sorting
   if (sortField) {
