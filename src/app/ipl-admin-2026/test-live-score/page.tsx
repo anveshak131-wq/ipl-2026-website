@@ -58,6 +58,21 @@ export default function TestLiveScorePage() {
       setMatches(matchesData);
       setPlayers(playersData);
       setTeams(teamsData);
+      
+      // Debug: Log players data from KV
+      console.log('Players loaded from KV (test page):', {
+        total: playersData.length,
+        league: currentLeague,
+        playersByLeague: playersData.filter(p => p.league === currentLeague).length,
+        samplePlayer: playersData[0] ? {
+          id: playersData[0].id,
+          name: playersData[0].name,
+          teamId: playersData[0].teamId,
+          league: playersData[0].league,
+          idType: typeof playersData[0].id,
+          teamIdType: typeof playersData[0].teamId
+        } : null
+      });
 
       // Auto-select first upcoming or live match (only if no match is currently selected)
       setSelectedMatchId(prev => {
@@ -123,21 +138,45 @@ export default function TestLiveScorePage() {
 
   // Get ALL players from each team's squad (no restrictions in test mode)
   const team1Players = useMemo(() => {
-    if (!selectedMatch) return [];
+    if (!selectedMatch) {
+      console.log('No selected match for team1Players (test)');
+      return [];
+    }
     // Filter by teamId and league to get all squad players
-    return players.filter(p => 
-      p.teamId === selectedMatch.team1.id && 
-      p.league === selectedMatch.league
-    );
+    const filtered = players.filter(p => {
+      const matchesTeam = p.teamId === selectedMatch.team1.id;
+      const matchesLeague = p.league === selectedMatch.league;
+      return matchesTeam && matchesLeague;
+    });
+    console.log('Team 1 players filtered (test):', {
+      totalPlayers: players.length,
+      team1Id: selectedMatch.team1.id,
+      league: selectedMatch.league,
+      filteredCount: filtered.length,
+      playerIds: filtered.map(p => p.id)
+    });
+    return filtered;
   }, [players, selectedMatch]);
 
   const team2Players = useMemo(() => {
-    if (!selectedMatch) return [];
+    if (!selectedMatch) {
+      console.log('No selected match for team2Players (test)');
+      return [];
+    }
     // Filter by teamId and league to get all squad players
-    return players.filter(p => 
-      p.teamId === selectedMatch.team2.id && 
-      p.league === selectedMatch.league
-    );
+    const filtered = players.filter(p => {
+      const matchesTeam = p.teamId === selectedMatch.team2.id;
+      const matchesLeague = p.league === selectedMatch.league;
+      return matchesTeam && matchesLeague;
+    });
+    console.log('Team 2 players filtered (test):', {
+      totalPlayers: players.length,
+      team2Id: selectedMatch.team2.id,
+      league: selectedMatch.league,
+      filteredCount: filtered.length,
+      playerIds: filtered.map(p => p.id)
+    });
+    return filtered;
   }, [players, selectedMatch]);
 
   const togglePlayer = (team: 'team1' | 'team2', playerId: string) => {
@@ -146,7 +185,7 @@ export default function TestLiveScorePage() {
       setTeam1Playing11(prev => {
         if (prev.includes(playerId)) {
           const newList = prev.filter(id => id !== playerId);
-          console.log('Team 1 playing 11 updated:', newList);
+          console.log('Team 1 - Removed player, new list:', newList);
           return newList;
         } else {
           if (prev.length >= 11) {
@@ -154,7 +193,7 @@ export default function TestLiveScorePage() {
             return prev;
           }
           const newList = [...prev, playerId];
-          console.log('Team 1 playing 11 updated:', newList);
+          console.log('Team 1 - Added player, new list:', newList);
           return newList;
         }
       });
@@ -162,7 +201,7 @@ export default function TestLiveScorePage() {
       setTeam2Playing11(prev => {
         if (prev.includes(playerId)) {
           const newList = prev.filter(id => id !== playerId);
-          console.log('Team 2 playing 11 updated:', newList);
+          console.log('Team 2 - Removed player, new list:', newList);
           return newList;
         } else {
           if (prev.length >= 11) {
@@ -170,7 +209,7 @@ export default function TestLiveScorePage() {
             return prev;
           }
           const newList = [...prev, playerId];
-          console.log('Team 2 playing 11 updated:', newList);
+          console.log('Team 2 - Added player, new list:', newList);
           return newList;
         }
       });
@@ -544,6 +583,7 @@ export default function TestLiveScorePage() {
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
+                                console.log('Button clicked for player:', player.name, player.id);
                                 togglePlayer('team1', player.id);
                               }}
                               type="button"
@@ -556,7 +596,7 @@ export default function TestLiveScorePage() {
                                   : 'bg-slate-700/50 border-slate-600/50 hover:border-slate-500/50'
                                 }
                               `}
-                              style={{ pointerEvents: 'auto', zIndex: 10 }}
+                              style={{ position: 'relative', zIndex: 10, pointerEvents: 'auto' }}
                             >
                               <div className="flex items-center justify-between mb-2">
                                 <div className="font-semibold text-white">{player.name}</div>
@@ -621,6 +661,7 @@ export default function TestLiveScorePage() {
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
+                                console.log('Button clicked for player:', player.name, player.id);
                                 togglePlayer('team2', player.id);
                               }}
                               type="button"
@@ -633,7 +674,7 @@ export default function TestLiveScorePage() {
                                   : 'bg-slate-700/50 border-slate-600/50 hover:border-slate-500/50'
                                 }
                               `}
-                              style={{ pointerEvents: 'auto', zIndex: 10 }}
+                              style={{ position: 'relative', zIndex: 10, pointerEvents: 'auto' }}
                             >
                               <div className="flex items-center justify-between mb-2">
                                 <div className="font-semibold text-white">{player.name}</div>

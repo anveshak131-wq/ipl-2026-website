@@ -56,6 +56,21 @@ export default function Playing11Page() {
       setMatches(matchesData);
       setPlayers(playersData);
       setTeams(teamsData);
+      
+      // Debug: Log players data from KV
+      console.log('Players loaded from KV:', {
+        total: playersData.length,
+        league: currentLeague,
+        playersByLeague: playersData.filter(p => p.league === currentLeague).length,
+        samplePlayer: playersData[0] ? {
+          id: playersData[0].id,
+          name: playersData[0].name,
+          teamId: playersData[0].teamId,
+          league: playersData[0].league,
+          idType: typeof playersData[0].id,
+          teamIdType: typeof playersData[0].teamId
+        } : null
+      });
 
       // Auto-select first upcoming match if none selected (preserve current selection if it exists)
       setSelectedMatchId(prev => {
@@ -122,46 +137,103 @@ export default function Playing11Page() {
 
   // Get ALL players from each team's squad (no restrictions)
   const team1Players = useMemo(() => {
-    if (!selectedMatch) return [];
+    if (!selectedMatch) {
+      console.log('No selected match for team1Players');
+      return [];
+    }
     // Filter by teamId and league to get all squad players
-    return players.filter(p => 
-      p.teamId === selectedMatch.team1.id && 
-      p.league === selectedMatch.league
-    );
+    const filtered = players.filter(p => {
+      const matchesTeam = p.teamId === selectedMatch.team1.id;
+      const matchesLeague = p.league === selectedMatch.league;
+      if (!matchesTeam || !matchesLeague) {
+        console.log('Player filtered out:', {
+          playerName: p.name,
+          playerTeamId: p.teamId,
+          matchTeamId: selectedMatch.team1.id,
+          playerLeague: p.league,
+          matchLeague: selectedMatch.league,
+          matchesTeam,
+          matchesLeague
+        });
+      }
+      return matchesTeam && matchesLeague;
+    });
+    console.log('Team 1 players filtered:', {
+      totalPlayers: players.length,
+      team1Id: selectedMatch.team1.id,
+      league: selectedMatch.league,
+      filteredCount: filtered.length,
+      playerIds: filtered.map(p => p.id),
+      playerNames: filtered.map(p => p.name)
+    });
+    return filtered;
   }, [players, selectedMatch]);
 
   const team2Players = useMemo(() => {
-    if (!selectedMatch) return [];
+    if (!selectedMatch) {
+      console.log('No selected match for team2Players');
+      return [];
+    }
     // Filter by teamId and league to get all squad players
-    return players.filter(p => 
-      p.teamId === selectedMatch.team2.id && 
-      p.league === selectedMatch.league
-    );
+    const filtered = players.filter(p => {
+      const matchesTeam = p.teamId === selectedMatch.team2.id;
+      const matchesLeague = p.league === selectedMatch.league;
+      if (!matchesTeam || !matchesLeague) {
+        console.log('Player filtered out:', {
+          playerName: p.name,
+          playerTeamId: p.teamId,
+          matchTeamId: selectedMatch.team2.id,
+          playerLeague: p.league,
+          matchLeague: selectedMatch.league,
+          matchesTeam,
+          matchesLeague
+        });
+      }
+      return matchesTeam && matchesLeague;
+    });
+    console.log('Team 2 players filtered:', {
+      totalPlayers: players.length,
+      team2Id: selectedMatch.team2.id,
+      league: selectedMatch.league,
+      filteredCount: filtered.length,
+      playerIds: filtered.map(p => p.id),
+      playerNames: filtered.map(p => p.name)
+    });
+    return filtered;
   }, [players, selectedMatch]);
 
   const togglePlayer = (team: 'team1' | 'team2', playerId: string) => {
+    console.log('togglePlayer called:', { team, playerId });
     if (team === 'team1') {
       setTeam1Playing11(prev => {
         if (prev.includes(playerId)) {
-          return prev.filter(id => id !== playerId);
+          const newList = prev.filter(id => id !== playerId);
+          console.log('Team 1 - Removed player, new list:', newList);
+          return newList;
         } else {
           if (prev.length >= 11) {
             alert('Maximum 11 players allowed for Team 1');
             return prev;
           }
-          return [...prev, playerId];
+          const newList = [...prev, playerId];
+          console.log('Team 1 - Added player, new list:', newList);
+          return newList;
         }
       });
     } else {
       setTeam2Playing11(prev => {
         if (prev.includes(playerId)) {
-          return prev.filter(id => id !== playerId);
+          const newList = prev.filter(id => id !== playerId);
+          console.log('Team 2 - Removed player, new list:', newList);
+          return newList;
         } else {
           if (prev.length >= 11) {
             alert('Maximum 11 players allowed for Team 2');
             return prev;
           }
-          return [...prev, playerId];
+          const newList = [...prev, playerId];
+          console.log('Team 2 - Added player, new list:', newList);
+          return newList;
         }
       });
     }
@@ -251,7 +323,7 @@ export default function Playing11Page() {
       <AuroraBackground />
       <AdminSidebar currentPage="/ipl-admin-2026/playing-11" />
       
-      <main className="flex-1 relative z-10 p-4 md:p-8 overflow-y-auto">
+      <main className="flex-1 relative z-20 p-4 md:p-8 overflow-y-auto" style={{ position: 'relative', zIndex: 20 }}>
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-6">
@@ -392,9 +464,15 @@ export default function Playing11Page() {
                     return (
                       <button
                         key={player.id}
-                        onClick={() => togglePlayer('team1', player.id)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log('Button clicked for player:', player.name, player.id);
+                          togglePlayer('team1', player.id);
+                        }}
+                        type="button"
                         className={`
-                          p-4 rounded-xl border-2 transition-all text-left
+                          p-4 rounded-xl border-2 transition-all text-left cursor-pointer
                           ${isSelected
                             ? isWPL
                               ? 'bg-purple-600/30 border-purple-500/50'
@@ -402,6 +480,7 @@ export default function Playing11Page() {
                             : 'bg-slate-700/50 border-slate-600/50 hover:border-slate-500/50'
                           }
                         `}
+                        style={{ position: 'relative', zIndex: 10 }}
                       >
                         <div className="flex items-center justify-between mb-2">
                           <div className="font-semibold text-white">{player.name}</div>
@@ -457,9 +536,15 @@ export default function Playing11Page() {
                     return (
                       <button
                         key={player.id}
-                        onClick={() => togglePlayer('team2', player.id)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log('Button clicked for player:', player.name, player.id);
+                          togglePlayer('team2', player.id);
+                        }}
+                        type="button"
                         className={`
-                          p-4 rounded-xl border-2 transition-all text-left
+                          p-4 rounded-xl border-2 transition-all text-left cursor-pointer
                           ${isSelected
                             ? isWPL
                               ? 'bg-purple-600/30 border-purple-500/50'
@@ -467,6 +552,7 @@ export default function Playing11Page() {
                             : 'bg-slate-700/50 border-slate-600/50 hover:border-slate-500/50'
                           }
                         `}
+                        style={{ position: 'relative', zIndex: 10 }}
                       >
                         <div className="flex items-center justify-between mb-2">
                           <div className="font-semibold text-white">{player.name}</div>
