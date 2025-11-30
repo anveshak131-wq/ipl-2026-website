@@ -83,8 +83,16 @@ export const getWPLGlassmorphism = (color: 'purple' | 'pink' | 'rose' | 'violet'
     violet: WPLColors.violetRGBA,
   };
 
+  // Map opacity to a valid lower opacity value
+  const lowerOpacityMap: Record<10 | 15 | 20, 10 | 15 | 20 | 30 | 40 | 50> = {
+    10: 10,
+    15: 10,
+    20: 10,
+  };
+  const lowerOpacity = lowerOpacityMap[opacity];
+
   return {
-    background: `linear-gradient(135deg, ${colorMap[color][opacity]}, ${colorMap[color][opacity - 10] || colorMap[color][10]})`,
+    background: `linear-gradient(135deg, ${colorMap[color][opacity]}, ${colorMap[color][lowerOpacity]})`,
     backdropFilter: 'blur(20px) saturate(180%)',
     WebkitBackdropFilter: 'blur(20px) saturate(180%)',
     border: `1px solid ${colorMap[color][30]}`,
