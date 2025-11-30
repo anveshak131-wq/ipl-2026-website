@@ -77,39 +77,8 @@ const mockTeams = [
   }
 ];
 
-// Default mock matches
-const defaultMatches = [
-  {
-    id: '1',
-    league: 'ipl',
-    date: '2026-03-23',
-    time: '19:30',
-    venue: 'M. A. Chidambaram Stadium, Chennai',
-    team1Id: '10',
-    team2Id: '1',
-    status: 'upcoming'
-  },
-  {
-    id: '2',
-    league: 'ipl',
-    date: '2026-03-24',
-    time: '15:30',
-    venue: 'Eden Gardens, Kolkata',
-    team1Id: '9',
-    team2Id: '4',
-    status: 'upcoming'
-  },
-  {
-    id: '3',
-    league: 'ipl',
-    date: '2026-03-25',
-    time: '19:30',
-    venue: 'Wankhede Stadium, Mumbai',
-    team1Id: '2',
-    team2Id: '8',
-    status: 'upcoming'
-  }
-];
+// No default/sample matches - start with empty array
+// Users must create matches through the admin panel
 
 // Helper function to verify admin token
 function verifyAdminToken(request) {
@@ -220,11 +189,11 @@ async function handleGetRequest(context) {
     const kvExists = await env.IPL_CACHE.get('matches');
     
     let matches;
-    // Only use defaultMatches if KV key doesn't exist at all (first time initialization)
-    // If KV exists but is empty array, use empty array (user has deleted all matches)
+    // Start with empty array - no default/sample matches
+    // If KV exists, use what's in KV (even if empty array)
     if (kvExists === null) {
-      // KV key doesn't exist - first time, use default matches
-      matches = defaultMatches;
+      // KV key doesn't exist - first time, start with empty array
+      matches = [];
     } else {
       // KV key exists - use what's in KV (even if empty array)
       matches = kvMatches || [];
@@ -300,10 +269,10 @@ async function handlePostRequest(context) {
     // Check if KV key exists
     const kvExists = await env.IPL_CACHE.get('matches');
     
-    // Only use defaultMatches if KV key doesn't exist at all (first time)
+    // Start with empty array - no default/sample matches
     // If KV exists but is empty, use empty array
     if (kvExists === null) {
-      matches = defaultMatches;
+      matches = [];
     } else {
       matches = matches || [];
     }
@@ -377,10 +346,10 @@ async function handlePutRequest(context) {
     // Check if KV key exists
     const kvExists = await env.IPL_CACHE.get('matches');
     
-    // Only use defaultMatches if KV key doesn't exist at all (first time)
+    // Start with empty array - no default/sample matches
     // If KV exists but is empty, use empty array
     if (kvExists === null) {
-      matches = defaultMatches;
+      matches = [];
     } else {
       matches = matches || [];
     }
@@ -464,10 +433,10 @@ async function handleDeleteRequest(context) {
     // Check if KV key exists
     const kvExists = await env.IPL_CACHE.get('matches');
     
-    // Only use defaultMatches if KV key doesn't exist at all (first time)
+    // Start with empty array - no default/sample matches
     // If KV exists but is empty, use empty array
     if (kvExists === null) {
-      matches = defaultMatches;
+      matches = [];
     } else {
       matches = matches || [];
     }
