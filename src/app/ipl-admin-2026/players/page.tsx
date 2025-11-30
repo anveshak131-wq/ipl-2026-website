@@ -451,12 +451,10 @@ export default function AdminPlayers() {
   // Filter and sort players
   // Debug: Log current filter state
   if (selectedTeam !== 'all') {
-    console.log('🔍 Filtering players by team:', {
-      selectedTeam,
-      selectedTeamType: typeof selectedTeam,
-      totalPlayers: players.length,
-      teamsAvailable: teams.map(t => ({ id: t.id, name: t.name, idType: typeof t.id }))
-    });
+    console.log('🔍 Filtering players by team:');
+    console.log('  Selected Team ID:', selectedTeam, '(type:', typeof selectedTeam + ')');
+    console.log('  Total Players:', players.length);
+    console.log('  Available Teams:', teams.map(t => `ID: ${t.id} (${typeof t.id}) = ${t.name}`));
   }
   
   let filteredPlayers = selectedTeam === 'all' 
@@ -477,19 +475,15 @@ export default function AdminPlayers() {
         
         // Debug logging for Ellyse Perry specifically
         if (player.name === 'Ellyse Perry' && selectedTeam !== 'all') {
-          console.log('🔍 Ellyse Perry filter check:', {
-            playerName: player.name,
-            playerTeamId: player.teamId,
-            playerTeamIdType: typeof player.teamId,
-            playerTeamIdString: playerTeamId,
-            selectedTeamId: selectedTeam,
-            selectedTeamIdType: typeof selectedTeam,
-            selectedTeamIdString: selectedTeamId,
-            matches,
-            willShow: matches,
-            allTeams: teams.map(t => ({ id: t.id, name: t.name, idType: typeof t.id }))
-          });
-          console.log('🔍 Full player object:', JSON.stringify(player, null, 2));
+          console.log('🔍 Ellyse Perry filter check:');
+          console.log('  Player TeamId:', player.teamId, '(type:', typeof player.teamId + ')');
+          console.log('  Player TeamId (string):', playerTeamId);
+          console.log('  Selected TeamId:', selectedTeam, '(type:', typeof selectedTeam + ')');
+          console.log('  Selected TeamId (string):', selectedTeamId);
+          console.log('  Match Result:', matches);
+          console.log('  Will Show:', matches);
+          const matchingTeam = teams.find(t => String(t.id) === playerTeamId);
+          console.log('  Her Team:', matchingTeam ? matchingTeam.name : 'NOT FOUND');
         }
         
         return matches;
@@ -497,12 +491,15 @@ export default function AdminPlayers() {
   
   // Debug: Log filtered results
   if (selectedTeam !== 'all') {
-    console.log('🔍 Filter results:', {
-      selectedTeam,
-      filteredCount: filteredPlayers.length,
-      totalCount: players.length,
-      ellyseInResults: filteredPlayers.some(p => p.name === 'Ellyse Perry')
-    });
+    console.log('🔍 Filter results:');
+    console.log('  Selected Team:', selectedTeam);
+    console.log('  Filtered Count:', filteredPlayers.length);
+    console.log('  Total Count:', players.length);
+    console.log('  Ellyse in Results:', filteredPlayers.some(p => p.name === 'Ellyse Perry'));
+    if (filteredPlayers.some(p => p.name === 'Ellyse Perry')) {
+      const ellyse = filteredPlayers.find(p => p.name === 'Ellyse Perry');
+      console.log('  ⚠️ Ellyse Perry SHOULD NOT be here! Her teamId:', ellyse?.teamId, 'Selected:', selectedTeam);
+    }
   }
 
   // Apply sorting
