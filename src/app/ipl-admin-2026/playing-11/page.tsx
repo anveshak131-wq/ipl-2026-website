@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import { Match, Player, Team } from '@/types';
 import { api } from '@/lib/data';
 import { LoadingSpinner } from '@/components/admin/animations';
-import { CheckCircle2, AlertCircle, Users, Save, X } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Users, Save, X, RefreshCw } from 'lucide-react';
 import { useLeague } from '@/contexts/LeagueContext';
 import { WPLColors } from '@/lib/wplColors';
 
@@ -23,6 +23,7 @@ export default function Playing11Page() {
   const [team1Playing11, setTeam1Playing11] = useState<string[]>([]);
   const [team2Playing11, setTeam2Playing11] = useState<string[]>([]);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Check authentication
   useEffect(() => {
@@ -39,37 +40,66 @@ export default function Playing11Page() {
   }, [router]);
 
   // Load matches, players, and teams
-  useEffect(() => {
+  const loadData = useCallback(async (showLoading = false) => {
     if (!isAuthenticated) return;
 
-    const loadData = async () => {
-      try {
-        const [matchesData, playersData, teamsData] = await Promise.all([
-          api.getMatches(currentLeague),
-          api.getPlayers(currentLeague),
-          api.getTeams(currentLeague),
-        ]);
-        setMatches(matchesData);
-        setPlayers(playersData);
-        setTeams(teamsData);
+    if (showLoading) {
+      setIsRefreshing(true);
+    }
 
-        // Auto-select first upcoming match if none selected
-        if (!selectedMatchId && matchesData.length > 0) {
+    try {
+      const [matchesData, playersData, teamsData] = await Promise.all([
+        api.getMatches(currentLeague),
+        api.getPlayers(currentLeague),
+        api.getTeams(currentLeague),
+      ]);
+      setMatches(matchesData);
+      setPlayers(playersData);
+      setTeams(teamsData);
+
+      // Auto-select first upcoming match if none selected (preserve current selection if it exists)
+      setSelectedMatchId(prev => {
+        if (prev && matchesData.find(m => m.id === prev)) {
+          return prev; // Keep current selection if it still exists
+        }
+        if (matchesData.length > 0) {
           const preferred =
             matchesData.find((m) => m.status === 'upcoming') ||
             matchesData.find((m) => m.status === 'live') ||
             matchesData[0];
-          if (preferred) {
-            setSelectedMatchId(preferred.id);
-          }
+          return preferred?.id || '';
         }
-      } catch (error) {
-        console.error('Error loading data:', error);
+        return prev;
+      });
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      if (showLoading) {
+        setIsRefreshing(false);
+      }
+    }
+  }, [isAuthenticated, currentLeague]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // Refresh players when page becomes visible (user switches back to tab)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // Reload players when tab becomes visible (in case they were updated in another tab)
+        loadData(false);
       }
     };
 
-    loadData();
-  }, [isAuthenticated, currentLeague, selectedMatchId]);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isAuthenticated, currentLeague, loadData]);
 
   const selectedMatch = useMemo(
     () => matches.find((m) => m.id === selectedMatchId) || null,
@@ -242,18 +272,36 @@ export default function Playing11Page() {
                   Select 11 players for each team before the match starts (after toss decision)
                 </p>
               </div>
-              {saveStatus === 'saved' && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
-                  <CheckCircle2 className="w-5 h-5 text-green-400" />
-                  <span className="text-green-400 font-semibold">Saved!</span>
-                </div>
-              )}
-              {saveStatus === 'error' && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg">
-                  <AlertCircle className="w-5 h-5 text-red-400" />
-                  <span className="text-red-400 font-semibold">Save Failed</span>
-                </div>
-              )}
+              <div className="flex items-center gap-3">
+                {saveStatus === 'saved' && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
+                    <CheckCircle2 className="w-5 h-5 text-green-400" />
+                    <span className="text-green-400 font-semibold">Saved!</span>
+                  </div>
+                )}
+                {saveStatus === 'error' && (
+                  <div className="flex items-center gap-2 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg">
+                    <AlertCircle className="w-5 h-5 text-red-400" />
+                    <span className="text-red-400 font-semibold">Save Failed</span>
+                  </div>
+                )}
+                <button
+                  onClick={() => loadData(true)}
+                  disabled={isRefreshing}
+                  className={`
+                    flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all
+                    ${isWPL
+                      ? 'bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300'
+                      : 'bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-300'
+                    }
+                    ${isRefreshing ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
+                  `}
+                  title="Refresh players data"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  {isRefreshing ? 'Refreshing...' : 'Refresh'}
+                </button>
+              </div>
             </div>
 
             {/* Match Selector */}
