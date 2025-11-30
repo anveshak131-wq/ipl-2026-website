@@ -12,6 +12,7 @@ import ModernTeamsShowcase from '@/components/home/ModernTeamsShowcase';
 import ModernNewsSection from '@/components/home/ModernNewsSection';
 import ModernStatsSection from '@/components/home/ModernStatsSection';
 import BackToTop from '@/components/ui/BackToTop';
+import QuickActionBar from '@/components/home/QuickActionBar';
 import { TeamsSkeleton, MatchesSkeleton, NewsSkeleton } from '@/components/home/HomePageSkeletons';
 import { api } from '@/lib/data';
 import { isPlaceholderTeam } from '@/lib/playoffUtils';
@@ -1051,6 +1052,7 @@ export default function Home() {
 
       <Footer />
       <BackToTop />
+      <QuickActionBar />
     </div>
   );
 }
