@@ -345,7 +345,7 @@ export default function WPLHomePage() {
                       boxShadow: `0 10px 40px ${WPLColors.purpleRGBA[50]}, 0 0 60px ${WPLColors.pinkRGBA[30]}`,
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.boxShadow = `0 20px 60px ${WPLColors.purpleRGBA[60]}, 0 0 80px ${WPLColors.pinkRGBA[40]}`;
+                      e.currentTarget.style.boxShadow = `0 20px 60px ${WPLColors.purpleRGBA[50]}, 0 0 80px ${WPLColors.pinkRGBA[40]}`;
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.boxShadow = `0 10px 40px ${WPLColors.purpleRGBA[50]}, 0 0 60px ${WPLColors.pinkRGBA[30]}`;
