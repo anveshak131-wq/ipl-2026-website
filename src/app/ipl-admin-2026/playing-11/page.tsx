@@ -48,11 +48,11 @@ export default function Playing11Page() {
     }
 
     try {
-      const [matchesData, playersData, teamsData] = await Promise.all([
-        api.getMatches(currentLeague),
-        api.getPlayers(currentLeague),
-        api.getTeams(currentLeague),
-      ]);
+              const [matchesData, playersData, teamsData] = await Promise.all([
+                api.getMatches(currentLeague),
+                api.getPlayers(undefined, currentLeague),
+                api.getTeams(currentLeague),
+              ]);
       setMatches(matchesData);
       setPlayers(playersData);
       setTeams(teamsData);

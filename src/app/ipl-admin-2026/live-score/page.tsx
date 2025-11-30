@@ -44,7 +44,7 @@ export default function AdminLiveScorePage() {
       try {
         const [matchesData, playersData] = await Promise.all([
           api.getMatches(currentLeague),
-          api.getPlayers(currentLeague),
+          api.getPlayers(undefined, currentLeague),
         ]);
           setMatches(matchesData);
         setPlayers(playersData);
@@ -194,7 +194,7 @@ export default function AdminLiveScorePage() {
           {/* Header */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-4">
-              <div>
+            <div>
                 <h1 
                   className="text-4xl font-bold mb-2"
                   style={{
@@ -295,8 +295,8 @@ export default function AdminLiveScorePage() {
                 )}
                 league={currentLeague}
                 playing11={selectedMatch.playing11}
-              />
-            </div>
+                    />
+                  </div>
           ) : (
             <div 
               className="rounded-2xl p-12 text-center backdrop-blur-xl border"
@@ -314,8 +314,8 @@ export default function AdminLiveScorePage() {
               >
                 Please select a match to start scoring
               </p>
-            </div>
-          )}
+                </div>
+              )}
         </div>
       </main>
     </div>
