@@ -2296,7 +2296,7 @@ export default function AdminMatches() {
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="text-sm font-bold text-ipl-gold">
-                                                        {getMatchNumberDisplay(match)}
+                                                        {getMatchNumberDisplay(match, matches)}
                                                     </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
@@ -2390,7 +2390,11 @@ export default function AdminMatches() {
                                                                     />
                                                                 );
                                                             })()}
-                                                            <span className="text-white font-semibold">{match.team1.shortName}</span>
+                                                            <span className="text-white font-semibold">
+                                                                {match.team1.id.includes('tbd-') || match.team1.shortName?.includes('Place') || match.team1.name?.includes('Place Team') 
+                                                                    ? 'TBD' 
+                                                                    : match.team1.shortName}
+                                                            </span>
                                                         </div>
                                                         <span className="text-gray-500 font-bold">vs</span>
                                                         <div className="flex items-center gap-2">
@@ -2467,7 +2471,11 @@ export default function AdminMatches() {
                                                                     />
                                                                 );
                                                             })()}
-                                                            <span className="text-white font-semibold">{match.team2.shortName}</span>
+                                                            <span className="text-white font-semibold">
+                                                                {match.team2.id.includes('tbd-') || match.team2.shortName?.includes('Place') || match.team2.name?.includes('Place Team') 
+                                                                    ? 'TBD' 
+                                                                    : match.team2.shortName}
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -2739,7 +2747,11 @@ export default function AdminMatches() {
                                                                         />
                                                                     );
                                                                 })()}
-                                                                <span className="text-white font-bold">{match.team1.shortName}</span>
+                                                                <span className="text-white font-bold">
+                                                                    {match.team1.id.includes('tbd-') || match.team1.shortName?.includes('Place') || match.team1.name?.includes('Place Team') 
+                                                                        ? 'TBD' 
+                                                                        : match.team1.shortName}
+                                                                </span>
                                                             </div>
                                                             <span className="text-gray-500 font-bold text-lg">vs</span>
                                                             <div className="flex items-center gap-2">
@@ -2816,7 +2828,11 @@ export default function AdminMatches() {
                                                                         />
                                                                     );
                                                                 })()}
-                                                                <span className="text-white font-bold">{match.team2.shortName}</span>
+                                                                <span className="text-white font-bold">
+                                                                    {match.team2.id.includes('tbd-') || match.team2.shortName?.includes('Place') || match.team2.name?.includes('Place Team') 
+                                                                        ? 'TBD' 
+                                                                        : match.team2.shortName}
+                                                                </span>
                                                             </div>
                                                         </div>
                                                     </div>

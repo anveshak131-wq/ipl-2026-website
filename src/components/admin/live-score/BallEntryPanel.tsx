@@ -7,9 +7,11 @@ import CurrentOverDisplay from './CurrentOverDisplay';
 import OverProgressBar from './OverProgressBar';
 import PlayerStats from './PlayerStats';
 import WicketModal from './WicketModal';
+import MatchStateManager from './MatchStateManager';
 import { useLiveScore, BallEvent } from '@/hooks/useLiveScore';
 import { Player } from '@/types';
 import { Users, RotateCcw, Save } from 'lucide-react';
+import { initializeMatchState } from '@/lib/matchStateMachine';
 
 interface BallEntryPanelProps {
   matchId: string;
@@ -47,17 +49,25 @@ export default function BallEntryPanel({
 
   const {
     state,
+    matchState,
     recordBall,
     recordWicket,
     undo,
     canUndo,
     changeBatter,
     changeBowler,
+    updateMatchState,
   } = useLiveScore({
     initialTeam1Name: team1Name,
     initialTeam2Name: team2Name,
     initialBatter,
     initialBowler,
+    initialMatchState: initializeMatchState(),
+    maxOvers: 20,
+    onMatchStateChange: (newMatchState) => {
+      // This will be called when match state changes
+      // You can save it to backend here if needed
+    },
   });
 
   const handleBallClick = useCallback((value: number | string) => {
@@ -174,8 +184,26 @@ export default function BallEntryPanel({
 
   const colors = leagueColors[league];
 
+  // Check if ball entry is allowed based on match state
+  const canRecordBalls = matchState.currentState === 'innings-1' || matchState.currentState === 'innings-2';
+
   return (
     <div className="space-y-6">
+      {/* Match State Manager */}
+      <MatchStateManager
+        matchState={matchState}
+        onStateChange={updateMatchState}
+        league={league}
+        team1Name={team1Name}
+        team2Name={team2Name}
+        currentInnings={state.innings}
+        team1Wickets={state.team1.wickets}
+        team2Wickets={state.team2.wickets}
+        team1Overs={state.team1.balls / 6}
+        team2Overs={state.team2.balls / 6}
+        maxOvers={20}
+      />
+
       {/* Match Info */}
       <div className="space-y-4">
         <CurrentOverDisplay
@@ -231,19 +259,36 @@ export default function BallEntryPanel({
 
       {/* Ball Entry Buttons */}
       <div className="space-y-4">
-        <div className="grid grid-cols-5 gap-3">
-          <BallEntryButton value={0} label="Dot" color="green" onClick={() => handleBallClick(0)} />
-          <BallEntryButton value={1} label="Single" color="green" onClick={() => handleBallClick(1)} />
-          <BallEntryButton value={2} label="Double" color="green" onClick={() => handleBallClick(2)} />
-          <BallEntryButton value={4} label="Four" color="green" onClick={() => handleBallClick(4)} />
-          <BallEntryButton value={6} label="Six" color="green" onClick={() => handleBallClick(6)} />
+        {!canRecordBalls && (
+          <div className="px-4 py-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
+            <p className="text-sm text-yellow-400 font-semibold">
+              ⚠️ Ball entry is disabled. Please transition to an innings state to record balls.
+            </p>
+          </div>
+        )}
+        <div className={`grid grid-cols-5 gap-3 ${!canRecordBalls ? 'opacity-50 pointer-events-none' : ''}`}>
+          <BallEntryButton value={0} label="Dot (0)" color="green" onClick={() => handleBallClick(0)} />
+          <BallEntryButton value={1} label="Single (1)" color="green" onClick={() => handleBallClick(1)} />
+          <BallEntryButton value={2} label="Double (2)" color="green" onClick={() => handleBallClick(2)} />
+          <BallEntryButton value={4} label="Four (4)" color="green" onClick={() => handleBallClick(4)} />
+          <BallEntryButton value={6} label="Six (6)" color="green" onClick={() => handleBallClick(6)} />
         </div>
-        <div className="grid grid-cols-5 gap-3">
-          <BallEntryButton value="W" label="Wicket" color="red" onClick={() => handleBallClick('W')} />
-          <BallEntryButton value="WD" label="Wide" color="orange" onClick={() => handleBallClick('WD')} />
-          <BallEntryButton value="NB" label="No-Ball" color="orange" onClick={() => handleBallClick('NB')} />
+        <div className={`grid grid-cols-5 gap-3 ${!canRecordBalls ? 'opacity-50 pointer-events-none' : ''}`}>
+          <BallEntryButton value="W" label="Wicket (W)" color="red" onClick={() => handleBallClick('W')} />
+          <BallEntryButton value="WD" label="Wide (D)" color="orange" onClick={() => handleBallClick('WD')} />
+          <BallEntryButton value="NB" label="No-Ball (N)" color="orange" onClick={() => handleBallClick('NB')} />
           <BallEntryButton value="B" label="Bye" color="orange" onClick={() => handleBallClick('B')} />
           <BallEntryButton value="LB" label="Leg-Bye" color="orange" onClick={() => handleBallClick('LB')} />
+        </div>
+        {/* Keyboard Shortcuts Hint */}
+        <div className="text-center">
+          <p className="text-xs text-gray-400">
+            💡 Keyboard Shortcuts: Press <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300">0-6</kbd> for runs, 
+            <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300 mx-1">W</kbd> for wicket, 
+            <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300 mx-1">N</kbd> for no-ball, 
+            <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300 mx-1">D</kbd> for wide, 
+            <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300 mx-1">U</kbd> for undo
+          </p>
         </div>
       </div>
 

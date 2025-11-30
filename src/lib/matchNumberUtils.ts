@@ -96,11 +96,37 @@ function getPlayoffTypeDisplay(playoffType: Match['playoffType']): string {
 /**
  * Get match number for display
  * @param match - The match
+ * @param allMatches - All matches (optional, for WPL last two matches logic)
  * @returns Formatted match number string with playoff type if applicable
  */
-export function getMatchNumberDisplay(match: Match): string {
+export function getMatchNumberDisplay(match: Match, allMatches?: Match[]): string {
   const matchNumber = match.matchNumber || '';
   const playoffType = getPlayoffTypeDisplay(match.playoffType);
+  
+  // For WPL, if it's one of the last two matches (Eliminator or Final), show just the playoff type
+  if (match.league === 'wpl' && allMatches) {
+    const wplMatches = allMatches
+      .filter(m => m.league === 'wpl')
+      .sort((a, b) => {
+        const dateA = new Date(`${a.date}T${a.time}:00`).getTime();
+        const dateB = new Date(`${b.date}T${b.time}:00`).getTime();
+        return dateA - dateB;
+      });
+    
+    const matchIndex = wplMatches.findIndex(m => m.id === match.id);
+    const totalWPLMatches = wplMatches.length;
+    
+    // Last two matches should show just "Eliminator" and "Final"
+    if (matchIndex >= totalWPLMatches - 2) {
+      if (matchIndex === totalWPLMatches - 2) {
+        // Second to last match = Eliminator
+        return 'Eliminator';
+      } else if (matchIndex === totalWPLMatches - 1) {
+        // Last match = Final
+        return 'Final';
+      }
+    }
+  }
   
   if (playoffType && matchNumber) {
     return `${matchNumber} - ${playoffType}`;

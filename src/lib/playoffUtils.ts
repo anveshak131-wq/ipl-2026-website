@@ -21,8 +21,8 @@ export function getTBDTeam(league: League, position: string = 'TBD'): Team {
   return {
     id: `tbd-${league}-${position.toLowerCase().replace(/\s+/g, '-')}`,
     league,
-    name: `${position} Place Team`,
-    shortName: position === 'TBD' ? 'TBD' : position,
+    name: `TBD Team`,
+    shortName: 'TBD', // Always use "TBD" for placeholder teams
     logo: '/logos/tba_logo.svg', // Use TBA logo for placeholder teams
     description,
     colors: {

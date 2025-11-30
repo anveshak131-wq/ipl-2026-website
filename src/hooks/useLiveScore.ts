@@ -1,4 +1,11 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
+import { 
+  MatchState, 
+  initializeMatchState, 
+  shouldAutoTransitionInnings,
+  transitionState,
+  MatchStateType
+} from '@/lib/matchStateMachine';
 
 export interface BallEvent {
   type: number | 'W' | 'WD' | 'NB' | 'B' | 'LB';
@@ -8,7 +15,7 @@ export interface BallEvent {
   fielderName?: string;
 }
 
-export interface MatchState {
+export interface LiveScoreState {
   innings: 1 | 2;
   battingTeam: 'team1' | 'team2';
   currentOver: number;
@@ -37,6 +44,7 @@ export interface MatchState {
     balls: number;
   };
   ballHistory: BallEvent[];
+  matchState?: MatchState; // Match state machine
 }
 
 interface UseLiveScoreProps {
@@ -44,6 +52,9 @@ interface UseLiveScoreProps {
   initialTeam2Name: string;
   initialBatter?: { id: string; name: string };
   initialBowler?: { id: string; name: string };
+  initialMatchState?: MatchState;
+  maxOvers?: number;
+  onMatchStateChange?: (matchState: MatchState) => void;
 }
 
 // Helper functions
@@ -63,9 +74,16 @@ export function useLiveScore({
   initialTeam1Name,
   initialTeam2Name,
   initialBatter,
-  initialBowler
+  initialBowler,
+  initialMatchState,
+  maxOvers = 20,
+  onMatchStateChange,
 }: UseLiveScoreProps) {
-  const [state, setState] = useState<MatchState>({
+  const [matchState, setMatchState] = useState<MatchState>(
+    initialMatchState || initializeMatchState()
+  );
+
+  const [state, setState] = useState<LiveScoreState>({
     innings: 1,
     battingTeam: 'team1',
     currentOver: 0.0,
@@ -84,11 +102,43 @@ export function useLiveScore({
     currentBatter: initialBatter ? { ...initialBatter, runs: 0, balls: 0 } : { id: '', name: 'Select Batter', runs: 0, balls: 0 },
     currentBowler: initialBowler ? { ...initialBowler, runs: 0, balls: 0 } : { id: '', name: 'Select Bowler', runs: 0, balls: 0 },
     ballHistory: [],
+    matchState,
   });
 
-  const [undoStack, setUndoStack] = useState<MatchState[]>([]);
+  const [undoStack, setUndoStack] = useState<LiveScoreState[]>([]);
+
+  // Auto-detect innings transitions
+  useEffect(() => {
+    const battingTeam = state.battingTeam;
+    const wickets = battingTeam === 'team1' ? state.team1.wickets : state.team2.wickets;
+    const overs = battingTeam === 'team1' ? state.team1.balls / 6 : state.team2.balls / 6;
+
+    if (shouldAutoTransitionInnings(matchState, state.innings, wickets, overs, maxOvers)) {
+      // Auto-transition to break or complete
+      if (state.innings === 1 && matchState.currentState === 'innings-1') {
+        const target = battingTeam === 'team1' ? state.team1.runs : state.team2.runs;
+        const newMatchState = transitionState(matchState, 'break', { target: target + 1 });
+        setMatchState(newMatchState);
+        if (onMatchStateChange) {
+          onMatchStateChange(newMatchState);
+        }
+      } else if (state.innings === 2 && matchState.currentState === 'innings-2') {
+        const newMatchState = transitionState(matchState, 'complete');
+        setMatchState(newMatchState);
+        if (onMatchStateChange) {
+          onMatchStateChange(newMatchState);
+        }
+      }
+    }
+  }, [state.innings, state.team1.wickets, state.team2.wickets, state.team1.balls, state.team2.balls, matchState, maxOvers, onMatchStateChange, state.battingTeam, state.team1.runs, state.team2.runs]);
 
   const recordBall = useCallback((ball: BallEvent) => {
+    // Check if current state allows ball entry
+    if (matchState.currentState !== 'innings-1' && matchState.currentState !== 'innings-2') {
+      alert(`Cannot record balls in ${matchState.currentState} state. Please transition to an innings state first.`);
+      return;
+    }
+
     setState((prev) => {
       // Save current state for undo (keep last 5)
       setUndoStack((stack) => {
@@ -167,9 +217,10 @@ export function useLiveScore({
           balls: newBowlerBalls,
         },
         ballHistory: [...prev.ballHistory, ball].slice(-100), // Keep last 100
+        matchState,
       };
     });
-  }, []);
+  }, [matchState]);
 
   const recordWicket = useCallback((dismissalType: string, fielderName?: string) => {
     recordBall({
@@ -231,8 +282,17 @@ export function useLiveScore({
 
   const canUndo = useMemo(() => undoStack.length > 0, [undoStack.length]);
 
+  const updateMatchState = useCallback((newMatchState: MatchState) => {
+    setMatchState(newMatchState);
+    setState((prev) => ({ ...prev, matchState: newMatchState }));
+    if (onMatchStateChange) {
+      onMatchStateChange(newMatchState);
+    }
+  }, [onMatchStateChange]);
+
   return {
     state,
+    matchState,
     recordBall,
     recordWicket,
     undo,
@@ -240,6 +300,7 @@ export function useLiveScore({
     changeBatter,
     changeBowler,
     switchInnings,
+    updateMatchState,
   };
 }
 

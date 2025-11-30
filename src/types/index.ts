@@ -83,6 +83,28 @@ export interface Match {
       overs: number;
     };
   };
+  matchState?: {
+    currentState: 'pre-match' | 'toss' | 'innings-1' | 'break' | 'innings-2' | 'complete';
+    toss?: {
+      winner: 'team1' | 'team2';
+      decision: 'bat' | 'bowl';
+      timestamp: number;
+    };
+    innings1?: {
+      battingTeam: 'team1' | 'team2';
+      target?: number;
+      completed: boolean;
+      completedAt?: number;
+    };
+    innings2?: {
+      battingTeam: 'team1' | 'team2';
+      target: number;
+      completed: boolean;
+      completedAt?: number;
+    };
+    completedAt?: number;
+    lockedStates: string[];
+  };
 }
 
 export interface News {
