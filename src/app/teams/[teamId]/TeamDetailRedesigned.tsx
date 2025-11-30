@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import PlayerModal from '@/components/teams/PlayerModal';
+import WPLPlayerCard from '@/components/teams/WPLPlayerCard';
+import WPLPlayerModal from '@/components/teams/WPLPlayerModal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Team, Player } from '@/types';
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
@@ -311,6 +313,9 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
     fetchTeamData();
   }, [teamId]);
 
+  // Check if team is WPL
+  const isWPL = teamData?.league === 'wpl';
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
@@ -571,15 +576,27 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
 
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {section.players.map((player, index) => (
-                          <PlayerCard3D
-                            key={player.id}
-                            player={player}
-                            index={index}
-                            onClick={() => {
-                              setSelectedPlayer(player);
-                              setIsModalOpen(true);
-                            }}
-                          />
+                          isWPL ? (
+                            <WPLPlayerCard
+                              key={player.id}
+                              player={player}
+                              index={index}
+                              onClick={() => {
+                                setSelectedPlayer(player);
+                                setIsModalOpen(true);
+                              }}
+                            />
+                          ) : (
+                            <PlayerCard3D
+                              key={player.id}
+                              player={player}
+                              index={index}
+                              onClick={() => {
+                                setSelectedPlayer(player);
+                                setIsModalOpen(true);
+                              }}
+                            />
+                          )
                         ))}
                       </div>
                     </div>
@@ -793,16 +810,28 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
 
       <Footer />
 
-      <PlayerModal
-        player={selectedPlayer}
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedPlayer(null);
-        }}
-        teamColors={teamData?.colors}
-        teamData={teamData || undefined}
-      />
+      {isWPL ? (
+        <WPLPlayerModal
+          player={selectedPlayer}
+          team={teamData}
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedPlayer(null);
+          }}
+        />
+      ) : (
+        <PlayerModal
+          player={selectedPlayer}
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedPlayer(null);
+          }}
+          teamColors={teamData?.colors}
+          teamData={teamData || undefined}
+        />
+      )}
 
       <style jsx global>{`
         @keyframes float {

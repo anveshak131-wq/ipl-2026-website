@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import PlayerModal from '@/components/teams/PlayerModal';
+import WPLPlayerCard from '@/components/teams/WPLPlayerCard';
+import WPLPlayerModal from '@/components/teams/WPLPlayerModal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import IPLLogo from '@/components/ui/IPLLogo';
@@ -1007,18 +1009,30 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                     </motion.h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {section.players.map((player, playerIndex) => (
-                        <PlayerCard 
-                          key={player.id} 
-                          player={player} 
-                          primaryColor={primaryColor} 
-                          secondaryColor={secondaryColor}
-                          onClick={() => {
-                            setSelectedPlayer(player);
-                            setIsModalOpen(true);
-                          }}
-                          index={playerIndex}
-                          keyPlayers={keyPlayers}
-                        />
+                        isWPL ? (
+                          <WPLPlayerCard
+                            key={player.id}
+                            player={player}
+                            onClick={() => {
+                              setSelectedPlayer(player);
+                              setIsModalOpen(true);
+                            }}
+                            index={playerIndex}
+                          />
+                        ) : (
+                          <PlayerCard 
+                            key={player.id} 
+                            player={player} 
+                            primaryColor={primaryColor} 
+                            secondaryColor={secondaryColor}
+                            onClick={() => {
+                              setSelectedPlayer(player);
+                              setIsModalOpen(true);
+                            }}
+                            index={playerIndex}
+                            keyPlayers={keyPlayers}
+                          />
+                        )
                       ))}
                     </div>
                   </AnimatedSection>
@@ -1222,16 +1236,28 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
 
       <Footer />
 
-      <PlayerModal
-        player={selectedPlayer}
-        isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setSelectedPlayer(null);
-        }}
-        teamColors={teamData?.colors}
-        teamData={teamData || undefined}
-      />
+      {isWPL ? (
+        <WPLPlayerModal
+          player={selectedPlayer}
+          team={teamData}
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedPlayer(null);
+          }}
+        />
+      ) : (
+        <PlayerModal
+          player={selectedPlayer}
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedPlayer(null);
+          }}
+          teamColors={teamData?.colors}
+          teamData={teamData || undefined}
+        />
+      )}
 
       {showPlayerComparison && teamData && teamData.players && (
         <PlayerComparisonTool
