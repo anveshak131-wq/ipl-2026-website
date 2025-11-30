@@ -19,7 +19,14 @@
 // 'UPW' = UP Warriorz (WPL)
 export function getAnimatedLogoPath(teamId: string, shortName?: string, league?: 'ipl' | 'wpl'): string {
   // Check for TBD teams - they should use TBA logo
-  if (teamId.includes('tbd-') || shortName === 'TBD' || shortName?.includes('Place')) {
+  // Also check for teams 16, 17, 18, 19 which are placeholder teams
+  if (teamId.includes('tbd-') || 
+      teamId === '16' || 
+      teamId === '17' || 
+      teamId === '18' || 
+      teamId === '19' ||
+      shortName === 'TBD' || 
+      shortName?.includes('Place')) {
     return '/logos/tba_logo.svg';
   }
   

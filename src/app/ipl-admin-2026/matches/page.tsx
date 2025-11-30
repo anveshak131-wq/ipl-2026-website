@@ -2319,7 +2319,18 @@ export default function AdminMatches() {
                                                         <div className="flex items-center gap-2">
                                                             {(() => {
                                                                 // Check if it's a TBD team by ID, shortName, or name
-                                                                if (match.team1.id.includes('tbd-') || match.team1.shortName === 'TBD' || match.team1.shortName?.includes('Place') || match.team1.name?.includes('Place Team')) {
+                                                                // Also check for teams 16, 17, 18, 19 which are placeholder teams
+                                                                const isPlaceholderTeam = 
+                                                                    match.team1.id.includes('tbd-') || 
+                                                                    match.team1.id === '16' || 
+                                                                    match.team1.id === '17' || 
+                                                                    match.team1.id === '18' || 
+                                                                    match.team1.id === '19' ||
+                                                                    match.team1.shortName === 'TBD' || 
+                                                                    match.team1.shortName?.includes('Place') || 
+                                                                    match.team1.name?.includes('Place Team');
+                                                                
+                                                                if (isPlaceholderTeam) {
                                                                     return (
                                                                         <img 
                                                                             src="/logos/tba_logo.svg" 
@@ -2391,7 +2402,13 @@ export default function AdminMatches() {
                                                                 );
                                                             })()}
                                                             <span className="text-white font-semibold">
-                                                                {match.team1.id.includes('tbd-') || match.team1.shortName?.includes('Place') || match.team1.name?.includes('Place Team') 
+                                                                {(match.team1.id.includes('tbd-') || 
+                                                                  match.team1.id === '16' || 
+                                                                  match.team1.id === '17' || 
+                                                                  match.team1.id === '18' || 
+                                                                  match.team1.id === '19' ||
+                                                                  match.team1.shortName?.includes('Place') || 
+                                                                  match.team1.name?.includes('Place Team')) 
                                                                     ? 'TBD' 
                                                                     : match.team1.shortName}
                                                             </span>
@@ -2400,7 +2417,18 @@ export default function AdminMatches() {
                                                         <div className="flex items-center gap-2">
                                                             {(() => {
                                                                 // Check if it's a TBD team by ID, shortName, or name
-                                                                if (match.team2.id.includes('tbd-') || match.team2.shortName === 'TBD' || match.team2.shortName?.includes('Place') || match.team2.name?.includes('Place Team')) {
+                                                                // Also check for teams 16, 17, 18, 19 which are placeholder teams
+                                                                const isPlaceholderTeam = 
+                                                                    match.team2.id.includes('tbd-') || 
+                                                                    match.team2.id === '16' || 
+                                                                    match.team2.id === '17' || 
+                                                                    match.team2.id === '18' || 
+                                                                    match.team2.id === '19' ||
+                                                                    match.team2.shortName === 'TBD' || 
+                                                                    match.team2.shortName?.includes('Place') || 
+                                                                    match.team2.name?.includes('Place Team');
+                                                                
+                                                                if (isPlaceholderTeam) {
                                                                     return (
                                                                         <img 
                                                                             src="/logos/tba_logo.svg" 
@@ -2472,7 +2500,13 @@ export default function AdminMatches() {
                                                                 );
                                                             })()}
                                                             <span className="text-white font-semibold">
-                                                                {match.team2.id.includes('tbd-') || match.team2.shortName?.includes('Place') || match.team2.name?.includes('Place Team') 
+                                                                {(match.team2.id.includes('tbd-') || 
+                                                                  match.team2.id === '16' || 
+                                                                  match.team2.id === '17' || 
+                                                                  match.team2.id === '18' || 
+                                                                  match.team2.id === '19' ||
+                                                                  match.team2.shortName?.includes('Place') || 
+                                                                  match.team2.name?.includes('Place Team')) 
                                                                     ? 'TBD' 
                                                                     : match.team2.shortName}
                                                             </span>
@@ -2657,7 +2691,8 @@ export default function AdminMatches() {
                                             >
                                                 {/* WPL Playoff Helper Text */}
                                                 {match.league === 'wpl' && match.playoffType && 
-                                                 (match.team1.id.includes('tbd-') || match.team2.id.includes('tbd-') || 
+                                                 ((match.team1.id.includes('tbd-') || match.team1.id === '16' || match.team1.id === '17' || match.team1.id === '18' || match.team1.id === '19') ||
+                                                  (match.team2.id.includes('tbd-') || match.team2.id === '16' || match.team2.id === '17' || match.team2.id === '18' || match.team2.id === '19') ||
                                                   match.team1.shortName?.includes('Place') || match.team2.shortName?.includes('Place') ||
                                                   match.team1.shortName === 'Winner of Eliminator' || match.team2.shortName === 'Winner of Eliminator') && (
                                                     <div className="mb-2">
@@ -2676,7 +2711,18 @@ export default function AdminMatches() {
                                                             <div className="flex items-center gap-2">
                                                                 {(() => {
                                                                     // Check if it's a TBD team by ID, shortName, or name
-                                                                    if (match.team1.id.includes('tbd-') || match.team1.shortName === 'TBD' || match.team1.shortName?.includes('Place') || match.team1.name?.includes('Place Team')) {
+                                                                    // Also check for teams 16, 17, 18, 19 which are placeholder teams
+                                                                    const isPlaceholderTeam = 
+                                                                        match.team1.id.includes('tbd-') || 
+                                                                        match.team1.id === '16' || 
+                                                                        match.team1.id === '17' || 
+                                                                        match.team1.id === '18' || 
+                                                                        match.team1.id === '19' ||
+                                                                        match.team1.shortName === 'TBD' || 
+                                                                        match.team1.shortName?.includes('Place') || 
+                                                                        match.team1.name?.includes('Place Team');
+                                                                    
+                                                                    if (isPlaceholderTeam) {
                                                                         return (
                                                                             <img 
                                                                                 src="/logos/tba_logo.svg" 
@@ -2757,7 +2803,19 @@ export default function AdminMatches() {
                                                             <div className="flex items-center gap-2">
                                                                 {(() => {
                                                                     // Check if it's a TBD team by ID, shortName, or name
-                                                                    if (match.team2.id.includes('tbd-') || match.team2.shortName === 'TBD' || match.team2.shortName?.includes('Place') || match.team2.name?.includes('Place Team')) {
+                                                                    // Check if it's a TBD team by ID, shortName, or name
+                                                                    // Also check for teams 16, 17, 18, 19 which are placeholder teams
+                                                                    const isPlaceholderTeam = 
+                                                                        match.team2.id.includes('tbd-') || 
+                                                                        match.team2.id === '16' || 
+                                                                        match.team2.id === '17' || 
+                                                                        match.team2.id === '18' || 
+                                                                        match.team2.id === '19' ||
+                                                                        match.team2.shortName === 'TBD' || 
+                                                                        match.team2.shortName?.includes('Place') || 
+                                                                        match.team2.name?.includes('Place Team');
+                                                                    
+                                                                    if (isPlaceholderTeam) {
                                                                         return (
                                                                             <img 
                                                                                 src="/logos/tba_logo.svg" 
