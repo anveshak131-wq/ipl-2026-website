@@ -344,6 +344,8 @@ export const api = {
       // Filter by league if specified
       if (league) {
         const beforeFilter = players.length;
+        // Store original players to check available leagues if needed
+        const originalPlayers = [...players];
         players = players.filter((p: Player) => {
           const playerLeague = p.league || 'ipl';
           const matches = playerLeague === league;
@@ -358,7 +360,7 @@ export const api = {
         });
         console.log(`API: After filtering by league '${league}':`, beforeFilter, '->', players.length);
         if (players.length === 0 && beforeFilter > 0) {
-          const uniqueLeagues = Array.from(new Set(playersData.map((p: any) => p.league || 'ipl')));
+          const uniqueLeagues = Array.from(new Set(originalPlayers.map((p: Player) => p.league || 'ipl')));
           console.warn(`⚠️ No players match league '${league}'. Available leagues:`, uniqueLeagues);
         }
       }
