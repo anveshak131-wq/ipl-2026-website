@@ -143,7 +143,7 @@ export default function WPLStatsPage() {
         <div 
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: `linear-gradient(135deg, ${WPLColors.gradientMid}1A, ${WPLColors.pinkRGBA[5]}, ${WPLColors.roseRGBA[10]})`,
+            background: `linear-gradient(135deg, ${WPLColors.gradientMid}1A, ${WPLColors.pinkRGBA[10]}, ${WPLColors.roseRGBA[10]})`,
           }}
         />
         <div 

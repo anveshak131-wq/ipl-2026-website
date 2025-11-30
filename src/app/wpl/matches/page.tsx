@@ -90,7 +90,7 @@ export default function WPLMatchesPage() {
         <div 
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: `linear-gradient(135deg, ${WPLColors.gradientMid}1A, ${WPLColors.pinkRGBA[5]}, ${WPLColors.roseRGBA[10]})`,
+            background: `linear-gradient(135deg, ${WPLColors.gradientMid}1A, ${WPLColors.pinkRGBA[10]}, ${WPLColors.roseRGBA[10]})`,
           }}
         />
         <div 
@@ -184,7 +184,7 @@ export default function WPLMatchesPage() {
             <div 
               className="inline-flex space-x-2 p-1.5 rounded-xl backdrop-blur-xl border-2 shadow-xl"
               style={{
-                background: `linear-gradient(135deg, ${WPLColors.violetRGBA[10]}, ${WPLColors.pinkRGBA[5]})`,
+                background: `linear-gradient(135deg, ${WPLColors.violetRGBA[10]}, ${WPLColors.pinkRGBA[10]})`,
                 borderColor: WPLColors.purpleRGBA[20],
               }}
             >
