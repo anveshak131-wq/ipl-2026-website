@@ -97,6 +97,9 @@ export default function PlayerDetailClient({ playerId }: PlayerDetailClientProps
   const primary = createColorVariations(teamColors.primary);
   const secondary = createColorVariations(teamColors.secondary);
 
+  // Check if player is from WPL
+  const isWPLPlayer = player.league === 'wpl' || team?.league === 'wpl';
+
   const stats = player.stats;
   const boundariesPerMatch = stats.matches > 0
     ? Math.round(((stats.fours + stats.sixes) / stats.matches) * 10) / 10
@@ -199,32 +202,35 @@ export default function PlayerDetailClient({ playerId }: PlayerDetailClientProps
               </div>
             </div>
 
-            {/* Summary numbers */}
-            <div className="grid grid-cols-3 gap-3 md:gap-4 text-center">
-              <div className="rounded-2xl bg-black/40 border border-white/10 px-4 py-3">
-                <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Matches</p>
-                <p className="text-2xl font-black text-white">{stats.matches}</p>
+            {/* Summary numbers - Hide for WPL players */}
+            {!isWPLPlayer && (
+              <div className="grid grid-cols-3 gap-3 md:gap-4 text-center">
+                <div className="rounded-2xl bg-black/40 border border-white/10 px-4 py-3">
+                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Matches</p>
+                  <p className="text-2xl font-black text-white">{stats.matches}</p>
+                </div>
+                <div className="rounded-2xl bg-black/40 border border-white/10 px-4 py-3">
+                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Runs</p>
+                  <p className="text-2xl font-black text-ipl-gold">{stats.runs}</p>
+                </div>
+                <div className="rounded-2xl bg-black/40 border border-white/10 px-4 py-3">
+                  <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Wickets</p>
+                  <p className="text-2xl font-black text-emerald-400">{stats.wickets}</p>
+                </div>
               </div>
-              <div className="rounded-2xl bg-black/40 border border-white/10 px-4 py-3">
-                <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Runs</p>
-                <p className="text-2xl font-black text-ipl-gold">{stats.runs}</p>
-              </div>
-              <div className="rounded-2xl bg-black/40 border border-white/10 px-4 py-3">
-                <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Wickets</p>
-                <p className="text-2xl font-black text-emerald-400">{stats.wickets}</p>
-              </div>
-            </div>
+            )}
           </div>
         </section>
 
-        {/* Tabs */}
-        <section className="mb-8">
-          <div className="inline-flex gap-2 p-1 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-xl">
-            {[
-              { id: 'overview', label: 'Overview' },
-              { id: 'batting', label: 'Batting stats' },
-              { id: 'bowling', label: 'Bowling stats' },
-            ].map((tab) => (
+        {/* Tabs - Hide for WPL players */}
+        {!isWPLPlayer && (
+          <section className="mb-8">
+            <div className="inline-flex gap-2 p-1 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-xl">
+              {[
+                { id: 'overview', label: 'Overview' },
+                { id: 'batting', label: 'Batting stats' },
+                { id: 'bowling', label: 'Bowling stats' },
+              ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
@@ -236,12 +242,13 @@ export default function PlayerDetailClient({ playerId }: PlayerDetailClientProps
               >
                 {tab.label}
               </button>
-            ))}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+        )}
 
-        {/* Content */}
-        {activeTab === 'overview' && (
+        {/* Content - Hide for WPL players */}
+        {!isWPLPlayer && activeTab === 'overview' && (
           <section className="space-y-8">
             {/* Recent form strip */}
             <div>
@@ -279,7 +286,7 @@ export default function PlayerDetailClient({ playerId }: PlayerDetailClientProps
           </section>
         )}
 
-        {activeTab === 'batting' && (
+        {!isWPLPlayer && activeTab === 'batting' && (
           <section className="space-y-6">
             <h2 className="text-lg md:text-xl font-bold text-white">Batting statistics</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -303,7 +310,7 @@ export default function PlayerDetailClient({ playerId }: PlayerDetailClientProps
           </section>
         )}
 
-        {activeTab === 'bowling' && (
+        {!isWPLPlayer && activeTab === 'bowling' && (
           <section className="space-y-6">
             <h2 className="text-lg md:text-xl font-bold text-white">Bowling statistics</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">

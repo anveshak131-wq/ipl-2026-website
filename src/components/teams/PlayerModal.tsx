@@ -106,6 +106,9 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
   const primaryColor = createColorVariations(colors.primary);
   const secondaryColor = createColorVariations(colors.secondary);
 
+  // Check if player is from WPL
+  const isWPLPlayer = player.league === 'wpl' || teamData?.league === 'wpl';
+
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClose();
@@ -366,16 +369,17 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
             </div>
           </div>
 
-          {/* Career Statistics Section */}
-          <div className="p-8">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-black flex items-center gap-3 text-white">
-                <div 
-                  className="w-1 h-8 rounded-full"
-                  style={{ background: `linear-gradient(to bottom, ${primaryColor.solid}, ${secondaryColor.solid})` }}
-                />
-                Career Statistics
-              </h3>
+          {/* Career Statistics Section - Hide for WPL players */}
+          {!isWPLPlayer && (
+            <div className="p-8">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-black flex items-center gap-3 text-white">
+                  <div 
+                    className="w-1 h-8 rounded-full"
+                    style={{ background: `linear-gradient(to bottom, ${primaryColor.solid}, ${secondaryColor.solid})` }}
+                  />
+                  Career Statistics
+                </h3>
               <div className="flex items-center gap-3">
                 <span className="text-sm font-semibold" style={{ color: '#FFFFFF' }}>Jersey:</span>
                 <span 
@@ -572,6 +576,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
               )}
             </div>
           </div>
+          )}
         </div>
       </div>
     </>
