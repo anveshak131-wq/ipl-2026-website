@@ -91,14 +91,23 @@ export default function TestLiveScorePage() {
     }
   }, [selectedMatch]);
 
+  // Get ALL players from each team's squad (no restrictions in test mode)
   const team1Players = useMemo(() => {
     if (!selectedMatch) return [];
-    return players.filter(p => p.teamId === selectedMatch.team1.id);
+    // Filter by teamId and league to get all squad players
+    return players.filter(p => 
+      p.teamId === selectedMatch.team1.id && 
+      p.league === selectedMatch.league
+    );
   }, [players, selectedMatch]);
 
   const team2Players = useMemo(() => {
     if (!selectedMatch) return [];
-    return players.filter(p => p.teamId === selectedMatch.team2.id);
+    // Filter by teamId and league to get all squad players
+    return players.filter(p => 
+      p.teamId === selectedMatch.team2.id && 
+      p.league === selectedMatch.league
+    );
   }, [players, selectedMatch]);
 
   const togglePlayer = (team: 'team1' | 'team2', playerId: string) => {
@@ -451,7 +460,7 @@ export default function TestLiveScorePage() {
                           {selectedMatch.team1.shortName || selectedMatch.team1.name}
                         </h2>
                         <p className="text-sm" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
-                          Select 11 players
+                          Select 11 players from squad ({team1Players.length} available)
                         </p>
                       </div>
                       <div className="flex items-center gap-2 px-4 py-2 rounded-lg" style={{
@@ -516,7 +525,7 @@ export default function TestLiveScorePage() {
                           {selectedMatch.team2.shortName || selectedMatch.team2.name}
                         </h2>
                         <p className="text-sm" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
-                          Select 11 players
+                          Select 11 players from squad ({team2Players.length} available)
                         </p>
                       </div>
                       <div className="flex items-center gap-2 px-4 py-2 rounded-lg" style={{
