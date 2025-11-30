@@ -2135,7 +2135,9 @@ export default function AdminMatches() {
                                                         </div>
                                                     </div>
                                                     <p className="text-xs text-gray-400 mt-2">
-                                                        Teams will be determined based on league standings. You can update them later.
+                                                        {currentLeague === 'wpl' 
+                                                            ? 'These are placeholders. Teams will be determined from the 5 WPL teams based on points table standings after the league stage. You can update them later with the actual teams.'
+                                                            : 'Teams will be determined based on league standings. You can update them later.'}
                                                     </p>
                                                 </div>
                                             </>
@@ -2259,6 +2261,17 @@ export default function AdminMatches() {
                                                     <div className="text-xs text-gray-400">{formatTime(match.time)}</div>
                                                 </td>
                                                 <td className="px-6 py-4">
+                                                    {/* WPL Playoff Helper Text */}
+                                                    {match.league === 'wpl' && match.playoffType && 
+                                                     (match.team1.id.includes('tbd-') || match.team2.id.includes('tbd-') || 
+                                                      match.team1.shortName?.includes('Place') || match.team2.shortName?.includes('Place') ||
+                                                      match.team1.shortName === 'Winner of Eliminator' || match.team2.shortName === 'Winner of Eliminator') && (
+                                                        <div className="mb-2">
+                                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30" title="Placeholder from 5 WPL teams based on points table">
+                                                                💡 Placeholder
+                                                            </span>
+                                                        </div>
+                                                    )}
                                                     <div className="flex items-center gap-3">
                                                         <div className="flex items-center gap-2">
                                                             {(() => {
@@ -2591,6 +2604,17 @@ export default function AdminMatches() {
                                                 className="bg-white/5 rounded-lg p-4 hover:bg-white/10 transition-all duration-200 border border-white/5"
                                                         whileHover={{ scale: 1.02, backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
                                             >
+                                                {/* WPL Playoff Helper Text */}
+                                                {match.league === 'wpl' && match.playoffType && 
+                                                 (match.team1.id.includes('tbd-') || match.team2.id.includes('tbd-') || 
+                                                  match.team1.shortName?.includes('Place') || match.team2.shortName?.includes('Place') ||
+                                                  match.team1.shortName === 'Winner of Eliminator' || match.team2.shortName === 'Winner of Eliminator') && (
+                                                    <div className="mb-2">
+                                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-purple-500/20 text-purple-300 border border-purple-500/30" title="Placeholder from 5 WPL teams based on points table">
+                                                            💡 Placeholder from 5 WPL teams
+                                                        </span>
+                                                    </div>
+                                                )}
                                                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                                                     <div className="flex items-center gap-4">
                                                         <div className="text-sm text-gray-400 font-medium min-w-[80px]">

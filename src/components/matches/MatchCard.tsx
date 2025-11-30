@@ -171,6 +171,19 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
 
         {/* Teams */}
         <div className="space-y-4">
+          {/* WPL Playoff Helper Text */}
+          {match.league === 'wpl' && match.playoffType && (
+            (match.team1.id.includes('tbd-') || match.team2.id.includes('tbd-') || 
+             match.team1.shortName?.includes('Place') || match.team2.shortName?.includes('Place') ||
+             match.team1.shortName === 'Winner of Eliminator' || match.team2.shortName === 'Winner of Eliminator') && (
+              <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-2 mb-2">
+                <p className="text-xs text-purple-300 text-center">
+                  💡 These are placeholders from the 5 WPL teams, determined by points table standings
+                </p>
+              </div>
+            )
+          )}
+          
           {/* Team 1 */}
           <div className="flex items-center space-x-3">
             <div className="w-12 h-12 rounded-full bg-black/30 border border-white/10 flex items-center justify-center flex-shrink-0 overflow-hidden">

@@ -7,18 +7,24 @@ import { Team, League, PlayoffType } from '@/types';
 /**
  * Get TBD (To Be Determined) team placeholder
  * @param league - The league (IPL or WPL)
- * @param position - Position label (e.g., "1st", "2nd", "Winner", "Loser")
+ * @param position - Position label (e.g., "1st Place", "2nd Place", "Winner of Eliminator")
  * @returns A placeholder team object
  */
 export function getTBDTeam(league: League, position: string = 'TBD'): Team {
   const leagueName = league.toUpperCase();
+  
+  // For WPL, clarify that these are placeholders from the original 5 teams
+  const description = league === 'wpl' 
+    ? `Placeholder - Will be replaced with one of the 5 WPL teams based on points table standings after league stage`
+    : `Team to be determined based on league standings`;
+  
   return {
     id: `tbd-${league}-${position.toLowerCase().replace(/\s+/g, '-')}`,
     league,
     name: `${position} Place Team`,
     shortName: position === 'TBD' ? 'TBD' : position,
     logo: '/logos/tba_logo.svg', // Use TBA logo for placeholder teams
-    description: `Team to be determined based on league standings`,
+    description,
     colors: {
       primary: league === 'ipl' ? '#004BA0' : '#9C27B0',
       secondary: '#FFFFFF'
