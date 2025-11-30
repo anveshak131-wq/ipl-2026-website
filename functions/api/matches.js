@@ -404,7 +404,7 @@ async function handlePutRequest(context) {
   }
 }
 
-// DELETE - Delete a match
+// DELETE - Delete a match or clear all matches
 async function handleDeleteRequest(context) {
   const { env, request } = context;
   
@@ -419,9 +419,20 @@ async function handleDeleteRequest(context) {
   try {
     const url = new URL(request.url);
     const matchId = url.searchParams.get('id');
+    const clearAll = url.searchParams.get('clearAll') === 'true';
+    
+    // If clearAll is true, clear all matches from KV storage
+    if (clearAll) {
+      await env.IPL_CACHE.put('matches', JSON.stringify([]));
+      console.log('All matches cleared from KV storage');
+      return new Response(JSON.stringify({ success: true, message: 'All matches cleared successfully' }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
     
     if (!matchId) {
-      return new Response(JSON.stringify({ error: 'Match ID is required' }), {
+      return new Response(JSON.stringify({ error: 'Match ID is required or use clearAll=true to clear all matches' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' }
       });

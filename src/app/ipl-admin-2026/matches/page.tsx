@@ -845,6 +845,38 @@ export default function AdminMatches() {
         }
     };
 
+    const handleClearAllMatches = async () => {
+        if (!confirm('⚠️ WARNING: Are you sure you want to delete ALL matches? This action cannot be undone and will clear all matches from the database.')) {
+            return;
+        }
+        
+        if (!confirm('This will permanently delete ALL matches. Are you absolutely sure?')) {
+            return;
+        }
+
+        try {
+            setIsSubmitting(true);
+            setError(null);
+            
+            await api.clearAllMatches();
+            
+            // Clear local state
+            setMatches([]);
+            setSelectedMatches(new Set());
+            
+            showSuccess('All matches cleared successfully');
+            
+            // Refresh to ensure consistency
+            await fetchInitialData();
+        } catch (error: any) {
+            console.error('Failed to clear all matches:', error);
+            setError(error?.message || 'Failed to clear all matches');
+            showError(error?.message || 'Failed to clear all matches');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     const handleDeleteOld = async (matchId: string) => {
         const match = matches.find(m => m.id === matchId);
         const isMockMatch = match && (match as any)._isMock;
@@ -1261,7 +1293,18 @@ export default function AdminMatches() {
                                     <IconPlus className="w-5 h-5" />
                                     Create Playoff Match
                                 </button>
+                                {matches.length > 0 && (
                                 <button
+                                    onClick={handleClearAllMatches}
+                                    disabled={isSubmitting}
+                                    className="glass-effect px-4 py-2.5 rounded-lg bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold hover:shadow-lg hover:shadow-red-500/50 transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    title="Clear all matches from database"
+                                >
+                                    <IconTrash className="w-5 h-5" />
+                                    <span className="hidden sm:inline">Clear All</span>
+                                </button>
+                            )}
+                            <button
                                     onClick={() => {
                                         setShowForm(true);
                                         setShowPlayoffForm(false);

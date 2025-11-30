@@ -231,38 +231,9 @@ export const mockPlayers: Player[] = [
   }
 ];
 
-export const mockMatches: Match[] = [
-  {
-    id: '1',
-    league: 'ipl',
-    date: '2026-03-23',
-    time: '19:30',
-    venue: 'M. A. Chidambaram Stadium, Chennai',
-    team1: mockTeams[9], // CSK
-    team2: mockTeams[0], // RCB (index 0, not 1)
-    status: 'upcoming'
-  },
-  {
-    id: '2',
-    league: 'ipl',
-    date: '2026-03-24',
-    time: '15:30',
-    venue: 'Eden Gardens, Kolkata',
-    team1: mockTeams[8], // KKR
-    team2: mockTeams[3], // GT
-    status: 'upcoming'
-  },
-  {
-    id: '3',
-    league: 'ipl',
-    date: '2026-03-25',
-    time: '19:30',
-    venue: 'Wankhede Stadium, Mumbai',
-    team1: mockTeams[1], // MI
-    team2: mockTeams[7], // RR
-    status: 'upcoming'
-  }
-];
+// No mock/sample matches - start with empty array
+// Users must create matches through the admin panel
+export const mockMatches: Match[] = [];
 
 export const mockNews: News[] = [
   {
@@ -371,6 +342,26 @@ export const api = {
     }
   },
   
+  clearAllMatches: async (): Promise<{ success: boolean; message: string }> => {
+    try {
+      const token = localStorage.getItem('admin_token') || sessionStorage.getItem('admin_token');
+      const response = await fetch('/api/matches?clearAll=true', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': token ? `Bearer ${token}` : ''
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Failed to clear matches');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error clearing matches:', error);
+      throw error;
+    }
+  },
+
   getMatches: async (league?: 'ipl' | 'wpl'): Promise<Match[]> => {
     try {
       const url = league ? `/api/matches?league=${league}` : '/api/matches';
@@ -380,12 +371,10 @@ export const api = {
       }
       let matches = await response.json();
       
-      // If API returns empty array, use fallback mock data but mark them as mock
+      // If API returns empty array, return empty array (no fallback mock data)
       if (!matches || matches.length === 0) {
-        console.log('API: No matches returned, using fallback mock data');
-        const mockData = league ? mockMatches.filter(match => match.league === league) : mockMatches;
-        // Mark mock matches so we know they're not deletable
-        return mockData.map(match => ({ ...match, _isMock: true }));
+        console.log('API: No matches returned');
+        return [];
       }
       
       // Ensure all matches have league property (migration for existing data)
@@ -405,9 +394,8 @@ export const api = {
       return matches;
     } catch (error) {
       console.error('Error fetching matches:', error);
-      // Fallback to mock data if API fails, mark as mock
-      const mockData = league ? mockMatches.filter(match => match.league === league) : mockMatches;
-      return mockData.map(match => ({ ...match, _isMock: true }));
+      // Return empty array if API fails (no fallback mock data)
+      return [];
     }
   },
   

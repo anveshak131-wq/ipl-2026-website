@@ -567,8 +567,8 @@ export default function AdminEmailNotificationsPage() {
         } catch (error) {
           console.warn('Failed to fetch matches from API, using mock data:', error);
           // Import mock data as fallback
-          const { mockMatches } = await import('@/lib/data');
-          matchesData = mockMatches || [];
+          // No mock matches - use empty array
+          matchesData = [];
         }
 
         // Fetch news with fallback to mock data
@@ -642,17 +642,11 @@ export default function AdminEmailNotificationsPage() {
         console.log(`Loaded ${finalNews.length} news articles`, finalNews);
       } catch (e) {
         console.error('Error loading matches/news:', e);
-        // Try to load mock data as last resort
+        // No mock matches - use empty array
         try {
-          const { mockMatches, mockNews } = await import('@/lib/data');
-          const transformedMatches = (mockMatches || []).map((m: any) => ({
-            id: m.id || `match-${Math.random()}`,
-            team1: typeof m.team1 === 'object' ? (m.team1?.name || m.team1?.shortName || 'Team 1') : (m.team1 || 'Team 1'),
-            team2: typeof m.team2 === 'object' ? (m.team2?.name || m.team2?.shortName || 'Team 2') : (m.team2 || 'Team 2'),
-            date: m.time ? `${m.date}T${m.time}` : (m.date || new Date().toISOString()),
-            venue: m.venue || 'TBD',
-            status: m.status || 'upcoming',
-          }));
+          const { mockNews } = await import('@/lib/data');
+          // No mock matches - use empty array
+          const transformedMatches: any[] = [];
           setMatches(transformedMatches);
           
           const transformedNews = (mockNews || []).map((n: any) => ({
