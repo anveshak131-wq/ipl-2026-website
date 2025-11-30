@@ -451,7 +451,34 @@ export default function AdminPlayers() {
   // Filter and sort players
   let filteredPlayers = selectedTeam === 'all' 
     ? players 
-    : players.filter(player => String(player.teamId) === String(selectedTeam));
+    : players.filter(player => {
+        // Only show players with a valid teamId when a specific team is selected
+        if (!player.teamId) {
+          return false; // Exclude players without a teamId
+        }
+        
+        // Ensure both values are strings for comparison
+        const playerTeamId = String(player.teamId).trim();
+        const selectedTeamId = String(selectedTeam).trim();
+        const matches = playerTeamId === selectedTeamId;
+        
+        // Debug logging for Ellyse Perry specifically
+        if (player.name === 'Ellyse Perry' && selectedTeam !== 'all') {
+          console.log('🔍 Ellyse Perry filter check:', {
+            playerName: player.name,
+            playerTeamId: player.teamId,
+            playerTeamIdType: typeof player.teamId,
+            playerTeamIdString: playerTeamId,
+            selectedTeamId: selectedTeam,
+            selectedTeamIdType: typeof selectedTeam,
+            selectedTeamIdString: selectedTeamId,
+            matches,
+            willShow: matches
+          });
+        }
+        
+        return matches;
+      });
 
   // Apply sorting
   if (sortField) {
@@ -928,7 +955,7 @@ export default function AdminPlayers() {
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {searchFilteredPlayers.length > 0 ? searchFilteredPlayers.map((player, idx) => {
-                    const team = teams.find(t => t.id === player.teamId);
+                    const team = teams.find(t => String(t.id) === String(player.teamId));
                     return (
                       <tr key={`${player.id}-${player.teamId}-${player.jerseyNumber}`} className="hover:bg-white/5">
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
