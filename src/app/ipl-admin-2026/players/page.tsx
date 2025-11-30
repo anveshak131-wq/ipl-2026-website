@@ -449,58 +449,19 @@ export default function AdminPlayers() {
   };
 
   // Filter and sort players
-  // Debug: Log current filter state
-  if (selectedTeam !== 'all') {
-    console.log('🔍 Filtering players by team:');
-    console.log('  Selected Team ID:', selectedTeam, '(type:', typeof selectedTeam + ')');
-    console.log('  Total Players:', players.length);
-    console.log('  Available Teams:', teams.map(t => `ID: ${t.id} (${typeof t.id}) = ${t.name}`));
-  }
-  
   let filteredPlayers = selectedTeam === 'all' 
     ? players 
     : players.filter(player => {
         // Only show players with a valid teamId when a specific team is selected
         if (!player.teamId) {
-          if (player.name === 'Ellyse Perry') {
-            console.log('❌ Ellyse Perry has no teamId, excluding from results');
-          }
           return false; // Exclude players without a teamId
         }
         
         // Ensure both values are strings for comparison
         const playerTeamId = String(player.teamId).trim();
         const selectedTeamId = String(selectedTeam).trim();
-        const matches = playerTeamId === selectedTeamId;
-        
-        // Debug logging for Ellyse Perry specifically
-        if (player.name === 'Ellyse Perry' && selectedTeam !== 'all') {
-          console.log('🔍 Ellyse Perry filter check:');
-          console.log('  Player TeamId:', player.teamId, '(type:', typeof player.teamId + ')');
-          console.log('  Player TeamId (string):', playerTeamId);
-          console.log('  Selected TeamId:', selectedTeam, '(type:', typeof selectedTeam + ')');
-          console.log('  Selected TeamId (string):', selectedTeamId);
-          console.log('  Match Result:', matches);
-          console.log('  Will Show:', matches);
-          const matchingTeam = teams.find(t => String(t.id) === playerTeamId);
-          console.log('  Her Team:', matchingTeam ? matchingTeam.name : 'NOT FOUND');
-        }
-        
-        return matches;
+        return playerTeamId === selectedTeamId;
       });
-  
-  // Debug: Log filtered results
-  if (selectedTeam !== 'all') {
-    console.log('🔍 Filter results:');
-    console.log('  Selected Team:', selectedTeam);
-    console.log('  Filtered Count:', filteredPlayers.length);
-    console.log('  Total Count:', players.length);
-    console.log('  Ellyse in Results:', filteredPlayers.some(p => p.name === 'Ellyse Perry'));
-    if (filteredPlayers.some(p => p.name === 'Ellyse Perry')) {
-      const ellyse = filteredPlayers.find(p => p.name === 'Ellyse Perry');
-      console.log('  ⚠️ Ellyse Perry SHOULD NOT be here! Her teamId:', ellyse?.teamId, 'Selected:', selectedTeam);
-    }
-  }
 
   // Apply sorting
   if (sortField) {
@@ -573,54 +534,10 @@ export default function AdminPlayers() {
   
   // Safety check: Double-filter by team to ensure no players slip through
   if (selectedTeam !== 'all') {
-    const beforeSafetyCheck = searchFilteredPlayers.length;
-    
-    // Check for duplicate Ellyse Perry entries
-    const ellyseEntries = players.filter(p => p.name === 'Ellyse Perry');
-    if (ellyseEntries.length > 1) {
-      console.error('❌ FOUND MULTIPLE Ellyse Perry entries!', ellyseEntries.length);
-      ellyseEntries.forEach((entry, idx) => {
-        console.error(`  Entry ${idx + 1}:`, {
-          id: entry.id,
-          teamId: entry.teamId,
-          teamIdType: typeof entry.teamId,
-          team: teams.find(t => String(t.id) === String(entry.teamId))?.name
-        });
-      });
-    }
-    
     searchFilteredPlayers = searchFilteredPlayers.filter(player => {
       if (!player.teamId) return false;
-      const matches = String(player.teamId).trim() === String(selectedTeam).trim();
-      
-      // Extra check for Ellyse Perry
-      if (player.name === 'Ellyse Perry' && !matches) {
-        console.error('❌ Ellyse Perry in searchFilteredPlayers but does not match selected team!');
-        console.error('  Player TeamId:', player.teamId, typeof player.teamId);
-        console.error('  Selected Team:', selectedTeam, typeof selectedTeam);
-        console.error('  Match:', matches);
-        return false; // Force exclude
-      }
-      
-      return matches;
+      return String(player.teamId).trim() === String(selectedTeam).trim();
     });
-    
-    // Debug: Check if Ellyse Perry is in the final list
-    const ellyseInFinal = searchFilteredPlayers.some(p => p.name === 'Ellyse Perry');
-    if (ellyseInFinal) {
-      const ellyse = searchFilteredPlayers.find(p => p.name === 'Ellyse Perry');
-      console.error('❌ ERROR: Ellyse Perry found in final render list!');
-      console.error('  Selected Team:', selectedTeam);
-      console.error('  Her TeamId:', ellyse?.teamId);
-      console.error('  Her ID:', ellyse?.id);
-      console.error('  This should not happen!');
-      // Force remove her
-      searchFilteredPlayers = searchFilteredPlayers.filter(p => p.name !== 'Ellyse Perry' || String(p.teamId) === String(selectedTeam));
-    }
-    
-    if (beforeSafetyCheck !== searchFilteredPlayers.length) {
-      console.warn('⚠️ Safety check removed', beforeSafetyCheck - searchFilteredPlayers.length, 'players that did not match team filter');
-    }
   }
 
   if (!isAuthenticated) {
@@ -1032,13 +949,7 @@ export default function AdminPlayers() {
                     .filter(player => {
                       // Final safety check: If a team is selected, ensure player matches
                       if (selectedTeam !== 'all' && player.teamId) {
-                        const matches = String(player.teamId).trim() === String(selectedTeam).trim();
-                        if (!matches && player.name === 'Ellyse Perry') {
-                          console.error('🚨 CRITICAL: Ellyse Perry passed through all filters! Removing now.');
-                          console.error('  Player TeamId:', player.teamId, 'Selected:', selectedTeam);
-                          return false;
-                        }
-                        return matches;
+                        return String(player.teamId).trim() === String(selectedTeam).trim();
                       }
                       return true;
                     })
