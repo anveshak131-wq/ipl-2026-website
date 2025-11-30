@@ -451,7 +451,7 @@ export default function AdminPlayers() {
   // Filter and sort players
   let filteredPlayers = selectedTeam === 'all' 
     ? players 
-    : players.filter(player => player.teamId === selectedTeam);
+    : players.filter(player => String(player.teamId) === String(selectedTeam));
 
   // Apply sorting
   if (sortField) {
@@ -760,7 +760,7 @@ export default function AdminPlayers() {
 
                     {/* Team Options */}
                     {teams.map((team) => {
-                      const teamPlayersCount = players.filter(p => p.teamId === team.id).length;
+                      const teamPlayersCount = players.filter(p => String(p.teamId) === String(team.id)).length;
                       return (
                         <button
                           key={team.id}
