@@ -618,7 +618,7 @@ export default function Home() {
                       viewport={{ once: true }}
                       transition={{ duration: 0.5, delay: idx * 0.1 }}
                       className="group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 p-6 hover:bg-white/10 hover:border-white/20 transition-all duration-300 cursor-pointer"
-                      onClick={() => router.push(`/matches`)}
+                      onClick={() => router.push(match.league === 'wpl' ? '/wpl/matches' : '/matches')}
                     >
                       <div className="flex items-center justify-between mb-4">
                         <span className={`text-xs font-bold px-3 py-1 rounded-full ${
@@ -647,7 +647,7 @@ export default function Home() {
                       <div className="flex items-center justify-between text-sm text-gray-400">
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4" />
-                          {formatMatchTime(match.date, match.time)}
+                          {match.time && match.date ? formatMatchTime(match.time, match.date) : 'TBD'}
                         </div>
                         <ChevronRight className="w-5 h-5 text-gray-500 group-hover:text-white group-hover:translate-x-1 transition-all" />
                       </div>
