@@ -310,7 +310,7 @@ export default function WPLHomePage() {
                     <div 
                       className="inline-block px-8 py-6 rounded-2xl backdrop-blur-xl"
                       style={{
-                        background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[25]}, ${WPLColors.pinkRGBA[20]})`,
+                        background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[20]}, ${WPLColors.pinkRGBA[20]})`,
                         border: `2px solid ${WPLColors.purpleRGBA[40]}`,
                         boxShadow: `0 20px 60px ${WPLColors.purpleRGBA[30]}`,
                       }}

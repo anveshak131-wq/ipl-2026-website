@@ -119,7 +119,7 @@ export default function WPLMatchesPage() {
         <motion.div 
           className="absolute bottom-20 left-10 w-80 h-80 rounded-full blur-3xl"
           style={{ 
-            background: `radial-gradient(circle, ${WPLColors.roseRGBA[25]}, ${WPLColors.pinkRGBA[15]}, transparent)`,
+            background: `radial-gradient(circle, ${WPLColors.roseRGBA[20]}, ${WPLColors.pinkRGBA[15]}, transparent)`,
           }}
           animate={{
             y: [0, 30, 0],
@@ -206,7 +206,7 @@ export default function WPLMatchesPage() {
                     boxShadow: `0 10px 30px ${tab.color}50, 0 0 50px ${tab.color}30`,
                     border: `2px solid ${tab.color}80`,
                   } : {
-                    background: `linear-gradient(135deg, ${WPLColors.violetRGBA[8]}, ${WPLColors.pinkRGBA[4]})`,
+                    background: `linear-gradient(135deg, ${WPLColors.violetRGBA[10]}, ${WPLColors.pinkRGBA[10]})`,
                     color: WPLColors.textSecondary,
                     border: `2px solid ${WPLColors.violetRGBA[20]}`,
                   }}

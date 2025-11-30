@@ -156,7 +156,7 @@ export default function WPLStatsPage() {
         <motion.div 
           className="absolute top-20 left-10 w-96 h-96 rounded-full blur-3xl"
           style={{ 
-            background: `radial-gradient(circle, ${WPLColors.purpleRGBA[25]}, ${WPLColors.pinkRGBA[15]}, transparent)`,
+            background: `radial-gradient(circle, ${WPLColors.purpleRGBA[20]}, ${WPLColors.pinkRGBA[15]}, transparent)`,
           }}
           animate={{
             y: [0, -25, 0],
@@ -172,7 +172,7 @@ export default function WPLStatsPage() {
         <motion.div 
           className="absolute bottom-10 right-20 w-96 h-96 rounded-full blur-3xl"
           style={{ 
-            background: `radial-gradient(circle, ${WPLColors.pinkRGBA[20]}, ${WPLColors.roseRGBA[12]}, transparent)`,
+            background: `radial-gradient(circle, ${WPLColors.pinkRGBA[20]}, ${WPLColors.roseRGBA[10]}, transparent)`,
           }}
           animate={{
             y: [0, 25, 0],
