@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
@@ -9,13 +9,11 @@ import Footer from '@/components/layout/Footer';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import TermsAcceptanceModal from '@/components/legal/TermsAcceptanceModal';
 import ModernTeamsShowcase from '@/components/home/ModernTeamsShowcase';
-import ModernMatchesGrid from '@/components/home/ModernMatchesGrid';
 import ModernNewsSection from '@/components/home/ModernNewsSection';
 import ModernStatsSection from '@/components/home/ModernStatsSection';
 import BackToTop from '@/components/ui/BackToTop';
 import { TeamsSkeleton, MatchesSkeleton, NewsSkeleton } from '@/components/home/HomePageSkeletons';
 import { api } from '@/lib/data';
-import { useLeague } from '@/contexts/LeagueContext';
 import { isPlaceholderTeam } from '@/lib/playoffUtils';
 import type { Team, Match, News } from '@/types';
 import { 
@@ -31,15 +29,13 @@ import {
   Users,
   Flame,
   Star,
-  ChevronRight,
-  Activity
+  ChevronRight
 } from 'lucide-react';
 import CountdownTimer from '@/components/ui/CountdownTimer';
 import { formatMatchTime } from '@/lib/timeUtils';
 
 export default function Home() {
   const router = useRouter();
-  const { currentLeague } = useLeague();
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [lastAcceptanceDate, setLastAcceptanceDate] = useState<string | null>(null);
   const [needsReAcceptance, setNeedsReAcceptance] = useState(false);
@@ -495,7 +491,7 @@ export default function Home() {
                             {iplNextMatch.team1.shortName} vs {iplNextMatch.team2.shortName}
                           </p>
                         </div>
-                        <CountdownTimer matchDate={iplNextMatch.date} matchTime={iplNextMatch.time} />
+                        <CountdownTimer targetDate={iplNextMatch.date} matchTime={iplNextMatch.time} />
                       </div>
                     </div>
                   )}
@@ -562,7 +558,7 @@ export default function Home() {
                             {wplNextMatch.team1.shortName} vs {wplNextMatch.team2.shortName}
                           </p>
                         </div>
-                        <CountdownTimer matchDate={wplNextMatch.date} matchTime={wplNextMatch.time} />
+                        <CountdownTimer targetDate={wplNextMatch.date} matchTime={wplNextMatch.time} />
                       </div>
                     </div>
                   )}
