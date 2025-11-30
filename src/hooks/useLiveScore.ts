@@ -110,15 +110,20 @@ export function useLiveScore({
         bowlerRunDelta = ball.type;
       } else if (ball.type === 'WD') {
         teamRunDelta = 1;
+        batterRunDelta = 0; // Wides don't count as batter runs
         bowlerRunDelta = 1;
       } else if (ball.type === 'NB') {
         teamRunDelta = 1;
+        batterRunDelta = 0; // No-balls don't count as batter runs (unless runs scored)
         bowlerRunDelta = 1;
       } else if (ball.type === 'B' || ball.type === 'LB') {
         teamRunDelta = 1;
-        // Byes/leg-byes don't count against bowler or batter
+        batterRunDelta = 0; // Byes/leg-byes don't count against bowler or batter
+        bowlerRunDelta = 0; // Byes/leg-byes don't count against bowler
       } else if (ball.type === 'W') {
         teamRunDelta = 0;
+        batterRunDelta = 0;
+        bowlerRunDelta = 0;
       }
 
       // Determine if legal delivery
@@ -133,17 +138,11 @@ export function useLiveScore({
       const newTeamWickets = isWicket ? team.wickets + 1 : team.wickets;
 
       // Update batter stats
-      const batterRunDelta = ['WD', 'NB', 'B', 'LB'].includes(ball.type as string) 
-        ? 0 
-        : (typeof ball.type === 'number' ? ball.type : 0);
       const batterBallDelta = isLegalDelivery ? 1 : 0;
       const newBatterRuns = prev.currentBatter.runs + batterRunDelta;
       const newBatterBalls = prev.currentBatter.balls + batterBallDelta;
 
       // Update bowler stats
-      const bowlerRunDelta = ['B', 'LB'].includes(ball.type as string)
-        ? 0
-        : (typeof ball.type === 'number' ? ball.type : (ball.type === 'WD' || ball.type === 'NB' ? 1 : 0));
       const bowlerBallDelta = isLegalDelivery ? 1 : 0;
       const newBowlerRuns = prev.currentBowler.runs + bowlerRunDelta;
       const newBowlerBalls = prev.currentBowler.balls + bowlerBallDelta;
