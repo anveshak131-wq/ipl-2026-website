@@ -656,7 +656,7 @@ export default function NewsPage() {
                     <div className="flex gap-2">
                       {[
                         { key: 'latest', label: 'Latest', icon: 'news' as const },
-                        { key: 'popular', label: 'Most Popular', icon: 'fire' as const },
+                        { key: 'popular', label: 'Most Popular', icon: 'trophy' as const },
                         { key: 'read', label: 'Most Read', icon: 'stats' as const }
                       ].map(option => (
                         <button
@@ -684,13 +684,13 @@ export default function NewsPage() {
                 { 
                   key: 'all', 
                   label: 'All News', 
-                  icon: 'sparkles' as const, 
+                  icon: 'news' as const, 
                   color: '#9333EA' 
                 },
                 { 
                   key: 'breaking', 
                   label: 'Breaking', 
-                  icon: 'fire' as const, 
+                  icon: 'trophy' as const, 
                   color: '#EF4444' 
                 },
                 { 
@@ -702,7 +702,7 @@ export default function NewsPage() {
                 { 
                   key: 'player', 
                   label: 'Player Spotlights', 
-                  icon: 'people' as const, 
+                        icon: 'user' as const,
                   color: '#F43F5E' 
                 },
                 { 
@@ -714,7 +714,7 @@ export default function NewsPage() {
                 { 
                   key: 'inspiration', 
                   label: 'Inspiration', 
-                  icon: 'sparkles' as const, 
+                  icon: 'news' as const, 
                   color: '#D946EF' 
                 },
                 { 
@@ -852,10 +852,10 @@ export default function NewsPage() {
                       <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-semibold border ${getCategoryColor(featuredImportant.category)}`}>
                         {featuredImportant.category === 'match' && <Icon name="cricket" size={10} />}
                         {featuredImportant.category === 'team' && <Icon name={currentLeague === 'wpl' ? 'trophy' : 'team'} size={10} />}
-                        {featuredImportant.category === 'player' && <Icon name={currentLeague === 'wpl' ? 'people' : 'trophy'} size={10} />}
+                        {featuredImportant.category === 'player' && <Icon name={currentLeague === 'wpl' ? 'user' : 'trophy'} size={10} />}
                         {featuredImportant.category === 'general' && <Icon name="news" size={10} />}
-                        {featuredImportant.category === 'breaking' && <Icon name="fire" size={10} />}
-                        {featuredImportant.category === 'inspiration' && <Icon name="sparkles" size={10} />}
+                        {featuredImportant.category === 'breaking' && <Icon name="news" size={10} />}
+                        {featuredImportant.category === 'inspiration' && <Icon name="news" size={10} />}
                         {featuredImportant.category === 'behind-the-scenes' && <Icon name="news" size={10} />}
                         {(() => {
                           const cat = featuredImportant.category;
@@ -968,10 +968,10 @@ export default function NewsPage() {
                       <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold border ${getCategoryColor((item as any).category)}`}>
                         {(item as any).category === 'match' && <Icon name="cricket" size={12} />}
                         {(item as any).category === 'team' && <Icon name={currentLeague === 'wpl' ? 'trophy' : 'team'} size={12} />}
-                        {(item as any).category === 'player' && <Icon name={currentLeague === 'wpl' ? 'people' : 'trophy'} size={12} />}
+                        {(item as any).category === 'player' && <Icon name={currentLeague === 'wpl' ? 'user' : 'trophy'} size={12} />}
                         {(item as any).category === 'general' && <Icon name="news" size={12} />}
-                        {(item as any).category === 'breaking' && <Icon name="fire" size={12} />}
-                        {(item as any).category === 'inspiration' && <Icon name="sparkles" size={12} />}
+                        {(item as any).category === 'breaking' && <Icon name="news" size={12} />}
+                        {(item as any).category === 'inspiration' && <Icon name="news" size={12} />}
                         {(item as any).category === 'behind-the-scenes' && <Icon name="news" size={12} />}
                         {(() => {
                           const cat = (item as any).category;

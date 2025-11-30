@@ -18,16 +18,16 @@ import FloatingBadge from '@/components/effects/FloatingBadge';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import GradientText from '@/components/ui/GradientText';
 import BackToTop from '@/components/ui/BackToTop';
-import QuickStatsWidget from '@/components/home/QuickStatsWidget';
 import { TeamsSkeleton, MatchesSkeleton, NewsSkeleton } from '@/components/home/HomePageSkeletons';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/data';
 import { useLeague } from '@/contexts/LeagueContext';
 import type { Team, Match, News } from '@/types';
 import { useMemo } from 'react';
-import { Sparkles, ArrowRight, Play, Calendar, TrendingUp, Users, Zap } from 'lucide-react';
+import { Sparkles, ArrowRight, Play, Calendar, TrendingUp, Users, Zap, Trophy, Star } from 'lucide-react';
 import WPLFloatingParticles from '@/components/animations/WPLFloatingParticles';
 import { WPLColors } from '@/lib/wplColors';
+import CountdownTimer from '@/components/ui/CountdownTimer';
 
 export default function WPLHomePage() {
   const router = useRouter();
@@ -217,32 +217,73 @@ export default function WPLHomePage() {
             
             <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
               <AnimatedSection direction="down" delay={0.1}>
-                {/* Badge */}
+                {/* Large WPL Logo/Badge */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
+                  className="mb-8"
+                >
+                  <div 
+                    className="inline-flex items-center gap-4 px-8 py-4 rounded-2xl backdrop-blur-xl shadow-2xl"
+                    style={{
+                      background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[20]}, ${WPLColors.pinkRGBA[15]})`,
+                      border: `2px solid ${WPLColors.purpleRGBA[40]}`,
+                      boxShadow: `0 20px 60px ${WPLColors.purpleRGBA[30]}, 0 0 80px ${WPLColors.pinkRGBA[20]}`,
+                    }}
+                  >
+                    <Trophy className="w-10 h-10" style={{ color: WPLColors.pink }} />
+                    <div className="text-left">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Sparkles className="w-5 h-5" style={{ color: WPLColors.textAccent }} />
+                        <span 
+                          className="text-lg font-black uppercase tracking-wider"
+                          style={{ color: WPLColors.textPrimary }}
+                        >
+                          Women's Premier League
+                        </span>
+                      </div>
+                      <span 
+                        className="text-sm font-semibold"
+                        style={{ color: WPLColors.textAccent }}
+                      >
+                        WPL 2026
+                      </span>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Empowerment Tagline */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
-                  className="inline-flex items-center gap-2 mb-8 px-6 py-3 rounded-full backdrop-blur-md shadow-lg"
-                  style={{
-                    background: WPLColors.purpleRGBA[10],
-                    border: `1px solid ${WPLColors.purpleRGBA[30]}`,
-                  }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                  className="mb-6"
                 >
-                  <Sparkles className="w-5 h-5 text-purple-400" />
-                  <span 
-                    className="text-sm font-bold uppercase tracking-wider"
-                    style={{ color: WPLColors.textAccent }}
+                  <div 
+                    className="inline-flex items-center gap-2 px-6 py-2 rounded-full"
+                    style={{
+                      background: `linear-gradient(135deg, ${WPLColors.pinkRGBA[20]}, ${WPLColors.roseRGBA[15]})`,
+                      border: `1px solid ${WPLColors.pinkRGBA[30]}`,
+                    }}
                   >
-                    Women's Premier League
-                  </span>
+                    <Star className="w-5 h-5" style={{ color: WPLColors.pink }} />
+                    <span 
+                      className="text-lg md:text-xl font-bold"
+                      style={{ color: WPLColors.textPrimary }}
+                    >
+                      Empowering Women's Cricket
+                    </span>
+                  </div>
                 </motion.div>
 
                 {/* Main Heading */}
                 <motion.h1
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
-                  className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-white mb-6 leading-tight"
+                  transition={{ duration: 0.8, delay: 0.3 }}
+                  className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black mb-6 leading-tight"
+                  style={{ color: WPLColors.textPrimary }}
                 >
                   WPL <GradientText gradient="from-purple-400 via-pink-400 to-rose-400" animate>2026</GradientText>
                 </motion.h1>
@@ -252,10 +293,68 @@ export default function WPLHomePage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.4 }}
-                  className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-10 leading-relaxed"
+                  className="text-xl md:text-2xl max-w-3xl mx-auto mb-12 leading-relaxed"
+                  style={{ color: WPLColors.textSecondary }}
                 >
                   The pinnacle of women's T20 cricket. Experience the power, passion, and excellence of WPL 2026.
                 </motion.p>
+
+                {/* Featured Match Countdown - Large and Prominent */}
+                {nextMatch && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9, y: 30 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.5 }}
+                    className="mb-12"
+                  >
+                    <div 
+                      className="inline-block px-8 py-6 rounded-2xl backdrop-blur-xl"
+                      style={{
+                        background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[25]}, ${WPLColors.pinkRGBA[20]})`,
+                        border: `2px solid ${WPLColors.purpleRGBA[40]}`,
+                        boxShadow: `0 20px 60px ${WPLColors.purpleRGBA[30]}`,
+                      }}
+                    >
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Calendar className="w-5 h-5" style={{ color: WPLColors.pink }} />
+                          <span 
+                            className="text-sm font-bold uppercase tracking-wider"
+                            style={{ color: WPLColors.textAccent }}
+                          >
+                            Next Match
+                          </span>
+                        </div>
+                        <div className="text-center mb-4">
+                          <p 
+                            className="text-lg font-semibold mb-1"
+                            style={{ color: WPLColors.textPrimary }}
+                          >
+                            {nextMatch.team1.name} vs {nextMatch.team2.name}
+                          </p>
+                          <p 
+                            className="text-sm"
+                            style={{ color: WPLColors.textSecondary }}
+                          >
+                            {new Date(nextMatch.date).toLocaleDateString('en-US', { 
+                              weekday: 'long', 
+                              year: 'numeric', 
+                              month: 'long', 
+                              day: 'numeric' 
+                            })}
+                          </p>
+                        </div>
+                        <div className="scale-125">
+                          <CountdownTimer 
+                            targetDate={nextMatch.date}
+                            matchTime={nextMatch.time}
+                            className="text-white"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
 
                 {/* CTA Buttons */}
                 <motion.div
@@ -346,12 +445,144 @@ export default function WPLHomePage() {
           </motion.div>
         </section>
         
-        {/* Quick Stats Widget */}
+        {/* Quick Stats Cards - Enhanced with Purple/Pink Accents */}
         {!isLoading && (
           <section className="relative py-12 -mt-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <AnimatedSection direction="up" delay={0.5}>
-                <QuickStatsWidget matches={matches} />
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {/* Total Matches */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 }}
+                    className="rounded-xl px-6 py-5 backdrop-blur-xl cursor-pointer"
+                    style={{
+                      background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[20]}, ${WPLColors.purpleRGBA[10]})`,
+                      border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                      boxShadow: `0 8px 32px 0 ${WPLColors.purpleRGBA[20]}`,
+                    }}
+                    whileHover={{ 
+                      scale: 1.05,
+                      boxShadow: `0 12px 40px 0 ${WPLColors.purpleRGBA[30]}`,
+                    }}
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <Calendar className="w-6 h-6" style={{ color: WPLColors.purple }} />
+                      <span 
+                        className="text-xs font-bold uppercase tracking-wider"
+                        style={{ color: WPLColors.textAccent }}
+                      >
+                        Matches
+                      </span>
+                    </div>
+                    <p 
+                      className="text-3xl font-black"
+                      style={{ color: WPLColors.textPrimary }}
+                    >
+                      {matches.length}
+                    </p>
+                  </motion.div>
+
+                  {/* Total Teams */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.7 }}
+                    className="rounded-xl px-6 py-5 backdrop-blur-xl cursor-pointer"
+                    style={{
+                      background: `linear-gradient(135deg, ${WPLColors.pinkRGBA[20]}, ${WPLColors.pinkRGBA[10]})`,
+                      border: `1px solid ${WPLColors.pinkRGBA[30]}`,
+                      boxShadow: `0 8px 32px 0 ${WPLColors.pinkRGBA[20]}`,
+                    }}
+                    whileHover={{ 
+                      scale: 1.05,
+                      boxShadow: `0 12px 40px 0 ${WPLColors.pinkRGBA[30]}`,
+                    }}
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <Users className="w-6 h-6" style={{ color: WPLColors.pink }} />
+                      <span 
+                        className="text-xs font-bold uppercase tracking-wider"
+                        style={{ color: WPLColors.pink }}
+                      >
+                        Teams
+                      </span>
+                    </div>
+                    <p 
+                      className="text-3xl font-black"
+                      style={{ color: WPLColors.textPrimary }}
+                    >
+                      {teams.length}
+                    </p>
+                  </motion.div>
+
+                  {/* Live Matches */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.8 }}
+                    className="rounded-xl px-6 py-5 backdrop-blur-xl cursor-pointer"
+                    style={{
+                      background: `linear-gradient(135deg, ${WPLColors.roseRGBA[20]}, ${WPLColors.roseRGBA[10]})`,
+                      border: `1px solid ${WPLColors.roseRGBA[30]}`,
+                      boxShadow: `0 8px 32px 0 ${WPLColors.roseRGBA[20]}`,
+                    }}
+                    whileHover={{ 
+                      scale: 1.05,
+                      boxShadow: `0 12px 40px 0 ${WPLColors.roseRGBA[30]}`,
+                    }}
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <Play className="w-6 h-6" style={{ color: WPLColors.rose }} />
+                      <span 
+                        className="text-xs font-bold uppercase tracking-wider"
+                        style={{ color: WPLColors.rose }}
+                      >
+                        Live
+                      </span>
+                    </div>
+                    <p 
+                      className="text-3xl font-black"
+                      style={{ color: WPLColors.textPrimary }}
+                    >
+                      {liveMatchCount}
+                    </p>
+                  </motion.div>
+
+                  {/* Upcoming Matches */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.9 }}
+                    className="rounded-xl px-6 py-5 backdrop-blur-xl cursor-pointer"
+                    style={{
+                      background: `linear-gradient(135deg, ${WPLColors.violetRGBA[20]}, ${WPLColors.pinkRGBA[10]})`,
+                      border: `1px solid ${WPLColors.violetRGBA[30]}`,
+                      boxShadow: `0 8px 32px 0 ${WPLColors.violetRGBA[20]}`,
+                    }}
+                    whileHover={{ 
+                      scale: 1.05,
+                      boxShadow: `0 12px 40px 0 ${WPLColors.violetRGBA[30]}`,
+                    }}
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <TrendingUp className="w-6 h-6" style={{ color: WPLColors.violet }} />
+                      <span 
+                        className="text-xs font-bold uppercase tracking-wider"
+                        style={{ color: WPLColors.textAccent }}
+                      >
+                        Upcoming
+                      </span>
+                    </div>
+                    <p 
+                      className="text-3xl font-black"
+                      style={{ color: WPLColors.textPrimary }}
+                    >
+                      {matches.filter(m => m.status === 'upcoming').length}
+                    </p>
+                  </motion.div>
+                </div>
               </AnimatedSection>
             </div>
           </section>
