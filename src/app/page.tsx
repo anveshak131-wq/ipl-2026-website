@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import CountdownTimer from '@/components/ui/CountdownTimer';
 import { formatMatchTime } from '@/lib/timeUtils';
+import { getAnimatedLogoPath } from '@/lib/logoUtils';
 
 export default function Home() {
   const router = useRouter();
@@ -78,6 +79,70 @@ export default function Home() {
     const allLive = [...iplLiveMatches, ...wplLiveMatches];
     return allLive[0] || null;
   }, [iplLiveMatches, wplLiveMatches]);
+
+  // Get last completed match for each league
+  const iplLastMatch = useMemo(() => {
+    const completed = iplMatches
+      .filter(m => m.status === 'completed')
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return completed[0] || null;
+  }, [iplMatches]);
+
+  const wplLastMatch = useMemo(() => {
+    const completed = wplMatches
+      .filter(m => m.status === 'completed')
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return completed[0] || null;
+  }, [wplMatches]);
+
+  // Get upcoming matches for hover preview
+  const iplUpcomingMatches = useMemo(() => {
+    return iplMatches
+      .filter(m => m.status === 'upcoming')
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .slice(0, 3);
+  }, [iplMatches]);
+
+  const wplUpcomingMatches = useMemo(() => {
+    return wplMatches
+      .filter(m => m.status === 'upcoming')
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .slice(0, 3);
+  }, [wplMatches]);
+
+  // State for logo carousel
+  const [iplLogoIndex, setIplLogoIndex] = useState(0);
+  const [wplLogoIndex, setWplLogoIndex] = useState(0);
+
+  // Get last completed match for each league
+  const iplLastMatch = useMemo(() => {
+    const completed = iplMatches
+      .filter(m => m.status === 'completed')
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return completed[0] || null;
+  }, [iplMatches]);
+
+  const wplLastMatch = useMemo(() => {
+    const completed = wplMatches
+      .filter(m => m.status === 'completed')
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return completed[0] || null;
+  }, [wplMatches]);
+
+  // Get upcoming matches for hover preview
+  const iplUpcomingMatches = useMemo(() => {
+    return iplMatches
+      .filter(m => m.status === 'upcoming')
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .slice(0, 3);
+  }, [iplMatches]);
+
+  const wplUpcomingMatches = useMemo(() => {
+    return wplMatches
+      .filter(m => m.status === 'upcoming')
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .slice(0, 3);
+  }, [wplMatches]);
 
   useEffect(() => {
     setIsHydrated(true);
@@ -134,6 +199,27 @@ export default function Home() {
 
     loadData();
   }, []);
+
+  // Auto-rotate team logos carousel
+  useEffect(() => {
+    const iplFilteredTeams = iplTeams.filter(t => !isPlaceholderTeam(t));
+    if (iplFilteredTeams.length > 0) {
+      const interval = setInterval(() => {
+        setIplLogoIndex((prev) => (prev + 1) % Math.min(iplFilteredTeams.length, 5));
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [iplTeams]);
+
+  useEffect(() => {
+    const wplFilteredTeams = wplTeams.filter(t => !isPlaceholderTeam(t));
+    if (wplFilteredTeams.length > 0) {
+      const interval = setInterval(() => {
+        setWplLogoIndex((prev) => (prev + 1) % Math.min(wplFilteredTeams.length, 5));
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [wplTeams]);
 
   const handleAcceptTerms = () => {
     setShowTermsModal(false);
@@ -452,8 +538,24 @@ export default function Home() {
                 <div className="relative z-10">
                   <div className="flex items-start justify-between mb-6">
                     <div className="flex items-center gap-4">
-                      <div className="p-5 rounded-2xl bg-blue-500/30 border border-blue-400/40 backdrop-blur-sm shadow-lg">
-                        <Trophy className="w-10 h-10 text-blue-300" />
+                      {/* Team Logos Carousel */}
+                      <div className="relative p-5 rounded-2xl bg-blue-500/30 border border-blue-400/40 backdrop-blur-sm shadow-lg overflow-hidden">
+                        <AnimatePresence mode="wait">
+                          {iplTeams.filter(t => !isPlaceholderTeam(t)).slice(0, 5).map((team, idx) => (
+                            idx === iplLogoIndex && (
+                              <motion.img
+                                key={team.id}
+                                src={getAnimatedLogoPath(team.id, team.shortName, 'ipl')}
+                                alt={team.shortName}
+                                className="w-10 h-10 object-contain"
+                                initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
+                                animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                                exit={{ opacity: 0, scale: 0.8, rotate: 10 }}
+                                transition={{ duration: 0.5 }}
+                              />
+                            )
+                          ))}
+                        </AnimatePresence>
                       </div>
                       <div>
                         <h3 className="text-3xl font-black text-white mb-1">Indian Premier League</h3>
@@ -482,6 +584,38 @@ export default function Home() {
                     </div>
                   </div>
 
+                  {/* Last Match Result Preview */}
+                  {iplLastMatch && (
+                    <div className="mb-4 p-4 rounded-xl bg-white/5 border border-white/10">
+                      <p className="text-xs text-gray-400 mb-2 flex items-center gap-2">
+                        <Trophy className="w-3 h-3" />
+                        Last Result
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-sm font-semibold ${
+                            iplLastMatch.score && iplLastMatch.score.team1.runs > iplLastMatch.score.team2.runs 
+                              ? 'text-yellow-400' 
+                              : 'text-white'
+                          }`}>
+                            {iplLastMatch.team1.shortName}
+                          </span>
+                          <span className="text-gray-400">vs</span>
+                          <span className={`text-sm font-semibold ${
+                            iplLastMatch.score && iplLastMatch.score.team2.runs > iplLastMatch.score.team1.runs 
+                              ? 'text-yellow-400' 
+                              : 'text-white'
+                          }`}>
+                            {iplLastMatch.team2.shortName}
+                          </span>
+                        </div>
+                        {iplLastMatch.result && (
+                          <span className="text-xs text-yellow-400 font-bold">✓</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {iplNextMatch && (
                     <div className="mb-6 p-4 rounded-xl bg-white/5 border border-white/10">
                       <div className="flex items-center justify-between">
@@ -496,7 +630,33 @@ export default function Home() {
                     </div>
                   )}
 
-                  <div className="flex items-center gap-2 text-blue-300 font-bold text-lg">
+                  {/* Interactive Hover Preview - Upcoming Matches */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-600/95 to-cyan-600/95 backdrop-blur-xl rounded-3xl p-8 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none group-hover:pointer-events-auto">
+                    <div className="h-full flex flex-col">
+                      <h4 className="text-xl font-black text-white mb-4">Upcoming Matches</h4>
+                      <div className="flex-1 space-y-3 overflow-y-auto">
+                        {iplUpcomingMatches.length > 0 ? (
+                          iplUpcomingMatches.map((match) => (
+                            <div key={match.id} className="p-3 rounded-lg bg-white/10 border border-white/20">
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-sm font-semibold text-white">
+                                  {match.team1.shortName} vs {match.team2.shortName}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 text-xs text-gray-300">
+                                <Clock className="w-3 h-3" />
+                                {match.time && match.date ? formatMatchTime(match.time, match.date) : 'TBD'}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-gray-400 text-sm">No upcoming matches</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-blue-300 font-bold text-lg relative z-10">
                     <span>Explore IPL</span>
                     <ArrowRight className="w-5 h-5" />
                   </div>
@@ -519,8 +679,24 @@ export default function Home() {
                 <div className="relative z-10">
                   <div className="flex items-start justify-between mb-6">
                     <div className="flex items-center gap-4">
-                      <div className="p-5 rounded-2xl bg-purple-500/30 border border-purple-400/40 backdrop-blur-sm shadow-lg">
-                        <Sparkles className="w-10 h-10 text-purple-300" />
+                      {/* Team Logos Carousel */}
+                      <div className="relative p-5 rounded-2xl bg-purple-500/30 border border-purple-400/40 backdrop-blur-sm shadow-lg overflow-hidden">
+                        <AnimatePresence mode="wait">
+                          {wplTeams.filter(t => !isPlaceholderTeam(t)).slice(0, 5).map((team, idx) => (
+                            idx === wplLogoIndex && (
+                              <motion.img
+                                key={team.id}
+                                src={getAnimatedLogoPath(team.id, team.shortName, 'wpl')}
+                                alt={team.shortName}
+                                className="w-10 h-10 object-contain"
+                                initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
+                                animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                                exit={{ opacity: 0, scale: 0.8, rotate: 10 }}
+                                transition={{ duration: 0.5 }}
+                              />
+                            )
+                          ))}
+                        </AnimatePresence>
                       </div>
                       <div>
                         <h3 className="text-3xl font-black text-white mb-1">Women's Premier League</h3>
@@ -549,6 +725,38 @@ export default function Home() {
                     </div>
                   </div>
 
+                  {/* Last Match Result Preview */}
+                  {wplLastMatch && (
+                    <div className="mb-4 p-4 rounded-xl bg-white/5 border border-white/10">
+                      <p className="text-xs text-gray-400 mb-2 flex items-center gap-2">
+                        <Trophy className="w-3 h-3" />
+                        Last Result
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-sm font-semibold ${
+                            wplLastMatch.score && wplLastMatch.score.team1.runs > wplLastMatch.score.team2.runs 
+                              ? 'text-yellow-400' 
+                              : 'text-white'
+                          }`}>
+                            {wplLastMatch.team1.shortName}
+                          </span>
+                          <span className="text-gray-400">vs</span>
+                          <span className={`text-sm font-semibold ${
+                            wplLastMatch.score && wplLastMatch.score.team2.runs > wplLastMatch.score.team1.runs 
+                              ? 'text-yellow-400' 
+                              : 'text-white'
+                          }`}>
+                            {wplLastMatch.team2.shortName}
+                          </span>
+                        </div>
+                        {wplLastMatch.result && (
+                          <span className="text-xs text-yellow-400 font-bold">✓</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
                   {wplNextMatch && (
                     <div className="mb-6 p-4 rounded-xl bg-white/5 border border-white/10">
                       <div className="flex items-center justify-between">
@@ -563,7 +771,33 @@ export default function Home() {
                     </div>
                   )}
 
-                  <div className="flex items-center gap-2 text-purple-300 font-bold text-lg">
+                  {/* Interactive Hover Preview - Upcoming Matches */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-600/95 to-pink-600/95 backdrop-blur-xl rounded-3xl p-8 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none group-hover:pointer-events-auto">
+                    <div className="h-full flex flex-col">
+                      <h4 className="text-xl font-black text-white mb-4">Upcoming Matches</h4>
+                      <div className="flex-1 space-y-3 overflow-y-auto">
+                        {wplUpcomingMatches.length > 0 ? (
+                          wplUpcomingMatches.map((match) => (
+                            <div key={match.id} className="p-3 rounded-lg bg-white/10 border border-white/20">
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-sm font-semibold text-white">
+                                  {match.team1.shortName} vs {match.team2.shortName}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 text-xs text-gray-300">
+                                <Clock className="w-3 h-3" />
+                                {match.time && match.date ? formatMatchTime(match.time, match.date) : 'TBD'}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-gray-400 text-sm">No upcoming matches</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-purple-300 font-bold text-lg relative z-10">
                     <span>Explore WPL</span>
                     <ArrowRight className="w-5 h-5" />
                   </div>
