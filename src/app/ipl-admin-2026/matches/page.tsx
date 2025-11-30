@@ -2315,8 +2315,8 @@ export default function AdminMatches() {
                                                             </span>
                                                         </div>
                                                     )}
-                                                    <div className="flex items-center gap-3">
-                                                        <div className="flex items-center gap-2">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="flex items-center gap-2 flex-shrink-0">
                                                             {(() => {
                                                                 // Check if it's a TBD team by ID, shortName, or name
                                                                 // Also check for teams 16, 17, 18, 19 which are placeholder teams
@@ -2401,7 +2401,7 @@ export default function AdminMatches() {
                                                                     />
                                                                 );
                                                             })()}
-                                                            <span className="text-white font-semibold">
+                                                            <span className="text-white font-semibold whitespace-nowrap">
                                                                 {(match.team1.id.includes('tbd-') || 
                                                                   match.team1.id === '16' || 
                                                                   match.team1.id === '17' || 
@@ -2413,8 +2413,8 @@ export default function AdminMatches() {
                                                                     : match.team1.shortName}
                                                             </span>
                                                         </div>
-                                                        <span className="text-gray-500 font-bold">vs</span>
-                                                        <div className="flex items-center gap-2">
+                                                        <span className="text-gray-500 font-bold mx-2 flex-shrink-0 whitespace-nowrap">vs</span>
+                                                        <div className="flex items-center gap-2 flex-shrink-0">
                                                             {(() => {
                                                                 // Check if it's a TBD team by ID, shortName, or name
                                                                 // Also check for teams 16, 17, 18, 19 which are placeholder teams
@@ -2499,7 +2499,7 @@ export default function AdminMatches() {
                                                                     />
                                                                 );
                                                             })()}
-                                                            <span className="text-white font-semibold">
+                                                            <span className="text-white font-semibold whitespace-nowrap">
                                                                 {(match.team2.id.includes('tbd-') || 
                                                                   match.team2.id === '16' || 
                                                                   match.team2.id === '17' || 
@@ -2793,14 +2793,20 @@ export default function AdminMatches() {
                                                                         />
                                                                     );
                                                                 })()}
-                                                                <span className="text-white font-bold">
-                                                                    {match.team1.id.includes('tbd-') || match.team1.shortName?.includes('Place') || match.team1.name?.includes('Place Team') 
+                                                                <span className="text-white font-bold whitespace-nowrap">
+                                                                    {(match.team1.id.includes('tbd-') || 
+                                                                      match.team1.id === '16' || 
+                                                                      match.team1.id === '17' || 
+                                                                      match.team1.id === '18' || 
+                                                                      match.team1.id === '19' ||
+                                                                      match.team1.shortName?.includes('Place') || 
+                                                                      match.team1.name?.includes('Place Team')) 
                                                                         ? 'TBD' 
                                                                         : match.team1.shortName}
                                                                 </span>
                                                             </div>
-                                                            <span className="text-gray-500 font-bold text-lg">vs</span>
-                                                            <div className="flex items-center gap-2">
+                                                            <span className="text-gray-500 font-bold text-lg mx-2 flex-shrink-0 whitespace-nowrap">vs</span>
+                                                            <div className="flex items-center gap-2 flex-shrink-0">
                                                                 {(() => {
                                                                     // Check if it's a TBD team by ID, shortName, or name
                                                                     // Check if it's a TBD team by ID, shortName, or name
@@ -2886,8 +2892,14 @@ export default function AdminMatches() {
                                                                         />
                                                                     );
                                                                 })()}
-                                                                <span className="text-white font-bold">
-                                                                    {match.team2.id.includes('tbd-') || match.team2.shortName?.includes('Place') || match.team2.name?.includes('Place Team') 
+                                                                <span className="text-white font-bold whitespace-nowrap">
+                                                                    {(match.team2.id.includes('tbd-') || 
+                                                                      match.team2.id === '16' || 
+                                                                      match.team2.id === '17' || 
+                                                                      match.team2.id === '18' || 
+                                                                      match.team2.id === '19' ||
+                                                                      match.team2.shortName?.includes('Place') || 
+                                                                      match.team2.name?.includes('Place Team')) 
                                                                         ? 'TBD' 
                                                                         : match.team2.shortName}
                                                                 </span>
