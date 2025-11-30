@@ -20,6 +20,7 @@ import { TeamsSkeleton, MatchesSkeleton, NewsSkeleton } from '@/components/home/
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/data';
 import { useLeague } from '@/contexts/LeagueContext';
+import { isPlaceholderTeam } from '@/lib/playoffUtils';
 import type { Team, Match, News } from '@/types';
 import { useMemo } from 'react';
 import { Trophy, Sparkles, ArrowRight, Zap, Play, TrendingUp, Calendar, Radio } from 'lucide-react';
@@ -452,7 +453,7 @@ export default function Home() {
               <AnimatedSection direction="up" delay={0.3}>
                 <div className="mb-12">
                   <h3 className="text-2xl font-bold text-white mb-6">Featured Teams</h3>
-                  <ModernTeamsShowcase teams={iplTeams.slice(0, 5)} />
+                  <ModernTeamsShowcase teams={iplTeams.filter(team => !isPlaceholderTeam(team)).slice(0, 5)} />
             </div>
               </AnimatedSection>
             ) : null}
@@ -503,7 +504,7 @@ export default function Home() {
               <AnimatedSection direction="up" delay={0.3}>
                 <div className="mb-12">
                   <h3 className="text-2xl font-bold text-white mb-6">Featured Teams</h3>
-                  <ModernTeamsShowcase teams={wplTeams.slice(0, 5)} />
+                  <ModernTeamsShowcase teams={wplTeams.filter(team => !isPlaceholderTeam(team)).slice(0, 5)} />
                 </div>
               </AnimatedSection>
             ) : null}

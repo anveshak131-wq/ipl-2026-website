@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import AnimatedCard from '@/components/ui/AnimatedCard';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
+import { isPlaceholderTeam } from '@/lib/playoffUtils';
 import type { Team } from '@/types';
 
 interface ModernTeamsShowcaseProps {
@@ -26,9 +27,12 @@ export default function ModernTeamsShowcase({ teams, isLoading = false }: Modern
     );
   }
 
+  // Filter out placeholder teams
+  const realTeams = teams.filter(team => !isPlaceholderTeam(team));
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 px-4 md:px-0">
-      {teams.map((team, idx) => (
+      {realTeams.map((team, idx) => (
         <div
           key={team.id}
           onMouseEnter={() => setHoveredTeam(team.id)}

@@ -12,6 +12,7 @@ import TeamQuickStatsPreview from '@/components/teams/TeamQuickStatsPreview';
 import { Team, Player, Match } from '@/types';
 import { api } from '@/lib/data';
 import { useLeague } from '@/contexts/LeagueContext';
+import { isPlaceholderTeam } from '@/lib/playoffUtils';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Icon from '@/components/ui/Icon';
 import AuroraBackground from '@/components/ui/AuroraBackground';
@@ -93,10 +94,18 @@ function TeamsPageContent() {
                     console.warn('Teams page: No teams returned! Check API or fallback data.');
                 }
 
-                const teamsWithPlayers = teamsData.map(team => ({
-                    ...team,
-                    players: (playersData || []).filter(player => player.teamId === team.id)
-                }));
+                const teamsWithPlayers = teamsData
+                    .filter(team => {
+                        // For WPL, filter out placeholder teams
+                        if (currentLeague === 'wpl' && isPlaceholderTeam(team)) {
+                            return false;
+                        }
+                        return true;
+                    })
+                    .map(team => ({
+                        ...team,
+                        players: (playersData || []).filter(player => player.teamId === team.id)
+                    }));
 
                 console.log('Teams page: Setting teams state with', teamsWithPlayers.length, 'teams');
                 setTeams(teamsWithPlayers);
@@ -110,7 +119,16 @@ function TeamsPageContent() {
                     if (teamsData.length === 0) {
                         console.error('Teams page: Even fallback returned 0 teams!');
                     }
-                    setTeams(teamsData.map(team => ({ ...team, players: [] })));
+                    const filteredTeams = teamsData
+                        .filter(team => {
+                            // For WPL, filter out placeholder teams
+                            if (currentLeague === 'wpl' && isPlaceholderTeam(team)) {
+                                return false;
+                            }
+                            return true;
+                        })
+                        .map(team => ({ ...team, players: [] }));
+                    setTeams(filteredTeams);
                 } catch (err) {
                     console.error('Teams page: Complete failure:', err);
                     setTeams([]); // Set empty array so UI shows "no teams" message

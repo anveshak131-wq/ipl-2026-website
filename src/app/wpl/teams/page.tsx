@@ -12,6 +12,7 @@ import TeamQuickStatsPreview from '@/components/teams/TeamQuickStatsPreview';
 import { Team, Player, Match } from '@/types';
 import { api } from '@/lib/data';
 import { useLeague } from '@/contexts/LeagueContext';
+import { isPlaceholderTeam } from '@/lib/playoffUtils';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Icon from '@/components/ui/Icon';
 import AuroraBackground from '@/components/ui/AuroraBackground';
@@ -93,10 +94,12 @@ function WPLTeamsPageContent() {
                     })
                 ]);
 
-                const teamsWithPlayers = teamsData.map(team => ({
-                    ...team,
-                    players: (playersData || []).filter(player => player.teamId === team.id)
-                }));
+                const teamsWithPlayers = teamsData
+                    .filter(team => !isPlaceholderTeam(team)) // Filter out placeholder teams
+                    .map(team => ({
+                        ...team,
+                        players: (playersData || []).filter(player => player.teamId === team.id)
+                    }));
 
                 setTeams(teamsWithPlayers);
                 setMatches(matchesData || []);

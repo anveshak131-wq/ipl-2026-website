@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Team } from '@/types';
 import { api } from '@/lib/data';
+import { isPlaceholderTeam } from '@/lib/playoffUtils';
 import LoadingSpinner from '../ui/LoadingSpinner';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import RCBLottie from '@/components/ui/RCBLottie';
@@ -21,7 +22,9 @@ export default function TeamsShowcase() {
     const fetchTeams = async () => {
       try {
         const teamsData = await api.getTeams();
-        setTeams(teamsData);
+        // Filter out placeholder teams
+        const realTeams = teamsData.filter(team => !isPlaceholderTeam(team));
+        setTeams(realTeams);
       } catch (error) {
         console.error('Failed to fetch teams:', error);
       } finally {

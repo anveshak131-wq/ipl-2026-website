@@ -140,3 +140,36 @@ export function getPlayoffTypes(): { value: PlayoffType; label: string }[] {
   ];
 }
 
+/**
+ * Check if a team is a placeholder/TBD team (should not be displayed in team listings)
+ * @param team - The team to check
+ * @returns true if the team is a placeholder/TBD team
+ */
+export function isPlaceholderTeam(team: Team): boolean {
+  // Check if team ID starts with 'tbd-'
+  if (team.id.startsWith('tbd-')) {
+    return true;
+  }
+  
+  // Check if team name contains placeholder indicators
+  const placeholderIndicators = [
+    'Place Team',
+    '1st Place',
+    '2nd Place',
+    '3rd Place',
+    '4th Place',
+    'Winner of',
+    'Loser of',
+    'Eliminator',
+    'TBD'
+  ];
+  
+  const nameLower = team.name.toLowerCase();
+  const shortNameLower = (team.shortName || '').toLowerCase();
+  
+  return placeholderIndicators.some(indicator => 
+    nameLower.includes(indicator.toLowerCase()) || 
+    shortNameLower.includes(indicator.toLowerCase())
+  );
+}
+
