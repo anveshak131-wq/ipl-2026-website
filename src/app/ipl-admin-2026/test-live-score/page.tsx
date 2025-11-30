@@ -376,13 +376,12 @@ export default function TestLiveScorePage() {
                 }}
               >
                 <option value="">Select a match...</option>
-                {matches
-                  .filter(m => m.status === 'upcoming' || m.status === 'live')
-                  .map((match) => (
-                    <option key={match.id} value={match.id}>
-                      {match.team1.shortName} vs {match.team2.shortName} · {new Date(match.date).toLocaleDateString()} {match.time}
-                    </option>
-                  ))}
+                {/* Test page: Show ALL matches (no time restrictions) */}
+                {matches.map((match) => (
+                  <option key={match.id} value={match.id}>
+                    {match.team1.shortName} vs {match.team2.shortName} · {new Date(match.date).toLocaleDateString()} {match.time} ({match.status})
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -409,7 +408,6 @@ export default function TestLiveScorePage() {
                 </button>
                 <button
                   onClick={() => setActiveTab('livescore')}
-                  disabled={team1Playing11.length !== 11 || team2Playing11.length !== 11}
                   className={`
                     px-6 py-3 rounded-xl font-bold transition-all flex items-center gap-2
                     ${activeTab === 'livescore'
@@ -418,11 +416,13 @@ export default function TestLiveScorePage() {
                         : 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-lg'
                       : 'bg-slate-700/50 text-gray-400 hover:bg-slate-700'
                     }
-                    ${(team1Playing11.length !== 11 || team2Playing11.length !== 11) ? 'opacity-50 cursor-not-allowed' : ''}
                   `}
                 >
                   <TestTube className="w-5 h-5" />
                   Live Score
+                  {team1Playing11.length === 11 && team2Playing11.length === 11 && (
+                    <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded">Playing 11 Set</span>
+                  )}
                 </button>
               </div>
             )}
@@ -597,42 +597,68 @@ export default function TestLiveScorePage() {
                     borderColor: 'rgba(255, 255, 255, 0.1)',
                   }}
                 >
-                  {team1Playing11.length === 11 && team2Playing11.length === 11 ? (
-                    <BallEntryPanel
-                      matchId={selectedMatch.id}
-                      team1Name={selectedMatch.team1.shortName || selectedMatch.team1.name}
-                      team2Name={selectedMatch.team2.shortName || selectedMatch.team2.name}
-                      team1Id={selectedMatch.team1.id}
-                      team2Id={selectedMatch.team2.id}
-                      onSave={handleSaveLiveScore}
-                      players={players.filter(p => 
-                        p.teamId === selectedMatch.team1.id || p.teamId === selectedMatch.team2.id
-                      )}
-                      league={currentLeague}
-                      playing11={{
-                        team1: team1Playing11,
-                        team2: team2Playing11,
-                      }}
-                    />
-                  ) : (
-                    <div className="text-center py-12">
-                      <AlertCircle className="w-16 h-16 mx-auto mb-4" style={{ color: isWPL ? WPLColors.pink : '#FBBF24' }} />
-                      <h3 className="text-2xl font-bold text-white mb-2">Playing 11 Required</h3>
-                      <p style={{ color: isWPL ? WPLColors.textSecondary : '#9CA3AF' }} className="mb-4">
-                        Please select playing 11 for both teams before testing live score entry.
-                      </p>
-                      <button
-                        onClick={() => setActiveTab('playing11')}
-                        className={`
-                          px-6 py-3 rounded-xl font-bold transition-all
-                          ${isWPL
-                            ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
-                            : 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white'
+                  {/* Test page: Always allow live score, but use playing11 if available */}
+                  <BallEntryPanel
+                    matchId={selectedMatch.id}
+                    team1Name={selectedMatch.team1.shortName || selectedMatch.team1.name}
+                    team2Name={selectedMatch.team2.shortName || selectedMatch.team2.name}
+                    team1Id={selectedMatch.team1.id}
+                    team2Id={selectedMatch.team2.id}
+                    onSave={handleSaveLiveScore}
+                    players={players.filter(p => 
+                      p.teamId === selectedMatch.team1.id || p.teamId === selectedMatch.team2.id
+                    )}
+                    league={currentLeague}
+                    playing11={
+                      team1Playing11.length === 11 && team2Playing11.length === 11
+                        ? {
+                            team1: team1Playing11,
+                            team2: team2Playing11,
                           }
-                        `}
-                      >
-                        Go to Playing 11 Selection
-                      </button>
+                        : undefined // Test page: Allow all players if playing11 not set
+                    }
+                  />
+                  {team1Playing11.length !== 11 || team2Playing11.length !== 11 ? (
+                    <div 
+                      className="mt-4 p-4 rounded-xl border"
+                      style={isWPL ? {
+                        background: WPLColors.purpleRGBA[10],
+                        borderColor: WPLColors.purpleRGBA[30],
+                      } : {
+                        background: 'rgba(59, 130, 246, 0.1)',
+                        borderColor: 'rgba(59, 130, 246, 0.3)',
+                      }}
+                    >
+                      <div className="flex items-start gap-3">
+                        <AlertCircle className="w-5 h-5 mt-0.5" style={{ color: isWPL ? WPLColors.pink : '#60A5FA' }} />
+                        <div>
+                          <p className="text-sm font-semibold text-white mb-1">Test Mode: Full Access</p>
+                          <p className="text-xs" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
+                            All players are available for testing. Set playing 11 to test the filtered player selection.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div 
+                      className="mt-4 p-4 rounded-xl border"
+                      style={isWPL ? {
+                        background: 'rgba(34, 197, 94, 0.1)',
+                        borderColor: 'rgba(34, 197, 94, 0.3)',
+                      } : {
+                        background: 'rgba(34, 197, 94, 0.1)',
+                        borderColor: 'rgba(34, 197, 94, 0.3)',
+                      }}
+                    >
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="w-5 h-5 mt-0.5 text-green-400" />
+                        <div>
+                          <p className="text-sm font-semibold text-green-400 mb-1">Playing 11 Active</p>
+                          <p className="text-xs text-green-300/80">
+                            Only players from the selected playing 11 are available for selection.
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
