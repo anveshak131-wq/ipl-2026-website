@@ -114,36 +114,6 @@ export default function Home() {
   const [iplLogoIndex, setIplLogoIndex] = useState(0);
   const [wplLogoIndex, setWplLogoIndex] = useState(0);
 
-  // Get last completed match for each league
-  const iplLastMatch = useMemo(() => {
-    const completed = iplMatches
-      .filter(m => m.status === 'completed')
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    return completed[0] || null;
-  }, [iplMatches]);
-
-  const wplLastMatch = useMemo(() => {
-    const completed = wplMatches
-      .filter(m => m.status === 'completed')
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    return completed[0] || null;
-  }, [wplMatches]);
-
-  // Get upcoming matches for hover preview
-  const iplUpcomingMatches = useMemo(() => {
-    return iplMatches
-      .filter(m => m.status === 'upcoming')
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .slice(0, 3);
-  }, [iplMatches]);
-
-  const wplUpcomingMatches = useMemo(() => {
-    return wplMatches
-      .filter(m => m.status === 'upcoming')
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .slice(0, 3);
-  }, [wplMatches]);
-
   useEffect(() => {
     setIsHydrated(true);
     
