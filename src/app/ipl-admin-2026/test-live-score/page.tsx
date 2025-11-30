@@ -570,38 +570,39 @@ export default function TestLiveScorePage() {
                         team2Players.map((player) => {
                           const isSelected = team2Playing11.includes(player.id);
                           return (
-                          <button
-                            key={player.id}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              togglePlayer('team2', player.id);
-                            }}
-                            type="button"
-                            className={`
-                              p-4 rounded-xl border-2 transition-all text-left cursor-pointer
-                              ${isSelected
-                                ? isWPL
-                                  ? 'bg-purple-600/30 border-purple-500/50'
-                                  : 'bg-blue-600/30 border-blue-500/50'
-                                : 'bg-slate-700/50 border-slate-600/50 hover:border-slate-500/50'
-                              }
-                            `}
-                            style={{ pointerEvents: 'auto', zIndex: 10 }}
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="font-semibold text-white">{player.name}</div>
-                              {isSelected && (
-                                <CheckCircle2 className="w-5 h-5" style={{ color: isWPL ? WPLColors.pink : '#60A5FA' }} />
-                              )}
-                            </div>
-                            <div className="text-xs" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
-                              {player.role} • #{player.jerseyNumber}
-                              {player.isCaptain && ' • Captain'}
-                            </div>
-                          </button>
-                        );
-                      })}
+                            <button
+                              key={player.id}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                togglePlayer('team2', player.id);
+                              }}
+                              type="button"
+                              className={`
+                                p-4 rounded-xl border-2 transition-all text-left cursor-pointer
+                                ${isSelected
+                                  ? isWPL
+                                    ? 'bg-purple-600/30 border-purple-500/50'
+                                    : 'bg-blue-600/30 border-blue-500/50'
+                                  : 'bg-slate-700/50 border-slate-600/50 hover:border-slate-500/50'
+                                }
+                              `}
+                              style={{ pointerEvents: 'auto', zIndex: 10 }}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="font-semibold text-white">{player.name}</div>
+                                {isSelected && (
+                                  <CheckCircle2 className="w-5 h-5" style={{ color: isWPL ? WPLColors.pink : '#60A5FA' }} />
+                                )}
+                              </div>
+                              <div className="text-xs" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
+                                {player.role} • #{player.jerseyNumber}
+                                {player.isCaptain && ' • Captain'}
+                              </div>
+                            </button>
+                          );
+                        })
+                      )}
                     </div>
                   </div>
 
