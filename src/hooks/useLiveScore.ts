@@ -81,8 +81,8 @@ export function useLiveScore({
       wickets: 0,
       balls: 0,
     },
-    currentBatter: initialBatter || { id: '', name: 'Select Batter', runs: 0, balls: 0 },
-    currentBowler: initialBowler || { id: '', name: 'Select Bowler', runs: 0, balls: 0 },
+    currentBatter: initialBatter ? { ...initialBatter, runs: 0, balls: 0 } : { id: '', name: 'Select Batter', runs: 0, balls: 0 },
+    currentBowler: initialBowler ? { ...initialBowler, runs: 0, balls: 0 } : { id: '', name: 'Select Bowler', runs: 0, balls: 0 },
     ballHistory: [],
   });
 
