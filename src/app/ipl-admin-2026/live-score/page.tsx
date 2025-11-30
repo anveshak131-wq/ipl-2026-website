@@ -287,11 +287,14 @@ export default function AdminLiveScorePage() {
                 matchId={selectedMatch.id}
                 team1Name={selectedMatch.team1.shortName || selectedMatch.team1.name}
                 team2Name={selectedMatch.team2.shortName || selectedMatch.team2.name}
+                team1Id={selectedMatch.team1.id}
+                team2Id={selectedMatch.team2.id}
                 onSave={handleSave}
                 players={players.filter(p => 
                   p.teamId === selectedMatch.team1.id || p.teamId === selectedMatch.team2.id
                 )}
                 league={currentLeague}
+                playing11={selectedMatch.playing11}
               />
             </div>
           ) : (

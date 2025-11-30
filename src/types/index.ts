@@ -67,6 +67,10 @@ export interface Match {
   result?: string;
   matchNumber?: string; // Auto-generated based on date and time ordering (e.g., "IPL-001", "WPL-001")
   playoffType?: PlayoffType; // Type of playoff match (null for regular matches)
+  playing11?: {
+    team1: string[]; // Array of player IDs for team 1
+    team2: string[]; // Array of player IDs for team 2
+  };
   score?: {
     team1: {
       runs: number;

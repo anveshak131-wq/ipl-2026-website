@@ -14,22 +14,31 @@ interface BallEntryPanelProps {
   matchId: string;
   team1Name: string;
   team2Name: string;
+  team1Id: string;
+  team2Id: string;
   onSave: (state: any) => Promise<void>;
   players: Player[];
   league?: 'ipl' | 'wpl';
   initialBatter?: { id: string; name: string };
   initialBowler?: { id: string; name: string };
+  playing11?: {
+    team1: string[];
+    team2: string[];
+  };
 }
 
 export default function BallEntryPanel({
   matchId,
   team1Name,
   team2Name,
+  team1Id,
+  team2Id,
   onSave,
   players,
   league = 'ipl',
   initialBatter,
-  initialBowler
+  initialBowler,
+  playing11
 }: BallEntryPanelProps) {
   const [showWicketModal, setShowWicketModal] = useState(false);
   const [showPlayerSelector, setShowPlayerSelector] = useState<'batter' | 'bowler' | null>(null);
@@ -83,6 +92,25 @@ export default function BallEntryPanel({
 
   const battingTeam = state.battingTeam === 'team1' ? state.team1 : state.team2;
   const bowlingTeam = state.battingTeam === 'team1' ? state.team2 : state.team1;
+  const battingTeamId = state.battingTeam === 'team1' ? team1Id : team2Id;
+  const bowlingTeamId = state.battingTeam === 'team1' ? team2Id : team1Id;
+
+  // Filter players based on match teams and playing 11
+  // If playing11 is defined, only show those players; otherwise show all team players
+  const battingTeamPlaying11 = playing11 
+    ? (state.battingTeam === 'team1' ? playing11.team1 : playing11.team2)
+    : null;
+  const bowlingTeamPlaying11 = playing11
+    ? (state.battingTeam === 'team1' ? playing11.team2 : playing11.team1)
+    : null;
+
+  const battingTeamPlayers = battingTeamPlaying11
+    ? players.filter(p => p.teamId === battingTeamId && battingTeamPlaying11.includes(p.id))
+    : players.filter(p => p.teamId === battingTeamId);
+  
+  const bowlingTeamPlayers = bowlingTeamPlaying11
+    ? players.filter(p => p.teamId === bowlingTeamId && bowlingTeamPlaying11.includes(p.id))
+    : players.filter(p => p.teamId === bowlingTeamId);
 
   const leagueColors = {
     ipl: {
@@ -207,30 +235,50 @@ export default function BallEntryPanel({
       {showPlayerSelector && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-slate-800 rounded-2xl p-6 max-w-md w-full border-2 border-slate-700">
-            <h3 className="text-xl font-bold text-white mb-4">
+            <h3 className="text-xl font-bold text-white mb-2">
               Select {showPlayerSelector === 'batter' ? 'Batter' : 'Bowler'}
             </h3>
+            <p className="text-sm text-gray-400 mb-4">
+              {showPlayerSelector === 'batter' 
+                ? `${battingTeam.name} - Playing 11` 
+                : `${bowlingTeam.name} - Playing 11`}
+            </p>
             <div className="max-h-96 overflow-y-auto space-y-2">
-              {players.map((player) => (
-                <button
-                  key={player.id}
-                  onClick={() => {
-                    if (showPlayerSelector === 'batter') {
-                      changeBatter({ id: player.id, name: player.name });
-                    } else {
-                      changeBowler({ id: player.id, name: player.name });
-                    }
-                    setShowPlayerSelector(null);
-                  }}
-                  className="w-full px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-white text-left transition-colors"
-                >
-                  {player.name}
-                </button>
-              ))}
+              {(showPlayerSelector === 'batter' ? battingTeamPlayers : bowlingTeamPlayers).length > 0 ? (
+                (showPlayerSelector === 'batter' ? battingTeamPlayers : bowlingTeamPlayers).map((player) => (
+                  <button
+                    key={player.id}
+                    onClick={() => {
+                      if (showPlayerSelector === 'batter') {
+                        changeBatter({ id: player.id, name: player.name });
+                      } else {
+                        changeBowler({ id: player.id, name: player.name });
+                      }
+                      setShowPlayerSelector(null);
+                    }}
+                    className="w-full px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-white text-left transition-colors flex items-center justify-between"
+                  >
+                    <div>
+                      <div className="font-semibold">{player.name}</div>
+                      <div className="text-xs text-gray-400">{player.role} • #{player.jerseyNumber}</div>
+                    </div>
+                    {player.isCaptain && (
+                      <span className="px-2 py-1 text-xs bg-yellow-500/20 text-yellow-400 rounded">
+                        C
+                      </span>
+                    )}
+                  </button>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-400">
+                  <p>No players found for {showPlayerSelector === 'batter' ? battingTeam.name : bowlingTeam.name}</p>
+                  <p className="text-xs mt-2">Please ensure players are assigned to this team</p>
+                </div>
+              )}
             </div>
             <button
               onClick={() => setShowPlayerSelector(null)}
-              className="mt-4 w-full px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-bold"
+              className="mt-4 w-full px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-bold transition-colors"
             >
               Cancel
             </button>

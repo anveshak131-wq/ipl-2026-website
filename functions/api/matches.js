@@ -331,7 +331,7 @@ async function handlePutRequest(context) {
   
   try {
     const body = await request.json();
-    const { id, date, time, venue, team1Id, team2Id, status, league } = body;
+    const { id, date, time, venue, team1Id, team2Id, status, league, playing11 } = body;
     
     if (!id) {
       return new Response(JSON.stringify({ error: 'Match ID is required' }), {
@@ -372,7 +372,8 @@ async function handlePutRequest(context) {
       ...(team1Id && { team1Id }),
       ...(team2Id && { team2Id }),
       ...(status && { status }),
-      ...(league && { league }) // Update league if provided
+      ...(league && { league }), // Update league if provided
+      ...(playing11 !== undefined && { playing11 }) // Update playing11 if provided
     };
     
     // Ensure league property exists (default to existing or 'ipl')
