@@ -292,27 +292,6 @@ export default function WPLPlayerModal({ player, team, isOpen, onClose }: WPLPla
                     </div>
                   </div>
                 </div>
-
-                {/* Note about Statistics */}
-                <div
-                  className="p-4 rounded-xl border"
-                  style={{
-                    background: WPLColors.purpleRGBA[10],
-                    borderColor: WPLColors.purpleRGBA[30],
-                  }}
-                >
-                  <div className="flex items-start gap-3">
-                    <CustomEmoji type="sparkles" size={24} />
-                    <div>
-                      <p className="text-sm font-semibold mb-1" style={{ color: WPLColors.textPrimary }}>
-                        Career Statistics
-                      </p>
-                      <p className="text-xs" style={{ color: WPLColors.textMuted }}>
-                        Detailed career statistics are not available for WPL players at this time.
-                      </p>
-                    </div>
-                  </div>
-                </div>
               </div>
             </motion.div>
           </motion.div>
