@@ -2,330 +2,247 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import LoadingSpinner from '../ui/LoadingSpinner';
-import IPLLogo from '../ui/IPLLogo';
-import { CustomEmoji } from '@/components/emoji/Emoji';
+import { motion } from 'framer-motion';
+import { ArrowRight, Play, Trophy, Sparkles, Zap, TrendingUp } from 'lucide-react';
+import Link from 'next/link';
 
 export default function HeroSection() {
   const router = useRouter();
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [isMounted, setIsMounted] = useState(false);
-
-  const highlights = [
-    {
-      id: 1,
-      title: 'IPL 2026',
-      subtitle: 'THE BIGGEST CRICKET FESTIVAL',
-      tagline: 'Experience the Thrills. Chase the Glory.',
-      stats: { teams: '10', matches: '74', cities: '12' },
-      gradient: 'from-orange-600 via-red-600 to-pink-600',
-      accentColor: '#F97316'
-    },
-    {
-      id: 2,
-      title: 'ELITE SQUADS',
-      subtitle: 'WORLD-CLASS TALENT ASSEMBLY',
-      tagline: 'Watch cricket legends battle on the biggest stage.',
-      stats: { players: '200+', nations: '15+', records: '∞' },
-      gradient: 'from-blue-600 via-purple-600 to-indigo-700',
-      accentColor: '#3B82F6'
-    },
-    {
-      id: 3,
-      title: 'EPIC MOMENTS',
-      subtitle: 'HIGH-OCTANE CRICKET ACTION',
-      tagline: 'Last-ball finishes. Record-breaking performances.',
-      stats: { matches: '74', venues: '12', fans: '500M+' },
-      gradient: 'from-purple-600 via-pink-600 to-red-600',
-      accentColor: '#A855F7'
-    }
-  ];
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 600);
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  // Auto-rotation is disabled so the IPL 2026 hero stays constant.
-  useEffect(() => {
-    if (isLoading) return;
-  }, [isLoading]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
-      if (isMounted) {
-        const x = e.clientX / (typeof window !== 'undefined' ? window.innerWidth : 1);
-        const y = e.clientY / (typeof window !== 'undefined' ? window.innerHeight : 1);
-        setMousePosition({ x, y });
-      }
+      setMousePosition({
+        x: (e.clientX / window.innerWidth - 0.5) * 20,
+        y: (e.clientY / window.innerHeight - 0.5) * 20,
+      });
     };
-
-    if (typeof window !== 'undefined') {
       window.addEventListener('mousemove', handleMouseMove);
       return () => window.removeEventListener('mousemove', handleMouseMove);
-    }
-  }, [isMounted]);
-
-  if (isLoading) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-black to-slate-900">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
-
-  const currentHighlight = highlights[0];
+  }, []);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-black">
-      {/* Dynamic Gradient Background */}
-      <div className="absolute inset-0">
-        <div className={`absolute inset-0 bg-gradient-to-br ${currentHighlight.gradient} opacity-25 transition-all duration-1000 blur-3xl scale-150`} />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.05)_0%,transparent_100%)]" />
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+      {/* Animated Background Grid */}
+      <div className="absolute inset-0 opacity-20">
+        <div 
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
+            `,
+            backgroundSize: '50px 50px',
+            transform: `translate(${mousePosition.x * 0.5}px, ${mousePosition.y * 0.5}px)`,
+          }}
+        />
       </div>
 
-      {/* Animated Grid Pattern */}
-      <div className="absolute inset-0 opacity-[0.03]">
-        <div className="absolute inset-0 bg-[linear-gradient(0deg,transparent_24%,rgba(255,255,255,0.15)_25%,rgba(255,255,255,0.15)_26%,transparent_27%,transparent_74%,rgba(255,255,255,0.15)_75%,rgba(255,255,255,0.15)_76%,transparent_77%,transparent),linear-gradient(90deg,transparent_24%,rgba(255,255,255,0.15)_25%,rgba(255,255,255,0.15)_26%,transparent_27%,transparent_74%,rgba(255,255,255,0.15)_75%,rgba(255,255,255,0.15)_76%,transparent_77%,transparent)] bg-[length:60px_60px]" />
-      </div>
-
-      {/* Floating Orbs with Mouse Parallax */}
-      <div 
-        className="absolute w-[600px] h-[600px] rounded-full blur-3xl opacity-20 transition-all duration-300 pointer-events-none"
+      {/* Gradient Orbs */}
+      <motion.div
+        className="absolute top-20 left-20 w-96 h-96 rounded-full blur-3xl opacity-30"
+        animate={{
+          scale: [1, 1.2, 1],
+          x: [0, 50, 0],
+          y: [0, 30, 0],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
         style={{
-          background: `radial-gradient(circle, ${currentHighlight.accentColor}80, transparent)`,
-          top: isMounted ? `${20 + mousePosition.y * 10}%` : '20%',
-          left: isMounted ? `${70 + mousePosition.x * 10}%` : '70%',
-          transform: 'translate(-50%, -50%)'
+          background: 'radial-gradient(circle, rgba(59, 130, 246, 0.4), transparent)',
         }}
       />
-      <div 
-        className="absolute w-[500px] h-[500px] rounded-full blur-3xl opacity-15 transition-all duration-300 pointer-events-none"
+      <motion.div
+        className="absolute bottom-20 right-20 w-96 h-96 rounded-full blur-3xl opacity-30"
+        animate={{
+          scale: [1, 1.3, 1],
+          x: [0, -50, 0],
+          y: [0, -30, 0],
+        }}
+        transition={{
+          duration: 10,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 1,
+        }}
         style={{
-          background: `radial-gradient(circle, ${currentHighlight.accentColor}60, transparent)`,
-          bottom: isMounted ? `${10 - mousePosition.y * 10}%` : '10%',
-          left: isMounted ? `${20 - mousePosition.x * 10}%` : '20%',
-          transform: 'translate(-50%, 50%)'
+          background: 'radial-gradient(circle, rgba(168, 85, 247, 0.4), transparent)',
         }}
       />
 
       {/* Main Content */}
-      <div className="relative z-10 h-full min-h-screen flex items-center">
+      <div className="relative z-10 min-h-screen flex items-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             
             {/* Left Content */}
-            <div className="space-y-10 animate-fade-in">
-              {/* Live Badge */}
-              <div className="inline-flex items-center space-x-3 bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-xl px-5 py-3 rounded-full border border-white/20 shadow-xl hover:scale-105 transition-transform duration-300 cursor-default">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              className="space-y-8"
+            >
+              {/* Badge */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl"
+              >
+                <div className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </div>
+                <span className="text-sm font-bold text-white/90 tracking-wider">LIVE CRICKET ACTION</span>
+              </motion.div>
+
+              {/* Main Heading */}
+              <motion.h1
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+                className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-white leading-[0.9] tracking-tight"
+              >
+                <span className="block bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent">
+                  CRICKET
                 </span>
-                <span className="text-sm font-bold text-white tracking-wider">SEASON 2026 • LIVE</span>
-              </div>
+                <span className="block bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  2026
+                </span>
+              </motion.h1>
 
-              {/* Main Headline - Ultra Bold Typography */}
-              <div className="space-y-4">
-                <h1 className="text-7xl md:text-8xl lg:text-9xl font-black text-white leading-none tracking-tighter animate-slide-up"
-                    style={{
-                      textShadow: `0 0 80px ${currentHighlight.accentColor}60, 0 0 40px ${currentHighlight.accentColor}40`,
-                      background: `linear-gradient(135deg, #fff 0%, ${currentHighlight.accentColor} 100%)`,
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      backgroundClip: 'text'
-                    }}>
-                  {currentHighlight.title}
-                </h1>
-                <p className="text-2xl md:text-3xl font-bold text-gray-300 tracking-wider">
-                  {currentHighlight.subtitle}
-                </p>
-                <p className="text-lg md:text-xl text-gray-400 leading-relaxed max-w-xl">
-                  {currentHighlight.tagline}
-                </p>
-              </div>
+              {/* Subtitle */}
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="text-xl md:text-2xl text-gray-300 leading-relaxed max-w-xl"
+              >
+                Experience the ultimate cricket platform. Follow IPL and WPL matches, track live scores, and stay updated with the latest news.
+              </motion.p>
 
-              {/* Stats Grid - Modern Cards */}
-              <div className="grid grid-cols-3 gap-4">
-                {Object.entries(currentHighlight.stats).map(([key, value], index) => (
-                  <div 
-                    key={key}
-                    className="group relative overflow-hidden bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl px-6 py-5 rounded-2xl border border-white/20 hover:border-white/40 hover:scale-110 transition-all duration-300 cursor-default shadow-xl"
-                    style={{ animationDelay: `${index * 100}ms` }}
+              {/* Stats */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.5 }}
+                className="grid grid-cols-3 gap-4 pt-4"
+              >
+                {[
+                  { label: 'Leagues', value: '2', icon: Trophy },
+                  { label: 'Teams', value: '15', icon: Sparkles },
+                  { label: 'Matches', value: '100+', icon: Zap },
+                ].map((stat, index) => (
+                  <motion.div
+                    key={stat.label}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 0.6 + index * 0.1 }}
+                    className="group relative overflow-hidden p-6 rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 hover:border-white/20 transition-all duration-300 hover:scale-105"
                   >
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-300"
-                         style={{ background: `linear-gradient(135deg, ${currentHighlight.accentColor}, transparent)` }} />
-                    <p className="text-3xl md:text-4xl font-black relative z-10" 
-                       style={{ color: currentHighlight.accentColor }}>
-                      {value}
-                    </p>
-                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mt-1 relative z-10">
-                      {key}
-                    </p>
-                  </div>
+                    <stat.icon className="w-6 h-6 text-blue-400 mb-2" />
+                    <div className="text-3xl font-black text-white mb-1">{stat.value}</div>
+                    <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{stat.label}</div>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
 
-              {/* CTA Buttons - Premium Design */}
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button 
-                  onClick={() => router.push('/matches')}
-                  className="group relative overflow-hidden rounded-xl font-black text-lg px-10 py-5 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                  style={{
-                    background: 'linear-gradient(135deg, #FFFFFF 0%, #F3F4F6 50%, #E5E7EB 100%)',
-                    boxShadow: '0 10px 40px rgba(255, 255, 255, 0.3), 0 0 60px rgba(255, 255, 255, 0.2)',
-                    border: '2px solid rgba(255, 255, 255, 0.8)',
-                    color: '#000',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow = '0 20px 60px rgba(255, 255, 255, 0.5), 0 0 80px rgba(255, 255, 255, 0.4)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.boxShadow = '0 10px 40px rgba(255, 255, 255, 0.3), 0 0 60px rgba(255, 255, 255, 0.2)';
-                  }}
+              {/* CTA Buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.7 }}
+                className="flex flex-wrap gap-4 pt-4"
+              >
+                <Link
+                  href="/matches"
+                  className="group relative px-8 py-4 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold text-lg shadow-2xl shadow-blue-500/50 hover:shadow-blue-500/70 transition-all duration-300 transform hover:scale-105 overflow-hidden"
                 >
-                  {/* Shimmer effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-                  
-                  {/* Glow effect */}
-                  <div 
-                    className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10"
-                    style={{
-                      background: 'radial-gradient(circle, rgba(255, 255, 255, 0.6), transparent)',
-                    }}
-                  />
-                  
-                  <span className="relative z-10 flex items-center justify-center gap-3 font-black tracking-tight">
-                    EXPLORE MATCHES
-                    <svg className="w-6 h-6 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
+                  <span className="relative z-10 flex items-center gap-2">
+                    <Play className="w-5 h-5" />
+                    View Matches
                   </span>
-                </button>
-                
-                <button 
-                  onClick={() => router.push('/teams')}
-                  className="group relative overflow-hidden rounded-xl font-black text-lg py-5 px-10 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05))',
-                    backdropFilter: 'blur(20px)',
-                    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3), 0 0 60px rgba(255, 255, 255, 0.1)',
-                    border: '2px solid rgba(255, 255, 255, 0.3)',
-                    color: '#fff',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.15))';
-                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)';
-                    e.currentTarget.style.boxShadow = '0 20px 60px rgba(0, 0, 0, 0.4), 0 0 80px rgba(255, 255, 255, 0.2)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05))';
-                    e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
-                    e.currentTarget.style.boxShadow = '0 10px 40px rgba(0, 0, 0, 0.3), 0 0 60px rgba(255, 255, 255, 0.1)';
-                  }}
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </Link>
+                <Link
+                  href="/teams"
+                  className="px-8 py-4 rounded-xl bg-white/10 backdrop-blur-xl text-white font-bold text-lg border-2 border-white/20 hover:border-white/40 hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
                 >
-                  {/* Shimmer effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-                  
-                  {/* Glow effect */}
-                  <div 
-                    className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10"
-                    style={{
-                      background: 'radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent)',
-                    }}
-                  />
-                  
-                  <span className="relative z-10 flex items-center justify-center gap-3 font-black tracking-tight">
-                    VIEW TEAMS
-                    <svg className="w-6 h-6 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </span>
-                </button>
-              </div>
-            </div>
+                  Explore Teams
+                </Link>
+              </motion.div>
+            </motion.div>
 
-            {/* Right Visual - SportsUP18 Orbital Logo Panel */}
-            <div className="relative h-[500px] lg:h-[600px] flex items-center justify-center animate-fade-in" style={{ animationDelay: '200ms' }}>
-              {/* Glow Effects */}
-              <div className="absolute inset-0 rounded-full blur-3xl opacity-30 animate-pulse"
-                   style={{ background: `radial-gradient(circle, ${currentHighlight.accentColor}, transparent)` }} />
-              
-              {/* Central Visual Element */}
-              <div className="relative w-full h-full flex items-center justify-center">
-                {/* Rotating Ring */}
-                <div className="absolute inset-0 animate-spin-slow">
-                  <div className="absolute inset-0 rounded-full border-2 border-dashed border-white/20" />
-                </div>
+            {/* Right Visual */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="relative h-[500px] lg:h-[600px] flex items-center justify-center"
+            >
+              {/* Central Orb */}
+              <motion.div
+                animate={{
+                  scale: [1, 1.1, 1],
+                  rotate: [0, 360],
+                }}
+                transition={{
+                  scale: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+                  rotate: { duration: 20, repeat: Infinity, ease: "linear" },
+                }}
+                className="relative w-80 h-80 lg:w-96 lg:h-96"
+              >
+                {/* Glow Ring */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/30 via-purple-500/30 to-pink-500/30 blur-3xl animate-pulse" />
                 
-                {/* Center Badge - SportsUP18 Logo */}
-                <div className="relative group">
-                  <div
-                    className="absolute inset-0 bg-gradient-to-br rounded-full blur-3xl opacity-60 group-hover:opacity-90 transition-opacity duration-700"
-                    style={{
-                      background: `conic-gradient(from 0deg, ${currentHighlight.accentColor}, transparent, ${currentHighlight.accentColor})`,
-                    }}
-                  />
-                  <div className="relative w-80 h-80 md:w-[26rem] md:h-[26rem] bg-gradient-to-br from-slate-950/90 via-slate-900/80 to-slate-950/90 backdrop-blur-2xl rounded-full border border-white/20 flex items-center justify-center shadow-[0_40px_120px_rgba(15,23,42,0.9)] transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-700 animate-glow-pulse">
-                    <div className="flex flex-col items-center gap-3 animate-scale-in">
-                      <div className="w-44 h-44 md:w-64 md:h-64 drop-shadow-2xl">
-                        <IPLLogo size="xl" animated className="scale-125 md:scale-150" />
-                      </div>
-                      <div className="text-center space-y-1">
-                        <p className="text-[11px] font-semibold tracking-[0.25em] uppercase text-gray-400">Season</p>
-                        <p className="text-4xl md:text-5xl font-black text-white tracking-tight">2026</p>
-                      </div>
-                      <div className="h-1 w-24 mx-auto rounded-full bg-gradient-to-r from-sky-400 via-ipl-gold to-purple-500" />
-                    </div>
+                {/* Main Circle */}
+                <div className="relative w-full h-full rounded-full bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-pink-600/20 backdrop-blur-2xl border border-white/20 flex items-center justify-center shadow-2xl">
+                  <div className="text-center space-y-4">
+                    <Trophy className="w-24 h-24 mx-auto text-yellow-400 drop-shadow-2xl" />
+                    <div className="text-4xl font-black text-white">2026</div>
+                    <div className="text-sm font-bold text-gray-400 uppercase tracking-wider">Season</div>
                   </div>
                 </div>
 
-                {/* Floating Stats Pills */}
-                <div className="absolute top-10 right-10 bg-white/10 backdrop-blur-xl px-6 py-3 rounded-full border border-white/20 shadow-xl animate-float">
-                  <p className="text-sm font-bold text-white"><CustomEmoji type="trophy" size={16} /> 10 TEAMS</p>
-                </div>
-                <div className="absolute bottom-20 left-10 bg-white/10 backdrop-blur-xl px-6 py-3 rounded-full border border-white/20 shadow-xl animate-float" style={{ animationDelay: '1s' }}>
-                  <p className="text-sm font-bold text-white"><CustomEmoji type="fire" size={16} /> 74 MATCHES</p>
-                </div>
-                <div className="absolute top-1/2 -right-5 bg-white/10 backdrop-blur-xl px-6 py-3 rounded-full border border-white/20 shadow-xl animate-float" style={{ animationDelay: '2s' }}>
-                  <p className="text-sm font-bold text-white"><CustomEmoji type="lightning" size={16} /> LIVE</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Slide Navigation Dots (visual only, IPL 2026 stays constant) */}
-          <div className="flex justify-center gap-3 mt-16">
-            {highlights.map((_, index) => (
-              <div
+                {/* Floating Elements */}
+                {[
+                  { top: '10%', right: '10%', icon: TrendingUp, delay: 0 },
+                  { bottom: '15%', left: '10%', icon: Zap, delay: 0.5 },
+                  { top: '50%', right: '-5%', icon: Sparkles, delay: 1 },
+                ].map((item, index) => (
+                  <motion.div
                 key={index}
-                className={`transition-all duration-300 rounded-full ${
-                  index === 0 ? 'w-12 h-3' : 'w-3 h-3'
-                }`}
-                style={{
-                  background:
-                    index === 0
-                      ? `linear-gradient(to right, ${currentHighlight.accentColor}, ${currentHighlight.accentColor}80)`
-                      : 'rgba(255, 255, 255, 0.3)',
-                  boxShadow:
-                    index === 0
-                      ? `0 0 20px ${currentHighlight.accentColor}80`
-                      : 'none',
-                }}
-              />
-            ))}
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5, delay: 1 + item.delay }}
+                    className={`absolute ${item.top || ''} ${item.right || ''} ${item.bottom || ''} ${item.left || ''} p-4 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl`}
+                  >
+                    <item.icon className="w-6 h-6 text-blue-400" />
+                  </motion.div>
+                ))}
+              </motion.div>
+            </motion.div>
           </div>
         </div>
       </div>
 
-      {/* Bottom Gradient Fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent pointer-events-none" />
+      {/* Scroll Indicator */}
+      <motion.div
+        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        animate={{ y: [0, 10, 0] }}
+        transition={{ duration: 2, repeat: Infinity }}
+      >
+        <div className="w-6 h-10 rounded-full border-2 border-white/20 flex items-start justify-center p-2">
+          <motion.div
+            className="w-1.5 h-1.5 rounded-full bg-white/50"
+            animate={{ y: [0, 12, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
+        </div>
+      </motion.div>
     </div>
   );
 }

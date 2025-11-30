@@ -165,116 +165,106 @@ export default function WPLHomePage() {
 
       <main className="relative z-10">
         {/* Premium Hero Section */}
-        <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-          <ParallaxSection speed={0.5}>
-            <div className="absolute inset-0">
-              {/* Enhanced gradient layers using exact WPL colors */}
-              <div 
-                className="absolute inset-0"
-                style={{
-                  background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[40]}, ${WPLColors.pinkRGBA[30]}, ${WPLColors.roseRGBA[40]})`,
-                }}
-              />
-              <div 
-                className="absolute inset-0"
-                style={{
-                  background: `linear-gradient(to top, ${WPLColors.gradientMid}4D, transparent, ${WPLColors.gradientEnd}4D)`,
-                }}
-              />
-              <div 
-                className="absolute inset-0"
-                style={{
-                  background: `radial-gradient(circle at 50% 50%, ${WPLColors.purpleRGBA[20]}, transparent 70%)`,
-                }}
-              />
-              <motion.div
-                className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl"
-                animate={{
-                  scale: [1, 1.3, 1],
-                  opacity: [0.4, 0.7, 0.4],
-                }}
-                transition={{
-                  duration: 8,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-              <motion.div
-                className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-pink-500/30 rounded-full blur-3xl"
-                animate={{
-                  scale: [1, 1.4, 1],
-                  opacity: [0.4, 0.8, 0.4],
-                }}
-                transition={{
-                  duration: 10,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: 1,
-                }}
-              />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(168,85,247,0.15),transparent_50%)]" />
-            </div>
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+          {/* Animated Background */}
+          <div className="absolute inset-0">
+            <div 
+              className="absolute inset-0"
+              style={{
+                background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[40]}, ${WPLColors.pinkRGBA[30]}, ${WPLColors.roseRGBA[40]})`,
+              }}
+            />
+            <div 
+              className="absolute inset-0"
+              style={{
+                background: `linear-gradient(to top, ${WPLColors.gradientMid}4D, transparent, ${WPLColors.gradientEnd}4D)`,
+              }}
+            />
+            <motion.div
+              className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full blur-3xl"
+              animate={{
+                scale: [1, 1.4, 1],
+                opacity: [0.3, 0.6, 0.3],
+                x: [0, 100, 0],
+                y: [0, 50, 0],
+              }}
+              transition={{
+                duration: 12,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              style={{
+                background: `radial-gradient(circle, ${WPLColors.purpleRGBA[50]}, transparent)`,
+              }}
+            />
+            <motion.div
+              className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full blur-3xl"
+              animate={{
+                scale: [1, 1.5, 1],
+                opacity: [0.3, 0.7, 0.3],
+                x: [0, -80, 0],
+                y: [0, -40, 0],
+              }}
+              transition={{
+                duration: 15,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1,
+              }}
+              style={{
+                background: `radial-gradient(circle, ${WPLColors.pinkRGBA[50]}, transparent)`,
+              }}
+            />
+            <div 
+              className="absolute inset-0"
+              style={{
+                background: `radial-gradient(circle at 50% 50%, ${WPLColors.purpleRGBA[20]}, transparent 70%)`,
+              }}
+            />
             
-            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-              <AnimatedSection direction="down" delay={0.1}>
-                {/* Large WPL Logo/Badge */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ duration: 0.8, type: "spring", stiffness: 100 }}
-                  className="mb-8"
-                >
-                  <div 
-                    className="inline-flex items-center gap-4 px-8 py-4 rounded-2xl backdrop-blur-xl shadow-2xl"
-                    style={{
-                      background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[20]}, ${WPLColors.pinkRGBA[15]})`,
-                      border: `2px solid ${WPLColors.purpleRGBA[40]}`,
-                      boxShadow: `0 20px 60px ${WPLColors.purpleRGBA[30]}, 0 0 80px ${WPLColors.pinkRGBA[20]}`,
-                    }}
-                  >
-                    <Trophy className="w-10 h-10" style={{ color: WPLColors.pink }} />
-                    <div className="text-left">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Sparkles className="w-5 h-5" style={{ color: WPLColors.textAccent }} />
-                        <span 
-                          className="text-lg font-black uppercase tracking-wider"
-                          style={{ color: WPLColors.textPrimary }}
-                        >
-                          Women's Premier League
-                        </span>
-                      </div>
-                      <span 
-                        className="text-sm font-semibold"
-                        style={{ color: WPLColors.textAccent }}
-                      >
-                        WPL 2026
-                      </span>
-                    </div>
-                  </div>
-                </motion.div>
-
-                {/* Empowerment Tagline */}
+            {/* Grid Pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <div 
+                className="absolute inset-0"
+                style={{
+                  backgroundImage: `
+                    linear-gradient(rgba(147,51,234,0.1) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(147,51,234,0.1) 1px, transparent 1px)
+                  `,
+                  backgroundSize: '60px 60px',
+                }}
+              />
+            </div>
+          </div>
+          
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+              
+              {/* Left Content */}
+              <motion.div
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8 }}
+                className="space-y-8"
+              >
+                {/* Badge */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
-                  className="mb-6"
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  className="inline-flex items-center gap-3 px-6 py-3 rounded-full backdrop-blur-xl shadow-2xl"
+                  style={{
+                    background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[20]}, ${WPLColors.pinkRGBA[15]})`,
+                    border: `1px solid ${WPLColors.purpleRGBA[40]}`,
+                  }}
                 >
-                  <div 
-                    className="inline-flex items-center gap-2 px-6 py-2 rounded-full"
-                    style={{
-                      background: `linear-gradient(135deg, ${WPLColors.pinkRGBA[20]}, ${WPLColors.roseRGBA[15]})`,
-                      border: `1px solid ${WPLColors.pinkRGBA[30]}`,
-                    }}
+                  <Sparkles className="w-5 h-5" style={{ color: WPLColors.pink }} />
+                  <span 
+                    className="text-sm font-bold uppercase tracking-wider"
+                    style={{ color: WPLColors.textPrimary }}
                   >
-                    <Star className="w-5 h-5" style={{ color: WPLColors.pink }} />
-                    <span 
-                      className="text-lg md:text-xl font-bold"
-                      style={{ color: WPLColors.textPrimary }}
-                    >
-                      Empowering Women's Cricket
-                    </span>
-                  </div>
+                    Women's Premier League
+                  </span>
                 </motion.div>
 
                 {/* Main Heading */}
@@ -282,10 +272,16 @@ export default function WPLHomePage() {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.3 }}
-                  className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black mb-6 leading-tight"
-                  style={{ color: WPLColors.textPrimary }}
+                  className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black leading-[0.9] tracking-tight"
                 >
-                  WPL <GradientText gradient="from-purple-400 via-pink-400 to-rose-400" animate>2026</GradientText>
+                  <span 
+                    className="block bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text text-transparent"
+                  >
+                    WPL
+                  </span>
+                  <span className="block bg-gradient-to-r from-purple-400 via-pink-400 to-rose-400 bg-clip-text text-transparent">
+                    2026
+                  </span>
                 </motion.h1>
 
                 {/* Subtitle */}
@@ -293,141 +289,167 @@ export default function WPLHomePage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.4 }}
-                  className="text-xl md:text-2xl max-w-3xl mx-auto mb-12 leading-relaxed"
+                  className="text-xl md:text-2xl leading-relaxed max-w-xl"
                   style={{ color: WPLColors.textSecondary }}
                 >
                   The pinnacle of women's T20 cricket. Experience the power, passion, and excellence of WPL 2026.
                 </motion.p>
 
-                {/* Featured Match Countdown - Large and Prominent */}
-                {nextMatch && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9, y: 30 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.5 }}
-                    className="mb-12"
-                  >
-                    <div 
-                      className="inline-block px-8 py-6 rounded-2xl backdrop-blur-xl"
+                {/* Quick Stats */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.5 }}
+                  className="grid grid-cols-3 gap-4 pt-4"
+                >
+                  {[
+                    { label: 'Teams', value: '5', bgColor: WPLColors.purpleRGBA[10], borderColor: WPLColors.purpleRGBA[30], textColor: WPLColors.purple },
+                    { label: 'Matches', value: '22', bgColor: WPLColors.pinkRGBA[10], borderColor: WPLColors.pinkRGBA[30], textColor: WPLColors.pink },
+                    { label: 'Season', value: '2026', bgColor: WPLColors.roseRGBA[10], borderColor: WPLColors.roseRGBA[30], textColor: WPLColors.rose },
+                  ].map((stat, index) => (
+                    <motion.div
+                      key={stat.label}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5, delay: 0.6 + index * 0.1 }}
+                      className="group relative overflow-hidden p-6 rounded-2xl backdrop-blur-xl transition-all duration-300 hover:scale-105"
                       style={{
-                        background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[20]}, ${WPLColors.pinkRGBA[20]})`,
-                        border: `2px solid ${WPLColors.purpleRGBA[40]}`,
-                        boxShadow: `0 20px 60px ${WPLColors.purpleRGBA[30]}`,
+                        background: stat.bgColor,
+                        border: `1px solid ${stat.borderColor}`,
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = stat.borderColor.replace('0.3', '0.5');
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = stat.borderColor;
                       }}
                     >
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Calendar className="w-5 h-5" style={{ color: WPLColors.pink }} />
-                          <span 
-                            className="text-sm font-bold uppercase tracking-wider"
-                            style={{ color: WPLColors.textAccent }}
-                          >
-                            Next Match
-                          </span>
-                        </div>
-                        <div className="text-center mb-4">
-                          <p 
-                            className="text-lg font-semibold mb-1"
-                            style={{ color: WPLColors.textPrimary }}
-                          >
-                            {nextMatch.team1.name} vs {nextMatch.team2.name}
-                          </p>
-                          <p 
-                            className="text-sm"
-                            style={{ color: WPLColors.textSecondary }}
-                          >
-                            {new Date(nextMatch.date).toLocaleDateString('en-US', { 
-                              weekday: 'long', 
-                              year: 'numeric', 
-                              month: 'long', 
-                              day: 'numeric' 
-                            })}
-                          </p>
-                        </div>
-                        <div className="scale-125">
-                          <CountdownTimer 
-                            targetDate={nextMatch.date}
-                            matchTime={nextMatch.time}
-                            className="text-white"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
+                      <div className="text-3xl font-black mb-1" style={{ color: stat.textColor }}>{stat.value}</div>
+                      <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: WPLColors.textMuted }}>{stat.label}</div>
+                    </motion.div>
+                  ))}
+                </motion.div>
 
                 {/* CTA Buttons */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.6 }}
-                  className="flex flex-wrap justify-center gap-4"
+                  transition={{ duration: 0.8, delay: 0.7 }}
+                  className="flex flex-wrap gap-4 pt-4"
                 >
                   <Link
-                    href="/live-score"
-                    className="group relative px-8 py-4 rounded-xl text-white font-bold text-lg transition-all duration-300 transform hover:scale-105 overflow-hidden"
+                    href="/wpl/matches"
+                    className="group relative px-8 py-4 rounded-xl text-white font-bold text-lg shadow-2xl transition-all duration-300 transform hover:scale-105 overflow-hidden"
                     style={{
-                      background: `linear-gradient(to right, ${WPLColors.purple}, ${WPLColors.pink})`,
-                      boxShadow: `0 20px 60px ${WPLColors.purpleRGBA[50]}`,
+                      background: `linear-gradient(135deg, ${WPLColors.purple}, ${WPLColors.pink})`,
+                      boxShadow: `0 10px 40px ${WPLColors.purpleRGBA[50]}, 0 0 60px ${WPLColors.pinkRGBA[30]}`,
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.boxShadow = `0 25px 70px ${WPLColors.purpleRGBA[50]}`;
+                      e.currentTarget.style.boxShadow = `0 20px 60px ${WPLColors.purpleRGBA[60]}, 0 0 80px ${WPLColors.pinkRGBA[40]}`;
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.boxShadow = `0 20px 60px ${WPLColors.purpleRGBA[50]}`;
+                      e.currentTarget.style.boxShadow = `0 10px 40px ${WPLColors.purpleRGBA[50]}, 0 0 60px ${WPLColors.pinkRGBA[30]}`;
                     }}
                   >
                     <span className="relative z-10 flex items-center gap-2">
                       <Play className="w-5 h-5" />
-                      Live Scores
+                      View Matches
                     </span>
                     <div 
                       className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                       style={{
-                        background: `linear-gradient(to right, ${WPLColors.pink}, ${WPLColors.purple})`,
+                        background: `linear-gradient(135deg, ${WPLColors.pink}, ${WPLColors.purple})`,
                       }}
                     />
                   </Link>
                   <Link
                     href="/wpl/teams"
-                    className="px-8 py-4 rounded-xl backdrop-blur-md text-white font-bold text-lg transition-all duration-300 transform hover:scale-105"
+                    className="px-8 py-4 rounded-xl backdrop-blur-xl text-white font-bold text-lg border-2 transition-all duration-300 transform hover:scale-105"
                     style={{
                       background: WPLColors.purpleRGBA[10],
-                      border: `2px solid ${WPLColors.purpleRGBA[30]}`,
+                      borderColor: WPLColors.purpleRGBA[30],
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = WPLColors.purpleRGBA[50];
                       e.currentTarget.style.background = WPLColors.purpleRGBA[20];
+                      e.currentTarget.style.borderColor = WPLColors.purpleRGBA[50];
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = WPLColors.purpleRGBA[30];
                       e.currentTarget.style.background = WPLColors.purpleRGBA[10];
+                      e.currentTarget.style.borderColor = WPLColors.purpleRGBA[30];
                     }}
                   >
                     Explore Teams
                   </Link>
-                  <Link
-                    href="/wpl/matches"
-                    className="px-8 py-4 rounded-xl backdrop-blur-md text-white font-bold text-lg transition-all duration-300 transform hover:scale-105"
+                </motion.div>
+              </motion.div>
+
+              {/* Right Visual */}
+              <motion.div
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="relative h-[500px] lg:h-[600px] flex items-center justify-center"
+              >
+                {/* Central Orb */}
+                <motion.div
+                  animate={{
+                    scale: [1, 1.1, 1],
+                    rotate: [0, 360],
+                  }}
+                  transition={{
+                    scale: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+                    rotate: { duration: 20, repeat: Infinity, ease: "linear" },
+                  }}
+                  className="relative w-80 h-80 lg:w-96 lg:h-96"
+                >
+                  {/* Glow Ring */}
+                  <div 
+                    className="absolute inset-0 rounded-full blur-3xl animate-pulse"
                     style={{
-                      background: WPLColors.pinkRGBA[10],
-                      border: `2px solid ${WPLColors.pinkRGBA[30]}`,
+                      background: `radial-gradient(circle, ${WPLColors.purpleRGBA[50]}, ${WPLColors.pinkRGBA[50]}, transparent)`,
                     }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = WPLColors.pinkRGBA[50];
-                      e.currentTarget.style.background = WPLColors.pinkRGBA[20];
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = WPLColors.pinkRGBA[30];
-                      e.currentTarget.style.background = WPLColors.pinkRGBA[10];
+                  />
+                  
+                  {/* Main Circle */}
+                  <div 
+                    className="relative w-full h-full rounded-full backdrop-blur-2xl border-2 flex items-center justify-center shadow-2xl"
+                    style={{
+                      background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[20]}, ${WPLColors.pinkRGBA[20]})`,
+                      borderColor: WPLColors.purpleRGBA[40],
                     }}
                   >
-                    View Matches
-                  </Link>
+                    <div className="text-center space-y-4">
+                      <Trophy className="w-24 h-24 mx-auto drop-shadow-2xl" style={{ color: WPLColors.pink }} />
+                      <div className="text-4xl font-black" style={{ color: WPLColors.textPrimary }}>WPL</div>
+                      <div className="text-2xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">2026</div>
+                    </div>
+                  </div>
+
+                  {/* Floating Elements */}
+                  {[
+                    { top: '10%', right: '10%', text: '5', label: 'Teams', delay: 0 },
+                    { bottom: '15%', left: '10%', text: '22', label: 'Matches', delay: 0.5 },
+                    { top: '50%', right: '-5%', text: 'T20', label: 'Format', delay: 1 },
+                  ].map((item, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5, delay: 1 + item.delay }}
+                      className={`absolute ${item.top || ''} ${item.right || ''} ${item.bottom || ''} ${item.left || ''} p-4 rounded-2xl backdrop-blur-xl shadow-xl text-center`}
+                      style={{
+                        background: WPLColors.purpleRGBA[10],
+                        border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                      }}
+                    >
+                      <div className="text-2xl font-black" style={{ color: WPLColors.purple }}>{item.text}</div>
+                      <div className="text-xs font-semibold uppercase tracking-wider" style={{ color: WPLColors.textMuted }}>{item.label}</div>
+                    </motion.div>
+                  ))}
                 </motion.div>
-              </AnimatedSection>
+              </motion.div>
             </div>
-          </ParallaxSection>
+          </div>
 
           {/* Scroll Indicator */}
           <motion.div
@@ -435,9 +457,17 @@ export default function WPLHomePage() {
             animate={{ y: [0, 10, 0] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
-            <div className="w-6 h-10 rounded-full border-2 border-purple-500/30 flex items-start justify-center p-2">
+            <div 
+              className="w-6 h-10 rounded-full border-2 flex items-start justify-center p-2"
+              style={{
+                borderColor: WPLColors.purpleRGBA[30],
+              }}
+            >
               <motion.div
-                className="w-1.5 h-1.5 rounded-full bg-purple-400/50"
+                className="w-1.5 h-1.5 rounded-full"
+                style={{
+                  background: WPLColors.pinkRGBA[50],
+                }}
                 animate={{ y: [0, 12, 0] }}
                 transition={{ duration: 2, repeat: Infinity }}
               />

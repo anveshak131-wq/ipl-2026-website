@@ -157,46 +157,72 @@ export default function IPLHomePage() {
 
       <main className="relative z-10">
         {/* Premium Hero Section */}
-        <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-          <ParallaxSection speed={0.5}>
-            <div className="absolute inset-0">
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-600/40 via-indigo-600/30 to-cyan-600/40" />
-              <motion.div
-                className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/30 rounded-full blur-3xl"
-                animate={{
-                  scale: [1, 1.3, 1],
-                  opacity: [0.4, 0.7, 0.4],
-                }}
-                transition={{
-                  duration: 8,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-              <motion.div
-                className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-500/30 rounded-full blur-3xl"
-                animate={{
-                  scale: [1, 1.4, 1],
-                  opacity: [0.4, 0.8, 0.4],
-                }}
-                transition={{
-                  duration: 10,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                  delay: 1,
-                }}
-              />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(59,130,246,0.15),transparent_50%)]" />
-            </div>
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+          {/* Animated Background */}
+          <div className="absolute inset-0">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-950/50 via-indigo-950/40 to-cyan-950/50" />
+            <motion.div
+              className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-blue-500/20 rounded-full blur-3xl"
+              animate={{
+                scale: [1, 1.4, 1],
+                opacity: [0.3, 0.6, 0.3],
+                x: [0, 100, 0],
+                y: [0, 50, 0],
+              }}
+              transition={{
+                duration: 12,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+            <motion.div
+              className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-cyan-500/20 rounded-full blur-3xl"
+              animate={{
+                scale: [1, 1.5, 1],
+                opacity: [0.3, 0.7, 0.3],
+                x: [0, -80, 0],
+                y: [0, -40, 0],
+              }}
+              transition={{
+                duration: 15,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 1,
+              }}
+            />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_70%)]" />
             
-            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
-              <AnimatedSection direction="down" delay={0.1}>
+            {/* Grid Pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <div 
+                className="absolute inset-0"
+                style={{
+                  backgroundImage: `
+                    linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px)
+                  `,
+                  backgroundSize: '60px 60px',
+                }}
+              />
+            </div>
+          </div>
+          
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+              
+              {/* Left Content */}
+              <motion.div
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8 }}
+                className="space-y-8"
+              >
                 {/* Badge */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
-                  className="inline-flex items-center gap-2 mb-8 px-6 py-3 rounded-full bg-white/10 backdrop-blur-md border border-blue-500/30 shadow-lg"
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-blue-500/10 backdrop-blur-xl border border-blue-400/30 shadow-2xl"
                 >
                   <Trophy className="w-5 h-5 text-blue-400" />
                   <span className="text-sm font-bold text-blue-300 uppercase tracking-wider">
@@ -208,10 +234,15 @@ export default function IPLHomePage() {
                 <motion.h1
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
-                  className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-white mb-6 leading-tight"
+                  transition={{ duration: 0.8, delay: 0.3 }}
+                  className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black leading-[0.9] tracking-tight"
                 >
-                  IPL <GradientText gradient="from-blue-400 via-cyan-400 to-indigo-400" animate>2026</GradientText>
+                  <span className="block bg-gradient-to-r from-white via-blue-200 to-cyan-200 bg-clip-text text-transparent">
+                    IPL
+                  </span>
+                  <span className="block bg-gradient-to-r from-blue-400 via-cyan-400 to-indigo-400 bg-clip-text text-transparent">
+                    2026
+                  </span>
                 </motion.h1>
 
                 {/* Subtitle */}
@@ -219,17 +250,52 @@ export default function IPLHomePage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.4 }}
-                  className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-10 leading-relaxed"
+                  className="text-xl md:text-2xl text-gray-300 leading-relaxed max-w-xl"
                 >
                   The world's biggest T20 cricket league. Experience the thrill, passion, and glory of IPL 2026.
                 </motion.p>
+
+                {/* Quick Stats */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.5 }}
+                  className="grid grid-cols-3 gap-4 pt-4"
+                >
+                  {[
+                    { label: 'Teams', value: '10', bgColor: 'rgba(59, 130, 246, 0.1)', borderColor: 'rgba(96, 165, 250, 0.2)', textColor: '#60A5FA' },
+                    { label: 'Matches', value: '74', bgColor: 'rgba(6, 182, 212, 0.1)', borderColor: 'rgba(34, 211, 238, 0.2)', textColor: '#22D3EE' },
+                    { label: 'Cities', value: '12', bgColor: 'rgba(99, 102, 241, 0.1)', borderColor: 'rgba(129, 140, 248, 0.2)', textColor: '#818CF8' },
+                  ].map((stat, index) => (
+                    <motion.div
+                      key={stat.label}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5, delay: 0.6 + index * 0.1 }}
+                      className="group relative overflow-hidden p-6 rounded-2xl backdrop-blur-xl transition-all duration-300 hover:scale-105"
+                      style={{
+                        background: stat.bgColor,
+                        border: `1px solid ${stat.borderColor}`,
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = stat.borderColor.replace('0.2', '0.4');
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = stat.borderColor;
+                      }}
+                    >
+                      <div className="text-3xl font-black mb-1" style={{ color: stat.textColor }}>{stat.value}</div>
+                      <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{stat.label}</div>
+                    </motion.div>
+                  ))}
+                </motion.div>
 
                 {/* CTA Buttons */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.6 }}
-                  className="flex flex-wrap justify-center gap-4"
+                  transition={{ duration: 0.8, delay: 0.7 }}
+                  className="flex flex-wrap gap-4 pt-4"
                 >
                   <Link
                     href="/live-score"
@@ -243,20 +309,71 @@ export default function IPLHomePage() {
                   </Link>
                   <Link
                     href="/teams"
-                    className="px-8 py-4 rounded-xl bg-white/10 backdrop-blur-md text-white font-bold text-lg border-2 border-blue-500/30 hover:border-blue-500/50 hover:bg-blue-500/20 transition-all duration-300 transform hover:scale-105"
+                    className="px-8 py-4 rounded-xl bg-white/10 backdrop-blur-xl text-white font-bold text-lg border-2 border-blue-500/30 hover:border-blue-500/50 hover:bg-blue-500/20 transition-all duration-300 transform hover:scale-105"
                   >
                     Explore Teams
                   </Link>
                   <Link
                     href="/matches"
-                    className="px-8 py-4 rounded-xl bg-white/10 backdrop-blur-md text-white font-bold text-lg border-2 border-cyan-500/30 hover:border-cyan-500/50 hover:bg-cyan-500/20 transition-all duration-300 transform hover:scale-105"
+                    className="px-8 py-4 rounded-xl bg-white/10 backdrop-blur-xl text-white font-bold text-lg border-2 border-cyan-500/30 hover:border-cyan-500/50 hover:bg-cyan-500/20 transition-all duration-300 transform hover:scale-105"
                   >
                     View Matches
                   </Link>
                 </motion.div>
-              </AnimatedSection>
+              </motion.div>
+
+              {/* Right Visual */}
+              <motion.div
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="relative h-[500px] lg:h-[600px] flex items-center justify-center"
+              >
+                {/* Central Orb */}
+                <motion.div
+                  animate={{
+                    scale: [1, 1.1, 1],
+                    rotate: [0, 360],
+                  }}
+                  transition={{
+                    scale: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+                    rotate: { duration: 20, repeat: Infinity, ease: "linear" },
+                  }}
+                  className="relative w-80 h-80 lg:w-96 lg:h-96"
+                >
+                  {/* Glow Ring */}
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/40 via-cyan-500/40 to-indigo-500/40 blur-3xl animate-pulse" />
+                  
+                  {/* Main Circle */}
+                  <div className="relative w-full h-full rounded-full bg-gradient-to-br from-blue-600/30 via-cyan-600/30 to-indigo-600/30 backdrop-blur-2xl border-2 border-blue-400/30 flex items-center justify-center shadow-2xl">
+                    <div className="text-center space-y-4">
+                      <Trophy className="w-24 h-24 mx-auto text-yellow-400 drop-shadow-2xl" />
+                      <div className="text-4xl font-black text-white">IPL</div>
+                      <div className="text-2xl font-black bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">2026</div>
+                    </div>
+                  </div>
+
+                  {/* Floating Elements */}
+                  {[
+                    { top: '10%', right: '10%', text: '10', label: 'Teams', delay: 0 },
+                    { bottom: '15%', left: '10%', text: '74', label: 'Matches', delay: 0.5 },
+                    { top: '50%', right: '-5%', text: '12', label: 'Cities', delay: 1 },
+                  ].map((item, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.5, delay: 1 + item.delay }}
+                      className={`absolute ${item.top || ''} ${item.right || ''} ${item.bottom || ''} ${item.left || ''} p-4 rounded-2xl bg-blue-500/10 backdrop-blur-xl border border-blue-400/30 shadow-xl text-center`}
+                    >
+                      <div className="text-2xl font-black text-blue-400">{item.text}</div>
+                      <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{item.label}</div>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </motion.div>
             </div>
-          </ParallaxSection>
+          </div>
 
           {/* Scroll Indicator */}
           <motion.div
