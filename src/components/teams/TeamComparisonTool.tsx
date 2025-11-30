@@ -146,11 +146,11 @@ export default function TeamComparisonTool({ teams, onClose }: TeamComparisonToo
                           return <RCBLionLogo className="w-full h-full" />;
                         }
                         return (
-                          <img
+                        <img
                             src={logoPath}
-                            alt={team.shortName}
-                            className="w-full h-full object-contain"
-                          />
+                          alt={team.shortName}
+                          className="w-full h-full object-contain"
+                        />
                         );
                       })()}
                     </div>

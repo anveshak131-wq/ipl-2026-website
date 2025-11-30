@@ -500,14 +500,14 @@ export default function AdminTeams() {
                                     Update WPL Teams
                                 </button>
                             )}
-                            <button
-                                onClick={handleAddTeam}
-                                className="group relative px-6 py-3 bg-gradient-to-r from-purple-600 via-purple-500 to-pink-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2"
-                                disabled={isSubmitting}
-                            >
-                                <PlusIcon className="w-5 h-5" />
-                                Add Team
-                            </button>
+                        <button
+                            onClick={handleAddTeam}
+                            className="group relative px-6 py-3 bg-gradient-to-r from-purple-600 via-purple-500 to-pink-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2"
+                            disabled={isSubmitting}
+                        >
+                            <PlusIcon className="w-5 h-5" />
+                            Add Team
+                        </button>
                         </div>
                     </div>
 
@@ -716,20 +716,20 @@ export default function AdminTeams() {
                                                     <td className="px-6 py-4">
                                                         <div className="flex items-center gap-2">
                                                             {team.colors?.primary ? (
-                                                                <div
-                                                                    className="w-6 h-6 rounded border-2 border-white/20 shadow-sm"
-                                                                    style={{ backgroundColor: team.colors.primary }}
-                                                                    title={team.colors.primary}
-                                                                />
+                                                            <div
+                                                                className="w-6 h-6 rounded border-2 border-white/20 shadow-sm"
+                                                                style={{ backgroundColor: team.colors.primary }}
+                                                                title={team.colors.primary}
+                                                            />
                                                             ) : (
                                                                 <div className="w-6 h-6 rounded border-2 border-white/20 shadow-sm bg-gray-500" title="No color set" />
                                                             )}
                                                             {team.colors?.secondary ? (
-                                                                <div
-                                                                    className="w-6 h-6 rounded border-2 border-white/20 shadow-sm"
-                                                                    style={{ backgroundColor: team.colors.secondary }}
-                                                                    title={team.colors.secondary}
-                                                                />
+                                                            <div
+                                                                className="w-6 h-6 rounded border-2 border-white/20 shadow-sm"
+                                                                style={{ backgroundColor: team.colors.secondary }}
+                                                                title={team.colors.secondary}
+                                                            />
                                                             ) : (
                                                                 <div className="w-6 h-6 rounded border-2 border-white/20 shadow-sm bg-gray-400" title="No color set" />
                                                             )}
@@ -857,20 +857,20 @@ export default function AdminTeams() {
                                             <div className="flex items-center justify-between">
                                                 <div className="flex items-center gap-2">
                                                     {team.colors?.primary ? (
-                                                        <div
-                                                            className="w-6 h-6 rounded border-2 border-white/20"
-                                                            style={{ backgroundColor: team.colors.primary }}
+                                                    <div
+                                                        className="w-6 h-6 rounded border-2 border-white/20"
+                                                        style={{ backgroundColor: team.colors.primary }}
                                                             title={team.colors.primary}
-                                                        />
+                                                    />
                                                     ) : (
                                                         <div className="w-6 h-6 rounded border-2 border-white/20 bg-gray-500" title="No color set" />
                                                     )}
                                                     {team.colors?.secondary ? (
-                                                        <div
-                                                            className="w-6 h-6 rounded border-2 border-white/20"
-                                                            style={{ backgroundColor: team.colors.secondary }}
+                                                    <div
+                                                        className="w-6 h-6 rounded border-2 border-white/20"
+                                                        style={{ backgroundColor: team.colors.secondary }}
                                                             title={team.colors.secondary}
-                                                        />
+                                                    />
                                                     ) : (
                                                         <div className="w-6 h-6 rounded border-2 border-white/20 bg-gray-400" title="No color set" />
                                                     )}
@@ -972,15 +972,15 @@ export default function AdminTeams() {
                                             </label>
                                             {editingTeam ? (
                                                 // When editing, allow changing league
-                                                <select
-                                                    value={formData.league}
-                                                    onChange={(e) => setFormData({ ...formData, league: e.target.value as 'ipl' | 'wpl' })}
-                                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all"
-                                                    required
-                                                >
-                                                    <option value="ipl">IPL (Indian Premier League)</option>
-                                                    <option value="wpl">WPL (Women's Premier League)</option>
-                                                </select>
+                                            <select
+                                                value={formData.league}
+                                                onChange={(e) => setFormData({ ...formData, league: e.target.value as 'ipl' | 'wpl' })}
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all"
+                                                required
+                                            >
+                                                <option value="ipl">IPL (Indian Premier League)</option>
+                                                <option value="wpl">WPL (Women's Premier League)</option>
+                                            </select>
                                             ) : (
                                                 // When creating, show current league as read-only
                                                 <div className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white">

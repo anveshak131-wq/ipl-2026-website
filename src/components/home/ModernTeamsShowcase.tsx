@@ -107,9 +107,9 @@ export default function ModernTeamsShowcase({ teams, isLoading = false }: Modern
                     const animatedPath = getAnimatedLogoPath(team.id, team.shortName, team.league);
                     if (animatedPath.endsWith('rcb_logo_premium.svg')) {
                       return (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <RCBLionLogo className="w-full h-full" />
-                        </div>
+                    <div className="w-full h-full flex items-center justify-center">
+                      <RCBLionLogo className="w-full h-full" />
+                    </div>
                       );
                     }
                     if (animatedPath.endsWith('.json')) {
@@ -117,20 +117,20 @@ export default function ModernTeamsShowcase({ teams, isLoading = false }: Modern
                       return null; // Add RCBLottie component if needed
                     }
                     return (
-                      <motion.img
+                    <motion.img
                         src={animatedPath}
-                        alt={`${team.shortName} logo`}
-                        className="w-full h-full object-contain drop-shadow-2xl"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = getLogoPath(team.id);
-                        }}
-                        whileHover={{ 
-                          scale: 1.15,
-                          rotate: [0, -5, 5, -5, 0],
-                          filter: "brightness(1.2)"
-                        }}
-                        transition={{ duration: 0.5 }}
-                      />
+                      alt={`${team.shortName} logo`}
+                      className="w-full h-full object-contain drop-shadow-2xl"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = getLogoPath(team.id);
+                      }}
+                      whileHover={{ 
+                        scale: 1.15,
+                        rotate: [0, -5, 5, -5, 0],
+                        filter: "brightness(1.2)"
+                      }}
+                      transition={{ duration: 0.5 }}
+                    />
                     );
                   })()}
                 </div>

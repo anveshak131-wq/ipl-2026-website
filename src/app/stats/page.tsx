@@ -158,21 +158,11 @@ export default function StatsPage() {
       router.push('/');
     }
   }, [currentLeague, router]);
-  
-  // Don't render stats page for WPL
-  if (currentLeague === 'wpl') {
-    return (
-      <div className="min-h-screen">
-        <Navbar />
-        <div className="flex items-center justify-center h-96">
-          <LoadingSpinner size="lg" />
-        </div>
-        <Footer />
-      </div>
-    );
-  }
 
   useEffect(() => {
+    // Only fetch data if not WPL
+    if (currentLeague === 'wpl') return;
+    
     const fetchData = async () => {
       setIsLoading(true);
       setError(null);
@@ -456,6 +446,19 @@ export default function StatsPage() {
     const targetTop = rect.top + window.scrollY - offset;
     window.scrollTo({ top: targetTop, behavior: 'smooth' });
   };
+
+  // Don't render stats page for WPL - must be after all hooks
+  if (currentLeague === 'wpl') {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <div className="flex items-center justify-center h-96">
+          <LoadingSpinner size="lg" />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
