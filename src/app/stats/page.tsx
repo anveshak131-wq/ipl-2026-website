@@ -132,6 +132,26 @@ export default function StatsPage() {
   const { currentLeague } = useLeague();
   const router = useRouter();
   
+  // All hooks must be called before any conditional returns
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [publishedStats, setPublishedStats] = useState<PublishedStats | null>(null);
+  const [selectedTeam1Id, setSelectedTeam1Id] = useState<string>('');
+  const [selectedTeam2Id, setSelectedTeam2Id] = useState<string>('');
+  const [expandedPlayerId, setExpandedPlayerId] = useState<string | null>(null);
+  const [statsConfig, setStatsConfig] = useState({
+    showTopRunScorers: true,
+    showTopWicketTakers: true,
+    showBestStrikeRates: true,
+    showBestEconomyRates: true,
+    showInsights: true,
+  });
+  const [activeStatsTab, setActiveStatsTab] = useState<StatsTabKey>('overview');
+  const [leadersRange, setLeadersRange] = useState<'season' | 'recent'>('season');
+  const [leadersLimit, setLeadersLimit] = useState<10 | 50>(10);
+  
   // Redirect WPL users away from stats page
   useEffect(() => {
     if (currentLeague === 'wpl') {
@@ -151,25 +171,6 @@ export default function StatsPage() {
       </div>
     );
   }
-  
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [publishedStats, setPublishedStats] = useState<PublishedStats | null>(null);
-  const [selectedTeam1Id, setSelectedTeam1Id] = useState<string>('');
-  const [selectedTeam2Id, setSelectedTeam2Id] = useState<string>('');
-  const [expandedPlayerId, setExpandedPlayerId] = useState<string | null>(null);
-  const [statsConfig, setStatsConfig] = useState({
-    showTopRunScorers: true,
-    showTopWicketTakers: true,
-    showBestStrikeRates: true,
-    showBestEconomyRates: true,
-    showInsights: true,
-  });
-  const [activeStatsTab, setActiveStatsTab] = useState<StatsTabKey>('overview');
-  const [leadersRange, setLeadersRange] = useState<'season' | 'recent'>('season');
-  const [leadersLimit, setLeadersLimit] = useState<10 | 50>(10);
 
   useEffect(() => {
     const fetchData = async () => {
