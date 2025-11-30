@@ -16,6 +16,7 @@ import QuickActionBar from '@/components/home/QuickActionBar';
 import { TeamsSkeleton, MatchesSkeleton, NewsSkeleton } from '@/components/home/HomePageSkeletons';
 import { api } from '@/lib/data';
 import { isPlaceholderTeam } from '@/lib/playoffUtils';
+import { useLeague } from '@/contexts/LeagueContext';
 import type { Team, Match, News } from '@/types';
 import { 
   Trophy, 
@@ -38,6 +39,7 @@ import { getAnimatedLogoPath } from '@/lib/logoUtils';
 
 export default function Home() {
   const router = useRouter();
+  const { setCurrentLeague } = useLeague();
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [lastAcceptanceDate, setLastAcceptanceDate] = useState<string | null>(null);
   const [needsReAcceptance, setNeedsReAcceptance] = useState(false);
@@ -117,6 +119,9 @@ export default function Home() {
 
   useEffect(() => {
     setIsHydrated(true);
+    
+    // Always default to IPL on homepage
+    setCurrentLeague('ipl');
     
     // Check if user has accepted terms
     const termsAccepted = localStorage.getItem("terms_accepted");

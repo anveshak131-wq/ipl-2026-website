@@ -28,7 +28,14 @@ type ViewMode = 'grid' | 'list';
 function TeamsPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { currentLeague } = useLeague();
+    const { currentLeague, setCurrentLeague } = useLeague();
+
+    // Default to IPL for teams page (unless on /wpl/teams)
+    useEffect(() => {
+        if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/wpl/')) {
+            setCurrentLeague('ipl');
+        }
+    }, [setCurrentLeague]);
 
     const [teams, setTeams] = useState<Team[]>([]);
     const [matches, setMatches] = useState<Match[]>([]);

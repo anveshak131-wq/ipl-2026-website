@@ -18,8 +18,15 @@ import WPLFloatingParticles from '@/components/animations/WPLFloatingParticles';
 import NewsSkeleton from '@/components/news/NewsSkeleton';
 
 export default function NewsPage() {
-  const { currentLeague } = useLeague();
+  const { currentLeague, setCurrentLeague } = useLeague();
   const [news, setNews] = useState<News[]>([]);
+
+  // Default to IPL for news page
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/wpl/')) {
+      setCurrentLeague('ipl');
+    }
+  }, [setCurrentLeague]);
   const [filteredNews, setFilteredNews] = useState<News[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'match' | 'team' | 'player' | 'general' | 'breaking' | 'inspiration' | 'behind-the-scenes'>('all');

@@ -16,11 +16,18 @@ import AnimatedSection from '@/components/ui/AnimatedSection';
 import GradientText from '@/components/ui/GradientText';
 
 export default function MatchesPage() {
-  const { currentLeague } = useLeague();
+  const { currentLeague, setCurrentLeague } = useLeague();
   const [matches, setMatches] = useState<Match[]>([]);
   const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'live' | 'completed'>('all');
+
+  // Default to IPL for matches page (unless on /wpl/matches)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/wpl/')) {
+      setCurrentLeague('ipl');
+    }
+  }, [setCurrentLeague]);
 
   useEffect(() => {
     const fetchMatches = async () => {

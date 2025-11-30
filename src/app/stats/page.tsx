@@ -129,8 +129,15 @@ function getBowlingContextLine(p: Player): string {
 }
 
 export default function StatsPage() {
-  const { currentLeague } = useLeague();
+  const { currentLeague, setCurrentLeague } = useLeague();
   const router = useRouter();
+
+  // Default to IPL for stats page
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/wpl/')) {
+      setCurrentLeague('ipl');
+    }
+  }, [setCurrentLeague]);
   
   // All hooks must be called before any conditional returns
   const [players, setPlayers] = useState<Player[]>([]);
