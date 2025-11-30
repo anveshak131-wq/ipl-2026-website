@@ -55,13 +55,24 @@ export default function Navbar() {
   // Group 1: Real-time & Core (Most Important)
   // Group 2: Explore & Discover
   // Group 3: Analytics & Insights
+  // Generate league-aware navigation items
+  const getLeagueAwareHref = (baseHref: string): string => {
+    if (currentLeague === 'wpl' && baseHref !== '/') {
+      // For WPL, use /wpl prefix for teams, matches, news
+      if (baseHref === '/teams' || baseHref === '/matches' || baseHref === '/news') {
+        return `/wpl${baseHref}`;
+      }
+    }
+    return baseHref;
+  };
+
   const primaryNavItems: NavItem[] = [
     // Real-time & Core Features (Highest Priority)
     { href: '/live-score', label: 'Live Score', emoji: 'lightning' },
-    { href: '/matches', label: 'Matches', emoji: 'cricket-bat' },
+    { href: getLeagueAwareHref('/matches'), label: 'Matches', emoji: 'cricket-bat' },
     // Explore & Discover
-    { href: '/teams', label: 'Teams', emoji: 'trophy' },
-    { href: '/news', label: 'News', emoji: 'fire' },
+    { href: getLeagueAwareHref('/teams'), label: 'Teams', emoji: 'trophy' },
+    { href: getLeagueAwareHref('/news'), label: 'News', emoji: 'fire' },
     // Analytics & Insights (only for IPL, not WPL)
     ...(currentLeague !== 'wpl' ? [{ href: '/stats', label: 'Stats', emoji: 'chart' as NavEmojiName }] : []),
     // Predictions temporarily removed - will be added back when improved

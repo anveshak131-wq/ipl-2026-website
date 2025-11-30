@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import EnhancedTeamCard from '@/components/teams/EnhancedTeamCard';
@@ -28,14 +28,21 @@ type ViewMode = 'grid' | 'list';
 function TeamsPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const pathname = usePathname();
     const { currentLeague, setCurrentLeague } = useLeague();
 
-    // Default to IPL for teams page (unless on /wpl/teams)
+    // Set league based on pathname, but preserve current league if already set
     useEffect(() => {
-        if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/wpl/')) {
+        if (pathname.startsWith('/wpl/teams') || pathname === '/wpl/teams') {
+            setCurrentLeague('wpl');
+        } else if (pathname === '/teams' && currentLeague === 'wpl') {
+            // If user is on WPL and navigates to /teams, redirect to /wpl/teams
+            router.push('/wpl/teams');
+        } else if (pathname === '/teams' && currentLeague !== 'wpl') {
+            // Only set to IPL if not already on WPL
             setCurrentLeague('ipl');
         }
-    }, [setCurrentLeague]);
+    }, [pathname, setCurrentLeague, currentLeague, router]);
 
     const [teams, setTeams] = useState<Team[]>([]);
     const [matches, setMatches] = useState<Match[]>([]);
