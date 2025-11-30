@@ -3,446 +3,114 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
-import type { Match, Player } from '@/types';
-
-interface LiveScoreData {
-  matchId: string;
-  team1: { name: string; runs: number; wickets: number; overs: number };
-  team2: { name: string; runs: number; wickets: number; overs: number };
-  currentBatter: { name: string; runs: number; balls: number };
-  currentBowler: { name: string; runs: number; balls: number };
-  commentary: string[];
-  status: string;
-  lastUpdated: string;
-  resultText?: string;
-}
-
-const DISMISSAL_MODES = [
-  { key: 'bowled', label: 'Bowled' },
-  { key: 'caught', label: 'Caught' },
-  { key: 'lbw', label: 'LBW' },
-  { key: 'run_out', label: 'Run out' },
-  { key: 'stumped', label: 'Stumped' },
-  { key: 'hit_wicket', label: 'Hit wicket' },
-] as const;
+import BallEntryPanel from '@/components/admin/live-score/BallEntryPanel';
+import AuroraBackground from '@/components/ui/AuroraBackground';
+import { Match, Player } from '@/types';
+import { api } from '@/lib/data';
+import { LoadingSpinner } from '@/components/admin/animations';
+import { CheckCircle2, AlertCircle } from 'lucide-react';
+import { useLeague } from '@/contexts/LeagueContext';
+import { WPLColors } from '@/lib/wplColors';
 
 export default function AdminLiveScorePage() {
   const router = useRouter();
+  const { currentLeague } = useLeague();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [liveScore, setLiveScore] = useState<LiveScoreData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
   const [matches, setMatches] = useState<Match[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [selectedMatchId, setSelectedMatchId] = useState<string>('');
-
-  const [formData, setFormData] = useState({
-    team1Name: 'RCB',
-    team1Runs: 0,
-    team1Wickets: 0,
-    team1Overs: 0,
-    team2Name: 'CSK',
-    team2Runs: 0,
-    team2Wickets: 0,
-    team2Overs: 0,
-    batterName: '',
-    batterRuns: 0,
-    batterBalls: 0,
-    bowlerName: '',
-    bowlerRuns: 0,
-    bowlerBalls: 0,
-    commentary: '',
-    status: 'Live',
-    innings: 1,
-    battingTeam: 'team1' as 'team1' | 'team2',
-    tossWinner: '' as '' | 'team1' | 'team2',
-    tossDecision: '' as '' | 'bat' | 'bowl',
-    dismissalType: '',
-    fielderName: '',
-    resultText: '',
-  });
-  const [lastBallSnapshot, setLastBallSnapshot] = useState<any | null>(null);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
   // Check authentication
   useEffect(() => {
     const checkAuth = () => {
-      const token = localStorage.getItem('auth_token');
+      const token = localStorage.getItem('adminToken');
       if (!token) {
         router.push('/ipl-admin-2026');
         return;
       }
-
-      // For admin users, the token is stored in localStorage after login.
-      // Trust that if the token exists, the user is authenticated.
-      // (Admin tokens are base64-encoded payloads, not verified against KV.)
       setIsAuthenticated(true);
       setIsLoading(false);
     };
-
     checkAuth();
   }, [router]);
 
-  // Load fixtures and players once authenticated
+  // Load matches and players
   useEffect(() => {
     if (!isAuthenticated) return;
 
     const loadData = async () => {
       try {
-        const [matchesRes, playersRes] = await Promise.all([
-          fetch('/api/matches'),
-          fetch('/api/players'),
+        const [matchesData, playersData] = await Promise.all([
+          api.getMatches(currentLeague),
+          api.getPlayers(currentLeague),
         ]);
-
-        if (matchesRes.ok) {
-          const matchesData: Match[] = await matchesRes.json();
           setMatches(matchesData);
-          // Pre-select the first upcoming or live match if none selected yet
+        setPlayers(playersData);
+
+        // Auto-select first live or upcoming match
           if (!selectedMatchId && matchesData.length > 0) {
             const preferred =
               matchesData.find((m) => m.status === 'live') ||
               matchesData.find((m) => m.status === 'upcoming') ||
               matchesData[0];
+          if (preferred) {
             setSelectedMatchId(preferred.id);
           }
         }
-
-        if (playersRes.ok) {
-          const playersData: Player[] = await playersRes.json();
-          setPlayers(playersData);
-        }
-      } catch (err) {
-        console.error('Error loading fixtures/players for admin live score:', err);
+      } catch (error) {
+        console.error('Error loading data:', error);
       }
     };
 
     loadData();
-  }, [isAuthenticated, selectedMatchId]);
+  }, [isAuthenticated, selectedMatchId, currentLeague]);
 
   const selectedMatch = useMemo(
     () => matches.find((m) => m.id === selectedMatchId) || null,
     [matches, selectedMatchId]
   );
 
-  // Fetch live score for the selected match
-  useEffect(() => {
-    if (!isAuthenticated || !selectedMatch) return;
-
-    const fetchLiveScore = async () => {
-      try {
-        const response = await fetch(`/api/live-score?matchId=${encodeURIComponent(selectedMatch.id)}`);
-        if (response.ok) {
-          const liveScoreData = await response.json();
-          setLiveScore(liveScoreData);
-          setFormData((prev) => ({
-            ...prev,
-            team1Name: selectedMatch.team1.shortName || selectedMatch.team1.name,
-            team1Runs: liveScoreData.team1.runs,
-            team1Wickets: liveScoreData.team1.wickets,
-            team1Overs: liveScoreData.team1.overs,
-            team2Name: selectedMatch.team2.shortName || selectedMatch.team2.name,
-            team2Runs: liveScoreData.team2.runs,
-            team2Wickets: liveScoreData.team2.wickets,
-            team2Overs: liveScoreData.team2.overs,
-            batterName: liveScoreData.currentBatter.name,
-            batterRuns: liveScoreData.currentBatter.runs,
-            batterBalls: liveScoreData.currentBatter.balls,
-            bowlerName: liveScoreData.currentBowler.name,
-            bowlerRuns: liveScoreData.currentBowler.runs,
-            bowlerBalls: liveScoreData.currentBowler.balls,
-            commentary: liveScoreData.commentary.length > 0 ? liveScoreData.commentary[0] : '',
-            status: liveScoreData.status,
-            innings: (liveScoreData as any).innings || prev.innings,
-            battingTeam: ((liveScoreData as any).battingTeam as 'team1' | 'team2') || prev.battingTeam,
-            tossWinner: ((liveScoreData as any).toss?.winner as 'team1' | 'team2') || prev.tossWinner,
-            tossDecision: ((liveScoreData as any).toss?.decision as 'bat' | 'bowl') || prev.tossDecision,
-            dismissalType: (liveScoreData as any).dismissalType || prev.dismissalType,
-            fielderName: (liveScoreData as any).fielderName || prev.fielderName,
-            resultText: (liveScoreData as any).resultText || prev.resultText,
-          }));
-        } else {
-          // No existing live score yet; initialise from fixture
-          setLiveScore(null);
-          setFormData((prev) => ({
-            ...prev,
-            team1Name: selectedMatch.team1.shortName || selectedMatch.team1.name,
-            team1Runs: 0,
-            team1Wickets: 0,
-            team1Overs: 0,
-            team2Name: selectedMatch.team2.shortName || selectedMatch.team2.name,
-            team2Runs: 0,
-            team2Wickets: 0,
-            team2Overs: 0,
-            status: selectedMatch.status === 'upcoming' ? 'Scheduled' : 'Live',
-          }));
-        }
-      } catch (error) {
-        console.error('Error fetching live score:', error);
-      }
-    };
-
-    fetchLiveScore();
-  }, [isAuthenticated, selectedMatch]);
-
-  const team1Players = useMemo(() => {
-    if (!selectedMatch) return [] as Player[];
-    return players.filter((p) => p.teamId === selectedMatch.team1.id);
-  }, [players, selectedMatch]);
-
-  const team2Players = useMemo(() => {
-    if (!selectedMatch) return [] as Player[];
-    return players.filter((p) => p.teamId === selectedMatch.team2.id);
-  }, [players, selectedMatch]);
-
-  // Helpers for overs/balls conversion
-  const oversToBalls = (overs: number) => {
-    const whole = Math.floor(overs);
-    const fraction = Math.round((overs - whole) * 10); // .0 - .5
-    return whole * 6 + fraction;
-  };
-
-  const ballsToOvers = (balls: number) => {
-    const whole = Math.floor(balls / 6);
-    const rem = balls % 6;
-    return parseFloat(`${whole}.${rem}`);
-  };
-
-  // Derived strike rate and economy
-  const batterStrikeRate = useMemo(() => {
-    if (!formData.batterBalls) return 0;
-    return parseFloat(((formData.batterRuns * 100) / formData.batterBalls).toFixed(1));
-  }, [formData.batterRuns, formData.batterBalls]);
-
-  const bowlerEconomy = useMemo(() => {
-    const balls = formData.bowlerBalls;
-    if (!balls) return 0;
-    const overs = balls / 6;
-    return parseFloat(((formData.bowlerRuns / overs)).toFixed(2));
-  }, [formData.bowlerRuns, formData.bowlerBalls]);
-
-  // Soft validation warnings for admins (non-blocking)
-  const team1Warnings: string[] = useMemo(() => {
-    const warnings: string[] = [];
-    if (formData.team1Wickets > 10) warnings.push('Wickets for Team 1 are more than 10.');
-    if (formData.team1Overs > 20) warnings.push('Overs for Team 1 are more than 20 (T20 match).');
-    if (formData.team1Runs < 0) warnings.push('Runs for Team 1 cannot be negative.');
-    return warnings;
-  }, [formData.team1Runs, formData.team1Wickets, formData.team1Overs]);
-
-  const team2Warnings: string[] = useMemo(() => {
-    const warnings: string[] = [];
-    if (formData.team2Wickets > 10) warnings.push('Wickets for Team 2 are more than 10.');
-    if (formData.team2Overs > 20) warnings.push('Overs for Team 2 are more than 20 (T20 match).');
-    if (formData.team2Runs < 0) warnings.push('Runs for Team 2 cannot be negative.');
-    return warnings;
-  }, [formData.team2Runs, formData.team2Wickets, formData.team2Overs]);
-
-  const batterWarnings: string[] = useMemo(() => {
-    const warnings: string[] = [];
-    if (formData.batterRuns < 0) warnings.push('Batter runs cannot be negative.');
-    if (formData.batterBalls < 0) warnings.push('Batter balls cannot be negative.');
-    if (formData.batterRuns > 0 && formData.batterBalls === 0) warnings.push('Batter has runs but 0 balls faced.');
-    return warnings;
-  }, [formData.batterRuns, formData.batterBalls]);
-
-  const bowlerWarnings: string[] = useMemo(() => {
-    const warnings: string[] = [];
-    if (formData.bowlerRuns < 0) warnings.push('Bowler runs cannot be negative.');
-    if (formData.bowlerBalls < 0) warnings.push('Bowler balls cannot be negative.');
-    if (formData.bowlerRuns > 0 && formData.bowlerBalls === 0) warnings.push('Bowler has runs conceded but 0 balls bowled.');
-    return warnings;
-  }, [formData.bowlerRuns, formData.bowlerBalls]);
-
-  // Per-ball quick update handler (runs, wicket, wides, no-balls, byes, leg-byes, combos)
-  const handleBallEvent = (event: number | 'W' | 'WD' | 'NB' | 'B' | 'LB' | 'NB4' | 'WD2') => {
+  const handleSave = async (state: any) => {
     if (!selectedMatch) return;
 
-    setFormData((prev) => {
-      // snapshot state before applying this ball so we can undo once
-      setLastBallSnapshot(prev);
-
-      const isWicket = event === 'W';
-      const isWide = event === 'WD' || event === 'WD2';
-      const isNoBall = event === 'NB' || event === 'NB4';
-      const isBye = event === 'B';
-      const isLegBye = event === 'LB';
-      const isRunNumber = typeof event === 'number';
-
-      // Team runs include all runs (off the bat + extras)
-      let teamRunDelta = 0;
-      let batterRunDelta = 0;
-      let bowlerRunDelta = 0;
-
-      if (isRunNumber) {
-        const n = event as number;
-        teamRunDelta = n;
-        batterRunDelta = n;
-        bowlerRunDelta = n;
-      } else if (event === 'WD') {
-        teamRunDelta = 1;
-        bowlerRunDelta = 1;
-      } else if (event === 'WD2') {
-        // Wide with one extra wide run (2 wides total)
-        teamRunDelta = 2;
-        bowlerRunDelta = 2;
-      } else if (event === 'NB') {
-        teamRunDelta = 1;
-        bowlerRunDelta = 1;
-      } else if (event === 'NB4') {
-        // No-ball + boundary four (1 extra + 4 to batter)
-        teamRunDelta = 5;
-        batterRunDelta = 4;
-        bowlerRunDelta = 5;
-      } else if (isBye || isLegBye) {
-        teamRunDelta = 1;
-        // Byes/leg-byes go to extras, not bowler/batter runs
-      } else if (event === 'W') {
-        // Wicket ball with no runs by default
-        teamRunDelta = 0;
-      }
-      const battingKey = prev.battingTeam === 'team1' ? 'team1' : 'team2';
-
-      const currentOvers = battingKey === 'team1' ? prev.team1Overs : prev.team2Overs;
-      const currentRuns = battingKey === 'team1' ? prev.team1Runs : prev.team2Runs;
-      const currentWickets = battingKey === 'team1' ? prev.team1Wickets : prev.team2Wickets;
-
-      const currentBalls = oversToBalls(currentOvers);
-
-      // Wides and no-balls do not count as legal balls
-      const isLegalDelivery = !isWide && !isNoBall;
-      const newTeamBalls = isLegalDelivery ? currentBalls + 1 : currentBalls;
-      const newTeamOvers = ballsToOvers(newTeamBalls);
-
-      const newTeamRuns = currentRuns + teamRunDelta;
-      const newTeamWickets = isWicket ? currentWickets + 1 : currentWickets;
-
-      // Batter stats: runs already in batterRunDelta, balls only for legal deliveries
-      const batterBallDelta = isLegalDelivery ? 1 : 0;
-      const newBatterRuns = prev.batterRuns + batterRunDelta;
-      const newBatterBalls = prev.batterBalls + batterBallDelta;
-
-      // Bowler stats: wides/no-balls and runs off the bat go against the bowler, byes/leg-byes do not
-      const bowlerBallDelta = isLegalDelivery ? 1 : 0;
-      const newBowlerRuns = prev.bowlerRuns + bowlerRunDelta;
-      const newBowlerBalls = prev.bowlerBalls + bowlerBallDelta;
-
-      const ballNumber = newTeamBalls;
-      const overNum = Math.floor(ballNumber / 6);
-      const ballInOver = ballNumber % 6;
-
-      let ballDesc: string;
-      if (isWicket) {
-        const baseName = prev.batterName || 'Batter';
-        const bowlerName = prev.bowlerName || 'Bowler';
-        const mode = prev.dismissalType || 'bowled';
-        const fielder = prev.fielderName || '';
-        // Simple phrasing based on dismissal type
-        if (mode === 'caught') {
-          ballDesc = fielder
-            ? `WICKET! ${baseName} is out, caught by ${fielder} off ${bowlerName}.`
-            : `WICKET! ${baseName} is out, caught off ${bowlerName}.`;
-        } else if (mode === 'lbw') {
-          ballDesc = `WICKET! ${baseName} is out, lbw to ${bowlerName}.`;
-        } else if (mode === 'run_out') {
-          ballDesc = fielder
-            ? `WICKET! ${baseName} is run out by ${fielder}.`
-            : `WICKET! ${baseName} is run out.`;
-        } else if (mode === 'stumped') {
-          ballDesc = fielder
-            ? `WICKET! ${baseName} is stumped by ${fielder} off ${bowlerName}.`
-            : `WICKET! ${baseName} is stumped off ${bowlerName}.`;
-        } else if (mode === 'hit_wicket') {
-          ballDesc = `WICKET! ${baseName} is hit wicket.`;
-        } else {
-          ballDesc = `WICKET! ${baseName} is out, bowled by ${bowlerName}.`;
-        }
-      } else if (event === 'WD') {
-        ballDesc = `Wide ball from ${prev.bowlerName || 'Bowler'}, 1 run to extras.`;
-      } else if (event === 'WD2') {
-        ballDesc = `Wide ball from ${prev.bowlerName || 'Bowler'}, 2 wides.`;
-      } else if (event === 'NB') {
-        ballDesc = `No-ball from ${prev.bowlerName || 'Bowler'}, 1 run to extras.`;
-      } else if (event === 'NB4') {
-        ballDesc = `No-ball from ${prev.bowlerName || 'Bowler'}, ${prev.batterName || 'Batter'} hits 4! 5 runs in total.`;
-      } else if (isBye) {
-        ballDesc = `${prev.batterName || 'Batter'} lets it go, 1 bye taken.`;
-      } else if (isLegBye) {
-        ballDesc = `${prev.batterName || 'Batter'} is hit on the pads, 1 leg-bye taken.`;
-      } else if (isRunNumber) {
-        const runValue = event as number;
-        ballDesc = `${prev.batterName || 'Batter'} scores ${runValue} run${runValue === 1 ? '' : 's'} off ${prev.bowlerName || 'Bowler'}.`;
-      } else {
-        ballDesc = 'Delivery update.';
-      }
-
-      const prefix = `Over ${overNum}.${ballInOver}: `;
-      const newCommentLine = prefix + ballDesc;
-
-      return {
-        ...prev,
-        team1Runs: battingKey === 'team1' ? newTeamRuns : prev.team1Runs,
-        team1Wickets: battingKey === 'team1' ? newTeamWickets : prev.team1Wickets,
-        team1Overs: battingKey === 'team1' ? newTeamOvers : prev.team1Overs,
-        team2Runs: battingKey === 'team2' ? newTeamRuns : prev.team2Runs,
-        team2Wickets: battingKey === 'team2' ? newTeamWickets : prev.team2Wickets,
-        team2Overs: battingKey === 'team2' ? newTeamOvers : prev.team2Overs,
-        batterRuns: newBatterRuns,
-        batterBalls: newBatterBalls,
-        bowlerRuns: newBowlerRuns,
-        bowlerBalls: newBowlerBalls,
-        commentary: newCommentLine,
-      };
-    });
-  };
-
-  const handleUndoLastBall = () => {
-    if (!lastBallSnapshot) return;
-    setFormData(lastBallSnapshot);
-    setLastBallSnapshot(null);
-  };
-
-  const handleSaveScore = async () => {
-    setIsSaving(true);
+    setSaveStatus('saving');
     try {
-      const token = localStorage.getItem('auth_token');
-      if (!selectedMatch) {
-        alert('Please select a match first');
-        return;
-      }
+      const token = localStorage.getItem('adminToken');
+      
+      // Convert state to API format
       const scoreUpdate = {
         team1: {
-          name: formData.team1Name,
-          runs: parseInt(formData.team1Runs.toString()),
-          wickets: parseInt(formData.team1Wickets.toString()),
-          overs: parseFloat(formData.team1Overs.toString()),
+          name: state.team1.name,
+          runs: state.team1.runs,
+          wickets: state.team1.wickets,
+          overs: ballsToOvers(state.team1.balls),
         },
         team2: {
-          name: formData.team2Name,
-          runs: parseInt(formData.team2Runs.toString()),
-          wickets: parseInt(formData.team2Wickets.toString()),
-          overs: parseFloat(formData.team2Overs.toString()),
+          name: state.team2.name,
+          runs: state.team2.runs,
+          wickets: state.team2.wickets,
+          overs: ballsToOvers(state.team2.balls),
         },
         currentBatter: {
-          name: formData.batterName,
-          runs: parseInt(formData.batterRuns.toString()),
-          balls: parseInt(formData.batterBalls.toString()),
+          name: state.currentBatter.name,
+          runs: state.currentBatter.runs,
+          balls: state.currentBatter.balls,
         },
         currentBowler: {
-          name: formData.bowlerName,
-          runs: parseInt(formData.bowlerRuns.toString()),
-          balls: parseInt(formData.bowlerBalls.toString()),
+          name: state.currentBowler.name,
+          runs: state.currentBowler.runs,
+          balls: state.currentBowler.balls,
         },
-        commentary: formData.commentary
-          ? [formData.commentary, ...(liveScore?.commentary || []).slice(0, 49)]
-          : liveScore?.commentary || [],
-        status: formData.status,
-        innings: formData.innings,
-        battingTeam: formData.battingTeam,
-        toss: formData.tossWinner && formData.tossDecision
-          ? { winner: formData.tossWinner, decision: formData.tossDecision }
-          : undefined,
-        resultText: formData.status === 'Completed'
-          ? formData.resultText
-          : liveScore?.resultText || '',
+        commentary: state.ballHistory.slice(-10).map((ball: any) => {
+          const over = Math.floor(ballsToOvers(state.team1.balls + state.team2.balls));
+          const ballInOver = (state.team1.balls + state.team2.balls) % 6;
+          return `Over ${over}.${ballInOver}: ${getBallDescription(ball)}`;
+        }),
+        status: 'Live',
+        innings: state.innings,
+        battingTeam: state.battingTeam,
       };
 
       const response = await fetch('/api/live-score', {
@@ -457,26 +125,57 @@ export default function AdminLiveScorePage() {
         }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        setLiveScore(data.liveScore);
-        setFormData({ ...formData, commentary: '' });
-        alert('Score updated successfully!');
-      } else {
-        alert('Failed to update score');
+      if (!response.ok) {
+        throw new Error('Failed to save score');
       }
+
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 2000);
     } catch (error) {
       console.error('Error saving score:', error);
-      alert('Error updating score');
-    } finally {
-      setIsSaving(false);
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus('idle'), 3000);
+      throw error;
     }
   };
 
+  // Helper functions
+  function ballsToOvers(balls: number): number {
+    const whole = Math.floor(balls / 6);
+    const rem = balls % 6;
+    return parseFloat(`${whole}.${rem}`);
+  }
+
+  function getBallDescription(ball: any): string {
+    if (typeof ball.type === 'number') {
+      return `${ball.type} run${ball.type === 1 ? '' : 's'}`;
+    }
+    switch (ball.type) {
+      case 'W': return `WICKET! ${ball.dismissalType || 'out'}`;
+      case 'WD': return 'Wide';
+      case 'NB': return 'No-ball';
+      case 'B': return 'Bye';
+      case 'LB': return 'Leg-bye';
+      default: return 'Ball';
+    }
+  }
+
+  const isWPL = currentLeague === 'wpl';
+  const bgStyle = isWPL 
+    ? { background: `linear-gradient(to bottom, ${WPLColors.base}, ${WPLColors.gradientStart}66, ${WPLColors.gradientMid}33, ${WPLColors.base})` }
+    : { background: '#0B0F13' };
+  const spinnerColor = isWPL ? WPLColors.pink : '#FFD700';
+  const headerGradient = isWPL
+    ? `linear-gradient(to right, ${WPLColors.textPrimary}, ${WPLColors.purple}, ${WPLColors.pink})`
+    : 'linear-gradient(to right, white, #93C5FD, #67E8F9)';
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-ipl-gold"></div>
+      <div className="flex min-h-screen" style={bgStyle}>
+        <AuroraBackground />
+        <div className="flex-1 flex items-center justify-center">
+          <LoadingSpinner size="lg" color={spinnerColor} />
+        </div>
       </div>
     );
   }
@@ -486,477 +185,134 @@ export default function AdminLiveScorePage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-900">
-      <AdminSidebar />
-
-      <main className="flex-grow">
-        <div className="max-w-6xl mx-auto px-6 py-8">
-          <h1 className="text-4xl font-bold text-white mb-8">Live Score Management</h1>
-
-          {/* Match Selector */}
-          <div className="mb-6 bg-slate-800/60 border border-white/10 rounded-2xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">Select Match</p>
-              <p className="text-sm text-gray-300 max-w-xl">
-                Choose a fixture to manage its live score. All updates will immediately reflect on the public live score page.
-              </p>
+    <div className="flex min-h-screen" style={bgStyle}>
+      <AuroraBackground />
+      <AdminSidebar currentPage="/ipl-admin-2026/live-score" />
+      
+      <main className="flex-1 relative z-10 p-4 md:p-8 overflow-y-auto">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 
+                  className="text-4xl font-bold mb-2"
+                  style={{
+                    background: headerGradient,
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
+                >
+                  Live Score Management
+                </h1>
+                <p style={{ color: isWPL ? WPLColors.textSecondary : '#9CA3AF' }}>
+                  Record ball-by-ball updates. All changes save automatically.
+                </p>
+              </div>
+              {saveStatus === 'saved' && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
+                  <CheckCircle2 className="w-5 h-5 text-green-400" />
+                  <span className="text-green-400 font-semibold">Saved!</span>
+                </div>
+              )}
+              {saveStatus === 'error' && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg">
+                  <AlertCircle className="w-5 h-5 text-red-400" />
+                  <span className="text-red-400 font-semibold">Save Failed</span>
+                </div>
+              )}
             </div>
-            <div className="flex flex-col md:flex-row md:items-center gap-3 w-full md:w-auto">
+
+            {/* Match Selector */}
+            <div 
+              className="rounded-2xl p-4 backdrop-blur-xl border"
+              style={isWPL ? {
+                background: WPLColors.purpleRGBA[10],
+                borderColor: WPLColors.purpleRGBA[30],
+              } : {
+                background: 'rgba(30, 41, 59, 0.6)',
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+              }}
+            >
+              <label 
+                className="block text-sm font-semibold mb-2"
+                style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}
+              >
+                Select Match
+              </label>
               <select
                 value={selectedMatchId}
                 onChange={(e) => setSelectedMatchId(e.target.value)}
-                className="w-full md:w-72 px-3 py-2 bg-slate-900 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-ipl-gold"
+                className="w-full md:w-96 px-4 py-3 rounded-lg text-white text-sm focus:outline-none transition-colors"
+                style={isWPL ? {
+                  background: WPLColors.purpleRGBA[20],
+                  border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                } : {
+                  background: '#0F172A',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = isWPL ? WPLColors.purpleRGBA[50] : '#3B82F6';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = isWPL ? WPLColors.purpleRGBA[30] : 'rgba(255, 255, 255, 0.1)';
+                }}
               >
                 <option value="">Select a match...</option>
-                {matches.map((match) => (
+                {matches
+                  .filter(m => m.status === 'live' || m.status === 'upcoming')
+                  .map((match) => (
                   <option key={match.id} value={match.id}>
-                    {match.team1.shortName} vs {match.team2.shortName} · {match.date} {match.time}
+                      {match.team1.shortName} vs {match.team2.shortName} · {new Date(match.date).toLocaleDateString()} {match.time}
                   </option>
                 ))}
               </select>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Score Update Form */}
-            <div className="bg-slate-800/50 rounded-2xl border border-white/10 p-8">
-              <h2 className="text-2xl font-bold text-white mb-6">Update Score</h2>
-
-              <form className="space-y-6">
-                {/* Inning indicator */}
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-1">Innings</p>
-                    <p className="text-xs text-gray-500">Select whether you are updating the 1st or 2nd innings of this match.</p>
-                  </div>
-                  <select
-                    value={formData.innings}
-                    onChange={(e) => setFormData({ ...formData, innings: parseInt(e.target.value) || 1 })}
-                    className="w-full md:w-48 px-3 py-2 bg-slate-700 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-ipl-gold"
-                  >
-                    <option value={1}>1st Innings</option>
-                    <option value={2}>2nd Innings</option>
-                  </select>
-                </div>
-
-                {/* Batting team toggle & Toss */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-1">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Batting team</p>
-                    <p className="text-[11px] text-gray-500">Which team is currently batting. Quick buttons and batter stats will apply to this team.</p>
-                    <select
-                      value={formData.battingTeam}
-                      onChange={(e) => setFormData({ ...formData, battingTeam: e.target.value as 'team1' | 'team2' })}
-                      className="w-full px-3 py-2 bg-slate-700 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-ipl-gold"
-                    >
-                      <option value="team1">{formData.team1Name}</option>
-                      <option value="team2">{formData.team2Name}</option>
-                    </select>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Toss winner</p>
-                    <p className="text-[11px] text-gray-500">Who won the toss at the start of the match.</p>
-                    <select
-                      value={formData.tossWinner}
-                      onChange={(e) => setFormData({ ...formData, tossWinner: e.target.value as any })}
-                      className="w-full px-3 py-2 bg-slate-700 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-ipl-gold"
-                    >
-                      <option value="">Select...</option>
-                      <option value="team1">{formData.team1Name}</option>
-                      <option value="team2">{formData.team2Name}</option>
-                    </select>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Toss decision</p>
-                    <p className="text-[11px] text-gray-500">What the toss winner chose to do – bat first or bowl first.</p>
-                    <select
-                      value={formData.tossDecision}
-                      onChange={(e) => setFormData({ ...formData, tossDecision: e.target.value as any })}
-                      className="w-full px-3 py-2 bg-slate-700 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-ipl-gold"
-                    >
-                      <option value="">Select...</option>
-                      <option value="bat">Bat</option>
-                      <option value="bowl">Bowl</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Team 1 */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-ipl-gold">Team 1</h3>
-                  <p className="text-[11px] text-gray-500">This is the first team in the fixture (usually the home side). Update their total runs, wickets, and overs here.</p>
-                  <input
-                    type="text"
-                    placeholder="Team Name"
-                    value={formData.team1Name}
-                    disabled
-                    className="w-full px-4 py-2 bg-slate-900 border border-white/10 rounded-lg text-white placeholder-gray-500 opacity-80 cursor-not-allowed"
-                  />
-                  <div className="grid grid-cols-3 gap-3">
-                    <input
-                      type="number"
-                      placeholder="Runs (e.g. 145)"
-                      value={formData.team1Runs}
-                      onChange={(e) => setFormData({ ...formData, team1Runs: parseInt(e.target.value) || 0 })}
-                      className="px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Wickets (e.g. 3)"
-                      value={formData.team1Wickets}
-                      onChange={(e) => setFormData({ ...formData, team1Wickets: parseInt(e.target.value) || 0 })}
-                      className="px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Overs (e.g. 10.2)"
-                      step="0.1"
-                      value={formData.team1Overs}
-                      onChange={(e) => setFormData({ ...formData, team1Overs: parseFloat(e.target.value) || 0 })}
-                      className="px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                    />
-                  </div>
-                  {team1Warnings.length > 0 && (
-                    <ul className="mt-1 space-y-0.5">
-                      {team1Warnings.map((w, idx) => (
-                        <li key={idx} className="text-[11px] text-red-400">{w}</li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-
-                {/* Team 2 */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-ipl-gold">Team 2</h3>
-                  <p className="text-[11px] text-gray-500">This is the second team in the fixture. Update their total runs, wickets, and overs here.</p>
-                  <input
-                    type="text"
-                    placeholder="Team Name"
-                    value={formData.team2Name}
-                    disabled
-                    className="w-full px-4 py-2 bg-slate-900 border border-white/10 rounded-lg text-white placeholder-gray-500 opacity-80 cursor-not-allowed"
-                  />
-                  <div className="grid grid-cols-3 gap-3">
-                    <input
-                      type="number"
-                      placeholder="Runs (e.g. 160)"
-                      value={formData.team2Runs}
-                      onChange={(e) => setFormData({ ...formData, team2Runs: parseInt(e.target.value) || 0 })}
-                      className="px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Wickets (e.g. 5)"
-                      value={formData.team2Wickets}
-                      onChange={(e) => setFormData({ ...formData, team2Wickets: parseInt(e.target.value) || 0 })}
-                      className="px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Overs (e.g. 8.4)"
-                      step="0.1"
-                      value={formData.team2Overs}
-                      onChange={(e) => setFormData({ ...formData, team2Overs: parseFloat(e.target.value) || 0 })}
-                      className="px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                    />
-                  </div>
-                  {team2Warnings.length > 0 && (
-                    <ul className="mt-1 space-y-0.5">
-                      {team2Warnings.map((w, idx) => (
-                        <li key={idx} className="text-[11px] text-red-400">{w}</li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-
-                {/* Current Players */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-ipl-gold">Current Match</h3>
-                  <p className="text-[11px] text-gray-500">Pick the striker (batter) and current bowler, then use quick buttons or manual inputs to keep their stats up to date.</p>
-                  <select
-                    value={formData.batterName}
-                    onChange={(e) => setFormData({ ...formData, batterName: e.target.value })}
-                    className="w-full px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-ipl-gold"
-                  >
-                    <option value="">Select batter...</option>
-                    {(formData.battingTeam === 'team1' ? team1Players : team2Players).map((p) => (
-                      <option key={p.id} value={p.name}>
-                        {p.name}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="grid grid-cols-2 gap-3">
-                    <input
-                      type="number"
-                      placeholder="Batter Runs (e.g. 35)"
-                      value={formData.batterRuns}
-                      onChange={(e) => setFormData({ ...formData, batterRuns: parseInt(e.target.value) || 0 })}
-                      className="px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Batter Balls (e.g. 22)"
-                      value={formData.batterBalls}
-                      onChange={(e) => setFormData({ ...formData, batterBalls: parseInt(e.target.value) || 0 })}
-                      className="px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                    />
-                  </div>
-
-                  {/* Batter strike rate */}
-                  <p className="text-xs text-gray-400">
-                    Strike rate:{' '}
-                    <span className="text-ipl-gold font-semibold">{batterStrikeRate.toFixed(1)}</span>
-                  </p>
-
-                  <select
-                    value={formData.bowlerName}
-                    onChange={(e) => setFormData({ ...formData, bowlerName: e.target.value })}
-                    className="w-full px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-ipl-gold"
-                  >
-                    <option value="">Select bowler...</option>
-                    {(formData.battingTeam === 'team1' ? team2Players : team1Players).map((p) => (
-                      <option key={p.id} value={p.name}>
-                        {p.name}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="grid grid-cols-2 gap-3">
-                    <input
-                      type="number"
-                      placeholder="Bowler Runs (e.g. 24)"
-                      value={formData.bowlerRuns}
-                      onChange={(e) => setFormData({ ...formData, bowlerRuns: parseInt(e.target.value) || 0 })}
-                      className="px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Bowler Balls (e.g. 18)"
-                      value={formData.bowlerBalls}
-                      onChange={(e) => setFormData({ ...formData, bowlerBalls: parseInt(e.target.value) || 0 })}
-                      className="px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                    />
-                  </div>
-
-                  {/* Bowler economy */}
-                  <p className="text-xs text-gray-400">
-                    Economy:{' '}
-                    <span className="text-ipl-gold font-semibold">{bowlerEconomy.toFixed(2)}</span>
-                  </p>
-
-                  {/* Quick ball controls */}
-                  <div className="mt-4 space-y-2">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Quick ball update</p>
-                        <p className="text-[11px] text-gray-500">
-                          Editing: {formData.innings === 1 ? '1st' : '2nd'} innings –{' '}
-                          {formData.battingTeam === 'team2' ? formData.team2Name : formData.team1Name} batting
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleUndoLastBall}
-                        disabled={!lastBallSnapshot}
-                        className="text-[11px] px-3 py-1 rounded-full border border-white/15 text-gray-300 hover:bg-slate-700/70 disabled:opacity-40 disabled:cursor-not-allowed"
-                      >
-                        Undo last ball
-                      </button>
-                    </div>
-                    <p className="text-[11px] text-gray-500">Click a button after each ball. It will automatically update the score, batter, bowler and extras (wides, no-balls, byes, leg-byes) and add a short commentary line.</p>
-                    <div className="flex flex-wrap gap-2">
-                      {[0, 1, 2, 3, 4, 6].map((r) => (
-                        <button
-                          key={r}
-                          type="button"
-                          onClick={() => handleBallEvent(r as number)}
-                          className="px-3 py-1.5 rounded-full bg-slate-700 border border-white/10 text-xs text-white hover:bg-slate-600 transition-colors"
-                        >
-                          {r} run{r === 1 ? '' : 's'}
-                        </button>
-                      ))}
-                      <button
-                        type="button"
-                        onClick={() => handleBallEvent('WD')}
-                        className="px-3 py-1.5 rounded-full bg-slate-700 border border-blue-400/60 text-xs text-blue-200 hover:bg-slate-600 transition-colors"
-                      >
-                        Wide
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleBallEvent('WD2')}
-                        className="px-3 py-1.5 rounded-full bg-slate-700 border border-blue-300/60 text-xs text-blue-100 hover:bg-slate-600 transition-colors"
-                      >
-                        Wide × 2
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleBallEvent('NB')}
-                        className="px-3 py-1.5 rounded-full bg-slate-700 border border-purple-400/60 text-xs text-purple-200 hover:bg-slate-600 transition-colors"
-                      >
-                        No-ball
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleBallEvent('NB4')}
-                        className="px-3 py-1.5 rounded-full bg-slate-700 border border-purple-300/60 text-xs text-purple-100 hover:bg-slate-600 transition-colors"
-                      >
-                        NB + 4
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleBallEvent('B')}
-                        className="px-3 py-1.5 rounded-full bg-slate-700 border border-teal-400/60 text-xs text-teal-200 hover:bg-slate-600 transition-colors"
-                      >
-                        Bye
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleBallEvent('LB')}
-                        className="px-3 py-1.5 rounded-full bg-slate-700 border border-amber-400/60 text-xs text-amber-200 hover:bg-slate-600 transition-colors"
-                      >
-                        Leg-bye
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleBallEvent('W')}
-                        className="px-3 py-1.5 rounded-full bg-red-600/20 border border-red-500/40 text-xs text-red-300 hover:bg-red-600/30 transition-colors"
-                      >
-                        Wicket
-                      </button>
-                    </div>
-                    {/* Dismissal type selector */}
-                    <div className="pt-2 border-t border-white/5 mt-2 space-y-1">
-                      <p className="text-[11px] text-gray-400">How did the batter get out? (optional)</p>
-                      <div className="flex flex-wrap gap-2">
-                        {DISMISSAL_MODES.map((mode) => (
-                          <button
-                            key={mode.key}
-                            type="button"
-                            onClick={() => setFormData({ ...formData, dismissalType: mode.key })}
-                            className={`px-3 py-1.5 rounded-full border text-xs transition-colors ${
-                              formData.dismissalType === mode.key
-                                ? 'bg-red-600/30 border-red-400 text-red-100'
-                                : 'bg-slate-700 border-white/15 text-gray-200 hover:bg-slate-600'
-                            }`}
-                          >
-                            {mode.label}
-                          </button>
-                        ))}
-                      </div>
-                      <div className="mt-2 grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2 items-center">
-                        <p className="text-[11px] text-gray-500">Optional fielder name (for caught / run out / stumped):</p>
-                        <input
-                          type="text"
-                          value={formData.fielderName}
-                          onChange={(e) => setFormData({ ...formData, fielderName: e.target.value })}
-                          placeholder="e.g. Jadeja at deep mid-wicket"
-                          className="px-3 py-1.5 bg-slate-700 border border-white/10 rounded-lg text-xs text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Commentary */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-ipl-gold">Add Commentary</h3>
-                  <p className="text-[11px] text-gray-500">Optional: type extra details about the last ball or over. This text appears on the public live score page.</p>
-                  <textarea
-                    placeholder="Example: Kohli drives through cover for four."
-                    value={formData.commentary}
-                    onChange={(e) => setFormData({ ...formData, commentary: e.target.value })}
-                    maxLength={500}
-                    rows={4}
-                    className="w-full px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold resize-none"
-                  />
-                  {/* Final result text (used when match is completed) */}
-                  <div className="space-y-1">
-                    <p className="text-[11px] text-gray-400">Final result text (shown when match is completed)</p>
-                    <input
-                      type="text"
-                      value={formData.resultText}
-                      onChange={(e) => setFormData({ ...formData, resultText: e.target.value })}
-                      placeholder="Example: RCB won by 15 runs."
-                      className="w-full px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-xs text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                    />
-                  </div>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                    className="w-full px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white focus:outline-none focus:border-ipl-gold"
-                  >
-                    {/* Match status used to show if the game is live, scheduled or finished */}
-                    <option>Live</option>
-                    <option>Scheduled</option>
-                    <option>Completed</option>
-                    <option>Cancelled</option>
-                  </select>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleSaveScore}
-                  disabled={isSaving || !selectedMatch}
-                  className="w-full px-6 py-3 bg-ipl-gold hover:bg-ipl-gold/90 text-black font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSaving ? 'Saving...' : 'Update Live Score'}
-                </button>
-              </form>
+          {/* Ball Entry Panel */}
+          {selectedMatch ? (
+            <div 
+              className="rounded-2xl p-6 md:p-8 backdrop-blur-xl border"
+              style={isWPL ? {
+                background: WPLColors.purpleRGBA[10],
+                borderColor: WPLColors.purpleRGBA[30],
+              } : {
+                background: 'rgba(30, 41, 59, 0.4)',
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+              }}
+            >
+              <BallEntryPanel
+                matchId={selectedMatch.id}
+                team1Name={selectedMatch.team1.shortName || selectedMatch.team1.name}
+                team2Name={selectedMatch.team2.shortName || selectedMatch.team2.name}
+                onSave={handleSave}
+                players={players.filter(p => 
+                  p.teamId === selectedMatch.team1.id || p.teamId === selectedMatch.team2.id
+                )}
+                league={currentLeague}
+              />
             </div>
-
-            {/* Live Preview */}
-            <div className="bg-slate-800/50 rounded-2xl border border-white/10 p-8">
-              <h2 className="text-2xl font-bold text-white mb-6">Live Preview</h2>
-
-              {liveScore && (
-                <div className="space-y-6">
-                  {/* Score Cards */}
-                  <div className="space-y-3">
-                    <div className="bg-gradient-to-br from-red-900/20 to-red-600/20 border border-red-500/30 rounded-lg p-4">
-                      <p className="text-gray-400 text-sm">Team 1</p>
-                      <h3 className="text-2xl font-bold text-white">{liveScore.team1.name}</h3>
-                      <p className="text-3xl font-bold text-ipl-gold mt-2">
-                        {liveScore.team1.runs}/{liveScore.team1.wickets} ({liveScore.team1.overs})
-                      </p>
-                    </div>
-
-                    <div className="bg-gradient-to-br from-yellow-900/20 to-yellow-600/20 border border-yellow-500/30 rounded-lg p-4">
-                      <p className="text-gray-400 text-sm">Team 2</p>
-                      <h3 className="text-2xl font-bold text-white">{liveScore.team2.name}</h3>
-                      <p className="text-3xl font-bold text-ipl-gold mt-2">
-                        {liveScore.team2.runs}/{liveScore.team2.wickets} ({liveScore.team2.overs})
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Status */}
-                  <div className="bg-slate-700/30 rounded-lg p-4 border border-white/5">
-                    <p className="text-gray-400 text-sm">Match Status</p>
-                    <p className="text-xl font-bold text-ipl-gold mt-1">{liveScore.status}</p>
-                    <p className="text-xs text-gray-500 mt-2">
-                      Last updated: {new Date(liveScore.lastUpdated).toLocaleString()}
-                    </p>
-                  </div>
-
-                  {/* Recent Commentary */}
-                  <div className="bg-slate-700/30 rounded-lg p-4 border border-white/5">
-                    <p className="text-gray-400 text-sm mb-2">Recent Commentary</p>
-                    <div className="max-h-32 overflow-y-auto space-y-2">
-                      {liveScore.commentary && liveScore.commentary.length > 0 ? (
-                        liveScore.commentary.slice(0, 5).map((comment, idx) => (
-                          <p key={idx} className="text-sm text-gray-300 border-l-2 border-ipl-gold pl-2">
-                            {comment}
-                          </p>
-                        ))
-                      ) : (
-                        <p className="text-sm text-gray-500">No commentary yet</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
+          ) : (
+            <div 
+              className="rounded-2xl p-12 text-center backdrop-blur-xl border"
+              style={isWPL ? {
+                background: WPLColors.purpleRGBA[10],
+                borderColor: WPLColors.purpleRGBA[30],
+              } : {
+                background: 'rgba(30, 41, 59, 0.4)',
+                borderColor: 'rgba(255, 255, 255, 0.1)',
+              }}
+            >
+              <p 
+                className="text-lg"
+                style={{ color: isWPL ? WPLColors.textSecondary : '#9CA3AF' }}
+              >
+                Please select a match to start scoring
+              </p>
             </div>
-          </div>
+          )}
         </div>
       </main>
     </div>
