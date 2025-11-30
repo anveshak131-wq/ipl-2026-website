@@ -21,6 +21,8 @@ import { CustomEmoji } from '@/components/emoji/Emoji';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import GradientText from '@/components/ui/GradientText';
 import { Sparkles } from 'lucide-react';
+import WPLFloatingParticles from '@/components/animations/WPLFloatingParticles';
+import { WPLColors, getWPLGlassmorphism, getWPLHoverGlow } from '@/lib/wplColors';
 
 type SortOption = 'name' | 'titles' | 'players' | 'performance';
 type TitleFilter = 'all' | '0' | '1' | '2+';
@@ -230,13 +232,64 @@ function WPLTeamsPageContent() {
     const hasActiveFilters = searchTerm || sortBy !== 'name' || titleFilter !== 'all' || homeGroundFilter !== 'all' || showFavoritesFirst;
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-gray-950 via-purple-950/20 to-gray-950">
+        <div 
+          className="min-h-screen"
+          style={{
+            background: `linear-gradient(to bottom, ${WPLColors.base}, ${WPLColors.gradientStart}66, ${WPLColors.gradientMid}33, ${WPLColors.base})`,
+          }}
+        >
             <Navbar />
             <AuroraBackground />
+            <WPLFloatingParticles />
 
             <main className="relative py-16 min-h-screen">
-                <div className="absolute top-20 left-10 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl -z-10 animate-float" />
-                <div className="absolute bottom-10 right-20 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl -z-10 animate-float" style={{ animationDelay: '1s' }} />
+                {/* Enhanced gradient overlays using exact WPL colors */}
+                <div 
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: `linear-gradient(135deg, ${WPLColors.gradientMid}1A, ${WPLColors.pinkRGBA[5]}, ${WPLColors.roseRGBA[10]})`,
+                  }}
+                />
+                <div 
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: `linear-gradient(to top, ${WPLColors.gradientMid}33, transparent, ${WPLColors.gradientEnd}33)`,
+                  }}
+                />
+                
+                <motion.div 
+                  className="absolute top-20 left-10 w-96 h-96 rounded-full blur-3xl"
+                  style={{ 
+                    background: `radial-gradient(circle, ${WPLColors.purpleRGBA[25]}, ${WPLColors.pinkRGBA[15]}, transparent)`,
+                  }}
+                  animate={{
+                    y: [0, -25, 0],
+                    x: [0, 15, 0],
+                    scale: [1, 1.1, 1],
+                  }}
+                  transition={{
+                    duration: 9,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                />
+                <motion.div 
+                  className="absolute bottom-10 right-20 w-96 h-96 rounded-full blur-3xl"
+                  style={{ 
+                    background: `radial-gradient(circle, ${WPLColors.pinkRGBA[20]}, ${WPLColors.roseRGBA[12]}, transparent)`,
+                  }}
+                  animate={{
+                    y: [0, 25, 0],
+                    x: [0, -15, 0],
+                    scale: [1, 1.12, 1],
+                  }}
+                  transition={{
+                    duration: 11,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: 1.5
+                  }}
+                />
 
                 <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Hero Header */}
@@ -251,7 +304,19 @@ function WPLTeamsPageContent() {
                                 className="inline-flex items-center space-x-2 mb-4"
                                 whileHover={{ scale: 1.05 }}
                             >
-                                <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-500/20 border border-purple-500/30 text-purple-300 flex items-center gap-2 hover:bg-purple-500/30 transition-all duration-300 cursor-default">
+                                <span 
+                                  className="px-3 py-1 rounded-full text-xs font-bold flex items-center gap-2 transition-all duration-300 cursor-default"
+                                  style={{
+                                    ...getWPLGlassmorphism('purple', 20),
+                                    color: WPLColors.textAccent,
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = WPLColors.purpleRGBA[30];
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = WPLColors.purpleRGBA[20];
+                                  }}
+                                >
                                     <Sparkles className="w-4 h-4" /> WPL 2026 TEAMS
                                 </span>
                             </motion.div>

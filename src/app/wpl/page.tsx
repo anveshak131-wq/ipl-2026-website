@@ -26,6 +26,8 @@ import { useLeague } from '@/contexts/LeagueContext';
 import type { Team, Match, News } from '@/types';
 import { useMemo } from 'react';
 import { Sparkles, ArrowRight, Play, Calendar, TrendingUp, Users, Zap } from 'lucide-react';
+import WPLFloatingParticles from '@/components/animations/WPLFloatingParticles';
+import { WPLColors } from '@/lib/wplColors';
 
 export default function WPLHomePage() {
   const router = useRouter();
@@ -126,8 +128,14 @@ export default function WPLHomePage() {
   const shouldShowModal = isHydrated && showTermsModal;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-purple-950/30 to-slate-950">
+    <div 
+      className="min-h-screen"
+      style={{
+        background: `linear-gradient(to bottom, ${WPLColors.base}, ${WPLColors.gradientStart}66, ${WPLColors.gradientMid}33, ${WPLColors.base})`,
+      }}
+    >
       <AuroraBackground />
+      <WPLFloatingParticles />
       <Navbar />
 
       {/* Terms Acceptance Modal */}
@@ -160,7 +168,25 @@ export default function WPLHomePage() {
         <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
           <ParallaxSection speed={0.5}>
             <div className="absolute inset-0">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-600/40 via-pink-600/30 to-rose-600/40" />
+              {/* Enhanced gradient layers using exact WPL colors */}
+              <div 
+                className="absolute inset-0"
+                style={{
+                  background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[40]}, ${WPLColors.pinkRGBA[30]}, ${WPLColors.roseRGBA[40]})`,
+                }}
+              />
+              <div 
+                className="absolute inset-0"
+                style={{
+                  background: `linear-gradient(to top, ${WPLColors.gradientMid}4D, transparent, ${WPLColors.gradientEnd}4D)`,
+                }}
+              />
+              <div 
+                className="absolute inset-0"
+                style={{
+                  background: `radial-gradient(circle at 50% 50%, ${WPLColors.purpleRGBA[20]}, transparent 70%)`,
+                }}
+              />
               <motion.div
                 className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl"
                 animate={{
@@ -196,10 +222,17 @@ export default function WPLHomePage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6 }}
-                  className="inline-flex items-center gap-2 mb-8 px-6 py-3 rounded-full bg-white/10 backdrop-blur-md border border-purple-500/30 shadow-lg"
+                  className="inline-flex items-center gap-2 mb-8 px-6 py-3 rounded-full backdrop-blur-md shadow-lg"
+                  style={{
+                    background: WPLColors.purpleRGBA[10],
+                    border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                  }}
                 >
                   <Sparkles className="w-5 h-5 text-purple-400" />
-                  <span className="text-sm font-bold text-purple-300 uppercase tracking-wider">
+                  <span 
+                    className="text-sm font-bold uppercase tracking-wider"
+                    style={{ color: WPLColors.textAccent }}
+                  >
                     Women's Premier League
                   </span>
                 </motion.div>
@@ -233,23 +266,62 @@ export default function WPLHomePage() {
                 >
                   <Link
                     href="/live-score"
-                    className="group relative px-8 py-4 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-lg shadow-2xl shadow-purple-500/50 hover:shadow-purple-500/70 transition-all duration-300 transform hover:scale-105 overflow-hidden"
+                    className="group relative px-8 py-4 rounded-xl text-white font-bold text-lg transition-all duration-300 transform hover:scale-105 overflow-hidden"
+                    style={{
+                      background: `linear-gradient(to right, ${WPLColors.purple}, ${WPLColors.pink})`,
+                      boxShadow: `0 20px 60px ${WPLColors.purpleRGBA[50]}`,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.boxShadow = `0 25px 70px ${WPLColors.purpleRGBA[50]}`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.boxShadow = `0 20px 60px ${WPLColors.purpleRGBA[50]}`;
+                    }}
                   >
                     <span className="relative z-10 flex items-center gap-2">
                       <Play className="w-5 h-5" />
                       Live Scores
                     </span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-pink-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div 
+                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      style={{
+                        background: `linear-gradient(to right, ${WPLColors.pink}, ${WPLColors.purple})`,
+                      }}
+                    />
                   </Link>
                   <Link
                     href="/wpl/teams"
-                    className="px-8 py-4 rounded-xl bg-white/10 backdrop-blur-md text-white font-bold text-lg border-2 border-purple-500/30 hover:border-purple-500/50 hover:bg-purple-500/20 transition-all duration-300 transform hover:scale-105"
+                    className="px-8 py-4 rounded-xl backdrop-blur-md text-white font-bold text-lg transition-all duration-300 transform hover:scale-105"
+                    style={{
+                      background: WPLColors.purpleRGBA[10],
+                      border: `2px solid ${WPLColors.purpleRGBA[30]}`,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = WPLColors.purpleRGBA[50];
+                      e.currentTarget.style.background = WPLColors.purpleRGBA[20];
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = WPLColors.purpleRGBA[30];
+                      e.currentTarget.style.background = WPLColors.purpleRGBA[10];
+                    }}
                   >
                     Explore Teams
                   </Link>
                   <Link
                     href="/wpl/matches"
-                    className="px-8 py-4 rounded-xl bg-white/10 backdrop-blur-md text-white font-bold text-lg border-2 border-pink-500/30 hover:border-pink-500/50 hover:bg-pink-500/20 transition-all duration-300 transform hover:scale-105"
+                    className="px-8 py-4 rounded-xl backdrop-blur-md text-white font-bold text-lg transition-all duration-300 transform hover:scale-105"
+                    style={{
+                      background: WPLColors.pinkRGBA[10],
+                      border: `2px solid ${WPLColors.pinkRGBA[30]}`,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = WPLColors.pinkRGBA[50];
+                      e.currentTarget.style.background = WPLColors.pinkRGBA[20];
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = WPLColors.pinkRGBA[30];
+                      e.currentTarget.style.background = WPLColors.pinkRGBA[10];
+                    }}
                   >
                     View Matches
                   </Link>

@@ -92,7 +92,7 @@ export interface News {
   publishedAt?: string;
   createdAt?: string;
   isImportant?: boolean;
-  category?: 'match' | 'team' | 'player' | 'general';
+  category?: 'match' | 'team' | 'player' | 'general' | 'breaking' | 'inspiration' | 'behind-the-scenes';
   linkedTeamIds?: string[];
   linkedMatchId?: string;
   linkedPlayerIds?: string[];

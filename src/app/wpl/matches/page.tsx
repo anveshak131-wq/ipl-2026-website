@@ -14,6 +14,8 @@ import AuroraBackground from '@/components/ui/AuroraBackground';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import GradientText from '@/components/ui/GradientText';
 import { Sparkles } from 'lucide-react';
+import WPLFloatingParticles from '@/components/animations/WPLFloatingParticles';
+import { WPLColors } from '@/lib/wplColors';
 
 export default function WPLMatchesPage() {
   const { currentLeague, setCurrentLeague } = useLeague();
@@ -55,8 +57,15 @@ export default function WPLMatchesPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-950 via-purple-950/20 to-gray-950">
+      <div 
+        className="min-h-screen"
+        style={{
+          background: `linear-gradient(to bottom, ${WPLColors.base}, ${WPLColors.gradientStart}66, ${WPLColors.gradientMid}33, ${WPLColors.base})`,
+        }}
+      >
         <Navbar />
+        <AuroraBackground />
+        <WPLFloatingParticles />
         <div className="flex items-center justify-center h-96">
           <LoadingSpinner size="lg" />
         </div>
@@ -66,15 +75,35 @@ export default function WPLMatchesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-purple-950/20 to-gray-950">
+    <div 
+      className="min-h-screen"
+      style={{
+        background: `linear-gradient(to bottom, ${WPLColors.base}, ${WPLColors.gradientStart}66, ${WPLColors.gradientMid}33, ${WPLColors.base})`,
+      }}
+    >
       <AuroraBackground />
+      <WPLFloatingParticles />
       <Navbar />
       
       <main className="relative py-16 min-h-screen">
+        {/* Enhanced gradient overlays using exact WPL colors */}
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: `linear-gradient(135deg, ${WPLColors.gradientMid}1A, ${WPLColors.pinkRGBA[5]}, ${WPLColors.roseRGBA[10]})`,
+          }}
+        />
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: `linear-gradient(to top, ${WPLColors.gradientMid}33, transparent, ${WPLColors.gradientEnd}33)`,
+          }}
+        />
+        
         <motion.div 
           className="absolute top-20 right-10 w-96 h-96 rounded-full blur-3xl"
           style={{ 
-            background: 'radial-gradient(circle, rgba(168, 85, 247, 0.3), rgba(236, 72, 153, 0.2), transparent)',
+            background: `radial-gradient(circle, ${WPLColors.purpleRGBA[30]}, ${WPLColors.pinkRGBA[20]}, transparent)`,
           }}
           animate={{
             y: [0, -30, 0],
@@ -90,7 +119,7 @@ export default function WPLMatchesPage() {
         <motion.div 
           className="absolute bottom-20 left-10 w-80 h-80 rounded-full blur-3xl"
           style={{ 
-            background: 'radial-gradient(circle, rgba(244, 114, 182, 0.25), rgba(251, 113, 133, 0.15), transparent)',
+            background: `radial-gradient(circle, ${WPLColors.roseRGBA[25]}, ${WPLColors.pinkRGBA[15]}, transparent)`,
           }}
           animate={{
             y: [0, 30, 0],
@@ -109,7 +138,20 @@ export default function WPLMatchesPage() {
           {/* Header */}
           <div className="mb-12">
             <div className="inline-flex items-center space-x-2 mb-4">
-              <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-500/20 border border-purple-500/30 text-purple-300 flex items-center gap-2 backdrop-blur-sm hover:bg-purple-500/30 transition-all duration-300 cursor-default">
+              <span 
+                className="px-3 py-1 rounded-full text-xs font-bold flex items-center gap-2 backdrop-blur-sm transition-all duration-300 cursor-default"
+                style={{
+                  background: WPLColors.purpleRGBA[20],
+                  border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                  color: WPLColors.textAccent,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = WPLColors.purpleRGBA[30];
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = WPLColors.purpleRGBA[20];
+                }}
+              >
                 <Sparkles className="w-4 h-4" /> WPL MATCH SCHEDULE
               </span>
             </div>
@@ -139,15 +181,18 @@ export default function WPLMatchesPage() {
 
           {/* Filter Tabs */}
           <div className="flex justify-start mb-12 overflow-x-auto">
-            <div className="inline-flex space-x-2 p-1.5 rounded-xl backdrop-blur-xl border-2 border-purple-500/20 shadow-xl"
-                 style={{
-                   background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(236, 72, 153, 0.05))',
-                 }}>
+            <div 
+              className="inline-flex space-x-2 p-1.5 rounded-xl backdrop-blur-xl border-2 shadow-xl"
+              style={{
+                background: `linear-gradient(135deg, ${WPLColors.violetRGBA[10]}, ${WPLColors.pinkRGBA[5]})`,
+                borderColor: WPLColors.purpleRGBA[20],
+              }}
+            >
               {[
-                { key: 'all', label: 'All Matches', icon: 'stats' as const, color: '#a855f7', gradient: 'from-purple-500 to-pink-500' },
-                { key: 'upcoming', label: 'Upcoming', icon: 'target' as const, color: '#ec4899', gradient: 'from-pink-500 to-rose-500' },
-                { key: 'live', label: 'Live', icon: 'cricket' as const, color: '#f43f5e', gradient: 'from-rose-500 to-red-500' },
-                { key: 'completed', label: 'Completed', icon: 'trophy' as const, color: '#a855f7', gradient: 'from-purple-500 to-violet-500' }
+                { key: 'all', label: 'All Matches', icon: 'stats' as const, color: WPLColors.violet },
+                { key: 'upcoming', label: 'Upcoming', icon: 'target' as const, color: WPLColors.pink },
+                { key: 'live', label: 'Live', icon: 'cricket' as const, color: WPLColors.rose },
+                { key: 'completed', label: 'Completed', icon: 'trophy' as const, color: WPLColors.violet }
               ].map((tab) => (
                 <button
                   key={tab.key}
@@ -156,14 +201,14 @@ export default function WPLMatchesPage() {
                     filter === tab.key ? 'scale-105' : ''
                   }`}
                   style={filter === tab.key ? {
-                    background: `linear-gradient(135deg, ${tab.color}, ${tab.color}dd)`,
-                    color: '#fff',
+                    background: `linear-gradient(135deg, ${tab.color}, ${tab.color}DD)`,
+                    color: WPLColors.textPrimary,
                     boxShadow: `0 10px 30px ${tab.color}50, 0 0 50px ${tab.color}30`,
                     border: `2px solid ${tab.color}80`,
                   } : {
-                    background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(236, 72, 153, 0.04))',
-                    color: '#cbd5e1',
-                    border: '2px solid rgba(168, 85, 247, 0.2)',
+                    background: `linear-gradient(135deg, ${WPLColors.violetRGBA[8]}, ${WPLColors.pinkRGBA[4]})`,
+                    color: WPLColors.textSecondary,
+                    border: `2px solid ${WPLColors.violetRGBA[20]}`,
                   }}
                 >
                   {filter === tab.key && (

@@ -34,7 +34,7 @@ The current news page (`/news`) is shared between IPL and WPL, with basic league
 #### **Visual Elements**
 - WPL logo integration in header
 - Purple/pink gradient backgrounds
-- WPL-specific iconography (if available)
+- WPL-specific iconography 
 
 ---
 
