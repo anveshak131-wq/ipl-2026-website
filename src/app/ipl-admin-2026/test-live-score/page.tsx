@@ -111,29 +111,26 @@ export default function TestLiveScorePage() {
   }, [players, selectedMatch]);
 
   const togglePlayer = (team: 'team1' | 'team2', playerId: string) => {
+    console.log('togglePlayer called:', { team, playerId });
     if (team === 'team1') {
       setTeam1Playing11(prev => {
-        if (prev.includes(playerId)) {
-          return prev.filter(id => id !== playerId);
-        } else {
-          if (prev.length >= 11) {
-            alert('Maximum 11 players allowed for Team 1');
-            return prev;
-          }
-          return [...prev, playerId];
-        }
+        const newList = prev.includes(playerId)
+          ? prev.filter(id => id !== playerId)
+          : prev.length >= 11
+            ? (alert('Maximum 11 players allowed for Team 1'), prev)
+            : [...prev, playerId];
+        console.log('Team 1 playing 11 updated:', newList);
+        return newList;
       });
     } else {
       setTeam2Playing11(prev => {
-        if (prev.includes(playerId)) {
-          return prev.filter(id => id !== playerId);
-        } else {
-          if (prev.length >= 11) {
-            alert('Maximum 11 players allowed for Team 2');
-            return prev;
-          }
-          return [...prev, playerId];
-        }
+        const newList = prev.includes(playerId)
+          ? prev.filter(id => id !== playerId)
+          : prev.length >= 11
+            ? (alert('Maximum 11 players allowed for Team 2'), prev)
+            : [...prev, playerId];
+        console.log('Team 2 playing 11 updated:', newList);
+        return newList;
       });
     }
   };
@@ -311,7 +308,7 @@ export default function TestLiveScorePage() {
       <AuroraBackground />
       <AdminSidebar currentPage="/ipl-admin-2026/test-live-score" />
       
-      <main className="flex-1 relative z-10 p-4 md:p-8 overflow-y-auto">
+      <main className="flex-1 relative z-20 p-4 md:p-8 overflow-y-auto">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-6">
@@ -476,35 +473,47 @@ export default function TestLiveScorePage() {
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {team1Players.map((player) => {
-                        const isSelected = team1Playing11.includes(player.id);
-                        return (
-                          <button
-                            key={player.id}
-                            onClick={() => togglePlayer('team1', player.id)}
-                            className={`
-                              p-4 rounded-xl border-2 transition-all text-left
-                              ${isSelected
-                                ? isWPL
-                                  ? 'bg-purple-600/30 border-purple-500/50'
-                                  : 'bg-blue-600/30 border-blue-500/50'
-                                : 'bg-slate-700/50 border-slate-600/50 hover:border-slate-500/50'
-                              }
-                            `}
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="font-semibold text-white">{player.name}</div>
-                              {isSelected && (
-                                <CheckCircle2 className="w-5 h-5" style={{ color: isWPL ? WPLColors.pink : '#60A5FA' }} />
-                              )}
-                            </div>
-                            <div className="text-xs" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
-                              {player.role} • #{player.jerseyNumber}
-                              {player.isCaptain && ' • Captain'}
-                            </div>
-                          </button>
-                        );
-                      })}
+                      {team1Players.length === 0 ? (
+                        <div className="col-span-full text-center py-8 text-gray-400">
+                          No players found for {selectedMatch.team1.name}. Please ensure players are assigned to this team.
+                        </div>
+                      ) : (
+                        team1Players.map((player) => {
+                          const isSelected = team1Playing11.includes(player.id);
+                          return (
+                            <button
+                              key={player.id}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                togglePlayer('team1', player.id);
+                              }}
+                              type="button"
+                              className={`
+                                p-4 rounded-xl border-2 transition-all text-left cursor-pointer
+                                ${isSelected
+                                  ? isWPL
+                                    ? 'bg-purple-600/30 border-purple-500/50'
+                                    : 'bg-blue-600/30 border-blue-500/50'
+                                  : 'bg-slate-700/50 border-slate-600/50 hover:border-slate-500/50'
+                                }
+                              `}
+                              style={{ pointerEvents: 'auto', zIndex: 10 }}
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="font-semibold text-white">{player.name}</div>
+                                {isSelected && (
+                                  <CheckCircle2 className="w-5 h-5" style={{ color: isWPL ? WPLColors.pink : '#60A5FA' }} />
+                                )}
+                              </div>
+                              <div className="text-xs" style={{ color: isWPL ? WPLColors.textMuted : '#9CA3AF' }}>
+                                {player.role} • #{player.jerseyNumber}
+                                {player.isCaptain && ' • Captain'}
+                              </div>
+                            </button>
+                          );
+                        })
+                      )}
                     </div>
                   </div>
 
@@ -541,14 +550,24 @@ export default function TestLiveScorePage() {
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {team2Players.map((player) => {
-                        const isSelected = team2Playing11.includes(player.id);
-                        return (
+                      {team2Players.length === 0 ? (
+                        <div className="col-span-full text-center py-8 text-gray-400">
+                          No players found for {selectedMatch.team2.name}. Please ensure players are assigned to this team.
+                        </div>
+                      ) : (
+                        team2Players.map((player) => {
+                          const isSelected = team2Playing11.includes(player.id);
+                          return (
                           <button
                             key={player.id}
-                            onClick={() => togglePlayer('team2', player.id)}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              togglePlayer('team2', player.id);
+                            }}
+                            type="button"
                             className={`
-                              p-4 rounded-xl border-2 transition-all text-left
+                              p-4 rounded-xl border-2 transition-all text-left cursor-pointer
                               ${isSelected
                                 ? isWPL
                                   ? 'bg-purple-600/30 border-purple-500/50'
@@ -556,6 +575,7 @@ export default function TestLiveScorePage() {
                                 : 'bg-slate-700/50 border-slate-600/50 hover:border-slate-500/50'
                               }
                             `}
+                            style={{ pointerEvents: 'auto', zIndex: 10 }}
                           >
                             <div className="flex items-center justify-between mb-2">
                               <div className="font-semibold text-white">{player.name}</div>
