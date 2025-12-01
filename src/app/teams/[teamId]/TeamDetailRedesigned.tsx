@@ -587,15 +587,15 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
                               }}
                             />
                           ) : (
-                            <PlayerCard3D
-                              key={player.id}
-                              player={player}
-                              index={index}
-                              onClick={() => {
-                                setSelectedPlayer(player);
-                                setIsModalOpen(true);
-                              }}
-                            />
+                          <PlayerCard3D
+                            key={player.id}
+                            player={player}
+                            index={index}
+                            onClick={() => {
+                              setSelectedPlayer(player);
+                              setIsModalOpen(true);
+                            }}
+                          />
                           )
                         ))}
                       </div>
@@ -821,16 +821,16 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
           }}
         />
       ) : (
-        <PlayerModal
-          player={selectedPlayer}
-          isOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false);
-            setSelectedPlayer(null);
-          }}
-          teamColors={teamData?.colors}
-          teamData={teamData || undefined}
-        />
+      <PlayerModal
+        player={selectedPlayer}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedPlayer(null);
+        }}
+        teamColors={teamData?.colors}
+        teamData={teamData || undefined}
+      />
       )}
 
       <style jsx global>{`

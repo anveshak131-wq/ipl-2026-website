@@ -190,13 +190,13 @@ export default function AdminLiveScorePage() {
     <div className="flex min-h-screen" style={bgStyle}>
       <AuroraBackground />
       <AdminSidebar currentPage="/ipl-admin-2026/live-score" />
-      
+
       <main className="flex-1 relative z-10 p-4 md:p-8 overflow-y-auto">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-4">
-              <div>
+            <div>
                 <div className="flex items-center gap-4 mb-2">
                   <h1 
                     className="text-4xl font-bold"
@@ -283,7 +283,7 @@ export default function AdminLiveScorePage() {
                 background: 'rgba(30, 41, 59, 0.4)',
                 borderColor: 'rgba(255, 255, 255, 0.1)',
               }}
-            >
+                    >
               <BallEntryPanel
                 matchId={selectedMatch.id}
                 team1Name={selectedMatch.team1.shortName || selectedMatch.team1.name}

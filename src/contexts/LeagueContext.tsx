@@ -23,9 +23,9 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
       const pathname = window.location.pathname;
       // If on admin pages, allow stored preference
       if (pathname.includes('/ipl-admin-2026')) {
-        const stored = localStorage.getItem(LEAGUE_STORAGE_KEY);
-        if (stored === 'ipl' || stored === 'wpl') {
-          return stored as League;
+      const stored = localStorage.getItem(LEAGUE_STORAGE_KEY);
+      if (stored === 'ipl' || stored === 'wpl') {
+        return stored as League;
         }
       }
       // For end-user pages, always default to IPL

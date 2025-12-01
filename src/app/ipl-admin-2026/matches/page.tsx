@@ -2385,7 +2385,7 @@ export default function AdminMatches() {
                                                                     return (
                                                                         <div className="w-8 h-8 flex items-center justify-center">
                                                                             <RCBLottie className="w-8 h-8" />
-                                                                        </div>
+                                                        </div>
                                                                     );
                                                                 }
                                                                 return (
@@ -2777,7 +2777,7 @@ export default function AdminMatches() {
                                                                         return (
                                                                             <div className="w-10 h-10 flex items-center justify-center">
                                                                                 <RCBLottie className="w-10 h-10" />
-                                                                            </div>
+                                                            </div>
                                                                         );
                                                                     }
                                                                     return (

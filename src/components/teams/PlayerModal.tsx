@@ -371,15 +371,15 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
 
           {/* Career Statistics Section - Hide for WPL players */}
           {!isWPLPlayer && (
-            <div className="p-8">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-black flex items-center gap-3 text-white">
-                  <div 
-                    className="w-1 h-8 rounded-full"
-                    style={{ background: `linear-gradient(to bottom, ${primaryColor.solid}, ${secondaryColor.solid})` }}
-                  />
-                  Career Statistics
-                </h3>
+          <div className="p-8">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-black flex items-center gap-3 text-white">
+                <div 
+                  className="w-1 h-8 rounded-full"
+                  style={{ background: `linear-gradient(to bottom, ${primaryColor.solid}, ${secondaryColor.solid})` }}
+                />
+                Career Statistics
+              </h3>
               <div className="flex items-center gap-3">
                 <span className="text-sm font-semibold" style={{ color: '#FFFFFF' }}>Jersey:</span>
                 <span 

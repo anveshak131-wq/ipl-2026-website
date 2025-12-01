@@ -433,7 +433,7 @@ export default function Home() {
         {featuredLiveMatch && (
           <section className="relative py-12 -mt-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <motion.div
+              <motion.div 
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -539,7 +539,7 @@ export default function Home() {
                       </div>
                     </div>
                     <ArrowRight className="w-7 h-7 text-blue-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-300" />
-                  </div>
+              </div>
 
                   <p className="text-gray-200 mb-8 leading-relaxed text-lg">
                     The world's biggest T20 cricket league. Experience the thrill, passion, and glory of the men's premier tournament.
@@ -588,8 +588,8 @@ export default function Home() {
                         {iplLastMatch.result && (
                           <span className="text-xs text-yellow-400 font-bold">✓</span>
                         )}
-                      </div>
-                    </div>
+                </div>
+              </div>
                   )}
 
                   {iplNextMatch && (
@@ -622,13 +622,13 @@ export default function Home() {
                               <div className="flex items-center gap-2 text-xs text-gray-300">
                                 <Clock className="w-3 h-3" />
                                 {match.time && match.date ? formatMatchTime(match.time, match.date) : 'TBD'}
-                              </div>
-                            </div>
+            </div>
+          </div>
                           ))
                         ) : (
                           <p className="text-gray-400 text-sm">No upcoming matches</p>
-                        )}
-                      </div>
+            )}
+          </div>
                     </div>
                   </div>
 
@@ -680,7 +680,7 @@ export default function Home() {
                       </div>
                     </div>
                     <ArrowRight className="w-7 h-7 text-purple-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-300" />
-                  </div>
+            </div>
 
                   <p className="text-gray-200 mb-8 leading-relaxed text-lg">
                     The pinnacle of women's T20 cricket. Power, passion, and excellence in every match.
@@ -763,13 +763,13 @@ export default function Home() {
                               <div className="flex items-center gap-2 text-xs text-gray-300">
                                 <Clock className="w-3 h-3" />
                                 {match.time && match.date ? formatMatchTime(match.time, match.date) : 'TBD'}
-                              </div>
-                            </div>
+                </div>
+              </div>
                           ))
-                        ) : (
+            ) : (
                           <p className="text-gray-400 text-sm">No upcoming matches</p>
-                        )}
-                      </div>
+            )}
+          </div>
                     </div>
                   </div>
 
@@ -798,11 +798,11 @@ export default function Home() {
                 <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-blue-500/20 border border-blue-500/30 backdrop-blur-sm">
                   <Calendar className="w-4 h-4 text-blue-400" />
                   <span className="text-xs font-bold text-blue-300 uppercase tracking-wider">Upcoming Matches</span>
-                </div>
+          </div>
                 <h2 className="text-4xl md:text-6xl font-black text-white">
                   Featured <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Matches</span>
-                </h2>
-              </div>
+              </h2>
+            </div>
               <Link
                 href="/matches"
                 className="group flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:text-white transition-all duration-300"
@@ -872,7 +872,7 @@ export default function Home() {
         <section className="relative py-20 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-purple-950/10 via-transparent to-transparent" />
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
+            <motion.div 
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -965,7 +965,7 @@ export default function Home() {
         ) : news.length > 0 ? (
           <section className="relative py-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <motion.div
+              <motion.div 
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -1039,7 +1039,7 @@ export default function Home() {
                     whileHover={{ x: 0 }}
                     transition={{ duration: 0.3 }}
                   />
-                </Link>
+                  </Link>
                 <Link
                   href="/matches"
                   className="group px-10 py-5 rounded-2xl bg-white/10 backdrop-blur-xl text-white font-bold text-lg border-2 border-white/20 hover:border-white/40 hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
@@ -1048,11 +1048,11 @@ export default function Home() {
                     View All Matches
                     <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                   </span>
-                </Link>
+                  </Link>
               </div>
             </motion.div>
           </div>
-        </section>
+          </section>
       </main>
 
       <Footer />

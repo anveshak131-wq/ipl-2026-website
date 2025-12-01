@@ -79,36 +79,36 @@ export default function ModernStatsSection({
       ]);
     } else {
       // IPL-specific stats
-      setStats([
-        {
-          icon: <Trophy className="w-6 h-6" />,
-          label: 'Total Matches',
+    setStats([
+      {
+        icon: <Trophy className="w-6 h-6" />,
+        label: 'Total Matches',
           value: matches.toString(),
-          change: '+12 this season',
-          color: 'from-yellow-500 to-orange-500',
-        },
-        {
-          icon: <Users className="w-6 h-6" />,
-          label: 'Active Players',
+        change: '+12 this season',
+        color: 'from-yellow-500 to-orange-500',
+      },
+      {
+        icon: <Users className="w-6 h-6" />,
+        label: 'Active Players',
           value: players,
           change: `Across ${teams} teams`,
-          color: 'from-blue-500 to-cyan-500',
-        },
-        {
-          icon: <Zap className="w-6 h-6" />,
-          label: 'Live Updates',
-          value: 'Real-time',
-          change: 'Every second',
-          color: 'from-purple-500 to-pink-500',
-        },
-        {
-          icon: <TrendingUp className="w-6 h-6" />,
-          label: 'Fan Engagement',
+        color: 'from-blue-500 to-cyan-500',
+      },
+      {
+        icon: <Zap className="w-6 h-6" />,
+        label: 'Live Updates',
+        value: 'Real-time',
+        change: 'Every second',
+        color: 'from-purple-500 to-pink-500',
+      },
+      {
+        icon: <TrendingUp className="w-6 h-6" />,
+        label: 'Fan Engagement',
           value: engagement,
-          change: 'Growing daily',
-          color: 'from-green-500 to-emerald-500',
-        },
-      ]);
+        change: 'Growing daily',
+        color: 'from-green-500 to-emerald-500',
+      },
+    ]);
     }
   }, [currentLeague, totalMatches, totalTeams, activePlayers, fanEngagement]);
 
