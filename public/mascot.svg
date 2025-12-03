@@ -1,0 +1,101 @@
+<svg
+  viewBox="0 0 400 400"
+  xmlns="http://www.w3.org/2000/svg"
+  width="400"
+  height="400"
+>
+  <defs>
+    <!-- Modern gradient -->
+    <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E40AF" />
+      <stop offset="50%" stop-color="#3B82F6" />
+      <stop offset="100%" stop-color="#60A5FA" />
+    </linearGradient>
+    
+    <linearGradient id="orangeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F97316" />
+      <stop offset="100%" stop-color="#FB923C" />
+    </linearGradient>
+    
+    <linearGradient id="darkGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1F2937" />
+      <stop offset="100%" stop-color="#111827" />
+    </linearGradient>
+    
+    <!-- Shadow -->
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+    
+    <!-- Glow -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background hexagon shape -->
+  <g transform="translate(200, 200)">
+    <path d="M 0,-120 L 104,-60 L 104,60 L 0,120 L -104,60 L -104,-60 Z" 
+          fill="url(#blueGradient)" 
+          filter="url(#shadow)" 
+          opacity="0.9">
+      <animateTransform attributeName="transform" type="rotate" values="0 0 0; 360 0 0" dur="20s" repeatCount="indefinite" />
+    </path>
+  </g>
+
+  <!-- Inner hexagon -->
+  <g transform="translate(200, 200)">
+    <path d="M 0,-90 L 78,-45 L 78,45 L 0,90 L -78,45 L -78,-45 Z" 
+          fill="none" 
+          stroke="#FFFFFF" 
+          stroke-width="3" 
+          opacity="0.3"/>
+  </g>
+
+  <!-- Cricket bat - modern stylized -->
+  <g transform="translate(200, 200) rotate(-20)">
+    <!-- Bat blade -->
+    <ellipse cx="0" cy="-25" rx="50" ry="35" fill="url(#darkGradient)" filter="url(#shadow)"/>
+    <!-- Bat handle -->
+    <rect x="-5" y="5" width="10" height="75" rx="5" fill="url(#darkGradient)" filter="url(#shadow)"/>
+    <!-- Highlight on blade -->
+    <ellipse cx="0" cy="-25" rx="35" ry="25" fill="none" stroke="url(#orangeGradient)" stroke-width="2" opacity="0.6"/>
+  </g>
+
+  <!-- Cricket ball - positioned dynamically -->
+  <circle cx="280" cy="140" r="20" fill="#8B4513" filter="url(#shadow)">
+    <animateTransform attributeName="transform" type="translate" values="0,0; -5,-5; 0,0" dur="3s" repeatCount="indefinite" />
+  </circle>
+  <!-- Ball seam -->
+  <path d="M 265 140 Q 280 130, 295 140" stroke="#654321" stroke-width="2" fill="none"/>
+  <path d="M 265 140 Q 280 150, 295 140" stroke="#654321" stroke-width="2" fill="none"/>
+
+  <!-- Stylized stumps - minimal design -->
+  <g transform="translate(200, 300)">
+    <rect x="-35" y="0" width="6" height="35" rx="3" fill="url(#darkGradient)" filter="url(#shadow)"/>
+    <rect x="-2" y="0" width="6" height="35" rx="3" fill="url(#darkGradient)" filter="url(#shadow)"/>
+    <rect x="29" y="0" width="6" height="35" rx="3" fill="url(#darkGradient)" filter="url(#shadow)"/>
+    <rect x="-35" y="0" width="70" height="5" rx="2.5" fill="url(#orangeGradient)" filter="url(#glow)"/>
+  </g>
+
+  <!-- Modern accent lines -->
+  <g opacity="0.4">
+    <line x1="120" y1="200" x2="150" y2="200" stroke="url(#orangeGradient)" stroke-width="4" stroke-linecap="round"/>
+    <line x1="250" y1="200" x2="280" y2="200" stroke="url(#orangeGradient)" stroke-width="4" stroke-linecap="round"/>
+    <line x1="200" y1="120" x2="200" y2="150" stroke="url(#orangeGradient)" stroke-width="4" stroke-linecap="round"/>
+    <line x1="200" y1="250" x2="200" y2="280" stroke="url(#orangeGradient)" stroke-width="4" stroke-linecap="round"/>
+  </g>
+
+  <!-- Geometric accent shapes -->
+  <circle cx="120" cy="120" r="8" fill="url(#orangeGradient)" opacity="0.6">
+    <animate attributeName="opacity" values="0.6;0.9;0.6" dur="2s" repeatCount="indefinite" />
+  </circle>
+  <circle cx="280" cy="280" r="8" fill="url(#orangeGradient)" opacity="0.6">
+    <animate attributeName="opacity" values="0.6;0.9;0.6" dur="2.5s" repeatCount="indefinite" />
+  </circle>
+</svg>
+

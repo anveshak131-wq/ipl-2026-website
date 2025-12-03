@@ -596,6 +596,38 @@ export default function StatsPage() {
             </p>
           )}
 
+          {/* Quick Stats - Similar to WPL stats page */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+            <motion.div 
+              className="rounded-xl px-6 py-4 cursor-pointer glass-effect"
+              whileHover={{ scale: 1.05 }}
+            >
+              <p className="text-xs uppercase tracking-wide font-semibold mb-1 text-gray-400">Players</p>
+              <p className="text-3xl font-black text-white">{players.length}</p>
+            </motion.div>
+            <motion.div 
+              className="rounded-xl px-6 py-4 cursor-pointer glass-effect"
+              whileHover={{ scale: 1.05 }}
+            >
+              <p className="text-xs uppercase tracking-wide font-semibold mb-1 text-gray-400">Teams</p>
+              <p className="text-3xl font-black text-white">{teams.length}</p>
+            </motion.div>
+            <motion.div 
+              className="rounded-xl px-6 py-4 cursor-pointer glass-effect"
+              whileHover={{ scale: 1.05 }}
+            >
+              <p className="text-xs uppercase tracking-wide font-semibold mb-1 text-gray-400">Total Runs</p>
+              <p className="text-3xl font-black text-white">{players.reduce((sum, p) => sum + p.stats.runs, 0).toLocaleString()}</p>
+            </motion.div>
+            <motion.div 
+              className="rounded-xl px-6 py-4 cursor-pointer glass-effect"
+              whileHover={{ scale: 1.05 }}
+            >
+              <p className="text-xs uppercase tracking-wide font-semibold mb-1 text-gray-400">Total Wickets</p>
+              <p className="text-3xl font-black text-white">{players.reduce((sum, p) => sum + p.stats.wickets, 0)}</p>
+            </motion.div>
+          </div>
+
           {/* Contextual sub-navigation */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 -mt-4">
             <div className="inline-flex items-center gap-1 bg-black/40 border border-white/10 rounded-full px-2 py-1 overflow-x-auto no-scrollbar">

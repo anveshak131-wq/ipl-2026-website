@@ -64,6 +64,17 @@ export default function Home() {
   const wplLiveMatches = useMemo(() => wplMatches.filter(m => m.status === 'live'), [wplMatches]);
   const totalLiveMatches = iplLiveMatches.length + wplLiveMatches.length;
   
+  // Calculate total players for each league
+  const iplTotalPlayers = useMemo(() => {
+    return iplTeams.reduce((sum, team) => sum + (team.players?.length || 0), 0);
+  }, [iplTeams]);
+  
+  const wplTotalPlayers = useMemo(() => {
+    return wplTeams.reduce((sum, team) => sum + (team.players?.length || 0), 0);
+  }, [wplTeams]);
+  
+  const totalPlayers = iplTotalPlayers + wplTotalPlayers;
+  
   const iplNextMatch = useMemo(() => {
     const upcoming = iplMatches
       .filter(m => m.status === 'upcoming')
@@ -955,7 +966,11 @@ export default function Home() {
               </h2>
               <p className="text-gray-400 text-lg">Comprehensive insights from both premier leagues</p>
             </motion.div>
-            <ModernStatsSection />
+            <ModernStatsSection 
+              totalMatches={iplMatches.length + wplMatches.length}
+              totalTeams={iplTeams.filter(t => !isPlaceholderTeam(t)).length + wplTeams.filter(t => !isPlaceholderTeam(t)).length}
+              activePlayers={totalPlayers > 0 ? totalPlayers.toString() : undefined}
+            />
           </div>
         </section>
 
