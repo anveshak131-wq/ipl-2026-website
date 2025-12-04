@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
       const venue = match.venue || match.stadium || 'TBD';
       const matchDate = new Date(match.date || match.matchDate);
 
-      const subject = `Match Reminder: ${team1} vs ${team2} starts in 30 minutes!`;
+      // const subject = `Match Reminder: ${team1} vs ${team2} starts in 30 minutes!`; // Will be used in production when email sending is implemented
       const body = `Don't miss the exciting match!\n\n${team1} vs ${team2}\nDate: ${matchDate.toLocaleString()}\nVenue: ${venue}\n\nTune in to catch all the action!`;
 
       const sentEmails: Array<{ email: string; success: boolean; error?: string }> = [];

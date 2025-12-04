@@ -58,7 +58,9 @@ export async function GET(request: NextRequest) {
  * POST /api/admin/versions/rollback
  * Rollback to a specific version
  */
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  void _request;
   try {
     // const body = await request.json();
     // const { versionId, entityType, entityId } = body; // Will be used in production rollback logic
