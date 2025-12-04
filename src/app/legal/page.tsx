@@ -57,6 +57,7 @@ export default function LegalPage() {
       }
     
     return undefined;
+    return undefined;
     return undefined;};
     load();
   }, []);

@@ -147,10 +147,21 @@ function fixUseEffectReturnsRegex(filePath) {
   const originalContent = content;
   
   // Find useEffect(() => { ...body... }, [deps])
-  // Look for cases where body has "if (condition) { return cleanup; }" but no return at end
+  // Must match: useEffect( ... ) with arrow function and dependency array
+  // More precise pattern to avoid matching regular arrow functions
   const pattern = /(useEffect\s*\(\s*\(\)\s*=>\s*\{)([\s\S]*?)(\}\s*,\s*\[[^\]]*\]\s*\))/g;
   
   content = content.replace(pattern, (match, start, body, end) => {
+    // Verify this is actually a useEffect call by checking the context
+    // Look backwards to ensure it's not part of a variable assignment like "const x = useEffect"
+    const matchIndex = content.indexOf(match);
+    const beforeMatch = content.substring(Math.max(0, matchIndex - 50), matchIndex);
+    
+    // Skip if it looks like a variable assignment (not a direct useEffect call)
+    if (beforeMatch.match(/=\s*useEffect\s*$/)) {
+      return match; // This is a variable assignment, not a direct useEffect call
+    }
+    
     // Check if body has conditional returns
     const hasIfWithReturn = /if\s*\([^)]+\)\s*\{[\s\S]*?return\s+/.test(body);
     

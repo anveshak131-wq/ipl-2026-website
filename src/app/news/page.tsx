@@ -210,6 +210,7 @@ export default function NewsPage() {
         break;
     
     return undefined;
+    return undefined;
     return undefined;}
 
     setFilteredNews(filtered);
