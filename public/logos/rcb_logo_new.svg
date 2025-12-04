@@ -1,50 +1,58 @@
 <svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="rcb-red" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="rcb-red-grad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#EC1C24" />
+      <stop offset="50%" stop-color="#D91E3A" />
       <stop offset="100%" stop-color="#C8102E" />
     </linearGradient>
-    <linearGradient id="rcb-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="rcb-gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#FFD700" />
       <stop offset="100%" stop-color="#FFA500" />
     </linearGradient>
-    <filter id="rcb-glow">
-      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+    <radialGradient id="rcb-glow" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#EC1C24" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#EC1C24" stop-opacity="0" />
+    </radialGradient>
+    <filter id="rcb-shadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="2" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
       <feMerge>
-        <feMergeNode in="coloredBlur"/>
+        <feMergeNode/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
   </defs>
   
-  <!-- Background Circle -->
-  <circle cx="200" cy="200" r="180" fill="url(#rcb-red)" opacity="0.1"/>
+  <!-- Background Glow -->
+  <circle cx="200" cy="200" r="190" fill="url(#rcb-glow)"/>
   
-  <!-- Main Shield Shape -->
-  <path d="M 200 50 L 280 80 L 320 160 L 320 240 L 280 320 L 200 350 L 120 320 L 80 240 L 80 160 L 120 80 Z" 
-        fill="url(#rcb-red)" filter="url(#rcb-glow)"/>
+  <!-- Main Circle -->
+  <circle cx="200" cy="200" r="170" fill="url(#rcb-red-grad)" filter="url(#rcb-shadow)"/>
   
-  <!-- Inner Shield -->
-  <path d="M 200 70 L 260 95 L 290 160 L 290 230 L 260 295 L 200 320 L 140 295 L 110 230 L 110 160 L 140 95 Z" 
-        fill="none" stroke="url(#rcb-gold)" stroke-width="3"/>
+  <!-- Inner Border -->
+  <circle cx="200" cy="200" r="160" fill="none" stroke="url(#rcb-gold-grad)" stroke-width="3"/>
   
-  <!-- Lion Crown -->
+  <!-- RCB Text with Modern Typography -->
   <g transform="translate(200, 200)">
-    <!-- Crown Base -->
-    <path d="M -40 -20 L -20 -40 L 20 -40 L 40 -20 L 35 -10 L -35 -10 Z" fill="url(#rcb-gold)"/>
-    <!-- Crown Points -->
-    <rect x="-35" y="-40" width="8" height="20" fill="url(#rcb-gold)"/>
-    <rect x="-10" y="-40" width="8" height="25" fill="url(#rcb-gold)"/>
-    <rect x="2" y="-40" width="8" height="25" fill="url(#rcb-gold)"/>
-    <rect x="27" y="-40" width="8" height="20" fill="url(#rcb-gold)"/>
-    <!-- RCB Text -->
-    <text x="0" y="30" font-family="Arial Black, sans-serif" font-size="32" font-weight="900" 
-          fill="url(#rcb-gold)" text-anchor="middle" letter-spacing="2">RCB</text>
+    <text x="0" y="-20" font-family="Arial Black, sans-serif" font-size="56" font-weight="900" 
+          fill="url(#rcb-gold-grad)" text-anchor="middle" letter-spacing="6">RCB</text>
+    
+    <!-- Decorative Line -->
+    <line x1="-60" y1="0" x2="60" y2="0" stroke="url(#rcb-gold-grad)" stroke-width="3" stroke-linecap="round"/>
+    
+    <!-- Star Elements -->
+    <path d="M -50 -40 L -45 -30 L -35 -30 L -42 -22 L -40 -12 L -50 -18 L -60 -12 L -58 -22 L -65 -30 L -55 -30 Z" 
+          fill="url(#rcb-gold-grad)" opacity="0.8"/>
+    <path d="M 50 -40 L 55 -30 L 65 -30 L 58 -22 L 60 -12 L 50 -18 L 40 -12 L 42 -22 L 35 -30 L 45 -30 Z" 
+          fill="url(#rcb-gold-grad)" opacity="0.8"/>
   </g>
   
-  <!-- Decorative Elements -->
-  <circle cx="150" cy="150" r="3" fill="url(#rcb-gold)"/>
-  <circle cx="250" cy="150" r="3" fill="url(#rcb-gold)"/>
-  <circle cx="150" cy="250" r="3" fill="url(#rcb-gold)"/>
-  <circle cx="250" cy="250" r="3" fill="url(#rcb-gold)"/>
+  <!-- Corner Accents -->
+  <circle cx="120" cy="120" r="8" fill="url(#rcb-gold-grad)" opacity="0.7"/>
+  <circle cx="280" cy="120" r="8" fill="url(#rcb-gold-grad)" opacity="0.7"/>
+  <circle cx="120" cy="280" r="8" fill="url(#rcb-gold-grad)" opacity="0.7"/>
+  <circle cx="280" cy="280" r="8" fill="url(#rcb-gold-grad)" opacity="0.7"/>
 </svg>

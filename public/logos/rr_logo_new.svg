@@ -1,53 +1,61 @@
 <svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="rr-pink" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="rr-pink-grad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#EA1A85" />
       <stop offset="100%" stop-color="#D11675" />
     </linearGradient>
-    <linearGradient id="rr-blue" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="rr-blue-grad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#004B8D" />
       <stop offset="100%" stop-color="#003366" />
     </linearGradient>
-    <filter id="rr-glow">
-      <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
+    <radialGradient id="rr-glow" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#EA1A85" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#EA1A85" stop-opacity="0" />
+    </radialGradient>
+    <filter id="rr-shadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="2" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
       <feMerge>
-        <feMergeNode in="coloredBlur"/>
+        <feMergeNode/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
   </defs>
   
-  <!-- Background Circle -->
-  <circle cx="200" cy="200" r="180" fill="url(#rr-pink)" opacity="0.1"/>
+  <!-- Background Glow -->
+  <circle cx="200" cy="200" r="190" fill="url(#rr-glow)"/>
   
   <!-- Main Circle -->
-  <circle cx="200" cy="200" r="170" fill="url(#rr-pink)" filter="url(#rr-glow)"/>
+  <circle cx="200" cy="200" r="170" fill="url(#rr-pink-grad)" filter="url(#rr-shadow)"/>
   
-  <!-- Inner Circle -->
-  <circle cx="200" cy="200" r="150" fill="none" stroke="url(#rr-blue)" stroke-width="4"/>
+  <!-- Inner Border -->
+  <circle cx="200" cy="200" r="160" fill="none" stroke="url(#rr-blue-grad)" stroke-width="4"/>
   
   <!-- Crown -->
-  <g transform="translate(200, 180)">
+  <g transform="translate(200, 160)">
     <!-- Crown Base -->
-    <path d="M -50 -10 L -30 -35 L -10 -45 L 10 -45 L 30 -35 L 50 -10 L 45 5 L -45 5 Z" 
-          fill="url(#rr-blue)"/>
+    <path d="M -55 -5 L -35 -40 L -15 -50 L 15 -50 L 35 -40 L 55 -5 L 50 8 L -50 8 Z" 
+          fill="url(#rr-blue-grad)"/>
     <!-- Crown Points -->
-    <rect x="-45" y="-45" width="15" height="35" fill="url(#rr-blue)"/>
-    <rect x="-20" y="-45" width="15" height="40" fill="url(#rr-blue)"/>
-    <rect x="5" y="-45" width="15" height="40" fill="url(#rr-blue)"/>
-    <rect x="30" y="-45" width="15" height="35" fill="url(#rr-blue)"/>
-    <!-- Gems -->
-    <circle cx="-20" cy="-25" r="5" fill="url(#rr-pink)"/>
-    <circle cx="20" cy="-25" r="5" fill="url(#rr-pink)"/>
+    <rect x="-50" y="-50" width="16" height="40" fill="url(#rr-blue-grad)"/>
+    <rect x="-22" y="-50" width="16" height="45" fill="url(#rr-blue-grad)"/>
+    <rect x="6" y="-50" width="16" height="45" fill="url(#rr-blue-grad)"/>
+    <rect x="34" y="-50" width="16" height="40" fill="url(#rr-blue-grad)"/>
+    <!-- Crown Gems -->
+    <circle cx="-22" cy="-30" r="6" fill="url(#rr-pink-grad)"/>
+    <circle cx="22" cy="-30" r="6" fill="url(#rr-pink-grad)"/>
   </g>
   
   <!-- RR Text -->
-  <text x="200" y="270" font-family="Arial Black, sans-serif" font-size="48" font-weight="900" 
-        fill="#FFFFFF" text-anchor="middle" letter-spacing="4">RR</text>
+  <text x="200" y="270" font-family="Arial Black, sans-serif" font-size="64" font-weight="900" 
+        fill="#FFFFFF" text-anchor="middle" letter-spacing="8">RR</text>
   
   <!-- Decorative Stars -->
-  <path d="M 130 130 L 135 140 L 145 140 L 137 147 L 140 157 L 130 150 L 120 157 L 123 147 L 115 140 L 125 140 Z" 
-        fill="url(#rr-blue)" opacity="0.8"/>
-  <path d="M 270 130 L 275 140 L 285 140 L 277 147 L 280 157 L 270 150 L 260 157 L 263 147 L 255 140 L 265 140 Z" 
-        fill="url(#rr-blue)" opacity="0.8"/>
+  <path d="M 130 130 L 137 140 L 147 140 L 140 147 L 143 157 L 130 150 L 117 157 L 120 147 L 113 140 L 123 140 Z" 
+        fill="url(#rr-blue-grad)" opacity="0.9"/>
+  <path d="M 270 130 L 277 140 L 287 140 L 280 147 L 283 157 L 270 150 L 257 157 L 260 147 L 253 140 L 263 140 Z" 
+        fill="url(#rr-blue-grad)" opacity="0.9"/>
 </svg>

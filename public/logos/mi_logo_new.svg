@@ -1,53 +1,55 @@
 <svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="mi-blue" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="mi-blue-grad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#004BA0" />
       <stop offset="100%" stop-color="#003A7A" />
     </linearGradient>
-    <linearGradient id="mi-light-blue" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="mi-light-grad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#0066CC" />
       <stop offset="100%" stop-color="#004BA0" />
     </linearGradient>
-    <filter id="mi-glow">
-      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+    <radialGradient id="mi-glow" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#004BA0" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#004BA0" stop-opacity="0" />
+    </radialGradient>
+    <filter id="mi-shadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="2" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
       <feMerge>
-        <feMergeNode in="coloredBlur"/>
+        <feMergeNode/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
   </defs>
   
-  <!-- Background Circle -->
-  <circle cx="200" cy="200" r="180" fill="url(#mi-blue)" opacity="0.15"/>
+  <!-- Background Glow -->
+  <circle cx="200" cy="200" r="190" fill="url(#mi-glow)"/>
   
   <!-- Main Circle -->
-  <circle cx="200" cy="200" r="160" fill="url(#mi-blue)" filter="url(#mi-glow)"/>
+  <circle cx="200" cy="200" r="170" fill="url(#mi-blue-grad)" filter="url(#mi-shadow)"/>
   
-  <!-- Inner Circle -->
-  <circle cx="200" cy="200" r="140" fill="none" stroke="#FFFFFF" stroke-width="4"/>
+  <!-- Inner Border -->
+  <circle cx="200" cy="200" r="160" fill="none" stroke="#FFFFFF" stroke-width="4"/>
   
-  <!-- Mumbai Skyline Silhouette -->
-  <g transform="translate(200, 200)">
+  <!-- Mumbai Skyline -->
+  <g transform="translate(200, 150)">
     <!-- Buildings -->
-    <rect x="-80" y="-20" width="25" height="60" fill="#FFFFFF" opacity="0.9"/>
-    <rect x="-50" y="-30" width="20" height="70" fill="#FFFFFF" opacity="0.9"/>
-    <rect x="-25" y="-10" width="25" height="50" fill="#FFFFFF" opacity="0.9"/>
-    <rect x="5" y="-40" width="30" height="80" fill="#FFFFFF" opacity="0.9"/>
-    <rect x="40" y="-25" width="20" height="65" fill="#FFFFFF" opacity="0.9"/>
-    <rect x="65" y="-15" width="25" height="55" fill="#FFFFFF" opacity="0.9"/>
-    
-    <!-- Gateway of India -->
-    <path d="M -15 40 L -10 40 L -10 20 L -5 20 L -5 40 L 5 40 L 5 20 L 10 20 L 10 40 L 15 40" 
-          fill="url(#mi-light-blue)" stroke="#FFFFFF" stroke-width="1"/>
+    <rect x="-90" y="0" width="20" height="50" fill="#FFFFFF" opacity="0.95"/>
+    <rect x="-65" y="-10" width="18" height="60" fill="#FFFFFF" opacity="0.95"/>
+    <rect x="-42" y="5" width="22" height="45" fill="#FFFFFF" opacity="0.95"/>
+    <rect x="-15" y="-15" width="25" height="65" fill="#FFFFFF" opacity="0.95"/>
+    <rect x="15" y="-5" width="20" height="55" fill="#FFFFFF" opacity="0.95"/>
+    <rect x="40" y="0" width="18" height="50" fill="#FFFFFF" opacity="0.95"/>
+    <rect x="63" y="10" width="22" height="40" fill="#FFFFFF" opacity="0.95"/>
   </g>
   
   <!-- MI Text -->
-  <text x="200" y="280" font-family="Arial Black, sans-serif" font-size="48" font-weight="900" 
-        fill="#FFFFFF" text-anchor="middle" letter-spacing="4">MI</text>
+  <text x="200" y="280" font-family="Arial Black, sans-serif" font-size="64" font-weight="900" 
+        fill="#FFFFFF" text-anchor="middle" letter-spacing="8">MI</text>
   
-  <!-- Stars -->
-  <path d="M 120 120 L 125 130 L 135 130 L 127 137 L 130 147 L 120 142 L 110 147 L 113 137 L 105 130 L 115 130 Z" 
-        fill="#FFFFFF" opacity="0.8"/>
-  <path d="M 280 120 L 283 127 L 290 127 L 285 132 L 287 139 L 280 135 L 273 139 L 275 132 L 270 127 L 277 127 Z" 
-        fill="#FFFFFF" opacity="0.8"/>
+  <!-- Wave Pattern -->
+  <path d="M 100 200 Q 150 190 200 200 T 300 200" stroke="url(#mi-light-grad)" stroke-width="2" fill="none" opacity="0.6"/>
 </svg>

@@ -1,56 +1,64 @@
 <svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="csk-yellow" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="csk-yellow-grad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#FFFF00" />
       <stop offset="100%" stop-color="#FFD700" />
     </linearGradient>
-    <linearGradient id="csk-blue" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="csk-blue-grad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#0081E8" />
       <stop offset="100%" stop-color="#0066CC" />
     </linearGradient>
-    <filter id="csk-glow">
-      <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
+    <radialGradient id="csk-glow" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#FFFF00" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#FFFF00" stop-opacity="0" />
+    </radialGradient>
+    <filter id="csk-shadow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="2" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
       <feMerge>
-        <feMergeNode in="coloredBlur"/>
+        <feMergeNode/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
   </defs>
   
-  <!-- Background Circle -->
-  <circle cx="200" cy="200" r="180" fill="url(#csk-yellow)" opacity="0.15"/>
+  <!-- Background Glow -->
+  <circle cx="200" cy="200" r="190" fill="url(#csk-glow)"/>
   
   <!-- Main Circle -->
-  <circle cx="200" cy="200" r="170" fill="url(#csk-yellow)" filter="url(#csk-glow)"/>
+  <circle cx="200" cy="200" r="170" fill="url(#csk-yellow-grad)" filter="url(#csk-shadow)"/>
   
-  <!-- Inner Circle -->
-  <circle cx="200" cy="200" r="150" fill="none" stroke="url(#csk-blue)" stroke-width="5"/>
+  <!-- Inner Border -->
+  <circle cx="200" cy="200" r="160" fill="none" stroke="url(#csk-blue-grad)" stroke-width="5"/>
   
   <!-- Lion Head -->
-  <g transform="translate(200, 180)">
+  <g transform="translate(200, 170)">
     <!-- Head Circle -->
-    <circle cx="0" cy="0" r="45" fill="url(#csk-blue)"/>
+    <circle cx="0" cy="0" r="50" fill="url(#csk-blue-grad)"/>
     <!-- Mane -->
-    <path d="M -45 0 Q -50 -20 -40 -30 Q -30 -35 -20 -25 Q -10 -30 0 -35 Q 10 -30 20 -25 Q 30 -35 40 -30 Q 50 -20 45 0" 
-          fill="url(#csk-yellow)" opacity="0.8"/>
+    <path d="M -50 0 Q -55 -25 -45 -35 Q -35 -40 -25 -30 Q -15 -35 -5 -40 Q 5 -35 15 -30 Q 25 -40 35 -35 Q 45 -25 50 0" 
+          fill="url(#csk-yellow-grad)" opacity="0.85"/>
     <!-- Face -->
-    <ellipse cx="0" cy="5" rx="30" ry="35" fill="url(#csk-yellow)"/>
+    <ellipse cx="0" cy="8" rx="35" ry="40" fill="url(#csk-yellow-grad)"/>
     <!-- Eyes -->
-    <circle cx="-12" cy="-5" r="6" fill="url(#csk-blue)"/>
-    <circle cx="12" cy="-5" r="6" fill="url(#csk-blue)"/>
+    <circle cx="-15" cy="-3" r="7" fill="url(#csk-blue-grad)"/>
+    <circle cx="15" cy="-3" r="7" fill="url(#csk-blue-grad)"/>
     <!-- Nose -->
-    <path d="M 0 5 L -5 15 L 5 15 Z" fill="url(#csk-blue)"/>
+    <path d="M 0 8 L -6 20 L 6 20 Z" fill="url(#csk-blue-grad)"/>
     <!-- Mouth -->
-    <path d="M -10 20 Q 0 25 10 20" stroke="url(#csk-blue)" stroke-width="2" fill="none"/>
+    <path d="M -12 25 Q 0 30 12 25" stroke="url(#csk-blue-grad)" stroke-width="2.5" fill="none"/>
   </g>
   
   <!-- CSK Text -->
-  <text x="200" y="280" font-family="Arial Black, sans-serif" font-size="42" font-weight="900" 
-        fill="url(#csk-blue)" text-anchor="middle" letter-spacing="3">CSK</text>
+  <text x="200" y="290" font-family="Arial Black, sans-serif" font-size="48" font-weight="900" 
+        fill="url(#csk-blue-grad)" text-anchor="middle" letter-spacing="4">CSK</text>
   
   <!-- Decorative Stars -->
-  <path d="M 130 130 L 135 140 L 145 140 L 137 147 L 140 157 L 130 150 L 120 157 L 123 147 L 115 140 L 125 140 Z" 
-        fill="url(#csk-blue)" opacity="0.6"/>
-  <path d="M 270 130 L 275 140 L 285 140 L 277 147 L 280 157 L 270 150 L 260 157 L 263 147 L 255 140 L 265 140 Z" 
-        fill="url(#csk-blue)" opacity="0.6"/>
+  <path d="M 130 130 L 137 140 L 147 140 L 140 147 L 143 157 L 130 150 L 117 157 L 120 147 L 113 140 L 123 140 Z" 
+        fill="url(#csk-blue-grad)" opacity="0.7"/>
+  <path d="M 270 130 L 277 140 L 287 140 L 280 147 L 283 157 L 270 150 L 257 157 L 260 147 L 253 140 L 263 140 Z" 
+        fill="url(#csk-blue-grad)" opacity="0.7"/>
 </svg>

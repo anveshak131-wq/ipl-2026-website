@@ -1,16 +1,16 @@
 <svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="srh-orange" x1="0%" y1="0%" x2="100%" y2="100%">
+    <radialGradient id="srh-sun-grad" cx="50%" cy="50%">
+      <stop offset="0%" stop-color="#FFD700" />
+      <stop offset="40%" stop-color="#FF822A" />
+      <stop offset="100%" stop-color="#FF6B00" />
+    </radialGradient>
+    <linearGradient id="srh-orange-grad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#FF822A" />
       <stop offset="100%" stop-color="#FF6B00" />
     </linearGradient>
-    <radialGradient id="srh-sun" cx="50%" cy="50%">
-      <stop offset="0%" stop-color="#FFD700" />
-      <stop offset="50%" stop-color="#FF822A" />
-      <stop offset="100%" stop-color="#FF6B00" />
-    </radialGradient>
     <filter id="srh-glow">
-      <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
+      <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
       <feMerge>
         <feMergeNode in="coloredBlur"/>
         <feMergeNode in="SourceGraphic"/>
@@ -18,34 +18,47 @@
     </filter>
   </defs>
   
-  <!-- Background -->
+  <!-- Black Background -->
   <rect width="400" height="400" fill="#000000"/>
   
-  <!-- Sun Circle -->
-  <circle cx="200" cy="200" r="150" fill="url(#srh-sun)" filter="url(#srh-glow)"/>
-  
-  <!-- Sun Rays -->
+  <!-- Sun with Rays -->
   <g transform="translate(200, 200)">
-    <g opacity="0.9">
-      <rect x="-3" y="-160" width="6" height="30" fill="url(#srh-orange)" transform="rotate(0)"/>
-      <rect x="-3" y="-160" width="6" height="30" fill="url(#srh-orange)" transform="rotate(30)"/>
-      <rect x="-3" y="-160" width="6" height="30" fill="url(#srh-orange)" transform="rotate(60)"/>
-      <rect x="-3" y="-160" width="6" height="30" fill="url(#srh-orange)" transform="rotate(90)"/>
-      <rect x="-3" y="-160" width="6" height="30" fill="url(#srh-orange)" transform="rotate(120)"/>
-      <rect x="-3" y="-160" width="6" height="30" fill="url(#srh-orange)" transform="rotate(150)"/>
-      <rect x="-3" y="-160" width="6" height="30" fill="url(#srh-orange)" transform="rotate(180)"/>
-      <rect x="-3" y="-160" width="6" height="30" fill="url(#srh-orange)" transform="rotate(210)"/>
-      <rect x="-3" y="-160" width="6" height="30" fill="url(#srh-orange)" transform="rotate(240)"/>
-      <rect x="-3" y="-160" width="6" height="30" fill="url(#srh-orange)" transform="rotate(270)"/>
-      <rect x="-3" y="-160" width="6" height="30" fill="url(#srh-orange)" transform="rotate(300)"/>
-      <rect x="-3" y="-160" width="6" height="30" fill="url(#srh-orange)" transform="rotate(330)"/>
+    <!-- Rays -->
+    <g opacity="0.85">
+      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(0)"/>
+      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(15)"/>
+      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(30)"/>
+      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(45)"/>
+      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(60)"/>
+      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(75)"/>
+      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(90)"/>
+      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(105)"/>
+      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(120)"/>
+      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(135)"/>
+      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(150)"/>
+      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(165)"/>
+      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(180)"/>
+      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(195)"/>
+      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(210)"/>
+      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(225)"/>
+      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(240)"/>
+      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(255)"/>
+      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(270)"/>
+      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(285)"/>
+      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(300)"/>
+      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(315)"/>
+      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(330)"/>
+      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(345)"/>
     </g>
+    
+    <!-- Main Sun Circle -->
+    <circle cx="0" cy="0" r="110" fill="url(#srh-sun-grad)" filter="url(#srh-glow)"/>
+    
+    <!-- Inner Circle -->
+    <circle cx="0" cy="0" r="90" fill="#000000"/>
+    
+    <!-- SRH Text -->
+    <text x="0" y="15" font-family="Arial Black, sans-serif" font-size="48" font-weight="900" 
+          fill="url(#srh-orange-grad)" text-anchor="middle" letter-spacing="4">SRH</text>
   </g>
-  
-  <!-- Inner Circle -->
-  <circle cx="200" cy="200" r="100" fill="#000000"/>
-  
-  <!-- SRH Text -->
-  <text x="200" y="220" font-family="Arial Black, sans-serif" font-size="42" font-weight="900" 
-        fill="url(#srh-orange)" text-anchor="middle" letter-spacing="3">SRH</text>
 </svg>

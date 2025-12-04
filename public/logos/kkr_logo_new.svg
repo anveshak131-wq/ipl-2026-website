@@ -1,10 +1,10 @@
 <svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="kkr-purple" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="kkr-purple-grad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#3A225D" />
       <stop offset="100%" stop-color="#2A1745" />
     </linearGradient>
-    <linearGradient id="kkr-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="kkr-gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#B9975B" />
       <stop offset="100%" stop-color="#FFD700" />
     </linearGradient>
@@ -17,38 +17,38 @@
     </filter>
   </defs>
   
-  <!-- Background -->
-  <rect width="400" height="400" fill="url(#kkr-purple)"/>
+  <!-- Purple Background -->
+  <rect width="400" height="400" fill="url(#kkr-purple-grad)"/>
   
-  <!-- Shield Shape -->
+  <!-- Shield Background Glow -->
   <path d="M 200 50 L 280 80 L 320 160 L 320 240 L 280 320 L 200 350 L 120 320 L 80 240 L 80 160 L 120 80 Z" 
-        fill="url(#kkr-gold)" filter="url(#kkr-glow)" opacity="0.2"/>
+        fill="url(#kkr-gold-grad)" filter="url(#kkr-glow)" opacity="0.15"/>
   
   <!-- Main Shield -->
   <path d="M 200 70 L 260 95 L 290 160 L 290 230 L 260 295 L 200 320 L 140 295 L 110 230 L 110 160 L 140 95 Z" 
-        fill="url(#kkr-purple)" stroke="url(#kkr-gold)" stroke-width="4"/>
+        fill="url(#kkr-purple-grad)" stroke="url(#kkr-gold-grad)" stroke-width="4"/>
   
   <!-- Knight Helmet -->
-  <g transform="translate(200, 200)">
+  <g transform="translate(200, 190)">
     <!-- Helmet -->
-    <path d="M -30 -40 Q 0 -50 30 -40 L 35 -20 L 30 0 L 25 10 L -25 10 L -30 0 L -35 -20 Z" 
-          fill="url(#kkr-gold)"/>
+    <path d="M -35 -45 Q 0 -55 35 -45 L 40 -20 L 35 0 L 30 12 L -30 12 L -35 0 L -40 -20 Z" 
+          fill="url(#kkr-gold-grad)"/>
     <!-- Visor -->
-    <path d="M -25 0 Q 0 5 25 0" stroke="url(#kkr-purple)" stroke-width="3" fill="none"/>
+    <path d="M -30 0 Q 0 6 30 0" stroke="url(#kkr-purple-grad)" stroke-width="3.5" fill="none"/>
     <!-- Plume -->
-    <path d="M 0 -50 L -5 -70 L 5 -70 Z" fill="url(#kkr-gold)"/>
-    <!-- Cross -->
-    <line x1="0" y1="-30" x2="0" y2="-10" stroke="url(#kkr-purple)" stroke-width="3"/>
-    <line x1="-10" y1="-20" x2="10" y2="-20" stroke="url(#kkr-purple)" stroke-width="3"/>
+    <path d="M 0 -55 L -6 -75 L 6 -75 Z" fill="url(#kkr-gold-grad)"/>
+    <!-- Cross on Helmet -->
+    <line x1="0" y1="-35" x2="0" y2="-12" stroke="url(#kkr-purple-grad)" stroke-width="3.5"/>
+    <line x1="-12" y1="-23" x2="12" y2="-23" stroke="url(#kkr-purple-grad)" stroke-width="3.5"/>
   </g>
   
   <!-- KKR Text -->
-  <text x="200" y="280" font-family="Arial Black, sans-serif" font-size="38" font-weight="900" 
-        fill="url(#kkr-gold)" text-anchor="middle" letter-spacing="2">KKR</text>
+  <text x="200" y="285" font-family="Arial Black, sans-serif" font-size="42" font-weight="900" 
+        fill="url(#kkr-gold-grad)" text-anchor="middle" letter-spacing="3">KKR</text>
   
-  <!-- Decorative Elements -->
-  <circle cx="150" cy="150" r="4" fill="url(#kkr-gold)"/>
-  <circle cx="250" cy="150" r="4" fill="url(#kkr-gold)"/>
-  <circle cx="150" cy="250" r="4" fill="url(#kkr-gold)"/>
-  <circle cx="250" cy="250" r="4" fill="url(#kkr-gold)"/>
+  <!-- Corner Accents -->
+  <circle cx="150" cy="150" r="5" fill="url(#kkr-gold-grad)" opacity="0.7"/>
+  <circle cx="250" cy="150" r="5" fill="url(#kkr-gold-grad)" opacity="0.7"/>
+  <circle cx="150" cy="250" r="5" fill="url(#kkr-gold-grad)" opacity="0.7"/>
+  <circle cx="250" cy="250" r="5" fill="url(#kkr-gold-grad)" opacity="0.7"/>
 </svg>
