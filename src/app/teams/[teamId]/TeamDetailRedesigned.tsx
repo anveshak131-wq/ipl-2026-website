@@ -295,9 +295,18 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
             const playersResponse = await fetch('/api/players');
             if (playersResponse.ok) {
               const allPlayers = await playersResponse.json();
+              // Match players by teamId - handle both "1" and "team1" formats
+              const teamPlayers = allPlayers.filter((p: Player) => {
+                const playerTeamId = String(p.teamId || '').replace(/^team/, '');
+                const teamIdStr = String(team.id || '').replace(/^team/, '');
+                return playerTeamId === teamIdStr || 
+                       playerTeamId === `team${teamIdStr}` || 
+                       teamIdStr === `team${playerTeamId}` ||
+                       String(p.teamId) === String(team.id);
+              });
               const teamWithPlayers = {
                 ...team,
-                players: sortPlayersByRoleAndAge(allPlayers.filter((p: Player) => p.teamId === team.id))
+                players: sortPlayersByRoleAndAge(teamPlayers)
               };
               setTeamData(teamWithPlayers);
             } else {
