@@ -42,16 +42,38 @@ export default function TeamsShowcase() {
           .filter(team => !isPlaceholderTeam(team))
           .map(team => {
             const normalizedTeamId = normalizeId(team.id);
+            const teamIdVariations = [
+              String(team.id),
+              normalizedTeamId,
+              `team${normalizedTeamId}`,
+              String(team.id).replace(/^team/i, ''),
+              String(team.id).toLowerCase(),
+              String(team.id).toUpperCase()
+            ];
+            
             // Attach players to teams with improved matching
             const teamPlayers = (playersData || []).filter(player => {
               const normalizedPlayerTeamId = normalizeId(player.teamId);
-              return normalizedPlayerTeamId === normalizedTeamId ||
-                     String(player.teamId).toLowerCase() === String(team.id).toLowerCase() ||
-                     String(player.teamId) === String(team.id);
+              const playerTeamIdVariations = [
+                String(player.teamId),
+                normalizedPlayerTeamId,
+                `team${normalizedPlayerTeamId}`,
+                String(player.teamId).replace(/^team/i, ''),
+                String(player.teamId).toLowerCase(),
+                String(player.teamId).toUpperCase()
+              ];
+              
+              // Check if any variation matches
+              return teamIdVariations.some(tv => 
+                playerTeamIdVariations.some(pv => pv === tv)
+              );
             });
             
             if (teamPlayers.length > 0) {
               console.log(`TeamsShowcase: Matched ${teamPlayers.length} players for team ${team.name} (ID: ${team.id})`);
+            } else if (playersData && playersData.length > 0) {
+              console.warn(`TeamsShowcase: No players matched for team ${team.name} (ID: ${team.id}). Sample player teamIds:`, 
+                playersData.slice(0, 3).map(p => p.teamId));
             }
             
             return {

@@ -196,11 +196,30 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
             const normalizedTeamId = normalizeId(team.id);
             console.log('TeamDetailClient: Normalized team ID:', normalizedTeamId, 'from:', team.id);
             
+            const teamIdVariations = [
+              String(team.id),
+              normalizedTeamId,
+              `team${normalizedTeamId}`,
+              String(team.id).replace(/^team/i, ''),
+              String(team.id).toLowerCase(),
+              String(team.id).toUpperCase()
+            ];
+            
             const teamPlayers = allPlayers.filter((p: Player) => {
               const normalizedPlayerTeamId = normalizeId(p.teamId);
-              const matches = normalizedPlayerTeamId === normalizedTeamId ||
-                             String(p.teamId).toLowerCase() === String(team.id).toLowerCase() ||
-                             String(p.teamId) === String(team.id);
+              const playerTeamIdVariations = [
+                String(p.teamId),
+                normalizedPlayerTeamId,
+                `team${normalizedPlayerTeamId}`,
+                String(p.teamId).replace(/^team/i, ''),
+                String(p.teamId).toLowerCase(),
+                String(p.teamId).toUpperCase()
+              ];
+              
+              // Check if any variation matches
+              const matches = teamIdVariations.some(tv => 
+                playerTeamIdVariations.some(pv => pv === tv)
+              );
               
               if (matches) {
                 console.log('TeamDetailClient: Matched player:', p.name, 'playerTeamId:', p.teamId, 'normalized:', normalizedPlayerTeamId, 'to team:', team.id, 'normalized:', normalizedTeamId);

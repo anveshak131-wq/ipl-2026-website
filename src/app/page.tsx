@@ -173,14 +173,37 @@ export default function Home() {
         // Attach players to teams with improved matching
         const iplTeamsWithPlayers = iplTeamsData.map(team => {
           const normalizedTeamId = normalizeId(team.id);
+          const teamIdVariations = [
+            String(team.id),
+            normalizedTeamId,
+            `team${normalizedTeamId}`,
+            String(team.id).replace(/^team/i, ''),
+            String(team.id).toLowerCase(),
+            String(team.id).toUpperCase()
+          ];
+          
           const teamPlayers = (iplPlayersData || []).filter(player => {
             const normalizedPlayerTeamId = normalizeId(player.teamId);
-            return normalizedPlayerTeamId === normalizedTeamId ||
-                   String(player.teamId).toLowerCase() === String(team.id).toLowerCase() ||
-                   String(player.teamId) === String(team.id);
+            const playerTeamIdVariations = [
+              String(player.teamId),
+              normalizedPlayerTeamId,
+              `team${normalizedPlayerTeamId}`,
+              String(player.teamId).replace(/^team/i, ''),
+              String(player.teamId).toLowerCase(),
+              String(player.teamId).toUpperCase()
+            ];
+            
+            // Check if any variation matches
+            return teamIdVariations.some(tv => 
+              playerTeamIdVariations.some(pv => pv === tv)
+            );
           });
+          
           if (teamPlayers.length > 0) {
             console.log(`Home page: Matched ${teamPlayers.length} players for IPL team ${team.name} (ID: ${team.id})`);
+          } else if (iplPlayersData && iplPlayersData.length > 0) {
+            console.warn(`Home page: No players matched for IPL team ${team.name} (ID: ${team.id}). Sample player teamIds:`, 
+              iplPlayersData.slice(0, 3).map(p => p.teamId));
           }
           return {
             ...team,
@@ -206,14 +229,37 @@ export default function Home() {
           .filter(team => !isPlaceholderTeam(team))
           .map(team => {
             const normalizedTeamId = normalizeId(team.id);
+            const teamIdVariations = [
+              String(team.id),
+              normalizedTeamId,
+              `team${normalizedTeamId}`,
+              String(team.id).replace(/^team/i, ''),
+              String(team.id).toLowerCase(),
+              String(team.id).toUpperCase()
+            ];
+            
             const teamPlayers = (wplPlayersData || []).filter(player => {
               const normalizedPlayerTeamId = normalizeId(player.teamId);
-              return normalizedPlayerTeamId === normalizedTeamId ||
-                     String(player.teamId).toLowerCase() === String(team.id).toLowerCase() ||
-                     String(player.teamId) === String(team.id);
+              const playerTeamIdVariations = [
+                String(player.teamId),
+                normalizedPlayerTeamId,
+                `team${normalizedPlayerTeamId}`,
+                String(player.teamId).replace(/^team/i, ''),
+                String(player.teamId).toLowerCase(),
+                String(player.teamId).toUpperCase()
+              ];
+              
+              // Check if any variation matches
+              return teamIdVariations.some(tv => 
+                playerTeamIdVariations.some(pv => pv === tv)
+              );
             });
+            
             if (teamPlayers.length > 0) {
               console.log(`Home page: Matched ${teamPlayers.length} players for WPL team ${team.name} (ID: ${team.id})`);
+            } else if (wplPlayersData && wplPlayersData.length > 0) {
+              console.warn(`Home page: No players matched for WPL team ${team.name} (ID: ${team.id}). Sample player teamIds:`, 
+                wplPlayersData.slice(0, 3).map(p => p.teamId));
             }
             return {
               ...team,
