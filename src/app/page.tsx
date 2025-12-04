@@ -149,6 +149,14 @@ export default function Home() {
       setShowTermsModal(true);
     }
 
+    // Helper function to normalize team/player IDs for matching
+    const normalizeId = (id: string | number | undefined): string => {
+      if (!id) return '';
+      const str = String(id).trim();
+      const numMatch = str.replace(/^team/i, '').match(/^\d+$/);
+      return numMatch ? numMatch[0] : str.toLowerCase();
+    };
+    
     // Load data for both leagues
     const loadData = async () => {
       try {
@@ -160,15 +168,20 @@ export default function Home() {
           api.getPlayers(undefined, 'ipl').catch(() => []), // Fetch players for accurate counts
         ]);
         
-        // Attach players to teams
+        console.log('Home page: Fetched IPL players:', iplPlayersData?.length || 0);
+        
+        // Attach players to teams with improved matching
         const iplTeamsWithPlayers = iplTeamsData.map(team => {
+          const normalizedTeamId = normalizeId(team.id);
           const teamPlayers = (iplPlayersData || []).filter(player => {
-            const playerTeamId = String(player.teamId || '');
-            const teamId = String(team.id || '');
-            return playerTeamId === teamId || 
-                   playerTeamId === `team${teamId}` || 
-                   teamId === `team${playerTeamId}`;
+            const normalizedPlayerTeamId = normalizeId(player.teamId);
+            return normalizedPlayerTeamId === normalizedTeamId ||
+                   String(player.teamId).toLowerCase() === String(team.id).toLowerCase() ||
+                   String(player.teamId) === String(team.id);
           });
+          if (teamPlayers.length > 0) {
+            console.log(`Home page: Matched ${teamPlayers.length} players for IPL team ${team.name} (ID: ${team.id})`);
+          }
           return {
             ...team,
             players: teamPlayers.length > 0 ? teamPlayers : (team.players || [])
@@ -187,17 +200,21 @@ export default function Home() {
           api.getPlayers(undefined, 'wpl').catch(() => []), // Fetch players for accurate counts
         ]);
         
-        // Attach players to teams
+        console.log('Home page: Fetched WPL players:', wplPlayersData?.length || 0);
+        
         const wplTeamsWithPlayers = wplTeamsData
           .filter(team => !isPlaceholderTeam(team))
           .map(team => {
+            const normalizedTeamId = normalizeId(team.id);
             const teamPlayers = (wplPlayersData || []).filter(player => {
-              const playerTeamId = String(player.teamId || '');
-              const teamId = String(team.id || '');
-              return playerTeamId === teamId || 
-                     playerTeamId === `team${teamId}` || 
-                     teamId === `team${playerTeamId}`;
+              const normalizedPlayerTeamId = normalizeId(player.teamId);
+              return normalizedPlayerTeamId === normalizedTeamId ||
+                     String(player.teamId).toLowerCase() === String(team.id).toLowerCase() ||
+                     String(player.teamId) === String(team.id);
             });
+            if (teamPlayers.length > 0) {
+              console.log(`Home page: Matched ${teamPlayers.length} players for WPL team ${team.name} (ID: ${team.id})`);
+            }
             return {
               ...team,
               players: teamPlayers.length > 0 ? teamPlayers : (team.players || [])

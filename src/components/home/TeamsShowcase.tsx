@@ -21,22 +21,38 @@ export default function TeamsShowcase() {
   useEffect(() => {
     const fetchTeams = async () => {
       try {
+        // Helper function to normalize team/player IDs for matching
+        const normalizeId = (id: string | number | undefined): string => {
+          if (!id) return '';
+          const str = String(id).trim();
+          const numMatch = str.replace(/^team/i, '').match(/^\d+$/);
+          return numMatch ? numMatch[0] : str.toLowerCase();
+        };
+        
         // Fetch both teams and players to ensure player counts are accurate
         const [teamsData, playersData] = await Promise.all([
           api.getTeams(),
           api.getPlayers().catch(() => []) // Don't fail if players fetch fails
         ]);
         
+        console.log('TeamsShowcase: Fetched players:', playersData?.length || 0);
+        
         // Filter out placeholder teams
         const realTeams = teamsData
           .filter(team => !isPlaceholderTeam(team))
           .map(team => {
-            // Attach players to teams
+            const normalizedTeamId = normalizeId(team.id);
+            // Attach players to teams with improved matching
             const teamPlayers = (playersData || []).filter(player => {
-              const playerTeamId = String(player.teamId || '').replace(/^team/, '');
-              const teamId = String(team.id || '').replace(/^team/, '');
-              return playerTeamId === teamId || playerTeamId === `team${teamId}` || teamId === `team${playerTeamId}`;
+              const normalizedPlayerTeamId = normalizeId(player.teamId);
+              return normalizedPlayerTeamId === normalizedTeamId ||
+                     String(player.teamId).toLowerCase() === String(team.id).toLowerCase() ||
+                     String(player.teamId) === String(team.id);
             });
+            
+            if (teamPlayers.length > 0) {
+              console.log(`TeamsShowcase: Matched ${teamPlayers.length} players for team ${team.name} (ID: ${team.id})`);
+            }
             
             return {
               ...team,
