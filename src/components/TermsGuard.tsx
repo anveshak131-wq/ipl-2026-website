@@ -73,6 +73,7 @@ export default function TermsGuard({ children }: TermsGuardProps) {
       window.addEventListener("keydown", handleKeyDown);
       return () => window.removeEventListener("keydown", handleKeyDown);
     }
+    return undefined;
   }, [isChecking, pathname, router]);
 
   if (isChecking) {

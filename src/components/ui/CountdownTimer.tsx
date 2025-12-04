@@ -86,6 +86,7 @@ export default function CountdownTimer({ targetDate, onComplete, className = '',
         const timer = setTimeout(() => setIsFlipping(false), 300);
         return () => clearTimeout(timer);
       }
+      return undefined;
     }, [value, isSeconds]);
 
     return (
