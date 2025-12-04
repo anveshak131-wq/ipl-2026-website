@@ -22,6 +22,7 @@ import { TeamsSkeleton, MatchesSkeleton, NewsSkeleton } from '@/components/home/
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/data';
 import { useLeague } from '@/contexts/LeagueContext';
+import { isPlaceholderTeam } from '@/lib/playoffUtils';
 import type { Team, Match, News } from '@/types';
 import { useMemo } from 'react';
 import { Sparkles, ArrowRight, Play, Calendar, TrendingUp, Users, Zap, Trophy, Star } from 'lucide-react';
