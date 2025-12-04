@@ -212,6 +212,7 @@ export default function NewsPage() {
     return undefined;
     return undefined;
     return undefined;
+    return undefined;
     return undefined;}
 
     setFilteredNews(filtered);

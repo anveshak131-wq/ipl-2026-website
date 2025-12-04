@@ -149,33 +149,39 @@ function fixUseEffectReturnsRegex(filePath) {
   // Find useEffect(() => { ...body... }, [deps])
   // Must match: useEffect( ... ) with arrow function and dependency array
   // More precise pattern to avoid matching regular arrow functions
-  const pattern = /(useEffect\s*\(\s*\(\)\s*=>\s*\{)([\s\S]*?)(\}\s*,\s*\[[^\]]*\]\s*\))/g;
+  // Use word boundary to ensure we match "useEffect" as a complete word
+  const pattern = /\buseEffect\s*\(\s*\(\)\s*=>\s*\{([\s\S]*?)\}\s*,\s*\[([^\]]*)\]\s*\)/g;
   
   let matchIndex = 0;
-  content = content.replace(pattern, (match, start, body, end) => {
-    // Verify this is actually a useEffect call by checking the context
-    // Look backwards to ensure it's not part of a variable assignment or regular function
+  content = content.replace(pattern, (match, body, deps) => {
+    // Reconstruct the full match for index finding
+    const fullMatch = `useEffect(() => {${body}}, [${deps}])`;
     const currentIndex = content.indexOf(match, matchIndex);
+    if (currentIndex === -1) return match;
     matchIndex = currentIndex + match.length;
-    const beforeMatch = content.substring(Math.max(0, currentIndex - 100), currentIndex);
+    
+    // Verify this is actually a useEffect call by checking the context
+    const beforeMatch = content.substring(Math.max(0, currentIndex - 50), currentIndex);
     
     // Skip if it looks like a variable assignment (not a direct useEffect call)
     if (beforeMatch.match(/[=:]\s*useEffect\s*$/)) {
       return match; // This is a variable assignment, not a direct useEffect call
     }
     
-    // Skip if it's part of a function definition like "const func = () => { useEffect(...) }"
-    // Check for patterns like: const/let/var name = ... useEffect
+    // Skip if it's part of a function definition
     if (beforeMatch.match(/(const|let|var|function)\s+\w+\s*[=:]\s*[^=]*useEffect\s*$/)) {
       return match;
     }
     
-    // Most importantly: ensure it starts with "useEffect(" at the beginning of a statement
-    // It should be preceded by whitespace, newline, semicolon, or be at the start
+    // Ensure it's at the start of a statement (preceded by whitespace, newline, semicolon, or start of line)
     const charBefore = currentIndex > 0 ? content[currentIndex - 1] : '';
     if (charBefore && !charBefore.match(/[\s\n;{}(]/)) {
       return match; // Not at the start of a statement
     }
+    
+    // Reconstruct start and end for the replacement
+    const start = 'useEffect(() => {';
+    const end = `}, [${deps}])`;
     
     // Check if body has conditional returns
     const hasIfWithReturn = /if\s*\([^)]+\)\s*\{[\s\S]*?return\s+/.test(body);
@@ -217,7 +223,7 @@ function fixUseEffectReturnsRegex(filePath) {
       
       // Add return undefined before closing brace
       modified = true;
-      return start + beforeBrace + '\n' + indent + 'return undefined;' + afterBrace + end;
+      return `useEffect(() => {${beforeBrace}\n${indent}return undefined;${afterBrace}}, [${deps}])`;
     }
     
     return match;
