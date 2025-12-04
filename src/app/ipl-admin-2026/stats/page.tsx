@@ -352,8 +352,7 @@ export default function AdminStatsPage() {
       return publishedList
         .map((pub) => playerMap.get(pub.id))
         .filter((p): p is Player => Boolean(p));
-    
-    return undefined;};
+    };
 
     const initialTopRuns = mapPublishedPlayers(publishedLeaders?.topRunScorers);
     const initialTopWickets = mapPublishedPlayers(publishedLeaders?.topWicketTakers);

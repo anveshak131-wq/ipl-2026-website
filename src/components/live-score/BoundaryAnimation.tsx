@@ -16,6 +16,7 @@ export default function BoundaryAnimation({
       const timer = setTimeout(onComplete, 2000);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [onComplete]);
 
   const isSix = runs === 6;
