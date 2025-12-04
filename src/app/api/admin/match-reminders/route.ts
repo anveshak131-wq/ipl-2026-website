@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     }
 
     const now = new Date();
-    const reminderTime = new Date(now.getTime() + 30 * 60 * 1000); // 30 minutes from now
+    // const reminderTime = new Date(now.getTime() + 30 * 60 * 1000); // Will be used in production for more precise filtering
 
     // Fetch upcoming matches
     const matchesResponse = await fetch(`${request.nextUrl.origin}/api/matches`);
