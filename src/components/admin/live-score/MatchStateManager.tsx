@@ -390,7 +390,7 @@ export default function MatchStateManager({
                 ?
               </p>
               <p className="text-xs text-yellow-400 mb-4">
-                ⚠️ This action will lock the current state and cannot be undone.
+                <span className="inline-flex items-center gap-2"><CustomEmoji type="warning" size={18} /> This action will lock the current state and cannot be undone.</span>
               </p>
               <div className="flex gap-3">
                 <button
