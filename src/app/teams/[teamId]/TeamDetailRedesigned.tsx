@@ -16,6 +16,7 @@ import RCBLottie from '@/components/ui/RCBLottie';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { getAnimatedLogoPath } from '@/lib/logoUtils';
 import CustomEmoji from '@/components/emoji/CustomEmoji';
+import { api } from '@/lib/data';
 
 interface TeamDetailRedesignedProps {
   teamId: string;
@@ -286,33 +287,54 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
       try {
         const numericId = teamId.replace('team', '');
         
-        const teamsResponse = await fetch('/api/teams');
-        if (teamsResponse.ok) {
-          const allTeams = await teamsResponse.json();
-          const team = allTeams.find((t: Team) => t.id === numericId || t.id === teamId);
+        // Use api helper for better error handling
+        const allTeams = await api.getTeams();
+        const team = allTeams.find((t: Team) => {
+          const tId = String(t.id || '').replace(/^team/, '');
+          return tId === numericId || String(t.id) === teamId || String(t.id) === numericId;
+        });
+        
+        console.log('TeamDetailRedesigned: Found team:', team?.id, team?.name);
+        
+        if (team) {
+          // Determine league from team data or default to 'ipl'
+          const teamLeague = (team.league || 'ipl') as 'ipl' | 'wpl';
+          console.log('TeamDetailRedesigned: Team league:', teamLeague);
           
-          if (team) {
-            const playersResponse = await fetch('/api/players');
-            if (playersResponse.ok) {
-              const allPlayers = await playersResponse.json();
-              // Match players by teamId - handle both "1" and "team1" formats
-              const teamPlayers = allPlayers.filter((p: Player) => {
-                const playerTeamId = String(p.teamId || '').replace(/^team/, '');
-                const teamIdStr = String(team.id || '').replace(/^team/, '');
-                return playerTeamId === teamIdStr || 
-                       playerTeamId === `team${teamIdStr}` || 
-                       teamIdStr === `team${playerTeamId}` ||
-                       String(p.teamId) === String(team.id);
-              });
-              const teamWithPlayers = {
-                ...team,
-                players: sortPlayersByRoleAndAge(teamPlayers)
-              };
-              setTeamData(teamWithPlayers);
-            } else {
-              setTeamData(team);
-            }
+          // Fetch players using api helper with league filter
+          const allPlayers = await api.getPlayers(undefined, teamLeague);
+          console.log('TeamDetailRedesigned: Fetched players for league', teamLeague, ':', allPlayers.length);
+          console.log('TeamDetailRedesigned: Team ID:', team.id, 'Type:', typeof team.id);
+          
+          if (allPlayers.length > 0) {
+            console.log('TeamDetailRedesigned: Sample player teamIds:', allPlayers.slice(0, 5).map(p => ({ name: p.name, teamId: p.teamId, teamIdType: typeof p.teamId })));
           }
+          
+          // Match players by teamId - handle both "1" and "team1" formats
+          const teamPlayers = allPlayers.filter((p: Player) => {
+            const playerTeamId = String(p.teamId || '').replace(/^team/, '');
+            const teamIdStr = String(team.id || '').replace(/^team/, '');
+            const matches = playerTeamId === teamIdStr || 
+                           playerTeamId === `team${teamIdStr}` || 
+                           teamIdStr === `team${playerTeamId}` ||
+                           String(p.teamId) === String(team.id);
+            
+            if (matches) {
+              console.log('TeamDetailRedesigned: Matched player:', p.name, 'teamId:', p.teamId, 'to team:', team.id);
+            }
+            return matches;
+          });
+          
+          console.log('TeamDetailRedesigned: Matched players for team:', teamPlayers.length);
+          
+          const teamWithPlayers = {
+            ...team,
+            players: sortPlayersByRoleAndAge(teamPlayers)
+          };
+          setTeamData(teamWithPlayers);
+        } else {
+          console.error('TeamDetailRedesigned: Team not found for ID:', teamId, 'numericId:', numericId);
+          setTeamData(null);
         }
       } catch (error) {
         console.error('Error fetching team data:', error);
