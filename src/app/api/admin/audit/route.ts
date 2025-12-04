@@ -11,8 +11,8 @@ export async function GET(request: NextRequest) {
     const entityId = searchParams.get('entityId');
     const action = searchParams.get('action');
     const userId = searchParams.get('userId');
-    const _startDate = searchParams.get('startDate'); // Will be used in production for date filtering
-    const _endDate = searchParams.get('endDate'); // Will be used in production for date filtering
+    // const startDate = searchParams.get('startDate'); // Will be used in production for date filtering
+    // const endDate = searchParams.get('endDate'); // Will be used in production for date filtering
 
     // In production, fetch from database
     // For now, return mock data

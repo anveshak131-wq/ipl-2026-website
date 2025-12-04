@@ -10,6 +10,8 @@
 import type { NextRequest } from "next/server";
 
 export function GET(_request: NextRequest) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  void _request;
   // Note: In a real application, you would:
   // 1. Check authentication cookies/tokens
   // 2. Query database for user's terms acceptance status
