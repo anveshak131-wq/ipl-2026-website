@@ -350,7 +350,7 @@ export default function AdminDashboard() {
                             </div>
 
                             <div className="space-y-4">
-                            {recentActivities.map((activity, index) => (
+                            {recentActivities.map((activity) => (
                             <div
                                 key={activity.id}
                                 className="group relative flex items-start space-x-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-300 border border-transparent hover:border-white/10"
