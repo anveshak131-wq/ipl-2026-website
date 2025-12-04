@@ -6,6 +6,7 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 import BallEntryPanel from '@/components/admin/live-score/BallEntryPanel';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import { Match, Player } from '@/types';
+import { LiveScoreState, BallEvent } from '@/types/components';
 import { api } from '@/lib/data';
 import { LoadingSpinner } from '@/components/admin/animations';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
@@ -74,7 +75,7 @@ export default function AdminLiveScorePage() {
     [matches, selectedMatchId]
   );
 
-  const handleSave = async (state: any) => {
+  const handleSave = async (state: LiveScoreState) => {
     if (!selectedMatch) return;
 
     setSaveStatus('saving');
@@ -148,7 +149,7 @@ export default function AdminLiveScorePage() {
     return parseFloat(`${whole}.${rem}`);
   }
 
-  function getBallDescription(ball: any): string {
+  function getBallDescription(ball: BallEvent): string {
     if (typeof ball.type === 'number') {
       return `${ball.type} run${ball.type === 1 ? '' : 's'}`;
     }

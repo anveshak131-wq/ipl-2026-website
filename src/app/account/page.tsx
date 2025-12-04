@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
 import Script from 'next/script';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -9,9 +8,6 @@ import { Team } from '@/types';
 import { api } from '@/lib/data';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import Icon from '@/components/ui/Icon';
-import AnimatedSection from '@/components/ui/AnimatedSection';
-import GradientText from '@/components/ui/GradientText';
-import GlassCard from '@/components/ui/GlassCard';
 
 interface ProfileResponse {
   profile?: {
@@ -26,12 +22,6 @@ interface ProfileResponse {
 
 interface SessionsResponse {
   sessions?: { id: string }[];
-}
-
-interface User {
-  id: string;
-  email: string;
-  name: string;
 }
 
 const getPasswordStrength = (password: string) => {

@@ -98,10 +98,27 @@ function WPLTeamsPageContent() {
 
                 const teamsWithPlayers = teamsData
                     .filter(team => !isPlaceholderTeam(team)) // Filter out placeholder teams
-                    .map(team => ({
-                        ...team,
-                        players: (playersData || []).filter(player => player.teamId === team.id)
-                    }));
+                    .map(team => {
+                        // Get players from fetched data, matching by teamId
+                        const fetchedPlayers = (playersData || []).filter(player => {
+                            // Handle both string and number IDs
+                            const playerTeamId = String(player.teamId || '');
+                            const teamId = String(team.id || '');
+                            return playerTeamId === teamId || 
+                                   playerTeamId === `team${teamId}` || 
+                                   teamId === `team${playerTeamId}`;
+                        });
+                        
+                        // Preserve original players if they exist and fetched players is empty
+                        const finalPlayers = fetchedPlayers.length > 0 
+                            ? fetchedPlayers 
+                            : (team.players || []);
+                        
+                        return {
+                            ...team,
+                            players: finalPlayers
+                        };
+                    });
 
                 setTeams(teamsWithPlayers);
                 setMatches(matchesData || []);
@@ -109,7 +126,11 @@ function WPLTeamsPageContent() {
                 console.error('WPL Teams page: Error in fetchTeams:', error);
                 try {
                     const teamsData = await api.getTeams('wpl');
-                    setTeams(teamsData.map(team => ({ ...team, players: [] })));
+                    setTeams(teamsData.map(team => ({ 
+                        ...team, 
+                        // Preserve original players if they exist
+                        players: team.players || [] 
+                    })));
                 } catch (err) {
                     console.error('WPL Teams page: Complete failure:', err);
                     setTeams([]);

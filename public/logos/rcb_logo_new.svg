@@ -1,15 +1,50 @@
-<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Royal Challengers Bengaluru">
-  <title>RCB</title>
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="rcbGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#EC1C24;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#A01419;stop-opacity:1" />
+    <linearGradient id="rcb-red" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EC1C24" />
+      <stop offset="100%" stop-color="#C8102E" />
     </linearGradient>
+    <linearGradient id="rcb-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD700" />
+      <stop offset="100%" stop-color="#FFA500" />
+    </linearGradient>
+    <filter id="rcb-glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
   
-  <circle cx="100" cy="100" r="95" fill="url(#rcbGradient)"/>
-  <circle cx="100" cy="100" r="85" fill="none" stroke="#000000" stroke-width="3"/>
-  <circle cx="100" cy="100" r="75" fill="#000000" opacity="0.2"/>
+  <!-- Background Circle -->
+  <circle cx="200" cy="200" r="180" fill="url(#rcb-red)" opacity="0.1"/>
   
-  <text x="100" y="120" font-family="Arial, sans-serif" font-size="64" font-weight="bold" text-anchor="middle" fill="#FFFFFF" letter-spacing="2">RCB</text>
+  <!-- Main Shield Shape -->
+  <path d="M 200 50 L 280 80 L 320 160 L 320 240 L 280 320 L 200 350 L 120 320 L 80 240 L 80 160 L 120 80 Z" 
+        fill="url(#rcb-red)" filter="url(#rcb-glow)"/>
+  
+  <!-- Inner Shield -->
+  <path d="M 200 70 L 260 95 L 290 160 L 290 230 L 260 295 L 200 320 L 140 295 L 110 230 L 110 160 L 140 95 Z" 
+        fill="none" stroke="url(#rcb-gold)" stroke-width="3"/>
+  
+  <!-- Lion Crown -->
+  <g transform="translate(200, 200)">
+    <!-- Crown Base -->
+    <path d="M -40 -20 L -20 -40 L 20 -40 L 40 -20 L 35 -10 L -35 -10 Z" fill="url(#rcb-gold)"/>
+    <!-- Crown Points -->
+    <rect x="-35" y="-40" width="8" height="20" fill="url(#rcb-gold)"/>
+    <rect x="-10" y="-40" width="8" height="25" fill="url(#rcb-gold)"/>
+    <rect x="2" y="-40" width="8" height="25" fill="url(#rcb-gold)"/>
+    <rect x="27" y="-40" width="8" height="20" fill="url(#rcb-gold)"/>
+    <!-- RCB Text -->
+    <text x="0" y="30" font-family="Arial Black, sans-serif" font-size="32" font-weight="900" 
+          fill="url(#rcb-gold)" text-anchor="middle" letter-spacing="2">RCB</text>
+  </g>
+  
+  <!-- Decorative Elements -->
+  <circle cx="150" cy="150" r="3" fill="url(#rcb-gold)"/>
+  <circle cx="250" cy="150" r="3" fill="url(#rcb-gold)"/>
+  <circle cx="150" cy="250" r="3" fill="url(#rcb-gold)"/>
+  <circle cx="250" cy="250" r="3" fill="url(#rcb-gold)"/>
 </svg>

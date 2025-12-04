@@ -1,15 +1,53 @@
-<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Punjab Kings">
-  <title>PBKS</title>
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="pbksGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#ED1D24;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#B0161C;stop-opacity:1" />
+    <linearGradient id="pbks-red" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ED1D24" />
+      <stop offset="100%" stop-color="#C8102E" />
     </linearGradient>
+    <linearGradient id="pbks-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FBDD0B" />
+      <stop offset="100%" stop-color="#FFD700" />
+    </linearGradient>
+    <filter id="pbks-glow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
   
-  <circle cx="100" cy="100" r="95" fill="url(#pbksGradient)"/>
-  <circle cx="100" cy="100" r="85" fill="none" stroke="#FBDD0B" stroke-width="3"/>
-  <circle cx="100" cy="100" r="75" fill="#FBDD0B" opacity="0.1"/>
+  <!-- Background Circle -->
+  <circle cx="200" cy="200" r="180" fill="url(#pbks-red)" opacity="0.1"/>
   
-  <text x="100" y="110" font-family="Arial, sans-serif" font-size="50" font-weight="bold" text-anchor="middle" fill="#FFFFFF" letter-spacing="1">PBKS</text>
+  <!-- Main Circle -->
+  <circle cx="200" cy="200" r="160" fill="url(#pbks-red)" filter="url(#pbks-glow)"/>
+  
+  <!-- Inner Circle -->
+  <circle cx="200" cy="200" r="140" fill="none" stroke="url(#pbks-gold)" stroke-width="5"/>
+  
+  <!-- Crown -->
+  <g transform="translate(200, 180)">
+    <!-- Crown Base -->
+    <path d="M -50 -10 L -30 -30 L -10 -40 L 10 -40 L 30 -30 L 50 -10 L 45 0 L -45 0 Z" 
+          fill="url(#pbks-gold)"/>
+    <!-- Crown Points -->
+    <rect x="-45" y="-40" width="12" height="30" fill="url(#pbks-gold)"/>
+    <rect x="-15" y="-40" width="12" height="35" fill="url(#pbks-gold)"/>
+    <rect x="3" y="-40" width="12" height="35" fill="url(#pbks-gold)"/>
+    <rect x="33" y="-40" width="12" height="30" fill="url(#pbks-gold)"/>
+    <!-- Gems -->
+    <circle cx="-15" cy="-20" r="4" fill="#ED1D24"/>
+    <circle cx="15" cy="-20" r="4" fill="#ED1D24"/>
+  </g>
+  
+  <!-- PBKS Text -->
+  <text x="200" y="260" font-family="Arial Black, sans-serif" font-size="38" font-weight="900" 
+        fill="url(#pbks-gold)" text-anchor="middle" letter-spacing="2">PBKS</text>
+  
+  <!-- Decorative Elements -->
+  <circle cx="140" cy="140" r="4" fill="url(#pbks-gold)"/>
+  <circle cx="260" cy="140" r="4" fill="url(#pbks-gold)"/>
+  <circle cx="140" cy="260" r="4" fill="url(#pbks-gold)"/>
+  <circle cx="260" cy="260" r="4" fill="url(#pbks-gold)"/>
 </svg>

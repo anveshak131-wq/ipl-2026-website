@@ -9,7 +9,7 @@
 
 import type { NextRequest } from "next/server";
 
-export function GET(request: NextRequest) {
+export function GET(_request: NextRequest) {
   // Note: In a real application, you would:
   // 1. Check authentication cookies/tokens
   // 2. Query database for user's terms acceptance status

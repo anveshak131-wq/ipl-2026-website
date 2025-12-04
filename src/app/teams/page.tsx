@@ -116,10 +116,27 @@ function TeamsPageContent() {
                         }
                         return true;
                     })
-                    .map(team => ({
-                        ...team,
-                        players: (playersData || []).filter(player => player.teamId === team.id)
-                    }));
+                    .map(team => {
+                        // Get players from fetched data, matching by teamId
+                        const fetchedPlayers = (playersData || []).filter(player => {
+                            // Handle both string and number IDs
+                            const playerTeamId = String(player.teamId || '');
+                            const teamId = String(team.id || '');
+                            return playerTeamId === teamId || 
+                                   playerTeamId === `team${teamId}` || 
+                                   teamId === `team${playerTeamId}`;
+                        });
+                        
+                        // Preserve original players if they exist and fetched players is empty
+                        const finalPlayers = fetchedPlayers.length > 0 
+                            ? fetchedPlayers 
+                            : (team.players || []);
+                        
+                        return {
+                            ...team,
+                            players: finalPlayers
+                        };
+                    });
 
                 console.log('Teams page: Setting teams state with', teamsWithPlayers.length, 'teams');
                 setTeams(teamsWithPlayers);
@@ -141,7 +158,11 @@ function TeamsPageContent() {
                             }
                             return true;
                         })
-                        .map(team => ({ ...team, players: [] }));
+                        .map(team => ({ 
+                            ...team, 
+                            // Preserve original players if they exist
+                            players: team.players || [] 
+                        }));
                     setTeams(filteredTeams);
                 } catch (err) {
                     console.error('Teams page: Complete failure:', err);

@@ -1,15 +1,54 @@
-<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Kolkata Knight Riders">
-  <title>KKR</title>
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="kkrGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#3A225D;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#2A1842;stop-opacity:1" />
+    <linearGradient id="kkr-purple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3A225D" />
+      <stop offset="100%" stop-color="#2A1745" />
     </linearGradient>
+    <linearGradient id="kkr-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B9975B" />
+      <stop offset="100%" stop-color="#FFD700" />
+    </linearGradient>
+    <filter id="kkr-glow">
+      <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
   
-  <circle cx="100" cy="100" r="95" fill="url(#kkrGradient)"/>
-  <circle cx="100" cy="100" r="85" fill="none" stroke="#B9975B" stroke-width="3"/>
-  <circle cx="100" cy="100" r="75" fill="#B9975B" opacity="0.1"/>
+  <!-- Background -->
+  <rect width="400" height="400" fill="url(#kkr-purple)"/>
   
-  <text x="100" y="120" font-family="Arial, sans-serif" font-size="64" font-weight="bold" text-anchor="middle" fill="#FFFFFF" letter-spacing="2">KKR</text>
+  <!-- Shield Shape -->
+  <path d="M 200 50 L 280 80 L 320 160 L 320 240 L 280 320 L 200 350 L 120 320 L 80 240 L 80 160 L 120 80 Z" 
+        fill="url(#kkr-gold)" filter="url(#kkr-glow)" opacity="0.2"/>
+  
+  <!-- Main Shield -->
+  <path d="M 200 70 L 260 95 L 290 160 L 290 230 L 260 295 L 200 320 L 140 295 L 110 230 L 110 160 L 140 95 Z" 
+        fill="url(#kkr-purple)" stroke="url(#kkr-gold)" stroke-width="4"/>
+  
+  <!-- Knight Helmet -->
+  <g transform="translate(200, 200)">
+    <!-- Helmet -->
+    <path d="M -30 -40 Q 0 -50 30 -40 L 35 -20 L 30 0 L 25 10 L -25 10 L -30 0 L -35 -20 Z" 
+          fill="url(#kkr-gold)"/>
+    <!-- Visor -->
+    <path d="M -25 0 Q 0 5 25 0" stroke="url(#kkr-purple)" stroke-width="3" fill="none"/>
+    <!-- Plume -->
+    <path d="M 0 -50 L -5 -70 L 5 -70 Z" fill="url(#kkr-gold)"/>
+    <!-- Cross -->
+    <line x1="0" y1="-30" x2="0" y2="-10" stroke="url(#kkr-purple)" stroke-width="3"/>
+    <line x1="-10" y1="-20" x2="10" y2="-20" stroke="url(#kkr-purple)" stroke-width="3"/>
+  </g>
+  
+  <!-- KKR Text -->
+  <text x="200" y="280" font-family="Arial Black, sans-serif" font-size="38" font-weight="900" 
+        fill="url(#kkr-gold)" text-anchor="middle" letter-spacing="2">KKR</text>
+  
+  <!-- Decorative Elements -->
+  <circle cx="150" cy="150" r="4" fill="url(#kkr-gold)"/>
+  <circle cx="250" cy="150" r="4" fill="url(#kkr-gold)"/>
+  <circle cx="150" cy="250" r="4" fill="url(#kkr-gold)"/>
+  <circle cx="250" cy="250" r="4" fill="url(#kkr-gold)"/>
 </svg>

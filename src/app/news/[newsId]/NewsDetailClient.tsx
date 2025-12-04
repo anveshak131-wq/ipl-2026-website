@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Content } from '@/types';
 import { api } from '@/lib/data';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -47,8 +48,16 @@ export default function NewsDetailClient({ newsId }: Props) {
       <div className="max-w-4xl mx-auto px-6 py-12">
         <button onClick={() => router.back()} className="mb-6 text-sm text-gray-300 hover:text-white">← Back</button>
         <h1 className="text-4xl font-black mb-4">{item.title}</h1>
-        <div className="mb-6">
-          <img src={getImageSrc(item.imageUrl)} alt={item.title} className="w-full h-80 object-cover rounded-xl" onError={(e) => { (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400"%3E%3Crect fill="%23333" width="800" height="400"/%3E%3Ctext x="50%25" y="50%25" font-size="32" fill="%23999" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E'; }} />
+        <div className="mb-6 relative w-full h-80 rounded-xl overflow-hidden">
+          <Image
+            src={getImageSrc(item.imageUrl)}
+            alt={item.title}
+            fill
+            className="object-cover rounded-xl"
+            priority
+            sizes="(max-width: 768px) 100vw, 896px"
+            onError={(e) => { (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400"%3E%3Crect fill="%23333" width="800" height="400"/%3E%3Ctext x="50%25" y="50%25" font-size="32" fill="%23999" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E'; }}
+          />
         </div>
         <div className="prose prose-invert max-w-none text-gray-200">
           <p>{item.content}</p>

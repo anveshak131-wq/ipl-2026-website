@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Image from 'next/image';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { News, Highlight, Team, Player, Match } from '@/types';
@@ -426,10 +427,12 @@ export default function FeedPage() {
                     <div className="grid grid-cols-1 md:grid-cols-3">
                       <div className="md:col-span-1 h-40 md:h-full overflow-hidden relative">
                         {item.imageUrl ? (
-                          <img
+                          <Image
                             src={item.imageUrl}
                             alt={item.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            fill
+                            className="object-cover group-hover:scale-110 transition-transform duration-500"
+                            sizes="(max-width: 768px) 100vw, 33vw"
                           />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-slate-800/60">

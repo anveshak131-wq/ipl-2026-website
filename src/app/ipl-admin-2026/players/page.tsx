@@ -466,8 +466,8 @@ export default function AdminPlayers() {
   // Apply sorting
   if (sortField) {
     filteredPlayers = [...filteredPlayers].sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
+      let aValue: number | string;
+      let bValue: number | string;
 
       switch (sortField) {
         case 'battingAverage':

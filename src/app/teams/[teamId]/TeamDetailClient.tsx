@@ -38,7 +38,9 @@ import {
   CricketBatIcon,
   TrophyIcon
 } from '@/components/ui/CustomIcons';
-import { Team, Player, CoachingStaff, KeyPlayers, Match } from '@/types';
+import Image from 'next/image';
+import { Team, Player, CoachingStaff, KeyPlayers, Match, Trophy } from '@/types';
+import { PlayerCardProps, KeyPlayersSectionProps, StatsTabProps, AboutTabProps } from '@/types/components';
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import RCBLottie from '@/components/ui/RCBLottie';
@@ -139,8 +141,8 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
     noResult: number;
     winPercentage: number;
   } | null>(null);
-  const [lastMatch, setLastMatch] = useState<any | null>(null);
-  const [nextMatch, setNextMatch] = useState<any | null>(null);
+  const [lastMatch, setLastMatch] = useState<Match | null>(null);
+  const [nextMatch, setNextMatch] = useState<Match | null>(null);
   const [allMatches, setAllMatches] = useState<Match[]>([]);
   const [coachingStaff, setCoachingStaff] = useState<CoachingStaff | null>(null);
   const [keyPlayers, setKeyPlayers] = useState<KeyPlayers | null>(null);
@@ -194,7 +196,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
             try {
               const keyPlayersResponse = await fetch(`/api/key-players?teamId=${team.id}`);
               if (keyPlayersResponse.ok) {
-                const raw: any = await keyPlayersResponse.json();
+                const raw = await keyPlayersResponse.json() as { keyPlayers?: KeyPlayers };
                 if (raw) {
                   const normalized: KeyPlayers = {
                     teamId: raw.teamId || team.id,
@@ -239,17 +241,17 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
         if (!res.ok) return;
 
         const matches = await res.json();
-        const teamMatches = matches.filter((m: any) => m.team1?.id === teamData.id || m.team2?.id === teamData.id);
+        const teamMatches = matches.filter((m: Match) => m.team1?.id === teamData.id || m.team2?.id === teamData.id);
         setAllMatches(teamMatches);
 
-        const completed = teamMatches.filter((m: any) => m.status === 'completed');
-        const upcoming = teamMatches.filter((m: any) => m.status === 'upcoming');
+        const completed = teamMatches.filter((m: Match) => m.status === 'completed');
+        const upcoming = teamMatches.filter((m: Match) => m.status === 'upcoming');
 
         let wins = 0;
         let losses = 0;
         let noResult = 0;
 
-        completed.forEach((m: any) => {
+        completed.forEach((m: Match) => {
           if (!m.result) {
             noResult += 1;
             return;
@@ -1271,7 +1273,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
 }
 
 // Player Card Component with enhanced animations and role tags
-function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyPlayers }: any) {
+function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyPlayers }: PlayerCardProps) {
   const stats = player.stats || {};
 
   // Derive role tags
@@ -1427,7 +1429,7 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
 }
 
 // Key Players Section (admin-managed)
-function KeyPlayersSection({ teamData, keyPlayers, primaryColor, secondaryColor }: any) {
+function KeyPlayersSection({ teamData, keyPlayers, primaryColor, secondaryColor }: KeyPlayersSectionProps) {
   if (!teamData || !teamData.players || !keyPlayers) {
     return null;
   }
@@ -1514,7 +1516,7 @@ function KeyPlayersSection({ teamData, keyPlayers, primaryColor, secondaryColor 
 }
 
 // Stats Tab
-function StatsTab({ teamData, primaryColor, secondaryColor, batsmen, bowlers, allRounders, wicketkeepers }: any) {
+function StatsTab({ teamData, primaryColor, secondaryColor, batsmen, bowlers, allRounders, wicketkeepers }: StatsTabProps) {
   const squad: Player[] = (teamData.players || []) as Player[];
 
   const totals = squad.reduce(
@@ -1711,7 +1713,7 @@ function StatsTab({ teamData, primaryColor, secondaryColor, batsmen, bowlers, al
 }
 
 // About Tab
-function AboutTab({ teamData, primaryColor, secondaryColor, coachingStaff }: any) {
+function AboutTab({ teamData, primaryColor, secondaryColor, coachingStaff }: AboutTabProps) {
   const hasCoachingStaff = coachingStaff && (
     coachingStaff.headCoach ||
     coachingStaff.mentor ||
@@ -1853,7 +1855,7 @@ function AboutTab({ teamData, primaryColor, secondaryColor, coachingStaff }: any
            <h4 className="text-2xl font-black" style={{ color: primaryColor.textOnLight }}>Trophy Cabinet</h4>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {teamData.trophies.map((trophy: any, idx: number) => (
+            {teamData.trophies.map((trophy, idx: number) => (
               <div key={idx} className="group p-6 rounded-2xl bg-white/5 hover:bg-white/10 transition-all border border-white/5 hover:border-white/20">
                 <div className="flex items-center gap-4">
                   <div className="text-5xl">🥇</div>

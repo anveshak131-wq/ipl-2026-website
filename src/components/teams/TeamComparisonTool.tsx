@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, TrendingUp, TrendingDown, Minus, Trophy, Users, Target } from 'lucide-react';
 import { Team } from '@/types';
@@ -115,10 +116,12 @@ export default function TeamComparisonTool({ teams, onClose }: TeamComparisonToo
                       {isRCB ? (
                         <RCBLionLogo className="w-full h-full" />
                       ) : (
-                        <img
+                        <Image
                           src={animatedLogo}
                           alt={team.shortName}
-                          className="w-full h-full object-contain"
+                          width={48}
+                          height={48}
+                          className="object-contain"
                         />
                       )}
                     </div>
@@ -146,10 +149,12 @@ export default function TeamComparisonTool({ teams, onClose }: TeamComparisonToo
                           return <RCBLionLogo className="w-full h-full" />;
                         }
                         return (
-                        <img
+                        <Image
                             src={logoPath}
                           alt={team.shortName}
-                          className="w-full h-full object-contain"
+                          width={64}
+                          height={64}
+                          className="object-contain"
                         />
                         );
                       })()}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { Content } from '@/types';
 
 interface NewsModalProps {
@@ -87,11 +88,14 @@ export default function NewsModal({ isOpen, newsId, onClose }: NewsModalProps) {
             <div className="space-y-6">
               {/* Image */}
               {item.imageUrl && (
-                <div className="w-full h-96 rounded-xl overflow-hidden bg-gradient-to-br from-gray-800 to-black">
-                  <img
+                <div className="relative w-full h-96 rounded-xl overflow-hidden bg-gradient-to-br from-gray-800 to-black">
+                  <Image
                     src={getImageSrc(item.imageUrl)}
                     alt={item.title}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    fill
+                    className="object-cover hover:scale-105 transition-transform duration-300"
+                    priority
+                    sizes="(max-width: 768px) 100vw, 768px"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
                     }}

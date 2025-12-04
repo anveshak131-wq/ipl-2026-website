@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useLeague } from '@/contexts/LeagueContext';
 import AdminSidebar from '@/components/admin/AdminSidebar';
@@ -649,10 +650,12 @@ export default function AdminTeams() {
                                                                     // Use team.logo if available and not the default placeholder
                                                                     if (team.logo && team.logo !== '/logos/default-team.svg' && team.logo.trim() !== '') {
                                                                         return (
-                                                                            <img 
+                                                                            <Image 
                                                                                 src={team.logo} 
                                                                                 alt={team.name} 
-                                                                                className="w-8 h-8 object-contain"
+                                                                                width={32}
+                                                                                height={32}
+                                                                                className="object-contain"
                                                                                 onError={(e) => {
                                                                                     // If logo fails to load, try animated logo
                                                                                     const anim = getAnimatedLogoPath(team.id, team.shortName, team.league);
@@ -788,10 +791,12 @@ export default function AdminTeams() {
                                                         // Use team.logo if available and not the default placeholder
                                                         if (team.logo && team.logo !== '/logos/default-team.svg' && team.logo.trim() !== '') {
                                                             return (
-                                                                <img 
+                                                                <Image 
                                                                     src={team.logo} 
                                                                     alt={team.name} 
-                                                                    className="w-10 h-10 object-contain"
+                                                                    width={40}
+                                                                    height={40}
+                                                                    className="object-contain"
                                                                     onError={(e) => {
                                                                         // If logo fails to load, try animated logo
                                                                         const anim = getAnimatedLogoPath(team.id, team.shortName, team.league);
@@ -824,10 +829,12 @@ export default function AdminTeams() {
                                                         // If we have an animated logo path, use it
                                                         if (anim && anim !== '/logos/rcb_logo_animated.svg') {
                                                             return (
-                                                                <img 
+                                                                <Image 
                                                                     src={anim} 
                                                                     alt={team.name} 
-                                                                    className="w-10 h-10 object-contain"
+                                                                    width={40}
+                                                                    height={40}
+                                                                    className="object-contain"
                                                                     onError={(e) => {
                                                                         // Final fallback: show short name
                                                                         (e.target as HTMLImageElement).style.display = 'none';

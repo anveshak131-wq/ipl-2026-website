@@ -1,15 +1,56 @@
-<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Chennai Super Kings">
-  <title>CSK</title>
+<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="cskGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#FFFF00;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#CCCC00;stop-opacity:1" />
+    <linearGradient id="csk-yellow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFF00" />
+      <stop offset="100%" stop-color="#FFD700" />
     </linearGradient>
+    <linearGradient id="csk-blue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0081E8" />
+      <stop offset="100%" stop-color="#0066CC" />
+    </linearGradient>
+    <filter id="csk-glow">
+      <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
   
-  <circle cx="100" cy="100" r="95" fill="url(#cskGradient)"/>
-  <circle cx="100" cy="100" r="85" fill="none" stroke="#0081E8" stroke-width="3"/>
-  <circle cx="100" cy="100" r="75" fill="#0081E8" opacity="0.1"/>
+  <!-- Background Circle -->
+  <circle cx="200" cy="200" r="180" fill="url(#csk-yellow)" opacity="0.15"/>
   
-  <text x="100" y="120" font-family="Arial, sans-serif" font-size="64" font-weight="bold" text-anchor="middle" fill="#0081E8" letter-spacing="2">CSK</text>
+  <!-- Main Circle -->
+  <circle cx="200" cy="200" r="170" fill="url(#csk-yellow)" filter="url(#csk-glow)"/>
+  
+  <!-- Inner Circle -->
+  <circle cx="200" cy="200" r="150" fill="none" stroke="url(#csk-blue)" stroke-width="5"/>
+  
+  <!-- Lion Head -->
+  <g transform="translate(200, 180)">
+    <!-- Head Circle -->
+    <circle cx="0" cy="0" r="45" fill="url(#csk-blue)"/>
+    <!-- Mane -->
+    <path d="M -45 0 Q -50 -20 -40 -30 Q -30 -35 -20 -25 Q -10 -30 0 -35 Q 10 -30 20 -25 Q 30 -35 40 -30 Q 50 -20 45 0" 
+          fill="url(#csk-yellow)" opacity="0.8"/>
+    <!-- Face -->
+    <ellipse cx="0" cy="5" rx="30" ry="35" fill="url(#csk-yellow)"/>
+    <!-- Eyes -->
+    <circle cx="-12" cy="-5" r="6" fill="url(#csk-blue)"/>
+    <circle cx="12" cy="-5" r="6" fill="url(#csk-blue)"/>
+    <!-- Nose -->
+    <path d="M 0 5 L -5 15 L 5 15 Z" fill="url(#csk-blue)"/>
+    <!-- Mouth -->
+    <path d="M -10 20 Q 0 25 10 20" stroke="url(#csk-blue)" stroke-width="2" fill="none"/>
+  </g>
+  
+  <!-- CSK Text -->
+  <text x="200" y="280" font-family="Arial Black, sans-serif" font-size="42" font-weight="900" 
+        fill="url(#csk-blue)" text-anchor="middle" letter-spacing="3">CSK</text>
+  
+  <!-- Decorative Stars -->
+  <path d="M 130 130 L 135 140 L 145 140 L 137 147 L 140 157 L 130 150 L 120 157 L 123 147 L 115 140 L 125 140 Z" 
+        fill="url(#csk-blue)" opacity="0.6"/>
+  <path d="M 270 130 L 275 140 L 285 140 L 277 147 L 280 157 L 270 150 L 260 157 L 263 147 L 255 140 L 265 140 Z" 
+        fill="url(#csk-blue)" opacity="0.6"/>
 </svg>

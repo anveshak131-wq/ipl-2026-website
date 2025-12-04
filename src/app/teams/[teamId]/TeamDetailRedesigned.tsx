@@ -9,7 +9,8 @@ import PlayerModal from '@/components/teams/PlayerModal';
 import WPLPlayerCard from '@/components/teams/WPLPlayerCard';
 import WPLPlayerModal from '@/components/teams/WPLPlayerModal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import { Team, Player } from '@/types';
+import { Team, Player, Trophy } from '@/types';
+import { StatsCardProps, PlayerCard3DProps } from '@/types/components';
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import RCBLottie from '@/components/ui/RCBLottie';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
@@ -74,7 +75,7 @@ function FloatingParticles() {
 }
 
 // Stats Card Component
-function StatsCard({ icon, value, label, delay }: any) {
+function StatsCard({ icon, value, label, delay }: StatsCardProps) {
   const [count, setCount] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -141,7 +142,7 @@ function StatsCard({ icon, value, label, delay }: any) {
 }
 
 // Enhanced Player Card with 3D Effect
-function PlayerCard3D({ player, onClick, index }: any) {
+function PlayerCard3D({ player, onClick, index }: PlayerCard3DProps) {
   const [tiltX, setTiltX] = useState(0);
   const [tiltY, setTiltY] = useState(0);
 
@@ -702,7 +703,7 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
                   
                   {teamData.trophies.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                      {teamData.trophies.map((trophy: any, i: number) => (
+                      {teamData.trophies.map((trophy: Trophy, i: number) => (
                         <div key={i} className="group text-center">
                           <div className="w-32 h-32 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-yellow-600 to-yellow-900 flex items-center justify-center text-6xl transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-2xl">
                             🥇

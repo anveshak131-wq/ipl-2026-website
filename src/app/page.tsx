@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -153,21 +154,57 @@ export default function Home() {
       try {
         // Load IPL data
         setIplLoading(true);
-        const [iplTeamsData, iplMatchesData] = await Promise.all([
+        const [iplTeamsData, iplMatchesData, iplPlayersData] = await Promise.all([
           api.getTeams('ipl'),
           api.getMatches('ipl'),
+          api.getPlayers(undefined, 'ipl').catch(() => []), // Fetch players for accurate counts
         ]);
-        setIplTeams(iplTeamsData);
+        
+        // Attach players to teams
+        const iplTeamsWithPlayers = iplTeamsData.map(team => {
+          const teamPlayers = (iplPlayersData || []).filter(player => {
+            const playerTeamId = String(player.teamId || '');
+            const teamId = String(team.id || '');
+            return playerTeamId === teamId || 
+                   playerTeamId === `team${teamId}` || 
+                   teamId === `team${playerTeamId}`;
+          });
+          return {
+            ...team,
+            players: teamPlayers.length > 0 ? teamPlayers : (team.players || [])
+          };
+        });
+        
+        setIplTeams(iplTeamsWithPlayers);
         setIplMatches(iplMatchesData);
         setIplLoading(false);
 
         // Load WPL data
         setWplLoading(true);
-        const [wplTeamsData, wplMatchesData] = await Promise.all([
+        const [wplTeamsData, wplMatchesData, wplPlayersData] = await Promise.all([
           api.getTeams('wpl'),
           api.getMatches('wpl'),
+          api.getPlayers(undefined, 'wpl').catch(() => []), // Fetch players for accurate counts
         ]);
-        setWplTeams(wplTeamsData);
+        
+        // Attach players to teams
+        const wplTeamsWithPlayers = wplTeamsData
+          .filter(team => !isPlaceholderTeam(team))
+          .map(team => {
+            const teamPlayers = (wplPlayersData || []).filter(player => {
+              const playerTeamId = String(player.teamId || '');
+              const teamId = String(team.id || '');
+              return playerTeamId === teamId || 
+                     playerTeamId === `team${teamId}` || 
+                     teamId === `team${playerTeamId}`;
+            });
+            return {
+              ...team,
+              players: teamPlayers.length > 0 ? teamPlayers : (team.players || [])
+            };
+          });
+        
+        setWplTeams(wplTeamsWithPlayers);
         setWplMatches(wplMatchesData);
         setWplLoading(false);
 
@@ -530,16 +567,21 @@ export default function Home() {
                         <AnimatePresence mode="wait">
                           {iplTeams.filter(t => !isPlaceholderTeam(t)).slice(0, 5).map((team, idx) => (
                             idx === iplLogoIndex && (
-                              <motion.img
+                              <motion.div
                                 key={team.id}
-                                src={getAnimatedLogoPath(team.id, team.shortName, 'ipl')}
-                                alt={team.shortName}
-                                className="w-10 h-10 object-contain"
                                 initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
                                 animate={{ opacity: 1, scale: 1, rotate: 0 }}
                                 exit={{ opacity: 0, scale: 0.8, rotate: 10 }}
                                 transition={{ duration: 0.5 }}
-                              />
+                              >
+                                <Image
+                                  src={getAnimatedLogoPath(team.id, team.shortName, 'ipl')}
+                                  alt={team.shortName}
+                                  width={40}
+                                  height={40}
+                                  className="object-contain"
+                                />
+                              </motion.div>
                             )
                           ))}
                         </AnimatePresence>

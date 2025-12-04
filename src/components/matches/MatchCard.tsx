@@ -1,5 +1,6 @@
 "use client";
 
+import Image from 'next/image';
 import { Match } from '@/types';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import RCBLottie from '@/components/ui/RCBLottie';
@@ -53,20 +54,24 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
       // Check for TBA logo
       if (team.logo.includes('tba_logo.svg')) {
         return (
-          <img
+          <Image
             src={team.logo}
             alt="TBA"
-            className="w-10 h-10 object-contain"
+            width={40}
+            height={40}
+            className="object-contain"
           />
         );
       }
       // If team has a logo, use it directly (unless it's a special case)
       if (!team.logo.endsWith('.json') && !team.logo.includes('rcb_logo_premium.svg')) {
         return (
-          <img
+          <Image
             src={team.logo}
             alt={`${team.shortName} logo`}
-            className="w-10 h-10 object-contain"
+            width={40}
+            height={40}
+            className="object-contain"
             onError={(e) => {
               // Fallback to animated path if team.logo fails
               const teamLeague = team.league || match.league || 'ipl';
@@ -81,10 +86,12 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
     // Check if it's a TBD team by ID or shortName
     if (team.id.includes('tbd-') || team.shortName === 'TBD' || team.shortName?.includes('Place') || team.name?.includes('Place Team')) {
       return (
-        <img
+        <Image
           src="/logos/tba_logo.svg"
           alt="TBA"
-          className="w-10 h-10 object-contain"
+          width={40}
+          height={40}
+          className="object-contain"
         />
       );
     }
@@ -104,10 +111,12 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
     }
 
     return (
-      <img
+      <Image
         src={animatedPath}
         alt={`${team.shortName} logo`}
-        className="w-10 h-10 object-contain"
+        width={40}
+        height={40}
+        className="object-contain"
         onError={(e) => {
           (e.target as HTMLImageElement).src = fallbackPath;
         }}

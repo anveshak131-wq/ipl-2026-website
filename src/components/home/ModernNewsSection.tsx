@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Clock, ArrowRight, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import AnimatedCard from '@/components/ui/AnimatedCard';
@@ -66,10 +67,12 @@ export default function ModernNewsSection({ articles, isLoading = false }: Moder
               {/* Image */}
               {article.image && (
                 <div className="relative h-40 overflow-hidden bg-gradient-to-br from-blue-500/20 to-purple-500/20">
-                  <img
+                  <Image
                     src={article.image}
                     alt={article.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    fill
+                    className="object-cover group-hover:scale-110 transition-transform duration-500"
+                    sizes="(max-width: 768px) 100vw, 50vw"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 </div>

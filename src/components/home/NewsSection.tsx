@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { News } from '@/types';
 import { api } from '@/lib/data';
 import LoadingSpinner from '../ui/LoadingSpinner';
@@ -119,10 +120,13 @@ export default function NewsSection() {
                 }}
               >
                 <div className="relative h-56 md:h-64 lg:h-72 overflow-hidden bg-gradient-to-br from-slate-700 to-slate-900">
-                  <img
+                  <Image
                     src={getImageSrc(featuredImportant)}
                     alt={featuredImportant.title}
-                    className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-500 group-hover:brightness-110"
+                    fill
+                    className="object-cover group-hover:scale-125 transition-transform duration-500 group-hover:brightness-110"
+                    priority
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = `https://via.placeholder.com/800x400?text=${featuredImportant.title.substring(0, 20)}`;
                     }}
@@ -188,10 +192,12 @@ export default function NewsSection() {
                     style={{ animationDelay: `${index * 80}ms` }}
                   >
                     <div className="relative h-40 overflow-hidden bg-gradient-to-br from-slate-700 to-slate-900">
-                      <img
+                      <Image
                         src={getImageSrc(article)}
                         alt={article.title}
-                        className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-500 group-hover:brightness-110"
+                        fill
+                        className="object-cover group-hover:scale-125 transition-transform duration-500 group-hover:brightness-110"
+                        sizes="(max-width: 768px) 100vw, 50vw"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = `https://via.placeholder.com/400x300?text=${article.title.substring(0, 20)}`;
                         }}
@@ -261,10 +267,12 @@ export default function NewsSection() {
                 >
                   {/* Image Container */}
                   <div className="relative h-48 overflow-hidden bg-gradient-to-br from-slate-700 to-slate-900">
-                    <img
+                    <Image
                       src={getImageSrc(article)}
                       alt={article.title}
-                      className="w-full h-full object-cover group-hover:scale-125 transition-transform duration-500 group-hover:brightness-110"
+                      fill
+                      className="object-cover group-hover:scale-125 transition-transform duration-500 group-hover:brightness-110"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = `https://via.placeholder.com/400x300?text=${article.title.substring(0, 20)}`;
                       }}

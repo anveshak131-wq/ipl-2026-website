@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { versionId, entityType, entityId } = body;
+    const { versionId: _versionId, entityType: _entityType, entityId: _entityId } = body; // Will be used in production rollback logic
 
     // In production, implement rollback logic
     // This would:

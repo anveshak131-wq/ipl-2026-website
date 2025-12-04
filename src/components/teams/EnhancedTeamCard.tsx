@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { Team } from '@/types';
 import { useRouter } from 'next/navigation';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
@@ -96,10 +97,12 @@ export default function EnhancedTeamCard({ team, onPlayerClick, isFavorite = fal
                 <RCBLionLogo className="w-full h-full" />
               </div>
             ) : (
-              <img
+              <Image
                 src={imageError ? fallbackLogo : animatedLogo}
                 alt={`${team.shortName} logo`}
-                className="w-16 h-16 object-contain relative z-10"
+                width={64}
+                height={64}
+                className="object-contain relative z-10"
                 onError={() => setImageError(true)}
               />
             )}

@@ -12,6 +12,7 @@ import { useLiveScore, BallEvent } from '@/hooks/useLiveScore';
 import { Player } from '@/types';
 import { Users, RotateCcw, Save } from 'lucide-react';
 import { initializeMatchState } from '@/lib/matchStateMachine';
+import { LiveScoreState } from '@/types/components';
 
 interface BallEntryPanelProps {
   matchId: string;
@@ -19,7 +20,7 @@ interface BallEntryPanelProps {
   team2Name: string;
   team1Id: string;
   team2Id: string;
-  onSave: (state: any) => Promise<void>;
+  onSave: (state: LiveScoreState) => Promise<void>;
   players: Player[];
   league?: 'ipl' | 'wpl';
   initialBatter?: { id: string; name: string };

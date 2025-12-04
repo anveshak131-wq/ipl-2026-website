@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useLeague } from '@/contexts/LeagueContext';
 import { motion } from 'framer-motion';
@@ -23,6 +24,7 @@ import {
     getMatchNumberDisplay
 } from '@/lib/matchNumberUtils';
 import { PlayoffType } from '@/types';
+import { BulkEditValues } from '@/types/components';
 import { getTBDTeam, getPlayoffMatchDetails, getPlayoffTypes } from '@/lib/playoffUtils';
 import { 
     exportToCSV, 
@@ -730,7 +732,7 @@ export default function AdminMatches() {
         status: filters.status !== 'all' ? filters.status : undefined,
     });
 
-    const handleBulkEdit = async (values: { [key: string]: any }) => {
+    const handleBulkEdit = async (values: BulkEditValues) => {
         if (selectedMatches.size === 0) return;
 
         try {
@@ -2332,10 +2334,12 @@ export default function AdminMatches() {
                                                                 
                                                                 if (isPlaceholderTeam) {
                                                                     return (
-                                                                        <img 
+                                                                        <Image 
                                                                             src="/logos/tba_logo.svg" 
                                                                             alt="TBA" 
-                                                                            className="w-8 h-8 object-contain"
+                                                                            width={32}
+                                                                            height={32}
+                                                                            className="object-contain"
                                                                         />
                                                                     );
                                                                 }
@@ -2345,20 +2349,24 @@ export default function AdminMatches() {
                                                                     // Check for TBA logo
                                                                     if (match.team1.logo.includes('tba_logo.svg')) {
                                                                         return (
-                                                                            <img 
+                                                                            <Image 
                                                                                 src={match.team1.logo} 
                                                                                 alt="TBA" 
-                                                                                className="w-8 h-8 object-contain"
+                                                                                width={32}
+                                                                                height={32}
+                                                                                className="object-contain"
                                                                             />
                                                                         );
                                                                     }
                                                                     // If team has a logo, use it directly (unless it's a special case)
                                                                     if (!match.team1.logo.endsWith('.json') && !match.team1.logo.includes('rcb_logo_premium.svg')) {
                                                                         return (
-                                                                            <img 
+                                                                            <Image 
                                                                                 src={match.team1.logo} 
                                                                                 alt={match.team1.shortName || match.team1.name} 
-                                                                                className="w-8 h-8 object-contain"
+                                                                                width={32}
+                                                                                height={32}
+                                                                                className="object-contain"
                                                                                 onError={(e) => {
                                                                                     // Fallback to animated path if team.logo fails
                                                                                     const team1League = match.team1.league || match.league || 'ipl';
@@ -2389,10 +2397,12 @@ export default function AdminMatches() {
                                                                     );
                                                                 }
                                                                 return (
-                                                                    <img 
+                                                                    <Image 
                                                                         src={animatedPath} 
                                                                         alt={match.team1.shortName || match.team1.name} 
-                                                                        className="w-8 h-8 object-contain"
+                                                                        width={32}
+                                                                        height={32}
+                                                                        className="object-contain"
                                                                         onError={(e) => {
                                                                             // Fallback to default logo
                                                                             const fallback = getLogoPath(match.team1.id);
@@ -2430,10 +2440,12 @@ export default function AdminMatches() {
                                                                 
                                                                 if (isPlaceholderTeam) {
                                                                     return (
-                                                                        <img 
+                                                                        <Image 
                                                                             src="/logos/tba_logo.svg" 
                                                                             alt="TBA" 
-                                                                            className="w-8 h-8 object-contain"
+                                                                            width={32}
+                                                                            height={32}
+                                                                            className="object-contain"
                                                                         />
                                                                     );
                                                                 }
@@ -2443,20 +2455,24 @@ export default function AdminMatches() {
                                                                     // Check for TBA logo
                                                                     if (match.team2.logo.includes('tba_logo.svg')) {
                                                                         return (
-                                                                            <img 
+                                                                            <Image 
                                                                                 src={match.team2.logo} 
                                                                                 alt="TBA" 
-                                                                                className="w-8 h-8 object-contain"
+                                                                                width={32}
+                                                                                height={32}
+                                                                                className="object-contain"
                                                                             />
                                                                         );
                                                                     }
                                                                     // If team has a logo, use it directly (unless it's a special case)
                                                                     if (!match.team2.logo.endsWith('.json') && !match.team2.logo.includes('rcb_logo_premium.svg')) {
                                                                         return (
-                                                                            <img 
+                                                                            <Image 
                                                                                 src={match.team2.logo} 
                                                                                 alt={match.team2.shortName || match.team2.name} 
-                                                                                className="w-8 h-8 object-contain"
+                                                                                width={32}
+                                                                                height={32}
+                                                                                className="object-contain"
                                                                                 onError={(e) => {
                                                                                     // Fallback to animated path if team.logo fails
                                                                                     const team2League = match.team2.league || match.league || 'ipl';
@@ -2487,10 +2503,12 @@ export default function AdminMatches() {
                                                                     );
                                                                 }
                                                                 return (
-                                                                    <img 
+                                                                    <Image 
                                                                         src={animatedPath} 
                                                                         alt={match.team2.shortName || match.team2.name} 
-                                                                        className="w-8 h-8 object-contain"
+                                                                        width={32}
+                                                                        height={32}
+                                                                        className="object-contain"
                                                                         onError={(e) => {
                                                                             // Fallback to default logo
                                                                             const fallback = getLogoPath(match.team2.id);
@@ -2724,10 +2742,12 @@ export default function AdminMatches() {
                                                                     
                                                                     if (isPlaceholderTeam) {
                                                                         return (
-                                                                            <img 
+                                                                            <Image 
                                                                                 src="/logos/tba_logo.svg" 
                                                                                 alt="TBA" 
-                                                                                className="w-10 h-10 object-contain"
+                                                                                width={40}
+                                                                                height={40}
+                                                                                className="object-contain"
                                                                             />
                                                                         );
                                                                     }
@@ -2737,20 +2757,24 @@ export default function AdminMatches() {
                                                                         // Check for TBA logo
                                                                         if (match.team1.logo.includes('tba_logo.svg')) {
                                                                             return (
-                                                                                <img 
+                                                                                <Image 
                                                                                     src={match.team1.logo} 
                                                                                     alt="TBA" 
-                                                                                    className="w-10 h-10 object-contain"
+                                                                                    width={40}
+                                                                                    height={40}
+                                                                                    className="object-contain"
                                                                                 />
                                                                             );
                                                                         }
                                                                         // If team has a logo, use it directly (unless it's a special case)
                                                                         if (!match.team1.logo.endsWith('.json') && !match.team1.logo.includes('rcb_logo_premium.svg')) {
                                                                             return (
-                                                                                <img 
+                                                                                <Image 
                                                                                     src={match.team1.logo} 
                                                                                     alt={match.team1.shortName || match.team1.name} 
-                                                                                    className="w-10 h-10 object-contain"
+                                                                                    width={40}
+                                                                                    height={40}
+                                                                                    className="object-contain"
                                                                                     onError={(e) => {
                                                                                         // Fallback to animated path if team.logo fails
                                                                                         const team1League = match.team1.league || match.league || 'ipl';
@@ -2781,10 +2805,12 @@ export default function AdminMatches() {
                                                                         );
                                                                     }
                                                                     return (
-                                                                        <img 
+                                                                        <Image 
                                                                             src={animatedPath} 
                                                                             alt={match.team1.shortName || match.team1.name} 
-                                                                            className="w-10 h-10 object-contain"
+                                                                            width={40}
+                                                                            height={40}
+                                                                            className="object-contain"
                                                                             onError={(e) => {
                                                                                 // Fallback to default logo
                                                                                 const fallback = getLogoPath(match.team1.id);
@@ -2823,10 +2849,12 @@ export default function AdminMatches() {
                                                                     
                                                                     if (isPlaceholderTeam) {
                                                                         return (
-                                                                            <img 
+                                                                            <Image 
                                                                                 src="/logos/tba_logo.svg" 
                                                                                 alt="TBA" 
-                                                                                className="w-10 h-10 object-contain"
+                                                                                width={40}
+                                                                                height={40}
+                                                                                className="object-contain"
                                                                             />
                                                                         );
                                                                     }
@@ -2836,20 +2864,24 @@ export default function AdminMatches() {
                                                                         // Check for TBA logo
                                                                         if (match.team2.logo.includes('tba_logo.svg')) {
                                                                             return (
-                                                                                <img 
+                                                                                <Image 
                                                                                     src={match.team2.logo} 
                                                                                     alt="TBA" 
-                                                                                    className="w-10 h-10 object-contain"
+                                                                                    width={40}
+                                                                                    height={40}
+                                                                                    className="object-contain"
                                                                                 />
                                                                             );
                                                                         }
                                                                         // If team has a logo, use it directly (unless it's a special case)
                                                                         if (!match.team2.logo.endsWith('.json') && !match.team2.logo.includes('rcb_logo_premium.svg')) {
                                                                             return (
-                                                                                <img 
+                                                                                <Image 
                                                                                     src={match.team2.logo} 
                                                                                     alt={match.team2.shortName || match.team2.name} 
-                                                                                    className="w-10 h-10 object-contain"
+                                                                                    width={40}
+                                                                                    height={40}
+                                                                                    className="object-contain"
                                                                                     onError={(e) => {
                                                                                         // Fallback to animated path if team.logo fails
                                                                                         const team2League = match.team2.league || match.league || 'ipl';
@@ -2880,10 +2912,12 @@ export default function AdminMatches() {
                                                                         );
                                                                     }
                                                                     return (
-                                                                        <img 
+                                                                        <Image 
                                                                             src={animatedPath} 
                                                                             alt={match.team2.shortName || match.team2.name} 
-                                                                            className="w-10 h-10 object-contain"
+                                                                            width={40}
+                                                                            height={40}
+                                                                            className="object-contain"
                                                                             onError={(e) => {
                                                                                 // Fallback to default logo
                                                                                 const fallback = getLogoPath(match.team2.id);

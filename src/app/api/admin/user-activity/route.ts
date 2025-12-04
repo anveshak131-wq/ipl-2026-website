@@ -8,8 +8,8 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const userId = searchParams.get('userId');
-    const startDate = searchParams.get('startDate');
-    const endDate = searchParams.get('endDate');
+    const _startDate = searchParams.get('startDate'); // Will be used in production for date filtering
+    const _endDate = searchParams.get('endDate'); // Will be used in production for date filtering
 
     // In production, fetch from database
     // For now, return mock data
