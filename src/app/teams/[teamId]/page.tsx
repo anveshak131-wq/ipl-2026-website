@@ -2,19 +2,13 @@ import TeamDetailClient from './TeamDetailClient';
 
 // Generate static params for all teams from default teams
 export async function generateStaticParams() {
-  // Default teams that will always exist
-  const defaultTeams = [
-    { teamId: 'team1' },
-    { teamId: 'team2' },
-    { teamId: 'team3' },
-    { teamId: 'team4' },
-    { teamId: 'team5' },
-    { teamId: 'team6' },
-    { teamId: 'team7' },
-    { teamId: 'team8' },
-    { teamId: 'team9' },
-    { teamId: 'team10' }
-  ];
+  // Generate both numeric IDs (1, 2, 3...) and team prefix versions (team1, team2, team3...)
+  // to support both URL formats: /teams/3 and /teams/team3
+  const defaultTeams = [];
+  for (let i = 1; i <= 10; i++) {
+    defaultTeams.push({ teamId: String(i) });      // Numeric format: /teams/1, /teams/2, etc.
+    defaultTeams.push({ teamId: `team${i}` });     // Team prefix format: /teams/team1, /teams/team2, etc.
+  }
   return defaultTeams;
 }
 
