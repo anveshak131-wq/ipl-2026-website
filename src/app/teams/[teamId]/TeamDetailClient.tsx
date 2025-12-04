@@ -184,21 +184,39 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
             }
             
             // Match players by teamId - handle both "1" and "team1" formats
+            // Normalize both IDs for comparison
+            const normalizeId = (id: string | number | undefined): string => {
+              if (!id) return '';
+              const str = String(id).trim();
+              // Remove 'team' prefix if present and convert to number then back to string for consistency
+              const numMatch = str.replace(/^team/i, '').match(/^\d+$/);
+              return numMatch ? numMatch[0] : str.toLowerCase();
+            };
+            
+            const normalizedTeamId = normalizeId(team.id);
+            console.log('TeamDetailClient: Normalized team ID:', normalizedTeamId, 'from:', team.id);
+            
             const teamPlayers = allPlayers.filter((p: Player) => {
-              const playerTeamId = String(p.teamId || '').replace(/^team/, '');
-              const teamIdStr = String(team.id || '').replace(/^team/, '');
-              const matches = playerTeamId === teamIdStr || 
-                             playerTeamId === `team${teamIdStr}` || 
-                             teamIdStr === `team${playerTeamId}` ||
+              const normalizedPlayerTeamId = normalizeId(p.teamId);
+              const matches = normalizedPlayerTeamId === normalizedTeamId ||
+                             String(p.teamId).toLowerCase() === String(team.id).toLowerCase() ||
                              String(p.teamId) === String(team.id);
               
               if (matches) {
-                console.log('TeamDetailClient: Matched player:', p.name, 'teamId:', p.teamId, 'to team:', team.id);
+                console.log('TeamDetailClient: Matched player:', p.name, 'playerTeamId:', p.teamId, 'normalized:', normalizedPlayerTeamId, 'to team:', team.id, 'normalized:', normalizedTeamId);
               }
               return matches;
             });
             
-            console.log('TeamDetailClient: Matched players for team:', teamPlayers.length);
+            console.log('TeamDetailClient: Matched players for team:', teamPlayers.length, 'out of', allPlayers.length, 'total players');
+            
+            if (teamPlayers.length === 0 && allPlayers.length > 0) {
+              console.warn('TeamDetailClient: No players matched! Sample player teamIds:', allPlayers.slice(0, 10).map(p => ({
+                name: p.name,
+                teamId: p.teamId,
+                normalized: normalizeId(p.teamId)
+              })));
+            }
             
             // Use matched players if found, otherwise fall back to team's original players array
             const finalPlayers = teamPlayers.length > 0 
