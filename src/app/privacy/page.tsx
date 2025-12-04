@@ -56,6 +56,7 @@ export default function PrivacyPage() {
         console.error("Failed to load privacy content", e);
       }
     
+    return undefined;
     return undefined;};
     load();
   }, []);

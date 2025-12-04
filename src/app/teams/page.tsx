@@ -172,6 +172,7 @@ function TeamsPageContent() {
                 setIsLoading(false);
             }
         
+        return undefined;
         return undefined;};
 
         fetchTeams();

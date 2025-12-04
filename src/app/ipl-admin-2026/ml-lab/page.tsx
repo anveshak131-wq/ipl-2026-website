@@ -198,6 +198,7 @@ export default function AdminMlLabPage() {
         setIsLoadingSchema(false);
       }
     
+    return undefined;
     return undefined;};
 
     loadSchema();

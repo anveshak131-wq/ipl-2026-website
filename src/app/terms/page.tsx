@@ -62,6 +62,7 @@ export default function TermsPage() {
         console.error("Failed to load terms content", e);
       }
     
+    return undefined;
     return undefined;};
     load();
   }, []);

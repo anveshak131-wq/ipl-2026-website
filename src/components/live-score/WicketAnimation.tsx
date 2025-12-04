@@ -18,6 +18,7 @@ export default function WicketAnimation({
       const timer = setTimeout(onComplete, 3000);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [onComplete]);
 
   return (

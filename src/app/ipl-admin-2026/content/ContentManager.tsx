@@ -231,6 +231,7 @@ export default function ContentManager({
         return dateB - dateA;
       });
     
+    return undefined;
     return undefined;}
 
     setFilteredContent(filtered);

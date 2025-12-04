@@ -203,6 +203,7 @@ export default function AdminEmailNotificationsPage() {
     return () => {
       isMounted = false;
     
+    return undefined;
     return undefined;};
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
@@ -663,6 +664,7 @@ export default function AdminEmailNotificationsPage() {
         setIsLoadingMatches(false);
       }
     
+    return undefined;
     return undefined;};
 
     loadMatchesAndNews();

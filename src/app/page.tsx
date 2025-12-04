@@ -220,6 +220,7 @@ export default function Home() {
         setNewsLoading(false);
       }
     
+    return undefined;
     return undefined;};
 
     loadData();

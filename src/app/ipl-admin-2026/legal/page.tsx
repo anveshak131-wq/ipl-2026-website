@@ -159,6 +159,7 @@ export default function AdminLegalPage() {
         console.error('Failed to load legal page', key, err);
       }
     
+    return undefined;
     return undefined;};
 
     loadContentFor('legal');
