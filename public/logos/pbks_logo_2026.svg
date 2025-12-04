@@ -1,0 +1,38 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="pbksGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ED1D24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF4444;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="pbksGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FBDD0B;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFD700;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background shield -->
+  <path d="M 100 30 L 160 50 L 170 100 L 160 150 L 100 170 L 40 150 L 30 100 L 40 50 Z" 
+        fill="url(#pbksGradient)" 
+        stroke="url(#pbksGold)" 
+        stroke-width="4"/>
+  
+  <!-- Inner shield -->
+  <path d="M 100 45 L 145 60 L 150 100 L 145 140 L 100 155 L 55 140 L 50 100 L 55 60 Z" 
+        fill="none" 
+        stroke="url(#pbksGold)" 
+        stroke-width="2" 
+        opacity="0.6"/>
+  
+  <!-- Crown element -->
+  <path d="M 100 50 L 110 70 L 125 65 L 115 80 L 120 95 L 100 85 L 80 95 L 85 80 L 75 65 L 90 70 Z" 
+        fill="url(#pbksGold)"/>
+  
+  <!-- Lion head (simplified) -->
+  <path d="M 100 110 Q 75 105 70 130 Q 75 140 100 135 Q 125 140 130 130 Q 125 105 100 110 Z" 
+        fill="url(#pbksGold)" opacity="0.8"/>
+  
+  <!-- PBKS Text -->
+  <text x="100" y="165" font-family="Arial Black, sans-serif" font-size="22" font-weight="900" 
+        fill="url(#pbksGold)" text-anchor="middle">PBKS</text>
+</svg>
+

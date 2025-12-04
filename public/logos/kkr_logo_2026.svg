@@ -1,0 +1,35 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="kkrGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3A225D;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5A3A7D;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="kkrGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#B9975B;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#D4AF37;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <circle cx="100" cy="100" r="90" fill="url(#kkrGradient)" stroke="url(#kkrGold)" stroke-width="4"/>
+  
+  <!-- Inner decorative ring -->
+  <circle cx="100" cy="100" r="75" fill="none" stroke="url(#kkrGold)" stroke-width="2" opacity="0.6"/>
+  
+  <!-- Knight helmet silhouette -->
+  <path d="M 100 40 L 130 50 L 140 70 L 135 90 L 130 110 L 120 130 L 100 140 L 80 130 L 70 110 L 65 90 L 60 70 L 70 50 Z" 
+        fill="url(#kkrGold)"/>
+  
+  <!-- Helmet visor -->
+  <path d="M 100 70 L 120 75 L 125 90 L 120 105 L 100 110 L 80 105 L 75 90 L 80 75 Z" 
+        fill="#3A225D"/>
+  
+  <!-- Plume -->
+  <path d="M 100 40 L 110 20 L 120 25 L 115 30 L 120 35 L 100 45 L 80 35 L 85 30 L 80 25 L 90 20 Z" 
+        fill="url(#kkrGold)"/>
+  
+  <!-- KKR Text -->
+  <text x="100" y="170" font-family="Arial Black, sans-serif" font-size="26" font-weight="900" 
+        fill="url(#kkrGold)" text-anchor="middle">KKR</text>
+</svg>
+

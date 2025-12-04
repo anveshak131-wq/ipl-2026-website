@@ -48,16 +48,17 @@ export function getAnimatedLogoPath(teamId: string, shortName?: string, league?:
   }
   
   const logoMap: { [key: string]: string } = {
-    // RCB uses the premium animated logo SVG in /public/logos
-    '1': 'rcb_logo_premium.svg',       // RCB
-    '2': 'mi_logo_animated.svg',       // MI
-    '3': 'srh_logo_animated.svg',      // SRH
-    '4': 'gt_logo_animated.svg',       // GT
-    '5': 'kxip_logo_animated.svg',     // PBKS
-    '6': 'dc_logo_animated.svg',       // DC
-    '7': 'lsg_logo_animated.svg',      // LSG
-    '8': 'rr_logo_animated.svg',       // RR
-    '9': 'kkr_logo_animated.svg',      // KKR
+    // RCB uses the special premium 2026 logo
+    '1': 'rcb_logo_premium_2026.svg',  // RCB - Special premium version
+    '2': 'mi_logo_2026.svg',          // MI
+    '3': 'srh_logo_2026.svg',         // SRH
+    '4': 'gt_logo_2026.svg',          // GT
+    '5': 'pbks_logo_2026.svg',        // PBKS
+    '6': 'dc_logo_2026.svg',          // DC
+    '7': 'lsg_logo_2026.svg',         // LSG
+    '8': 'rr_logo_2026.svg',          // RR
+    '9': 'kkr_logo_2026.svg',         // KKR
+    '10': 'csk_logo_2026.svg'         // CSK,      // KKR
     '10': 'csk_logo_animated.svg',     // CSK
   };
 
@@ -77,20 +78,20 @@ export function getAnimatedLogoPath(teamId: string, shortName?: string, league?:
 // Get regular logo path (fallback)
 export function getLogoPath(teamId: string): string {
   const logoMap: { [key: string]: string } = {
-    '1': 'rcb_logo_premium.svg',      // RCB
-    '2': 'mi_logo_new.svg',       // MI
-    '3': 'srh_logo_new.svg',      // SRH
-    '4': 'gt_logo_new.svg',       // GT
-    '5': 'kxip_logo_new.svg',     // PBKS
-    '6': 'dc_logo_new.svg',       // DC
-    '7': 'lsg_logo_new.svg',      // LSG
-    '8': 'rr_logo_new.svg',       // RR
-    '9': 'kkr_logo_new.svg',      // KKR
-    '10': 'csk_logo_new.svg',     // CSK
+    '1': 'rcb_logo_premium_2026.svg',  // RCB - Special premium version
+    '2': 'mi_logo_2026.svg',          // MI
+    '3': 'srh_logo_2026.svg',         // SRH
+    '4': 'gt_logo_2026.svg',          // GT
+    '5': 'pbks_logo_2026.svg',        // PBKS
+    '6': 'dc_logo_2026.svg',          // DC
+    '7': 'lsg_logo_2026.svg',         // LSG
+    '8': 'rr_logo_2026.svg',          // RR
+    '9': 'kkr_logo_2026.svg',         // KKR
+    '10': 'csk_logo_2026.svg',         // CSK
   };
 
   const numericId = teamId.replace('team', '');
-  const logoFile = logoMap[numericId] || 'rcb_logo_premium.svg';
+  const logoFile = logoMap[numericId] || 'rcb_logo_premium_2026.svg';
   return `/logos/${logoFile}`;
 }
 
