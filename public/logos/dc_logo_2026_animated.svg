@@ -1,0 +1,50 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="dcGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0078BC;stop-opacity:1">
+        <animate attributeName="stop-color" values="#0078BC;#0099DD;#0078BC" dur="3s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" style="stop-color:#0099DD;stop-opacity:1">
+        <animate attributeName="stop-color" values="#0099DD;#0078BC;#0099DD" dur="3s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+    <linearGradient id="dcRed" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#EF1B26;stop-opacity:1">
+        <animate attributeName="stop-color" values="#EF1B26;#FF4444;#EF1B26" dur="2s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="100%" style="stop-color:#FF4444;stop-opacity:1">
+        <animate attributeName="stop-color" values="#FF4444;#EF1B26;#FF4444" dur="2s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle with pulse -->
+  <circle cx="100" cy="100" r="90" fill="url(#dcGradient)" stroke="url(#dcRed)" stroke-width="4">
+    <animate attributeName="r" values="90;92;90" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Inner circle with rotation -->
+  <circle cx="100" cy="100" r="75" fill="none" stroke="url(#dcRed)" stroke-width="2" opacity="0.5">
+    <animateTransform attributeName="transform" type="rotate" values="0 100 100;360 100 100" dur="18s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Capital building silhouette with wave -->
+  <path d="M 60 140 L 60 100 L 70 90 L 70 80 L 80 70 L 80 100 L 90 90 L 100 80 L 110 90 L 120 100 L 120 70 L 130 80 L 130 90 L 140 100 L 140 140 Z" 
+        fill="url(#dcRed)">
+    <animateTransform attributeName="transform" type="translate" values="0,0;0,-2;0,0" dur="2s" repeatCount="indefinite"/>
+  </path>
+  
+  <!-- Dome with pulse -->
+  <path d="M 100 80 Q 70 80 70 100 Q 70 120 100 120 Q 130 120 130 100 Q 130 80 100 80" 
+        fill="url(#dcRed)">
+    <animateTransform attributeName="transform" type="scale" values="1;1.05;1" dur="2s" repeatCount="indefinite"/>
+  </path>
+  
+  <!-- DC Text -->
+  <text x="100" y="170" font-family="Arial Black, sans-serif" font-size="32" font-weight="900" 
+        fill="#FFFFFF" text-anchor="middle">
+    <animate attributeName="opacity" values="1;0.8;1" dur="2s" repeatCount="indefinite"/>
+    DC
+  </text>
+</svg>
+
