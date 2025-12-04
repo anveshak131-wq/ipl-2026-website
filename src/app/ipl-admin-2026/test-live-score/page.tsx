@@ -6,7 +6,7 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 import BallEntryPanel from '@/components/admin/live-score/BallEntryPanel';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import { Match, Player, Team } from '@/types';
-import { LiveScoreState, BallEvent } from '@/types/components';
+import { LiveScoreState, BallEvent } from '@/hooks/useLiveScore';
 import { api } from '@/lib/data';
 import { LoadingSpinner } from '@/components/admin/animations';
 import { CheckCircle2, AlertCircle, Users, Save, X, TestTube, RefreshCw } from 'lucide-react';

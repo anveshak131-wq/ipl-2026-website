@@ -197,15 +197,15 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
               const keyPlayersResponse = await fetch(`/api/key-players?teamId=${team.id}`);
               if (keyPlayersResponse.ok) {
                 const raw = await keyPlayersResponse.json() as { keyPlayers?: KeyPlayers };
-                if (raw) {
+                if (raw && raw.keyPlayers) {
                   const normalized: KeyPlayers = {
-                    teamId: raw.teamId || team.id,
-                    powerHitterIds: raw.powerHitterIds || (raw.powerHitterId ? [raw.powerHitterId] : []),
-                    anchorIds: raw.anchorIds || (raw.anchorId ? [raw.anchorId] : []),
-                    finisherIds: raw.finisherIds || (raw.finisherId ? [raw.finisherId] : []),
-                    strikeBowlerIds: raw.strikeBowlerIds || (raw.strikeBowlerId ? [raw.strikeBowlerId] : []),
-                    deathSpecialistIds: raw.deathSpecialistIds || (raw.deathSpecialistId ? [raw.deathSpecialistId] : []),
-                    allRoundXFactorIds: raw.allRoundXFactorIds || (raw.allRoundXFactorId ? [raw.allRoundXFactorId] : []),
+                    teamId: raw.keyPlayers.teamId || team.id,
+                    powerHitterIds: raw.keyPlayers.powerHitterIds || [],
+                    anchorIds: raw.keyPlayers.anchorIds || [],
+                    finisherIds: raw.keyPlayers.finisherIds || [],
+                    strikeBowlerIds: raw.keyPlayers.strikeBowlerIds || [],
+                    deathSpecialistIds: raw.keyPlayers.deathSpecialistIds || [],
+                    allRoundXFactorIds: raw.keyPlayers.allRoundXFactorIds || [],
                   };
                   setKeyPlayers(normalized);
                 } else {

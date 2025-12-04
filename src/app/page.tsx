@@ -233,6 +233,7 @@ export default function Home() {
       }, 3000);
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [iplTeams]);
 
   useEffect(() => {
@@ -243,6 +244,7 @@ export default function Home() {
       }, 3000);
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [wplTeams]);
 
   const handleAcceptTerms = () => {

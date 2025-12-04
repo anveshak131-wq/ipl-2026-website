@@ -6,7 +6,7 @@ import AdminSidebar from '@/components/admin/AdminSidebar';
 import BallEntryPanel from '@/components/admin/live-score/BallEntryPanel';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import { Match, Player } from '@/types';
-import { LiveScoreState, BallEvent } from '@/types/components';
+import { LiveScoreState, BallEvent } from '@/hooks/useLiveScore';
 import { api } from '@/lib/data';
 import { LoadingSpinner } from '@/components/admin/animations';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
@@ -86,34 +86,34 @@ export default function AdminLiveScorePage() {
       const scoreUpdate = {
         team1: {
           name: selectedMatch.team1.shortName || selectedMatch.team1.name,
-          runs: state.score.team1.runs,
-          wickets: state.score.team1.wickets,
-          overs: state.score.team1.overs,
+          runs: state.team1.runs,
+          wickets: state.team1.wickets,
+          overs: ballsToOvers(state.team1.balls),
         },
         team2: {
           name: selectedMatch.team2.shortName || selectedMatch.team2.name,
-          runs: state.score.team2.runs,
-          wickets: state.score.team2.wickets,
-          overs: state.score.team2.overs,
+          runs: state.team2.runs,
+          wickets: state.team2.wickets,
+          overs: ballsToOvers(state.team2.balls),
         },
         currentBatter: state.currentBatter ? {
-          name: players.find(p => p.id === state.currentBatter)?.name || '',
-          runs: 0,
-          balls: 0,
+          name: state.currentBatter.name,
+          runs: state.currentBatter.runs,
+          balls: state.currentBatter.balls,
         } : undefined,
         currentBowler: state.currentBowler ? {
-          name: players.find(p => p.id === state.currentBowler)?.name || '',
-          runs: 0,
-          balls: 0,
+          name: state.currentBowler.name,
+          runs: state.currentBowler.runs,
+          balls: state.currentBowler.balls,
         } : undefined,
         commentary: state.ballHistory.slice(-10).map((ball: any) => {
-          const totalBalls = state.currentOver * 6 + state.currentBall;
+          const totalBalls = Math.floor(state.currentOver) * 6 + Math.round((state.currentOver % 1) * 10);
           const over = Math.floor(totalBalls / 6);
           const ballInOver = totalBalls % 6;
           return `Over ${over}.${ballInOver}: ${getBallDescription(ball)}`;
         }),
         status: 'Live',
-        innings: state.currentInnings,
+        innings: state.innings,
         battingTeam: state.battingTeam,
       };
 
@@ -151,13 +151,17 @@ export default function AdminLiveScorePage() {
   }
 
   function getBallDescription(ball: BallEvent): string {
-    if (ball.isWicket) {
-      return `WICKET! ${ball.wicketType || 'out'}`;
+    if (typeof ball.type === 'number') {
+      return `${ball.type} run${ball.type === 1 ? '' : 's'}`;
     }
-    if (ball.runs === 0) {
-      return 'Dot ball';
+    switch (ball.type) {
+      case 'W': return `WICKET! ${ball.dismissalType || 'out'}`;
+      case 'WD': return 'Wide';
+      case 'NB': return 'No-ball';
+      case 'B': return 'Bye';
+      case 'LB': return 'Leg-bye';
+      default: return 'Ball';
     }
-    return `${ball.runs} run${ball.runs === 1 ? '' : 's'}`;
   }
 
   const isWPL = currentLeague === 'wpl';

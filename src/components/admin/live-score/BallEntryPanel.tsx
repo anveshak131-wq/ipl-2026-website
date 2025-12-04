@@ -12,7 +12,7 @@ import { useLiveScore, BallEvent } from '@/hooks/useLiveScore';
 import { Player } from '@/types';
 import { Users, RotateCcw, Save } from 'lucide-react';
 import { initializeMatchState } from '@/lib/matchStateMachine';
-import { LiveScoreState } from '@/types/components';
+import { LiveScoreState } from '@/hooks/useLiveScore';
 
 interface BallEntryPanelProps {
   matchId: string;
