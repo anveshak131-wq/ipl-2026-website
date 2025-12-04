@@ -151,15 +151,30 @@ function fixUseEffectReturnsRegex(filePath) {
   // More precise pattern to avoid matching regular arrow functions
   const pattern = /(useEffect\s*\(\s*\(\)\s*=>\s*\{)([\s\S]*?)(\}\s*,\s*\[[^\]]*\]\s*\))/g;
   
+  let matchIndex = 0;
   content = content.replace(pattern, (match, start, body, end) => {
     // Verify this is actually a useEffect call by checking the context
-    // Look backwards to ensure it's not part of a variable assignment like "const x = useEffect"
-    const matchIndex = content.indexOf(match);
-    const beforeMatch = content.substring(Math.max(0, matchIndex - 50), matchIndex);
+    // Look backwards to ensure it's not part of a variable assignment or regular function
+    const currentIndex = content.indexOf(match, matchIndex);
+    matchIndex = currentIndex + match.length;
+    const beforeMatch = content.substring(Math.max(0, currentIndex - 100), currentIndex);
     
     // Skip if it looks like a variable assignment (not a direct useEffect call)
-    if (beforeMatch.match(/=\s*useEffect\s*$/)) {
+    if (beforeMatch.match(/[=:]\s*useEffect\s*$/)) {
       return match; // This is a variable assignment, not a direct useEffect call
+    }
+    
+    // Skip if it's part of a function definition like "const func = () => { useEffect(...) }"
+    // Check for patterns like: const/let/var name = ... useEffect
+    if (beforeMatch.match(/(const|let|var|function)\s+\w+\s*[=:]\s*[^=]*useEffect\s*$/)) {
+      return match;
+    }
+    
+    // Most importantly: ensure it starts with "useEffect(" at the beginning of a statement
+    // It should be preceded by whitespace, newline, semicolon, or be at the start
+    const charBefore = currentIndex > 0 ? content[currentIndex - 1] : '';
+    if (charBefore && !charBefore.match(/[\s\n;{}(]/)) {
+      return match; // Not at the start of a statement
     }
     
     // Check if body has conditional returns

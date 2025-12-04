@@ -161,6 +161,7 @@ export default function AdminLegalPage() {
     
     return undefined;
     return undefined;
+    return undefined;
     return undefined;};
 
     loadContentFor('legal');

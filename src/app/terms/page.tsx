@@ -64,6 +64,7 @@ export default function TermsPage() {
     
     return undefined;
     return undefined;
+    return undefined;
     return undefined;};
     load();
   }, []);
