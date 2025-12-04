@@ -200,9 +200,16 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
             
             console.log('TeamDetailClient: Matched players for team:', teamPlayers.length);
             
+            // Use matched players if found, otherwise fall back to team's original players array
+            const finalPlayers = teamPlayers.length > 0 
+              ? teamPlayers 
+              : (team.players || []);
+            
+            console.log('TeamDetailClient: Final players count:', finalPlayers.length);
+            
             const teamWithPlayers = {
               ...team,
-              players: sortPlayersByRoleAndAge(teamPlayers)
+              players: sortPlayersByRoleAndAge(finalPlayers)
             };
             setTeamData(teamWithPlayers);
             
