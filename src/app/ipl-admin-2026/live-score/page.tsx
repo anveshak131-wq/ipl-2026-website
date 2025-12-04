@@ -85,34 +85,35 @@ export default function AdminLiveScorePage() {
       // Convert state to API format
       const scoreUpdate = {
         team1: {
-          name: state.team1.name,
-          runs: state.team1.runs,
-          wickets: state.team1.wickets,
-          overs: ballsToOvers(state.team1.balls),
+          name: selectedMatch.team1.shortName || selectedMatch.team1.name,
+          runs: state.score.team1.runs,
+          wickets: state.score.team1.wickets,
+          overs: state.score.team1.overs,
         },
         team2: {
-          name: state.team2.name,
-          runs: state.team2.runs,
-          wickets: state.team2.wickets,
-          overs: ballsToOvers(state.team2.balls),
+          name: selectedMatch.team2.shortName || selectedMatch.team2.name,
+          runs: state.score.team2.runs,
+          wickets: state.score.team2.wickets,
+          overs: state.score.team2.overs,
         },
-        currentBatter: {
-          name: state.currentBatter.name,
-          runs: state.currentBatter.runs,
-          balls: state.currentBatter.balls,
-        },
-        currentBowler: {
-          name: state.currentBowler.name,
-          runs: state.currentBowler.runs,
-          balls: state.currentBowler.balls,
-        },
+        currentBatter: state.currentBatter ? {
+          name: players.find(p => p.id === state.currentBatter)?.name || '',
+          runs: 0,
+          balls: 0,
+        } : undefined,
+        currentBowler: state.currentBowler ? {
+          name: players.find(p => p.id === state.currentBowler)?.name || '',
+          runs: 0,
+          balls: 0,
+        } : undefined,
         commentary: state.ballHistory.slice(-10).map((ball: any) => {
-          const over = Math.floor(ballsToOvers(state.team1.balls + state.team2.balls));
-          const ballInOver = (state.team1.balls + state.team2.balls) % 6;
+          const totalBalls = state.currentOver * 6 + state.currentBall;
+          const over = Math.floor(totalBalls / 6);
+          const ballInOver = totalBalls % 6;
           return `Over ${over}.${ballInOver}: ${getBallDescription(ball)}`;
         }),
         status: 'Live',
-        innings: state.innings,
+        innings: state.currentInnings,
         battingTeam: state.battingTeam,
       };
 
@@ -150,17 +151,13 @@ export default function AdminLiveScorePage() {
   }
 
   function getBallDescription(ball: BallEvent): string {
-    if (typeof ball.type === 'number') {
-      return `${ball.type} run${ball.type === 1 ? '' : 's'}`;
+    if (ball.isWicket) {
+      return `WICKET! ${ball.wicketType || 'out'}`;
     }
-    switch (ball.type) {
-      case 'W': return `WICKET! ${ball.dismissalType || 'out'}`;
-      case 'WD': return 'Wide';
-      case 'NB': return 'No-ball';
-      case 'B': return 'Bye';
-      case 'LB': return 'Leg-bye';
-      default: return 'Ball';
+    if (ball.runs === 0) {
+      return 'Dot ball';
     }
+    return `${ball.runs} run${ball.runs === 1 ? '' : 's'}`;
   }
 
   const isWPL = currentLeague === 'wpl';
