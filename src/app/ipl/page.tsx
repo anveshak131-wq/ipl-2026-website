@@ -138,6 +138,7 @@ export default function IPLHomePage() {
           
           return {
             ...team,
+            league: team.league || 'ipl', // Ensure league is set for IPL teams
             players: teamPlayers.length > 0 ? teamPlayers : (team.players || [])
           };
         });

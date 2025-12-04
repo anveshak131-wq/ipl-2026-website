@@ -138,6 +138,7 @@ export default function WPLHomePage() {
             
             return {
               ...team,
+              league: team.league || 'wpl', // Ensure league is set for WPL teams
               players: teamPlayers.length > 0 ? teamPlayers : (team.players || [])
             };
           });
