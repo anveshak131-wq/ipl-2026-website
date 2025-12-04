@@ -270,18 +270,6 @@ function ContentManager({
     }
   };
 
-  const handleToggleActive = async (contentId: string) => {
-    const item = content.find(c => c.id === contentId);
-    if (!item) return;
-    
-    try {
-      const updated = await api.updateContent(contentId, { isActive: !item.isActive });
-      setContent(content.map(c => c.id === contentId ? updated : c));
-    } catch (error) {
-      console.error('Failed to toggle status:', error);
-    }
-  };
-
   const getStatusBadgeColor = (isActive: boolean) => {
     if (isActive) return 'bg-green-500/20 text-green-400 border-green-500/30';
     return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
