@@ -1,53 +1,24 @@
 <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- Official RCB Red Gradient -->
     <linearGradient id="rcb-red" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#C8102E;stop-opacity:1">
         <animate attributeName="stop-color" values="#C8102E;#D91E3A;#C8102E" dur="4s" repeatCount="indefinite"/>
       </stop>
-      <stop offset="50%" style="stop-color:#A01D1D;stop-opacity:1"/>
       <stop offset="100%" style="stop-color:#8B1A1A;stop-opacity:1">
-        <animate attributeName="stop-color" values="#8B1A1A;#A01D1D;#8B1A1A" dur="4s" repeatCount="indefinite"/>
+        <animate attributeName="stop-color" values="#8B1A1A;#C8102E;#8B1A1A" dur="4s" repeatCount="indefinite"/>
       </stop>
     </linearGradient>
-    
-    <!-- Official RCB Gold Gradient -->
     <linearGradient id="rcb-gold" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1">
         <animate attributeName="stop-color" values="#FFD700;#FFA500;#FFD700" dur="3s" repeatCount="indefinite"/>
       </stop>
-      <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1"/>
-      <stop offset="100%" style="stop-color:#FF8C00;stop-opacity:1">
-        <animate attributeName="stop-color" values="#FF8C00;#FFA500;#FF8C00" dur="3s" repeatCount="indefinite"/>
+      <stop offset="100%" style="stop-color:#FFA500;stop-opacity:1">
+        <animate attributeName="stop-color" values="#FFA500;#FFD700;#FFA500" dur="3s" repeatCount="indefinite"/>
       </stop>
     </linearGradient>
-    
-    <!-- Radial Glow -->
-    <radialGradient id="rcb-glow-grad" cx="50%" cy="50%">
-      <stop offset="0%" style="stop-color:#C8102E;stop-opacity:0.8">
-        <animate attributeName="stop-opacity" values="0.8;0.5;0.8" dur="3s" repeatCount="indefinite"/>
-      </stop>
-      <stop offset="50%" style="stop-color:#C8102E;stop-opacity:0.4"/>
-      <stop offset="100%" style="stop-color:#C8102E;stop-opacity:0"/>
-    </radialGradient>
-    
-    <!-- Shadow Filter -->
-    <filter id="rcb-shadow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
-      <feOffset dx="3" dy="3" result="offsetblur"/>
-      <feComponentTransfer>
-        <feFuncA type="linear" slope="0.3"/>
-      </feComponentTransfer>
-      <feMerge>
-        <feMergeNode/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    
-    <!-- Glow Filter -->
-    <filter id="rcb-glow" x="-100%" y="-100%" width="300%" height="300%">
-      <feGaussianBlur stdDeviation="6" result="coloredBlur">
-        <animate attributeName="stdDeviation" values="6;8;6" dur="3s" repeatCount="indefinite"/>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur">
+        <animate attributeName="stdDeviation" values="3;5;3" dur="2.5s" repeatCount="indefinite"/>
       </feGaussianBlur>
       <feMerge>
         <feMergeNode in="coloredBlur"/>
@@ -56,152 +27,59 @@
     </filter>
   </defs>
   
-  <!-- Outer Glow Ring -->
-  <circle cx="100" cy="100" r="95" fill="url(#rcb-glow-grad)" opacity="0.4">
-    <animate attributeName="opacity" values="0.3;0.5;0.3" dur="3s" repeatCount="indefinite"/>
-  </circle>
+  <!-- Shield -->
+  <path d="M 100 20 L 155 40 L 165 100 L 155 160 L 100 180 L 45 160 L 35 100 L 45 40 Z" 
+        fill="url(#rcb-red)" 
+        stroke="url(#rcb-gold)" 
+        stroke-width="4" 
+        filter="url(#glow)">
+    <animateTransform attributeName="transform" type="scale" values="1;1.01;1" dur="4s" repeatCount="indefinite"/>
+  </path>
   
-  <!-- Main Shield Background - Classic RCB Shape -->
-  <g filter="url(#rcb-shadow)">
-    <path d="M 100 15 L 160 40 L 160 100 C 160 140 140 170 100 180 C 60 170 40 140 40 100 L 40 40 Z" 
-          fill="url(#rcb-red)" opacity="0.98">
-      <animateTransform attributeName="transform" type="scale" values="1;1.01;1" dur="4s" repeatCount="indefinite"/>
-    </path>
+  <!-- Inner border -->
+  <path d="M 100 35 L 140 50 L 145 100 L 140 150 L 100 165 L 60 150 L 55 100 L 60 50 Z" 
+        fill="none" 
+        stroke="url(#rcb-gold)" 
+        stroke-width="2" 
+        opacity="0.6"/>
+  
+  <!-- Crown -->
+  <path d="M 100 30 L 110 45 L 125 40 L 115 55 L 130 65 L 100 55 L 70 65 L 85 55 L 75 40 L 90 45 Z" 
+        fill="url(#rcb-gold)" 
+        filter="url(#glow)">
+    <animateTransform attributeName="transform" type="scale" values="1;1.05;1" dur="2s" repeatCount="indefinite"/>
+  </path>
+  
+  <!-- Lion head - simple and clean -->
+  <g transform="translate(100, 105)">
+    <!-- Mane -->
+    <circle cx="0" cy="-8" r="32" fill="url(#rcb-gold)" opacity="0.95"/>
     
-    <!-- Inner Shield Border -->
-    <path d="M 100 25 L 150 45 L 150 100 C 150 135 135 160 100 170 C 65 160 50 135 50 100 L 50 45 Z" 
-          fill="none" stroke="url(#rcb-gold)" stroke-width="3" opacity="0.95"/>
+    <!-- Face -->
+    <ellipse cx="0" cy="0" rx="24" ry="28" fill="#000" opacity="0.95"/>
     
-    <!-- Inner Highlight -->
-    <path d="M 100 35 L 140 50 L 140 100 C 140 130 130 150 100 160 C 70 150 60 130 60 100 L 60 50 Z" 
-          fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
-  </g>
-  
-  <!-- Decorative Corner Elements -->
-  <g stroke="url(#rcb-gold)" stroke-width="2" fill="none" opacity="0.7">
-    <path d="M 50 25 L 60 25 L 50 35"/>
-    <path d="M 45 30 L 55 30 L 45 40"/>
-    <path d="M 150 25 L 140 25 L 150 35"/>
-    <path d="M 155 30 L 145 30 L 155 40"/>
-    <path d="M 50 175 L 60 175 L 50 165"/>
-    <path d="M 45 170 L 55 170 L 45 160"/>
-    <path d="M 150 175 L 140 175 L 150 165"/>
-    <path d="M 155 170 L 145 170 L 155 160"/>
-  </g>
-  
-  <!-- Crown at Top - Classic RCB Element -->
-  <g transform="translate(100, 35)">
-    <animateTransform attributeName="transform" type="translate" values="100,35; 100,32; 100,35" dur="3s" repeatCount="indefinite"/>
-    <path d="M -30 -10 L -25 -4 L -17.5 -8 L -11 -4 L 0 -10 L 11 -4 L 17.5 -8 L 25 -4 L 30 -10 L 0 -14 Z" 
-          fill="url(#rcb-gold)" stroke="#000" stroke-width="1.5" filter="url(#rcb-glow)"/>
-    <!-- Crown Base -->
-    <rect x="-30" y="-10" width="60" height="4" fill="url(#rcb-gold)" opacity="0.9"/>
-    <!-- Crown Jewels -->
-    <circle cx="-17.5" cy="-12" r="2.5" fill="#C8102E">
-      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
-      <animateTransform attributeName="transform" type="scale" values="1;1.3;1" dur="2s" repeatCount="indefinite"/>
+    <!-- Eyes -->
+    <circle cx="-9" cy="-5" r="4" fill="#C8102E">
+      <animate attributeName="opacity" values="1;0.7;1" dur="3s" repeatCount="indefinite"/>
     </circle>
-    <circle cx="0" cy="-12" r="2.5" fill="#C8102E">
-      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite" begin="0.3s"/>
-      <animateTransform attributeName="transform" type="scale" values="1;1.3;1" dur="2s" repeatCount="indefinite" begin="0.3s"/>
+    <circle cx="-9" cy="-5" r="2" fill="#000"/>
+    <circle cx="9" cy="-5" r="4" fill="#C8102E">
+      <animate attributeName="opacity" values="1;0.7;1" dur="3s" repeatCount="indefinite" begin="1.5s"/>
     </circle>
-    <circle cx="17.5" cy="-12" r="2.5" fill="#C8102E">
-      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite" begin="0.6s"/>
-      <animateTransform attributeName="transform" type="scale" values="1;1.3;1" dur="2s" repeatCount="indefinite" begin="0.6s"/>
-    </circle>
+    <circle cx="9" cy="-5" r="2" fill="#000"/>
+    
+    <!-- Nose -->
+    <ellipse cx="0" cy="8" rx="3" ry="2.5" fill="#000"/>
+    <path d="M -2 8 Q 0 13 2 8" fill="none" stroke="url(#rcb-gold)" stroke-width="1.5" stroke-linecap="round"/>
+    
+    <!-- Mouth -->
+    <path d="M -8 13 Q 0 17 8 13" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"/>
   </g>
   
-  <!-- Lion Head - Detailed Front View (Classic RCB Style) -->
-  <g transform="translate(100, 100)">
-    <animateTransform attributeName="transform" type="translate" values="100,100; 100,97; 100,100" dur="4s" repeatCount="indefinite"/>
-    
-    <!-- Majestic Mane -->
-    <g>
-      <animateTransform attributeName="transform" type="rotate" values="-1 0 0; 1 0 0; -1 0 0" dur="6s" repeatCount="indefinite"/>
-      
-      <!-- Outer Mane Layer -->
-      <circle cx="0" cy="-5" r="40" fill="url(#rcb-gold)" opacity="0.95" filter="url(#rcb-glow)"/>
-      <circle cx="0" cy="-5" r="37" fill="none" stroke="#FF8C00" stroke-width="2" opacity="0.8"/>
-      
-      <!-- Mane Texture Lines -->
-      <g stroke="#FF8C00" stroke-width="1.5" opacity="0.7" fill="none">
-        <path d="M -35 -10 Q -25 -25 -15 -15"/>
-        <path d="M -25 -15 Q -15 -30 -5 -20"/>
-        <path d="M -15 -20 Q -5 -35 5 -25"/>
-        <path d="M 15 -20 Q 5 -35 -5 -25"/>
-        <path d="M 25 -15 Q 15 -30 5 -20"/>
-        <path d="M 35 -10 Q 25 -25 15 -15"/>
-      </g>
-    </g>
-    
-    <!-- Lion Face -->
-    <g>
-      <!-- Face Base -->
-      <ellipse cx="0" cy="3" rx="28" ry="30" fill="#1a1a1a" opacity="0.98" filter="url(#rcb-shadow)"/>
-      
-      <!-- Fierce Eyes -->
-      <ellipse cx="-11" cy="-2" rx="5" ry="6" fill="#FFFFFF" opacity="0.95">
-        <animate attributeName="ry" values="6;0.6;6" dur="0.3s" repeatCount="indefinite" begin="0s;5s"/>
-      </ellipse>
-      <circle cx="-11" cy="-2" r="3.5" fill="#C8102E">
-        <animate attributeName="r" values="3.5;4.5;3.5" dur="2.5s" repeatCount="indefinite"/>
-        <animate attributeName="opacity" values="1;0.75;1" dur="2.5s" repeatCount="indefinite"/>
-      </circle>
-      <circle cx="-11" cy="-2" r="1.5" fill="#000"/>
-      
-      <ellipse cx="11" cy="-2" rx="5" ry="6" fill="#FFFFFF" opacity="0.95">
-        <animate attributeName="ry" values="6;0.6;6" dur="0.3s" repeatCount="indefinite" begin="0s;5s"/>
-      </ellipse>
-      <circle cx="11" cy="-2" r="3.5" fill="#C8102E">
-        <animate attributeName="r" values="3.5;4.5;3.5" dur="2.5s" repeatCount="indefinite" begin="0.15s"/>
-        <animate attributeName="opacity" values="1;0.75;1" dur="2.5s" repeatCount="indefinite" begin="0.15s"/>
-      </circle>
-      <circle cx="11" cy="-2" r="1.5" fill="#000"/>
-      
-      <!-- Eyebrows -->
-      <path d="M -18 -8 Q -11 -10 -11 -6" fill="none" stroke="url(#rcb-gold)" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
-      <path d="M 18 -8 Q 11 -10 11 -6" fill="none" stroke="url(#rcb-gold)" stroke-width="2" stroke-linecap="round" opacity="0.8"/>
-      
-      <!-- Nose -->
-      <ellipse cx="0" cy="9" rx="4" ry="3" fill="#000" opacity="0.9"/>
-      <path d="M -3 9 Q 0 15 3 9" fill="none" stroke="url(#rcb-gold)" stroke-width="2" stroke-linecap="round">
-        <animate attributeName="stroke-width" values="2;2.5;2" dur="2s" repeatCount="indefinite"/>
-      </path>
-      
-      <!-- Mouth -->
-      <path d="M -15 15 Q 0 20 15 15 Q 12 25 0 22 Q -12 25 -15 15 Z" 
-            fill="#C8102E" opacity="0.95" filter="url(#rcb-shadow)"/>
-      <path d="M -12 18 Q 0 22 12 18" fill="none" stroke="url(#rcb-gold)" stroke-width="2" stroke-linecap="round"/>
-      
-      <!-- Teeth -->
-      <path d="M -4 18 L -2 25 L -6 25 Z" fill="#FFFFFF" opacity="0.95"/>
-      <path d="M 4 18 L 2 25 L 6 25 Z" fill="#FFFFFF" opacity="0.95"/>
-      
-      <!-- Whiskers -->
-      <g stroke="url(#rcb-gold)" stroke-width="1.5" stroke-linecap="round" opacity="0.8">
-        <line x1="-20" y1="4" x2="-28" y2="2"/>
-        <line x1="-20" y1="8" x2="-28" y2="8"/>
-        <line x1="-20" y1="12" x2="-28" y2="14"/>
-        <line x1="20" y1="4" x2="28" y2="2"/>
-        <line x1="20" y1="8" x2="28" y2="8"/>
-        <line x1="20" y1="12" x2="28" y2="14"/>
-      </g>
-    </g>
-  </g>
-  
-  <!-- RCB Text - Bold with Effects -->
-  <g transform="translate(100, 170)">
-    <!-- Text Shadow -->
-    <text x="0" y="0" font-size="22" font-weight="900" fill="#000" text-anchor="middle" 
-          font-family="Arial Black, sans-serif" letter-spacing="4" opacity="0.5">RCB</text>
-    <!-- Main Text -->
-    <text x="0" y="0" font-size="22" font-weight="900" fill="#FFFFFF" text-anchor="middle" 
-          font-family="Arial Black, sans-serif" letter-spacing="4" filter="url(#rcb-shadow)">
-      <animate attributeName="opacity" values="0.95;1;0.95" dur="2s" repeatCount="indefinite"/>
-      RCB
-    </text>
-    <!-- Text Outline -->
-    <text x="0" y="0" font-size="22" font-weight="900" fill="none" stroke="url(#rcb-gold)" stroke-width="1" 
-          text-anchor="middle" font-family="Arial Black, sans-serif" letter-spacing="4" opacity="0.9">RCB</text>
-  </g>
+  <!-- RCB text -->
+  <text x="100" y="165" font-family="Arial Black, sans-serif" font-size="32" font-weight="900" 
+        fill="url(#rcb-gold)" text-anchor="middle" filter="url(#glow)">
+    <animate attributeName="opacity" values="1;0.9;1" dur="2s" repeatCount="indefinite"/>
+    RCB
+  </text>
 </svg>
