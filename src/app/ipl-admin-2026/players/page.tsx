@@ -1108,7 +1108,7 @@ export default function AdminPlayers() {
             description={editingPlayer ? 'Update player information' : 'Add a new player to the database'}
             variant="info"
             size="xl"
-            icon="🏏"
+            icon={<CustomEmoji type="cricket-stumps" size={24} />}
             contentClassName="max-h-[70vh] overflow-y-auto"
             footer={
               <div className="flex gap-4">
@@ -1515,7 +1515,7 @@ export default function AdminPlayers() {
         description={`Are you sure you want to delete ${deleteTarget?.name}? This action cannot be undone.`}
         variant="danger"
         size="md"
-        icon="🗑️"
+        icon={<CustomEmoji type="warning" size={24} />}
         footer={
           <div className="flex gap-3">
             <button

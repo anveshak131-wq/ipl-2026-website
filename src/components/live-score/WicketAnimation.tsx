@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import CustomEmoji from '@/components/emoji/CustomEmoji';
 
 interface WicketAnimationProps {
   playerName: string;
@@ -51,10 +52,14 @@ export default function WicketAnimation({
   ) || (
     <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-50">
       {/* Wicket burst effect */}
-      <div className="wicket-burst text-8xl">🎯</div>
+      <div className="wicket-burst">
+        <CustomEmoji type="target" size={96} />
+      </div>
 
       {/* Falling stumps */}
-      <div className="wicket-fall absolute text-6xl">🏏</div>
+      <div className="wicket-fall absolute">
+        <CustomEmoji type="cricket-stumps" size={72} />
+      </div>
 
       {/* Celebration text */}
       <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 text-center">
@@ -80,7 +85,7 @@ export default function WicketAnimation({
             animationDelay: `${i * 0.1}s`,
           }}
         >
-          🎉
+          <CustomEmoji type="party" size={32} />
         </div>
       ))}
     </div>

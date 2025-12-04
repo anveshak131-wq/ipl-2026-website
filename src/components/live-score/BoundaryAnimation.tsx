@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import CustomEmoji from '@/components/emoji/CustomEmoji';
 
 interface BoundaryAnimationProps {
   runs: number;
@@ -59,12 +60,24 @@ export default function BoundaryAnimation({
       <div className="boundary-flash absolute w-32 h-32 rounded-full border-4 border-ipl-gold" />
 
       {/* Boundary/Six text */}
-      <div className={`${isSix ? 'six-rotate' : 'boundary-pulse'} text-7xl font-black mb-20`}>
-        {isSix ? '🎯 SIX!' : '⚾ BOUNDARY!'}
+      <div className={`${isSix ? 'six-rotate' : 'boundary-pulse'} flex items-center gap-4 text-7xl font-black mb-20`}>
+        {isSix ? (
+          <>
+            <CustomEmoji type="target" size={80} />
+            <span>SIX!</span>
+          </>
+        ) : (
+          <>
+            <CustomEmoji type="cricket-ball" size={80} />
+            <span>BOUNDARY!</span>
+          </>
+        )}
       </div>
 
       {/* Flying ball */}
-      <div className="ball-fly absolute text-4xl">🏏</div>
+      <div className="ball-fly absolute">
+        <CustomEmoji type="cricket-stumps" size={48} />
+      </div>
 
       {/* Runs display */}
       <div className="absolute bottom-1/3 text-center">

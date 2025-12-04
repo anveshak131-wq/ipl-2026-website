@@ -737,8 +737,8 @@ export default function TeamDetailRedesigned({ teamId }: TeamDetailRedesignedPro
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                       {teamData.trophies.map((trophy: Trophy, i: number) => (
                         <div key={i} className="group text-center">
-                          <div className="w-32 h-32 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-yellow-600 to-yellow-900 flex items-center justify-center text-6xl transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-2xl">
-                            🥇
+                          <div className="w-32 h-32 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-yellow-600 to-yellow-900 flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 shadow-2xl">
+                            <CustomEmoji type="medal-gold" size={64} />
                           </div>
                           <p className="text-2xl font-black" style={{ color: '#DAA520' }}>{trophy.year}</p>
                           <p className="text-sm mt-1 text-white">{trophy.name}</p>

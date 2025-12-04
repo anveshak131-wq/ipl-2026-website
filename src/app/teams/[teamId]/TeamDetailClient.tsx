@@ -1929,7 +1929,7 @@ function AboutTab({ teamData, primaryColor, secondaryColor, coachingStaff }: Abo
             {teamData.trophies.map((trophy, idx: number) => (
               <div key={idx} className="group p-6 rounded-2xl bg-white/5 hover:bg-white/10 transition-all border border-white/5 hover:border-white/20">
                 <div className="flex items-center gap-4">
-                  <div className="text-5xl">🥇</div>
+                  <CustomEmoji type="medal-gold" size={48} />
                   <div className="flex-1">
                     <p className="text-3xl font-black" style={{ color: primaryColor.text }}>{trophy.year}</p>
                     <p className="text-sm font-semibold mt-1" style={{ color: primaryColor.textOnLight }}>{trophy.name}</p>

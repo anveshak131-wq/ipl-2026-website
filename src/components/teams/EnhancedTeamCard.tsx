@@ -123,7 +123,7 @@ export default function EnhancedTeamCard({ team, onPlayerClick, isFavorite = fal
                 animate={{ scale: isFavorite ? [1, 1.3, 1] : 1 }}
                 transition={{ duration: 0.3 }}
               >
-                {isFavorite ? '⭐' : '☆'}
+                <CustomEmoji type={isFavorite ? 'star' : 'star-outline'} size={20} />
               </motion.span>
             </button>
           )}
@@ -143,7 +143,7 @@ export default function EnhancedTeamCard({ team, onPlayerClick, isFavorite = fal
             </h3>
             {trophyCount > 0 && (
               <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/50 text-xs font-bold text-amber-300">
-                🏆 {trophyCount}
+                <CustomEmoji type="trophy" size={16} /> {trophyCount}
               </span>
             )}
           </div>
@@ -243,7 +243,7 @@ export default function EnhancedTeamCard({ team, onPlayerClick, isFavorite = fal
             aria-label="View stats"
             title="Statistics"
           >
-            📊
+            <CustomEmoji type="chart" size={20} />
           </button>
         </div>
       </div>

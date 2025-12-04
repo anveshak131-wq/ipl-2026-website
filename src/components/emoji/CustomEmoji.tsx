@@ -27,7 +27,17 @@ export type EmojiType =
   | 'cricket-bat'
   | 'venue'
   | 'art'
-  | 'energy';
+  | 'energy'
+  | 'medal-gold'
+  | 'medal-silver'
+  | 'medal-bronze'
+  | 'cricket-ball'
+  | 'cricket-stumps'
+  | 'bat-ball'
+  | 'clap'
+  | 'rocket'
+  | 'wow'
+  | 'thumbs-up';
 
 interface CustomEmojiProps {
   type: EmojiType;
@@ -880,6 +890,455 @@ export default function CustomEmoji({
                 />
               </>
             )}
+          </svg>
+        );
+
+      case 'medal-gold':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" style={svgProps} className={className}>
+            <defs>
+              <linearGradient id="medal-gold-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: '#FFD700', stopOpacity: 1 }} />
+                <stop offset="50%" style={{ stopColor: '#FFA500', stopOpacity: 1 }} />
+                <stop offset="100%" style={{ stopColor: '#FF8C00', stopOpacity: 1 }} />
+              </linearGradient>
+              <radialGradient id="medal-gold-shine" cx="50%" cy="30%">
+                <stop offset="0%" style={{ stopColor: '#FFF', stopOpacity: 0.8 }} />
+                <stop offset="100%" style={{ stopColor: '#FFF', stopOpacity: 0 }} />
+              </radialGradient>
+              <filter id="medal-gold-glow">
+                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+            <motion.circle
+              cx="12"
+              cy="12"
+              r="10"
+              fill="url(#medal-gold-gradient)"
+              filter="url(#medal-gold-glow)"
+              animate={animate ? { 
+                scale: [1, 1.05, 1],
+                rotate: [0, 5, -5, 0]
+              } : {}}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            <motion.circle
+              cx="12"
+              cy="12"
+              r="10"
+              fill="url(#medal-gold-shine)"
+              opacity="0.6"
+            />
+            <motion.text
+              x="12"
+              y="16"
+              textAnchor="middle"
+              fontSize="12"
+              fontWeight="bold"
+              fill="#FFF"
+              animate={animate ? { scale: [1, 1.1, 1] } : {}}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            >
+              1
+            </motion.text>
+            <motion.path
+              d="M12 4L13.5 8.5L18 9.5L14.5 12.5L15 17L12 15L9 17L9.5 12.5L6 9.5L10.5 8.5L12 4Z"
+              fill="#FFF"
+              opacity="0.3"
+              animate={animate ? { rotate: [0, 360] } : {}}
+              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+            />
+          </svg>
+        );
+
+      case 'medal-silver':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" style={svgProps} className={className}>
+            <defs>
+              <linearGradient id="medal-silver-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: '#C0C0C0', stopOpacity: 1 }} />
+                <stop offset="50%" style={{ stopColor: '#808080', stopOpacity: 1 }} />
+                <stop offset="100%" style={{ stopColor: '#606060', stopOpacity: 1 }} />
+              </linearGradient>
+              <radialGradient id="medal-silver-shine" cx="50%" cy="30%">
+                <stop offset="0%" style={{ stopColor: '#FFF', stopOpacity: 0.7 }} />
+                <stop offset="100%" style={{ stopColor: '#FFF', stopOpacity: 0 }} />
+              </radialGradient>
+            </defs>
+            <motion.circle
+              cx="12"
+              cy="12"
+              r="10"
+              fill="url(#medal-silver-gradient)"
+              animate={animate ? { scale: [1, 1.05, 1] } : {}}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            <motion.circle
+              cx="12"
+              cy="12"
+              r="10"
+              fill="url(#medal-silver-shine)"
+              opacity="0.5"
+            />
+            <motion.text
+              x="12"
+              y="16"
+              textAnchor="middle"
+              fontSize="12"
+              fontWeight="bold"
+              fill="#FFF"
+              animate={animate ? { scale: [1, 1.1, 1] } : {}}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            >
+              2
+            </motion.text>
+          </svg>
+        );
+
+      case 'medal-bronze':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" style={svgProps} className={className}>
+            <defs>
+              <linearGradient id="medal-bronze-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: '#CD7F32', stopOpacity: 1 }} />
+                <stop offset="50%" style={{ stopColor: '#B87333', stopOpacity: 1 }} />
+                <stop offset="100%" style={{ stopColor: '#8B4513', stopOpacity: 1 }} />
+              </linearGradient>
+              <radialGradient id="medal-bronze-shine" cx="50%" cy="30%">
+                <stop offset="0%" style={{ stopColor: '#FFF', stopOpacity: 0.6 }} />
+                <stop offset="100%" style={{ stopColor: '#FFF', stopOpacity: 0 }} />
+              </radialGradient>
+            </defs>
+            <motion.circle
+              cx="12"
+              cy="12"
+              r="10"
+              fill="url(#medal-bronze-gradient)"
+              animate={animate ? { scale: [1, 1.05, 1] } : {}}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            <motion.circle
+              cx="12"
+              cy="12"
+              r="10"
+              fill="url(#medal-bronze-shine)"
+              opacity="0.4"
+            />
+            <motion.text
+              x="12"
+              y="16"
+              textAnchor="middle"
+              fontSize="12"
+              fontWeight="bold"
+              fill="#FFF"
+              animate={animate ? { scale: [1, 1.1, 1] } : {}}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            >
+              3
+            </motion.text>
+          </svg>
+        );
+
+      case 'cricket-ball':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" style={svgProps} className={className}>
+            <defs>
+              <linearGradient id="cricket-ball-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: '#8B4513', stopOpacity: 1 }} />
+                <stop offset="50%" style={{ stopColor: '#654321', stopOpacity: 1 }} />
+                <stop offset="100%" style={{ stopColor: '#3E2723', stopOpacity: 1 }} />
+              </linearGradient>
+              <radialGradient id="cricket-ball-shine" cx="30%" cy="30%">
+                <stop offset="0%" style={{ stopColor: '#D4A574', stopOpacity: 0.8 }} />
+                <stop offset="100%" style={{ stopColor: '#8B4513', stopOpacity: 0 }} />
+              </radialGradient>
+            </defs>
+            <motion.circle
+              cx="12"
+              cy="12"
+              r="10"
+              fill="url(#cricket-ball-gradient)"
+              animate={animate ? { 
+                rotate: [0, 360],
+                scale: [1, 1.05, 1]
+              } : {}}
+              transition={{ 
+                rotate: { duration: 3, repeat: Infinity, ease: "linear" },
+                scale: { duration: 2, repeat: Infinity }
+              }}
+            />
+            <motion.circle
+              cx="12"
+              cy="12"
+              r="10"
+              fill="url(#cricket-ball-shine)"
+            />
+            <motion.path
+              d="M6 8 Q8 6 10 8 Q12 6 14 8 Q16 6 18 8"
+              stroke="#654321"
+              strokeWidth="1"
+              fill="none"
+              opacity="0.4"
+              animate={animate ? { pathLength: [0, 1, 0] } : {}}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            <motion.path
+              d="M6 16 Q8 18 10 16 Q12 18 14 16 Q16 18 18 16"
+              stroke="#654321"
+              strokeWidth="1"
+              fill="none"
+              opacity="0.4"
+              animate={animate ? { pathLength: [0, 1, 0] } : {}}
+              transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+            />
+          </svg>
+        );
+
+      case 'cricket-stumps':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" style={svgProps} className={className}>
+            <defs>
+              <linearGradient id="stumps-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style={{ stopColor: '#8B4513', stopOpacity: 1 }} />
+                <stop offset="100%" style={{ stopColor: '#654321', stopOpacity: 1 }} />
+              </linearGradient>
+            </defs>
+            <motion.rect
+              x="10"
+              y="4"
+              width="1.5"
+              height="16"
+              rx="0.75"
+              fill="url(#stumps-gradient)"
+              animate={animate ? { y: [4, 3, 4] } : {}}
+              transition={{ duration: 0.1, repeat: Infinity }}
+            />
+            <motion.rect
+              x="11.25"
+              y="4"
+              width="1.5"
+              height="16"
+              rx="0.75"
+              fill="url(#stumps-gradient)"
+              animate={animate ? { y: [4, 3, 4] } : {}}
+              transition={{ duration: 0.1, repeat: Infinity, delay: 0.05 }}
+            />
+            <motion.rect
+              x="12.5"
+              y="4"
+              width="1.5"
+              height="16"
+              rx="0.75"
+              fill="url(#stumps-gradient)"
+              animate={animate ? { y: [4, 3, 4] } : {}}
+              transition={{ duration: 0.1, repeat: Infinity, delay: 0.1 }}
+            />
+            <motion.rect
+              x="8"
+              y="3"
+              width="8"
+              height="1"
+              rx="0.5"
+              fill="#D4A574"
+              opacity="0.8"
+            />
+            <motion.rect
+              x="8"
+              y="18"
+              width="8"
+              height="2"
+              rx="1"
+              fill="#654321"
+            />
+          </svg>
+        );
+
+      case 'bat-ball':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" style={svgProps} className={className}>
+            <defs>
+              <linearGradient id="bat-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style={{ stopColor: '#8B4513', stopOpacity: 1 }} />
+                <stop offset="100%" style={{ stopColor: '#654321', stopOpacity: 1 }} />
+              </linearGradient>
+            </defs>
+            <motion.path
+              d="M4 8 L18 4 L20 6 L6 10 Z"
+              fill="url(#bat-gradient)"
+              animate={animate ? { rotate: [0, 5, -5, 0] } : {}}
+              transition={{ duration: 2, repeat: Infinity }}
+              style={{ transformOrigin: '12px 7px' }}
+            />
+            <motion.circle
+              cx="18"
+              cy="5"
+              r="3"
+              fill="#8B4513"
+              animate={animate ? { 
+                scale: [1, 1.1, 1],
+                rotate: [0, 360]
+              } : {}}
+              transition={{ 
+                scale: { duration: 1.5, repeat: Infinity },
+                rotate: { duration: 2, repeat: Infinity, ease: "linear" }
+              }}
+            />
+            <motion.path
+              d="M17 4.5 L19 5.5 M18.5 3.5 L18.5 6.5"
+              stroke="#654321"
+              strokeWidth="0.5"
+              opacity="0.6"
+            />
+          </svg>
+        );
+
+      case 'clap':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" style={svgProps} className={className}>
+            <defs>
+              <linearGradient id="clap-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: '#FFD700', stopOpacity: 1 }} />
+                <stop offset="100%" style={{ stopColor: '#FFA500', stopOpacity: 1 }} />
+              </linearGradient>
+            </defs>
+            {[...Array(6)].map((_, i) => (
+              <motion.path
+                key={i}
+                d={`M${8 + i * 1.5} ${10 + Math.sin(i) * 2} L${9 + i * 1.5} ${14 + Math.sin(i) * 2} L${7 + i * 1.5} ${14 + Math.sin(i) * 2} Z`}
+                fill="url(#clap-gradient)"
+                animate={animate ? {
+                  scale: [1, 1.3, 1],
+                  opacity: [0.7, 1, 0.7],
+                  y: [0, -2, 0]
+                } : {}}
+                transition={{
+                  duration: 0.5,
+                  repeat: Infinity,
+                  delay: i * 0.1
+                }}
+              />
+            ))}
+          </svg>
+        );
+
+      case 'rocket':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" style={svgProps} className={className}>
+            <defs>
+              <linearGradient id="rocket-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: '#FF6B6B', stopOpacity: 1 }} />
+                <stop offset="50%" style={{ stopColor: '#FF8E53', stopOpacity: 1 }} />
+                <stop offset="100%" style={{ stopColor: '#FF6B6B', stopOpacity: 1 }} />
+              </linearGradient>
+            </defs>
+            <motion.path
+              d="M12 2 L14 8 L20 10 L14 12 L12 18 L10 12 L4 10 L10 8 Z"
+              fill="url(#rocket-gradient)"
+              animate={animate ? {
+                y: [0, -5, 0],
+                scale: [1, 1.1, 1]
+              } : {}}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            />
+            {animate && (
+              <>
+                <motion.circle
+                  cx="12"
+                  cy="20"
+                  r="2"
+                  fill="#FFD700"
+                  opacity="0.8"
+                  animate={{ scale: [0, 2, 0], opacity: [0.8, 0, 0] }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                />
+                <motion.circle
+                  cx="12"
+                  cy="20"
+                  r="1"
+                  fill="#FF6B6B"
+                  opacity="0.6"
+                  animate={{ scale: [0, 1.5, 0], opacity: [0.6, 0, 0] }}
+                  transition={{ duration: 1, repeat: Infinity, delay: 0.3 }}
+                />
+              </>
+            )}
+          </svg>
+        );
+
+      case 'wow':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" style={svgProps} className={className}>
+            <defs>
+              <linearGradient id="wow-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: '#FFD700', stopOpacity: 1 }} />
+                <stop offset="100%" style={{ stopColor: '#FFA500', stopOpacity: 1 }} />
+              </linearGradient>
+            </defs>
+            <motion.circle
+              cx="12"
+              cy="12"
+              r="10"
+              fill="url(#wow-gradient)"
+              animate={animate ? { scale: [1, 1.2, 1] } : {}}
+              transition={{ duration: 1, repeat: Infinity }}
+            />
+            <motion.circle
+              cx="9"
+              cy="10"
+              r="2"
+              fill="#FFF"
+              animate={animate ? { scale: [1, 1.3, 1] } : {}}
+              transition={{ duration: 0.8, repeat: Infinity }}
+            />
+            <motion.circle
+              cx="15"
+              cy="10"
+              r="2"
+              fill="#FFF"
+              animate={animate ? { scale: [1, 1.3, 1] } : {}}
+              transition={{ duration: 0.8, repeat: Infinity, delay: 0.2 }}
+            />
+            <motion.ellipse
+              cx="12"
+              cy="16"
+              rx="3"
+              ry="2"
+              fill="none"
+              stroke="#FFF"
+              strokeWidth="2"
+              animate={animate ? { scaleX: [1, 1.2, 1] } : {}}
+              transition={{ duration: 1, repeat: Infinity }}
+            />
+          </svg>
+        );
+
+      case 'thumbs-up':
+        return (
+          <svg viewBox="0 0 24 24" fill="none" style={svgProps} className={className}>
+            <defs>
+              <linearGradient id="thumbs-up-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style={{ stopColor: '#4ECDC4', stopOpacity: 1 }} />
+                <stop offset="100%" style={{ stopColor: '#44A08D', stopOpacity: 1 }} />
+              </linearGradient>
+            </defs>
+            <motion.path
+              d="M7 10V20C7 21.1 7.9 22 9 22H16C17.1 22 18 21.1 18 20V12L14 8H12C11.45 8 11 8.45 11 9V10H7Z"
+              fill="url(#thumbs-up-gradient)"
+              animate={animate ? { 
+                rotate: [0, -10, 10, 0],
+                scale: [1, 1.05, 1]
+              } : {}}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              style={{ transformOrigin: '12px 15px' }}
+            />
+            <motion.path
+              d="M5 10H7V20H5C4.45 20 4 19.55 4 19V11C4 10.45 4.45 10 5 10Z"
+              fill="url(#thumbs-up-gradient)"
+            />
           </svg>
         );
 

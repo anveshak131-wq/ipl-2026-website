@@ -27,11 +27,18 @@ export type EmojiName =
   | 'heart'
   | 'wow'
   | 'thumbs_up'
+  | 'thumbs-up'
   | 'warning'
   | 'cricket-bat'
   | 'venue'
   | 'art'
-  | 'energy';
+  | 'energy'
+  | 'medal-gold'
+  | 'medal-silver'
+  | 'medal-bronze'
+  | 'cricket-ball'
+  | 'cricket-stumps'
+  | 'bat-ball';
 
 interface EmojiProps {
   name: EmojiName | string;
@@ -42,7 +49,7 @@ interface EmojiProps {
   gradient?: boolean;
 }
 
-// Legacy emoji character mapping (for fallback)
+// Legacy emoji character mapping (for fallback - deprecated, use CustomEmoji instead)
 const EMOJI_CHAR: Record<string, string> = {
   trophy: "🏆",
   cricket: "🏏",
@@ -62,6 +69,7 @@ const EMOJI_CHAR: Record<string, string> = {
   heart: "❤️",
   wow: "😮",
   thumbs_up: "👍",
+  "thumbs-up": "👍",
   clock: "🕐",
   crown: "👑",
   "flag-india": "🇮🇳",
@@ -71,7 +79,13 @@ const EMOJI_CHAR: Record<string, string> = {
   "cricket-bat": "🏏",
   venue: "🏟️",
   art: "🎨",
-  energy: "⚡"
+  energy: "⚡",
+  "medal-gold": "🥇",
+  "medal-silver": "🥈",
+  "medal-bronze": "🥉",
+  "cricket-ball": "⚾",
+  "cricket-stumps": "🏏",
+  "bat-ball": "🏏"
 };
 
 // Mapping string names to CustomEmoji types
@@ -99,12 +113,19 @@ const EMOJI_TYPE_MAP: Record<string, EmojiType> = {
   venue: 'venue',
   art: 'art',
   energy: 'energy',
+  'medal-gold': 'medal-gold',
+  'medal-silver': 'medal-silver',
+  'medal-bronze': 'medal-bronze',
+  'cricket-ball': 'cricket-ball',
+  'cricket-stumps': 'cricket-stumps',
+  'bat-ball': 'bat-ball',
   // Legacy names that map to our custom emojis
-  clap: 'sparkles',
-  rocket: 'fire',
+  clap: 'clap',
+  rocket: 'rocket',
   heart: 'heart',
-  wow: 'sparkles',
-  thumbs_up: 'star'
+  wow: 'wow',
+  thumbs_up: 'thumbs-up',
+  'thumbs-up': 'thumbs-up'
 };
 
 export default function Emoji({ 

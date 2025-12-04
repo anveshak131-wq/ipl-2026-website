@@ -13,6 +13,7 @@ import {
 } from '@/lib/matchStateMachine';
 import { Lock, ChevronRight, AlertCircle } from 'lucide-react';
 import { WPLColors } from '@/lib/wplColors';
+import CustomEmoji from '@/components/emoji/CustomEmoji';
 
 interface MatchStateManagerProps {
   matchState: MatchState;
@@ -324,7 +325,7 @@ export default function MatchStateManager({
                           : 'bg-slate-700 text-gray-300 hover:bg-slate-600'
                       }`}
                     >
-                      🏏 Bat
+                      <CustomEmoji type="cricket-bat" size={18} /> Bat
                     </button>
                     <button
                       onClick={() => setTossDecision('bowl')}
@@ -334,7 +335,7 @@ export default function MatchStateManager({
                           : 'bg-slate-700 text-gray-300 hover:bg-slate-600'
                       }`}
                     >
-                      🎾 Bowl
+                      <CustomEmoji type="cricket-ball" size={18} /> Bowl
                     </button>
                   </div>
                 </div>
