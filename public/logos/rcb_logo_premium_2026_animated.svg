@@ -8,12 +8,13 @@
         <animate attributeName="stop-color" values="#8B1A1A;#C8102E;#8B1A1A" dur="4s" repeatCount="indefinite"/>
       </stop>
     </linearGradient>
+    <!-- Muted gold - less bright -->
     <linearGradient id="rcb-gold" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1">
-        <animate attributeName="stop-color" values="#FFD700;#FFA500;#FFD700" dur="3s" repeatCount="indefinite"/>
+      <stop offset="0%" style="stop-color:#D4AF37;stop-opacity:1">
+        <animate attributeName="stop-color" values="#D4AF37;#B8860B;#D4AF37" dur="3s" repeatCount="indefinite"/>
       </stop>
-      <stop offset="100%" style="stop-color:#FFA500;stop-opacity:1">
-        <animate attributeName="stop-color" values="#FFA500;#FFD700;#FFA500" dur="3s" repeatCount="indefinite"/>
+      <stop offset="100%" style="stop-color:#B8860B;stop-opacity:1">
+        <animate attributeName="stop-color" values="#B8860B;#D4AF37;#B8860B" dur="3s" repeatCount="indefinite"/>
       </stop>
     </linearGradient>
     <filter id="glow">
@@ -50,30 +51,57 @@
     <animateTransform attributeName="transform" type="scale" values="1;1.05;1" dur="2s" repeatCount="indefinite"/>
   </path>
   
-  <!-- Lion head - simple and clean -->
+  <!-- Lion head - improved design -->
   <g transform="translate(100, 105)">
-    <!-- Mane -->
-    <circle cx="0" cy="-8" r="32" fill="url(#rcb-gold)" opacity="0.95"/>
+    <!-- Mane - fuller and more natural -->
+    <ellipse cx="0" cy="-10" rx="35" ry="30" fill="url(#rcb-gold)" opacity="0.95"/>
+    <ellipse cx="0" cy="-10" rx="32" ry="27" fill="none" stroke="#8B6914" stroke-width="1.5" opacity="0.6"/>
     
-    <!-- Face -->
-    <ellipse cx="0" cy="0" rx="24" ry="28" fill="#000" opacity="0.95"/>
+    <!-- Face - better proportions -->
+    <ellipse cx="0" cy="2" rx="26" ry="30" fill="#1a1a1a" opacity="0.98"/>
+    <ellipse cx="0" cy="2" rx="23" ry="27" fill="#2a2a2a" opacity="0.3"/>
     
-    <!-- Eyes -->
-    <circle cx="-9" cy="-5" r="4" fill="#C8102E">
-      <animate attributeName="opacity" values="1;0.7;1" dur="3s" repeatCount="indefinite"/>
+    <!-- Eyes - more expressive -->
+    <ellipse cx="-10" cy="-3" rx="5" ry="6" fill="#FFFFFF" opacity="0.95"/>
+    <circle cx="-10" cy="-3" r="3.5" fill="#C8102E">
+      <animate attributeName="opacity" values="1;0.8;1" dur="3s" repeatCount="indefinite"/>
     </circle>
-    <circle cx="-9" cy="-5" r="2" fill="#000"/>
-    <circle cx="9" cy="-5" r="4" fill="#C8102E">
-      <animate attributeName="opacity" values="1;0.7;1" dur="3s" repeatCount="indefinite" begin="1.5s"/>
+    <circle cx="-10" cy="-3" r="2" fill="#000"/>
+    <circle cx="-10" cy="-3" r="0.8" fill="#FFF"/>
+    
+    <ellipse cx="10" cy="-3" rx="5" ry="6" fill="#FFFFFF" opacity="0.95"/>
+    <circle cx="10" cy="-3" r="3.5" fill="#C8102E">
+      <animate attributeName="opacity" values="1;0.8;1" dur="3s" repeatCount="indefinite" begin="1.5s"/>
     </circle>
-    <circle cx="9" cy="-5" r="2" fill="#000"/>
+    <circle cx="10" cy="-3" r="2" fill="#000"/>
+    <circle cx="10" cy="-3" r="0.8" fill="#FFF"/>
     
-    <!-- Nose -->
-    <ellipse cx="0" cy="8" rx="3" ry="2.5" fill="#000"/>
-    <path d="M -2 8 Q 0 13 2 8" fill="none" stroke="url(#rcb-gold)" stroke-width="1.5" stroke-linecap="round"/>
+    <!-- Eyebrows -->
+    <path d="M -16 -8 Q -10 -9 -10 -5" fill="none" stroke="url(#rcb-gold)" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+    <path d="M 16 -8 Q 10 -9 10 -5" fill="none" stroke="url(#rcb-gold)" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
     
-    <!-- Mouth -->
-    <path d="M -8 13 Q 0 17 8 13" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round"/>
+    <!-- Nose - better shape -->
+    <ellipse cx="0" cy="10" rx="4" ry="3" fill="#000" opacity="0.9"/>
+    <path d="M -2.5 10 Q 0 16 2.5 10" fill="none" stroke="url(#rcb-gold)" stroke-width="2" stroke-linecap="round"/>
+    
+    <!-- Mouth - more natural -->
+    <path d="M -10 18 Q 0 22 10 18 Q 8 28 0 25 Q -8 28 -10 18 Z" 
+          fill="#C8102E" opacity="0.95"/>
+    <path d="M -8 20 Q 0 23 8 20" fill="none" stroke="url(#rcb-gold)" stroke-width="1.5" stroke-linecap="round"/>
+    
+    <!-- Teeth -->
+    <path d="M -3.5 20 L -2 25 L -5 25 Z" fill="#FFFFFF" opacity="0.95"/>
+    <path d="M 3.5 20 L 2 25 L 5 25 Z" fill="#FFFFFF" opacity="0.95"/>
+    
+    <!-- Whiskers -->
+    <g stroke="url(#rcb-gold)" stroke-width="1.5" stroke-linecap="round" opacity="0.6">
+      <line x1="-14" y1="6" x2="-20" y2="5"/>
+      <line x1="-14" y1="10" x2="-20" y2="10"/>
+      <line x1="-14" y1="14" x2="-20" y2="15"/>
+      <line x1="14" y1="6" x2="20" y2="5"/>
+      <line x1="14" y1="10" x2="20" y2="10"/>
+      <line x1="14" y1="14" x2="20" y2="15"/>
+    </g>
   </g>
   
   <!-- RCB text -->
