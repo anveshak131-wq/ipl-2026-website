@@ -76,22 +76,77 @@ export default function WPLHomePage() {
       setShowTermsModal(true);
     }
 
+    // Helper function to normalize team/player IDs for matching
+    const normalizeId = (id: string | number | undefined): string => {
+      if (!id) return '';
+      const str = String(id).trim();
+      const numMatch = str.replace(/^team/i, '').match(/^\d+$/);
+      return numMatch ? numMatch[0] : str.toLowerCase();
+    };
+    
     // Load data for WPL
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const [teamsData, matchesData, newsData] = await Promise.all([
+        const [teamsData, matchesData, newsData, playersData] = await Promise.all([
           api.getTeams('wpl'),
           api.getMatches('wpl'),
           api.getNews(),
+          api.getPlayers(undefined, 'wpl').catch(() => []), // Fetch players for accurate counts
         ]);
+        
+        console.log('WPL Home page: Fetched players:', playersData?.length || 0);
+        
+        // Attach players to teams with improved matching
+        const teamsWithPlayers = teamsData
+          .filter(team => !isPlaceholderTeam(team))
+          .map(team => {
+            const normalizedTeamId = normalizeId(team.id);
+            const teamIdVariations = [
+              String(team.id),
+              normalizedTeamId,
+              `team${normalizedTeamId}`,
+              String(team.id).replace(/^team/i, ''),
+              String(team.id).toLowerCase(),
+              String(team.id).toUpperCase()
+            ];
+            
+            const teamPlayers = (playersData || []).filter(player => {
+              const normalizedPlayerTeamId = normalizeId(player.teamId);
+              const playerTeamIdVariations = [
+                String(player.teamId),
+                normalizedPlayerTeamId,
+                `team${normalizedPlayerTeamId}`,
+                String(player.teamId).replace(/^team/i, ''),
+                String(player.teamId).toLowerCase(),
+                String(player.teamId).toUpperCase()
+              ];
+              
+              // Check if any variation matches
+              return teamIdVariations.some(tv => 
+                playerTeamIdVariations.some(pv => pv === tv)
+              );
+            });
+            
+            if (teamPlayers.length > 0) {
+              console.log(`WPL Home page: Matched ${teamPlayers.length} players for team ${team.name} (ID: ${team.id})`);
+            } else if (playersData && playersData.length > 0) {
+              console.warn(`WPL Home page: No players matched for team ${team.name} (ID: ${team.id}). Sample player teamIds:`, 
+                playersData.slice(0, 3).map(p => p.teamId));
+            }
+            
+            return {
+              ...team,
+              players: teamPlayers.length > 0 ? teamPlayers : (team.players || [])
+            };
+          });
         
         // Filter news by league
         const filteredNews = newsData.filter(item => 
           !item.league || item.league === 'wpl' || item.league === 'both'
         );
         
-        setTeams(teamsData);
+        setTeams(teamsWithPlayers);
         setMatches(matchesData);
         setNews(filteredNews);
 

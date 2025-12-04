@@ -96,18 +96,57 @@ function WPLTeamsPageContent() {
                     })
                 ]);
 
+                // Helper function to normalize team/player IDs for matching
+                const normalizeId = (id: string | number | undefined): string => {
+                    if (!id) return '';
+                    const str = String(id).trim();
+                    const numMatch = str.replace(/^team/i, '').match(/^\d+$/);
+                    return numMatch ? numMatch[0] : str.toLowerCase();
+                };
+                
+                console.log('WPL Teams page: Fetched players:', playersData?.length || 0);
+                
                 const teamsWithPlayers = teamsData
                     .filter(team => !isPlaceholderTeam(team)) // Filter out placeholder teams
                     .map(team => {
-                        // Get players from fetched data, matching by teamId
+                        const normalizedTeamId = normalizeId(team.id);
+                        const teamIdVariations = [
+                            String(team.id),
+                            normalizedTeamId,
+                            `team${normalizedTeamId}`,
+                            String(team.id).replace(/^team/i, ''),
+                            String(team.id).toLowerCase(),
+                            String(team.id).toUpperCase()
+                        ];
+                        
+                        // Get players from fetched data, matching by teamId with comprehensive variations
                         const fetchedPlayers = (playersData || []).filter(player => {
-                            // Handle both string and number IDs
-                            const playerTeamId = String(player.teamId || '');
-                            const teamId = String(team.id || '');
-                            return playerTeamId === teamId || 
-                                   playerTeamId === `team${teamId}` || 
-                                   teamId === `team${playerTeamId}`;
+                            // Check if player league matches
+                            const leagueMatch = !player.league || player.league === 'wpl';
+                            if (!leagueMatch) return false;
+                            
+                            const normalizedPlayerTeamId = normalizeId(player.teamId);
+                            const playerTeamIdVariations = [
+                                String(player.teamId),
+                                normalizedPlayerTeamId,
+                                `team${normalizedPlayerTeamId}`,
+                                String(player.teamId).replace(/^team/i, ''),
+                                String(player.teamId).toLowerCase(),
+                                String(player.teamId).toUpperCase()
+                            ];
+                            
+                            // Check if any variation matches
+                            return teamIdVariations.some(tv => 
+                                playerTeamIdVariations.some(pv => pv === tv)
+                            );
                         });
+                        
+                        if (fetchedPlayers.length > 0) {
+                            console.log(`WPL Teams page: Matched ${fetchedPlayers.length} players for team ${team.name} (ID: ${team.id})`);
+                        } else if (playersData && playersData.length > 0) {
+                            console.warn(`WPL Teams page: No players matched for team ${team.name} (ID: ${team.id}). Sample player teamIds:`, 
+                                playersData.slice(0, 3).map(p => p.teamId));
+                        }
                         
                         // Preserve original players if they exist and fetched players is empty
                         const finalPlayers = fetchedPlayers.length > 0 
