@@ -27,6 +27,7 @@ import InteractiveStadiumTour from '@/components/teams/InteractiveStadiumTour';
 import PlayerComparisonTool from '@/components/teams/PlayerComparisonTool';
 import TeamFormationVisualizer from '@/components/teams/TeamFormationVisualizer';
 import { Calendar } from 'lucide-react';
+import { api } from '@/lib/data';
 import { 
   UsersIcon, 
   StarIcon, 
@@ -167,28 +168,43 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
           const team = allTeams.find((t: Team) => t.id === numericId || t.id === teamId);
           
           if (team) {
-            // Fetch players with league filter if provided
-            const playersUrl = league ? `/api/players?league=${league}` : '/api/players';
-            const playersResponse = await fetch(playersUrl);
-            if (playersResponse.ok) {
-              const allPlayers = await playersResponse.json();
-              // Match players by teamId - handle both "1" and "team1" formats
-              const teamPlayers = allPlayers.filter((p: Player) => {
-                const playerTeamId = String(p.teamId || '').replace(/^team/, '');
-                const teamIdStr = String(team.id || '').replace(/^team/, '');
-                return playerTeamId === teamIdStr || 
-                       playerTeamId === `team${teamIdStr}` || 
-                       teamIdStr === `team${playerTeamId}` ||
-                       String(p.teamId) === String(team.id);
-              });
-              const teamWithPlayers = {
-                ...team,
-                players: sortPlayersByRoleAndAge(teamPlayers)
-              };
-              setTeamData(teamWithPlayers);
-            } else {
-              setTeamData(team);
+            // Fetch players using api helper for better error handling and ID normalization
+            const teamLeague = league || (team.league as 'ipl' | 'wpl') || 'ipl';
+            console.log('TeamDetailClient: Fetching players for league:', teamLeague, 'team ID:', team.id);
+            
+            const allPlayers = await api.getPlayers(undefined, teamLeague);
+            console.log('TeamDetailClient: Fetched players:', allPlayers.length);
+            
+            if (allPlayers.length > 0) {
+              console.log('TeamDetailClient: Sample player teamIds:', allPlayers.slice(0, 5).map(p => ({ 
+                name: p.name, 
+                teamId: p.teamId, 
+                teamIdType: typeof p.teamId 
+              })));
             }
+            
+            // Match players by teamId - handle both "1" and "team1" formats
+            const teamPlayers = allPlayers.filter((p: Player) => {
+              const playerTeamId = String(p.teamId || '').replace(/^team/, '');
+              const teamIdStr = String(team.id || '').replace(/^team/, '');
+              const matches = playerTeamId === teamIdStr || 
+                             playerTeamId === `team${teamIdStr}` || 
+                             teamIdStr === `team${playerTeamId}` ||
+                             String(p.teamId) === String(team.id);
+              
+              if (matches) {
+                console.log('TeamDetailClient: Matched player:', p.name, 'teamId:', p.teamId, 'to team:', team.id);
+              }
+              return matches;
+            });
+            
+            console.log('TeamDetailClient: Matched players for team:', teamPlayers.length);
+            
+            const teamWithPlayers = {
+              ...team,
+              players: sortPlayersByRoleAndAge(teamPlayers)
+            };
+            setTeamData(teamWithPlayers);
             
             // Fetch coaching staff for this team
             try {
