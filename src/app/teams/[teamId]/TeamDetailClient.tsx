@@ -1517,6 +1517,7 @@ function KeyPlayersSection({ teamData, keyPlayers, primaryColor, secondaryColor 
 
 // Stats Tab
 function StatsTab({ teamData, primaryColor, secondaryColor, batsmen, bowlers, allRounders, wicketkeepers }: StatsTabProps) {
+  if (!teamData) return null;
   const squad: Player[] = (teamData.players || []) as Player[];
 
   const totals = squad.reduce(
@@ -1714,6 +1715,7 @@ function StatsTab({ teamData, primaryColor, secondaryColor, batsmen, bowlers, al
 
 // About Tab
 function AboutTab({ teamData, primaryColor, secondaryColor, coachingStaff }: AboutTabProps) {
+  if (!teamData) return null;
   const hasCoachingStaff = coachingStaff && (
     coachingStaff.headCoach ||
     coachingStaff.mentor ||

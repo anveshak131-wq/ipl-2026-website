@@ -104,6 +104,7 @@ function StatsCard({ icon, value, label, delay }: StatsCardProps) {
       }, 30);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [count, value, isVisible]);
 
   return (

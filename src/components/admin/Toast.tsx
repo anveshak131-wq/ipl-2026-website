@@ -27,6 +27,7 @@ function ToastItem({ toast, onClose }: ToastProps) {
 
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [toast.id, toast.duration, onClose]);
 
   const icons = {
