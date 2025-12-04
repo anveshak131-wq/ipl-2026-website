@@ -1,18 +1,20 @@
 <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <!-- Premium gradient for RCB -->
-    <linearGradient id="rcbGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#EC1C24;stop-opacity:1">
-        <animate attributeName="stop-color" values="#EC1C24;#FF6B6B;#EC1C24" dur="3s" repeatCount="indefinite"/>
+    <!-- Premium red gradient -->
+    <linearGradient id="rcbRedGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#D32F2F;stop-opacity:1">
+        <animate attributeName="stop-color" values="#D32F2F;#FF1744;#D32F2F" dur="2.5s" repeatCount="indefinite"/>
       </stop>
-      <stop offset="50%" style="stop-color:#FF6B6B;stop-opacity:1">
-        <animate attributeName="stop-color" values="#FF6B6B;#EC1C24;#FF6B6B" dur="3s" repeatCount="indefinite"/>
+      <stop offset="50%" style="stop-color:#EC1C24;stop-opacity:1">
+        <animate attributeName="stop-color" values="#EC1C24;#FF5252;#EC1C24" dur="2.5s" repeatCount="indefinite"/>
       </stop>
-      <stop offset="100%" style="stop-color:#EC1C24;stop-opacity:1">
-        <animate attributeName="stop-color" values="#EC1C24;#FF6B6B;#EC1C24" dur="3s" repeatCount="indefinite"/>
+      <stop offset="100%" style="stop-color:#B71C1C;stop-opacity:1">
+        <animate attributeName="stop-color" values="#B71C1C;#D32F2F;#B71C1C" dur="2.5s" repeatCount="indefinite"/>
       </stop>
     </linearGradient>
-    <linearGradient id="rcbGold" x1="0%" y1="0%" x2="100%" y2="100%">
+    
+    <!-- Premium gold gradient -->
+    <linearGradient id="rcbGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1">
         <animate attributeName="stop-color" values="#FFD700;#FFA500;#FFD700" dur="2s" repeatCount="indefinite"/>
       </stop>
@@ -20,89 +22,122 @@
         <animate attributeName="stop-color" values="#FFA500;#FFD700;#FFA500" dur="2s" repeatCount="indefinite"/>
       </stop>
     </linearGradient>
+    
+    <!-- Radial glow -->
     <radialGradient id="rcbGlow" cx="50%" cy="50%">
-      <stop offset="0%" style="stop-color:#EC1C24;stop-opacity:0.8">
-        <animate attributeName="stop-opacity" values="0.8;0.4;0.8" dur="2s" repeatCount="indefinite"/>
+      <stop offset="0%" style="stop-color:#EC1C24;stop-opacity:0.9">
+        <animate attributeName="stop-opacity" values="0.9;0.5;0.9" dur="2s" repeatCount="indefinite"/>
       </stop>
-      <stop offset="100%" style="stop-color:#EC1C24;stop-opacity:0">
-        <animate attributeName="stop-opacity" values="0;0.2;0" dur="2s" repeatCount="indefinite"/>
+      <stop offset="70%" style="stop-color:#EC1C24;stop-opacity:0.4">
+        <animate attributeName="stop-opacity" values="0.4;0.2;0.4" dur="2s" repeatCount="indefinite"/>
       </stop>
+      <stop offset="100%" style="stop-color:#EC1C24;stop-opacity:0"/>
     </radialGradient>
-    <!-- Animated glow effect -->
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="3" result="coloredBlur">
-        <animate attributeName="stdDeviation" values="3;5;3" dur="2s" repeatCount="indefinite"/>
+    
+    <!-- Glow filter -->
+    <filter id="glowFilter">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur">
+        <animate attributeName="stdDeviation" values="4;6;4" dur="2s" repeatCount="indefinite"/>
       </feGaussianBlur>
       <feMerge>
         <feMergeNode in="coloredBlur"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
+    
+    <!-- Shadow filter -->
+    <filter id="shadowFilter">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
   </defs>
   
-  <!-- Background glow with pulse animation -->
-  <circle cx="100" cy="100" r="95" fill="url(#rcbGlow)" opacity="0.6">
-    <animate attributeName="r" values="95;100;95" dur="2s" repeatCount="indefinite"/>
+  <!-- Outer glow ring -->
+  <circle cx="100" cy="100" r="95" fill="url(#rcbGlow)" opacity="0.7">
+    <animate attributeName="r" values="95;98;95" dur="3s" repeatCount="indefinite"/>
   </circle>
   
-  <!-- Main shield shape with premium design -->
-  <path d="M 100 20 L 160 40 L 180 100 L 160 160 L 100 180 L 40 160 L 20 100 L 40 40 Z" 
-        fill="url(#rcbGradient)" 
-        stroke="url(#rcbGold)" 
-        stroke-width="3"
-        filter="url(#glow)">
-    <animateTransform attributeName="transform" type="rotate" values="0 100 100;2 100 100;0 100 100;-2 100 100;0 100 100" dur="4s" repeatCount="indefinite"/>
-  </path>
+  <!-- Main circular badge -->
+  <circle cx="100" cy="100" r="85" fill="url(#rcbRedGrad)" stroke="url(#rcbGoldGrad)" stroke-width="4" filter="url(#glowFilter)">
+    <animateTransform attributeName="transform" type="scale" values="1;1.02;1" dur="3s" repeatCount="indefinite"/>
+  </circle>
   
-  <!-- Inner shield detail with rotation -->
-  <path d="M 100 35 L 145 50 L 160 100 L 145 150 L 100 165 L 55 150 L 40 100 L 55 50 Z" 
-        fill="none" 
-        stroke="url(#rcbGold)" 
-        stroke-width="2" 
-        opacity="0.6">
-    <animateTransform attributeName="transform" type="rotate" values="0 100 100;-1 100 100;0 100 100;1 100 100;0 100 100" dur="3s" repeatCount="indefinite"/>
-  </path>
+  <!-- Inner decorative ring -->
+  <circle cx="100" cy="100" r="72" fill="none" stroke="url(#rcbGoldGrad)" stroke-width="2" opacity="0.7">
+    <animateTransform attributeName="transform" type="rotate" values="0 100 100;360 100 100" dur="25s" repeatCount="indefinite"/>
+  </circle>
   
-  <!-- Crown/Star element at top with pulse -->
-  <path d="M 100 30 L 110 50 L 130 45 L 115 60 L 120 80 L 100 70 L 80 80 L 85 60 L 70 45 L 90 50 Z" 
-        fill="url(#rcbGold)" 
-        filter="url(#glow)">
-    <animateTransform attributeName="transform" type="scale" values="1;1.1;1" dur="1.5s" repeatCount="indefinite"/>
-  </path>
+  <!-- Crown at top -->
+  <g filter="url(#shadowFilter)">
+    <path d="M 100 25 L 115 45 L 135 40 L 125 60 L 135 75 L 100 65 L 65 75 L 75 60 L 65 40 L 85 45 Z" 
+          fill="url(#rcbGoldGrad)" opacity="0.95">
+      <animateTransform attributeName="transform" type="scale" values="1;1.08;1" dur="2s" repeatCount="indefinite"/>
+    </path>
+    <!-- Crown jewels -->
+    <circle cx="100" cy="50" r="4" fill="#FF1744">
+      <animate attributeName="r" values="4;5;4" dur="1.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="85" cy="55" r="3" fill="#FF1744">
+      <animate attributeName="r" values="3;4;3" dur="1.5s" repeatCount="indefinite" begin="0.5s"/>
+    </circle>
+    <circle cx="115" cy="55" r="3" fill="#FF1744">
+      <animate attributeName="r" values="3;4;3" dur="1.5s" repeatCount="indefinite" begin="1s"/>
+    </circle>
+  </g>
   
-  <!-- RCB Text with premium styling and glow -->
-  <text x="100" y="120" font-family="Arial Black, sans-serif" font-size="42" font-weight="900" 
-        fill="url(#rcbGold)" text-anchor="middle" 
-        stroke="#000" stroke-width="1" opacity="0.3">RCB</text>
-  <text x="100" y="120" font-family="Arial Black, sans-serif" font-size="42" font-weight="900" 
-        fill="url(#rcbGold)" text-anchor="middle">
-    <animate attributeName="opacity" values="1;0.8;1" dur="2s" repeatCount="indefinite"/>
+  <!-- Bold RCB Text -->
+  <text x="100" y="110" font-family="Arial Black, sans-serif" font-size="48" font-weight="900" 
+        fill="url(#rcbGoldGrad)" text-anchor="middle" 
+        stroke="#000" stroke-width="1.5" opacity="0.2" filter="url(#shadowFilter)">RCB</text>
+  <text x="100" y="110" font-family="Arial Black, sans-serif" font-size="48" font-weight="900" 
+        fill="url(#rcbGoldGrad)" text-anchor="middle" filter="url(#glowFilter)">
+    <animate attributeName="opacity" values="1;0.9;1" dur="2s" repeatCount="indefinite"/>
     RCB
   </text>
   
-  <!-- Lion silhouette (simplified) with subtle animation -->
-  <path d="M 70 140 Q 60 130 70 120 Q 80 115 90 120 Q 100 115 110 120 Q 120 115 130 120 Q 140 130 130 140 L 125 150 Q 120 155 100 155 Q 80 155 75 150 Z" 
-        fill="#000" 
-        opacity="0.7">
-    <animateTransform attributeName="transform" type="translate" values="0,0;2,0;0,0" dur="3s" repeatCount="indefinite"/>
-  </path>
+  <!-- Lion head silhouette (more detailed) -->
+  <g filter="url(#shadowFilter)">
+    <path d="M 100 125 Q 75 120 65 145 Q 70 155 85 150 Q 100 152 115 150 Q 130 155 135 145 Q 125 120 100 125 Z" 
+          fill="#000" opacity="0.85">
+      <animateTransform attributeName="transform" type="translate" values="0,0;1,0;0,0" dur="4s" repeatCount="indefinite"/>
+    </path>
+    <!-- Lion eyes -->
+    <circle cx="90" cy="135" r="3" fill="url(#rcbGoldGrad)">
+      <animate attributeName="opacity" values="1;0.6;1" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="110" cy="135" r="3" fill="url(#rcbGoldGrad)">
+      <animate attributeName="opacity" values="1;0.6;1" dur="2s" repeatCount="indefinite" begin="1s"/>
+    </circle>
+    <!-- Lion mane details -->
+    <path d="M 100 125 Q 85 115 70 120 Q 75 130 85 135" fill="none" stroke="#000" stroke-width="1.5" opacity="0.6"/>
+    <path d="M 100 125 Q 115 115 130 120 Q 125 130 115 135" fill="none" stroke="#000" stroke-width="1.5" opacity="0.6"/>
+  </g>
   
-  <!-- Decorative elements with twinkle animation -->
-  <circle cx="100" cy="100" r="2" fill="url(#rcbGold)" opacity="0.8">
-    <animate attributeName="opacity" values="0.8;0.2;0.8" dur="1s" repeatCount="indefinite"/>
-    <animate attributeName="r" values="2;3;2" dur="1s" repeatCount="indefinite"/>
-  </circle>
-  <circle cx="60" cy="80" r="1.5" fill="url(#rcbGold)" opacity="0.6">
-    <animate attributeName="opacity" values="0.6;0.2;0.6" dur="1.5s" repeatCount="indefinite" begin="0.3s"/>
-  </circle>
-  <circle cx="140" cy="80" r="1.5" fill="url(#rcbGold)" opacity="0.6">
-    <animate attributeName="opacity" values="0.6;0.2;0.6" dur="1.5s" repeatCount="indefinite" begin="0.6s"/>
-  </circle>
-  <circle cx="60" cy="120" r="1.5" fill="url(#rcbGold)" opacity="0.6">
-    <animate attributeName="opacity" values="0.6;0.2;0.6" dur="1.5s" repeatCount="indefinite" begin="0.9s"/>
-  </circle>
-  <circle cx="140" cy="120" r="1.5" fill="url(#rcbGold)" opacity="0.6">
-    <animate attributeName="opacity" values="0.6;0.2;0.6" dur="1.5s" repeatCount="indefinite" begin="1.2s"/>
-  </circle>
+  <!-- Decorative stars around the logo -->
+  <g opacity="0.8">
+    <path d="M 100 15 L 102 20 L 107 20 L 103 23 L 105 28 L 100 25 L 95 28 L 97 23 L 93 20 L 98 20 Z" 
+          fill="url(#rcbGoldGrad)">
+      <animate attributeName="opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite"/>
+    </path>
+    <path d="M 50 50 L 51 53 L 54 53 L 52 55 L 53 58 L 50 56 L 47 58 L 48 55 L 46 53 L 49 53 Z" 
+          fill="url(#rcbGoldGrad)">
+      <animate attributeName="opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite" begin="0.5s"/>
+    </path>
+    <path d="M 150 50 L 151 53 L 154 53 L 152 55 L 153 58 L 150 56 L 147 58 L 148 55 L 146 53 L 149 53 Z" 
+          fill="url(#rcbGoldGrad)">
+      <animate attributeName="opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite" begin="1s"/>
+    </path>
+    <path d="M 50 150 L 51 153 L 54 153 L 52 155 L 53 158 L 50 156 L 47 158 L 48 155 L 46 153 L 49 153 Z" 
+          fill="url(#rcbGoldGrad)">
+      <animate attributeName="opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite" begin="1.5s"/>
+    </path>
+    <path d="M 150 150 L 151 153 L 154 153 L 152 155 L 153 158 L 150 156 L 147 158 L 148 155 L 146 153 L 149 153 Z" 
+          fill="url(#rcbGoldGrad)">
+      <animate attributeName="opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite" begin="0.25s"/>
+    </path>
+  </g>
+  
+  <!-- Bottom accent -->
+  <path d="M 70 170 Q 100 175 130 170" fill="none" stroke="url(#rcbGoldGrad)" stroke-width="3" opacity="0.8">
+    <animate attributeName="opacity" values="0.8;0.5;0.8" dur="2s" repeatCount="indefinite"/>
+  </path>
 </svg>
-
