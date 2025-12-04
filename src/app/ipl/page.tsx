@@ -56,6 +56,11 @@ export default function IPLHomePage() {
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     return upcoming[0] || null;
   }, [matches]);
+  
+  // Calculate total players from teams
+  const totalPlayers = useMemo(() => {
+    return teams.reduce((sum, team) => sum + (team.players?.length || 0), 0);
+  }, [teams]);
 
   useEffect(() => {
     setIsHydrated(true);
@@ -74,22 +79,75 @@ export default function IPLHomePage() {
       setShowTermsModal(true);
     }
 
+    // Helper function to normalize team/player IDs for matching
+    const normalizeId = (id: string | number | undefined): string => {
+      if (!id) return '';
+      const str = String(id).trim();
+      const numMatch = str.replace(/^team/i, '').match(/^\d+$/);
+      return numMatch ? numMatch[0] : str.toLowerCase();
+    };
+    
     // Load data for IPL
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const [teamsData, matchesData, newsData] = await Promise.all([
+        const [teamsData, matchesData, newsData, playersData] = await Promise.all([
           api.getTeams('ipl'),
           api.getMatches('ipl'),
           api.getNews(),
+          api.getPlayers(undefined, 'ipl').catch(() => []), // Fetch players for accurate counts
         ]);
+        
+        console.log('IPL Home page: Fetched players:', playersData?.length || 0);
+        
+        // Attach players to teams with improved matching
+        const teamsWithPlayers = teamsData.map(team => {
+          const normalizedTeamId = normalizeId(team.id);
+          const teamIdVariations = [
+            String(team.id),
+            normalizedTeamId,
+            `team${normalizedTeamId}`,
+            String(team.id).replace(/^team/i, ''),
+            String(team.id).toLowerCase(),
+            String(team.id).toUpperCase()
+          ];
+          
+          const teamPlayers = (playersData || []).filter(player => {
+            const normalizedPlayerTeamId = normalizeId(player.teamId);
+            const playerTeamIdVariations = [
+              String(player.teamId),
+              normalizedPlayerTeamId,
+              `team${normalizedPlayerTeamId}`,
+              String(player.teamId).replace(/^team/i, ''),
+              String(player.teamId).toLowerCase(),
+              String(player.teamId).toUpperCase()
+            ];
+            
+            // Check if any variation matches
+            return teamIdVariations.some(tv => 
+              playerTeamIdVariations.some(pv => pv === tv)
+            );
+          });
+          
+          if (teamPlayers.length > 0) {
+            console.log(`IPL Home page: Matched ${teamPlayers.length} players for team ${team.name} (ID: ${team.id})`);
+          } else if (playersData && playersData.length > 0) {
+            console.warn(`IPL Home page: No players matched for team ${team.name} (ID: ${team.id}). Sample player teamIds:`, 
+              playersData.slice(0, 3).map(p => p.teamId));
+          }
+          
+          return {
+            ...team,
+            players: teamPlayers.length > 0 ? teamPlayers : (team.players || [])
+          };
+        });
         
         // Filter news by league
         const filteredNews = newsData.filter(item => 
           !item.league || item.league === 'ipl' || item.league === 'both'
         );
         
-        setTeams(teamsData);
+        setTeams(teamsWithPlayers);
         setMatches(matchesData);
         setNews(filteredNews);
 
@@ -489,7 +547,11 @@ export default function IPLHomePage() {
                   </Link>
                 </div>
               </AnimatedSection>
-              <ModernStatsSection />
+              <ModernStatsSection 
+                totalMatches={matches.length}
+                totalTeams={teams.length}
+                activePlayers={totalPlayers > 0 ? totalPlayers.toString() : undefined}
+              />
             </div>
           </section>
         )}
