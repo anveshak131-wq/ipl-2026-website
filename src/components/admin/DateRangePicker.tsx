@@ -35,7 +35,8 @@ export default function DateRangePicker({
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-    };
+    
+    return undefined;};
   }, [isOpen]);
 
   const formatDate = (date: Date | null): string => {

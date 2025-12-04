@@ -171,7 +171,8 @@ function TeamsPageContent() {
             } finally {
                 setIsLoading(false);
             }
-        };
+        
+        return undefined;};
 
         fetchTeams();
     }, [currentLeague]); // Re-fetch when league changes

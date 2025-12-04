@@ -55,7 +55,8 @@ export default function LegalPage() {
       } catch (e) {
         console.error("Failed to load legal content", e);
       }
-    };
+    
+    return undefined;};
     load();
   }, []);
 

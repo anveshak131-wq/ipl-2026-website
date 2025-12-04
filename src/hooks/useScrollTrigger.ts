@@ -33,7 +33,8 @@ export function useScrollTrigger(options: UseScrollTriggerOptions = {}) {
       if (ref.current) {
         observer.unobserve(ref.current);
       }
-    };
+    
+    return undefined;};
   }, [threshold, rootMargin]);
 
   return { ref, isVisible };

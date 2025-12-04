@@ -158,7 +158,8 @@ export default function AdminLegalPage() {
       } catch (err) {
         console.error('Failed to load legal page', key, err);
       }
-    };
+    
+    return undefined;};
 
     loadContentFor('legal');
     loadContentFor('privacy');

@@ -276,7 +276,8 @@ export default function AdminMatches() {
                     console.error('Failed to update match statuses:', error);
                 }
             }
-        };
+        
+        return undefined;};
 
         // Run immediately
         updateMatchStatuses();

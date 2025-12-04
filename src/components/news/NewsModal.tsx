@@ -50,7 +50,8 @@ export default function NewsModal({ isOpen, newsId, onClose }: NewsModalProps) {
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
-    };
+    
+    return undefined;};
   }, [isOpen, onClose]);
 
   const getImageSrc = (url?: string) => {

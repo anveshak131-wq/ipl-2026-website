@@ -30,7 +30,8 @@ export default function WPLPlayerModal({ player, team, isOpen, onClose }: WPLPla
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
-    };
+    
+    return undefined;};
   }, [isOpen, onClose]);
 
   if (!isOpen || !player) return null;

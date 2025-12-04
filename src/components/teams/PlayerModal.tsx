@@ -91,7 +91,8 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
-    };
+    
+    return undefined;};
   }, [isOpen, onClose]);
 
   if (!isOpen || !player) return null;

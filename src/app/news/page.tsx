@@ -208,7 +208,8 @@ export default function NewsPage() {
           return dateB - dateA;
         });
         break;
-    }
+    
+    return undefined;}
 
     setFilteredNews(filtered);
   }, [selectedCategory, searchQuery, searchType, selectedTeam, selectedPlayer, selectedMatch, timeFilter, sortBy, news, teams, players, matches]);

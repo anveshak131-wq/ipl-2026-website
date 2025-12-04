@@ -312,7 +312,8 @@ export default function LiveScorePage() {
     return () => {
       isCancelled = true;
       clearInterval(interval);
-    };
+    
+    return undefined;};
   }, []);
 
   // Fetch messages (only if user is logged in)

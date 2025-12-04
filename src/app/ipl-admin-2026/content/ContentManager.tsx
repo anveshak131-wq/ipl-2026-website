@@ -230,7 +230,8 @@ export default function ContentManager({
         const dateB = new Date((b as any).publishedAt || b.createdAt || '').getTime() || 0;
         return dateB - dateA;
       });
-    }
+    
+    return undefined;}
 
     setFilteredContent(filtered);
   }, [

@@ -132,7 +132,8 @@ export default function Playing11Page() {
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
+    
+    return undefined;};
   }, [isAuthenticated, currentLeague, loadData]);
 
   const selectedMatch = useMemo(

@@ -50,7 +50,8 @@ export default function RCBLottie({ className = 'w-full h-full', loop = true, au
           console.error('Error destroying animation:', e);
         }
       }
-    };
+    
+    return undefined;};
   }, [loop, autoplay, hasError]);
 
   // Fallback: simple animated SVG if Lottie fails

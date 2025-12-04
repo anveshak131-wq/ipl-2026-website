@@ -145,7 +145,8 @@ export default function WorldCricketPage() {
 
     return () => {
       cancelled = true;
-    };
+    
+    return undefined;};
   }, []);
 
   useEffect(() => {
@@ -184,7 +185,8 @@ export default function WorldCricketPage() {
 
     return () => {
       cancelled = true;
-    };
+    
+    return undefined;};
   }, [selectedMatch?.id]);
 
   const grouped = useMemo(() => classifyMatches(matches), [matches]);

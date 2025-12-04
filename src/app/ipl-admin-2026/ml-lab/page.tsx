@@ -197,7 +197,8 @@ export default function AdminMlLabPage() {
       } finally {
         setIsLoadingSchema(false);
       }
-    };
+    
+    return undefined;};
 
     loadSchema();
   }, [primaryDatasetKey, targetColumn]);

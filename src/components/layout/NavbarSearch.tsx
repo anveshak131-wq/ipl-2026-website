@@ -239,6 +239,7 @@ export default function NavbarSearch({ onClose }: NavbarSearchProps) {
       document.addEventListener('mousedown', handleClickOutside);
       return () => document.removeEventListener('mousedown', handleClickOutside);
     }
+    return undefined;
   }, [isOpen]);
 
   const handleResultClick = (href: string) => {

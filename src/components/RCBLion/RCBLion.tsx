@@ -396,7 +396,8 @@ export default function RCBLion({ width = 400, height = 400, className }: RCBLio
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
-    };
+    
+    return undefined;};
   }, [width, height]);
 
   return <canvas ref={canvasRef} className={className} />;

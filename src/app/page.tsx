@@ -219,7 +219,8 @@ export default function Home() {
         setWplLoading(false);
         setNewsLoading(false);
       }
-    };
+    
+    return undefined;};
 
     loadData();
   }, []);

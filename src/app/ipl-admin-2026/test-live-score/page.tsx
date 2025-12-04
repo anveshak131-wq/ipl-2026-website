@@ -129,7 +129,8 @@ export default function TestLiveScorePage() {
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
+    
+    return undefined;};
   }, [isAuthenticated, currentLeague]);
 
   const selectedMatch = useMemo(
