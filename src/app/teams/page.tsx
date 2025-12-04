@@ -108,6 +108,14 @@ function TeamsPageContent() {
                     console.warn('Teams page: No teams returned! Check API or fallback data.');
                 }
 
+                // Helper function to normalize team/player IDs for matching
+                const normalizeId = (id: string | number | undefined): string => {
+                    if (!id) return '';
+                    const str = String(id).trim();
+                    const numMatch = str.replace(/^team/i, '').match(/^\d+$/);
+                    return numMatch ? numMatch[0] : str.toLowerCase();
+                };
+                
                 const teamsWithPlayers = teamsData
                     .filter(team => {
                         // For WPL, filter out placeholder teams
@@ -117,15 +125,44 @@ function TeamsPageContent() {
                         return true;
                     })
                     .map(team => {
-                        // Get players from fetched data, matching by teamId
+                        const normalizedTeamId = normalizeId(team.id);
+                        const teamIdVariations = [
+                            String(team.id),
+                            normalizedTeamId,
+                            `team${normalizedTeamId}`,
+                            String(team.id).replace(/^team/i, ''),
+                            String(team.id).toLowerCase(),
+                            String(team.id).toUpperCase()
+                        ];
+                        
+                        // Get players from fetched data, matching by teamId with comprehensive variations
                         const fetchedPlayers = (playersData || []).filter(player => {
-                            // Handle both string and number IDs - normalize both
-                            const playerTeamId = String(player.teamId || '').replace(/^team/, '');
-                            const teamId = String(team.id || '').replace(/^team/, '');
-                            // Also check if player league matches
+                            // Check if player league matches
                             const leagueMatch = !player.league || !currentLeague || player.league === currentLeague;
-                            return (playerTeamId === teamId || playerTeamId === `team${teamId}` || teamId === `team${playerTeamId}`) && leagueMatch;
+                            if (!leagueMatch) return false;
+                            
+                            const normalizedPlayerTeamId = normalizeId(player.teamId);
+                            const playerTeamIdVariations = [
+                                String(player.teamId),
+                                normalizedPlayerTeamId,
+                                `team${normalizedPlayerTeamId}`,
+                                String(player.teamId).replace(/^team/i, ''),
+                                String(player.teamId).toLowerCase(),
+                                String(player.teamId).toUpperCase()
+                            ];
+                            
+                            // Check if any variation matches
+                            return teamIdVariations.some(tv => 
+                                playerTeamIdVariations.some(pv => pv === tv)
+                            );
                         });
+                        
+                        if (fetchedPlayers.length > 0) {
+                            console.log(`Teams page: Matched ${fetchedPlayers.length} players for team ${team.name} (ID: ${team.id})`);
+                        } else if (playersData && playersData.length > 0) {
+                            console.warn(`Teams page: No players matched for team ${team.name} (ID: ${team.id}). Sample player teamIds:`, 
+                                playersData.slice(0, 3).map(p => p.teamId));
+                        }
                         
                         // Always use fetched players if available, otherwise use team's original players
                         const finalPlayers = fetchedPlayers.length > 0 
