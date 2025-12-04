@@ -119,15 +119,15 @@ function TeamsPageContent() {
                     .map(team => {
                         // Get players from fetched data, matching by teamId
                         const fetchedPlayers = (playersData || []).filter(player => {
-                            // Handle both string and number IDs
-                            const playerTeamId = String(player.teamId || '');
-                            const teamId = String(team.id || '');
-                            return playerTeamId === teamId || 
-                                   playerTeamId === `team${teamId}` || 
-                                   teamId === `team${playerTeamId}`;
+                            // Handle both string and number IDs - normalize both
+                            const playerTeamId = String(player.teamId || '').replace(/^team/, '');
+                            const teamId = String(team.id || '').replace(/^team/, '');
+                            // Also check if player league matches
+                            const leagueMatch = !player.league || !currentLeague || player.league === currentLeague;
+                            return (playerTeamId === teamId || playerTeamId === `team${teamId}` || teamId === `team${playerTeamId}`) && leagueMatch;
                         });
                         
-                        // Preserve original players if they exist and fetched players is empty
+                        // Always use fetched players if available, otherwise use team's original players
                         const finalPlayers = fetchedPlayers.length > 0 
                             ? fetchedPlayers 
                             : (team.players || []);

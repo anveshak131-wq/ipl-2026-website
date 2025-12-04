@@ -21,9 +21,29 @@ export default function TeamsShowcase() {
   useEffect(() => {
     const fetchTeams = async () => {
       try {
-        const teamsData = await api.getTeams();
+        // Fetch both teams and players to ensure player counts are accurate
+        const [teamsData, playersData] = await Promise.all([
+          api.getTeams(),
+          api.getPlayers().catch(() => []) // Don't fail if players fetch fails
+        ]);
+        
         // Filter out placeholder teams
-        const realTeams = teamsData.filter(team => !isPlaceholderTeam(team));
+        const realTeams = teamsData
+          .filter(team => !isPlaceholderTeam(team))
+          .map(team => {
+            // Attach players to teams
+            const teamPlayers = (playersData || []).filter(player => {
+              const playerTeamId = String(player.teamId || '').replace(/^team/, '');
+              const teamId = String(team.id || '').replace(/^team/, '');
+              return playerTeamId === teamId || playerTeamId === `team${teamId}` || teamId === `team${playerTeamId}`;
+            });
+            
+            return {
+              ...team,
+              players: teamPlayers.length > 0 ? teamPlayers : (team.players || [])
+            };
+          });
+        
         setTeams(realTeams);
       } catch (error) {
         console.error('Failed to fetch teams:', error);
