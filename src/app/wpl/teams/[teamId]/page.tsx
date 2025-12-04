@@ -2,14 +2,14 @@ import TeamDetailClient from '@/app/teams/[teamId]/TeamDetailClient';
 
 // Generate static params for WPL teams
 export async function generateStaticParams() {
-  // WPL teams will be dynamically fetched, but we can pre-generate common IDs
-  const defaultWPLTeams = [
-    { teamId: 'team11' },
-    { teamId: 'team12' },
-    { teamId: 'team13' },
-    { teamId: 'team14' },
-    { teamId: 'team15' }
-  ];
+  // Generate both numeric IDs (11, 12, 13...) and team prefix versions (team11, team12, team13...)
+  // to support both URL formats: /wpl/teams/11 and /wpl/teams/team11
+  // WPL teams typically use IDs 11-15, but we'll generate a wider range for flexibility
+  const defaultWPLTeams = [];
+  for (let i = 11; i <= 15; i++) {
+    defaultWPLTeams.push({ teamId: String(i) });      // Numeric format: /wpl/teams/11, /wpl/teams/12, etc.
+    defaultWPLTeams.push({ teamId: `team${i}` });     // Team prefix format: /wpl/teams/team11, /wpl/teams/team12, etc.
+  }
   return defaultWPLTeams;
 }
 
