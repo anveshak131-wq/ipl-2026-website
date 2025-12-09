@@ -3,6 +3,10 @@ name = "ipl-2026-website"
 pages_build_command = "npm run build"
 pages_build_output_dir = "out"
 
+# Optimize build for faster deployment
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
 [[kv_namespaces]]
 binding = "SPORTS_KV"
 id = "local-sports-kv"
