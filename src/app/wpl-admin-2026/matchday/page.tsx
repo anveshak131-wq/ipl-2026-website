@@ -143,16 +143,12 @@ export default function WPLMatchDayAdmin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900">
-      <AuroraBackground />
-      
-      <div className="relative z-10">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <AnimatedSection>
-            <div className="text-center mb-8">
-              <GradientText className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-pink-400">
-                WPL Match Day Admin
-              </GradientText>
+    <div>
+      <AnimatedSection>
+        <div className="text-center mb-8">
+          <GradientText className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-pink-400">
+            WPL Match Day Admin
+          </GradientText>
               <p className="text-gray-300 text-lg">
                 Manage venues, weather data, and match conditions for Women's Premier League
               </p>
@@ -412,7 +408,6 @@ export default function WPLMatchDayAdmin() {
             />
           )}
         </div>
-      </div>
     </div>
   );
 }

@@ -129,6 +129,20 @@ export default function WPLAdminRouter() {
       );
     }
     
+    if (pathname.includes('/venues')) {
+      return (
+        <div>
+          <WPLAdminSidebar currentPage="venues" />
+          <div className="ml-64">
+            <GlobalSearch />
+            <div className="p-6">
+              {/* Venues admin page will be rendered by Next.js routing */}
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
     if (pathname.includes('/stories')) {
       return (
         <div>

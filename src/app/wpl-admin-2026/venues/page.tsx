@@ -258,15 +258,14 @@ export default function VenuesAdmin() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900 flex items-center justify-center">
+      <div className="flex items-center justify-center h-64">
         <Loader2 className="animate-spin text-white" size={48} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900 p-8">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-6xl">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-white mb-4">Venue Management</h1>
           <p className="text-gray-300">Add and manage cricket venues with automatic information retrieval</p>
@@ -425,7 +424,5 @@ export default function VenuesAdmin() {
             </div>
           )}
         </div>
-      </div>
-    </div>
   );
 }
