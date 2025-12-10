@@ -408,6 +408,7 @@ export default function WPLStoriesAdmin() {
               onClose={() => setSelectedStory(null)}
             />
           )}
+          </AnimatedSection>
         </div>
     </div>
   );
