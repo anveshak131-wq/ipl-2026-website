@@ -15,6 +15,16 @@ import AdminLegalPage from './legal/page';
 import AdminDatasets from './datasets/page';
 import AdminDatasetManager from './dataset-manager/page';
 import AdminMlLabPage from './ml-lab/page';
+import AdminEngagement from './engagement/page';
+import AdminTestLiveScore from './test-live-score/page';
+import AdminKeyPlayers from './key-players/page';
+import AdminPlaying11 from './playing-11/page';
+import AdminNews from './news/page';
+import AdminModeration from './moderation/page';
+import AdminCoaches from './coaches/page';
+import AdminDemo from './demo/page';
+import AdminMatchday from './matchday/page';
+import AdminStories from './stories/page';
 
 export default function AdminRouter() {
   const router = useRouter();
@@ -136,6 +146,26 @@ export default function AdminRouter() {
       return <AdminSettings />;
     } else if (pathname === '/ipl-admin-2026/legal') {
       return <AdminLegalPage />;
+    } else if (pathname === '/ipl-admin-2026/engagement') {
+      return <AdminEngagement />;
+    } else if (pathname === '/ipl-admin-2026/test-live-score') {
+      return <AdminTestLiveScore />;
+    } else if (pathname === '/ipl-admin-2026/key-players') {
+      return <AdminKeyPlayers />;
+    } else if (pathname === '/ipl-admin-2026/playing-11') {
+      return <AdminPlaying11 />;
+    } else if (pathname === '/ipl-admin-2026/news') {
+      return <AdminNews />;
+    } else if (pathname === '/ipl-admin-2026/moderation') {
+      return <AdminModeration />;
+    } else if (pathname === '/ipl-admin-2026/coaches') {
+      return <AdminCoaches />;
+    } else if (pathname === '/ipl-admin-2026/demo') {
+      return <AdminDemo />;
+    } else if (pathname === '/ipl-admin-2026/matchday') {
+      return <AdminMatchday />;
+    } else if (pathname === '/ipl-admin-2026/stories') {
+      return <AdminStories />;
     }
     return <AdminDashboard />;
   };
