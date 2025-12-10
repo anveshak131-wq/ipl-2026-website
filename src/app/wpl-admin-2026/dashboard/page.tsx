@@ -243,6 +243,7 @@ export default function WPLAdminDashboard() {
                 </div>
               </motion.div>
             </AnimatedSection>
+          </div>
 
           {/* Recent Activity */}
           <AnimatedSection delay={0.8}>
