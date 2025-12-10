@@ -221,15 +221,28 @@ export default function WPLAdminDashboard() {
                 className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-purple-400/20"
                 whileHover={{ scale: 1.02 }}
               >
-                <div.
-                  < ''; truncated content
-.
-                </.
-                 "];
-              </ .
-              .
-              .
-            </motion.div>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-white">Quick Actions</h3>
+                  <TrendingUp className="text-purple-400" size={20} />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <motion.button
+                    className="p-3 bg-purple-600/20 rounded-lg text-purple-300 hover:bg-purple-600/30"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Review Stories
+                  </motion.button>
+                  <motion.button
+                    className="p-3 bg-purple-600/20 rounded-lg text-purple-300 hover:bg-purple-600/30"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Update Venues
+                  </motion.button>
+                </div>
+              </motion.div>
+            </AnimatedSection>
           </AnimatedSection>
 
           {/* Recent Activity */}
