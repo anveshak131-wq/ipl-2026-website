@@ -6,7 +6,7 @@ import { Heart, MessageCircle, Eye, Filter, Search, Calendar, User, Tag, Star, T
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import GradientText from '@/components/ui/GradientText';
 import AnimatedSection from '@/components/ui/AnimatedSection';
-import WPLFloatingParticles from '@/components/ui/WPLFloatingParticles';
+import WPLFloatingParticles from '@/components/animations/WPLFloatingParticles';
 
 interface FanStory {
   id: string;

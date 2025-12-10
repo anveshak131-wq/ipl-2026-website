@@ -6,7 +6,7 @@ import { MapPin, Calendar, Cloud, Wind, Droplets, Thermometer, Clock, Eye, Trend
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import GradientText from '@/components/ui/GradientText';
 import AnimatedSection from '@/components/ui/AnimatedSection';
-import WPLFloatingParticles from '@/components/ui/WPLFloatingParticles';
+import WPLFloatingParticles from '@/components/animations/WPLFloatingParticles';
 
 interface Venue {
   id: string;
