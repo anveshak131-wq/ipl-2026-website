@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Search, MapPin, Plus, Trash2, Edit3, Loader2, Check, X } from 'lucide-react';
+import AuroraBackground from '@/components/ui/AuroraBackground';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 
 interface Venue {
@@ -268,147 +269,10 @@ export default function VenuesAdmin() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900">
       <AuroraBackground />
-      
       <div className="relative z-10">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <AnimatedSection>
-            <div className="text-center mb-8">
-              <h1 className="text-4xl font-bold text-white mb-4">Venue Management</h1>
-              <p className="text-gray-300">Add and manage cricket venues with automatic information retrieval</p>
-            </div>
-          </AnimatedSection>
-
-          {error && (
-            <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300">
-              {error}
-            </div>
-          )}
-
-          <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-purple-400/20 mb-8">
-            <h2 className="text-xl font-semibold text-white mb-4">Add New Venue</h2>
-            
-            <div className="flex gap-4 mb-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && searchVenues()}
-                  placeholder="Enter venue name (e.g., Wankhede Stadium, Eden Gardens)"
-                  className="w-full pl-10 pr-4 py-3 bg-white/10 text-white placeholder-gray-400 border border-purple-400/20 rounded-lg focus:outline-none focus:border-purple-400"
-                />
-              </div>
-              <button
-                onClick={searchVenues}
-                disabled={isSearching || !searchQuery.trim()}
-                className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {isSearching ? (
-                  <Loader2 className="animate-spin" size={20} />
-                ) : (
-                  <Search size={20} />
-                )}
-                {isSearching ? 'Searching...' : 'Search Venue'}
-              </button>
-            </div>
-          </div>
-
-          {venues.length > 0 && (
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-purple-400/20">
-              <h2 className="text-xl font-semibold text-white mb-4">Saved Venues ({venues.length})</h2>
-              <div className="grid gap-4">
-                {venues.map((venue) => (
-                  <motion.div
-                    key={venue.id}
-                    className="bg-white/5 rounded-lg p-4 border border-purple-400/10"
-                    whileHover={{ scale: 1.02 }}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h3 className="text-xl font-bold text-white mb-2">{venue.name}</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-gray-300">
-                          <div className="flex items-center gap-2">
-                            <MapPin size={16} />
-                            {venue.city}, {venue.country}
-                          </div>
-                          {venue.capacity && (
-                            <div>Capacity: {venue.capacity.toLocaleString()}</div>
-                          )}
-                          {venue.established && (
-                            <div>Est. {venue.established}</div>
-                          )}
-                          {venue.timezone && (
-                            <div>Timezone: {venue.timezone}</div>
-                          )}
-                        onChange={(e) => setEditingVenue({ ...editingVenue, name: e.target.value })}
-                        className="w-full p-2 bg-white/10 text-white border border-purple-400/20 rounded"
-                      />
-                      <div className="grid grid-cols-2 gap-3">
-                        <input
-                          type="text"
-                          value={editingVenue.city || ''}
-                          onChange={(e) => setEditingVenue({ ...editingVenue, city: e.target.value })}
-                          placeholder="City"
-                          className="p-2 bg-white/10 text-white border border-purple-400/20 rounded"
-                        />
-                        <input
-                          type="number"
-                          value={editingVenue.capacity || ''}
-                          onChange={(e) => setEditingVenue({ ...editingVenue, capacity: parseInt(e.target.value) })}
-                          placeholder="Capacity"
-                          className="p-2 bg-white/10 text-white border border-purple-400/20 rounded"
-                        />
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => updateVenue(editingVenue)}
-                          className="p-2 bg-green-600 text-white rounded hover:bg-green-700"
-                        >
-                          <Check size={20} />
-                        </button>
-                        <button
-                          onClick={() => setEditingVenue(null)}
-                          className="p-2 bg-gray-600 text-white rounded hover:bg-gray-700"
-                        >
-                          <X size={20} />
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-white font-medium">{venue.name}</h3>
-                        <p className="text-gray-400 text-sm">
-                          <MapPin size={14} className="inline mr-1" />
-                          {venue.city} {venue.lat && venue.lng && `(${venue.lat.toFixed(4)}, ${venue.lng.toFixed(4)})`}
-                        </p>
-                        <div className="flex gap-4 text-xs text-gray-500 mt-1">
-                          {venue.capacity && <span>Capacity: {venue.capacity.toLocaleString()}</span>}
-                          {venue.established && <span>Est: {venue.established}</span>}
-                          {venue.pitchType && <span>Pitch: {venue.pitchType}</span>}
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => setEditingVenue(venue)}
-                          className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                        >
-                          <Edit3 size={20} />
-                        </button>
-                        <button
-                          onClick={() => deleteVenue(venue.id)}
-                          className="p-2 bg-red-600 text-white rounded hover:bg-red-700"
-                        >
-                          <Trash2 size={20} />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
+          <h1 className="text-4xl font-bold text-white mb-4">Venue Management</h1>
+          <p className="text-gray-300">Add and manage cricket venues with automatic information retrieval</p>
         </div>
       </div>
     </div>
