@@ -266,21 +266,25 @@ export default function VenuesAdmin() {
   }
 
   return (
-      <>
-        <AnimatedSection>
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-white mb-4">Venue Management</h1>
-            <p className="text-gray-300">Add and manage cricket venues with automatic information retrieval</p>
-          </div>
-        </AnimatedSection>
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900">
+      <AuroraBackground />
+      
+      <div className="relative z-10">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <AnimatedSection>
+            <div className="text-center mb-8">
+              <h1 className="text-4xl font-bold text-white mb-4">Venue Management</h1>
+              <p className="text-gray-300">Add and manage cricket venues with automatic information retrieval</p>
+            </div>
+          </AnimatedSection>
 
-        {error && (
-          <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300">
-            {error}
-          </div>
-        )}
+          {error && (
+            <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300">
+              {error}
+            </div>
+          )}
 
-        {/* Search Section */}
+          {/* Search Section */}
         <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-purple-400/20 mb-8">
           <h2 className="text-xl font-semibold text-white mb-4">Add New Venue</h2>
           
@@ -427,6 +431,8 @@ export default function VenuesAdmin() {
             </div>
           )}
         </div>
-      </>
+        </div>
+      </div>
+    </div>
   );
 }

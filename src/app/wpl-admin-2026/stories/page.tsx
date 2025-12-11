@@ -148,19 +148,23 @@ export default function WPLStoriesAdmin() {
   };
 
   return (
-    <>
-      <AnimatedSection>
-        <div className="text-center mb-8">
-          <GradientText className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-pink-400">
-            WPL Fan Stories Admin
-          </GradientText>
-          <p className="text-gray-300 text-lg">
-            Manage and moderate user-submitted WPL cricket stories
-          </p>
-        </div>
-      </AnimatedSection>
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900">
+      <AuroraBackground />
+      
+      <div className="relative z-10">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <AnimatedSection>
+            <div className="text-center mb-8">
+              <GradientText className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-pink-400">
+                WPL Fan Stories Admin
+              </GradientText>
+              <p className="text-gray-300 text-lg">
+                Manage and moderate user-submitted WPL cricket stories
+              </p>
+            </div>
+          </AnimatedSection>
 
-      {/* Filters and Search */}
+          {/* Filters and Search */}
       <AnimatedSection>
         <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-purple-400/20 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -409,7 +413,9 @@ export default function WPLStoriesAdmin() {
             />
           )}
         </div>
-      </>
+        </div>
+      </div>
+    </div>
   );
 }
 
