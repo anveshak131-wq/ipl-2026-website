@@ -96,7 +96,6 @@ export default function AdminMatchday() {
 
   return (
     <div className="p-6">
-      <div style={{color: 'red', fontSize: '20px'}}>TEST: AdminMatchday is rendering</div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-4">Match Day Admin</h1>
         <p className="text-gray-300">
@@ -127,7 +126,7 @@ export default function AdminMatchday() {
       {activeTab === 'venues' && (
         <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-blue-400/20 mb-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-white">Venue Management</h2>
+            <h2 className="text-2xl font-bold text-white">Venue Management ({venues.length} venues)</h2>
             <motion.button
               onClick={() => setEditingVenue({
                 id: '',
@@ -149,7 +148,12 @@ export default function AdminMatchday() {
           </div>
 
           <div className="grid gap-4">
-            {venues.map((venue) => (
+            {venues.length === 0 ? (
+              <div className="text-center py-8 text-gray-400">
+                No venues found. Click "Add Venue" to create your first venue.
+              </div>
+            ) : (
+              venues.map((venue) => (
               <motion.div
                 key={venue.id}
                 className="bg-white/5 rounded-lg p-4 border border-blue-400/10"
@@ -193,7 +197,7 @@ export default function AdminMatchday() {
                   </div>
                 </div>
               </motion.div>
-            ))}
+            )))}
           </div>
         </div>
       )}
