@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, MessageCircle, Eye, Edit, Trash2, Plus, Save, X, Filter, Search, Calendar, User, Tag } from 'lucide-react';
+import { Heart, MessageCircle, Eye, Edit, Trash2, Plus, Save, X, Filter, Search, Calendar, User, Tag, Check } from 'lucide-react';
 
 interface FanStory {
   id: string;
