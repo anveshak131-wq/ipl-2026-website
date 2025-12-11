@@ -148,30 +148,31 @@ export default function WPLStoriesAdmin() {
   };
 
   return (
+    <>
       <AnimatedSection>
         <div className="text-center mb-8">
           <GradientText className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-pink-400">
             WPL Fan Stories Admin
           </GradientText>
-              <p className="text-gray-300 text-lg">
-                Manage and moderate user-submitted WPL cricket stories
-              </p>
-            </div>
-          </AnimatedSection>
+          <p className="text-gray-300 text-lg">
+            Manage and moderate user-submitted WPL cricket stories
+          </p>
+        </div>
+      </AnimatedSection>
 
-          {/* Filters and Search */}
-          <AnimatedSection>
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-purple-400/20 mb-8">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                  <input
-                    type="text"
-                    placeholder="Search stories..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full bg-purple-900/30 text-white rounded-lg pl-10 pr-4 py-2 border border-purple-400/20"
-                  />
+      {/* Filters and Search */}
+      <AnimatedSection>
+        <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-purple-400/20 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+              <input
+                type="text"
+                placeholder="Search stories..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-purple-900/30 text-white rounded-lg pl-10 pr-4 py-2 border border-purple-400/20"
+              />
                 </div>
                 
                 <select
@@ -408,7 +409,7 @@ export default function WPLStoriesAdmin() {
             />
           )}
         </div>
-      </AnimatedSection>
+      </>
   );
 }
 

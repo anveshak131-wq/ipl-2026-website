@@ -266,11 +266,13 @@ export default function VenuesAdmin() {
   }
 
   return (
-      <AnimatedSection>
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-4">Venue Management</h1>
-          <p className="text-gray-300">Add and manage cricket venues with automatic information retrieval</p>
-        </div>
+      <>
+        <AnimatedSection>
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-white mb-4">Venue Management</h1>
+            <p className="text-gray-300">Add and manage cricket venues with automatic information retrieval</p>
+          </div>
+        </AnimatedSection>
 
         {error && (
           <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300">
@@ -425,6 +427,6 @@ export default function VenuesAdmin() {
             </div>
           )}
         </div>
-      </AnimatedSection>
+      </>
   );
 }
