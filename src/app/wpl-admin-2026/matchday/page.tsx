@@ -412,7 +412,6 @@ export default function WPLMatchDayAdmin() {
             />
           )}
         </div>
-        </div>
       </div>
     </div>
   );

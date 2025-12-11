@@ -413,7 +413,6 @@ export default function WPLStoriesAdmin() {
             />
           )}
         </div>
-        </div>
       </div>
     </div>
   );

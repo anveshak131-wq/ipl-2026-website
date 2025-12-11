@@ -284,7 +284,6 @@ export default function VenuesAdmin() {
             </div>
           )}
 
-          {/* Search Section */}
           <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-purple-400/20 mb-8">
             <h2 className="text-xl font-semibold text-white mb-4">Add New Venue</h2>
             
@@ -295,73 +294,53 @@ export default function VenuesAdmin() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && searchVenues()}
-                placeholder="Enter venue name (e.g., Wankhede Stadium, Eden Gardens)"
-                className="w-full pl-10 pr-4 py-3 bg-white/10 text-white placeholder-gray-400 border border-purple-400/20 rounded-lg focus:outline-none focus:border-purple-400"
-              />
+                  onKeyPress={(e) => e.key === 'Enter' && searchVenues()}
+                  placeholder="Enter venue name (e.g., Wankhede Stadium, Eden Gardens)"
+                  className="w-full pl-10 pr-4 py-3 bg-white/10 text-white placeholder-gray-400 border border-purple-400/20 rounded-lg focus:outline-none focus:border-purple-400"
+                />
+              </div>
+              <button
+                onClick={searchVenues}
+                disabled={isSearching || !searchQuery.trim()}
+                className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {isSearching ? (
+                  <Loader2 className="animate-spin" size={20} />
+                ) : (
+                  <Search size={20} />
+                )}
+                {isSearching ? 'Searching...' : 'Search Venue'}
+              </button>
             </div>
-            <button
-              onClick={searchVenues}
-              disabled={isSearching || !searchQuery.trim()}
-              className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              {isSearching ? (
-                <Loader2 className="animate-spin" size={20} />
-              ) : (
-                <Search size={20} />
-              )}
-              Search
-            </button>
           </div>
 
-          {/* Search Results */}
-          {searchResults.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-white font-medium">Search Results:</h3>
-              {searchResults.map((result, index) => (
-                <div key={index} className="bg-white/5 rounded-lg p-4 border border-purple-400/10">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-white font-medium">{result.name}</h4>
-                      <p className="text-gray-400 text-sm">
-                        <MapPin size={14} className="inline mr-1" />
-                        {result.city}, {result.country}
-                      </p>
-                      <p className="text-gray-500 text-xs">
-                        Coordinates: {result.lat.toFixed(4)}, {result.lng.toFixed(4)}
-                      </p>
-                      {result.capacity && (
-                        <p className="text-gray-500 text-xs">Capacity: {result.capacity.toLocaleString()}</p>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => addVenue(result)}
-                      className="p-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                    >
-                      <Plus size={20} />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Existing Venues */}
-        <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-purple-400/20">
-          <h2 className="text-xl font-semibold text-white mb-4">Existing Venues ({venues.length})</h2>
-          
-          {venues.length === 0 ? (
-            <p className="text-gray-400 text-center py-8">No venues added yet. Search and add venues above.</p>
-          ) : (
-            <div className="space-y-4">
-              {venues.map((venue) => (
-                <div key={venue.id} className="bg-white/5 rounded-lg p-4 border border-purple-400/10">
-                  {editingVenue?.id === venue.id ? (
-                    <div className="space-y-3">
-                      <input
-                        type="text"
-                        value={editingVenue.name}
+          {venues.length > 0 && (
+            <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-purple-400/20">
+              <h2 className="text-xl font-semibold text-white mb-4">Saved Venues ({venues.length})</h2>
+              <div className="grid gap-4">
+                {venues.map((venue) => (
+                  <motion.div
+                    key={venue.id}
+                    className="bg-white/5 rounded-lg p-4 border border-purple-400/10"
+                    whileHover={{ scale: 1.02 }}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-white mb-2">{venue.name}</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-gray-300">
+                          <div className="flex items-center gap-2">
+                            <MapPin size={16} />
+                            {venue.city}, {venue.country}
+                          </div>
+                          {venue.capacity && (
+                            <div>Capacity: {venue.capacity.toLocaleString()}</div>
+                          )}
+                          {venue.established && (
+                            <div>Est. {venue.established}</div>
+                          )}
+                          {venue.timezone && (
+                            <div>Timezone: {venue.timezone}</div>
+                          )}
                         onChange={(e) => setEditingVenue({ ...editingVenue, name: e.target.value })}
                         className="w-full p-2 bg-white/10 text-white border border-purple-400/20 rounded"
                       />
@@ -430,7 +409,6 @@ export default function VenuesAdmin() {
               ))}
             </div>
           )}
-        </div>
         </div>
       </div>
     </div>
