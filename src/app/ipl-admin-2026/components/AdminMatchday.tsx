@@ -38,6 +38,7 @@ interface MatchConditions {
 }
 
 export default function AdminMatchday() {
+  console.log('AdminMatchday component rendering');
   const [venues, setVenues] = useState<VenueInfo[]>([]);
   const [weatherData, setWeatherData] = useState<WeatherInfo[]>([]);
   const [matchConditions, setMatchConditions] = useState<MatchConditions[]>([]);
@@ -95,6 +96,7 @@ export default function AdminMatchday() {
 
   return (
     <div className="p-6">
+      <div style={{color: 'red', fontSize: '20px'}}>TEST: AdminMatchday is rendering</div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-4">Match Day Admin</h1>
         <p className="text-gray-300">
