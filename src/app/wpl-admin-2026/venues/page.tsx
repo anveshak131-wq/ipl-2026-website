@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Search, MapPin, Plus, Trash2, Edit3, Loader2, Check, X } from 'lucide-react';
+import AnimatedSection from '@/components/ui/AnimatedSection';
 
 interface Venue {
   id: string;
