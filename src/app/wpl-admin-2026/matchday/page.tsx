@@ -160,25 +160,25 @@ export default function WPLMatchDayAdmin() {
           </AnimatedSection>
 
           {/* Tab Navigation */}
-      <div className="flex flex-wrap gap-2 mb-8 justify-center">
-        {['venues', 'weather', 'conditions'].map((tab) => (
-          <motion.button
-            key={tab}
-            onClick={() => setActiveTab(tab as any)}
-            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
-              activeTab === tab
-                ? 'bg-purple-600 text-white'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-            }`}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
-          </motion.button>
-        ))}
-      </div>
+          <div className="flex flex-wrap gap-2 mb-8 justify-center">
+            {['venues', 'weather', 'conditions'].map((tab) => (
+              <motion.button
+                key={tab}
+                onClick={() => setActiveTab(tab as any)}
+                className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                  activeTab === tab
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </motion.button>
+            ))}
+          </div>
 
-      {/* Venues Tab */}
+          {/* Venues Tab */}
           {activeTab === 'venues' && (
             <AnimatedSection>
               <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-purple-400/20">
