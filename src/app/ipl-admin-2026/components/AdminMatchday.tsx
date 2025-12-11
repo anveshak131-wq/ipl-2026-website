@@ -37,7 +37,7 @@ interface MatchConditions {
   tossImpact: string;
 }
 
-export default function MatchDayAdmin() {
+export default function AdminMatchday() {
   const [venues, setVenues] = useState<VenueInfo[]>([]);
   const [weatherData, setWeatherData] = useState<WeatherInfo[]>([]);
   const [matchConditions, setMatchConditions] = useState<MatchConditions[]>([]);
@@ -47,53 +47,17 @@ export default function MatchDayAdmin() {
   const [activeTab, setActiveTab] = useState<'venues' | 'weather' | 'conditions'>('venues');
 
   useEffect(() => {
-    // Load mock data
+    // Load initial data
     setVenues([
       {
         id: '1',
-        name: 'Eden Gardens',
-        city: 'Kolkata',
-        capacity: 66000,
-        pitchType: 'Red Soil',
-        floodlights: true,
-        dimensions: '66m x 66m',
-        established: 1864
-      },
-      {
-        id: '2',
         name: 'Wankhede Stadium',
         city: 'Mumbai',
         capacity: 33000,
-        pitchType: 'Black Soil',
+        pitchType: 'Balanced',
         floodlights: true,
-        dimensions: '64m x 64m',
+        dimensions: '150m x 140m',
         established: 1974
-      }
-    ]);
-
-    setWeatherData([
-      {
-        id: '1',
-        venueId: '1',
-        temperature: 32,
-        humidity: 65,
-        windSpeed: 12,
-        condition: 'sunny',
-        lastUpdated: new Date().toISOString()
-      }
-    ]);
-
-    setMatchConditions([
-      {
-        id: '1',
-        venueId: '1',
-        matchId: 'match-001',
-        pitchReport: 'Flat pitch with good bounce, expected to assist both batsmen and bowlers',
-        outfieldCondition: 'Excellent, well-maintained',
-        expectedDew: true,
-        avgFirstInnings: 180,
-        avgChasing: 165,
-        tossImpact: 'Team winning toss likely to bowl first due to dew factor'
       }
     ]);
   }, []);
@@ -420,52 +384,53 @@ function VenueEditModal({ venue, onSave, onCancel }: {
             placeholder="Venue Name"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="bg-slate-700 text-white rounded-lg px-4 py-2"
+            className="p-2 bg-slate-700 text-white border border-slate-600 rounded"
           />
           <input
             type="text"
             placeholder="City"
             value={formData.city}
             onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-            className="bg-slate-700 text-white rounded-lg px-4 py-2"
+            className="p-2 bg-slate-700 text-white border border-slate-600 rounded"
           />
           <input
             type="number"
             placeholder="Capacity"
             value={formData.capacity}
             onChange={(e) => setFormData({ ...formData, capacity: parseInt(e.target.value) })}
-            className="bg-slate-700 text-white rounded-lg px-4 py-2"
+            className="p-2 bg-slate-700 text-white border border-slate-600 rounded"
           />
           <input
             type="text"
             placeholder="Pitch Type"
             value={formData.pitchType}
             onChange={(e) => setFormData({ ...formData, pitchType: e.target.value })}
-            className="bg-slate-700 text-white rounded-lg px-4 py-2"
+            className="p-2 bg-slate-700 text-white border border-slate-600 rounded"
           />
           <input
             type="text"
             placeholder="Dimensions"
             value={formData.dimensions}
             onChange={(e) => setFormData({ ...formData, dimensions: e.target.value })}
-            className="bg-slate-700 text-white rounded-lg px-4 py-2"
+            className="p-2 bg-slate-700 text-white border border-slate-600 rounded"
           />
           <input
             type="number"
             placeholder="Established Year"
             value={formData.established}
             onChange={(e) => setFormData({ ...formData, established: parseInt(e.target.value) })}
-            className="bg-slate-700 text-white rounded-lg px-4 py-2"
+            className="p-2 bg-slate-700 text-white border border-slate-600 rounded"
           />
-          <label className="flex items-center gap-2 text-white">
-            <input
-              type="checkbox"
-              checked={formData.floodlights}
-              onChange={(e) => setFormData({ ...formData, floodlights: e.target.checked })}
-              className="rounded"
-            />
-            Floodlights Available
-          </label>
+        </div>
+
+        <div className="flex items-center gap-2 mt-4">
+          <input
+            type="checkbox"
+            checked={formData.floodlights}
+            onChange={(e) => setFormData({ ...formData, floodlights: e.target.checked })}
+            className="w-4 h-4"
+          />
+          <label className="text-white">Floodlights Available</label>
         </div>
 
         <div className="flex justify-end gap-2 mt-6">
@@ -477,7 +442,7 @@ function VenueEditModal({ venue, onSave, onCancel }: {
           </button>
           <motion.button
             onClick={() => onSave(formData)}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -521,40 +486,43 @@ function WeatherEditModal({ weather, venues, onSave, onCancel }: {
           <select
             value={formData.venueId}
             onChange={(e) => setFormData({ ...formData, venueId: e.target.value })}
-            className="w-full bg-slate-700 text-white rounded-lg px-4 py-2"
+            className="w-full p-2 bg-slate-700 text-white border border-slate-600 rounded"
           >
             <option value="">Select Venue</option>
-            {venues.map((venue) => (
-              <option key={venue.id} value={venue.id}>
-                {venue.name}
-              </option>
+            {venues.map(venue => (
+              <option key={venue.id} value={venue.id}>{venue.name}</option>
             ))}
           </select>
-          <input
-            type="number"
-            placeholder="Temperature (°C)"
-            value={formData.temperature}
-            onChange={(e) => setFormData({ ...formData, temperature: parseInt(e.target.value) })}
-            className="w-full bg-slate-700 text-white rounded-lg px-4 py-2"
-          />
-          <input
-            type="number"
-            placeholder="Humidity (%)"
-            value={formData.humidity}
-            onChange={(e) => setFormData({ ...formData, humidity: parseInt(e.target.value) })}
-            className="w-full bg-slate-700 text-white rounded-lg px-4 py-2"
-          />
+          
+          <div className="grid grid-cols-2 gap-4">
+            <input
+              type="number"
+              placeholder="Temperature (°C)"
+              value={formData.temperature}
+              onChange={(e) => setFormData({ ...formData, temperature: parseFloat(e.target.value) })}
+              className="p-2 bg-slate-700 text-white border border-slate-600 rounded"
+            />
+            <input
+              type="number"
+              placeholder="Humidity (%)"
+              value={formData.humidity}
+              onChange={(e) => setFormData({ ...formData, humidity: parseFloat(e.target.value) })}
+              className="p-2 bg-slate-700 text-white border border-slate-600 rounded"
+            />
+          </div>
+          
           <input
             type="number"
             placeholder="Wind Speed (km/h)"
             value={formData.windSpeed}
-            onChange={(e) => setFormData({ ...formData, windSpeed: parseInt(e.target.value) })}
-            className="w-full bg-slate-700 text-white rounded-lg px-4 py-2"
+            onChange={(e) => setFormData({ ...formData, windSpeed: parseFloat(e.target.value) })}
+            className="w-full p-2 bg-slate-700 text-white border border-slate-600 rounded"
           />
+          
           <select
             value={formData.condition}
             onChange={(e) => setFormData({ ...formData, condition: e.target.value as any })}
-            className="w-full bg-slate-700 text-white rounded-lg px-4 py-2"
+            className="w-full p-2 bg-slate-700 text-white border border-slate-600 rounded"
           >
             <option value="sunny">Sunny</option>
             <option value="cloudy">Cloudy</option>
@@ -572,7 +540,7 @@ function WeatherEditModal({ weather, venues, onSave, onCancel }: {
           </button>
           <motion.button
             onClick={() => onSave(formData)}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -613,68 +581,73 @@ function ConditionsEditModal({ conditions, venues, onSave, onCancel }: {
         </div>
 
         <div className="space-y-4">
-          <select
-            value={formData.venueId}
-            onChange={(e) => setFormData({ ...formData, venueId: e.target.value })}
-            className="w-full bg-slate-700 text-white rounded-lg px-4 py-2"
-          >
-            <option value="">Select Venue</option>
-            {venues.map((venue) => (
-              <option key={venue.id} value={venue.id}>
-                {venue.name}
-              </option>
-            ))}
-          </select>
           <input
             type="text"
             placeholder="Match ID"
             value={formData.matchId}
             onChange={(e) => setFormData({ ...formData, matchId: e.target.value })}
-            className="w-full bg-slate-700 text-white rounded-lg px-4 py-2"
+            className="w-full p-2 bg-slate-700 text-white border border-slate-600 rounded"
           />
+          
+          <select
+            value={formData.venueId}
+            onChange={(e) => setFormData({ ...formData, venueId: e.target.value })}
+            className="w-full p-2 bg-slate-700 text-white border border-slate-600 rounded"
+          >
+            <option value="">Select Venue</option>
+            {venues.map(venue => (
+              <option key={venue.id} value={venue.id}>{venue.name}</option>
+            ))}
+          </select>
+          
           <textarea
             placeholder="Pitch Report"
             value={formData.pitchReport}
             onChange={(e) => setFormData({ ...formData, pitchReport: e.target.value })}
-            className="w-full bg-slate-700 text-white rounded-lg px-4 py-2 h-24"
+            className="w-full p-2 bg-slate-700 text-white border border-slate-600 rounded h-24"
           />
+          
           <textarea
             placeholder="Outfield Condition"
             value={formData.outfieldCondition}
             onChange={(e) => setFormData({ ...formData, outfieldCondition: e.target.value })}
-            className="w-full bg-slate-700 text-white rounded-lg px-4 py-2 h-20"
+            className="w-full p-2 bg-slate-700 text-white border border-slate-600 rounded h-24"
           />
+          
           <div className="grid grid-cols-2 gap-4">
             <input
               type="number"
               placeholder="Avg First Innings Score"
               value={formData.avgFirstInnings}
               onChange={(e) => setFormData({ ...formData, avgFirstInnings: parseInt(e.target.value) })}
-              className="bg-slate-700 text-white rounded-lg px-4 py-2"
+              className="p-2 bg-slate-700 text-white border border-slate-600 rounded"
             />
             <input
               type="number"
               placeholder="Avg Chasing Score"
               value={formData.avgChasing}
               onChange={(e) => setFormData({ ...formData, avgChasing: parseInt(e.target.value) })}
-              className="bg-slate-700 text-white rounded-lg px-4 py-2"
+              className="p-2 bg-slate-700 text-white border border-slate-600 rounded"
             />
           </div>
-          <textarea
-            placeholder="Toss Impact Analysis"
+          
+          <input
+            type="text"
+            placeholder="Toss Impact"
             value={formData.tossImpact}
             onChange={(e) => setFormData({ ...formData, tossImpact: e.target.value })}
-            className="w-full bg-slate-700 text-white rounded-lg px-4 py-2 h-20"
+            className="w-full p-2 bg-slate-700 text-white border border-slate-600 rounded"
           />
-          <label className="flex items-center gap-2 text-white">
+
+          <div className="flex items-center gap-2">
             <input
               type="checkbox"
               checked={formData.expectedDew}
               onChange={(e) => setFormData({ ...formData, expectedDew: e.target.checked })}
-              className="rounded"
+              className="w-4 h-4"
             />
-            Dew Expected
-          </label>
+            <label className="text-white">Dew Expected</label>
+          </div>
         </div>
 
         <div className="flex justify-end gap-2 mt-6">
@@ -686,7 +659,7 @@ function ConditionsEditModal({ conditions, venues, onSave, onCancel }: {
           </button>
           <motion.button
             onClick={() => onSave(formData)}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >

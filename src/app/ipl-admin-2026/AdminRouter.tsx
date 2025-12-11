@@ -23,8 +23,8 @@ import AdminNews from './news/page';
 import AdminModeration from './moderation/page';
 import AdminCoaches from './coaches/page';
 import AdminDemo from './demo/page';
-import AdminMatchday from './matchday/page';
-import AdminStories from './stories/page';
+import AdminMatchday from './components/AdminMatchday';
+import AdminStories from './components/AdminStories';
 
 export default function AdminRouter() {
   const router = useRouter();

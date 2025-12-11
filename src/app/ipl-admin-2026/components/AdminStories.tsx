@@ -1,98 +1,45 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Heart, MessageCircle, Eye, Edit, Trash2, Plus, Save, X, Filter, Search, Calendar, User, Tag, Check } from 'lucide-react';
+import { Eye, Edit, Trash2, Plus, Save, X, Search, Calendar, User, Tag, Check } from 'lucide-react';
 
 interface FanStory {
   id: string;
   title: string;
   author: string;
-  email: string;
-  category: 'match-experience' | 'player-fan' | 'venue-memory' | 'cricket-journey' | 'emotional-moment';
+  category: string;
   content: string;
   excerpt: string;
-  likes: number;
-  comments: number;
-  views: number;
-  featured: boolean;
   status: 'pending' | 'approved' | 'rejected';
   submittedAt: string;
-  publishedAt?: string;
   tags: string[];
-  imageUrl?: string;
 }
 
-export default function StoriesAdmin() {
-  const [stories, setStories] = useState<FanStory[]>([]);
+export default function AdminStories() {
+  const [stories, setStories] = useState<FanStory[]>([
+    {
+      id: '1',
+      title: 'My First IPL Match Experience',
+      author: 'John Doe',
+      category: 'match-experience',
+      content: 'It was an amazing experience watching my first IPL match...',
+      excerpt: 'An incredible experience at the stadium',
+      status: 'pending',
+      submittedAt: new Date().toISOString(),
+      tags: ['cricket', 'ipl', 'stadium']
+    }
+  ]);
   const [editingStory, setEditingStory] = useState<FanStory | null>(null);
   const [selectedStory, setSelectedStory] = useState<FanStory | null>(null);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
-
-  useEffect(() => {
-    // Load mock data
-    setStories([
-      {
-        id: '1',
-        title: 'My First IPL Match Experience',
-        author: 'Rahul Sharma',
-        email: 'rahul@example.com',
-        category: 'match-experience',
-        content: 'The atmosphere was electric! I still remember the roar of the crowd when...',
-        excerpt: 'An incredible first-time experience at an IPL match that changed my life forever.',
-        likes: 245,
-        comments: 18,
-        views: 1520,
-        featured: true,
-        status: 'approved',
-        submittedAt: '2024-12-01T10:30:00Z',
-        publishedAt: '2024-12-02T08:00:00Z',
-        tags: ['IPL', 'First Match', 'Eden Gardens'],
-        imageUrl: '/images/stories/ipl-match.jpg'
-      },
-      {
-        id: '2',
-        title: 'Meeting MS Dhoni - A Dream Come True',
-        author: 'Priya Patel',
-        email: 'priya@example.com',
-        category: 'player-fan',
-        content: 'I never thought I would meet my idol in person. It happened during...',
-        excerpt: 'The unforgettable moment when I finally met the man who inspired millions.',
-        likes: 512,
-        comments: 34,
-        views: 3200,
-        featured: true,
-        status: 'approved',
-        submittedAt: '2024-11-28T15:45:00Z',
-        publishedAt: '2024-11-29T09:00:00Z',
-        tags: ['MS Dhoni', 'Meet & Greet', 'CSK']
-      },
-      {
-        id: '3',
-        title: 'The Cricket Journey That Changed Everything',
-        author: 'Amit Kumar',
-        email: 'amit@example.com',
-        category: 'cricket-journey',
-        content: 'From playing street cricket to watching my first international match...',
-        excerpt: 'How cricket shaped my life and taught me valuable lessons.',
-        likes: 89,
-        comments: 12,
-        views: 670,
-        featured: false,
-        status: 'pending',
-        submittedAt: '2024-12-05T11:20:00Z',
-        tags: ['Journey', 'Inspiration', 'Street Cricket']
-      }
-    ]);
-  }, []);
+  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
 
   const filteredStories = stories.filter(story => {
     const matchesFilter = filter === 'all' || story.status === filter;
     const matchesSearch = story.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         story.author.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         story.content.toLowerCase().includes(searchTerm.toLowerCase());
+                         story.author.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || story.category === categoryFilter;
     return matchesFilter && matchesSearch && matchesCategory;
   });
@@ -110,18 +57,8 @@ export default function StoriesAdmin() {
     setStories(stories.filter(s => s.id !== id));
   };
 
-  const handleStatusChange = (id: string, status: 'pending' | 'approved' | 'rejected') => {
-    setStories(stories.map(s => 
-      s.id === id 
-        ? { ...s, status, publishedAt: status === 'approved' ? new Date().toISOString() : undefined }
-        : s
-    ));
-  };
-
-  const handleFeaturedToggle = (id: string) => {
-    setStories(stories.map(s => 
-      s.id === id ? { ...s, featured: !s.featured } : s
-    ));
+  const handleStatusChange = (id: string, status: 'approved' | 'rejected') => {
+    setStories(stories.map(s => s.id === id ? { ...s, status } : s));
   };
 
   const getStatusColor = (status: string) => {
@@ -142,14 +79,6 @@ export default function StoriesAdmin() {
       case 'emotional-moment': return 'Emotional Moment';
       default: return category;
     }
-  };
-
-  const handleApproveStory = (id: string) => {
-    handleStatusChange(id, 'approved');
-  };
-
-  const handleRejectStory = (id: string) => {
-    handleStatusChange(id, 'rejected');
   };
 
   return (
@@ -287,7 +216,7 @@ export default function StoriesAdmin() {
               {story.status === 'pending' && (
                 <div className="flex gap-2">
                   <motion.button
-                    onClick={() => handleApproveStory(story.id)}
+                    onClick={() => handleStatusChange(story.id, 'approved')}
                     className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -295,7 +224,7 @@ export default function StoriesAdmin() {
                     <Check size={14} />
                   </motion.button>
                   <motion.button
-                    onClick={() => handleRejectStory(story.id)}
+                    onClick={() => handleStatusChange(story.id, 'rejected')}
                     className="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -440,7 +369,7 @@ function StoryViewModal({ story, onClose }: {
               {new Date(story.submittedAt).toLocaleDateString()}
             </span>
             <span className="px-2 py-1 bg-blue-600/30 text-blue-300 rounded-full text-xs">
-              {getCategoryLabel(story.category)}
+              {story.category}
             </span>
           </div>
           
