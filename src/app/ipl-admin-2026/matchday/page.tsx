@@ -3,9 +3,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, MapPin, Thermometer, Wind, Droplets, Eye, Edit, Trash2, Plus, Save, X } from 'lucide-react';
-import AuroraBackground from '@/components/ui/AuroraBackground';
-import GradientText from '@/components/ui/GradientText';
-import AnimatedSection from '@/components/ui/AnimatedSection';
 
 interface VenueInfo {
   id: string;
@@ -133,276 +130,260 @@ export default function MatchDayAdmin() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      <AuroraBackground />
-      
-      <div className="relative z-10">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <AnimatedSection>
-            <div className="text-center mb-8">
-              <GradientText className="text-4xl md:text-5xl font-bold mb-4">
-                Match Day Admin
-              </GradientText>
-              <p className="text-gray-300 text-lg">
-                Manage venues, weather data, and match conditions
-              </p>
-            </div>
-          </AnimatedSection>
+    <div className="p-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-white mb-4">Match Day Admin</h1>
+        <p className="text-gray-300">
+          Manage venues, weather data, and match conditions for IPL matches
+        </p>
+      </div>
 
-          {/* Tab Navigation */}
-          <div className="flex flex-wrap gap-2 mb-8 justify-center">
-            {['venues', 'weather', 'conditions'].map((tab) => (
-              <motion.button
-                key={tab}
-                onClick={() => setActiveTab(tab as any)}
-                className={`px-6 py-3 rounded-lg font-semibold transition-all ${
-                  activeTab === tab
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </motion.button>
-            ))}
+      {/* Tab Navigation */}
+      <div className="flex flex-wrap gap-2 mb-8">
+        {['venues', 'weather', 'conditions'].map((tab) => (
+          <motion.button
+            key={tab}
+            onClick={() => setActiveTab(tab as any)}
+            className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+              activeTab === tab
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+          </motion.button>
+        ))}
+      </div>
+
+      {/* Venues Tab */}
+      {activeTab === 'venues' && (
+        <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-blue-400/20 mb-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-white">Venue Management</h2>
+            <motion.button
+              onClick={() => setEditingVenue({
+                id: '',
+                name: '',
+                city: '',
+                capacity: 0,
+                pitchType: '',
+                floodlights: false,
+                dimensions: '',
+                established: new Date().getFullYear()
+              })}
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Plus size={20} />
+              Add Venue
+            </motion.button>
           </div>
 
-          {/* Venues Tab */}
-          {activeTab === 'venues' && (
-            <AnimatedSection>
-              <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-white">Venue Management</h2>
-                  <motion.button
-                    onClick={() => setEditingVenue({
-                      id: '',
-                      name: '',
-                      city: '',
-                      capacity: 0,
-                      pitchType: '',
-                      floodlights: false,
-                      dimensions: '',
-                      established: new Date().getFullYear()
-                    })}
-                    className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Plus size={20} />
-                    Add Venue
-                  </motion.button>
-                </div>
-
-                <div className="grid gap-4">
-                  {venues.map((venue) => (
-                    <motion.div
-                      key={venue.id}
-                      className="bg-white/5 rounded-lg p-4 border border-white/10"
-                      whileHover={{ scale: 1.02 }}
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <h3 className="text-xl font-bold text-white mb-2">{venue.name}</h3>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-gray-300">
-                            <div className="flex items-center gap-2">
-                              <MapPin size={16} />
-                              {venue.city}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Calendar size={16} />
-                              Est. {venue.established}
-                            </div>
-                            <div>Capacity: {venue.capacity.toLocaleString()}</div>
-                            <div>Pitch: {venue.pitchType}</div>
-                            <div>Dimensions: {venue.dimensions}</div>
-                            <div>Floodlights: {venue.floodlights ? 'Yes' : 'No'}</div>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <motion.button
-                            onClick={() => setEditingVenue(venue)}
-                            className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                          >
-                            <Edit size={16} />
-                          </motion.button>
-                          <motion.button
-                            onClick={() => handleDeleteVenue(venue.id)}
-                            className="p-2 bg-red-600 text-white rounded hover:bg-red-700"
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                          >
-                            <Trash2 size={16} />
-                          </motion.button>
-                        </div>
+          <div className="grid gap-4">
+            {venues.map((venue) => (
+              <motion.div
+                key={venue.id}
+                className="bg-white/5 rounded-lg p-4 border border-blue-400/10"
+                whileHover={{ scale: 1.02 }}
+              >
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-white mb-2">{venue.name}</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-gray-300">
+                      <div className="flex items-center gap-2">
+                        <MapPin size={16} />
+                        {venue.city}
                       </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </AnimatedSection>
-          )}
-
-          {/* Weather Tab */}
-          {activeTab === 'weather' && (
-            <AnimatedSection>
-              <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-white">Weather Management</h2>
-                  <motion.button
-                    onClick={() => setEditingWeather({
-                      id: '',
-                      venueId: '',
-                      temperature: 0,
-                      humidity: 0,
-                      windSpeed: 0,
-                      condition: 'sunny',
-                      lastUpdated: new Date().toISOString()
-                    })}
-                    className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Plus size={20} />
-                    Add Weather
-                  </motion.button>
-                </div>
-
-                <div className="grid gap-4">
-                  {weatherData.map((weather) => (
-                    <motion.div
-                      key={weather.id}
-                      className="bg-white/5 rounded-lg p-4 border border-white/10"
-                      whileHover={{ scale: 1.02 }}
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-gray-300">
-                            <div className="flex items-center gap-2">
-                              <Thermometer size={16} />
-                              {weather.temperature}°C
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Droplets size={16} />
-                              {weather.humidity}%
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Wind size={16} />
-                              {weather.windSpeed} km/h
-                            </div>
-                            <div>Condition: {weather.condition}</div>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <motion.button
-                            onClick={() => setEditingWeather(weather)}
-                            className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                          >
-                            <Edit size={16} />
-                          </motion.button>
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <Calendar size={16} />
+                        Est. {venue.established}
                       </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            </AnimatedSection>
-          )}
-
-          {/* Match Conditions Tab */}
-          {activeTab === 'conditions' && (
-            <AnimatedSection>
-              <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-white">Match Conditions</h2>
-                  <motion.button
-                    onClick={() => setEditingConditions({
-                      id: '',
-                      venueId: '',
-                      matchId: '',
-                      pitchReport: '',
-                      outfieldCondition: '',
-                      expectedDew: false,
-                      avgFirstInnings: 0,
-                      avgChasing: 0,
-                      tossImpact: ''
-                    })}
-                    className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Plus size={20} />
-                    Add Conditions
-                  </motion.button>
-                </div>
-
-                <div className="grid gap-4">
-                  {matchConditions.map((conditions) => (
-                    <motion.div
-                      key={conditions.id}
-                      className="bg-white/5 rounded-lg p-4 border border-white/10"
-                      whileHover={{ scale: 1.02 }}
+                      <div>Capacity: {venue.capacity.toLocaleString()}</div>
+                      <div>Pitch: {venue.pitchType}</div>
+                      <div>Dimensions: {venue.dimensions}</div>
+                      <div>Floodlights: {venue.floodlights ? 'Yes' : 'No'}</div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <motion.button
+                      onClick={() => setEditingVenue(venue)}
+                      className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
                     >
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <h3 className="text-lg font-bold text-white mb-2">Match: {conditions.matchId}</h3>
-                          <div className="space-y-2 text-gray-300">
-                            <div><strong>Pitch Report:</strong> {conditions.pitchReport}</div>
-                            <div><strong>Outfield:</strong> {conditions.outfieldCondition}</div>
-                            <div><strong>Dew Expected:</strong> {conditions.expectedDew ? 'Yes' : 'No'}</div>
-                            <div><strong>Avg 1st Innings:</strong> {conditions.avgFirstInnings}</div>
-                            <div><strong>Avg Chasing:</strong> {conditions.avgChasing}</div>
-                            <div><strong>Toss Impact:</strong> {conditions.tossImpact}</div>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <motion.button
-                            onClick={() => setEditingConditions(conditions)}
-                            className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                          >
-                            <Edit size={16} />
-                          </motion.button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
+                      <Edit size={16} />
+                    </motion.button>
+                    <motion.button
+                      onClick={() => handleDeleteVenue(venue.id)}
+                      className="p-2 bg-red-600 text-white rounded hover:bg-red-700"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <Trash2 size={16} />
+                    </motion.button>
+                  </div>
                 </div>
-              </div>
-            </AnimatedSection>
-          )}
-
-          {/* Edit Modals */}
-          {editingVenue && (
-            <VenueEditModal
-              venue={editingVenue}
-              onSave={handleSaveVenue}
-              onCancel={() => setEditingVenue(null)}
-            />
-          )}
-          {editingWeather && (
-            <WeatherEditModal
-              weather={editingWeather}
-              venues={venues}
-              onSave={handleSaveWeather}
-              onCancel={() => setEditingWeather(null)}
-            />
-          )}
-          {editingConditions && (
-            <ConditionsEditModal
-              conditions={editingConditions}
-              venues={venues}
-              onSave={handleSaveConditions}
-              onCancel={() => setEditingConditions(null)}
-            />
-          )}
+              </motion.div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Weather Tab */}
+      {activeTab === 'weather' && (
+        <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-blue-400/20 mb-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-white">Weather Management</h2>
+            <motion.button
+              onClick={() => setEditingWeather({
+                id: '',
+                venueId: '',
+                temperature: 0,
+                humidity: 0,
+                windSpeed: 0,
+                condition: 'sunny',
+                lastUpdated: new Date().toISOString()
+              })}
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Plus size={20} />
+              Add Weather
+            </motion.button>
+          </div>
+
+          <div className="grid gap-4">
+            {weatherData.map((weather) => (
+              <motion.div
+                key={weather.id}
+                className="bg-white/5 rounded-lg p-4 border border-blue-400/10"
+                whileHover={{ scale: 1.02 }}
+              >
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-gray-300">
+                      <div className="flex items-center gap-2">
+                        <Thermometer size={16} />
+                        {weather.temperature}°C
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Droplets size={16} />
+                        {weather.humidity}%
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Wind size={16} />
+                        {weather.windSpeed} km/h
+                      </div>
+                      <div>Condition: {weather.condition}</div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <motion.button
+                      onClick={() => setEditingWeather(weather)}
+                      className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <Edit size={16} />
+                    </motion.button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Match Conditions Tab */}
+      {activeTab === 'conditions' && (
+        <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-blue-400/20 mb-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-white">Match Conditions</h2>
+            <motion.button
+              onClick={() => setEditingConditions({
+                id: '',
+                venueId: '',
+                matchId: '',
+                pitchReport: '',
+                outfieldCondition: '',
+                expectedDew: false,
+                avgFirstInnings: 0,
+                avgChasing: 0,
+                tossImpact: ''
+              })}
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Plus size={20} />
+              Add Conditions
+            </motion.button>
+          </div>
+
+          <div className="grid gap-4">
+            {matchConditions.map((conditions) => (
+              <motion.div
+                key={conditions.id}
+                className="bg-white/5 rounded-lg p-4 border border-blue-400/10"
+                whileHover={{ scale: 1.02 }}
+              >
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-white mb-2">Match: {conditions.matchId}</h3>
+                    <div className="space-y-2 text-gray-300">
+                      <div><strong>Pitch Report:</strong> {conditions.pitchReport}</div>
+                      <div><strong>Outfield:</strong> {conditions.outfieldCondition}</div>
+                      <div><strong>Dew Expected:</strong> {conditions.expectedDew ? 'Yes' : 'No'}</div>
+                      <div><strong>Avg 1st Innings:</strong> {conditions.avgFirstInnings}</div>
+                      <div><strong>Avg Chasing:</strong> {conditions.avgChasing}</div>
+                      <div><strong>Toss Impact:</strong> {conditions.tossImpact}</div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <motion.button
+                      onClick={() => setEditingConditions(conditions)}
+                      className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <Edit size={16} />
+                    </motion.button>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modals */}
+      {editingVenue && (
+        <VenueEditModal
+          venue={editingVenue}
+          onSave={handleSaveVenue}
+          onCancel={() => setEditingVenue(null)}
+        />
+      )}
+      {editingWeather && (
+        <WeatherEditModal
+          weather={editingWeather}
+          venues={venues}
+          onSave={handleSaveWeather}
+          onCancel={() => setEditingWeather(null)}
+        />
+      )}
+      {editingConditions && (
+        <ConditionsEditModal
+          conditions={editingConditions}
+          venues={venues}
+          onSave={handleSaveConditions}
+          onCancel={() => setEditingConditions(null)}
+        />
+      )}
     </div>
   );
 }
