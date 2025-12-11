@@ -265,8 +265,8 @@ export default function VenuesAdmin() {
   }
 
   return (
-      <div className="max-w-6xl">
-        <div className="mb-8">
+      <AnimatedSection>
+        <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-4">Venue Management</h1>
           <p className="text-gray-300">Add and manage cricket venues with automatic information retrieval</p>
         </div>
@@ -424,5 +424,6 @@ export default function VenuesAdmin() {
             </div>
           )}
         </div>
+      </AnimatedSection>
   );
 }

@@ -148,7 +148,6 @@ export default function WPLStoriesAdmin() {
   };
 
   return (
-    <div>
       <AnimatedSection>
         <div className="text-center mb-8">
           <GradientText className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-pink-400">
@@ -408,9 +407,8 @@ export default function WPLStoriesAdmin() {
               onClose={() => setSelectedStory(null)}
             />
           )}
-          </AnimatedSection>
         </div>
-    </div>
+      </AnimatedSection>
   );
 }
 
