@@ -95,8 +95,8 @@ export default function AdminMatchday() {
   };
 
   return (
-    <div>
-      <div className="mb-8">
+    <div className="px-6">
+      <div className="mb-8 pt-6">
         <h1 className="text-3xl font-bold text-white mb-4">Match Day Admin</h1>
         <p className="text-gray-300">
           Manage venues, weather data, and match conditions for IPL matches
@@ -124,8 +124,8 @@ export default function AdminMatchday() {
 
       {/* Venues Tab */}
       {activeTab === 'venues' && (
-        <div className="bg-white/10 backdrop-blur-md rounded-xl border border-blue-400/20 mb-6">
-          <div className="flex justify-between items-center mb-6 px-6 pt-6">
+        <div className="bg-white/10 backdrop-blur-md rounded-xl border border-blue-400/20">
+          <div className="flex justify-between items-center mb-6 pt-6">
             <h2 className="text-2xl font-bold text-white">Venue Management ({venues.length} venues)</h2>
             <motion.button
               onClick={() => setEditingVenue({
@@ -147,7 +147,7 @@ export default function AdminMatchday() {
             </motion.button>
           </div>
 
-          <div className="grid gap-4 px-6 pb-6">
+          <div className="grid gap-4 pb-6">
             {venues.length === 0 ? (
               <div className="text-center py-8 text-gray-400">
                 No venues found. Click "Add Venue" to create your first venue.
@@ -204,8 +204,8 @@ export default function AdminMatchday() {
 
       {/* Weather Tab */}
       {activeTab === 'weather' && (
-        <div className="bg-white/10 backdrop-blur-md rounded-xl border border-blue-400/20 mb-6">
-          <div className="flex justify-between items-center mb-6 px-6 pt-6">
+        <div className="bg-white/10 backdrop-blur-md rounded-xl border border-blue-400/20">
+          <div className="flex justify-between items-center mb-6 pt-6">
             <h2 className="text-2xl font-bold text-white">Weather Management</h2>
             <motion.button
               onClick={() => setEditingWeather({
@@ -226,7 +226,7 @@ export default function AdminMatchday() {
             </motion.button>
           </div>
 
-          <div className="grid gap-4 px-6 pb-6">
+          <div className="grid gap-4 pb-6">
             {weatherData.map((weather) => (
               <motion.div
                 key={weather.id}
@@ -270,8 +270,8 @@ export default function AdminMatchday() {
 
       {/* Match Conditions Tab */}
       {activeTab === 'conditions' && (
-        <div className="bg-white/10 backdrop-blur-md rounded-xl border border-blue-400/20 mb-6">
-          <div className="flex justify-between items-center mb-6 px-6 pt-6">
+        <div className="bg-white/10 backdrop-blur-md rounded-xl border border-blue-400/20">
+          <div className="flex justify-between items-center mb-6 pt-6">
             <h2 className="text-2xl font-bold text-white">Match Conditions</h2>
             <motion.button
               onClick={() => setEditingConditions({
@@ -294,7 +294,7 @@ export default function AdminMatchday() {
             </motion.button>
           </div>
 
-          <div className="grid gap-4 px-6 pb-6">
+          <div className="grid gap-4 pb-6">
             {matchConditions.map((conditions) => (
               <motion.div
                 key={conditions.id}
