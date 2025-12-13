@@ -105,3 +105,11 @@ async function analyzeContent(request, corsHeaders) {
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ error: 'Failed to analyze content' }),
+      { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+    );
+  }
+}
