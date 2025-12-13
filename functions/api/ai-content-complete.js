@@ -234,3 +234,11 @@ async function factCheckContent(request, corsHeaders) {
     }), {
       status: 200,
       headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ error: 'Failed to fact check content' }),
+      { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+    );
+  }
+}
