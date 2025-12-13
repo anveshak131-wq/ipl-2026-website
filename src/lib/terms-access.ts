@@ -15,6 +15,8 @@ export const PUBLIC_ROUTES_WITHOUT_TERMS = [
   "/rcb-lion", // Static page
   "/_next",
   "/api/legal", // API endpoint for fetching terms content
+  "/ipl-admin-2026", // Admin routes - don't require terms acceptance
+  "/wpl-admin-2026", // WPL Admin routes - don't require terms acceptance
 ];
 
 /**

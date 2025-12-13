@@ -28,6 +28,14 @@ export default function TermsGuard({ children }: TermsGuardProps) {
   const [canAccess, setCanAccess] = useState(false);
 
   useEffect(() => {
+    // Check if current route is admin route - exclude admin routes from terms check
+    if (pathname.startsWith('/ipl-admin-2026') || pathname.startsWith('/wpl-admin-2026')) {
+      // Admin routes, allow access without terms check
+      setCanAccess(true);
+      setIsChecking(false);
+      return;
+    }
+
     // Check if current route is whitelisted (doesn't require terms acceptance)
     const isPublicRoute = PUBLIC_ROUTES_WITHOUT_TERMS.some(route => {
       if (route.endsWith("/")) {
