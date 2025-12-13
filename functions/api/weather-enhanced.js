@@ -31,46 +31,6 @@ export const onRequest = async (context) => {
         return await getCurrentWeather(env, venueId, lat, lng, corsHeaders);
     }
   } catch (error) {
-    console.error2.error(' 
-   : 'Failed to.
-    }
- juson.stringify({.
-   .
-  }
-};
-
-锋
-}; translat
-
-    { 'Contentisa-Content.
-  };
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  };
-
-  if (request.method === 'OPTIONS') {
-    return new Response(null, { status: 200, headers: corsHeaders });
-  }
-
-  try {
-    const action = searchParams.get('action') || 'current';
-    const venueId = searchParams.get('venueId');
-    const lat = searchParams.get('lat');
-    const lng = searchParams.get('lng');
-
-    switch (action) {
-      case 'current':
-        return await getCurrentWeather(env, venueId, lat, lng, corsHeaders);
-      case 'forecast':
-        return await getWeatherForecast(env, venueId, lat, lng, corsHeaders);
-      case 'ai-analysis':
-        return await getAIWeatherAnalysis(env, venueId, lat, lng, corsHeaders);
-      case 'sync':
-        return await syncWeatherData(env, corsHeaders);
-      default:
-        return await getCurrentWeather(env, venueId, lat, lng, corsHeaders);
-    }
-  } catch (error) {
     console.error('Weather API error:', error);
     return new Response(
       JSON.stringify({ error: 'Failed to fetch weather data' }),
@@ -154,83 +114,39 @@ async function syncWeatherData(env, corsHeaders) {
     // Simulate weather data sync
     const venues = [
       { id: '1', name: 'Narendra Modi Stadium', lat: 23.0225, lng: 72.5714 },
-      { id: '2', name: 'CURRENT Weather with AI enhancement
-async function getCurrentWeather(env, venueId, lat, lng, corsHeaders) {
-  let weatherData = await getCachedWeatherData(env);
-  
-  if (!weatherData) {
-    // Generate sample weather data if no cached data
-    weatherData = generateSampleWeatherData(venueId, lat, lng);
+      { id: '2', name: 'Eden Gardens', lat: 22.5645, lng: 88.3412 },
+      { id: '3', name: 'Wankhede Stadium', lat: 18.9417, lng: 72.8258 },
+      { id: '4', name: 'M. Chinnaswamy Stadium', lat: 12.9784, lng: 77.5994 },
+      { id: '5', name: 'MA Chidambaram Stadium', lat: 13.0624, lng: 80.2411 }
+    ];
+
+    const weatherData = venues.map(venue => generateSampleWeatherData(venue.id, venue.lat.toString(), venue.lng.toString()));
+    
+    // Cache the weather data
+    await env.SPORTS_KV.put('weather:latest', JSON.stringify(weatherData), { expirationTtl: 3600 });
+    
+    return new Response(JSON.stringify({
+      success: true,
+      message: 'Weather data synced successfully',
+      venuesUpdated: venues.length,
+      nextUpdate: getNextUpdateTime()
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({
+      success: false,
+      error: 'Failed to sync weather data'
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
   }
-
-  // Add AI predictions
-  const enhancedData = weatherData.map(weather => ({
-    ...weather,
-    aiPrediction: generateAIWeatherPrediction(weather),
-    matchImpact: calculateMatchImpact(weather),
-    recommendations: getPlayingRecommendations(weather)
-  }));
-  
-  return new Response(JSON.stringify({ 
-    weather: enhancedData,
-    cached: true,
-    lastUpdated: enhancedData[0]?.timestamp || new Date().toISOString(),
-    nextUpdate: getNextUpdateTime()
-  }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json', ...corsHeaders }
-  });
 }
 
-// Get weather forecast with AI
-async function getWeatherForecast(env, venueId, lat, lng, corsHeaders) {
-  const forecast = generateWeatherForecast(venueId, lat, lng);
-  
-  return new Response(JSON.stringify({
-    forecast,
-    venueId,
-    generatedAt: new Date().toISOString(),
-    aiEnhanced: true
-  }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json', ...corsHeaders }
-  });
-}
-
-// AI weather analysis
-async function getAIWeatherAnalysis(env, venueId, lat, lng, corsHeaders) {
-  const currentWeather = await getCachedWeatherData(env) || generateSampleWeatherData(venueId, lat, lng);
-  const forecast = generateWeatherForecast(venueId, lat, lng);
-  
-  const analysis = {
-    venueId,
-    currentConditions: currentWeather[0],
-    forecast,
-    aiAnalysis: {
-      matchImpact: calculateMatchImpact(currentWeather[0]),
-      pitchEffect: predictPitchBehavior(currentWeather[0], forecast),
-      playerConditions: predictPlayerConditions(currentWeather[0]),
-      strategicRecommendations: getStrategicRecommendations(currentWeather[0], forecast),
-      confidence: 85 + Math.random() * 10,
-      riskFactors: identifyRiskFactors(currentWeather[0], forecast)
-    },
-    generatedAt: new Date().toISOString()
-  };
-  
-  return new Response(JSON.stringify(analysis), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json', ...corsHeaders }
-  });
-}
-
-// Sync weather data
-async function syncWeatherData(env, corsHeaders) {
-  try {
-    // Simulate weather data sync
-    const venues = [
-      { id: '1', name: 'Narendra Modi Stadium', lat: 23.0225, lng: 72.5714 },
-      { idoux '2', Corme:ougans',LING', lat一下吧 lat:入市: 22.Clusteredns: 88. sportsup99/src/app/紫-admin-顿/components/AdminMatchdayNew关联.tsx的诊断吧
- gernericateSampleWeather丰富Data(上述吧, laterea lat, lng Mem, lng) Elementary, runaway, combinations: 88十条吧, lngenera吧吧, lat, lng Programme lng) {
+// Generate sample weather data
+function generateSampleWeatherData(venueId, lat, lng) {
   const baseTemp = 25 + Math.random() * 10;
   const conditions = ['sunny', 'cloudy', 'partly-cloudy', 'overcast'];
   

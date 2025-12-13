@@ -1,5 +1,6 @@
-import AdminStories from '../components/AdminStories';
+import AdminStoriesAdvanced from '../components/AdminStoriesAdvanced';
 
 export default function StoriesPage() {
-  return <AdminStories />;
+  console.log('Advanced AI-Powered StoriesPage rendering');
+  return <AdminStoriesAdvanced />;
 }

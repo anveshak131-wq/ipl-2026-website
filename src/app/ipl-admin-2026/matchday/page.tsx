@@ -1,6 +1,6 @@
-import AdminMatchday from '../components/AdminMatchday';
+import AdminMatchdayAdvanced from '../components/AdminMatchdayAdvanced';
 
 export default function MatchdayPage() {
-  console.log('MatchdayPage rendering');
-  return <AdminMatchday />;
+  console.log('Advanced AI-Powered MatchdayPage rendering');
+  return <AdminMatchdayAdvanced />;
 }
