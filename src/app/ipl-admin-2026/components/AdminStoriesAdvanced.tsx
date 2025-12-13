@@ -3,14 +3,28 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Brain, Sparkles, TrendingUp, FileText, PenTool, Image as ImageIcon,
-  Video, Link2, Hash, Bell, Settings, Database, Wifi, Cloud, Search,
-  Filter, Download, Upload, RefreshCw, Plus, Edit, Save, X, Eye,
-  Heart, MessageSquare, Share2, BarChart3, Users, Activity, Zap,
-  Target, Clock, Calendar, User, Tag, Check, AlertCircle, ThumbsUp,
-  ThumbsDown, Star, Globe, Newspaper, Mic, Camera, Send, Bot,
-  TrendingDown, ArrowUp, ArrowDown, MoreVertical, Grid, List
+  Brain, Sparkles, TrendingUp, AlertTriangle, Calendar, Settings,
+  Activity, Zap, Target, BarChart3, Users, RefreshCw, Plus,
+  Edit, Save, X, ChevronRight, ChevronDown, Filter, Search,
+  Eye, Heart, MessageSquare, Share2, Clock, FileText, Hash,
+  Database, Globe, Shield, CheckCircle, XCircle, AlertCircle,
+  TrendingUp as TrendingIcon, Download, Upload, Play, Pause
 } from 'lucide-react';
+
+// Add global styles to disable scrolling
+const noScrollStyles = `
+  html, body {
+    overflow: hidden !important;
+    height: 100vh !important;
+    position: fixed !important;
+    width: 100vw !important;
+  }
+  
+  #__next {
+    height: 100vh !important;
+    overflow: hidden !important;
+  }
+`;
 
 // Advanced interfaces with comprehensive AI features
 interface FanStory {
@@ -168,7 +182,19 @@ export default function AdminStoriesAdvanced() {
   });
 
   useEffect(() => {
+    // Inject styles to disable scrolling
+    const styleElement = document.createElement('style');
+    styleElement.textContent = noScrollStyles;
+    document.head.appendChild(styleElement);
+    
     loadInitialData();
+    
+    // Cleanup styles on unmount
+    return () => {
+      if (styleElement.parentNode) {
+        styleElement.parentNode.removeChild(styleElement);
+      }
+    };
   }, []);
 
   const loadInitialData = async () => {
@@ -577,10 +603,10 @@ As we look to the future of cricket, ${aiGenerator.prompt} will likely continue 
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="h-screen w-screen overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Advanced Header */}
       <motion.header 
-        className="bg-black/40 backdrop-blur-xl border-b border-purple-500/20"
+        className="bg-black/40 backdrop-blur-xl border-b border-purple-500/20 flex-shrink-0"
         initial={{ y: -50, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5 }}
@@ -635,9 +661,9 @@ As we look to the future of cricket, ${aiGenerator.prompt} will likely continue 
         ))}
       </AnimatePresence>
 
-      <div className="px-6 py-6">
+      <div className="px-6 py-4 flex-shrink-0">
         {/* Advanced Navigation */}
-        <div className="flex gap-2 mb-8 overflow-x-auto">
+        <div className="flex gap-2 mb-6 overflow-x-auto">
           {[
             { id: 'dashboard', label: 'Dashboard', icon: <BarChart3 className="w-4 h-4" /> },
             { id: 'stories', label: 'Stories', icon: <FileText className="w-4 h-4" /> },
@@ -662,6 +688,8 @@ As we look to the future of cricket, ${aiGenerator.prompt} will likely continue 
           ))}
         </div>
 
+      {/* Main Content Area - Scrollable within viewport */}
+      <div className="flex-1 overflow-y-auto px-6 pb-6">
         {/* Dashboard Overview */}
         {activeView === 'dashboard' && (
           <motion.div
@@ -1615,6 +1643,7 @@ As we look to the future of cricket, ${aiGenerator.prompt} will likely continue 
             </motion.div>
           </motion.div>
         )}
+      </div>
       </AnimatePresence>
     </div>
   );
