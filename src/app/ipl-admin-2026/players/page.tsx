@@ -582,109 +582,124 @@ export default function AdminPlayers() {
             </div>
 
             {/* Statistics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
               {/* Total Players */}
-              <div className="glass-effect rounded-xl p-6 border border-white/10 hover:border-ipl-gold/50 transition-all duration-300 transform hover:scale-[1.02]">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-400 text-sm font-medium mb-2">Total Players</p>
-                    <p className="text-3xl font-bold text-white">{stats.total}</p>
-                  </div>
-                  <div className="w-12 h-12 bg-gradient-to-br from-ipl-gold to-ipl-purple rounded-lg flex items-center justify-center">
+              <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-slate-600/50 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
                     <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
                     </svg>
                   </div>
+                  <div className="text-right">
+                    <p className="text-3xl font-bold text-white">{stats.total}</p>
+                    <p className="text-xs text-gray-400">Total Players</p>
+                  </div>
                 </div>
-                <div className="mt-4 flex items-center text-xs text-ipl-gold font-semibold">
-                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M12 7a1 1 0 110-2h.01a1 1 0 110 2H12zm-2 2a1 1 0 100-2 1 1 0 000 2zm4 0a1 1 0 100-2 1 1 0 000 2zm2-4a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                  </svg>
-                  All squads combined
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-300 font-medium">All squads combined</span>
+                  <div className="flex items-center text-xs text-blue-400 font-semibold bg-blue-500/10 px-2 py-1 rounded-full">
+                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M12 7a1 1 0 110-2h.01a1 1 0 110 2H12zm-2 2a1 1 0 100-2 1 1 0 000 2zm4 0a1 1 0 100-2 1 1 0 000 2zm2-4a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                    </svg>
+                    Active
+                  </div>
                 </div>
               </div>
 
               {/* Batsmen */}
-              <div className="glass-effect rounded-xl p-6 border border-white/10 hover:border-green-500/50 transition-all duration-300 transform hover:scale-[1.02]">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-400 text-sm font-medium mb-2">Batsmen</p>
-                    <p className="text-3xl font-bold text-white">{stats.batsmen}</p>
-                  </div>
-                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+              <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-emerald-500/50 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
                     <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" />
                     </svg>
                   </div>
+                  <div className="text-right">
+                    <p className="text-3xl font-bold text-white">{stats.batsmen}</p>
+                    <p className="text-xs text-gray-400">Batsmen</p>
+                  </div>
                 </div>
-                <div className="mt-4 flex items-center text-xs text-green-400 font-semibold">
-                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  {stats.total > 0 ? ((stats.batsmen / stats.total) * 100).toFixed(0) : 0}% of squad
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-300 font-medium">Run scorers</span>
+                  <div className="flex items-center text-xs text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-1 rounded-full">
+                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    {stats.total > 0 ? ((stats.batsmen / stats.total) * 100).toFixed(0) : 0}%
+                  </div>
                 </div>
               </div>
 
               {/* Bowlers */}
-              <div className="glass-effect rounded-xl p-6 border border-white/10 hover:border-blue-500/50 transition-all duration-300 transform hover:scale-[1.02]">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-400 text-sm font-medium mb-2">Bowlers</p>
-                    <p className="text-3xl font-bold text-white">{stats.bowlers}</p>
-                  </div>
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg flex items-center justify-center">
+              <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-blue-500/50 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
                     <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                     </svg>
                   </div>
+                  <div className="text-right">
+                    <p className="text-3xl font-bold text-white">{stats.bowlers}</p>
+                    <p className="text-xs text-gray-400">Bowlers</p>
+                  </div>
                 </div>
-                <div className="mt-4 flex items-center text-xs text-blue-400 font-semibold">
-                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  {stats.total > 0 ? ((stats.bowlers / stats.total) * 100).toFixed(0) : 0}% of squad
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-300 font-medium">Wicket takers</span>
+                  <div className="flex items-center text-xs text-blue-400 font-semibold bg-blue-500/10 px-2 py-1 rounded-full">
+                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    {stats.total > 0 ? ((stats.bowlers / stats.total) * 100).toFixed(0) : 0}%
+                  </div>
                 </div>
               </div>
 
               {/* All-rounders */}
-              <div className="glass-effect rounded-xl p-6 border border-white/10 hover:border-purple-500/50 transition-all duration-300 transform hover:scale-[1.02]">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-400 text-sm font-medium mb-2">All-rounders</p>
-                    <p className="text-3xl font-bold text-white">{stats.allRounders}</p>
-                  </div>
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
+              <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-purple-500/50 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
                     <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
                     </svg>
                   </div>
+                  <div className="text-right">
+                    <p className="text-3xl font-bold text-white">{stats.allRounders}</p>
+                    <p className="text-xs text-gray-400">All-rounders</p>
+                  </div>
                 </div>
-                <div className="mt-4 flex items-center text-xs text-purple-400 font-semibold">
-                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  {stats.total > 0 ? ((stats.allRounders / stats.total) * 100).toFixed(0) : 0}% of squad
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-300 font-medium">Versatile players</span>
+                  <div className="flex items-center text-xs text-purple-400 font-semibold bg-purple-500/10 px-2 py-1 rounded-full">
+                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    {stats.total > 0 ? ((stats.allRounders / stats.total) * 100).toFixed(0) : 0}%
+                  </div>
                 </div>
               </div>
 
               {/* Wicket-keepers */}
-              <div className="glass-effect rounded-xl p-6 border border-white/10 hover:border-orange-500/50 transition-all duration-300 transform hover:scale-[1.02]">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-gray-400 text-sm font-medium mb-2">Wicket-keepers</p>
-                    <p className="text-3xl font-bold text-white">{stats.wicketkeepers}</p>
-                  </div>
-                  <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
+              <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-orange-500/50 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg">
                     <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" />
                     </svg>
                   </div>
+                  <div className="text-right">
+                    <p className="text-3xl font-bold text-white">{stats.wicketkeepers}</p>
+                    <p className="text-xs text-gray-400">Wicket-keepers</p>
+                  </div>
                 </div>
-                <div className="mt-4 flex items-center text-xs text-orange-400 font-semibold">
-                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  {stats.total > 0 ? ((stats.wicketkeepers / stats.total) * 100).toFixed(0) : 0}% of squad
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-300 font-medium">Behind the stumps</span>
+                  <div className="flex items-center text-xs text-orange-400 font-semibold bg-orange-500/10 px-2 py-1 rounded-full">
+                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    {stats.total > 0 ? ((stats.wicketkeepers / stats.total) * 100).toFixed(0) : 0}%
+                  </div>
                 </div>
               </div>
             </div>

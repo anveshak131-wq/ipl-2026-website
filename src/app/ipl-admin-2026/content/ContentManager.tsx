@@ -380,66 +380,85 @@ export default function ContentManager({
       <div className="flex-1 relative z-10">
         <div className="p-8">
           {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
-            <div>
-              <div className="mb-2 text-xs text-gray-400 flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => router.push('/ipl-admin-2026/dashboard')}
-                  className="hover:text-ipl-gold transition-colors"
-                >
-                  Admin
-                </button>
-                <span className="text-gray-600">/</span>
-                <button
-                  type="button"
-                  onClick={() => router.push('/ipl-admin-2026/content')}
-                  className="hover:text-ipl-gold transition-colors"
-                >
-                  Content
-                </button>
-                <span className="text-gray-600">/</span>
-                <span className="text-gray-300">{breadcrumbLeafLabel}</span>
-              </div>
-              <h1 className="text-3xl font-bold text-white mb-2">
-                Content Management
-              </h1>
-              <p className="text-gray-400">
-                Manage news articles, banners, and highlights
-              </p>
-              {!restrictToType && (
-                <div className="mt-4 inline-flex rounded-xl bg-black/40 border border-white/10 p-1">
-                  {[{ key: 'news', label: 'News' }, { key: 'banner', label: 'Banners' }, { key: 'highlight', label: 'Highlights' }].map((tab) => {
-                    const isActive = currentType === tab.key;
-                    return (
-                      <button
-                        key={tab.key}
-                        type="button"
-                        onClick={() => setActiveContentType(tab.key as 'news' | 'banner' | 'highlight')}
-                        className={`px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${
-                          isActive
-                            ? 'bg-gradient-to-r from-ipl-gold to-ipl-purple text-black shadow-md'
-                            : 'text-gray-300 hover:bg-white/5'
-                        }`}
-                      >
-                        {tab.label}
-                      </button>
-                    );
-                  })}
+          <div className="mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="mb-2 text-xs text-gray-400 flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => router.push('/ipl-admin-2026/dashboard')}
+                    className="hover:text-blue-400 transition-colors"
+                  >
+                    Admin
+                  </button>
+                  <span className="text-gray-600">/</span>
+                  <button
+                    type="button"
+                    onClick={() => router.push('/ipl-admin-2026/content')}
+                    className="hover:text-blue-400 transition-colors"
+                  >
+                    Content
+                  </button>
+                  <span className="text-gray-600">/</span>
+                  <span className="text-gray-300">{breadcrumbLeafLabel}</span>
                 </div>
-              )}
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent mb-2">
+                  Content Management
+                </h1>
+                <p className="text-gray-400 text-lg">
+                  Manage news articles, banners, and highlights
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-xl">
+                  <div className={`w-2 h-2 rounded-full ${
+                    content.length > 0 ? 'bg-green-500 animate-pulse' : 'bg-gray-500'
+                  }`}></div>
+                  <span className={`text-sm font-medium ${
+                    content.length > 0 ? 'text-green-400' : 'text-gray-400'
+                  }`}>
+                    {content.length} items
+                  </span>
+                </div>
+              </div>
             </div>
-            <button 
-              onClick={handleAddContent}
-              className="flex items-center gap-2 bg-gradient-to-r from-ipl-gold to-ipl-purple px-6 py-3 rounded-xl font-semibold text-white hover:shadow-xl hover:scale-105 transition-all duration-200"
-            >
-              <IconPlus className="w-5 h-5" />
-              {currentType === 'news'
-                ? 'Create News'
-                : currentType === 'banner'
-                ? 'Create Banner'
-                : 'Create Highlight'}
-            </button>
+
+            {!restrictToType && (
+              <div className="mt-6 inline-flex rounded-xl bg-slate-800/50 border border-slate-700/50 p-1 backdrop-blur-sm">
+                {[{ key: 'news', label: 'News Articles', icon: '📰' }, { key: 'banner', label: 'Banners', icon: '📢' }, { key: 'highlight', label: 'Highlights', icon: '⭐' }].map((tab) => {
+                  const isActive = currentType === tab.key;
+                  return (
+                    <button
+                      key={tab.key}
+                      type="button"
+                      onClick={() => setActiveContentType(tab.key as 'news' | 'banner' | 'highlight')}
+                      className={`px-4 py-2.5 text-sm font-semibold rounded-lg transition-all flex items-center gap-2 ${
+                        isActive
+                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
+                          : 'text-gray-300 hover:bg-slate-700/50 hover:text-white'
+                      }`}
+                    >
+                      <span>{tab.icon}</span>
+                      {tab.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={handleAddContent}
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 hover:shadow-xl hover:scale-105 flex items-center gap-3 shadow-lg"
+              >
+                <IconPlus className="w-5 h-5" />
+                {currentType === 'news'
+                  ? 'Create News Article'
+                  : currentType === 'banner'
+                  ? 'Create Banner'
+                  : 'Create Highlight'}
+              </button>
+            </div>
           </div>
 
           {/* Filters Section */}
@@ -548,26 +567,90 @@ export default function ContentManager({
 
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div className="glass-effect rounded-xl p-4">
-              <div className="text-gray-400 text-sm mb-1">{`Total ${currentTypeLabel}`}</div>
-              <div className="text-2xl font-bold text-white">{totalCurrent}</div>
-            </div>
-            <div className="glass-effect rounded-xl p-4">
-              <div className="text-gray-400 text-sm mb-1">Published</div>
-              <div className="text-2xl font-bold text-green-400">
-                {publishedCurrent}
+            <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-slate-500/50 transition-all duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
+                  <IconNewspaper className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-right">
+                  <p className="text-3xl font-bold text-white">{totalCurrent}</p>
+                  <p className="text-xs text-gray-400">Total</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-300 font-medium">{currentTypeLabel}</span>
+                <div className="flex items-center text-xs text-blue-400 font-semibold bg-blue-500/10 px-2 py-1 rounded-full">
+                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  100%
+                </div>
               </div>
             </div>
-            <div className="glass-effect rounded-xl p-4">
-              <div className="text-gray-400 text-sm mb-1">Drafts</div>
-              <div className="text-2xl font-bold text-gray-400">
-                {draftCurrent}
+            <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-green-500/50 transition-all duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div className="text-right">
+                  <p className="text-3xl font-bold text-white">{publishedCurrent}</p>
+                  <p className="text-xs text-gray-400">Published</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-300 font-medium">Live Content</span>
+                <div className="flex items-center text-xs text-green-400 font-semibold bg-green-500/10 px-2 py-1 rounded-full">
+                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  {totalCurrent > 0 ? ((publishedCurrent / totalCurrent) * 100).toFixed(0) : 0}%
+                </div>
               </div>
             </div>
-            <div className="glass-effect rounded-xl p-4">
-              <div className="text-gray-400 text-sm mb-1">All Content Items</div>
-              <div className="text-2xl font-bold text-blue-400">
-                {content.length}
+            <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-orange-500/50 transition-all duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </div>
+                <div className="text-right">
+                  <p className="text-3xl font-bold text-white">{draftCurrent}</p>
+                  <p className="text-xs text-gray-400">Drafts</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-300 font-medium">Work in Progress</span>
+                <div className="flex items-center text-xs text-orange-400 font-semibold bg-orange-500/10 px-2 py-1 rounded-full">
+                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  {totalCurrent > 0 ? ((draftCurrent / totalCurrent) * 100).toFixed(0) : 0}%
+                </div>
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-purple-500/50 transition-all duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                </div>
+                <div className="text-right">
+                  <p className="text-3xl font-bold text-white">{content.length}</p>
+                  <p className="text-xs text-gray-400">All Items</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-300 font-medium">Total Content</span>
+                <div className="flex items-center text-xs text-purple-400 font-semibold bg-purple-500/10 px-2 py-1 rounded-full">
+                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  All Types
+                </div>
               </div>
             </div>
           </div>

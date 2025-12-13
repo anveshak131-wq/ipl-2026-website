@@ -1336,49 +1336,101 @@ export default function AdminMatches() {
 
                     {/* Global status summary */}
                     <StaggeredList className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" staggerDelay={0.1}>
-                        <motion.div 
-                            className="glass-effect rounded-xl p-4 hover:bg-white/5 transition-all duration-200 cursor-pointer"
+                        <motion.div
+                            className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-slate-500/50 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] cursor-pointer"
                             onClick={() => setFilters({ ...filters, status: 'all' })}
                             whileHover={{ scale: 1.02 }}
                         >
-                            <div className="flex items-center justify-between mb-2">
-                                <div className="text-xs text-gray-400">Total matches</div>
-                                <Calendar className="w-4 h-4 text-gray-400" />
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center shadow-lg">
+                                    <Calendar className="w-6 h-6 text-white" />
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-3xl font-bold text-white">{statusCounts.total}</p>
+                                    <p className="text-xs text-gray-400">Total</p>
+                                </div>
                             </div>
-                            <div className="text-2xl font-bold text-white">{statusCounts.total}</div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm text-gray-300 font-medium">All matches</span>
+                                <div className="flex items-center text-xs text-slate-400 font-semibold bg-slate-500/10 px-2 py-1 rounded-full">
+                                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                    </svg>
+                                    100%
+                                </div>
+                            </div>
                         </motion.div>
-                        <motion.div 
-                            className="glass-effect rounded-xl p-4 hover:bg-white/5 transition-all duration-200 cursor-pointer"
+                        <motion.div
+                            className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-blue-500/50 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] cursor-pointer"
                             onClick={() => setFilters({ ...filters, status: 'upcoming' })}
                             whileHover={{ scale: 1.02 }}
                         >
-                            <div className="flex items-center justify-between mb-2">
-                                <div className="text-xs text-gray-400">Upcoming</div>
-                                <Clock className="w-4 h-4 text-blue-400" />
-                        </div>
-                            <div className="text-2xl font-bold text-blue-400">{statusCounts.upcoming}</div>
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
+                                    <Clock className="w-6 h-6 text-white" />
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-3xl font-bold text-white">{statusCounts.upcoming}</p>
+                                    <p className="text-xs text-gray-400">Upcoming</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm text-gray-300 font-medium">Scheduled</span>
+                                <div className="flex items-center text-xs text-blue-400 font-semibold bg-blue-500/10 px-2 py-1 rounded-full">
+                                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                    </svg>
+                                    {statusCounts.total > 0 ? ((statusCounts.upcoming / statusCounts.total) * 100).toFixed(0) : 0}%
+                                </div>
+                            </div>
                         </motion.div>
-                        <motion.div 
-                            className="glass-effect rounded-xl p-4 hover:bg-white/5 transition-all duration-200 cursor-pointer"
+                        <motion.div
+                            className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-red-500/50 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] cursor-pointer"
                             onClick={() => setFilters({ ...filters, status: 'live' })}
                             whileHover={{ scale: 1.02 }}
                         >
-                            <div className="flex items-center justify-between mb-2">
-                                <div className="text-xs text-gray-400">Live</div>
-                                <Zap className="w-4 h-4 text-ipl-accent" />
-                        </div>
-                            <div className="text-2xl font-bold text-ipl-accent">{statusCounts.live}</div>
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-pink-600 flex items-center justify-center shadow-lg">
+                                    <Zap className="w-6 h-6 text-white" />
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-3xl font-bold text-white">{statusCounts.live}</p>
+                                    <p className="text-xs text-gray-400">Live</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm text-gray-300 font-medium">In progress</span>
+                                <div className="flex items-center text-xs text-red-400 font-semibold bg-red-500/10 px-2 py-1 rounded-full">
+                                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                    </svg>
+                                    {statusCounts.total > 0 ? ((statusCounts.live / statusCounts.total) * 100).toFixed(0) : 0}%
+                                </div>
+                            </div>
                         </motion.div>
-                        <motion.div 
-                            className="glass-effect rounded-xl p-4 hover:bg-white/5 transition-all duration-200 cursor-pointer"
+                        <motion.div
+                            className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-green-500/50 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] cursor-pointer"
                             onClick={() => setFilters({ ...filters, status: 'completed' })}
                             whileHover={{ scale: 1.02 }}
                         >
-                            <div className="flex items-center justify-between mb-2">
-                                <div className="text-xs text-gray-400">Completed</div>
-                                <CheckCircle2 className="w-4 h-4 text-green-400" />
-                        </div>
-                            <div className="text-2xl font-bold text-green-400">{statusCounts.completed}</div>
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
+                                    <CheckCircle2 className="w-6 h-6 text-white" />
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-3xl font-bold text-white">{statusCounts.completed}</p>
+                                    <p className="text-xs text-gray-400">Completed</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm text-gray-300 font-medium">Finished</span>
+                                <div className="flex items-center text-xs text-green-400 font-semibold bg-green-500/10 px-2 py-1 rounded-full">
+                                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                    </svg>
+                                    {statusCounts.total > 0 ? ((statusCounts.completed / statusCounts.total) * 100).toFixed(0) : 0}%
+                                </div>
+                            </div>
                         </motion.div>
                     </StaggeredList>
 

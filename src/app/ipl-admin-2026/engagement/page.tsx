@@ -303,50 +303,70 @@ export default function AdminEngagementPage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-slate-900">
+    <div className="flex min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
       <AdminSidebar />
 
-      <main className="flex-grow">
-        <div className="max-w-6xl mx-auto px-6 py-8">
+      <main className="flex-1 relative z-10">
+        <div className="max-w-6xl mx-auto px-8 py-8">
+          {/* Header */}
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-white mb-2">User Engagement Management</h1>
-            <p className="text-gray-400 mb-3">Monitor active users and manage community engagement</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent mb-2">
+                  User Engagement
+                </h1>
+                <p className="text-gray-400 text-lg">
+                  Monitor active users and manage community interactions
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-xl">
+                  <div className={`w-2 h-2 rounded-full ${
+                    usersStatus === 'ok' && messagesStatus === 'ok' ? 'bg-green-500 animate-pulse' : (usersStatus === 'error' || messagesStatus === 'error') ? 'bg-red-500' : 'bg-yellow-500'
+                  }`}></div>
+                  <span className={`text-sm font-medium ${
+                    usersStatus === 'ok' && messagesStatus === 'ok' ? 'text-green-400' : (usersStatus === 'error' || messagesStatus === 'error') ? 'text-red-400' : 'text-yellow-400'
+                  }`}>
+                    {usersStatus === 'ok' && messagesStatus === 'ok' ? 'All systems OK' : (usersStatus === 'error' || messagesStatus === 'error') ? 'Service issues' : 'Loading...'}
+                  </span>
+                </div>
+              </div>
+            </div>
 
-            <div className="flex flex-wrap gap-3 text-xs text-gray-400">
+            {/* Status Indicators */}
+            <div className="mt-6 flex flex-wrap gap-3">
               {!isTabVisible && (
-                <div className="w-full mb-2 flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-300">
-                  <span className="text-sm">⏸️</span>
-                  <span>Polling paused (tab hidden)</span>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-300">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm4-2a1 1 0 00-1 1v4a1 1 0 102 0V7a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-sm font-medium">Polling paused (tab hidden)</span>
                 </div>
               )}
               {(usersConsecutiveErrors >= MAX_CONSECUTIVE_ERRORS || messagesConsecutiveErrors >= MAX_CONSECUTIVE_ERRORS) && (
-                <div className="w-full mb-2 flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-500/10 border border-orange-500/30 text-orange-300">
-                  <span className="text-sm">⚠️</span>
-                  <span>Slow polling active due to consecutive errors (15s interval)</span>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/10 border border-orange-500/30 text-orange-300">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-sm font-medium">Slow polling active (15s interval)</span>
                 </div>
               )}
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/60 border border-white/10">
-                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: usersStatus === 'ok' ? '#22c55e' : usersStatus === 'error' ? '#ef4444' : '#6b7280' }} />
-                <span>
-                  Active users:{' '}
-                  <span className={usersStatus === 'error' ? 'text-red-400' : 'text-gray-200'}>
-                    {usersStatus === 'ok' ? 'OK' : usersStatus === 'error' ? 'Error' : 'Loading...'}
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800/50 border border-slate-700/50">
+                <div className={`w-2 h-2 rounded-full ${usersStatus === 'ok' ? 'bg-green-500' : usersStatus === 'error' ? 'bg-red-500' : 'bg-gray-500'}`}></div>
+                <span className="text-sm text-gray-300">
+                  Users: <span className={usersStatus === 'error' ? 'text-red-400' : usersStatus === 'ok' ? 'text-green-400' : 'text-gray-400'}>
+                    {usersStatus === 'ok' ? 'Connected' : usersStatus === 'error' ? 'Error' : 'Loading'}
                   </span>
-                  {usersLastUpdated && (
-                    <span className="text-gray-500"> · Updated {usersLastUpdated}</span>
-                  )}
+                  {usersLastUpdated && <span className="text-gray-500 ml-2">• {usersLastUpdated}</span>}
                 </span>
               </div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/60 border border-white/10">
-                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: messagesStatus === 'ok' ? '#22c55e' : messagesStatus === 'error' ? '#ef4444' : '#6b7280' }} />
-                <span>
-                  Chat messages:{' '}
-                  <span className={messagesStatus === 'error' ? 'text-red-400' : 'text-gray-200'}>
-                    {messagesStatus === 'ok' ? 'OK' : messagesStatus === 'error' ? 'Error' : 'Loading...'}
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800/50 border border-slate-700/50">
+                <div className={`w-2 h-2 rounded-full ${messagesStatus === 'ok' ? 'bg-green-500' : messagesStatus === 'error' ? 'bg-red-500' : 'bg-gray-500'}`}></div>
+                <span className="text-sm text-gray-300">
+                  Messages: <span className={messagesStatus === 'error' ? 'text-red-400' : messagesStatus === 'ok' ? 'text-green-400' : 'text-gray-400'}>
+                    {messagesStatus === 'ok' ? 'Connected' : messagesStatus === 'error' ? 'Error' : 'Loading'}
                   </span>
-                  {messagesLastUpdated && (
-                    <span className="text-gray-500"> · Updated {messagesLastUpdated}</span>
-                  )}
+                  {messagesLastUpdated && <span className="text-gray-500 ml-2">• {messagesLastUpdated}</span>}
                 </span>
               </div>
             </div>
@@ -354,17 +374,75 @@ export default function AdminEngagementPage() {
 
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-slate-800/50 rounded-2xl border border-white/10 p-6">
-              <p className="text-gray-400 text-sm mb-2">Total Active Users</p>
-              <p className="text-4xl font-bold text-ipl-gold">{activeUsers.length}</p>
+            <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-slate-500/50 transition-all duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                  </svg>
+                </div>
+                <div className="text-right">
+                  <p className="text-3xl font-bold text-white">{activeUsers.length}</p>
+                  <p className="text-xs text-gray-400">Active Users</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-300 font-medium">Currently online</span>
+                <div className="flex items-center text-xs text-blue-400 font-semibold bg-blue-500/10 px-2 py-1 rounded-full">
+                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  Live
+                </div>
+              </div>
             </div>
-            <div className="bg-slate-800/50 rounded-2xl border border-white/10 p-6">
-              <p className="text-gray-400 text-sm mb-2">Live Chat Status</p>
-              <p className="text-4xl font-bold text-green-400">{activeUsers.length > 0 ? 'Active' : 'Idle'}</p>
+            <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-green-500/50 transition-all duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </div>
+                <div className="text-right">
+                  <p className="text-3xl font-bold text-white">{activeUsers.length > 0 ? 'Active' : 'Idle'}</p>
+                  <p className="text-xs text-gray-400">Chat Status</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-300 font-medium">Live chat</span>
+                <div className={`flex items-center text-xs font-semibold px-2 py-1 rounded-full ${
+                  activeUsers.length > 0
+                    ? 'text-green-400 bg-green-500/10'
+                    : 'text-gray-400 bg-gray-500/10'
+                }`}>
+                  <div className={`w-2 h-2 rounded-full mr-1 ${
+                    activeUsers.length > 0 ? 'bg-green-500 animate-pulse' : 'bg-gray-500'
+                  }`}></div>
+                  {activeUsers.length > 0 ? 'Active' : 'Idle'}
+                </div>
+              </div>
             </div>
-            <div className="bg-slate-800/50 rounded-2xl border border-white/10 p-6">
-              <p className="text-gray-400 text-sm mb-2">Last Updated</p>
-              <p className="text-lg font-semibold text-white">{new Date().toLocaleTimeString()}</p>
+            <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-purple-500/50 transition-all duration-300">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
+                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="text-right">
+                  <p className="text-lg font-bold text-white">{new Date().toLocaleTimeString()}</p>
+                  <p className="text-xs text-gray-400">Last Updated</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-300 font-medium">Real-time sync</span>
+                <div className="flex items-center text-xs text-purple-400 font-semibold bg-purple-500/10 px-2 py-1 rounded-full">
+                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  Auto
+                </div>
+              </div>
             </div>
           </div>
 

@@ -8,7 +8,7 @@ import {
   Edit, Save, X, ChevronRight, ChevronDown, Filter, Search,
   Eye, Heart, MessageSquare, Share2, Clock, FileText, Hash,
   Database, Globe, Shield, CheckCircle, XCircle, AlertCircle,
-  TrendingUp as TrendingIcon, Download, Upload, Play, Pause
+  TrendingUp as TrendingIcon, Download, Upload, Play, Pause, PenTool
 } from 'lucide-react';
 
 // Add global styles to disable scrolling
