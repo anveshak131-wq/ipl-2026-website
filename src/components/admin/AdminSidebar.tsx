@@ -553,49 +553,49 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
 
   const SidebarContent = () => (
     <>
-      {/* Header - More compact */}
-      <div className={`px-4 py-3 border-b border-[#2A3440] ${collapsed ? 'px-3' : ''}`}>
-        <div className={`flex items-center ${collapsed ? 'justify-center' : 'space-x-2.5'} transition-all duration-300`}>
+      {/* Header - Redesigned with admin classes */}
+      <div className={`admin-glass px-4 py-4 border-b border-white/8 ${collapsed ? 'px-3' : ''}`}>
+        <div className={`flex items-center ${collapsed ? 'justify-center' : 'space-x-3'} transition-all duration-300`}>
           <div className="relative flex items-center justify-center">
             <IPLLogo size="sm" animated />
           </div>
           {!collapsed && (
             <div className="flex flex-col">
-              <span className="text-[#E6EDF3] font-bold text-base leading-tight">SportsUP18</span>
-              <span className="text-[#6B7280] text-[10px]">Admin</span>
+              <span className="text-white font-bold text-base leading-tight">SportsUP18</span>
+              <span className="text-gray-400 text-xs">Admin Panel</span>
             </div>
           )}
         </div>
       </div>
 
-      {/* Search - More compact */}
+      {/* Search - Redesigned with admin classes */}
       {!collapsed && (
-        <div className="px-3 py-2 border-b border-[#2A3440]">
+        <div className="px-4 py-3 border-b border-white/8">
           <div className="relative">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#6B7280]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               id="sidebar-search"
               type="text"
-              placeholder="Search... (⌘K)"
+              placeholder="Search navigation... (⌘K)"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-7 py-1.5 bg-[#141A22] border border-[#2A3440] rounded-lg text-[#E6EDF3] text-xs placeholder-[#6B7280] focus:outline-none focus:ring-1 focus:ring-[#2F6FED] focus:border-transparent transition-all"
+              className="admin-input w-full pl-10 pr-8 py-2.5 text-sm"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#AEBAC7] transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-4 h-4" />
               </button>
             )}
           </div>
         </div>
       )}
 
-      {/* League Switcher - More compact */}
+      {/* League Switcher - Redesigned */}
       {!collapsed && (
-        <div className="px-3 py-2 border-b border-[#2A3440]">
+        <div className="px-4 py-3 border-b border-white/8">
           <AdminLeagueSwitcher />
         </div>
       )}
@@ -631,8 +631,8 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         </div>
       )}
 
-      {/* Navigation */}
-      <nav className="flex-1 px-3 py-2 space-y-3 overflow-y-auto">
+      {/* Navigation - Redesigned with admin classes */}
+      <nav className="flex-1 px-4 py-4 space-y-4 overflow-y-auto">
         {Object.entries(filteredMenuGroups).map(([groupName, items]) => {
           const isExpanded = expandedGroups.has(groupName);
           const hasActiveItem = items.some(
@@ -643,7 +643,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
           // For "Main" group, always show items (no collapse)
           if (groupName === 'Main') {
             return (
-              <div key={groupName} className="space-y-0.5">
+              <div key={groupName} className="space-y-1">
                 {items.map((item) => {
                   const isActive =
                     currentPage === item.href ||
@@ -652,20 +652,20 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
                     <button
                       key={item.href}
                       onClick={() => handleNavigation(item.href)}
-                      className={`w-full group relative flex items-center ${collapsed ? 'justify-center px-2' : 'space-x-2.5 px-2.5'} py-2 rounded-lg transition-all duration-200 ${
+                      className={`w-full group relative flex items-center ${collapsed ? 'justify-center px-2' : 'space-x-3 px-3'} py-2.5 rounded-lg transition-all duration-200 ${
                         isActive
-                          ? 'bg-[#1A2332] text-[#E6EDF3]'
-                          : 'text-[#AEBAC7] hover:text-[#E6EDF3] hover:bg-[#141A22]'
+                          ? 'admin-glass text-white'
+                          : 'text-gray-300 hover:text-white hover:bg-white/5'
                       }`}
                       title={collapsed ? item.label : undefined}
                     >
                       {isActive && !collapsed && (
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-[#2F6FED] rounded-r-full" />
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-500 rounded-r-full" />
                       )}
-                      <span className={`relative flex-shrink-0 ${isActive ? 'text-[#2F6FED]' : ''} transition-colors`}>
+                      <span className={`relative flex-shrink-0 ${isActive ? 'text-blue-400' : 'text-gray-400'} transition-colors`}>
                         {item.icon}
                         {item.badge !== undefined && item.badge > 0 && (
-                          <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border border-[#0B0F13]">
+                          <span className="admin-badge admin-badge-error absolute -top-1 -right-1 text-[9px] px-1 py-0.5">
                             {item.badge > 9 ? '9+' : item.badge}
                           </span>
                         )}
@@ -674,7 +674,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
                         <>
                           <span className="font-medium text-sm flex-1 text-left">{item.label}</span>
                           {item.shortcut && (
-                            <kbd className="px-1 py-0.5 text-[10px] font-semibold text-[#6B7280] bg-[#141A22] border border-[#2A3440] rounded">
+                            <kbd className="px-1.5 py-0.5 text-xs font-semibold text-gray-400 bg-white/5 border border-white/10 rounded">
                               {item.shortcut}
                             </kbd>
                           )}
@@ -693,15 +693,15 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
               {!collapsed && (
                 <button
                   onClick={() => toggleGroup(groupName)}
-                  className="w-full flex items-center justify-between px-2.5 py-1.5 mb-1 group hover:bg-[#141A22] rounded transition-colors"
+                  className="w-full flex items-center justify-between px-3 py-2 mb-2 group hover:bg-white/5 rounded-lg transition-colors"
                 >
-                  <span className="text-[10px] font-semibold text-[#6B7280] uppercase tracking-wider group-hover:text-[#AEBAC7] transition-colors">
+                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider group-hover:text-gray-300 transition-colors">
                     {groupName}
                   </span>
                   {isExpanded ? (
-                    <ChevronDown className="w-3 h-3 text-[#6B7280] group-hover:text-[#AEBAC7] transition-colors" />
+                    <ChevronDown className="w-4 h-4 text-gray-400 group-hover:text-gray-300 transition-colors" />
                   ) : (
-                    <ChevronRight className="w-3 h-3 text-[#6B7280] group-hover:text-[#AEBAC7] transition-colors" />
+                    <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-300 transition-colors" />
                   )}
                 </button>
               )}
@@ -712,7 +712,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.2 }}
-                    className="space-y-0.5 overflow-hidden"
+                    className="space-y-1 overflow-hidden"
                   >
                     {items.map((item) => {
                       const isActive =
@@ -722,20 +722,20 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
                         <button
                           key={item.href}
                           onClick={() => handleNavigation(item.href)}
-                          className={`w-full group relative flex items-center ${collapsed ? 'justify-center px-2' : 'space-x-2.5 px-2.5'} py-2 rounded-lg transition-all duration-200 ${
+                          className={`w-full group relative flex items-center ${collapsed ? 'justify-center px-2' : 'space-x-3 px-3'} py-2 rounded-lg transition-all duration-200 ${
                             isActive
-                              ? 'bg-[#1A2332] text-[#E6EDF3]'
-                              : 'text-[#AEBAC7] hover:text-[#E6EDF3] hover:bg-[#141A22]'
+                              ? 'admin-glass text-white'
+                              : 'text-gray-300 hover:text-white hover:bg-white/5'
                           }`}
                           title={collapsed ? item.label : undefined}
                         >
                           {isActive && !collapsed && (
-                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-6 bg-[#2F6FED] rounded-r-full" />
+                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-500 rounded-r-full" />
                           )}
-                          <span className={`relative flex-shrink-0 ${isActive ? 'text-[#2F6FED]' : ''} transition-colors`}>
+                          <span className={`relative flex-shrink-0 ${isActive ? 'text-blue-400' : 'text-gray-400'} transition-colors`}>
                             {item.icon}
                             {item.badge !== undefined && item.badge > 0 && (
-                              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border border-[#0B0F13]">
+                              <span className="admin-badge admin-badge-error absolute -top-1 -right-1 text-[9px] px-1 py-0.5">
                                 {item.badge > 9 ? '9+' : item.badge}
                               </span>
                             )}
@@ -744,7 +744,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
                             <>
                               <span className="font-medium text-sm flex-1 text-left">{item.label}</span>
                               {item.shortcut && (
-                                <kbd className="px-1 py-0.5 text-[10px] font-semibold text-[#6B7280] bg-[#141A22] border border-[#2A3440] rounded">
+                                <kbd className="px-1.5 py-0.5 text-xs font-semibold text-gray-400 bg-white/5 border border-white/10 rounded">
                                   {item.shortcut}
                                 </kbd>
                               )}
@@ -796,16 +796,16 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         </div>
       )}
 
-      {/* User Profile & Actions */}
-      <div className={`px-3 py-2 border-t border-[#2A3440] space-y-2 ${collapsed ? 'px-2' : ''}`}>
-        {/* Collapse button - more compact */}
+      {/* User Profile & Actions - Redesigned */}
+      <div className={`px-4 py-4 border-t border-white/8 space-y-3 ${collapsed ? 'px-3' : ''}`}>
+        {/* Collapse button */}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className={`w-full flex items-center ${collapsed ? 'justify-center px-2' : 'justify-end px-2'} py-1.5 rounded text-[#6B7280] hover:text-[#AEBAC7] hover:bg-[#141A22] transition-all duration-200`}
+          className={`w-full flex items-center ${collapsed ? 'justify-center px-2' : 'justify-end px-3'} py-2 rounded-lg text-gray-400 hover:text-gray-300 hover:bg-white/5 transition-all duration-200`}
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           <svg
-            className={`w-4 h-4 transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`}
+            className={`w-5 h-5 transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -814,34 +814,34 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
           </svg>
         </button>
 
-        {/* Compact User Profile */}
-        <div className={`${collapsed ? 'px-2' : 'px-2'} py-2 rounded-lg bg-[#141A22] border border-[#2A3440]`}>
-          <div className={`flex items-center ${collapsed ? 'justify-center' : 'space-x-2'}`}>
+        {/* User Profile */}
+        <div className="admin-glass p-3 rounded-lg">
+          <div className={`flex items-center ${collapsed ? 'justify-center' : 'space-x-3'}`}>
             <div className="relative">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#2F6FED] to-[#7B61FF] flex items-center justify-center text-white font-semibold text-xs shadow-lg">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm shadow-lg">
                 {adminInitials}
               </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-500 border border-[#141A22] rounded-full"></div>
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-gray-900 rounded-full"></div>
             </div>
             {!collapsed && (
               <div className="flex-1 min-w-0">
-                <div className="text-[#E6EDF3] font-medium text-xs truncate">{adminName}</div>
-                <div className="text-[#6B7280] text-[10px] truncate">{adminEmail}</div>
+                <div className="text-white font-medium text-sm truncate">{adminName}</div>
+                <div className="text-gray-400 text-xs truncate">{adminEmail}</div>
               </div>
             )}
           </div>
         </div>
 
-        {/* Compact Logout */}
+        {/* Logout */}
         <button
           onClick={handleLogout}
-          className={`w-full flex items-center ${collapsed ? 'justify-center px-2' : 'space-x-2 px-2'} py-1.5 rounded text-red-400/70 hover:text-red-300 hover:bg-red-500/10 transition-all duration-200`}
+          className={`w-full flex items-center ${collapsed ? 'justify-center px-2' : 'space-x-3 px-3'} py-2.5 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-all duration-200`}
           title={collapsed ? 'Logout' : undefined}
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
-          {!collapsed && <span className="font-medium text-xs">Logout</span>}
+          {!collapsed && <span className="font-medium text-sm">Logout</span>}
         </button>
       </div>
     </>
@@ -868,14 +868,14 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
       <aside
         className={`
           fixed md:sticky top-0 left-0 h-screen z-40
-          bg-[#0B0F13] border-r border-[#2A3440]
+          bg-gray-950 border-r border-white/10
           flex flex-col
           transition-all duration-300 ease-in-out
-          ${collapsed ? 'w-20' : 'w-72'}
+          ${collapsed ? 'w-20' : 'w-80'}
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
         `}
         style={{
-          background: 'linear-gradient(180deg, #0B0F13 0%, #12171D 100%)',
+          background: 'linear-gradient(180deg, rgb(17 24 39) 0%, rgb(31 41 55) 100%)',
           boxShadow: '0 0 40px rgba(0, 0, 0, 0.5)',
         }}
       >

@@ -556,23 +556,23 @@ export default function AdminPlayers() {
   }
 
   return (
-    <div className="flex min-h-screen bg-ipl-dark">
+    <div className="flex min-h-screen bg-gray-950">
       <AdminSidebar currentPage="/ipl-admin-2026/players" />
-      
+
       <div className="flex-1">
         <div className="p-8">
           {/* Header */}
           <div className="mb-8">
             <div className="flex justify-between items-start mb-6">
               <div>
-                <h1 className="text-4xl font-bold text-white mb-2">
+                <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent mb-2">
                   Player Management
                 </h1>
-                <p className="text-gray-400">Track and manage all IPL players</p>
+                <p className="text-gray-400 text-lg">Track and manage all IPL players</p>
               </div>
-              <button 
+              <button
                 onClick={handleAddPlayer}
-                className="ipl-button flex items-center gap-2 shadow-lg hover:shadow-xl"
+                className="admin-btn-primary flex items-center gap-2"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -584,7 +584,7 @@ export default function AdminPlayers() {
             {/* Statistics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
               {/* Total Players */}
-              <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-slate-600/50 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
+              <div className="admin-card group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
                     <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -598,17 +598,14 @@ export default function AdminPlayers() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-300 font-medium">All squads combined</span>
-                  <div className="flex items-center text-xs text-blue-400 font-semibold bg-blue-500/10 px-2 py-1 rounded-full">
-                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M12 7a1 1 0 110-2h.01a1 1 0 110 2H12zm-2 2a1 1 0 100-2 1 1 0 000 2zm4 0a1 1 0 100-2 1 1 0 000 2zm2-4a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-                    </svg>
+                  <div className="admin-badge-success">
                     Active
                   </div>
                 </div>
               </div>
 
               {/* Batsmen */}
-              <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-emerald-500/50 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
+              <div className="admin-card group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
                     <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -622,17 +619,14 @@ export default function AdminPlayers() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-300 font-medium">Run scorers</span>
-                  <div className="flex items-center text-xs text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-1 rounded-full">
-                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
+                  <div className="admin-badge-neutral">
                     {stats.total > 0 ? ((stats.batsmen / stats.total) * 100).toFixed(0) : 0}%
                   </div>
                 </div>
               </div>
 
               {/* Bowlers */}
-              <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-blue-500/50 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
+              <div className="admin-card group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
                     <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -646,17 +640,14 @@ export default function AdminPlayers() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-300 font-medium">Wicket takers</span>
-                  <div className="flex items-center text-xs text-blue-400 font-semibold bg-blue-500/10 px-2 py-1 rounded-full">
-                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
+                  <div className="admin-badge-neutral">
                     {stats.total > 0 ? ((stats.bowlers / stats.total) * 100).toFixed(0) : 0}%
                   </div>
                 </div>
               </div>
 
               {/* All-rounders */}
-              <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-purple-500/50 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
+              <div className="admin-card group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
                     <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -670,17 +661,14 @@ export default function AdminPlayers() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-300 font-medium">Versatile players</span>
-                  <div className="flex items-center text-xs text-purple-400 font-semibold bg-purple-500/10 px-2 py-1 rounded-full">
-                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
+                  <div className="admin-badge-neutral">
                     {stats.total > 0 ? ((stats.allRounders / stats.total) * 100).toFixed(0) : 0}%
                   </div>
                 </div>
               </div>
 
               {/* Wicket-keepers */}
-              <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-orange-500/50 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
+              <div className="admin-card group">
                 <div className="flex items-center justify-between mb-4">
                   <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg">
                     <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -694,10 +682,7 @@ export default function AdminPlayers() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-300 font-medium">Behind the stumps</span>
-                  <div className="flex items-center text-xs text-orange-400 font-semibold bg-orange-500/10 px-2 py-1 rounded-full">
-                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
+                  <div className="admin-badge-neutral">
                     {stats.total > 0 ? ((stats.wicketkeepers / stats.total) * 100).toFixed(0) : 0}%
                   </div>
                 </div>

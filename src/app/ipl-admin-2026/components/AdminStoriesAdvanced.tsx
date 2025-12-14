@@ -2,13 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
+import {
   Brain, Sparkles, TrendingUp, AlertTriangle, Calendar, Settings,
   Activity, Zap, Target, BarChart3, Users, RefreshCw, Plus,
   Edit, Save, X, ChevronRight, ChevronDown, Filter, Search,
   Eye, Heart, MessageSquare, Share2, Clock, FileText, Hash,
   Database, Globe, Shield, CheckCircle, XCircle, AlertCircle,
-  TrendingUp as TrendingIcon, Download, Upload, Play, Pause, PenTool
+  TrendingUp as TrendingIcon, Download, Upload, Play, Pause, PenTool,
+  Bot, ArrowUp, Grid, List, User, Star
 } from 'lucide-react';
 
 // Add global styles to disable scrolling
@@ -1522,6 +1523,8 @@ As we look to the future of cricket, ${aiGenerator.prompt} will likely continue 
         )}
       </div>
 
+      </div>
+
       {/* Story Detail Modal */}
       <AnimatePresence>
         {selectedStory && (
@@ -1563,7 +1566,7 @@ As we look to the future of cricket, ${aiGenerator.prompt} will likely continue 
                     {selectedStory.readingTime} min read
                   </span>
                 </div>
-                
+
                 {/* Story Content */}
                 <div className="prose prose-invert max-w-none">
                   <p className="text-gray-200 leading-relaxed whitespace-pre-wrap">
@@ -1643,7 +1646,6 @@ As we look to the future of cricket, ${aiGenerator.prompt} will likely continue 
             </motion.div>
           </motion.div>
         )}
-      </div>
       </AnimatePresence>
     </div>
   );

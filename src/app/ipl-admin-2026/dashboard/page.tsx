@@ -242,11 +242,16 @@ export default function AdminDashboard() {
 
   if (!isAuthenticated || isLoading) {
     return (
-      <div className="flex min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+      <div className="flex min-h-screen bg-gray-950">
         <div className="flex-1 flex items-center justify-center">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
-            <p className="text-gray-400 text-lg">Loading Dashboard...</p>
+          <div className="flex flex-col items-center gap-6">
+            <div className="admin-glass p-8 rounded-2xl">
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
+                <p className="text-white text-lg font-medium">Loading Dashboard...</p>
+                <p className="text-gray-400 text-sm">Fetching your analytics data</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -352,24 +357,24 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+    <div className="flex min-h-screen bg-gray-950">
       <AdminSidebar currentPage="/ipl-admin-2026/dashboard" />
 
       <main className="flex-1 overflow-auto">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          {/* Header */}
-          <div className="mb-10">
+        <div className="max-w-7xl mx-auto px-8 py-8">
+          {/* Header - Redesigned */}
+          <div className="mb-12">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-              <div className="space-y-2">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                    <BarChart3 className="w-5 h-5 text-white" />
+              <div className="space-y-3">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                    <BarChart3 className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h1 className="text-3xl lg:text-4xl font-bold text-white">
+                    <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
                       Dashboard Overview
                     </h1>
-                    <p className="text-gray-400 text-base lg:text-lg">
+                    <p className="text-gray-400 text-lg lg:text-xl">
                       Monitor your {currentLeague.toUpperCase()} platform performance
                     </p>
                   </div>
@@ -377,22 +382,22 @@ export default function AdminDashboard() {
               </div>
 
               <div className="flex items-center gap-4">
-                {/* System Status */}
-                <div className="flex items-center gap-3 px-4 py-3 bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-xl">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-2.5 h-2.5 rounded-full ${
+                {/* System Status - Redesigned */}
+                <div className="admin-glass px-4 py-3 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-3 h-3 rounded-full ${
                       apiStatus.users === 'ok' && apiStatus.messages === 'ok' && apiStatus.matches === 'ok'
-                        ? 'bg-emerald-500 animate-pulse'
+                        ? 'bg-green-500 animate-pulse'
                         : apiStatus.users === 'error' || apiStatus.messages === 'error' || apiStatus.matches === 'error'
                         ? 'bg-red-500'
-                        : 'bg-amber-500'
+                        : 'bg-yellow-500'
                     }`}></div>
                     <span className={`text-sm font-medium ${
                       apiStatus.users === 'ok' && apiStatus.messages === 'ok' && apiStatus.matches === 'ok'
-                        ? 'text-emerald-400'
+                        ? 'text-green-400'
                         : apiStatus.users === 'error' || apiStatus.messages === 'error' || apiStatus.matches === 'error'
                         ? 'text-red-400'
-                        : 'text-amber-400'
+                        : 'text-yellow-400'
                     }`}>
                       {apiStatus.users === 'ok' && apiStatus.messages === 'ok' && apiStatus.matches === 'ok'
                         ? 'All Systems Operational'
@@ -403,22 +408,24 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                {/* Date & Time */}
-                <div className="flex items-center gap-3 px-4 py-3 bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 rounded-xl">
-                  <Clock className="w-5 h-5 text-gray-400" />
-                  <div className="text-left">
-                    <div className="text-white text-sm font-medium">
-                      {new Date().toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric'
-                      })}
-                    </div>
-                    <div className="text-gray-400 text-xs">
-                      {new Date().toLocaleTimeString('en-US', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
+                {/* Date & Time - Redesigned */}
+                <div className="admin-glass px-4 py-3 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <Clock className="w-5 h-5 text-gray-400" />
+                    <div className="text-left">
+                      <div className="text-white text-sm font-medium">
+                        {new Date().toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </div>
+                      <div className="text-gray-400 text-xs">
+                        {new Date().toLocaleTimeString('en-US', {
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -426,27 +433,27 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          {/* Stats Grid - Redesigned */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
             {statCards.map((card, index) => (
               <div
                 key={index}
-                className={`group relative bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border ${card.borderColor} hover:border-white/30 transition-all duration-300 overflow-hidden ${card.glowColor} hover:shadow-2xl`}
+                className={`admin-card group relative overflow-hidden hover:scale-[1.02] transition-all duration-300 ${card.glowColor} hover:shadow-2xl`}
               >
                 {/* Background gradient */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${card.bgGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl`}></div>
+                <div className={`absolute inset-0 bg-gradient-to-br ${card.bgGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl`}></div>
 
-                <div className="relative z-10">
+                <div className="relative z-10 p-6">
                   {/* Icon */}
                   <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${card.gradient} mb-4 shadow-lg`}>
                     <card.icon className="w-6 h-6 text-white" />
                   </div>
 
                   {/* Value */}
-                  <div className="mb-3">
+                  <div className="mb-4">
                     <h3 className="text-3xl font-bold text-white mb-1">
                       {isLoading ? (
-                        <div className="w-20 h-8 bg-slate-700/50 rounded animate-pulse"></div>
+                        <div className="w-20 h-8 bg-gray-700/50 rounded animate-pulse"></div>
                       ) : (
                         card.value
                       )}
@@ -460,13 +467,13 @@ export default function AdminDashboard() {
                   <div className="flex items-center justify-between">
                     <p className="text-gray-300 text-sm font-medium">{card.title}</p>
                     {card.trend === 'up' && (
-                      <div className="flex items-center gap-1 text-emerald-400 text-xs font-semibold bg-emerald-500/10 px-2 py-1 rounded-full">
-                        <ArrowUpRight className="w-3 h-3" />
+                      <div className="admin-badge admin-badge-success text-xs px-2 py-1">
+                        <ArrowUpRight className="w-3 h-3 mr-1" />
                         {card.change}
                       </div>
                     )}
                     {card.trend === 'neutral' && (
-                      <div className="text-gray-400 text-xs font-semibold bg-gray-500/10 px-2 py-1 rounded-full">
+                      <div className="admin-badge admin-badge-neutral text-xs px-2 py-1">
                         {card.change}
                       </div>
                     )}
@@ -474,17 +481,17 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Accent line */}
-                <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${card.gradient} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 rounded-b-2xl`}></div>
+                <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${card.gradient} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 rounded-b-xl`}></div>
               </div>
             ))}
           </div>
 
-          {/* Quick Actions */}
-          <div className="mb-10">
-            <div className="flex items-center justify-between mb-6">
+          {/* Quick Actions - Redesigned */}
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-8">
               <h2 className="text-2xl font-bold text-white">Quick Actions</h2>
               <div className="flex items-center gap-2 text-sm text-gray-400">
-                <Zap className="w-4 h-4" />
+                <Zap className="w-5 h-5" />
                 <span>Frequently used</span>
               </div>
             </div>
@@ -494,12 +501,12 @@ export default function AdminDashboard() {
                 <button
                   key={index}
                   onClick={() => router.push(action.path)}
-                  className={`group relative ${action.bgColor} backdrop-blur-xl rounded-2xl p-6 border ${action.borderColor} ${action.hoverColor} hover:shadow-2xl transition-all duration-300 text-left overflow-hidden hover:scale-[1.02]`}
+                  className={`admin-card group relative overflow-hidden hover:scale-[1.02] transition-all duration-300 text-left cursor-pointer`}
                 >
                   {/* Background gradient */}
-                  <div className={`absolute inset-0 bg-gradient-to-br ${action.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl`}></div>
+                  <div className={`absolute inset-0 bg-gradient-to-br ${action.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl`}></div>
 
-                  <div className="relative z-10">
+                  <div className="relative z-10 p-6">
                     <action.icon className="w-8 h-8 text-white mb-4 group-hover:scale-110 transition-transform duration-300" />
                     <h3 className="text-white font-semibold mb-2 group-hover:text-white transition-colors">
                       {action.title}
@@ -516,8 +523,8 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Message Activity Chart */}
-          <div className="mb-10 bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-slate-600/50 transition-all duration-300">
+          {/* Message Activity Chart - Redesigned */}
+          <div className="mb-12 admin-card">
             <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center">
@@ -529,7 +536,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
               <div className="flex items-center gap-4">
-                <div className="text-center p-3 bg-slate-800/50 rounded-xl border border-slate-600/30">
+                <div className="admin-glass p-3 rounded-xl text-center">
                   <p className="text-xs text-gray-400 mb-1">Peak Hour</p>
                   <p className="text-lg font-bold text-white">
                     {hourlyMessages.length > 0
@@ -537,7 +544,7 @@ export default function AdminDashboard() {
                       : '--'}
                   </p>
                 </div>
-                <div className="text-center p-3 bg-slate-800/50 rounded-xl border border-slate-600/30">
+                <div className="admin-glass p-3 rounded-xl text-center">
                   <p className="text-xs text-gray-400 mb-1">Avg/Hour</p>
                   <p className="text-lg font-bold text-purple-400">{stats.messagesPerHour}</p>
                 </div>
@@ -605,10 +612,10 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Analytics Grid */}
+          {/* Analytics Grid - Redesigned */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Platform Overview */}
-            <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-slate-600/50 transition-all duration-300">
+            <div className="admin-card">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
@@ -620,43 +627,49 @@ export default function AdminDashboard() {
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-5 bg-gradient-to-r from-slate-800/50 to-slate-700/30 rounded-xl border border-slate-600/30 hover:border-slate-500/40 transition-all duration-300">
-                  <div>
-                    <p className="text-gray-400 text-sm mb-2">Total Matches</p>
-                    <p className="text-3xl font-bold text-white">{stats.totalMatches}</p>
-                    <p className="text-xs text-gray-500 mt-1">Scheduled fixtures</p>
-                  </div>
-                  <div className="p-3 bg-blue-500/10 rounded-xl border border-blue-500/20">
-                    <Calendar className="w-6 h-6 text-blue-400" />
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between p-5 bg-gradient-to-r from-slate-800/50 to-slate-700/30 rounded-xl border border-slate-600/30 hover:border-slate-500/40 transition-all duration-300">
-                  <div>
-                    <p className="text-gray-400 text-sm mb-2">Chat Messages</p>
-                    <p className="text-3xl font-bold text-white">{stats.totalMessages}</p>
-                    <p className="text-xs text-gray-500 mt-1">Total conversations</p>
-                  </div>
-                  <div className="p-3 bg-purple-500/10 rounded-xl border border-purple-500/20">
-                    <MessageSquare className="w-6 h-6 text-purple-400" />
+                <div className="admin-glass p-5 rounded-xl hover:bg-white/8 transition-all duration-300">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-400 text-sm mb-2">Total Matches</p>
+                      <p className="text-3xl font-bold text-white">{stats.totalMatches}</p>
+                      <p className="text-xs text-gray-500 mt-1">Scheduled fixtures</p>
+                    </div>
+                    <div className="p-3 bg-blue-500/10 rounded-xl border border-blue-500/20">
+                      <Calendar className="w-6 h-6 text-blue-400" />
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between p-5 bg-gradient-to-r from-slate-800/50 to-slate-700/30 rounded-xl border border-slate-600/30 hover:border-slate-500/40 transition-all duration-300">
-                  <div>
-                    <p className="text-gray-400 text-sm mb-2">Page Views</p>
-                    <p className="text-3xl font-bold text-white">{stats.pageViews.toLocaleString()}</p>
-                    <p className="text-xs text-gray-500 mt-1">Total visits</p>
+                <div className="admin-glass p-5 rounded-xl hover:bg-white/8 transition-all duration-300">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-400 text-sm mb-2">Chat Messages</p>
+                      <p className="text-3xl font-bold text-white">{stats.totalMessages}</p>
+                      <p className="text-xs text-gray-500 mt-1">Total conversations</p>
+                    </div>
+                    <div className="p-3 bg-purple-500/10 rounded-xl border border-purple-500/20">
+                      <MessageSquare className="w-6 h-6 text-purple-400" />
+                    </div>
                   </div>
-                  <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-                    <Eye className="w-6 h-6 text-emerald-400" />
+                </div>
+
+                <div className="admin-glass p-5 rounded-xl hover:bg-white/8 transition-all duration-300">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-400 text-sm mb-2">Page Views</p>
+                      <p className="text-3xl font-bold text-white">{stats.pageViews.toLocaleString()}</p>
+                      <p className="text-xs text-gray-500 mt-1">Total visits</p>
+                    </div>
+                    <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                      <Eye className="w-6 h-6 text-emerald-400" />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* User Activity & Engagement by Time of Day */}
-            <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-slate-600/50 transition-all duration-300">
+            <div className="admin-card">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">

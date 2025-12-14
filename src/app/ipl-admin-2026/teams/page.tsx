@@ -447,38 +447,38 @@ export default function AdminTeams() {
     }
 
     return (
-        <div className="flex min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
+        <div className="flex min-h-screen bg-gray-950">
             <AuroraBackground />
             <AdminSidebar currentPage="/ipl-admin-2026/teams" />
 
             <div className="flex-1 relative z-10">
-                <div className="p-6 lg:p-8">
+                <div className="p-8">
                     {success && (
-                        <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 backdrop-blur-sm">
+                        <div className="admin-glass mb-6 p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-emerald-400">
                             {success}
                         </div>
                     )}
 
                     {error && (
-                        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 backdrop-blur-sm">
+                        <div className="admin-glass mb-6 p-4 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400">
                             {error}
                         </div>
                     )}
 
-                    <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 mb-8">
+                    <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-6 mb-8">
                         <div>
-                            <h1 className="text-3xl lg:text-4xl font-bold text-white mb-2">
+                            <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent mb-2">
                                 Teams
                             </h1>
-                            <p className="text-gray-400">
+                            <p className="text-gray-400 text-lg">
                                 Manage {currentLeague === 'wpl' ? 'WPL' : 'IPL'} 2026 teams
                             </p>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-4">
                             {currentLeague === 'wpl' && teams.filter(t => t.league === 'wpl').length === 0 && (
                                 <button
                                     onClick={handleAddAllWPLTeams}
-                                    className="group relative px-5 py-3 bg-gradient-to-r from-purple-600 via-pink-500 to-rose-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2"
+                                    className="admin-btn-primary flex items-center gap-2"
                                     disabled={isSubmitting}
                                     title="Add all 5 WPL teams at once"
                                 >
@@ -491,7 +491,7 @@ export default function AdminTeams() {
                             {currentLeague === 'wpl' && teams.filter(t => t.league === 'wpl').length > 0 && (
                                 <button
                                     onClick={handleUpdateWPLTeams}
-                                    className="group relative px-5 py-3 bg-gradient-to-r from-indigo-600 via-purple-500 to-pink-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2"
+                                    className="admin-btn-secondary flex items-center gap-2"
                                     disabled={isSubmitting}
                                     title="Update existing WPL teams with logos, colors, and descriptions"
                                 >
@@ -503,7 +503,7 @@ export default function AdminTeams() {
                             )}
                         <button
                             onClick={handleAddTeam}
-                            className="group relative px-6 py-3 bg-gradient-to-r from-purple-600 via-purple-500 to-pink-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 flex items-center justify-center gap-2"
+                            className="admin-btn-primary flex items-center gap-2"
                             disabled={isSubmitting}
                         >
                             <PlusIcon className="w-5 h-5" />
@@ -513,7 +513,7 @@ export default function AdminTeams() {
                     </div>
 
                     {selectedTeams.size > 0 && (
-                        <div className="mb-8 p-5 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-xl backdrop-blur-sm flex items-center justify-between shadow-lg">
+                        <div className="admin-glass mb-8 p-5 rounded-xl border border-blue-500/20 bg-blue-500/5 flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
                                     <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -525,15 +525,15 @@ export default function AdminTeams() {
                             <button
                                 onClick={handleBulkDelete}
                                 disabled={isSubmitting}
-                                className="px-5 py-2.5 bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 rounded-lg text-red-400 hover:text-red-300 transition-all duration-200 disabled:opacity-50 hover:shadow-lg font-medium"
+                                className="admin-btn-ghost text-red-400 hover:text-red-300 hover:bg-red-500/10 disabled:opacity-50"
                             >
                                 Delete Selected
                             </button>
                         </div>
                     )}
 
-                    <div className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl border border-slate-700/50 rounded-2xl overflow-hidden shadow-2xl">
-                        <div className="p-6 border-b border-slate-700/50 bg-gradient-to-r from-slate-800/50 to-slate-700/30">
+                    <div className="admin-card overflow-hidden">
+                        <div className="p-6 border-b border-white/8">
                             <div className="relative">
                                 <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                                 <input
@@ -541,7 +541,7 @@ export default function AdminTeams() {
                                     placeholder="Search teams by name..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full pl-12 pr-4 py-3 bg-slate-800/40 border border-slate-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all duration-300"
+                                    className="admin-input w-full pl-12 pr-4 py-3"
                                 />
                             </div>
                         </div>
@@ -550,11 +550,11 @@ export default function AdminTeams() {
                             <div className="p-12">
                                 <div className="space-y-4">
                                     {[...Array(5)].map((_, i) => (
-                                        <div key={i} className="animate-pulse flex items-center gap-4 p-5 bg-gradient-to-r from-slate-800/50 to-slate-700/30 rounded-xl border border-slate-600/30">
-                                            <div className="w-12 h-12 bg-slate-600/50 rounded-lg" />
+                                        <div key={i} className="animate-pulse flex items-center gap-4 p-5 admin-glass rounded-xl">
+                                            <div className="w-12 h-12 bg-gray-700/50 rounded-lg" />
                                             <div className="flex-1 space-y-2">
-                                                <div className="h-5 bg-slate-600/50 rounded w-1/4" />
-                                                <div className="h-4 bg-slate-600/50 rounded w-1/6" />
+                                                <div className="h-5 bg-gray-700/50 rounded w-1/4" />
+                                                <div className="h-4 bg-gray-700/50 rounded w-1/6" />
                                             </div>
                                         </div>
                                     ))}
@@ -576,7 +576,7 @@ export default function AdminTeams() {
                                 {!searchQuery && (
                                     <button
                                         onClick={handleAddTeam}
-                                        className="px-8 py-4 bg-gradient-to-r from-purple-600 via-purple-500 to-pink-500 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                                        className="admin-btn-primary flex items-center gap-2"
                                     >
                                         <PlusIcon className="w-5 h-5" />
                                         Add Your First Team
@@ -587,7 +587,7 @@ export default function AdminTeams() {
                             <>
                                 <div className="hidden lg:block overflow-x-auto">
                                     <table className="w-full">
-                                        <thead className="bg-gradient-to-r from-slate-800/60 to-slate-700/40 sticky top-0 z-10 backdrop-blur-xl border-b border-slate-600/50">
+                                        <thead className="admin-glass sticky top-0 z-10 border-b border-white/8">
                                             <tr>
                                                 <th className="px-6 py-5 text-left">
                                                     <div className="flex items-center gap-3">
@@ -595,7 +595,7 @@ export default function AdminTeams() {
                                                             type="checkbox"
                                                             checked={selectedTeams.size === filteredAndSortedTeams.length && filteredAndSortedTeams.length > 0}
                                                             onChange={toggleSelectAll}
-                                                            className="w-4 h-4 rounded border-slate-500/50 bg-slate-700/50 text-blue-500 focus:ring-blue-500/20 focus:ring-offset-0"
+                                                            className="w-4 h-4 rounded border-white/20 bg-white/5 text-blue-500 focus:ring-blue-500/20 focus:ring-offset-0"
                                                         />
                                                         <span className="text-xs font-semibold text-gray-300 uppercase tracking-wider">Select</span>
                                                     </div>
@@ -633,11 +633,11 @@ export default function AdminTeams() {
                                                 </th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-slate-700/30">
+                                        <tbody className="divide-y divide-white/5">
                                             {filteredAndSortedTeams.map((team) => (
                                                 <tr
                                                     key={team.id}
-                                                    className="hover:bg-gradient-to-r hover:from-slate-800/50 hover:to-slate-700/30 transition-all duration-300 group border-b border-slate-700/20"
+                                                    className="hover:bg-white/5 transition-all duration-300 group"
                                                 >
                                                     <td className="px-6 py-5">
                                                         <input
@@ -783,9 +783,9 @@ export default function AdminTeams() {
                                     </table>
                                 </div>
 
-                                <div className="lg:hidden divide-y divide-slate-700/30">
+                                <div className="lg:hidden divide-y divide-white/5">
                                     {filteredAndSortedTeams.map((team) => (
-                                        <div key={team.id} className="p-5 hover:bg-gradient-to-r hover:from-slate-800/50 hover:to-slate-700/30 transition-all duration-300 border-b border-slate-700/20">
+                                        <div key={team.id} className="p-5 hover:bg-white/5 transition-all duration-300">
                                             <div className="flex items-start gap-4 mb-4">
                                                 <input
                                                     type="checkbox"
@@ -933,8 +933,8 @@ export default function AdminTeams() {
 
                     <div className="absolute inset-y-0 right-0 max-w-full flex">
                         <div className="w-screen max-w-md transform transition-all duration-300 ease-out">
-                            <div className="h-full flex flex-col bg-gradient-to-br from-gray-900 via-gray-900 to-gray-950 border-l border-white/10 shadow-2xl">
-                                <div className="px-6 py-6 border-b border-white/10 bg-white/5">
+                            <div className="h-full flex flex-col bg-gray-950 border-l border-white/10 shadow-2xl">
+                                <div className="px-6 py-6 border-b border-white/8 admin-glass">
                                     <div className="flex items-center justify-between">
                                         <h2 className="text-2xl font-bold text-white">
                                             {editingTeam ? 'Edit Team' : 'Add Team'}
@@ -958,7 +958,7 @@ export default function AdminTeams() {
                                                 type="text"
                                                 value={formData.name}
                                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all"
+                                                className="admin-input w-full"
                                                 placeholder="Royal Challengers Bengaluru"
                                                 required
                                             />
@@ -1188,18 +1188,18 @@ export default function AdminTeams() {
                                     </form>
                                 </div>
 
-                                <div className="px-6 py-6 border-t border-white/10 bg-white/5 flex gap-3">
+                                <div className="px-6 py-6 border-t border-white/8 admin-glass flex gap-3">
                                     <button
                                         onClick={() => setShowSlideOver(false)}
                                         type="button"
-                                        className="flex-1 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold rounded-xl transition-all duration-200"
+                                        className="admin-btn-ghost flex-1"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         onClick={handleSubmit}
                                         disabled={isSubmitting}
-                                        className="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-purple-500/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="admin-btn-primary flex-1"
                                     >
                                         {isSubmitting ? 'Saving...' : (editingTeam ? 'Update' : 'Create')}
                                     </button>
