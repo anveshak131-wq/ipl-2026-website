@@ -844,11 +844,8 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
           {!collapsed && <span className="font-medium text-sm">Logout</span>}
         </button>
       </div>
-    </>
-  );
 
-  return (
-    <>
+      {/* Mobile menu button - only visible on mobile */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
         className="md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-[#12171D] border border-[#2A3440] text-[#E6EDF3] hover:bg-[#1A2332] transition-colors"
@@ -858,21 +855,24 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         </svg>
       </button>
 
+      {/* Mobile overlay - only visible on mobile when open */}
       {mobileOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+          className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
+      {/* Desktop sidebar - always visible on desktop, hidden on mobile by default */}
       <aside
         className={`
-          fixed md:sticky top-0 left-0 h-screen z-40
+          ${mobileOpen ? 'fixed' : 'fixed md:sticky'} top-0 left-0 h-screen
+          ${mobileOpen ? 'z-50' : 'z-40 md:z-40'}
           bg-gray-950 border-r border-white/10
           flex flex-col
           transition-all duration-300 ease-in-out
           ${collapsed ? 'w-20' : 'w-80'}
-          ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0
+          ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
         `}
         style={{
           background: 'linear-gradient(180deg, rgb(17 24 39) 0%, rgb(31 41 55) 100%)',
