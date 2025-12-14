@@ -872,7 +872,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
           flex flex-col
           transition-all duration-300 ease-in-out
           ${collapsed ? 'w-20' : 'w-80'}
-          ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+          ${mobileOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0
         `}
         style={{
           background: 'linear-gradient(180deg, rgb(17 24 39) 0%, rgb(31 41 55) 100%)',
