@@ -899,6 +899,5 @@ export default function AdminMatchdayAdvanced() {
         )}
       </AnimatePresence>
     </div>
-  </div>
   );
 }
