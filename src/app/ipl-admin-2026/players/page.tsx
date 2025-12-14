@@ -704,7 +704,7 @@ export default function AdminPlayers() {
                   placeholder="Search by player name, nationality..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg pl-12 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold/50 focus:ring-2 focus:ring-ipl-gold/20 transition-all duration-300"
+                  className="admin-input w-full pl-12 pr-4 py-3"
                 />
               </div>
 
@@ -848,7 +848,7 @@ export default function AdminPlayers() {
           </div>
 
           {/* Players Table */}
-          <div className="glass-effect rounded-xl overflow-hidden">
+          <div className="admin-card overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-white/5">
@@ -1076,7 +1076,7 @@ export default function AdminPlayers() {
           </div>
 
           {/* Summary Footer */}
-          <div className="mt-6 glass-effect rounded-xl p-4 border border-white/10 flex justify-between items-center">
+          <div className="mt-6 admin-glass rounded-xl p-4 flex justify-between items-center">
             <div className="text-sm text-gray-400">
               <span className="font-semibold text-white">{stats.total}</span> total players in <span className="font-semibold text-white">{teams.length}</span> teams
             </div>
@@ -1140,7 +1140,7 @@ export default function AdminPlayers() {
                           type="text"
                           value={formData.name}
                           onChange={(e) => setFormData({...formData, name: e.target.value})}
-                          className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                          className="admin-input w-full"
                           placeholder="Enter player name"
                           required
                         />
@@ -1153,7 +1153,7 @@ export default function AdminPlayers() {
                         <select
                           value={formData.role}
                           onChange={(e) => setFormData({...formData, role: e.target.value as any})}
-                          className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-ipl-gold"
+                          className="admin-input w-full"
                         >
                           <option value="Batsman">Batsman</option>
                           <option value="Bowler">Bowler</option>
