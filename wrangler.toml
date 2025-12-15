@@ -23,6 +23,11 @@ binding = "IPL_CACHE"
 id = "local-ipl-cache"
 preview_id = "local-ipl-cache-preview"
 
+[[kv_namespaces]]
+binding = "WEATHER_CACHE"
+id = "local-weather-cache"
+preview_id = "local-weather-cache-preview"
+
 # Environment configuration for email service
 [env.production]
 vars = { ENVIRONMENT = "production" }
@@ -34,14 +39,14 @@ cron = "*/5 * * * *"  # Run every 5 minutes
 path = "/api/admin/match-reminders"
 
 # Scheduled event for weather updates
-# This cron job runs twice daily at 6 AM and 6 PM UTC to update weather for all grounds
+# This cron job runs twice daily at 6 AM and 6 PM UTC to update weather for WPL stadiums
 [[triggers.crons]]
 cron = "0 6 * * *"  # Run daily at 6 AM UTC
-path = "/weather-scheduler"
+path = "/cron/weather-update"
 
 [[triggers.crons]]
 cron = "0 18 * * *"  # Run daily at 6 PM UTC
-path = "/weather-scheduler"
+path = "/cron/weather-update"
 
 # Email service environment variables
 # Uncomment and set your email service credentials:

@@ -148,6 +148,22 @@ export default function AdminMatchdayAdvanced() {
     };
   }, []);
 
+  const loadWeatherData = async (venueId: string) => {
+    try {
+      const response = await fetch(`/api/weather/${venueId}`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch weather data: ${response.status}`);
+      }
+      
+      const weatherData = await response.json();
+      return weatherData;
+    } catch (error) {
+      console.error('Error fetching weather data:', error);
+      return null;
+    }
+  };
+
   const loadInitialData = async () => {
     setLoading(true);
     try {
@@ -475,7 +491,126 @@ export default function AdminMatchdayAdvanced() {
       }
 
       setVenues(sampleVenues);
-      setWeatherData(sampleWeather);
+      
+      // Load real weather data for each venue
+      const weatherPromises = sampleVenues.map(async (venue) => {
+        const weatherData = await loadWeatherData(venue.id);
+        return weatherData;
+      });
+      
+      const weatherResults = await Promise.allSettled(weatherPromises);
+      const validWeatherData = weatherResults
+        .filter((result): result is PromiseFulfilledResult<any> => result.status === 'fulfilled' && result.value !== null)
+        .map(result => result.value);
+      
+      setWeatherData(validWeatherData);
+      
+      // Load match conditions
+      const sampleConditions: MatchCondition[] = [];
+      
+      // Add match conditions for WPL venues
+      if (isWPL) {
+        sampleConditions.push(
+          {
+            id: 'wpl-dy-patil-conditions',
+            venueId: 'wpl-dy-patil',
+            pitchReport: {
+              hardness: 7,
+              grassCoverage: 70,
+              cracks: false,
+              moisture: 20,
+              expectedBehavior: 'Coastal pitch with good carry and swing',
+              day1: 'Fresh pitch, pace bowlers get assistance',
+              day2: 'Pitch settles, balanced conditions',
+              day3: 'Spin starts to play, variable bounce'
+            },
+            outfieldCondition: 'Fast with coastal moisture',
+            weatherForecast: 'Partly cloudy with moderate humidity',
+            recommendedTeam: 'bowl-first',
+            aiAnalysis: {
+              battingConditions: 'Good for stroke play early, spin later',
+              bowlingConditions: 'Pace and swing effective early, spin crucial later',
+              fieldingConditions: 'Quick outfield, dew factor in evening',
+              strategicAdvice: [
+                'Bowl first to exploit early moisture',
+                'Pace attack crucial in powerplay',
+                'Spinners dominate middle overs'
+              ],
+              keyFactors: ['Coastal conditions', 'Dew factor', 'Pitch wear'],
+              winProbability: { bat: 45, bowl: 55 },
+              confidence: 88
+            },
+            lastUpdated: new Date().toISOString()
+          },
+          {
+            id: 'wpl-bca-stadium-conditions',
+            venueId: 'wpl-bca-stadium',
+            pitchReport: {
+              hardness: 8,
+              grassCoverage: 60,
+              cracks: false,
+              moisture: 12,
+              expectedBehavior: 'Balanced hybrid surface',
+              day1: 'Hard and true, excellent for batting',
+              day2: 'Slight wear, balanced conditions',
+              day3: 'Even wear, consistent bounce'
+            },
+            outfieldCondition: 'Perfect and fast',
+            weatherForecast: 'Clear and sunny',
+            recommendedTeam: 'bat-first',
+            aiAnalysis: {
+              battingConditions: 'Excellent with true bounce',
+              bowlingConditions: 'Pacers get some movement, spinners effective',
+              fieldingConditions: 'Ideal conditions, no moisture',
+              strategicAdvice: [
+                'Bat first on true surface',
+                'Build partnerships on flat pitch',
+                'Death overs bowling crucial'
+              ],
+              keyFactors: ['True pitch', 'Clear weather', 'Fast outfield'],
+              winProbability: { bat: 60, bowl: 40 },
+              confidence: 92
+            },
+            lastUpdated: new Date().toISOString()
+          }
+        );
+      } else {
+        // IPL match conditions
+        sampleConditions.push(
+          {
+            id: '1',
+            venueId: '1',
+            pitchReport: {
+              hardness: 8,
+              grassCoverage: 65,
+              cracks: false,
+              moisture: 15,
+              expectedBehavior: 'Balanced surface with good pace and bounce',
+              day1: 'Hard and dry, excellent for batting',
+              day2: 'Slight wear, spinners come into play',
+              day3: 'Cracks appearing, variable bounce'
+            },
+            outfieldCondition: 'Fast and dry',
+            weatherForecast: 'Clear with moderate humidity',
+            recommendedTeam: 'bat-first',
+            aiAnalysis: {
+              battingConditions: 'Excellent with true bounce and pace',
+              bowlingConditions: 'Pacers may get early movement, spinners effective later',
+              fieldingConditions: 'Fast outfield allows quick boundary movement',
+              strategicAdvice: [
+                'Bat first if dew expected',
+                'Fast bowlers exploit early conditions',
+                'Spinners crucial in middle overs'
+              ],
+              keyFactors: ['Dew factor', 'Pitch wear', 'Wind conditions'],
+              winProbability: { bat: 65, bowl: 35 },
+              confidence: 91
+            },
+            lastUpdated: new Date().toISOString()
+          }
+        );
+      }
+      
       setMatchConditions(sampleConditions);
     } catch (error) {
       console.error('Error loading data:', error);
