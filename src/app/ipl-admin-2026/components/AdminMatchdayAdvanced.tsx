@@ -154,25 +154,25 @@ export default function AdminMatchdayAdvanced() {
       if (isWPL) {
         sampleVenues = [
           {
-            id: 'wpl-mumbai',
-            name: 'Wankhede Stadium - Mumbai',
-            city: 'Mumbai',
-            capacity: 33000,
-            coordinates: { lat: 18.9398, lng: 72.8259 },
+            id: 'wpl-dy-patil',
+            name: 'Dr. DY Patil Sports Academy, Navi Mumbai',
+            city: 'Navi Mumbai',
+            capacity: 55000,
+            coordinates: { lat: 19.0471, lng: 73.0695 },
             timezone: 'Asia/Kolkata',
-            established: 1974,
+            established: 2008,
             pitchType: 'Red Soil',
             floodlights: true,
-            drainageSystem: 'Sand-based',
+            drainageSystem: 'Advanced',
             avgFirstInnings: 165,
             avgSecondInnings: 155,
-            highestTotal: 223,
-            lowestTotal: 87,
+            highestTotal: 218,
+            lowestTotal: 89,
             lastMatch: 'MI-W vs RCB-W - 2024-03-15',
             upcomingMatch: 'MI-W vs DC-W - 2025-03-22',
             status: 'active' as const,
             aiInsights: {
-              crowdPrediction: 31000,
+              crowdPrediction: 48000,
               weatherImpact: 'medium' as const,
               optimalConditions: ['Evening matches', 'Moderate humidity'],
               strategicRecommendations: ['Pace-friendly conditions', 'Dew factor in night games'],
@@ -181,25 +181,25 @@ export default function AdminMatchdayAdvanced() {
             }
           },
           {
-            id: 'wpl-bengaluru',
-            name: 'M. Chinnaswamy Stadium - Bengaluru',
-            city: 'Bengaluru',
-            capacity: 38000,
-            coordinates: { lat: 12.9784, lng: 77.5998 },
+            id: 'wpl-bca-stadium',
+            name: 'BCA Stadium, Kotambi (Vadodara)',
+            city: 'Vadodara',
+            capacity: 35000,
+            coordinates: { lat: 22.3072, lng: 73.1812 },
             timezone: 'Asia/Kolkata',
-            established: 1969,
-            pitchType: 'Red Soil',
+            established: 2023,
+            pitchType: 'Hybrid',
             floodlights: true,
-            drainageSystem: 'Sand-based',
+            drainageSystem: 'State-of-the-art',
             avgFirstInnings: 160,
             avgSecondInnings: 150,
-            highestTotal: 215,
+            highestTotal: 205,
             lowestTotal: 82,
-            lastMatch: 'RCB-W vs UPW - 2024-03-20',
+            lastMatch: 'GG vs UPW - 2024-03-20',
             upcomingMatch: 'RCB-W vs GG - 2025-03-25',
             status: 'active' as const,
             aiInsights: {
-              crowdPrediction: 35000,
+              crowdPrediction: 32000,
               weatherImpact: 'low' as const,
               optimalConditions: ['Clear weather', 'Balanced pitch'],
               strategicRecommendations: ['Balanced conditions', 'Spinners effective'],
@@ -388,11 +388,11 @@ export default function AdminMatchdayAdvanced() {
     
     // WPL venue filtering - only show WPL-specific venues in WPL mode
     const isWPLVenue = isWPL && (
-      venue.name.toLowerCase().includes('mumbai') || 
-      venue.name.toLowerCase().includes('bengaluru') ||
-      venue.name.toLowerCase().includes('delhi') ||
-      venue.name.toLowerCase().includes('gujarat') ||
-      venue.name.toLowerCase().includes('lucknow')
+      venue.name.toLowerCase().includes('dy patil') || 
+      venue.name.toLowerCase().includes('bca') ||
+      venue.name.toLowerCase().includes('kotambi') ||
+      venue.name.toLowerCase().includes('vadodara') ||
+      venue.name.toLowerCase().includes('navi mumbai')
     );
     
     return matchesSearch && matchesFilter && (!isWPL || isWPLVenue);
