@@ -15,10 +15,12 @@ const WPL_VENUES = {
 };
 
 // OpenWeatherMap API
-const WEATHER_API_KEY = process.env.OPENWEATHER_API_KEY;
 const WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5';
 
 export async function scheduled(event, env, ctx) {
+  // OpenWeatherMap API (you'll need to add your API key to environment variables)
+  const WEATHER_API_KEY = env.OPENWEATHER_API_KEY || 'demo_key';
+  
   console.log('Starting scheduled weather update for WPL stadiums');
   
   const results = {};

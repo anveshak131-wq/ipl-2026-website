@@ -14,11 +14,12 @@ const WPL_VENUES = {
   }
 };
 
-// OpenWeatherMap API (you'll need to add your API key to environment variables)
-const WEATHER_API_KEY = process.env.OPENWEATHER_API_KEY;
 const WEATHER_API_URL = 'https://api.openweathermap.org/data/2.5';
 
 export async function onRequestGet(context) {
+  // OpenWeatherMap API (you'll need to add your API key to environment variables)
+  const WEATHER_API_KEY = context.env.OPENWEATHER_API_KEY || 'demo_key';
+  
   try {
     const { venueId } = context.params;
     
@@ -141,6 +142,9 @@ function mapWeatherCondition(condition) {
 
 // Batch update endpoint for cron jobs
 export async function onRequestPost(context) {
+  // OpenWeatherMap API (you'll need to add your API key to environment variables)
+  const WEATHER_API_KEY = context.env.OPENWEATHER_API_KEY || 'demo_key';
+  
   try {
     const results = {};
     
