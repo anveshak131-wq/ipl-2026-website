@@ -114,6 +114,9 @@ interface MatchAIAnalysis {
 }
 
 export default function AdminMatchdayAdvanced() {
+  const { currentLeague, isWPL } = useLeague();
+  console.log('AdminMatchdayAdvanced - currentLeague:', currentLeague, 'isWPL:', isWPL);
+
   const [venues, setVenues] = useState<Venue[]>([]);
   const [weatherData, setWeatherData] = useState<WeatherData[]>([]);
   const [matchConditions, setMatchConditions] = useState<MatchCondition[]>([]);
@@ -394,6 +397,8 @@ export default function AdminMatchdayAdvanced() {
       venue.name.toLowerCase().includes('vadodara') ||
       venue.name.toLowerCase().includes('navi mumbai')
     );
+    
+    console.log('Filtering venue:', venue.name, 'isWPL:', isWPL, 'isWPLVenue:', isWPLVenue, 'matchesFilter:', matchesFilter, 'matchesSearch:', matchesSearch);
     
     return matchesSearch && matchesFilter && (!isWPL || isWPLVenue);
   });
