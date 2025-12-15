@@ -159,8 +159,33 @@ export default function AdminMatchdayAdvanced() {
   // Helper function to get venue name by ID
   const getVenueName = (venueId: string) => {
     const venueNames: Record<string, string> = {
+      // WPL venues
       'wpl-dy-patil': 'Dr. DY Patil Sports Academy, Navi Mumbai',
       'wpl-bca-stadium': 'BCA Stadium, Kotambi (Vadodara)',
+      
+      // IPL venues (matching matches page)
+      'wankhede': 'Wankhede Stadium, Mumbai',
+      'chennai': 'M. A. Chidambaram Stadium, Chennai',
+      'bengaluru': 'M. Chinnaswamy Stadium, Bengaluru',
+      'kolkata': 'Eden Gardens, Kolkata',
+      'delhi': 'Arun Jaitley Stadium, Delhi',
+      'jaipur': 'Sawai Mansingh Stadium, Jaipur',
+      'ahmedabad': 'Narendra Modi Stadium, Ahmedabad',
+      'hyderabad': 'Rajiv Gandhi International Stadium, Hyderabad',
+      'mohali': 'Punjab Cricket Association Stadium, Mohali',
+      'dharamsala': 'Himachal Pradesh Cricket Association Stadium, Dharamsala',
+      'visakhapatnam': 'Dr. Y.S. Rajasekhara Reddy ACA-VDCA Cricket Stadium, Visakhapatnam',
+      'lucknow': 'Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium, Lucknow',
+      'pune': 'Maharashtra Cricket Association Stadium, Pune',
+      'mullanpur': 'Maharaja Yadavindra Singh International Cricket Stadium, Mullanpur',
+      'guwahati': 'Barsapara Cricket Stadium, Guwahati',
+      'indore': 'Holkar Cricket Stadium, Indore',
+      'ranchi': 'JSCA International Stadium Complex, Ranchi',
+      'kanpur': 'Green Park, Kanpur',
+      'cuttack': 'Barabati Stadium, Cuttack',
+      'barsapara': 'ACA Stadium, Barsapara',
+      
+      // Legacy IDs for compatibility
       '1': 'Narendra Modi Stadium, Ahmedabad',
       '2': 'Eden Gardens, Kolkata'
     };
@@ -287,9 +312,90 @@ export default function AdminMatchdayAdvanced() {
           }
         ];
       } else {
+        // IPL venues - load all official IPL venues
         sampleVenues = [
           {
-            id: '1',
+            id: 'wankhede',
+            name: 'Wankhede Stadium',
+            city: 'Mumbai',
+            capacity: 33000,
+            coordinates: { lat: 19.0, lng: 72.85 },
+            timezone: 'Asia/Kolkata',
+            established: 1974,
+            pitchType: 'Red Soil',
+            floodlights: true,
+            drainageSystem: 'Sand-based',
+            avgFirstInnings: 160,
+            avgSecondInnings: 150,
+            highestTotal: 235,
+            lowestTotal: 87,
+            lastMatch: '2024-05-27',
+            upcomingMatch: '2025-03-23',
+            status: 'active',
+            lastUpdated: new Date().toISOString()
+          },
+          {
+            id: 'chennai',
+            name: 'M. A. Chidambaram Stadium',
+            city: 'Chennai',
+            capacity: 50000,
+            coordinates: { lat: 13.0827, lng: 80.2707 },
+            timezone: 'Asia/Kolkata',
+            established: 1916,
+            pitchType: 'Red Soil',
+            floodlights: true,
+            drainageSystem: 'Sand-based',
+            avgFirstInnings: 155,
+            avgSecondInnings: 145,
+            highestTotal: 246,
+            lowestTotal: 70,
+            lastMatch: '2024-05-29',
+            upcomingMatch: '2025-03-21',
+            status: 'active',
+            lastUpdated: new Date().toISOString()
+          },
+          {
+            id: 'bengaluru',
+            name: 'M. Chinnaswamy Stadium',
+            city: 'Bengaluru',
+            capacity: 38000,
+            coordinates: { lat: 12.9784, lng: 77.5998 },
+            timezone: 'Asia/Kolkata',
+            established: 1969,
+            pitchType: 'Red Soil',
+            floodlights: true,
+            drainageSystem: 'Sand-based',
+            avgFirstInnings: 165,
+            avgSecondInnings: 155,
+            highestTotal: 263,
+            lowestTotal: 82,
+            lastMatch: '2024-05-25',
+            upcomingMatch: '2025-03-25',
+            status: 'active',
+            lastUpdated: new Date().toISOString()
+          },
+          {
+            id: 'kolkata',
+            name: 'Eden Gardens',
+            city: 'Kolkata',
+            capacity: 66000,
+            coordinates: { lat: 22.5697, lng: 88.3697 },
+            timezone: 'Asia/Kolkata',
+            established: 1864,
+            pitchType: 'Red Soil',
+            floodlights: true,
+            drainageSystem: 'Sand-based',
+            avgFirstInnings: 158,
+            avgSecondInnings: 148,
+            highestTotal: 264,
+            lowestTotal: 77,
+            lastMatch: '2024-05-26',
+            upcomingMatch: '2025-03-24',
+            status: 'active',
+            lastUpdated: new Date().toISOString()
+          },
+          {
+            id: 'ahmedabad',
             name: 'Narendra Modi Stadium',
             city: 'Ahmedabad',
             capacity: 132000,
@@ -306,54 +412,148 @@ export default function AdminMatchdayAdvanced() {
             lastMatch: '2024-05-29',
             upcomingMatch: '2025-03-15',
             status: 'active',
-            aiInsights: {
-              crowdPrediction: 95000,
-              weatherImpact: 'medium',
-              optimalConditions: ['Clear weather', 'Low humidity', 'Moderate temperature'],
-              strategicRecommendations: [
-                'Favor spinners in middle overs',
-                'Dew factor expected in second innings',
-                'Boundary fielding recommended'
-              ],
-              riskFactors: ['High humidity may affect bowling', 'Dew could impact second innings'],
-              confidence: 87
-            }
-          },
-          {
-            id: '2',
-            name: 'Eden Gardens',
-            city: 'Kolkata',
-            capacity: 66000,
-            coordinates: { lat: 22.5645, lng: 88.3412 },
-            timezone: 'Asia/Kolkata',
-            established: 1864,
-            pitchType: 'Traditional Red Soil',
-            floodlights: true,
-            drainageSystem: 'Improved with Super Sopper',
-            avgFirstInnings: 155,
-            avgSecondInnings: 140,
-            highestTotal: 204,
-            lowestTotal: 90,
-            lastMatch: '2024-05-01',
-            upcomingMatch: '2025-03-20',
-            status: 'active',
-            aiInsights: {
-              crowdPrediction: 58000,
-              weatherImpact: 'low',
-              optimalConditions: ['Overcast conditions', 'Moderate breeze'],
-              strategicRecommendations: [
-                'Pacers expected to get early movement',
-                'Spinners crucial in middle overs',
-                'Traditional cricket conditions'
-              ],
-              riskFactors: ['Rain possibility', 'Variable bounce'],
-              confidence: 92
-            }
+            lastUpdated: new Date().toISOString()
           }
         ];
       }
 
       const sampleWeather: WeatherData[] = [];
+
+      // Add weather data for IPL venues
+      if (!isWPL) {
+        sampleWeather.push(
+          {
+            venueId: 'wankhede',
+            temperature: 32,
+            feelsLike: 35,
+            humidity: 70,
+            windSpeed: 15,
+            windDirection: 200,
+            pressure: 1008,
+            visibility: 9,
+            uvIndex: 7,
+            condition: 'partly-cloudy',
+            description: 'Partly cloudy with coastal humidity',
+            timestamp: new Date().toISOString(),
+            aiPrediction: {
+              matchImpact: 'medium',
+              pitchEffect: 'Coastal conditions may help swing bowlers early',
+              dewFactor: 80,
+              playingConditions: 'Moderate humidity with sea breeze',
+              recommendations: [
+                'Pace bowlers effective in first 10 overs',
+                'Dew expected in night matches',
+                'Spinners crucial in middle overs'
+              ],
+              confidence: 87
+            }
+          },
+          {
+            venueId: 'chennai',
+            temperature: 34,
+            feelsLike: 38,
+            humidity: 75,
+            windSpeed: 12,
+            windDirection: 180,
+            pressure: 1010,
+            visibility: 8,
+            uvIndex: 8,
+            condition: 'hot',
+            description: 'Hot and humid conditions',
+            timestamp: new Date().toISOString(),
+            aiPrediction: {
+              matchImpact: 'high',
+              pitchEffect: 'High humidity favors spinners',
+              dewFactor: 85,
+              playingConditions: 'Very humid with slow outfield',
+              recommendations: [
+                'Spinners will dominate middle overs',
+                'High dew factor in evening',
+                'Toss crucial - field first in night matches'
+              ],
+              confidence: 92
+            }
+          },
+          {
+            venueId: 'bengaluru',
+            temperature: 28,
+            feelsLike: 30,
+            humidity: 60,
+            windSpeed: 18,
+            windDirection: 90,
+            pressure: 1012,
+            visibility: 10,
+            uvIndex: 6,
+            condition: 'pleasant',
+            description: 'Pleasant weather with moderate conditions',
+            timestamp: new Date().toISOString(),
+            aiPrediction: {
+              matchImpact: 'low',
+              pitchEffect: 'Balanced conditions for both bat and ball',
+              dewFactor: 65,
+              playingConditions: 'Ideal cricket conditions',
+              recommendations: [
+                'Balanced pitch favors all-rounders',
+                'Minimal dew factor',
+                'Good visibility throughout match'
+              ],
+              confidence: 90
+            }
+          },
+          {
+            venueId: 'kolkata',
+            temperature: 31,
+            feelsLike: 34,
+            humidity: 72,
+            windSpeed: 10,
+            windDirection: 150,
+            pressure: 1009,
+            visibility: 9,
+            uvIndex: 7,
+            condition: 'humid',
+            description: 'Humid conditions with moderate temperature',
+            timestamp: new Date().toISOString(),
+            aiPrediction: {
+              matchImpact: 'medium',
+              pitchEffect: 'Traditional Kolkata conditions favor spinners',
+              dewFactor: 78,
+              playingConditions: 'Humid with traditional pitch behavior',
+              recommendations: [
+                'Spinners key in middle overs',
+                'Dew expected in second innings',
+                'Pace bowlers effective early'
+              ],
+              confidence: 88
+            }
+          },
+          {
+            venueId: 'ahmedabad',
+            temperature: 33,
+            feelsLike: 36,
+            humidity: 55,
+            windSpeed: 14,
+            windDirection: 210,
+            pressure: 1011,
+            visibility: 10,
+            uvIndex: 8,
+            condition: 'sunny',
+            description: 'Clear weather with moderate humidity',
+            timestamp: new Date().toISOString(),
+            aiPrediction: {
+              matchImpact: 'medium',
+              pitchEffect: 'Dry pitch will favor batsmen initially, spinners later',
+              dewFactor: 75,
+              playingConditions: 'Excellent batting conditions with moderate humidity',
+              recommendations: [
+                'Teams winning toss might prefer to field first',
+                'Spinners will be crucial in middle overs',
+                'Dew might affect second innings bowling'
+              ],
+              confidence: 89
+            }
+          }
+        );
+      }
 
       // Add weather data for WPL venues
       if (isWPL) {
