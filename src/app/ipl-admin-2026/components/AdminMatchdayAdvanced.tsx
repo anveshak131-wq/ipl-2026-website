@@ -130,6 +130,14 @@ export default function AdminMatchdayAdvanced() {
   const [filterStatus, setFilterStatus] = useState<'all' | 'active' | 'maintenance' | 'inactive'>('all');
   const [showVenueModal, setShowVenueModal] = useState(false);
   const [editingVenue, setEditingVenue] = useState<Venue | null>(null);
+  const [venueForm, setVenueForm] = useState({
+    name: '',
+    city: '',
+    capacity: '',
+    latitude: '',
+    longitude: '',
+    pitchType: 'Red Soil'
+  });
   const [notifications, setNotifications] = useState<string[]>([]);
 
   useEffect(() => {
@@ -579,8 +587,8 @@ export default function AdminMatchdayAdvanced() {
   const syncAllData = async () => {
     setSyncing(true);
     try {
-      // Simulate API calls
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Actually refresh the data
+      await loadInitialData();
       addNotification('All data synced successfully');
     } catch (error) {
       addNotification('Sync failed');
@@ -592,13 +600,105 @@ export default function AdminMatchdayAdvanced() {
   const generateAIInsights = async () => {
     setAiGenerating(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Actually refresh weather data for AI insights
+      const weatherPromises = venues.map(async (venue) => {
+        const weatherData = await loadWeatherData(venue.id);
+        return weatherData;
+      });
+      
+      const weatherResults = await Promise.allSettled(weatherPromises);
+      const validWeatherData = weatherResults
+        .filter((result): result is PromiseFulfilledResult<any> => result.status === 'fulfilled' && result.value !== null)
+        .map(result => result.value);
+      
+      setWeatherData(validWeatherData);
       addNotification('AI insights generated successfully');
     } catch (error) {
       addNotification('AI generation failed');
     } finally {
       setAiGenerating(false);
     }
+  };
+
+  // Handle venue form input changes
+  const handleVenueFormChange = (field: string, value: string) => {
+    setVenueForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Save venue (add new or update existing)
+  const saveVenue = () => {
+    if (!venueForm.name || !venueForm.city) {
+      addNotification('Please fill in required fields');
+      return;
+    }
+
+    if (editingVenue) {
+      // Update existing venue
+      setVenues(prev => prev.map(venue => 
+        venue.id === editingVenue.id 
+          ? { ...venue, ...venueForm, capacity: parseInt(venueForm.capacity) || 0 }
+          : venue
+      ));
+      addNotification('Venue updated successfully');
+    } else {
+      // Add new venue
+      const newVenue: Venue = {
+        id: Date.now().toString(),
+        name: venueForm.name,
+        city: venueForm.city,
+        capacity: parseInt(venueForm.capacity) || 0,
+        status: 'active' as const,
+        coordinates: {
+          lat: parseFloat(venueForm.latitude) || 0,
+          lng: parseFloat(venueForm.longitude) || 0
+        },
+        pitchType: venueForm.pitchType,
+        lastUpdated: new Date().toISOString()
+      };
+      setVenues(prev => [...prev, newVenue]);
+      addNotification('Venue added successfully');
+    }
+
+    // Reset form and close modal
+    setVenueForm({
+      name: '',
+      city: '',
+      capacity: '',
+      latitude: '',
+      longitude: '',
+      pitchType: 'Red Soil'
+    });
+    setEditingVenue(null);
+    setShowVenueModal(false);
+  };
+
+  // Open venue modal for adding or editing
+  const openVenueModal = (venue?: Venue) => {
+    if (venue) {
+      setEditingVenue(venue);
+      setVenueForm({
+        name: venue.name,
+        city: venue.city,
+        capacity: venue.capacity.toString(),
+        latitude: venue.coordinates.lat.toString(),
+        longitude: venue.coordinates.lng.toString(),
+        pitchType: venue.pitchType
+      });
+    } else {
+      setEditingVenue(null);
+      setVenueForm({
+        name: '',
+        city: '',
+        capacity: '',
+        latitude: '',
+        longitude: '',
+        pitchType: 'Red Soil'
+      });
+    }
+    setShowVenueModal(true);
   };
 
   const filteredVenues = venues.filter(venue => {
@@ -827,7 +927,7 @@ export default function AdminMatchdayAdvanced() {
                   <option value="inactive">Inactive</option>
                 </select>
                 <motion.button
-                  onClick={() => setShowVenueModal(true)}
+                  onClick={() => openVenueModal()}
                   className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -905,7 +1005,7 @@ export default function AdminMatchdayAdvanced() {
                       View Details
                     </motion.button>
                     <motion.button
-                      onClick={() => setEditingVenue(venue)}
+                      onClick={() => openVenueModal(venue)}
                       className="flex-1 p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -1169,21 +1269,55 @@ export default function AdminMatchdayAdvanced() {
               exit={{ scale: 0.9, opacity: 0 }}
             >
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-white">Add New Venue</h3>
+                <h3 className="text-xl font-bold text-white">
+                  {editingVenue ? 'Edit Venue' : 'Add New Venue'}
+                </h3>
                 <button onClick={() => setShowVenueModal(false)} className="text-gray-400 hover:text-white">
                   <X size={24} />
                 </button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input placeholder="Venue Name" className="p-3 bg-slate-700 text-white rounded-lg" />
-                <input placeholder="City" className="p-3 bg-slate-700 text-white rounded-lg" />
-                <input placeholder="Capacity" type="number" className="p-3 bg-slate-700 text-white rounded-lg" />
-                <input placeholder="Latitude" type="number" className="p-3 bg-slate-700 text-white rounded-lg" />
-                <input placeholder="Longitude" type="number" className="p-3 bg-slate-700 text-white rounded-lg" />
-                <select className="p-3 bg-slate-700 text-white rounded-lg">
-                  <option>Red Soil</option>
-                  <option>Black Soil</option>
-                  <option>Mixed</option>
+                <input 
+                  placeholder="Venue Name" 
+                  value={venueForm.name}
+                  onChange={(e) => handleVenueFormChange('name', e.target.value)}
+                  className="p-3 bg-slate-700 text-white rounded-lg" 
+                />
+                <input 
+                  placeholder="City" 
+                  value={venueForm.city}
+                  onChange={(e) => handleVenueFormChange('city', e.target.value)}
+                  className="p-3 bg-slate-700 text-white rounded-lg" 
+                />
+                <input 
+                  placeholder="Capacity" 
+                  type="number" 
+                  value={venueForm.capacity}
+                  onChange={(e) => handleVenueFormChange('capacity', e.target.value)}
+                  className="p-3 bg-slate-700 text-white rounded-lg" 
+                />
+                <input 
+                  placeholder="Latitude" 
+                  type="number" 
+                  value={venueForm.latitude}
+                  onChange={(e) => handleVenueFormChange('latitude', e.target.value)}
+                  className="p-3 bg-slate-700 text-white rounded-lg" 
+                />
+                <input 
+                  placeholder="Longitude" 
+                  type="number" 
+                  value={venueForm.longitude}
+                  onChange={(e) => handleVenueFormChange('longitude', e.target.value)}
+                  className="p-3 bg-slate-700 text-white rounded-lg" 
+                />
+                <select 
+                  value={venueForm.pitchType}
+                  onChange={(e) => handleVenueFormChange('pitchType', e.target.value)}
+                  className="p-3 bg-slate-700 text-white rounded-lg"
+                >
+                  <option value="Red Soil">Red Soil</option>
+                  <option value="Black Soil">Black Soil</option>
+                  <option value="Mixed">Mixed</option>
                 </select>
               </div>
               <div className="flex justify-end gap-3 mt-6">
@@ -1191,13 +1325,13 @@ export default function AdminMatchdayAdvanced() {
                   Cancel
                 </button>
                 <motion.button
-                  onClick={() => setShowVenueModal(false)}
+                  onClick={saveVenue}
                   className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Save size={20} />
-                  Save Venue
+                  <Save size={18} />
+                  {editingVenue ? 'Update Venue' : 'Add Venue'}
                 </motion.button>
               </div>
             </motion.div>
