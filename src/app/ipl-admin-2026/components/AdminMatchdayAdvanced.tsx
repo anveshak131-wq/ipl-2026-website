@@ -148,6 +148,17 @@ export default function AdminMatchdayAdvanced() {
     };
   }, []);
 
+  // Helper function to get venue name by ID
+  const getVenueName = (venueId: string) => {
+    const venueNames = {
+      'wpl-dy-patil': 'Dr. DY Patil Sports Academy, Navi Mumbai',
+      'wpl-bca-stadium': 'BCA Stadium, Kotambi (Vadodara)',
+      '1': 'Narendra Modi Stadium, Ahmedabad',
+      '2': 'Eden Gardens, Kolkata'
+    };
+    return venueNames[venueId] || venueId;
+  };
+
   const loadWeatherData = async (venueId: string) => {
     try {
       const response = await fetch(`/api/weather/${venueId}`);
@@ -923,7 +934,12 @@ export default function AdminMatchdayAdvanced() {
                   whileHover={{ scale: 1.02 }}
                 >
                   <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-bold text-white">Weather Conditions</h3>
+                    <div>
+                      <h3 className="text-xl font-bold text-white">Weather Conditions</h3>
+                      <p className="text-sm text-blue-300 font-medium">
+                        {getVenueName(weather.venueId)}
+                      </p>
+                    </div>
                     {getWeatherIcon(weather.condition)}
                   </div>
 
@@ -1010,7 +1026,14 @@ export default function AdminMatchdayAdvanced() {
                   className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-green-400/20"
                   whileHover={{ scale: 1.01 }}
                 >
-                  <h3 className="text-xl font-bold text-white mb-6">Match Conditions Analysis</h3>
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="text-xl font-bold text-white">Match Conditions Analysis</h3>
+                      <p className="text-sm text-green-300 font-medium">
+                        {getVenueName(condition.venueId)}
+                      </p>
+                    </div>
+                  </div>
 
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div className="space-y-4">
