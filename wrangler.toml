@@ -30,7 +30,17 @@ preview_id = "local-weather-cache-preview"
 
 # Environment configuration for email service
 [env.production]
-vars = { ENVIRONMENT = "production" }
+vars = { 
+  ENVIRONMENT = "production",
+  OPENWEATHER_API_KEY = "4521f1357955496894b160548251012"
+}
+
+# Development environment variables
+[env.development]
+vars = { 
+  ENVIRONMENT = "development",
+  OPENWEATHER_API_KEY = "4521f1357955496894b160548251012"
+}
 
 # Scheduled event for email reminders
 # This cron job runs every 5 minutes to check for matches starting in 30 minutes
