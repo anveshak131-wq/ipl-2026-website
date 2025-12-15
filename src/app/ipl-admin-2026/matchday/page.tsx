@@ -1,5 +1,5 @@
 import AdminMatchdayAdvanced from '../components/AdminMatchdayAdvanced';
-import AdminSidebar from '../components/admin/AdminSidebar';
+import AdminSidebar from '@/components/admin/AdminSidebar';
 
 export default function MatchdayPage() {
   console.log('Advanced AI-Powered MatchdayPage rendering');
