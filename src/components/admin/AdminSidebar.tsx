@@ -858,6 +858,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         </svg>
       </button>
 
+      {/* Mobile overlay - only visible on mobile when sidebar is open */}
       {mobileOpen && (
         <div
           className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
@@ -865,15 +866,32 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         />
       )}
 
+      {/* Mobile sidebar - only visible on mobile screens */}
       <aside
         className={`
-          fixed md:sticky top-0 left-0 h-screen z-40
+          md:hidden fixed top-0 left-0 h-screen z-50
           bg-gray-950 border-r border-white/10
           flex flex-col
           transition-all duration-300 ease-in-out
           ${collapsed ? 'w-20' : 'w-80'}
-          -translate-x-full md:translate-x-0
-          ${mobileOpen ? '!translate-x-0' : ''}
+          ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
+        style={{
+          background: 'linear-gradient(180deg, rgb(17 24 39) 0%, rgb(31 41 55) 100%)',
+          boxShadow: '0 0 40px rgba(0, 0, 0, 0.5)',
+        }}
+      >
+        <SidebarContent />
+      </aside>
+
+      {/* Desktop sidebar - only visible on desktop screens */}
+      <aside
+        className={`
+          hidden md:flex sticky top-0 left-0 h-screen z-40
+          bg-gray-950 border-r border-white/10
+          flex-col
+          transition-all duration-300 ease-in-out
+          ${collapsed ? 'w-20' : 'w-80'}
         `}
         style={{
           background: 'linear-gradient(180deg, rgb(17 24 39) 0%, rgb(31 41 55) 100%)',
