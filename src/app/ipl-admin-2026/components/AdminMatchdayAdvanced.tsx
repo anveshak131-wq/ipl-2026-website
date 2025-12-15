@@ -1439,39 +1439,12 @@ export default function AdminMatchdayAdvanced() {
               outfieldCondition: 'Good',
               pitchCondition: 'Excellent',
             }
-          ]; // Removed extra comma here
+          ];
         }
       }
 
-      // Filter weather data based on current league
-      if (isWPL) {
-        sampleWeather = sampleWeather.filter(weather => 
-          weather.venueId.startsWith('wpl-')
-        );
-      } else {
-        sampleWeather = sampleWeather.filter(weather => 
-          !weather.venueId.startsWith('wpl-')
-        );
-      }
-
+      setWeatherData(sampleWeather);
       setVenues(sampleVenues);
-      
-      // Load real weather data for each venue
-      console.log('Loading weather data for venues:', sampleVenues.map(v => v.id));
-      const weatherPromises = sampleVenues.map(async (venue) => {
-        const weatherData = await loadWeatherData(venue.id);
-        return weatherData;
-      });
-      
-      const weatherResults = await Promise.allSettled(weatherPromises);
-      console.log('Weather results:', weatherResults);
-      
-      const validWeatherData = weatherResults
-        .filter((result): result is PromiseFulfilledResult<any> => result.status === 'fulfilled' && result.value !== null)
-        .map(result => result.value);
-      
-      console.log('Valid weather data:', validWeatherData);
-      setWeatherData(validWeatherData);
       
       // Load match conditions
       const sampleConditions: MatchCondition[] = [];
