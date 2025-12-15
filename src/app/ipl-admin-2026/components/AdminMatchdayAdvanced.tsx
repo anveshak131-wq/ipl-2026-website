@@ -142,10 +142,10 @@ export default function AdminMatchdayAdvanced() {
     const scheduleWeatherUpdates = () => {
       const now = new Date();
       
-      // Convert current UTC time to IST for calculation
+      // Calculate IST hour correctly
       const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
       const istTime = new Date(now.getTime() + istOffset);
-      const istHour = istTime.getUTCHours(); // Get IST hour (0-23)
+      const istHour = istTime.getHours(); // Get IST hour (0-23)
       
       // Calculate next update time in UTC
       const nextUpdateUTC = new Date(now);
