@@ -10,6 +10,7 @@ import {
   Sun, CloudRain, CloudSnow, Navigation, Bell, Database
 } from 'lucide-react';
 import { useLeague } from '@/contexts/LeagueContext';
+import { weatherService, VenueWeatherData } from '@/lib/weatherService';
 
 // Add global styles to disable scrolling
 // Removed noScrollStyles to allow proper scrolling
@@ -111,6 +112,7 @@ export default function AdminMatchdayAdvanced() {
   const [weatherData, setWeatherData] = useState<WeatherData[]>([]);
   const [matchConditions, setMatchConditions] = useState<MatchCondition[]>([]);
   const [loading, setLoading] = useState(false);
+  const [weatherLoading, setWeatherLoading] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [aiGenerating, setAiGenerating] = useState(false);
   const [activeView, setActiveView] = useState<'overview' | 'venues' | 'weather' | 'conditions' | 'ai-insights'>('overview');
@@ -133,10 +135,20 @@ export default function AdminMatchdayAdvanced() {
     loadInitialData();
   }, []);
 
-  // Helper function to get venue name by ID
+  useEffect(() => {
+    if (isWPL) return;
+
+    refreshWeatherData();
+
+    const weatherInterval = setInterval(() => {
+      refreshWeatherData();
+    }, 12 * 60 * 60 * 1000); // 12 hours in milliseconds
+
+    return () => clearInterval(weatherInterval);
+  }, [isWPL]);
+
   const getVenueName = (venueId: string) => {
     const venueNames: Record<string, string> = {
-      // WPL venues
       'wpl-dy-patil': 'Dr. DY Patil Sports Academy, Navi Mumbai',
       'wpl-bca-stadium': 'BCA Stadium, Kotambi (Vadodara)',
       
@@ -221,6 +233,32 @@ export default function AdminMatchdayAdvanced() {
     } catch (error) {
       console.error('Error fetching weather data:', error);
       return null;
+    }
+  };
+
+  const refreshWeatherData = async () => {
+    if (isWPL) return;
+    
+    setWeatherLoading(true);
+    try {
+      const freshWeatherData = await weatherService.fetchWeatherForAllVenues();
+      const updatedWeatherData = freshWeatherData.map(weather => ({
+        ...weather,
+        outfieldCondition: 'Good',
+        pitchCondition: 'Excellent',
+        expectedRunRate: 8.5,
+        bowlingConditions: 'Balanced',
+        battingConditions: 'Favorable',
+        fieldingConditions: 'Good'
+      }));
+      
+      setWeather(updatedWeatherData);
+      addNotification('Weather data updated successfully');
+    } catch (error) {
+      console.error('Error refreshing weather data:', error);
+      addNotification('Failed to update weather data', 'error');
+    } finally {
+      setWeatherLoading(false);
     }
   };
 
@@ -696,42 +734,318 @@ export default function AdminMatchdayAdvanced() {
         ];
       }
 
-      const sampleWeather: WeatherData[] = [];
-
-      // Add weather data for IPL venues
+      // Load real-time weather data using weather service
+      let sampleWeather: WeatherData[] = [];
+      
       if (!isWPL) {
-        sampleWeather.push(
-          {
-            venueId: 'wankhede',
-            temperature: 32,
-            feelsLike: 35,
-            humidity: 70,
-            windSpeed: 15,
-            windDirection: 200,
-            pressure: 1008,
-            visibility: 9,
-            uvIndex: 7,
-            condition: 'partly-cloudy',
-            description: 'Partly cloudy with coastal humidity',
-            timestamp: new Date().toISOString(),
-            aiPrediction: {
-              matchImpact: 'medium',
-              pitchEffect: 'Coastal conditions may help swing bowlers early',
-              dewFactor: 80,
-              playingConditions: 'Moderate humidity with sea breeze',
-              recommendations: [
-                'Pace bowlers effective in first 10 overs',
-                'Dew expected in night matches',
-                'Spinners crucial in middle overs'
-              ],
-              confidence: 87
+        try {
+          // Fetch real weather data for all IPL venues
+          const realWeatherData = await weatherService.fetchWeatherForAllVenues();
+          sampleWeather = realWeatherData.map(weather => ({
+            ...weather,
+            // Ensure compatibility with existing WeatherData interface
+            outfieldCondition: 'Good',
+            pitchCondition: 'Excellent',
+            expectedRunRate: 8.5,
+            bowlingConditions: 'Balanced',
+            battingConditions: 'Favorable',
+            fieldingConditions: 'Good'
+          }));
+        } catch (error) {
+          console.error('Error fetching real weather data, using fallback:', error);
+          // Fallback to static data if API fails
+          sampleWeather = [
+            {
+              venueId: 'wankhede',
+              temperature: 30,
+              feelsLike: 33,
+              humidity: 75,
+              windSpeed: 18,
+              windDirection: 220,
+              pressure: 1008,
+              visibility: 8,
+              uvIndex: 8,
+              condition: 'partly-cloudy' as const,
+              description: 'Coastal Mumbai with high humidity and sea breeze',
+              timestamp: new Date().toISOString(),
+              aiPrediction: {
+                matchImpact: 'high' as const,
+                pitchEffect: 'Clay soil provides good bounce, sea breeze aids swing bowling',
+                dewFactor: 85,
+                playingConditions: 'Humid coastal conditions favor swing bowlers early',
+                recommendations: [
+                  'Pace bowlers will get swing with sea breeze',
+                  'High dew factor in night matches',
+                  'Clay soil offers good batting conditions'
+                ],
+                confidence: 89
+              },
+              outfieldCondition: 'Good',
+              pitchCondition: 'Excellent',
+              expectedRunRate: 8.5,
+              bowlingConditions: 'Balanced',
+              battingConditions: 'Favorable',
+              fieldingConditions: 'Good'
+            },
+            {
+              venueId: 'chennai',
+              temperature: 34,
+              feelsLike: 38,
+              humidity: 75,
+              windSpeed: 12,
+              windDirection: 180,
+              pressure: 1010,
+              visibility: 8,
+              uvIndex: 8,
+              condition: 'sunny',
+              description: 'Hot and humid conditions',
+              timestamp: new Date().toISOString(),
+              aiPrediction: {
+                matchImpact: 'high',
+                pitchEffect: 'High humidity favors spinners',
+                dewFactor: 85,
+                playingConditions: 'Very humid with slow outfield',
+                recommendations: [
+                  'Spinners will dominate middle overs',
+                  'High dew factor in evening',
+                  'Toss crucial - field first in night matches'
+                ],
+                confidence: 92
+              },
+              outfieldCondition: 'Good',
+              pitchCondition: 'Excellent',
+              expectedRunRate: 8.5,
+              bowlingConditions: 'Balanced',
+              battingConditions: 'Favorable',
+              fieldingConditions: 'Good'
+            },
+            {
+              venueId: 'bengaluru',
+              temperature: 28,
+              feelsLike: 30,
+              humidity: 60,
+              windSpeed: 18,
+              windDirection: 90,
+              pressure: 1012,
+              visibility: 10,
+              uvIndex: 6,
+              condition: 'pleasant',
+              description: 'Pleasant weather with moderate conditions',
+              timestamp: new Date().toISOString(),
+              aiPrediction: {
+                matchImpact: 'low',
+                pitchEffect: 'Balanced conditions for both bat and ball',
+                dewFactor: 65,
+                playingConditions: 'Ideal cricket conditions',
+                recommendations: [
+                  'Balanced pitch favors all-rounders',
+                  'Minimal dew factor',
+                  'Good visibility throughout match'
+                ],
+                confidence: 90
+              },
+              outfieldCondition: 'Good',
+              pitchCondition: 'Excellent',
+              expectedRunRate: 8.5,
+              bowlingConditions: 'Balanced',
+              battingConditions: 'Favorable',
+              fieldingConditions: 'Good'
+            },
+            {
+              venueId: 'kolkata',
+              temperature: 31,
+              feelsLike: 34,
+              humidity: 72,
+              windSpeed: 10,
+              windDirection: 150,
+              pressure: 1009,
+              visibility: 9,
+              uvIndex: 7,
+              condition: 'humid',
+              description: 'Humid conditions with moderate temperature',
+              timestamp: new Date().toISOString(),
+              aiPrediction: {
+                matchImpact: 'medium',
+                pitchEffect: 'Traditional Kolkata conditions favor spinners',
+                dewFactor: 78,
+                playingConditions: 'Humid with traditional pitch behavior',
+                recommendations: [
+                  'Spinners key in middle overs',
+                  'Dew expected in second innings',
+                  'Pace bowlers effective early'
+                ],
+                confidence: 88
+              },
+              outfieldCondition: 'Good',
+              pitchCondition: 'Excellent',
+              expectedRunRate: 8.5,
+              bowlingConditions: 'Balanced',
+              battingConditions: 'Favorable',
+              fieldingConditions: 'Good'
+            },
+            {
+              venueId: 'ahmedabad',
+              temperature: 33,
+              feelsLike: 36,
+              humidity: 55,
+              windSpeed: 14,
+              windDirection: 210,
+              pressure: 1011,
+              visibility: 10,
+              uvIndex: 8,
+              condition: 'sunny',
+              description: 'Clear weather with moderate humidity',
+              timestamp: new Date().toISOString(),
+              aiPrediction: {
+                matchImpact: 'medium',
+                pitchEffect: 'Dry pitch will favor batsmen initially, spinners later',
+                dewFactor: 75,
+                playingConditions: 'Excellent batting conditions with moderate humidity',
+                recommendations: [
+                  'Teams winning toss might prefer to field first',
+                  'Spinners will be crucial in middle overs',
+                  'Dew might affect second innings bowling'
+                ],
+                confidence: 89
+              },
+              outfieldCondition: 'Good',
+              pitchCondition: 'Excellent',
+              expectedRunRate: 8.5,
+              bowlingConditions: 'Balanced',
+              battingConditions: 'Favorable',
+              fieldingConditions: 'Good'
+            },
+            {
+              venueId: 'delhi',
+              temperature: 35,
+              feelsLike: 38,
+              humidity: 45,
+              windSpeed: 12,
+              windDirection: 180,
+              pressure: 1010,
+              visibility: 10,
+              uvIndex: 9,
+              condition: 'sunny',
+              description: 'Hot and dry conditions',
+              timestamp: new Date().toISOString(),
+              aiPrediction: {
+                matchImpact: 'high',
+                pitchEffect: 'Dry conditions favor batsmen, spinners later',
+                dewFactor: 70,
+                playingConditions: 'Very hot with low humidity',
+                recommendations: [
+                  'Batting-friendly conditions',
+                  'Spinners important in middle overs',
+                  'Hydration crucial for players'
+                ],
+                confidence: 91
+              },
+              outfieldCondition: 'Good',
+              pitchCondition: 'Excellent',
+              expectedRunRate: 8.5,
+              bowlingConditions: 'Balanced',
+              battingConditions: 'Favorable',
+              fieldingConditions: 'Good'
+            },
+            {
+              venueId: 'jaipur',
+              temperature: 34,
+              feelsLike: 37,
+              humidity: 50,
+              windSpeed: 16,
+              windDirection: 220,
+              pressure: 1009,
+              visibility: 10,
+              uvIndex: 8,
+              condition: 'sunny',
+              description: 'Sunny with moderate breeze',
+              timestamp: new Date().toISOString(),
+              aiPrediction: {
+                matchImpact: 'medium',
+                pitchEffect: 'Traditional Rajasthan pitch favors spinners',
+                dewFactor: 72,
+                playingConditions: 'Dry with moderate wind',
+                recommendations: [
+                  'Spinners will dominate middle overs',
+                  'Pace bowlers effective early',
+                  'Dew expected in evening'
+                ],
+                confidence: 88
+              },
+              outfieldCondition: 'Good',
+              pitchCondition: 'Excellent',
+              expectedRunRate: 8.5,
+              bowlingConditions: 'Balanced',
+              battingConditions: 'Favorable',
+              fieldingConditions: 'Good'
+            },
+            {
+              venueId: 'hyderabad',
+              temperature: 32,
+              feelsLike: 35,
+              humidity: 65,
+              windSpeed: 10,
+              windDirection: 160,
+              pressure: 1012,
+              visibility: 9,
+              uvIndex: 7,
+              condition: 'humid',
+              description: 'Humid conditions with moderate temperature',
+              timestamp: new Date().toISOString(),
+              aiPrediction: {
+                matchImpact: 'medium',
+                pitchEffect: 'Hyderabad humidity favors balanced conditions',
+                dewFactor: 78,
+                playingConditions: 'Humid with moderate conditions',
+                recommendations: [
+                  'Balanced conditions for bat and ball',
+                  'Dew factor significant in night matches',
+                  'Both pace and spin effective'
+                ],
+                confidence: 87
+              },
+              outfieldCondition: 'Good',
+              pitchCondition: 'Excellent',
+              expectedRunRate: 8.5,
+              bowlingConditions: 'Balanced',
+              battingConditions: 'Favorable',
+              fieldingConditions: 'Good'
+            },
+            {
+              venueId: 'mohali',
+              temperature: 30,
+              feelsLike: 32,
+              humidity: 60,
+              windSpeed: 18,
+              windDirection: 240,
+              pressure: 1013,
+              visibility: 10,
+              uvIndex: 6,
+              condition: 'pleasant',
+              description: 'Pleasant weather with good breeze',
+              timestamp: new Date().toISOString(),
+              aiPrediction: {
+                matchImpact: 'low',
+                pitchEffect: 'Punjab conditions favor balanced cricket',
+                dewFactor: 68,
+                playingConditions: 'Ideal cricket conditions',
+                recommendations: [
+                  'Balanced pitch favors all-rounders',
+                  'Minimal dew factor',
+                  'Good visibility throughout match'
+                ],
+                confidence: 90
+              },
+              outfieldCondition: 'Good',
+              pitchCondition: 'Excellent',
+              expectedRunRate: 8.5,
+              bowlingConditions: 'Balanced',
+              battingConditions: 'Favorable',
+              fieldingConditions: 'Good'
             }
-          },
-          {
-            venueId: 'chennai',
-            temperature: 34,
-            feelsLike: 38,
-            humidity: 75,
+          ];
+        }
+      }
             windSpeed: 12,
             windDirection: 180,
             pressure: 1010,
@@ -1905,6 +2219,21 @@ export default function AdminMatchdayAdvanced() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-white mb-2">Weather Conditions</h2>
+                <p className="text-blue-300">Real-time weather data for all IPL venues</p>
+              </div>
+              <button
+                onClick={refreshWeatherData}
+                disabled={weatherLoading}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800/50 text-white rounded-lg transition-colors"
+              >
+                <RefreshCw className={`w-4 h-4 ${weatherLoading ? 'animate-spin' : ''}`} />
+                {weatherLoading ? 'Updating...' : 'Refresh Weather'}
+              </button>
+            </div>
+            
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {weatherData.map((weather) => (
                 <motion.div
