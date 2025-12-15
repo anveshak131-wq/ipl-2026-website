@@ -63,8 +63,9 @@ interface VenueWeatherData {
   };
 }
 
-// Venue coordinates for IPL stadiums
+// Venue coordinates for IPL and WPL stadiums
 const VENUE_COORDINATES = {
+  // IPL venues
   wankhede: { lat: 19.0, lng: 72.85, city: 'Mumbai' },
   chennai: { lat: 13.0827, lng: 80.2707, city: 'Chennai' },
   bengaluru: { lat: 12.9784, lng: 77.5998, city: 'Bengaluru' },
@@ -84,11 +85,15 @@ const VENUE_COORDINATES = {
   ranchi: { lat: 23.3441, lng: 85.3096, city: 'Ranchi' },
   kanpur: { lat: 26.4750, lng: 80.3319, city: 'Kanpur' },
   cuttack: { lat: 20.4625, lng: 85.8828, city: 'Cuttack' },
-  barsapara: { lat: 26.1258, lng: 91.7394, city: 'Guwahati' }
+  barsapara: { lat: 26.1258, lng: 91.7394, city: 'Guwahati' },
+  // WPL venues
+  'wpl-dy-patil': { lat: 19.0, lng: 73.2, city: 'Navi Mumbai' },
+  'wpl-bca-stadium': { lat: 22.3, lng: 73.2, city: 'Vadodara' }
 };
 
 // Pitch types for venues
 const VENUE_PITCH_TYPES = {
+  // IPL venues
   wankhede: 'Clay Soil',
   chennai: 'Clay and Red Soil',
   bengaluru: 'Red Soil',
@@ -108,7 +113,10 @@ const VENUE_PITCH_TYPES = {
   ranchi: 'Red Soil',
   kanpur: 'Red Soil',
   cuttack: 'Red Soil',
-  barsapara: 'Red Soil'
+  barsapara: 'Red Soil',
+  // WPL venues
+  'wpl-dy-patil': 'Clay Soil',
+  'wpl-bca-stadium': 'Red Soil'
 };
 
 class WeatherService {

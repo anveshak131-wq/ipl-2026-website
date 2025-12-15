@@ -136,8 +136,6 @@ export default function AdminMatchdayAdvanced() {
   }, []);
 
   useEffect(() => {
-    if (isWPL) return;
-
     refreshWeatherData();
 
     const weatherInterval = setInterval(() => {
@@ -145,7 +143,7 @@ export default function AdminMatchdayAdvanced() {
     }, 12 * 60 * 60 * 1000); // 12 hours in milliseconds
 
     return () => clearInterval(weatherInterval);
-  }, [isWPL]);
+  }, []);
 
   const getVenueName = (venueId: string) => {
     const venueNames: Record<string, string> = {
@@ -237,8 +235,6 @@ export default function AdminMatchdayAdvanced() {
   };
 
   const refreshWeatherData = async () => {
-    if (isWPL) return;
-    
     setWeatherLoading(true);
     try {
       const freshWeatherData = await weatherService.fetchWeatherForAllVenues();
@@ -251,8 +247,7 @@ export default function AdminMatchdayAdvanced() {
         battingConditions: 'Favorable',
         fieldingConditions: 'Good'
       }));
-      
-      setWeather(updatedWeatherData);
+      setWeatherData(updatedWeatherData);
       addNotification('Weather data updated successfully');
     } catch (error) {
       console.error('Error refreshing weather data:', error);
@@ -734,26 +729,25 @@ export default function AdminMatchdayAdvanced() {
         ];
       }
 
-      // Load real-time weather data using weather service
+      // Load real-time weather data using weather service for both IPL and WPL
       let sampleWeather: WeatherData[] = [];
       
-      if (!isWPL) {
-        try {
-          // Fetch real weather data for all IPL venues
-          const realWeatherData = await weatherService.fetchWeatherForAllVenues();
-          sampleWeather = realWeatherData.map(weather => ({
-            ...weather,
-            // Ensure compatibility with existing WeatherData interface
-            outfieldCondition: 'Good',
-            pitchCondition: 'Excellent',
-            expectedRunRate: 8.5,
-            bowlingConditions: 'Balanced',
-            battingConditions: 'Favorable',
-            fieldingConditions: 'Good'
-          }));
-        } catch (error) {
-          console.error('Error fetching real weather data, using fallback:', error);
-          // Fallback to static data if API fails
+      try {
+        // Fetch real weather data for all venues (IPL + WPL)
+        const realWeatherData = await weatherService.fetchWeatherForAllVenues();
+        sampleWeather = realWeatherData.map(weather => ({
+          ...weather,
+          // Ensure compatibility with existing WeatherData interface
+          outfieldCondition: 'Good',
+          pitchCondition: 'Excellent',
+          expectedRunRate: 8.5,
+          bowlingConditions: 'Balanced',
+          battingConditions: 'Favorable',
+          fieldingConditions: 'Good'
+        }));
+      } catch (error) {
+        console.error('Error fetching real weather data, using fallback:', error);
+        // Fallback to static data if API fails
           sampleWeather = [
             {
               venueId: 'wankhede',
@@ -1395,91 +1389,14 @@ export default function AdminMatchdayAdvanced() {
         }
       }
 
-      // Add weather data for WPL venues
+      // Filter weather data based on current league
       if (isWPL) {
-        sampleWeather.push(
-          {
-            venueId: 'wpl-dy-patil',
-            temperature: 30,
-            feelsLike: 33,
-            humidity: 70,
-            windSpeed: 15,
-            windDirection: 200,
-            pressure: 1008,
-            visibility: 9,
-            uvIndex: 7,
-            condition: 'partly-cloudy',
-            description: 'Partly cloudy with coastal humidity',
-            timestamp: new Date().toISOString(),
-            aiPrediction: {
-              matchImpact: 'medium',
-              pitchEffect: 'Coastal conditions may help swing bowlers early',
-              dewFactor: 80,
-              playingConditions: 'Moderate humidity with sea breeze',
-              recommendations: [
-                'Pace bowlers effective in first 10 overs',
-                'Dew expected in night matches',
-                'Spinners crucial in middle overs'
-              ],
-              confidence: 87
-            }
-          },
-          {
-            venueId: 'wpl-bca-stadium',
-            temperature: 28,
-            feelsLike: 30,
-            humidity: 55,
-            windSpeed: 10,
-            windDirection: 90,
-            pressure: 1012,
-            visibility: 10,
-            uvIndex: 6,
-            condition: 'sunny',
-            description: 'Clear weather with moderate temperature',
-            timestamp: new Date().toISOString(),
-            aiPrediction: {
-              matchImpact: 'low',
-              pitchEffect: 'Balanced conditions for both bat and ball',
-              dewFactor: 60,
-              playingConditions: 'Ideal cricket conditions',
-              recommendations: [
-                'Balanced pitch favors all-rounders',
-                'Minimal dew factor',
-                'Good visibility throughout match'
-              ],
-              confidence: 92
-            }
-          }
+        sampleWeather = sampleWeather.filter(weather => 
+          weather.venueId.startsWith('wpl-')
         );
       } else {
-        // IPL weather data
-        sampleWeather.push(
-          {
-            venueId: '1',
-            temperature: 32,
-            feelsLike: 35,
-            humidity: 65,
-            windSpeed: 12,
-            windDirection: 180,
-            pressure: 1010,
-            visibility: 10,
-            uvIndex: 8,
-            condition: 'sunny',
-            description: 'Clear skies with moderate humidity',
-            timestamp: new Date().toISOString(),
-            aiPrediction: {
-              matchImpact: 'medium',
-              pitchEffect: 'Dry pitch will favor batsmen initially, spinners later',
-              dewFactor: 75,
-              playingConditions: 'Excellent batting conditions with moderate humidity',
-              recommendations: [
-                'Teams winning toss might prefer to field first',
-                'Spinners will be crucial in middle overs',
-                'Dew might affect second innings bowling'
-              ],
-              confidence: 89
-            }
-          }
+        sampleWeather = sampleWeather.filter(weather => 
+          !weather.venueId.startsWith('wpl-')
         );
       }
 
