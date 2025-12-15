@@ -148,70 +148,132 @@ export default function AdminMatchdayAdvanced() {
     setLoading(true);
     try {
       // Load enhanced sample data with AI insights
-      const sampleVenues: Venue[] = [
-        {
-          id: '1',
-          name: 'Narendra Modi Stadium',
-          city: 'Ahmedabad',
-          capacity: 132000,
-          coordinates: { lat: 23.0225, lng: 72.5714 },
-          timezone: 'Asia/Kolkata',
-          established: 1982,
-          pitchType: 'Red Soil',
-          floodlights: true,
-          drainageSystem: 'Sand-based',
-          avgFirstInnings: 165,
-          avgSecondInnings: 145,
-          highestTotal: 239,
-          lowestTotal: 85,
-          lastMatch: '2024-05-29',
-          upcomingMatch: '2025-03-15',
-          status: 'active',
-          aiInsights: {
-            crowdPrediction: 95000,
-            weatherImpact: 'medium',
-            optimalConditions: ['Clear weather', 'Low humidity', 'Moderate temperature'],
-            strategicRecommendations: [
-              'Favor spinners in middle overs',
-              'Dew factor expected in second innings',
-              'Boundary fielding recommended'
-            ],
-            riskFactors: ['High humidity may affect bowling', 'Dew could impact second innings'],
-            confidence: 87
+      let sampleVenues: Venue[] = [];
+
+      // Add WPL-specific venues for WPL filtering
+      if (isWPL) {
+        sampleVenues = [
+          {
+            id: 'wpl-mumbai',
+            name: 'Wankhede Stadium - Mumbai',
+            city: 'Mumbai',
+            capacity: 33000,
+            coordinates: { lat: 18.9398, lng: 72.8259 },
+            timezone: 'Asia/Kolkata',
+            established: 1974,
+            pitchType: 'Red Soil',
+            floodlights: true,
+            drainageSystem: 'Sand-based',
+            avgFirstInnings: 165,
+            avgSecondInnings: 155,
+            highestTotal: 223,
+            lowestTotal: 87,
+            lastMatch: 'MI-W vs RCB-W - 2024-03-15',
+            upcomingMatch: 'MI-W vs DC-W - 2025-03-22',
+            status: 'active' as const,
+            aiInsights: {
+              crowdPrediction: 31000,
+              weatherImpact: 'medium' as const,
+              optimalConditions: ['Evening matches', 'Moderate humidity'],
+              strategicRecommendations: ['Pace-friendly conditions', 'Dew factor in night games'],
+              riskFactors: ['High humidity', 'Coastal conditions'],
+              confidence: 88
+            }
+          },
+          {
+            id: 'wpl-bengaluru',
+            name: 'M. Chinnaswamy Stadium - Bengaluru',
+            city: 'Bengaluru',
+            capacity: 38000,
+            coordinates: { lat: 12.9784, lng: 77.5998 },
+            timezone: 'Asia/Kolkata',
+            established: 1969,
+            pitchType: 'Red Soil',
+            floodlights: true,
+            drainageSystem: 'Sand-based',
+            avgFirstInnings: 160,
+            avgSecondInnings: 150,
+            highestTotal: 215,
+            lowestTotal: 82,
+            lastMatch: 'RCB-W vs UPW - 2024-03-20',
+            upcomingMatch: 'RCB-W vs GG - 2025-03-25',
+            status: 'active' as const,
+            aiInsights: {
+              crowdPrediction: 35000,
+              weatherImpact: 'low' as const,
+              optimalConditions: ['Clear weather', 'Balanced pitch'],
+              strategicRecommendations: ['Balanced conditions', 'Spinners effective'],
+              riskFactors: ['Variable bounce', 'Evening conditions'],
+              confidence: 91
+            }
           }
-        },
-        {
-          id: '2',
-          name: 'Eden Gardens',
-          city: 'Kolkata',
-          capacity: 66000,
-          coordinates: { lat: 22.5645, lng: 88.3412 },
-          timezone: 'Asia/Kolkata',
-          established: 1864,
-          pitchType: 'Traditional Red Soil',
-          floodlights: true,
-          drainageSystem: 'Improved with Super Sopper',
-          avgFirstInnings: 155,
-          avgSecondInnings: 140,
-          highestTotal: 204,
-          lowestTotal: 90,
-          lastMatch: '2024-05-01',
-          upcomingMatch: '2025-03-20',
-          status: 'active',
-          aiInsights: {
-            crowdPrediction: 58000,
-            weatherImpact: 'low',
-            optimalConditions: ['Overcast conditions', 'Moderate breeze'],
-            strategicRecommendations: [
-              'Pacers expected to get early movement',
-              'Spinners crucial in middle overs',
-              'Traditional cricket conditions'
-            ],
-            riskFactors: ['Rain possibility', 'Variable bounce'],
-            confidence: 92
+        ];
+      } else {
+        sampleVenues = [
+          {
+            id: '1',
+            name: 'Narendra Modi Stadium',
+            city: 'Ahmedabad',
+            capacity: 132000,
+            coordinates: { lat: 23.0225, lng: 72.5714 },
+            timezone: 'Asia/Kolkata',
+            established: 1982,
+            pitchType: 'Red Soil',
+            floodlights: true,
+            drainageSystem: 'Sand-based',
+            avgFirstInnings: 165,
+            avgSecondInnings: 145,
+            highestTotal: 239,
+            lowestTotal: 85,
+            lastMatch: '2024-05-29',
+            upcomingMatch: '2025-03-15',
+            status: 'active',
+            aiInsights: {
+              crowdPrediction: 95000,
+              weatherImpact: 'medium',
+              optimalConditions: ['Clear weather', 'Low humidity', 'Moderate temperature'],
+              strategicRecommendations: [
+                'Favor spinners in middle overs',
+                'Dew factor expected in second innings',
+                'Boundary fielding recommended'
+              ],
+              riskFactors: ['High humidity may affect bowling', 'Dew could impact second innings'],
+              confidence: 87
+            }
+          },
+          {
+            id: '2',
+            name: 'Eden Gardens',
+            city: 'Kolkata',
+            capacity: 66000,
+            coordinates: { lat: 22.5645, lng: 88.3412 },
+            timezone: 'Asia/Kolkata',
+            established: 1864,
+            pitchType: 'Traditional Red Soil',
+            floodlights: true,
+            drainageSystem: 'Improved with Super Sopper',
+            avgFirstInnings: 155,
+            avgSecondInnings: 140,
+            highestTotal: 204,
+            lowestTotal: 90,
+            lastMatch: '2024-05-01',
+            upcomingMatch: '2025-03-20',
+            status: 'active',
+            aiInsights: {
+              crowdPrediction: 58000,
+              weatherImpact: 'low',
+              optimalConditions: ['Overcast conditions', 'Moderate breeze'],
+              strategicRecommendations: [
+                'Pacers expected to get early movement',
+                'Spinners crucial in middle overs',
+                'Traditional cricket conditions'
+              ],
+              riskFactors: ['Rain possibility', 'Variable bounce'],
+              confidence: 92
+            }
           }
-        }
-      ];
+        ];
+      }
 
       const sampleWeather: WeatherData[] = [
         {
@@ -323,7 +385,17 @@ export default function AdminMatchdayAdvanced() {
     const matchesSearch = venue.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           venue.city.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = filterStatus === 'all' || venue.status === filterStatus;
-    return matchesSearch && matchesFilter;
+    
+    // WPL venue filtering - only show WPL-specific venues in WPL mode
+    const isWPLVenue = isWPL && (
+      venue.name.toLowerCase().includes('mumbai') || 
+      venue.name.toLowerCase().includes('bengaluru') ||
+      venue.name.toLowerCase().includes('delhi') ||
+      venue.name.toLowerCase().includes('gujarat') ||
+      venue.name.toLowerCase().includes('lucknow')
+    );
+    
+    return matchesSearch && matchesFilter && (!isWPL || isWPLVenue);
   });
 
   const getWeatherIcon = (condition: string) => {
