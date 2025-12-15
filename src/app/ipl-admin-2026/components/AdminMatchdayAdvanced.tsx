@@ -156,8 +156,47 @@ export default function AdminMatchdayAdvanced() {
         throw new Error(`Failed to fetch weather data: ${response.status}`);
       }
       
-      const weatherData = await response.json();
-      return weatherData;
+      const apiResponse = await response.json();
+      
+      console.log('Weather API response for', venueId, ':', apiResponse);
+      
+      // Extract current weather data from API response
+      // API returns nested structure, but component expects flat structure
+      if (apiResponse && apiResponse.current) {
+        const weatherData = {
+          venueId: apiResponse.venueId || venueId,
+          temperature: apiResponse.current.temperature,
+          feelsLike: apiResponse.current.feelsLike,
+          humidity: apiResponse.current.humidity,
+          windSpeed: apiResponse.current.windSpeed,
+          windDirection: apiResponse.current.windDirection,
+          pressure: apiResponse.current.pressure,
+          visibility: apiResponse.current.visibility,
+          uvIndex: apiResponse.current.uvIndex,
+          condition: apiResponse.current.condition,
+          description: apiResponse.current.description,
+          timestamp: apiResponse.current.timestamp,
+          aiPrediction: apiResponse.current.aiPrediction || {
+            matchImpact: 'medium',
+            pitchEffect: 'Balanced conditions expected',
+            dewFactor: 50,
+            playingConditions: 'Good cricket conditions',
+            recommendations: ['Standard play recommended'],
+            confidence: 75
+          }
+        };
+        console.log('Processed weather data:', weatherData);
+        return weatherData;
+      }
+      
+      // Fallback: try to use the response directly if it's already flat
+      if (apiResponse && apiResponse.temperature) {
+        console.log('Using flat weather data structure');
+        return apiResponse;
+      }
+      
+      console.log('No valid weather data structure found');
+      return null;
     } catch (error) {
       console.error('Error fetching weather data:', error);
       return null;
@@ -388,16 +427,20 @@ export default function AdminMatchdayAdvanced() {
       setVenues(sampleVenues);
       
       // Load real weather data for each venue
+      console.log('Loading weather data for venues:', sampleVenues.map(v => v.id));
       const weatherPromises = sampleVenues.map(async (venue) => {
         const weatherData = await loadWeatherData(venue.id);
         return weatherData;
       });
       
       const weatherResults = await Promise.allSettled(weatherPromises);
+      console.log('Weather results:', weatherResults);
+      
       const validWeatherData = weatherResults
         .filter((result): result is PromiseFulfilledResult<any> => result.status === 'fulfilled' && result.value !== null)
         .map(result => result.value);
       
+      console.log('Valid weather data:', validWeatherData);
       setWeatherData(validWeatherData);
       
       // Load match conditions
