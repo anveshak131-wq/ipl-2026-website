@@ -547,7 +547,6 @@ export default function AdminPlayers() {
   if (isLoading) {
     return (
       <div className="flex min-h-screen bg-ipl-dark">
-        <AdminSidebar currentPage="/ipl-admin-2026/players" />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-white">Loading...</div>
         </div>
@@ -556,7 +555,9 @@ export default function AdminPlayers() {
   }
 
   return (
-    <div className="p-8">
+    <div className="flex min-h-screen bg-gray-950">
+      <div className="flex-1">
+        <div className="p-8">
           {/* Header */}
           <div className="mb-8">
             <div className="flex justify-between items-start mb-6">
