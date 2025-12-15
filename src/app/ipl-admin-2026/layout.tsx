@@ -85,7 +85,7 @@ export default function AdminLayout({
     <LeagueProvider>
       <div className="min-h-screen bg-ipl-dark">
         <AdminSidebar />
-        <div className="lg:pl-64">
+        <div>
           <div className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur-sm border-b border-white/10">
             <div className="px-6 py-3">
               <div className="flex items-center justify-between">
