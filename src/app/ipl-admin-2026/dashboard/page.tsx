@@ -357,9 +357,7 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-gray-950">
-      <main className="flex-1 overflow-auto">
-        <div className="max-w-7xl mx-auto px-8 py-8">
+    <div className="max-w-7xl mx-auto px-8 py-8">
           {/* Header - Redesigned */}
           <div className="mb-12">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
@@ -814,7 +812,5 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
-      </main>
-    </div>
-  );
+      );
 }

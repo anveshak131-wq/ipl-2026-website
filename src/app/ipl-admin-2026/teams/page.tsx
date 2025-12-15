@@ -447,11 +447,7 @@ export default function AdminTeams() {
     }
 
     return (
-        <div className="flex min-h-screen bg-gray-950">
-            <AuroraBackground />
-
-            <div className="flex-1 relative z-10">
-                <div className="p-8">
+        <div className="p-8 relative z-10">
                     {success && (
                         <div className="admin-glass mb-6 p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-emerald-400">
                             {success}
@@ -1207,7 +1203,5 @@ export default function AdminTeams() {
                         </div>
                     </div>
                 </div>
-            )}
-        </div>
     );
 }
