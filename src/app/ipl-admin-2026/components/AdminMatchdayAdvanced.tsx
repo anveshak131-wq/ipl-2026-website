@@ -829,7 +829,7 @@ export default function AdminMatchdayAdvanced() {
               pressure: 1012,
               visibility: 10,
               uvIndex: 6,
-              condition: 'pleasant',
+              condition: 'sunny',
               description: 'Pleasant weather with moderate conditions',
               timestamp: new Date().toISOString(),
               aiPrediction: {
@@ -1021,7 +1021,7 @@ export default function AdminMatchdayAdvanced() {
               pressure: 1013,
               visibility: 10,
               uvIndex: 6,
-              condition: 'pleasant',
+              condition: 'sunny',
               description: 'Pleasant weather with good breeze',
               timestamp: new Date().toISOString(),
               aiPrediction: {
@@ -1077,7 +1077,7 @@ export default function AdminMatchdayAdvanced() {
             pressure: 1012,
             visibility: 10,
             uvIndex: 6,
-            condition: 'pleasant',
+            condition: 'sunny',
             description: 'Pleasant weather with moderate conditions',
             timestamp: new Date().toISOString(),
             aiPrediction: {
@@ -1233,7 +1233,7 @@ export default function AdminMatchdayAdvanced() {
             pressure: 1013,
             visibility: 10,
             uvIndex: 6,
-            condition: 'pleasant',
+            condition: 'sunny',
             description: 'Pleasant weather with good breeze',
             timestamp: new Date().toISOString(),
             aiPrediction: {
@@ -1311,7 +1311,7 @@ export default function AdminMatchdayAdvanced() {
             pressure: 1010,
             visibility: 10,
             uvIndex: 8,
-            condition: 'warm',
+            condition: 'sunny',
             description: 'Warm conditions with moderate humidity',
             timestamp: new Date().toISOString(),
             aiPrediction: {
@@ -1337,7 +1337,7 @@ export default function AdminMatchdayAdvanced() {
             pressure: 1011,
             visibility: 9,
             uvIndex: 6,
-            condition: 'pleasant',
+            condition: 'sunny',
             description: 'Pleasant weather with moderate conditions',
             timestamp: new Date().toISOString(),
             aiPrediction: {
@@ -1363,7 +1363,7 @@ export default function AdminMatchdayAdvanced() {
             pressure: 1012,
             visibility: 10,
             uvIndex: 7,
-            condition: 'pleasant',
+            condition: 'sunny',
             description: 'New stadium with good conditions',
             timestamp: new Date().toISOString(),
             aiPrediction: {
@@ -1415,7 +1415,7 @@ export default function AdminMatchdayAdvanced() {
             pressure: 1011,
             visibility: 10,
             uvIndex: 8,
-            condition: 'warm',
+            condition: 'sunny',
             description: 'Warm conditions with low humidity',
             timestamp: new Date().toISOString(),
             aiPrediction: {
