@@ -9,6 +9,7 @@ import {
   Edit, Save, X, ChevronRight, ChevronDown, Filter, Search,
   Sun, CloudRain, CloudSnow, Navigation, Bell, Database
 } from 'lucide-react';
+import { useLeague } from '@/contexts/LeagueContext';
 
 // Add global styles to disable scrolling
 const noScrollStyles = `
