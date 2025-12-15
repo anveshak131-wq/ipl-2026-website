@@ -557,8 +557,6 @@ export default function AdminPlayers() {
 
   return (
     <div className="flex min-h-screen bg-gray-950">
-      <AdminSidebar currentPage="/ipl-admin-2026/players" />
-
       <div className="flex-1">
         <div className="p-8">
           {/* Header */}
