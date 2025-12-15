@@ -12,19 +12,7 @@ import {
 import { useLeague } from '@/contexts/LeagueContext';
 
 // Add global styles to disable scrolling
-const noScrollStyles = `
-  html, body {
-    overflow: hidden !important;
-    height: 100vh !important;
-    position: fixed !important;
-    width: 100vw !important;
-  }
-
-  #__next {
-    height: 100vh !important;
-    overflow: hidden !important;
-  }
-`;
+// Removed noScrollStyles to allow proper scrolling
 
 // Advanced interfaces with AI integration
 interface Venue {
@@ -141,19 +129,7 @@ export default function AdminMatchdayAdvanced() {
   const [notifications, setNotifications] = useState<string[]>([]);
 
   useEffect(() => {
-    // Inject styles to disable scrolling
-    const styleElement = document.createElement('style');
-    styleElement.textContent = noScrollStyles;
-    document.head.appendChild(styleElement);
-
     loadInitialData();
-
-    // Cleanup styles on unmount
-    return () => {
-      if (styleElement.parentNode) {
-        styleElement.parentNode.removeChild(styleElement);
-      }
-    };
   }, []);
 
   // Helper function to get venue name by ID
@@ -941,7 +917,7 @@ export default function AdminMatchdayAdvanced() {
   };
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
+    <div className="min-h-screen w-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
       {/* Advanced Header */}
       <motion.header
         className="bg-black/40 backdrop-blur-xl border-b border-blue-500/20 flex-shrink-0"
