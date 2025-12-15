@@ -83,8 +83,8 @@ export default function AdminLayout({
   // Show admin layout with sidebar for authenticated users
   return (
     <LeagueProvider>
-      <div className="min-h-screen bg-ipl-dark">
-        <div>
+      <div className="min-h-screen bg-ipl-dark flex flex-col">
+        <div className="flex-1 flex flex-col">
           <div className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur-sm border-b border-white/10">
             <div className="px-6 py-3">
               <div className="flex items-center justify-between">
@@ -100,7 +100,7 @@ export default function AdminLayout({
               </div>
             </div>
           </div>
-          <main className="p-6">
+          <main className="p-6 overflow-y-auto flex-1">
             {children}
           </main>
         </div>

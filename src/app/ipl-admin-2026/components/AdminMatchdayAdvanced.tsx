@@ -150,7 +150,7 @@ export default function AdminMatchdayAdvanced() {
 
   // Helper function to get venue name by ID
   const getVenueName = (venueId: string) => {
-    const venueNames = {
+    const venueNames: Record<string, string> = {
       'wpl-dy-patil': 'Dr. DY Patil Sports Academy, Navi Mumbai',
       'wpl-bca-stadium': 'BCA Stadium, Kotambi (Vadodara)',
       '1': 'Narendra Modi Stadium, Ahmedabad',
