@@ -138,11 +138,65 @@ export default function AdminMatchdayAdvanced() {
   useEffect(() => {
     refreshWeatherData();
 
-    const weatherInterval = setInterval(() => {
-      refreshWeatherData();
-    }, 12 * 60 * 60 * 1000); // 12 hours in milliseconds
+    // Schedule weather updates at 6:00 AM and 6:00 PM IST
+    const scheduleWeatherUpdates = () => {
+      const now = new Date();
+      
+      // Convert current UTC time to IST for calculation
+      const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
+      const istTime = new Date(now.getTime() + istOffset);
+      const istHour = istTime.getUTCHours(); // Get IST hour (0-23)
+      
+      // Calculate next update time in UTC
+      const nextUpdateUTC = new Date(now);
+      
+      if (istHour < 6) {
+        // Next update is 6:00 AM IST today
+        nextUpdateUTC.setUTCHours(0, 30, 0, 0); // 6:00 AM IST = 00:30 UTC
+      } else if (istHour < 18) {
+        // Next update is 6:00 PM IST today
+        nextUpdateUTC.setUTCHours(12, 30, 0, 0); // 6:00 PM IST = 12:30 UTC
+      } else {
+        // Next update is 6:00 AM IST tomorrow
+        nextUpdateUTC.setUTCHours(0, 30, 0, 0); // 6:00 AM IST = 00:30 UTC
+        nextUpdateUTC.setUTCDate(nextUpdateUTC.getUTCDate() + 1);
+      }
+      
+      // If calculated time is in the past, move to next slot
+      if (nextUpdateUTC <= now) {
+        if (istHour < 18) {
+          nextUpdateUTC.setUTCHours(12, 30, 0, 0); // Move to 6:00 PM IST
+        } else {
+          nextUpdateUTC.setUTCHours(0, 30, 0, 0); // Move to 6:00 AM IST tomorrow
+          nextUpdateUTC.setUTCDate(nextUpdateUTC.getUTCDate() + 1);
+        }
+      }
 
-    return () => clearInterval(weatherInterval);
+      const timeUntilUpdate = nextUpdateUTC.getTime() - now.getTime();
+      
+      const istTimeString = new Date(nextUpdateUTC.getTime() + istOffset).toLocaleString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        hour: '2-digit',
+        minute: '2-digit',
+        day: '2-digit',
+        month: 'short'
+      });
+      
+      console.log(`Next weather update scheduled for: ${istTimeString} IST`);
+      console.log(`Time until update: ${Math.round(timeUntilUpdate / (1000 * 60 * 60))} hours`);
+      
+      setTimeout(() => {
+        refreshWeatherData();
+        // Schedule the next update
+        scheduleWeatherUpdates();
+      }, timeUntilUpdate);
+    };
+
+    scheduleWeatherUpdates();
+
+    return () => {
+      // Cleanup will be handled by setTimeout clearing
+    };
   }, []);
 
   const getVenueName = (venueId: string) => {
