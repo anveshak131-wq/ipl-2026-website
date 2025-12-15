@@ -33,6 +33,7 @@ interface Venue {
   lastMatch: string;
   upcomingMatch: string;
   status: 'active' | 'maintenance' | 'inactive';
+  lastUpdated: string;
   aiInsights?: VenueAIInsights;
 }
 
@@ -250,6 +251,7 @@ export default function AdminMatchdayAdvanced() {
             lastMatch: 'MI-W vs RCB-W - 2024-03-15',
             upcomingMatch: 'MI-W vs DC-W - 2025-03-22',
             status: 'active' as const,
+            lastUpdated: new Date().toISOString(),
             aiInsights: {
               crowdPrediction: 48000,
               weatherImpact: 'medium' as const,
@@ -277,6 +279,7 @@ export default function AdminMatchdayAdvanced() {
             lastMatch: 'GG vs UPW - 2024-03-20',
             upcomingMatch: 'RCB-W vs GG - 2025-03-25',
             status: 'active' as const,
+            lastUpdated: new Date().toISOString(),
             aiInsights: {
               crowdPrediction: 32000,
               weatherImpact: 'low' as const,
@@ -734,7 +737,7 @@ export default function AdminMatchdayAdvanced() {
             pressure: 1010,
             visibility: 8,
             uvIndex: 8,
-            condition: 'hot',
+            condition: 'sunny',
             description: 'Hot and humid conditions',
             timestamp: new Date().toISOString(),
             aiPrediction: {
@@ -838,7 +841,7 @@ export default function AdminMatchdayAdvanced() {
             pressure: 1010,
             visibility: 10,
             uvIndex: 9,
-            condition: 'hot',
+            condition: 'sunny',
             description: 'Hot and dry conditions',
             timestamp: new Date().toISOString(),
             aiPrediction: {
@@ -1516,12 +1519,22 @@ export default function AdminMatchdayAdvanced() {
         name: venueForm.name,
         city: venueForm.city,
         capacity: parseInt(venueForm.capacity) || 0,
-        status: 'active' as const,
         coordinates: {
           lat: parseFloat(venueForm.latitude) || 0,
           lng: parseFloat(venueForm.longitude) || 0
         },
+        timezone: 'Asia/Kolkata',
+        established: new Date().getFullYear(),
         pitchType: venueForm.pitchType,
+        floodlights: true,
+        drainageSystem: 'Standard',
+        avgFirstInnings: 160,
+        avgSecondInnings: 150,
+        highestTotal: 200,
+        lowestTotal: 100,
+        lastMatch: '',
+        upcomingMatch: '',
+        status: 'active' as const,
         lastUpdated: new Date().toISOString()
       };
       setVenues(prev => [...prev, newVenue]);
