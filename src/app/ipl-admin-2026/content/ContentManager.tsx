@@ -183,16 +183,18 @@ export default function ContentManager({
       console.log('League context:', { isIPL, isWPL });
       console.log('Total players before filtering:', playersData.length);
       
-      // Filter teams and players based on current league
+      // Filter teams and players based on current league using league property
       const filteredTeams = teamsData.filter(team => {
-        if (isIPL) return !team.id.startsWith('wpl-');
-        if (isWPL) return team.id.startsWith('wpl-');
+        const teamLeague = team.league || 'ipl';
+        if (isIPL) return teamLeague === 'ipl';
+        if (isWPL) return teamLeague === 'wpl';
         return true;
       });
       
       const filteredPlayers = playersData.filter(player => {
-        if (isIPL) return !player.id.startsWith('wpl-');
-        if (isWPL) return player.id.startsWith('wpl-');
+        const playerLeague = player.league || 'ipl';
+        if (isIPL) return playerLeague === 'ipl';
+        if (isWPL) return playerLeague === 'wpl';
         return true;
       });
       
@@ -204,7 +206,7 @@ export default function ContentManager({
       });
       
       console.log('Players after filtering:', filteredPlayers.length);
-      console.log('WPL players filtered out:', playersData.filter(p => p.id.startsWith('wpl-')).length);
+      console.log('WPL players filtered out:', playersData.filter(p => (p.league || 'ipl') === 'wpl').length);
       
       setTeams(filteredTeams);
       setMatches(filteredMatches);

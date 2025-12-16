@@ -88,10 +88,11 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
             console.log('GlobalSearch - League context:', { isIPL, isWPL });
             console.log('GlobalSearch - Total teams before filtering:', teams.length);
             
-            // Filter teams based on current league
+            // Filter teams based on current league using league property
             const filteredTeams = teams.filter((team: any) => {
-              if (isIPL) return !team.id.startsWith('wpl-');
-              if (isWPL) return team.id.startsWith('wpl-');
+              const teamLeague = team.league || 'ipl';
+              if (isIPL) return teamLeague === 'ipl';
+              if (isWPL) return teamLeague === 'wpl';
               return true;
             });
             
@@ -123,10 +124,11 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
             console.log('GlobalSearch - League context:', { isIPL, isWPL });
             console.log('GlobalSearch - Total players before filtering:', players.length);
             
-            // Filter players based on current league
+            // Filter players based on current league using league property
             const filteredPlayers = players.filter((player: any) => {
-              if (isIPL) return !player.id.startsWith('wpl-');
-              if (isWPL) return player.id.startsWith('wpl-');
+              const playerLeague = player.league || 'ipl';
+              if (isIPL) return playerLeague === 'ipl';
+              if (isWPL) return playerLeague === 'wpl';
               return true;
             });
             
