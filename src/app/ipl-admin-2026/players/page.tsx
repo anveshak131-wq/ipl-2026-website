@@ -10,6 +10,7 @@ import { api } from '@/lib/data';
 import { parseDateDDMMYYYY, formatDateDDMMYYYY, calculateAge, isValidDate } from '@/lib/dateUtils';
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { CustomEmoji } from '@/components/emoji/Emoji';
+import '@/styles/flags.css';
 
 // Sort icons
 const ChevronUpIcon = ({ className }: { className?: string }) => (
@@ -961,8 +962,18 @@ export default function AdminPlayers() {
                               {idx + 1}
                             </div>
                             <div>
-                              <div className="text-white font-semibold">{player.name}</div>
-                              <div className="text-xs text-gray-500">{player.nationality}</div>
+                              <div className="flex items-center gap-2">
+                                {player.nationality && (
+                                  <span 
+                                    className={`flag ${getCountryFlagClass(player.nationality)}`}
+                                    title={player.nationality}
+                                  />
+                                )}
+                                <div>
+                                  <div className="text-white font-semibold">{player.name}</div>
+                                  <div className="text-xs text-gray-500">{player.nationality}</div>
+                                </div>
+                              </div>
                             </div>
                             {player.isCaptain && (
                               <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30" title="Captain">
@@ -1560,3 +1571,37 @@ export default function AdminPlayers() {
     </div>
   );
 }
+
+// Country flag utility function
+const getCountryFlagClass = (nationality: string): string => {
+  if (!nationality) return "";
+  
+  const countryMap: { [key: string]: string } = {
+    'India': 'flag-india',
+    'Australia': 'flag-australia',
+    'England': 'flag-england',
+    'South Africa': 'flag-south-africa',
+    'New Zealand': 'flag-new-zealand',
+    'Pakistan': 'flag-pakistan',
+    'Sri Lanka': 'flag-sri-lanka',
+    'West Indies': 'flag-west-indies',
+    'Bangladesh': 'flag-bangladesh',
+    'Afghanistan': 'flag-afghanistan',
+    'Ireland': 'flag-ireland',
+    'Netherlands': 'flag-netherlands',
+    'Scotland': 'flag-scotland',
+    'Zimbabwe': 'flag-zimbabwe',
+    'Nepal': 'flag-nepal',
+    'Oman': 'flag-oman',
+    'UAE': 'flag-uae',
+    'USA': 'flag-usa',
+    'United States': 'flag-usa',
+    'Canada': 'flag-canada',
+    'Kenya': 'flag-kenya',
+    'Namibia': 'flag-namibia',
+    'Papua New Guinea': 'flag-papua-new-guinea',
+    'Hong Kong': 'flag-hong-kong'
+  };
+  
+  return countryMap[nationality] || "";
+};

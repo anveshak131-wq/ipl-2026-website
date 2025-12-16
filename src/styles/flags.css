@@ -1,0 +1,105 @@
+/* Cricket Country Flags */
+.flag {
+  display: inline-block;
+  width: 20px;
+  height: 14px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin-right: 6px;
+  border-radius: 2px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Individual flag classes */
+.flag-india {
+  background-image: url('/flags/cricket/india.svg');
+}
+
+.flag-australia {
+  background-image: url('/flags/cricket/australia.svg');
+}
+
+.flag-england {
+  background-image: url('/flags/cricket/england.svg');
+}
+
+.flag-south-africa {
+  background-image: url('/flags/cricket/south-africa.svg');
+}
+
+.flag-new-zealand {
+  background-image: url('/flags/cricket/new-zealand.svg');
+}
+
+.flag-pakistan {
+  background-image: url('/flags/cricket/pakistan.svg');
+}
+
+.flag-sri-lanka {
+  background-image: url('/flags/cricket/sri-lanka.svg');
+}
+
+.flag-west-indies {
+  background-image: url('/flags/cricket/west-indies.svg');
+}
+
+.flag-bangladesh {
+  background-image: url('/flags/cricket/bangladesh.svg');
+}
+
+.flag-afghanistan {
+  background-image: url('/flags/cricket/afghanistan.svg');
+}
+
+.flag-ireland {
+  background-image: url('/flags/cricket/ireland.svg');
+}
+
+.flag-netherlands {
+  background-image: url('/flags/cricket/netherlands.svg');
+}
+
+.flag-scotland {
+  background-image: url('/flags/cricket/scotland.svg');
+}
+
+.flag-zimbabwe {
+  background-image: url('/flags/cricket/zimbabwe.svg');
+}
+
+.flag-nepal {
+  background-image: url('/flags/cricket/nepal.svg');
+}
+
+.flag-oman {
+  background-image: url('/flags/cricket/oman.svg');
+}
+
+.flag-uae {
+  background-image: url('/flags/cricket/uae.svg');
+}
+
+.flag-usa {
+  background-image: url('/flags/cricket/usa.svg');
+}
+
+.flag-canada {
+  background-image: url('/flags/cricket/canada.svg');
+}
+
+.flag-kenya {
+  background-image: url('/flags/cricket/kenya.svg');
+}
+
+.flag-namibia {
+  background-image: url('/flags/cricket/namibia.svg');
+}
+
+.flag-papua-new-guinea {
+  background-image: url('/flags/cricket/papua-new-guinea.svg');
+}
+
+.flag-hong-kong {
+  background-image: url('/flags/cricket/hong-kong.svg');
+}
