@@ -75,9 +75,27 @@ export const onRequest = async (context) => {
       const playersData = await env.IPL_CACHE.get('players', 'json');
       const players = playersData || [];
 
-      // Check team size limit for IPL teams (25 players max)
       const playerLeague = newPlayer.league || 'ipl';
+
+      // Check for duplicate player (same name and team in same league)
+      const duplicatePlayer = players.find(p => 
+        (p.league || 'ipl') === playerLeague &&
+        p.teamId === newPlayer.teamId &&
+        p.name.toLowerCase().trim() === newPlayer.name.toLowerCase().trim()
+      );
+      
+      if (duplicatePlayer) {
+        return new Response(JSON.stringify({ 
+          error: 'A player with the name "' + newPlayer.name + '" already exists in this team for ' + playerLeague.toUpperCase() + '.' 
+        }), {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+
+      // Check team size limits
       if (playerLeague === 'ipl') {
+        // IPL teams: maximum 25 players
         const existingTeamPlayers = players.filter(p => 
           (p.league || 'ipl') === 'ipl' && p.teamId === newPlayer.teamId
         );
@@ -85,6 +103,20 @@ export const onRequest = async (context) => {
         if (existingTeamPlayers.length >= 25) {
           return new Response(JSON.stringify({ 
             error: 'IPL teams cannot have more than 25 players. This team already has ' + existingTeamPlayers.length + ' players.' 
+          }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json', ...corsHeaders },
+          });
+        }
+      } else if (playerLeague === 'wpl') {
+        // WPL teams: maximum 18 players
+        const existingTeamPlayers = players.filter(p => 
+          (p.league || 'ipl') === 'wpl' && p.teamId === newPlayer.teamId
+        );
+        
+        if (existingTeamPlayers.length >= 18) {
+          return new Response(JSON.stringify({ 
+            error: 'WPL teams cannot have more than 18 players. This team already has ' + existingTeamPlayers.length + ' players.' 
           }), {
             status: 400,
             headers: { 'Content-Type': 'application/json', ...corsHeaders },
