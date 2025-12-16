@@ -74,7 +74,14 @@ export const onRequest = async (context) => {
 
       const playersData = await env.IPL_CACHE.get('players', 'json');
       const players = playersData || [];
-      const newId = (players.length + 1).toString();
+      
+      // Generate unique ID within the specific league
+      const leaguePlayers = players.filter(p => (p.league || 'ipl') === (newPlayer.league || 'ipl'));
+      const maxId = leaguePlayers.length > 0 
+        ? Math.max(...leaguePlayers.map(p => parseInt(p.id) || 0))
+        : 0;
+      const newId = (maxId + 1).toString();
+      
       const playerToAdd = {
         id: newId,
         league: newPlayer.league || 'ipl', // Default to 'ipl' if not specified
