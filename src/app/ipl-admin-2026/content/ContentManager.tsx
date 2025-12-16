@@ -86,6 +86,15 @@ export default function ContentManager({
   const [newsCategoryFilter, setNewsCategoryFilter] = useState<'all' | 'match' | 'team' | 'player' | 'general'>('all');
   const [dateFilter, setDateFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
   const [previewAsOf, setPreviewAsOf] = useState<string>('');
+  
+  // Player search for linked players
+  const [playerSearchQuery, setPlayerSearchQuery] = useState('');
+
+  // Filter players for selection based on search query
+  const filteredPlayersForSelection = players.filter(player =>
+    player.name.toLowerCase().includes(playerSearchQuery.toLowerCase()) ||
+    player.role.toLowerCase().includes(playerSearchQuery.toLowerCase())
+  );
 
   const [formData, setFormData] = useState<{
     type: 'banner' | 'highlight' | 'news';
@@ -1036,21 +1045,84 @@ export default function ContentManager({
                             <label className="block text-sm font-semibold text-gray-300 mb-2">
                               Linked Players (for player stories)
                             </label>
-                            <select
-                              multiple
-                              value={formData.linkedPlayerIds}
-                              onChange={(e) => {
-                                const ids = Array.from(e.target.selectedOptions).map((opt) => opt.value);
-                                setFormData({ ...formData, linkedPlayerIds: ids });
-                              }}
-                              className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-ipl-gold focus:ring-2 focus:ring-ipl-gold/20 transition-all h-32"
-                            >
-                              {players.map((player) => (
-                                <option key={player.id} value={player.id}>
-                                  {player.name} ({player.role})
-                                </option>
-                              ))}
-                            </select>
+                            
+                            {/* Search bar for players */}
+                            <div className="relative mb-3">
+                              <svg className="absolute left-3 top-3 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                              </svg>
+                              <input
+                                type="text"
+                                placeholder="Search players by name or role..."
+                                value={playerSearchQuery}
+                                onChange={(e) => setPlayerSearchQuery(e.target.value)}
+                                className="w-full bg-white/5 border border-white/20 rounded-xl pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold focus:ring-2 focus:ring-ipl-gold/20 transition-all"
+                              />
+                            </div>
+                            
+                            {/* Filtered players list */}
+                            <div className="bg-white/5 border border-white/20 rounded-xl p-3 max-h-48 overflow-y-auto">
+                              {filteredPlayersForSelection.length === 0 ? (
+                                <p className="text-gray-400 text-sm text-center py-4">
+                                  No players found matching "{playerSearchQuery}"
+                                </p>
+                              ) : (
+                                <div className="space-y-2">
+                                  {filteredPlayersForSelection.map((player) => (
+                                    <div
+                                      key={player.id}
+                                      className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${
+                                        formData.linkedPlayerIds.includes(player.id)
+                                          ? 'bg-ipl-gold/20 border border-ipl-gold/30'
+                                          : 'hover:bg-white/10'
+                                      }`}
+                                      onClick={() => {
+                                        const isSelected = formData.linkedPlayerIds.includes(player.id);
+                                        if (isSelected) {
+                                          setFormData({
+                                            ...formData,
+                                            linkedPlayerIds: formData.linkedPlayerIds.filter(id => id !== player.id)
+                                          });
+                                        } else {
+                                          setFormData({
+                                            ...formData,
+                                            linkedPlayerIds: [...formData.linkedPlayerIds, player.id]
+                                          });
+                                        }
+                                      }}
+                                    >
+                                      <div className="flex items-center space-x-3">
+                                        <div className={`w-4 h-4 rounded border-2 ${
+                                          formData.linkedPlayerIds.includes(player.id)
+                                            ? 'bg-ipl-gold border-ipl-gold'
+                                            : 'border-gray-400'
+                                        }`}>
+                                          {formData.linkedPlayerIds.includes(player.id) && (
+                                            <svg className="w-full h-full text-white p-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                            </svg>
+                                          )}
+                                        </div>
+                                        <div>
+                                          <div className="text-white font-medium">{player.name}</div>
+                                          <div className="text-gray-400 text-sm">{player.role}</div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                            
+                            {/* Selected players summary */}
+                            {formData.linkedPlayerIds.length > 0 && (
+                              <div className="mt-3 p-2 bg-ipl-gold/10 border border-ipl-gold/20 rounded-lg">
+                                <p className="text-ipl-gold text-sm font-medium">
+                                  {formData.linkedPlayerIds.length} player{formData.linkedPlayerIds.length !== 1 ? 's' : ''} selected
+                                </p>
+                              </div>
+                            )}
+                            
                             <p className="mt-1 text-xs text-gray-400">Optional: used to show this article in player news panels.</p>
                           </div>
                         </div>
