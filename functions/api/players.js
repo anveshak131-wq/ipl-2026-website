@@ -74,6 +74,23 @@ export const onRequest = async (context) => {
 
       const playersData = await env.IPL_CACHE.get('players', 'json');
       const players = playersData || [];
+
+      // Check team size limit for IPL teams (25 players max)
+      const playerLeague = newPlayer.league || 'ipl';
+      if (playerLeague === 'ipl') {
+        const existingTeamPlayers = players.filter(p => 
+          (p.league || 'ipl') === 'ipl' && p.teamId === newPlayer.teamId
+        );
+        
+        if (existingTeamPlayers.length >= 25) {
+          return new Response(JSON.stringify({ 
+            error: 'IPL teams cannot have more than 25 players. This team already has ' + existingTeamPlayers.length + ' players.' 
+          }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json', ...corsHeaders },
+          });
+        }
+      }
       
       // Generate unique ID within the specific league
       const leaguePlayers = players.filter(p => (p.league || 'ipl') === (newPlayer.league || 'ipl'));
