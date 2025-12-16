@@ -8,6 +8,7 @@ import AuroraBackground from '@/components/ui/AuroraBackground';
 import ModernDialog from '@/components/admin/ModernDialog';
 import { Content, Team, Match, Player } from '@/types';
 import { api } from '@/lib/data';
+import { useLeague } from '@/contexts/LeagueContext';
 
 // Icons
 const IconSearch = ({ className }: { className?: string }) => (
@@ -66,6 +67,7 @@ export default function ContentManager({
 }: ContentManagerProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const { isIPL, isWPL } = useLeague();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [content, setContent] = useState<Content[]>([]);
   const [filteredContent, setFilteredContent] = useState<Content[]>([]);
@@ -168,7 +170,7 @@ export default function ContentManager({
     };
 
     checkAuth();
-  }, [router]);
+  }, [router, isIPL, isWPL]);
 
   const fetchContext = async () => {
     try {
@@ -177,9 +179,30 @@ export default function ContentManager({
         api.getMatches(),
         api.getPlayers(),
       ]);
-      setTeams(teamsData);
-      setMatches(matchesData);
-      setPlayers(playersData);
+      
+      // Filter teams and players based on current league
+      const filteredTeams = teamsData.filter(team => {
+        if (isIPL) return !team.id.startsWith('wpl-');
+        if (isWPL) return team.id.startsWith('wpl-');
+        return true;
+      });
+      
+      const filteredPlayers = playersData.filter(player => {
+        if (isIPL) return !player.id.startsWith('wpl-');
+        if (isWPL) return player.id.startsWith('wpl-');
+        return true;
+      });
+      
+      // Filter matches based on current league
+      const filteredMatches = matchesData.filter(match => {
+        if (isIPL) return !match.id?.startsWith('wpl-');
+        if (isWPL) return match.id?.startsWith('wpl-');
+        return true;
+      });
+      
+      setTeams(filteredTeams);
+      setMatches(filteredMatches);
+      setPlayers(filteredPlayers);
     } catch (error) {
       console.error('Failed to fetch context data for news links:', error);
     }

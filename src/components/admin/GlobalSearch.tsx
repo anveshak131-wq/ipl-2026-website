@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, Clock, Command, ArrowRight, FileText, Users, Calendar, Trophy } from 'lucide-react';
+import { useLeague } from '@/contexts/LeagueContext';
 
 interface SearchResult {
   id: string;
@@ -20,6 +21,7 @@ interface GlobalSearchProps {
 
 export default function GlobalSearch({ onClose }: GlobalSearchProps) {
   const router = useRouter();
+  const { isIPL, isWPL } = useLeague();
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -83,7 +85,14 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
           const teamsRes = await fetch('/api/teams');
           if (teamsRes.ok) {
             const teams = await teamsRes.json();
-            const teamMatches = teams
+            // Filter teams based on current league
+            const filteredTeams = teams.filter((team: any) => {
+              if (isIPL) return !team.id.startsWith('wpl-');
+              if (isWPL) return team.id.startsWith('wpl-');
+              return true;
+            });
+            
+            const teamMatches = filteredTeams
               .filter((team: any) =>
                 team.name?.toLowerCase().includes(query.toLowerCase()) ||
                 team.shortName?.toLowerCase().includes(query.toLowerCase())
@@ -108,7 +117,14 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
           const playersRes = await fetch('/api/players');
           if (playersRes.ok) {
             const players = await playersRes.json();
-            const playerMatches = players
+            // Filter players based on current league
+            const filteredPlayers = players.filter((player: any) => {
+              if (isIPL) return !player.id.startsWith('wpl-');
+              if (isWPL) return player.id.startsWith('wpl-');
+              return true;
+            });
+            
+            const playerMatches = filteredPlayers
               .filter((player: any) =>
                 player.name?.toLowerCase().includes(query.toLowerCase()) ||
                 player.role?.toLowerCase().includes(query.toLowerCase())
