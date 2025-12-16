@@ -7,6 +7,7 @@ import { WPLColors } from '@/lib/wplColors';
 import { formatDateDDMMYYYY, calculateAge } from '@/lib/dateUtils';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import { X } from 'lucide-react';
+import FlagImage from '@/components/ui/FlagImage';
 
 interface WPLPlayerModalProps {
   player: Player | null;
@@ -259,9 +260,14 @@ export default function WPLPlayerModal({ player, team, isOpen, onClose }: WPLPla
                       <p className="text-xs uppercase mb-1" style={{ color: WPLColors.textMuted }}>
                         Nationality
                       </p>
-                      <p className="text-lg font-bold" style={{ color: WPLColors.textPrimary }}>
-                        {player.nationality}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        {player.nationality && (
+                          <FlagImage nationality={player.nationality} size="sm" />
+                        )}
+                        <p className="text-lg font-bold" style={{ color: WPLColors.textPrimary }}>
+                          {player.nationality}
+                        </p>
+                      </div>
                     </div>
                     <div
                       className="p-4 rounded-xl border"

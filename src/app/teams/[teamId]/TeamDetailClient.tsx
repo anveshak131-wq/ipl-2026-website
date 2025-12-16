@@ -47,6 +47,7 @@ import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import RCBLottie from '@/components/ui/RCBLottie';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { getOptimalTextColor } from '@/lib/colorUtils';
+import FlagImage from '@/components/ui/FlagImage';
 
 interface TeamDetailClientProps {
   teamId: string;
@@ -1413,9 +1414,14 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer" />
 
       {/* Player Name */}
-      <h3 className="text-xl font-bold mb-2 pr-16" style={{ color: primaryColor.textOnLight }}>
-        {player.name}
-      </h3>
+      <div className="flex items-center gap-2 mb-2 pr-16">
+        {player.nationality && (
+          <FlagImage nationality={player.nationality} size="sm" />
+        )}
+        <h3 className="text-xl font-bold" style={{ color: primaryColor.textOnLight }}>
+          {player.name}
+        </h3>
+      </div>
       <p className="text-sm font-semibold mb-4" style={{ color: primaryColor.textOnLight }}>
         {player.role}
       </p>

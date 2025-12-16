@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Player } from '@/types';
 import { WPLColors } from '@/lib/wplColors';
 import { CustomEmoji } from '@/components/emoji/Emoji';
+import FlagImage from '@/components/ui/FlagImage';
 
 interface WPLPlayerCardProps {
   player: Player;
@@ -139,12 +140,17 @@ export default function WPLPlayerCard({ player, onClick, index = 0 }: WPLPlayerC
           </div>
 
           {/* Player Name */}
-          <h3 
-            className="text-xl font-bold mb-2 text-center transition-colors"
-            style={{ color: WPLColors.textPrimary }}
-          >
-            {player.name}
-          </h3>
+          <div className="flex items-center justify-center gap-2 mb-2">
+            {player.nationality && (
+              <FlagImage nationality={player.nationality} size="sm" />
+            )}
+            <h3 
+              className="text-xl font-bold text-center transition-colors"
+              style={{ color: WPLColors.textPrimary }}
+            >
+              {player.name}
+            </h3>
+          </div>
           
           {/* Role Badge */}
           <div className="flex justify-center mb-4">
