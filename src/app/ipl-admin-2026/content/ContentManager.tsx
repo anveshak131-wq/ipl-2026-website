@@ -180,6 +180,9 @@ export default function ContentManager({
         api.getPlayers(),
       ]);
       
+      console.log('League context:', { isIPL, isWPL });
+      console.log('Total players before filtering:', playersData.length);
+      
       // Filter teams and players based on current league
       const filteredTeams = teamsData.filter(team => {
         if (isIPL) return !team.id.startsWith('wpl-');
@@ -199,6 +202,9 @@ export default function ContentManager({
         if (isWPL) return match.id?.startsWith('wpl-');
         return true;
       });
+      
+      console.log('Players after filtering:', filteredPlayers.length);
+      console.log('WPL players filtered out:', playersData.filter(p => p.id.startsWith('wpl-')).length);
       
       setTeams(filteredTeams);
       setMatches(filteredMatches);

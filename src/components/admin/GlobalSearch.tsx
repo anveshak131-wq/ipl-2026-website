@@ -117,12 +117,17 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
           const playersRes = await fetch('/api/players');
           if (playersRes.ok) {
             const players = await playersRes.json();
+            console.log('GlobalSearch - League context:', { isIPL, isWPL });
+            console.log('GlobalSearch - Total players before filtering:', players.length);
+            
             // Filter players based on current league
             const filteredPlayers = players.filter((player: any) => {
               if (isIPL) return !player.id.startsWith('wpl-');
               if (isWPL) return player.id.startsWith('wpl-');
               return true;
             });
+            
+            console.log('GlobalSearch - Players after filtering:', filteredPlayers.length);
             
             const playerMatches = filteredPlayers
               .filter((player: any) =>
