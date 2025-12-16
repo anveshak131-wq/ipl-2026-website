@@ -82,15 +82,16 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
 
         // Search teams
         try {
-          const teamsRes = await fetch('/api/teams');
+          const league = isIPL ? 'ipl' : isWPL ? 'wpl' : undefined;
+          const teamsUrl = league ? `/api/teams?league=${league}` : '/api/teams';
+          const teamsRes = await fetch(teamsUrl);
           if (teamsRes.ok) {
             const teams = await teamsRes.json();
-            // Filter teams based on current league
-            const filteredTeams = teams.filter((team: any) => {
-              if (isIPL) return !team.id.startsWith('wpl-');
-              if (isWPL) return team.id.startsWith('wpl-');
-              return true;
-            });
+            console.log('GlobalSearch - League context:', { isIPL, isWPL });
+            console.log('GlobalSearch - Total teams before filtering:', teams.length);
+            
+            // No need for client-side filtering - API already filters by league
+            const filteredTeams = teams;
             
             const teamMatches = filteredTeams
               .filter((team: any) =>
@@ -114,18 +115,16 @@ export default function GlobalSearch({ onClose }: GlobalSearchProps) {
 
         // Search players
         try {
-          const playersRes = await fetch('/api/players');
+          const league = isIPL ? 'ipl' : isWPL ? 'wpl' : undefined;
+          const playersUrl = league ? `/api/players?league=${league}` : '/api/players';
+          const playersRes = await fetch(playersUrl);
           if (playersRes.ok) {
             const players = await playersRes.json();
             console.log('GlobalSearch - League context:', { isIPL, isWPL });
             console.log('GlobalSearch - Total players before filtering:', players.length);
             
-            // Filter players based on current league
-            const filteredPlayers = players.filter((player: any) => {
-              if (isIPL) return !player.id.startsWith('wpl-');
-              if (isWPL) return player.id.startsWith('wpl-');
-              return true;
-            });
+            // No need for client-side filtering - API already filters by league
+            const filteredPlayers = players;
             
             console.log('GlobalSearch - Players after filtering:', filteredPlayers.length);
             

@@ -175,28 +175,17 @@ export default function ContentManager({
   const fetchContext = async () => {
     try {
       const [teamsData, matchesData, playersData] = await Promise.all([
-        api.getTeams(),
+        api.getTeams(currentLeague),
         api.getMatches(),
-        api.getPlayers(),
+        api.getPlayers(undefined, currentLeague),
       ]);
       
       console.log('League context:', { isIPL, isWPL });
       console.log('Total players before filtering:', playersData.length);
       
-      // Filter teams and players based on current league
-      const filteredTeams = teamsData.filter(team => {
-        if (isIPL) return !team.id.startsWith('wpl-');
-        if (isWPL) return team.id.startsWith('wpl-');
-        return true;
-      });
-      
-      const filteredPlayers = playersData.filter(player => {
-        if (isIPL) return !player.id.startsWith('wpl-');
-        if (isWPL) return player.id.startsWith('wpl-');
-        return true;
-      });
-      
-      // Filter matches based on current league
+      // No need for client-side filtering - API already filters by league
+      const filteredTeams = teamsData;
+      const filteredPlayers = playersData;
       const filteredMatches = matchesData.filter(match => {
         if (isIPL) return !match.id?.startsWith('wpl-');
         if (isWPL) return match.id?.startsWith('wpl-');
