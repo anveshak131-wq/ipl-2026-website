@@ -144,12 +144,12 @@ export default function WPLPlayerCard({ player, onClick, index = 0 }: WPLPlayerC
             {player.nationality && (
               <FlagImage nationality={player.nationality} size="sm" />
             )}
-            <h3 
+          <h3 
               className="text-xl font-bold text-center transition-colors"
-              style={{ color: WPLColors.textPrimary }}
-            >
-              {player.name}
-            </h3>
+            style={{ color: WPLColors.textPrimary }}
+          >
+            {player.name}
+          </h3>
           </div>
           
           {/* Role Badge */}

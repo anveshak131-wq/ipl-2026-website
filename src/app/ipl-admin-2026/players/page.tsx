@@ -100,6 +100,7 @@ export default function AdminPlayers() {
     jerseyNumber: string;
     isCaptain: boolean;
     bowlingStyle: string;
+    customBowlingStyle: string;
     battingStyle: string;
     stats: {
       matches: string;
@@ -127,6 +128,7 @@ export default function AdminPlayers() {
     jerseyNumber: '',
     isCaptain: false,
     bowlingStyle: 'N/A (Batsman)',
+    customBowlingStyle: '',
     battingStyle: 'Right-handed bat',
     stats: {
       matches: '',
@@ -219,6 +221,7 @@ export default function AdminPlayers() {
       jerseyNumber: '',
       isCaptain: false,
       bowlingStyle: 'N/A (Batsman)',
+      customBowlingStyle: '',
       battingStyle: 'Right-handed bat',
       stats: {
         matches: '',
@@ -266,6 +269,10 @@ export default function AdminPlayers() {
       setLastCalculatedAge('');
     }
     
+    // Work out bowling style – if it's not in the predefined list, treat it as a custom style
+    const existingBowlingStyle = player.bowlingStyle || 'N/A (Batsman)';
+    const isPredefinedBowlingStyle = BOWLING_STYLES.includes(existingBowlingStyle);
+
     setFormData({
       name: player.name,
       role: player.role,
@@ -276,7 +283,8 @@ export default function AdminPlayers() {
       nationality: player.nationality,
       jerseyNumber: player.jerseyNumber ? player.jerseyNumber.toString() : '',
       isCaptain: player.isCaptain || false,
-      bowlingStyle: player.bowlingStyle || 'N/A (Batsman)',
+      bowlingStyle: isPredefinedBowlingStyle ? existingBowlingStyle : 'N/A (Batsman)',
+      customBowlingStyle: isPredefinedBowlingStyle ? '' : existingBowlingStyle,
       battingStyle: player.battingStyle || 'Right-handed bat',
       stats: {
         matches: player.stats.matches.toString(),
@@ -326,13 +334,19 @@ export default function AdminPlayers() {
         calculatedAge = calculateAge(dateOfBirthISO);
       }
       
+      const finalBowlingStyle = formData.customBowlingStyle.trim() || formData.bowlingStyle;
+
       const playerData = {
-        ...formData,
+        name: formData.name,
+        role: formData.role,
+        teamId: formData.teamId,
+        league: formData.league,
         dateOfBirth: dateOfBirthISO || undefined,
         age: calculatedAge,
+        nationality: formData.nationality,
         jerseyNumber: parseInt(formData.jerseyNumber),
         isCaptain: formData.isCaptain,
-        bowlingStyle: formData.bowlingStyle,
+        bowlingStyle: finalBowlingStyle,
         battingStyle: formData.battingStyle,
         stats: {
           matches: parseInt(formData.stats.matches) || 0,
@@ -1306,6 +1320,16 @@ export default function AdminPlayers() {
                             </option>
                           ))}
                         </select>
+                        <p className="text-xs text-gray-500 mt-1">
+                          If the exact style is not in the list, enter a custom bowling style below.
+                        </p>
+                        <input
+                          type="text"
+                          value={formData.customBowlingStyle}
+                          onChange={(e) => setFormData({ ...formData, customBowlingStyle: e.target.value })}
+                          className="mt-2 w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                          placeholder="Custom bowling style (optional)"
+                        />
                       </div>
 
                       <div>
