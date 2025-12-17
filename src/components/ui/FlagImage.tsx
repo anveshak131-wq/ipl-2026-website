@@ -23,12 +23,13 @@ const sizeClasses: Record<NonNullable<FlagImageProps['size']>, string> = {
 const nationalityToEmoji: { [key: string]: string } = {
   India: '🇮🇳',
   Australia: '🇦🇺',
-  England: '🏴', // St George’s Cross is not standardized everywhere; keep simple flag-style emoji
+  // Use GB flag for broad support; England regional flag often renders as plain black on many platforms.
+  England: '🇬🇧',
   'South Africa': '🇿🇦',
   'New Zealand': '🇳🇿',
-  Pakistan: '🇵🇰',
   'Sri Lanka': '🇱🇰',
-  'West Indies': '🏏', // No official flag emoji; use cricket emoji as best approximation
+  // No official emoji for West Indies; use tropical island to reflect the team identity.
+  'West Indies': '🏝️',
   Bangladesh: '🇧🇩',
   Afghanistan: '🇦🇫',
   Ireland: '🇮🇪',
@@ -53,6 +54,11 @@ const FlagImage: React.FC<FlagImageProps> = ({
   className = '',
   alt
 }) => {
+  // For IPL/WPL, Pakistan is banned – do not render any flag or label for it.
+  if (nationality === 'Pakistan') {
+    return null;
+  }
+
   const emoji = nationalityToEmoji[nationality] || '🌐';
   const defaultAlt = `${nationality || 'Unknown'} flag`;
 

@@ -189,9 +189,11 @@ export default function PlayerDetailClient({ playerId }: PlayerDetailClientProps
                       </span>
                     )}
                   </span>
-                  <span>
-                    Nationality: <span className="font-semibold text-white">{player.nationality}</span>
-                  </span>
+                  {player.nationality !== 'Pakistan' && (
+                    <span>
+                      Nationality: <span className="font-semibold text-white">{player.nationality}</span>
+                    </span>
+                  )}
                   <span>
                     Batting: <span className="font-semibold text-white">{player.battingStyle}</span>
                   </span>

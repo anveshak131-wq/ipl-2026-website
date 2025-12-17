@@ -26,10 +26,10 @@ const ChevronDownIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-// Cricket-playing countries
+// Cricket-playing countries (exclude Pakistan – not part of IPL/WPL)
 const CRICKET_COUNTRIES = [
-  'India', 'Australia', 'England', 'South Africa', 'New Zealand', 'Pakistan', 
-  'Sri Lanka', 'West Indies', 'Bangladesh', 'Afghanistan', 'Ireland', 
+  'India', 'Australia', 'England', 'South Africa', 'New Zealand',
+  'Sri Lanka', 'West Indies', 'Bangladesh', 'Afghanistan', 'Ireland',
   'Netherlands', 'Scotland', 'Zimbabwe', 'Nepal', 'Oman', 'UAE', 'USA',
   'Canada', 'Kenya', 'Namibia', 'Papua New Guinea', 'Hong Kong'
 ];

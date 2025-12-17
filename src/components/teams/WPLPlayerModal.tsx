@@ -250,25 +250,27 @@ export default function WPLPlayerModal({ player, team, isOpen, onClose }: WPLPla
                         )}
                       </p>
                     </div>
-                    <div
-                      className="p-4 rounded-xl border"
-                      style={{
-                        background: WPLColors.pinkRGBA[10],
-                        borderColor: WPLColors.pinkRGBA[30],
-                      }}
-                    >
-                      <p className="text-xs uppercase mb-1" style={{ color: WPLColors.textMuted }}>
-                        Nationality
-                      </p>
-                      <div className="flex items-center gap-2">
-                        {player.nationality && (
-                          <FlagImage nationality={player.nationality} size="sm" />
-                        )}
-                        <p className="text-lg font-bold" style={{ color: WPLColors.textPrimary }}>
-                          {player.nationality}
+                    {player.nationality !== 'Pakistan' && (
+                      <div
+                        className="p-4 rounded-xl border"
+                        style={{
+                          background: WPLColors.pinkRGBA[10],
+                          borderColor: WPLColors.pinkRGBA[30],
+                        }}
+                      >
+                        <p className="text-xs uppercase mb-1" style={{ color: WPLColors.textMuted }}>
+                          Nationality
                         </p>
+                        <div className="flex items-center gap-2">
+                          {player.nationality && (
+                            <FlagImage nationality={player.nationality} size="sm" />
+                          )}
+                          <p className="text-lg font-bold" style={{ color: WPLColors.textPrimary }}>
+                            {player.nationality}
+                          </p>
+                        </div>
                       </div>
-                    </div>
+                    )}
                     <div
                       className="p-4 rounded-xl border"
                       style={{
