@@ -9,84 +9,62 @@ interface FlagImageProps {
   alt?: string;
 }
 
-const sizeClasses = {
-  sm: 'w-4 h-3',
-  md: 'w-6 h-4', 
-  lg: 'w-8 h-6',
-  xl: 'w-12 h-9'
+// NOTE: This component now renders Unicode emoji flags instead of SVG images.
+// The older `/public/flags/cricket/*.svg` assets are no longer used by this
+// component and can be considered deprecated.
+
+const sizeClasses: Record<NonNullable<FlagImageProps['size']>, string> = {
+  sm: 'text-xs',
+  md: 'text-sm',
+  lg: 'text-lg',
+  xl: 'text-2xl'
 };
 
-const FlagImage: React.FC<FlagImageProps> = ({ 
-  nationality, 
-  size = 'md', 
+const nationalityToEmoji: { [key: string]: string } = {
+  India: '🇮🇳',
+  Australia: '🇦🇺',
+  England: '🏴', // St George’s Cross is not standardized everywhere; keep simple flag-style emoji
+  'South Africa': '🇿🇦',
+  'New Zealand': '🇳🇿',
+  Pakistan: '🇵🇰',
+  'Sri Lanka': '🇱🇰',
+  'West Indies': '🏏', // No official flag emoji; use cricket emoji as best approximation
+  Bangladesh: '🇧🇩',
+  Afghanistan: '🇦🇫',
+  Ireland: '🇮🇪',
+  Netherlands: '🇳🇱',
+  Scotland: '🏴', // Saltire flag support varies; use basic flag emoji
+  Zimbabwe: '🇿🇼',
+  Nepal: '🇳🇵',
+  Oman: '🇴🇲',
+  UAE: '🇦🇪',
+  USA: '🇺🇸',
+  'United States': '🇺🇸',
+  Canada: '🇨🇦',
+  Kenya: '🇰🇪',
+  Namibia: '🇳🇦',
+  'Papua New Guinea': '🇵🇬',
+  'Hong Kong': '🇭🇰'
+};
+
+const FlagImage: React.FC<FlagImageProps> = ({
+  nationality,
+  size = 'md',
   className = '',
-  alt 
+  alt
 }) => {
-  // Map nationalities to flag file names
-  const getFlagFileName = (nationality: string): string => {
-    const flagMap: { [key: string]: string } = {
-      'India': 'india.svg',
-      'Australia': 'australia.svg',
-      'England': 'england.svg',
-      'South Africa': 'south-africa.svg',
-      'New Zealand': 'new-zealand.svg',
-      'Pakistan': 'pakistan.svg',
-      'Sri Lanka': 'sri-lanka.svg',
-      'West Indies': 'west-indies.svg',
-      'Bangladesh': 'bangladesh.svg',
-      'Afghanistan': 'afghanistan.svg',
-      'Ireland': 'ireland.svg',
-      'Netherlands': 'netherlands.svg',
-      'Scotland': 'scotland.svg',
-      'Zimbabwe': 'zimbabwe.svg',
-      'Nepal': 'nepal.svg',
-      'Oman': 'oman.svg',
-      'UAE': 'uae.svg',
-      'USA': 'usa.svg',
-      'United States': 'usa.svg',
-      'Canada': 'canada.svg',
-      'Kenya': 'kenya.svg',
-      'Namibia': 'namibia.svg',
-      'Papua New Guinea': 'papua-new-guinea.svg',
-      'Hong Kong': 'hong-kong.svg'
-    };
-
-    return flagMap[nationality] || 'india.svg'; // Default to India if not found
-  };
-
-  const flagFileName = getFlagFileName(nationality);
-  const flagPath = `/flags/cricket/${flagFileName}`;
-  const defaultAlt = `${nationality} flag`;
-  
-  // Handle West Indies - use a special cricket-specific flag
-  if (nationality === 'West Indies') {
-    return (
-      <img
-        src={flagPath}
-        alt={alt || defaultAlt}
-        className={`${sizeClasses[size]} object-cover rounded-sm ${className}`}
-        title={nationality}
-        onError={(e) => {
-          // Fallback to India flag if West Indies flag fails to load
-          const target = e.target as HTMLImageElement;
-          target.src = '/flags/cricket/india.svg';
-        }}
-      />
-    );
-  }
+  const emoji = nationalityToEmoji[nationality] || '🌐';
+  const defaultAlt = `${nationality || 'Unknown'} flag`;
 
   return (
-    <img
-      src={flagPath}
-      alt={alt || defaultAlt}
-      className={`${sizeClasses[size]} object-cover rounded-sm ${className}`}
+    <span
+      role="img"
+      aria-label={alt || defaultAlt}
       title={nationality}
-      onError={(e) => {
-        // Fallback to India flag if specific flag fails to load
-        const target = e.target as HTMLImageElement;
-        target.src = '/flags/cricket/india.svg';
-      }}
-    />
+      className={`${sizeClasses[size]} inline-block align-middle ${className}`}
+    >
+      {emoji}
+    </span>
   );
 };
 
