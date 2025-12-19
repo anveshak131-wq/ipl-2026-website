@@ -892,7 +892,7 @@ export default function ContentManager({
                         {formData.type === 'news' && (
                           <div className="mt-3 flex items-center gap-2">
                             <input
-                              id="isImportant"
+                              id="content-isImportant"
                               type="checkbox"
                               checked={formData.isImportant}
                               onChange={(e) =>
@@ -900,7 +900,7 @@ export default function ContentManager({
                               }
                               className="w-4 h-4 rounded border-white/40 bg-white/10 text-ipl-gold focus:ring-ipl-gold/60"
                             />
-                            <label htmlFor="isImportant" className="text-sm text-gray-300">
+                            <label htmlFor="content-isImportant" className="text-sm text-gray-300">
                               Mark as important (reserve featured block on news pages)
                             </label>
                           </div>

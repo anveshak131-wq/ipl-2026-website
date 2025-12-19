@@ -1352,12 +1352,12 @@ export default function AdminPlayers() {
                       <div className="flex items-center">
                         <input
                           type="checkbox"
-                          id="isCaptain"
+                          id="player-isCaptain"
                           checked={formData.isCaptain}
                           onChange={(e) => setFormData({ ...formData, isCaptain: e.target.checked })}
                           className="w-4 h-4 bg-white/10 border border-white/20 rounded text-ipl-gold focus:outline-none focus:border-ipl-gold"
                         />
-                        <label htmlFor="isCaptain" className="ml-2 text-sm font-medium text-gray-300">
+                        <label htmlFor="player-isCaptain" className="ml-2 text-sm font-medium text-gray-300">
                           Is Captain
                         </label>
                       </div>

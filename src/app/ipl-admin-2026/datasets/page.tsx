@@ -309,11 +309,11 @@ export default function AdminDatasetsPage() {
 
               <div className="mt-4 grid grid-cols-1 md:grid-cols-[2fr,1fr] gap-3 items-end">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-300 mb-1" htmlFor="dataset-key">
+                  <label className="block text-xs font-semibold text-gray-300 mb-1" htmlFor="datasets-dataset-key">
                     Dataset key in KV
                   </label>
                   <input
-                    id="dataset-key"
+                    id="datasets-dataset-key"
                     type="text"
                     value={datasetKey}
                     onChange={(e) => setDatasetKey(e.target.value)}

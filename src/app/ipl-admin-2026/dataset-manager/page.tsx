@@ -543,12 +543,12 @@ export default function AdminDatasetManagerPage() {
           <div>
             <label
               className="block text-sm font-medium text-gray-300 mb-2"
-              htmlFor="new-column-name"
+              htmlFor="dataset-manager-new-column-name"
             >
               Column name
             </label>
             <input
-              id="new-column-name"
+              id="dataset-manager-new-column-name"
               type="text"
               value={newColumnName}
               onChange={(e) => {
