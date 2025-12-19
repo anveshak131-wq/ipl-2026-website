@@ -363,7 +363,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
           </svg>
         ),
         group: 'Content',
-        shortcut: 'M',
+        shortcut: 'D',
       },
       {
         href: '/ipl-admin-2026/stories',
