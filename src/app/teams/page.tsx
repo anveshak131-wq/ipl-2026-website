@@ -274,6 +274,20 @@ function TeamsPageContent() {
         return Array.from(grounds).sort();
     }, [teams]);
 
+    // Custom team ordering function
+    const getCustomTeamOrder = (team: Team): number => {
+        // Priority order: RCB/RCB-W first, then others
+        const shortName = team.shortName.toLowerCase();
+        
+        // RCB teams get highest priority (0)
+        if (shortName === 'rcb' || shortName === 'rcb-w') {
+            return 0;
+        }
+        
+        // All other teams get normal priority (1)
+        return 1;
+    };
+
     // Filter and sort teams
     const filteredAndSortedTeams = useMemo(() => {
         let result = teams;
@@ -305,8 +319,17 @@ function TeamsPageContent() {
             );
         }
 
-        // Sort
+        // Sort with custom ordering
         result = [...result].sort((a, b) => {
+            // First apply custom ordering
+            const orderA = getCustomTeamOrder(a);
+            const orderB = getCustomTeamOrder(b);
+            
+            if (orderA !== orderB) {
+                return orderA - orderB;
+            }
+            
+            // If same custom order, apply regular sort
             if (sortBy === 'titles') {
                 return (b.trophies?.length || 0) - (a.trophies?.length || 0);
             }
