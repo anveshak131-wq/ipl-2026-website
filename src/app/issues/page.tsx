@@ -4,8 +4,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import { Button } from '@/components/ui/Button';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import Icon from '@/components/ui/Icon';
 
 // Types
 interface Issue {
@@ -15,8 +15,7 @@ interface Issue {
   description: string;
   priority: 'low' | 'medium' | 'high' | 'critical';
   status: 'open' | 'in_progress' | 'resolved' | 'closed';
-  userId?: string;
-  userEmail?: string;
+  reporterEmail?: string;
   attachments: string[];
   createdAt: Date;
   updatedAt: Date;
@@ -129,7 +128,7 @@ export default function IssuesPage() {
           description: 'The live score has been stuck at 45/2 for 30 minutes',
           priority: 'high',
           status: 'in_progress',
-          userEmail: 'user@example.com',
+          reporterEmail: 'user@example.com',
           attachments: [],
           createdAt: new Date(Date.now() - 3600000),
           updatedAt: new Date(Date.now() - 1800000),
@@ -142,7 +141,7 @@ export default function IssuesPage() {
           description: 'Getting authentication error when trying to login with Google',
           priority: 'medium',
           status: 'open',
-          userEmail: 'user2@example.com',
+          reporterEmail: 'user2@example.com',
           attachments: [],
           createdAt: new Date(Date.now() - 7200000),
           updatedAt: new Date(Date.now() - 7200000),
@@ -288,12 +287,12 @@ export default function IssuesPage() {
             {/* Actions Bar */}
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
               <div className="flex flex-col sm:flex-row gap-4 flex-1">
-                <Button
+                <button
                   onClick={() => setShowForm(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium"
                 >
                   Report New Issue
-                </Button>
+                </button>
                 
                 <select
                   value={statusFilter}
@@ -420,13 +419,13 @@ export default function IssuesPage() {
                         >
                           Cancel
                         </button>
-                        <Button
+                        <button
                           type="submit"
                           disabled={submitting}
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {submitting ? 'Submitting...' : 'Submit Issue'}
-                        </Button>
+                        </button>
                       </div>
                     </form>
                   </div>
@@ -482,9 +481,9 @@ export default function IssuesPage() {
                     
                     <p className="text-gray-700 mb-4">{issue.description}</p>
                     
-                    {issue.userEmail && (
+                    {issue.reporterEmail && (
                       <div className="text-sm text-gray-500">
-                        Reported by {issue.userEmail}
+                        Reported by {issue.reporterEmail}
                       </div>
                     )}
                   </div>
