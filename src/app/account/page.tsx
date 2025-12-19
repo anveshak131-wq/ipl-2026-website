@@ -710,6 +710,28 @@ export default function AccountPage() {
           </section>
         </div>
 
+        {/* Support & Issues */}
+        <section className="mt-10 bg-blue-900/20 border border-blue-500/40 rounded-2xl p-6">
+          <h2 className="text-lg font-semibold text-blue-300 mb-2">Support & Issues</h2>
+          <p className="text-xs text-blue-100 mb-3">
+            Having problems? Report issues, track status, and find answers to common questions.
+          </p>
+          <div className="space-y-3">
+            <a
+              href="/issues"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-blue-600 text-white hover:bg-blue-500 shadow-md shadow-blue-900/40 transition-all"
+            >
+              Report an Issue
+            </a>
+            <a
+              href="/issues?tab=faq"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-gray-600 text-white hover:bg-gray-500 shadow-md shadow-gray-900/40 transition-all"
+            >
+              View FAQ
+            </a>
+          </div>
+        </section>
+
         {/* Danger zone */}
         <section className="mt-10 bg-red-900/20 border border-red-500/40 rounded-2xl p-6">
           <h2 className="text-lg font-semibold text-red-300 mb-2">Danger zone</h2>
