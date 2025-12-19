@@ -276,16 +276,26 @@ function TeamsPageContent() {
 
     // Custom team ordering function
     const getCustomTeamOrder = (team: Team): number => {
-        // Priority order: RCB/RCB-W first, then others
+        // Priority order: RCB, MI, CSK first, then others
         const shortName = team.shortName.toLowerCase();
         
-        // RCB teams get highest priority (0)
-        if (shortName === 'rcb' || shortName === 'rcb-w') {
+        // RCB gets highest priority (0)
+        if (shortName === 'rcb') {
             return 0;
         }
         
-        // All other teams get normal priority (1)
-        return 1;
+        // MI gets second priority (1)
+        if (shortName === 'mi') {
+            return 1;
+        }
+        
+        // CSK gets third priority (2)
+        if (shortName === 'csk') {
+            return 2;
+        }
+        
+        // All other teams get normal priority (3)
+        return 3;
     };
 
     // Filter and sort teams
