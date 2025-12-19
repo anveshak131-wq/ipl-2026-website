@@ -283,60 +283,6 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
     return () => clearInterval(interval);
   }, []);
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger shortcuts when typing in input fields
-      const activeElement = document.activeElement;
-      const isInputFocused = activeElement && (
-        activeElement.tagName === 'INPUT' ||
-        activeElement.tagName === 'TEXTAREA' ||
-        activeElement.getAttribute('contenteditable') === 'true'
-      );
-      
-      if (isInputFocused) return;
-
-      // Cmd/Ctrl + K for search
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        if (!collapsed) {
-          const searchInput = document.getElementById('sidebar-search');
-          searchInput?.focus();
-        }
-      }
-
-      // Cmd/Ctrl + B to toggle sidebar
-      if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
-        e.preventDefault();
-        setCollapsed(!collapsed);
-      }
-
-      // Escape to close search
-      if (e.key === 'Escape' && document.activeElement?.id === 'sidebar-search') {
-        setSearchQuery('');
-        (document.activeElement as HTMLElement).blur();
-      }
-
-      // Single letter shortcuts - only work without modifier keys
-      if (!e.metaKey && !e.ctrlKey && !e.altKey && !e.shiftKey) {
-        const key = e.key.toLowerCase();
-        
-        // Find menu item by shortcut
-        for (const items of Object.values(menuGroups)) {
-          const item = items.find((i) => i.shortcut?.toLowerCase() === key);
-          if (item) {
-            e.preventDefault();
-            router.push(item.href);
-            break;
-          }
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [collapsed, menuGroups, router]);
-
   // Consolidated menu groups for cleaner navigation
   const menuGroups: { [key: string]: MenuItem[] } = useMemo(() => ({
     Main: [
@@ -513,6 +459,60 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
       },
     ],
   }), [currentLeague]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger shortcuts when typing in input fields
+      const activeElement = document.activeElement;
+      const isInputFocused = activeElement && (
+        activeElement.tagName === 'INPUT' ||
+        activeElement.tagName === 'TEXTAREA' ||
+        activeElement.getAttribute('contenteditable') === 'true'
+      );
+      
+      if (isInputFocused) return;
+
+      // Cmd/Ctrl + K for search
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        if (!collapsed) {
+          const searchInput = document.getElementById('sidebar-search');
+          searchInput?.focus();
+        }
+      }
+
+      // Cmd/Ctrl + B to toggle sidebar
+      if ((e.metaKey || e.ctrlKey) && e.key === 'b') {
+        e.preventDefault();
+        setCollapsed(!collapsed);
+      }
+
+      // Escape to close search
+      if (e.key === 'Escape' && document.activeElement?.id === 'sidebar-search') {
+        setSearchQuery('');
+        (document.activeElement as HTMLElement).blur();
+      }
+
+      // Single letter shortcuts - only work without modifier keys
+      if (!e.metaKey && !e.ctrlKey && !e.altKey && !e.shiftKey) {
+        const key = e.key.toLowerCase();
+        
+        // Find menu item by shortcut
+        for (const items of Object.values(menuGroups)) {
+          const item = items.find((i) => i.shortcut?.toLowerCase() === key);
+          if (item) {
+            e.preventDefault();
+            router.push(item.href);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [collapsed, menuGroups, router]);
 
   const findMenuItemByHref = (href: string): MenuItem | null => {
     for (const items of Object.values(menuGroups)) {
