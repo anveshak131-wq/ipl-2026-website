@@ -49,6 +49,10 @@ issues = [
   }
 ];
 
+export async function generateStaticParams() {
+  return [];
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
