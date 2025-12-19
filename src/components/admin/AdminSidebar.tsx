@@ -286,6 +286,16 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger shortcuts when typing in input fields
+      const activeElement = document.activeElement;
+      const isInputFocused = activeElement && (
+        activeElement.tagName === 'INPUT' ||
+        activeElement.tagName === 'TEXTAREA' ||
+        activeElement.getAttribute('contenteditable') === 'true'
+      );
+      
+      if (isInputFocused) return;
+
       // Cmd/Ctrl + K for search
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
@@ -306,11 +316,26 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         setSearchQuery('');
         (document.activeElement as HTMLElement).blur();
       }
+
+      // Single letter shortcuts - only work without modifier keys
+      if (!e.metaKey && !e.ctrlKey && !e.altKey && !e.shiftKey) {
+        const key = e.key.toLowerCase();
+        
+        // Find menu item by shortcut
+        for (const items of Object.values(menuGroups)) {
+          const item = items.find((i) => i.shortcut?.toLowerCase() === key);
+          if (item) {
+            e.preventDefault();
+            router.push(item.href);
+            break;
+          }
+        }
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [collapsed]);
+  }, [collapsed, menuGroups, router]);
 
   // Consolidated menu groups for cleaner navigation
   const menuGroups: { [key: string]: MenuItem[] } = useMemo(() => ({
