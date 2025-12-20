@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Cloud, MapPin, Wind, Droplets, Eye, Thermometer, Gauge,
-  Brain, Sparkles, TrendingUp, AlertTriangle, Calendar, Settings,
-  Activity, Zap, Target, BarChart3, Users, RefreshCw, Plus,
+  Brain, Sparkles, TrendingUp, AlertTriangle,
+  Activity, Target, RefreshCw, Plus,
   Edit, Save, X, ChevronRight, ChevronDown, Filter, Search,
   Sun, CloudRain, CloudSnow, Navigation, Bell, Database
 } from 'lucide-react';

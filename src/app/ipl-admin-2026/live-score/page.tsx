@@ -9,7 +9,6 @@ import { Match, Player } from '@/types';
 import { LiveScoreState, BallEvent } from '@/hooks/useLiveScore';
 import { api } from '@/lib/data';
 import { LoadingSpinner } from '@/components/admin/animations';
-import { CheckCircle2, AlertCircle } from 'lucide-react';
 import { useLeague } from '@/contexts/LeagueContext';
 import { WPLColors } from '@/lib/wplColors';
 import MatchStatusBadge from '@/components/admin/live-score/MatchStatusBadge';

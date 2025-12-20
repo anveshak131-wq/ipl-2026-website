@@ -96,7 +96,7 @@ export default function AdminRouter() {
               setIsLoading(false);
               return;
             }
-          } catch (tokenError) {
+          } catch {
             // Token is not valid base64, continue to redirect
           }
           
@@ -106,7 +106,7 @@ export default function AdminRouter() {
           }
           setIsLoading(false);
         }
-      } catch (error) {
+      } catch {
         // localStorage not available, redirect to login
         const isLoginPage = pathname === '/ipl-admin-2026' || pathname === '/ipl-admin-2026/' || pathname === '/ipl-admin-2026/setup';
         if (!isLoginPage) {

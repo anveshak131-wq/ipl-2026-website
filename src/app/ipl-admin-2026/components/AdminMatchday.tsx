@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, MapPin, Thermometer, Wind, Droplets, Eye, Edit, Trash2, Plus, Save, X } from 'lucide-react';
+import { Calendar, MapPin, Thermometer, Wind, Droplets, Edit, Trash2, Plus, Save, X } from 'lucide-react';
 
 interface VenueInfo {
   id: string;
