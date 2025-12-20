@@ -158,6 +158,13 @@ async function handleGetRequest(context) {
     // Try to get teams from KV storage
     let teams = await env.IPL_CACHE.get('teams', 'json');
     
+    // Force refresh from default teams if CSK still has old color
+    if (teams && teams.find(t => t.shortName === 'CSK' && t.colors.primary === '#FFFF00')) {
+      teams = defaultTeams;
+      // Update KV storage with fresh data
+      await env.IPL_CACHE.put('teams', JSON.stringify(teams));
+    }
+    
     // Fallback to default teams if KV storage is empty
     if (!teams) {
       teams = defaultTeams;
