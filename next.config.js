@@ -6,7 +6,7 @@ const nextConfig = {
     domains: ['localhost', 'example.com'], // add your domains as needed
     unoptimized: true, // Required for static export
   },
-  // output: 'export', // Commented out to fix API routes issue
+  output: 'export', // Enable static export for Cloudflare Pages
   trailingSlash: false, // Do not force trailing slashes (avoid 308 redirects)
   // Disable webpack cache for Cloudflare Pages deployment
   webpack: (config, { dev, isServer }) => {

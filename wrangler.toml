@@ -1,7 +1,7 @@
 # Cloudflare Pages build configuration
 name = "ipl-2026-website"
-pages_build_command = "npm run build && rm -rf .next/cache"
-pages_build_output_dir = ".next"
+pages_build_command = "npm run build"
+pages_build_output_dir = "out"
 
 # Optimize build for faster deployment
 compatibility_date = "2024-01-01"
