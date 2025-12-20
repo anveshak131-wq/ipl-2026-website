@@ -11,9 +11,7 @@ const nextConfig = {
   // Disable webpack cache for Cloudflare Pages deployment
   webpack: (config, { dev, isServer }) => {
     // Completely disable cache in production
-    if (!dev) {
-      config.cache = false;
-    }
+    config.cache = false;
     return config;
   },
   // Build optimizations
