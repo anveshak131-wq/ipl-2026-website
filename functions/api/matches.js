@@ -73,7 +73,7 @@ const mockTeams = [
     name: 'Chennai Super Kings',
     shortName: 'CSK',
     logo: '/logos/csk_logo_new.svg',
-    colors: { primary: '#FFFF00', secondary: '#0081E8' }
+    colors: { primary: '#FFB90F', secondary: '#0081E8' }
   }
 ];
 

@@ -406,7 +406,7 @@ function getRecommendedTeams(user, engagement) {
     '7': { name: 'LSG', color: '#9C2A2C' },
     '8': { name: 'RR', color: '#EA1A85' },
     '9': { name: 'KKR', color: '#3A225D' },
-    '10': { name: 'CSK', color: '#FFFF00' },
+    '10': { name: 'CSK', color: '#FFB90F' },
   };
 
   const favorites = user.favoriteTeamIds || [];

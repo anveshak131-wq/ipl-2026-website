@@ -135,7 +135,7 @@ export const mockTeams: Team[] = [
     shortName: 'CSK',
     logo: '/logos/csk_logo_2026_animated.svg',
     description: 'The Yellow Army led by the legendary MS Dhoni',
-    colors: { primary: '#FFFF00', secondary: '#0081E8' },
+    colors: { primary: '#FFB90F', secondary: '#0081E8' },
     players: [],
     trophies: [
       { year: 2010, name: 'IPL Champions' },
