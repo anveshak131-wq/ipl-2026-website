@@ -8,6 +8,13 @@ const nextConfig = {
   },
   // output: 'export', // Commented out to fix API routes issue
   trailingSlash: false, // Do not force trailing slashes (avoid 308 redirects)
+  // Disable webpack cache for Cloudflare Pages deployment
+  webpack: (config, { dev, isServer }) => {
+    if (!dev && !isServer) {
+      config.cache = false; // Disable webpack cache to reduce build size
+    }
+    return config;
+  },
   // Build optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
