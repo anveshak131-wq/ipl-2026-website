@@ -19,6 +19,18 @@ function verifyAdminToken(request) {
   return true;
 }
 
+// Helper: get team name by team ID
+async function getTeamNameById(players, teamId, league, env) {
+  try {
+    const teamsData = await env.IPL_CACHE.get('teams', 'json');
+    const teams = teamsData || [];
+    const team = teams.find(t => (t.league || 'ipl') === league && t.id === teamId);
+    return team ? team.name : `Team ${teamId}`;
+  } catch (error) {
+    return `Team ${teamId}`;
+  }
+}
+
 export const onRequest = async (context) => {
   const { request, env } = context;
 
@@ -77,16 +89,16 @@ export const onRequest = async (context) => {
 
       const playerLeague = newPlayer.league || 'ipl';
 
-      // Check for duplicate player (same name and team in same league)
+      // Check for duplicate player (same name in any team within same league)
       const duplicatePlayer = players.find(p => 
         (p.league || 'ipl') === playerLeague &&
-        p.teamId === newPlayer.teamId &&
         p.name.toLowerCase().trim() === newPlayer.name.toLowerCase().trim()
       );
       
       if (duplicatePlayer) {
+        const existingTeamName = await getTeamNameById(players, duplicatePlayer.teamId, playerLeague, env);
         return new Response(JSON.stringify({ 
-          error: 'A player with the name "' + newPlayer.name + '" already exists in this team for ' + playerLeague.toUpperCase() + '.' 
+          error: 'Player "' + newPlayer.name + '" already exists in ' + existingTeamName + ' for ' + playerLeague.toUpperCase() + '. A player cannot play for multiple teams in the same league.' 
         }), {
           status: 400,
           headers: { 'Content-Type': 'application/json', ...corsHeaders },
@@ -192,6 +204,24 @@ export const onRequest = async (context) => {
       if (index === -1) {
         return new Response(JSON.stringify({ error: 'Player not found' }), {
           status: 404,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+
+      // Check for duplicate player when updating team or name
+      const playerLeague = updatedPlayer.league || players[index].league || 'ipl';
+      const duplicatePlayer = players.find(p => 
+        p.id !== updatedPlayer.id && // Exclude the current player
+        (p.league || 'ipl') === playerLeague &&
+        p.name.toLowerCase().trim() === updatedPlayer.name.toLowerCase().trim()
+      );
+      
+      if (duplicatePlayer) {
+        const existingTeamName = await getTeamNameById(players, duplicatePlayer.teamId, playerLeague, env);
+        return new Response(JSON.stringify({ 
+          error: 'Player "' + updatedPlayer.name + '" already exists in ' + existingTeamName + ' for ' + playerLeague.toUpperCase() + '. A player cannot play for multiple teams in the same league.' 
+        }), {
+          status: 400,
           headers: { 'Content-Type': 'application/json', ...corsHeaders },
         });
       }
