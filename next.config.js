@@ -10,8 +10,9 @@ const nextConfig = {
   trailingSlash: false, // Do not force trailing slashes (avoid 308 redirects)
   // Disable webpack cache for Cloudflare Pages deployment
   webpack: (config, { dev, isServer }) => {
-    if (!dev && !isServer) {
-      config.cache = false; // Disable webpack cache to reduce build size
+    // Completely disable cache in production
+    if (!dev) {
+      config.cache = false;
     }
     return config;
   },
