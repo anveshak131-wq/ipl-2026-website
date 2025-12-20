@@ -135,7 +135,7 @@ const defaultTeams = [
     shortName: 'CSK',
     logo: '/logos/csk_logo_new.svg',
     description: 'The Yellow Army led by the legendary MS Dhoni',
-    colors: { primary: '#FFB90F', secondary: '#0081E8' },
+    colors: { primary: '#FFB90F', secondary: '#0081E8' }, // Force redeploy - CSK color fix
     trophies: [
       { year: 2010, name: 'IPL Champions' },
       { year: 2011, name: 'IPL Champions' },
