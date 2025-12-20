@@ -160,6 +160,7 @@ async function handleGetRequest(context) {
     
     // Force refresh from default teams if CSK still has old color
     if (teams && teams.find(t => t.shortName === 'CSK' && t.colors.primary === '#FFFF00')) {
+      console.log('CSK color fix: Clearing KV cache and using default teams');
       teams = defaultTeams;
       // Update KV storage with fresh data
       await env.IPL_CACHE.put('teams', JSON.stringify(teams));
@@ -167,6 +168,7 @@ async function handleGetRequest(context) {
     
     // Fallback to default teams if KV storage is empty
     if (!teams) {
+      console.log('KV cache empty, using default teams');
       teams = defaultTeams;
     }
     
