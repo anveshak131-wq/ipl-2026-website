@@ -17,8 +17,6 @@
     "build:analyze": "ANALYZE=true next build"
   },
   "dependencies": {
-    "@types/bcryptjs": "^2.4.6",
-    "@types/jsonwebtoken": "^9.0.10",
     "autoprefixer": "^10.4.22",
     "bcryptjs": "^3.0.3",
     "framer-motion": "^7.10.3",
