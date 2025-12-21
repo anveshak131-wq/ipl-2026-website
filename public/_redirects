@@ -5,6 +5,3 @@
 
 # Admin routes with client-side routing
 /admin/*    /admin/index.html   200
-
-# All other routes - serve index.html for Next.js client-side routing
-/*          /index.html         200
