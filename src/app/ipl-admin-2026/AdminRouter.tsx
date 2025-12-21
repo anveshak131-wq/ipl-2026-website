@@ -30,6 +30,7 @@ export default function AdminRouter() {
   const router = useRouter();
   const pathname = usePathname();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const hasCheckedAuth = useRef(false);
 
@@ -71,17 +72,24 @@ export default function AdminRouter() {
             return;
           }
 
-          // Check if user has admin or super_admin role
-          const userRole = data.user?.role;
-          if (userRole !== 'admin' && userRole !== 'super_admin') {
-            // Not an admin, redirect to home
+          const role = data.user?.role;
+          setUserRole(role);
+
+          // Check if user has valid admin role
+          if (role !== 'admin' && role !== 'super_admin' && role !== 'players_admin') {
             alert('Access denied. Admin privileges required.');
             router.push('/');
             setIsLoading(false);
             return;
           }
 
-          // User is authenticated and has admin role
+          // For players_admin, restrict to /players only
+          if (role === 'players_admin' && pathname !== '/ipl-admin-2026/players') {
+            router.push('/ipl-admin-2026/players');
+            setIsLoading(false);
+            return;
+          }
+
           setIsAuthenticated(true);
           setIsLoading(false);
         } catch (error) {
@@ -90,8 +98,8 @@ export default function AdminRouter() {
           try {
             // Parse token to see if it's a valid base64 admin token
             const tokenPayload = JSON.parse(atob(token));
-            if (tokenPayload.role === 'admin' || tokenPayload.role === 'super_admin') {
-              // Token appears to be a valid admin token, allow access
+            if (tokenPayload.role === 'admin' || tokenPayload.role === 'super_admin' || tokenPayload.role === 'players_admin') {
+              setUserRole(tokenPayload.role);
               setIsAuthenticated(true);
               setIsLoading(false);
               return;
@@ -187,11 +195,11 @@ export default function AdminRouter() {
   return (
     <LeagueProvider>
       <div className="flex min-h-screen bg-ipl-dark">
-        <AdminSidebar currentPage={pathname} />
+        {userRole !== 'players_admin' && <AdminSidebar currentPage={pathname} />}
         <div className="flex-1">
           {renderPage()}
         </div>
-        <GlobalSearch />
+        {userRole !== 'players_admin' && <GlobalSearch />}
       </div>
     </LeagueProvider>
   );

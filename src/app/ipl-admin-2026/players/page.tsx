@@ -80,6 +80,7 @@ export default function AdminPlayers() {
   const router = useRouter();
   const { currentLeague } = useLeague();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -173,13 +174,40 @@ export default function AdminPlayers() {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem('adminToken');
-    if (!token) {
-      router.push('/ipl-admin-2026');
-      return;
-    }
-    setIsAuthenticated(true);
-    fetchData();
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
+        if (!token) {
+          router.push('/ipl-admin-2026');
+          return;
+        }
+
+        const response = await fetch(`/api/auth?action=verify&token=${token}`);
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          router.push('/ipl-admin-2026');
+          return;
+        }
+
+        const role = data.user?.role;
+        setUserRole(role);
+
+        if (role !== 'admin' && role !== 'super_admin' && role !== 'players_admin') {
+          alert('Access denied. Admin privileges required.');
+          router.push('/');
+          return;
+        }
+
+        setIsAuthenticated(true);
+        fetchData();
+      } catch (error) {
+        console.error('Auth error:', error);
+        router.push('/ipl-admin-2026');
+      }
+    };
+
+    checkAuth();
   }, [router]);
 
   // Auto-calculate age when date of birth is entered or changed
@@ -839,7 +867,7 @@ export default function AdminPlayers() {
 
   return (
     <div className="flex min-h-screen bg-gray-950">
-      <AdminSidebar currentPage="/ipl-admin-2026/players" />
+      {userRole !== 'players_admin' && <AdminSidebar currentPage="/ipl-admin-2026/players" />}
       <div className="flex-1">
         <div className="p-8">
           {/* Header */}
