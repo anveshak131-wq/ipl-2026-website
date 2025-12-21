@@ -173,11 +173,19 @@ export default function Playing11Page() {
     });
     console.log('Total players available:', players.length);
     
+    // Normalize team ID by removing "Team " prefix and extracting number
+    const normalizeTeamId = (id: string | number) => {
+      let str = String(id).trim();
+      if (str.startsWith('Team ')) str = str.replace('Team ', '');
+      if (str.toLowerCase().startsWith('team')) str = str.replace(/^team/i, '');
+      return str;
+    };
+    
     // Filter by teamId and league to get all squad players
     // Try both string and number comparison for teamId
     const filtered = players.filter(p => {
-      const playerTeamId = String(p.teamId);
-      const matchTeamId = String(selectedMatch.team1.id);
+      const playerTeamId = normalizeTeamId(p.teamId);
+      const matchTeamId = normalizeTeamId(selectedMatch.team1.id);
       const playerLeague = p.league || 'ipl';
       const matchLeague = selectedMatch.league || 'ipl';
       
@@ -230,11 +238,19 @@ export default function Playing11Page() {
     });
     console.log('Total players available:', players.length);
     
+    // Normalize team ID by removing "Team " prefix and extracting number
+    const normalizeTeamId = (id: string | number) => {
+      let str = String(id).trim();
+      if (str.startsWith('Team ')) str = str.replace('Team ', '');
+      if (str.toLowerCase().startsWith('team')) str = str.replace(/^team/i, '');
+      return str;
+    };
+    
     // Filter by teamId and league to get all squad players
     // Try both string and number comparison for teamId
     const filtered = players.filter(p => {
-      const playerTeamId = String(p.teamId);
-      const matchTeamId = String(selectedMatch.team2.id);
+      const playerTeamId = normalizeTeamId(p.teamId);
+      const matchTeamId = normalizeTeamId(selectedMatch.team2.id);
       const playerLeague = p.league || 'ipl';
       const matchLeague = selectedMatch.league || 'ipl';
       

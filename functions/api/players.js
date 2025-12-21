@@ -44,27 +44,45 @@ export const onRequest = async (context) => {
       const url = new URL(request.url);
       const league = url.searchParams.get('league');
       
-      const playersData = await env.IPL_CACHE.get('players', 'json');
+      let playersData = await env.IPL_CACHE.get('players', 'json');
       let players = playersData || [];
       
       // Normalize teamId values - ensure they're strings without "Team" prefix
-      players = players.map(player => {
-        let normalizedTeamId = String(player.teamId || '').trim();
-        // Remove "Team " prefix if present
-        if (normalizedTeamId.startsWith('Team ')) {
-          normalizedTeamId = normalizedTeamId.replace('Team ', '');
-        }
-        // Remove "team" prefix (case-insensitive)
-        if (normalizedTeamId.toLowerCase().startsWith('team')) {
-          normalizedTeamId = normalizedTeamId.replace(/^team/i, '');
-        }
-        
-        return {
-          ...player,
-          teamId: normalizedTeamId || player.teamId, // Use normalized or fallback to original
-          league: player.league || 'ipl' // Default to 'ipl' if missing
-        };
+      // This is critical for WPL players which may have been created with malformed teamIds
+      const needsUpdate = players.some(player => {
+        const teamIdStr = String(player.teamId || '');
+        return teamIdStr.startsWith('Team ') || /^team\d+$/i.test(teamIdStr);
       });
+      
+      if (needsUpdate) {
+        players = players.map(player => {
+          let normalizedTeamId = String(player.teamId || '').trim();
+          // Remove "Team " prefix if present
+          if (normalizedTeamId.startsWith('Team ')) {
+            normalizedTeamId = normalizedTeamId.replace('Team ', '');
+          }
+          // Remove "team" prefix (case-insensitive) but keep just the number
+          if (normalizedTeamId.toLowerCase().startsWith('team')) {
+            normalizedTeamId = normalizedTeamId.replace(/^team/i, '');
+          }
+          
+          return {
+            ...player,
+            teamId: normalizedTeamId || player.teamId, // Use normalized or fallback to original
+            league: player.league || 'ipl' // Default to 'ipl' if missing
+          };
+        });
+        
+        // Update KV storage with corrected players
+        console.log('Normalizing and updating player teamIds in KV storage');
+        await env.IPL_CACHE.put('players', JSON.stringify(players));
+      } else {
+        // Ensure all players have league property (migration for existing data)
+        players = players.map(player => ({
+          ...player,
+          league: player.league || 'ipl' // Default to 'ipl' if missing
+        }));
+      }
       
       // Filter by league if specified
       if (league && (league === 'ipl' || league === 'wpl')) {
