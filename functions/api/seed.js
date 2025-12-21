@@ -107,6 +107,7 @@ export const onRequest = async (context) => {
     const mockPlayers = [
       {
         id: '1',
+        league: 'ipl',
         name: 'Virat Kohli',
         role: 'Batsman',
         teamId: '1',
@@ -133,6 +134,7 @@ export const onRequest = async (context) => {
       },
       {
         id: '2',
+        league: 'ipl',
         name: 'Rohit Sharma',
         role: 'Batsman',
         teamId: '2',
@@ -159,6 +161,7 @@ export const onRequest = async (context) => {
       },
       {
         id: '3',
+        league: 'ipl',
         name: 'Jasprit Bumrah',
         role: 'Bowler',
         teamId: '2',

@@ -48,6 +48,7 @@ export const onRequest = async (context) => {
       const league = url.searchParams.get('league');
       const forceRefresh = url.searchParams.get('forceRefresh') === 'true';
       const fixEllyse = url.searchParams.get('fixEllyse') === 'true';
+      const diagnostic = url.searchParams.get('diagnostic') === 'true';
       
       let playersData = await env.IPL_CACHE.get('players', 'json');
       let players = playersData || [];
@@ -75,6 +76,62 @@ export const onRequest = async (context) => {
       console.log(`Total players in KV: ${players.length}`);
       console.log(`Requested league: ${league}`);
       
+      // Diagnostic mode - return detailed breakdown
+      if (diagnostic) {
+        const iplPlayers = players.filter(p => {
+          const playerLeague = p.league || 'ipl';
+          const teamId = String(p.teamId || '').trim();
+          return playerLeague === 'ipl' || (['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'].includes(teamId) && playerLeague !== 'wpl');
+        });
+        const wplPlayers = players.filter(p => {
+          const playerLeague = p.league || 'ipl';
+          const teamId = String(p.teamId || '').trim();
+          return playerLeague === 'wpl' || ['11', '12', '13', '14', '15'].includes(teamId);
+        });
+        const unknownPlayers = players.filter(p => {
+          const playerLeague = p.league || 'ipl';
+          const teamId = String(p.teamId || '').trim();
+          const isIPL = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'].includes(teamId);
+          const isWPL = ['11', '12', '13', '14', '15'].includes(teamId);
+          return !isIPL && !isWPL;
+        });
+        
+        return new Response(JSON.stringify({
+          diagnostic: true,
+          summary: {
+            total: players.length,
+            ipl: iplPlayers.length,
+            wpl: wplPlayers.length,
+            unknown: unknownPlayers.length
+          },
+          iplPlayers: iplPlayers.map(p => ({
+            id: p.id,
+            name: p.name,
+            teamId: p.teamId,
+            league: p.league || 'ipl',
+            role: p.role
+          })),
+          wplPlayers: wplPlayers.map(p => ({
+            id: p.id,
+            name: p.name,
+            teamId: p.teamId,
+            league: p.league || 'ipl',
+            role: p.role
+          })),
+          unknownPlayers: unknownPlayers.map(p => ({
+            id: p.id,
+            name: p.name,
+            teamId: p.teamId,
+            league: p.league || 'ipl',
+            role: p.role
+          })),
+          rawCount: players.length
+        }, null, 2), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+      
       // Show sample of WPL players currently in KV
       const wplPlayers = players.filter(p => (p.league || 'ipl') === 'wpl' || ['11', '12', '13', '14', '15'].includes(String(p.teamId)));
       console.log(`WPL-related players found: ${wplPlayers.length}`);
@@ -96,6 +153,8 @@ export const onRequest = async (context) => {
       
       // WPL team IDs are 11-15
       const wplTeamIds = ['11', '12', '13', '14', '15'];
+      // IPL team IDs are 1-10
+      const iplTeamIds = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
       
       // Known WPL player corrections (player name -> correct teamId)
       const wplPlayerCorrections = {
@@ -116,7 +175,20 @@ export const onRequest = async (context) => {
       players = players.map(player => {
         let normalizedTeamId = normalizeTeamId(player.teamId);
         const playerLeague = player.league || 'ipl';
-        const isWPLPlayer = playerLeague === 'wpl' || wplTeamIds.includes(normalizedTeamId);
+        const isIPLTeam = iplTeamIds.includes(normalizedTeamId);
+        const isWPLTeam = wplTeamIds.includes(normalizedTeamId);
+        const isWPLPlayer = playerLeague === 'wpl' || isWPLTeam;
+        
+        // CRITICAL: Protect IPL players - never convert IPL teamIds to WPL
+        if (isIPLTeam && playerLeague === 'wpl') {
+          console.log(`[FIX] Player "${player.name}": Incorrectly marked as WPL, correcting to IPL (teamId: ${normalizedTeamId})`);
+          needsUpdate = true;
+          return {
+            ...player,
+            teamId: normalizedTeamId,
+            league: 'ipl'
+          };
+        }
         
         // Check if this player has a known correction (ONLY apply to WPL players)
         if (isWPLPlayer && wplPlayerCorrections[player.name]) {
@@ -130,8 +202,8 @@ export const onRequest = async (context) => {
         
         const shouldBeWPL = wplTeamIds.includes(normalizedTeamId);
         
-        // If player is on WPL team but marked as IPL, correct it
-        if (shouldBeWPL && playerLeague !== 'wpl') {
+        // If player is on WPL team but marked as IPL, correct it (but only if not an IPL teamId)
+        if (shouldBeWPL && !isIPLTeam && playerLeague !== 'wpl') {
           console.log(`[FIX] Player "${player.name}": league '${playerLeague}' -> 'wpl' (teamId: ${normalizedTeamId})`);
           needsUpdate = true;
           return {
