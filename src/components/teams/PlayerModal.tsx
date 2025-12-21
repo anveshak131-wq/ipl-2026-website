@@ -267,7 +267,9 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    {player.dateOfBirth ? calculateAge(player.dateOfBirth) : player.age} years
+                    {(player.dateOfBirth ? calculateAge(player.dateOfBirth) : player.age) > 0 
+                      ? `${player.dateOfBirth ? calculateAge(player.dateOfBirth) : player.age} years`
+                      : 'Age not set'}
                     {player.dateOfBirth && <span className="text-xs ml-2">({formatDateDDMMYYYY(player.dateOfBirth)})</span>}
                   </span>
                   {player.nationality !== 'Pakistan' && (
@@ -335,7 +337,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                       <p 
                         className="text-2xl font-black mb-2 text-white"
                       >
-                        {player.battingStyle || 'N/A'}
+                        {player.battingStyle && player.battingStyle.trim() !== '' ? player.battingStyle : 'N/A'}
                       </p>
                       <p 
                         className="text-sm font-semibold uppercase tracking-wider text-white"
@@ -358,7 +360,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                         className="text-2xl font-black mb-2"
                         style={{ color: secondaryColor.text || primaryColor.text }}
                       >
-                        {player.bowlingStyle || 'N/A'}
+                        {player.bowlingStyle && player.bowlingStyle.trim() !== '' ? player.bowlingStyle : 'N/A'}
                       </p>
                       <p 
                         className="text-sm font-semibold uppercase tracking-wider"
@@ -411,31 +413,36 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
               </h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { label: 'Highest Score', value: player.stats.highest },
-                  { label: 'Fours (4s)', value: player.stats.fours },
-                  { label: 'Sixes (6s)', value: player.stats.sixes },
-                  { label: 'Fifties (50s)', value: player.stats.fifties },
-                  { label: 'Hundreds (100s)', value: player.stats.hundreds },
-                  { label: 'Total Runs', value: player.stats.runs },
-                  { label: 'Batting Avg', value: player.stats.average },
-                  { label: 'Strike Rate', value: player.stats.strikeRate },
-                ].map((stat, index) => (
-                  <div
-                    key={index}
-                    className="p-4 rounded-xl backdrop-blur-sm border text-center transform hover:scale-105 transition-all duration-300 hover:shadow-xl"
-                    style={{
-                      background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-                      borderColor: primaryColor.medium,
-                    }}
-                  >
-                    <p 
-                      className="text-3xl font-black mb-1 text-white"
+                  { label: 'Highest Score', value: player.stats.highest, isNumeric: true },
+                  { label: 'Fours (4s)', value: player.stats.fours, isNumeric: true },
+                  { label: 'Sixes (6s)', value: player.stats.sixes, isNumeric: true },
+                  { label: 'Fifties (50s)', value: player.stats.fifties, isNumeric: true },
+                  { label: 'Hundreds (100s)', value: player.stats.hundreds, isNumeric: true },
+                  { label: 'Total Runs', value: player.stats.runs, isNumeric: true },
+                  { label: 'Batting Avg', value: player.stats.average, isNumeric: true, format: (v: number) => v.toFixed(2) },
+                  { label: 'Strike Rate', value: player.stats.strikeRate, isNumeric: true, format: (v: number) => v.toFixed(1) },
+                ].map((stat, index) => {
+                  const displayValue = stat.isNumeric 
+                    ? (stat.value > 0 ? (stat.format ? stat.format(stat.value) : stat.value.toString()) : '-')
+                    : stat.value;
+                  return (
+                    <div
+                      key={index}
+                      className="p-4 rounded-xl backdrop-blur-sm border text-center transform hover:scale-105 transition-all duration-300 hover:shadow-xl"
+                      style={{
+                        background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+                        borderColor: primaryColor.medium,
+                      }}
                     >
-                      {stat.value}
-                    </p>
-                    <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: primaryColor.textOnLight }}>{stat.label}</p>
-                  </div>
-                ))}
+                      <p 
+                        className="text-3xl font-black mb-1 text-white"
+                      >
+                        {displayValue}
+                      </p>
+                      <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: primaryColor.textOnLight }}>{stat.label}</p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -452,8 +459,8 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
               </h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { label: 'Wickets', value: player.stats.wickets },
-                  { label: 'Economy Rate', value: player.stats.economy },
+                  { label: 'Wickets', value: player.stats.wickets, isNumeric: true },
+                  { label: 'Economy Rate', value: player.stats.economy, isNumeric: true, format: (v: number) => v.toFixed(2) },
                   { 
                     label: 'Bowling Avg', 
                     value: (() => {
@@ -461,27 +468,39 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                         (player.stats.wickets > 0 
                           ? calculateBowlingAverage(player.stats.economy, player.stats.wickets, player.stats.matches)
                           : 0);
-                      return bowlingAvg > 0 ? bowlingAvg.toFixed(2) : '-';
-                    })()
+                      return bowlingAvg;
+                    })(),
+                    isNumeric: true,
+                    format: (v: number) => v.toFixed(2)
                   },
-                  { label: 'Best Bowling (BBM)', value: player.stats.bestBowling || '-' },
-                ].map((stat, index) => (
-                  <div
-                    key={index}
-                    className="p-4 rounded-xl backdrop-blur-sm border text-center transform hover:scale-105 transition-all duration-300 hover:shadow-xl"
-                    style={{
-                      background: `linear-gradient(135deg, ${secondaryColor.light}, ${primaryColor.light})`,
-                      borderColor: secondaryColor.medium || primaryColor.medium,
-                    }}
-                  >
-                    <p 
-                      className="text-3xl font-black mb-1 text-white"
+                  { label: 'Best Bowling (BBM)', value: player.stats.bestBowling, isNumeric: false },
+                ].map((stat, index) => {
+                  let displayValue: string;
+                  if (stat.isNumeric) {
+                    displayValue = stat.value > 0 
+                      ? (stat.format ? stat.format(stat.value) : stat.value.toString())
+                      : '-';
+                  } else {
+                    displayValue = stat.value && stat.value !== '-' ? stat.value : '-';
+                  }
+                  return (
+                    <div
+                      key={index}
+                      className="p-4 rounded-xl backdrop-blur-sm border text-center transform hover:scale-105 transition-all duration-300 hover:shadow-xl"
+                      style={{
+                        background: `linear-gradient(135deg, ${secondaryColor.light}, ${primaryColor.light})`,
+                        borderColor: secondaryColor.medium || primaryColor.medium,
+                      }}
                     >
-                      {stat.value}
-                    </p>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-white">{stat.label}</p>
-                  </div>
-                ))}
+                      <p 
+                        className="text-3xl font-black mb-1 text-white"
+                      >
+                        {displayValue}
+                      </p>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-white">{stat.label}</p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 

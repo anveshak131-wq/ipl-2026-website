@@ -1069,9 +1069,11 @@ export default function AdminPlayers() {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                          <span className="inline-flex items-center justify-center w-8 h-8 bg-ipl-gold/20 text-ipl-gold rounded-full font-bold text-xs">
-                            {player.jerseyNumber > 0 ? player.jerseyNumber : '-'}
-                          </span>
+                          {player.jerseyNumber > 0 && (
+                            <span className="inline-flex items-center justify-center w-8 h-8 bg-ipl-gold/20 text-ipl-gold rounded-full font-bold text-xs">
+                              {player.jerseyNumber}
+                            </span>
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold border ${
@@ -1095,25 +1097,25 @@ export default function AdminPlayers() {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-semibold">
-                          {player.age > 0 ? `${player.age}y` : '-'}
+                          {player.age > 0 && `${player.age}y`}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                          {player.dateOfBirth ? (
+                          {player.dateOfBirth && (
                             currentLeague === 'wpl' 
                               ? formatDateMonthDDYYYY(player.dateOfBirth)
                               : formatDateDDMMYYYY(player.dateOfBirth)
-                          ) : '-'}
+                          )}
                         </td>
                         {currentLeague !== 'wpl' && (
                           <>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-ipl-gold font-bold">
-                              {player.stats.runs > 0 ? player.stats.runs : '-'}
+                              {player.stats.runs > 0 && player.stats.runs}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-400 font-bold">
-                              {player.stats.wickets > 0 ? player.stats.wickets : '-'}
+                              {player.stats.wickets > 0 && player.stats.wickets}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-purple-400 font-semibold">
-                              {player.stats.average > 0 ? player.stats.average.toFixed(2) : '-'}
+                              {player.stats.average > 0 && player.stats.average.toFixed(2)}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
                               {(() => {
@@ -1121,24 +1123,23 @@ export default function AdminPlayers() {
                                   (player.stats.wickets > 0 
                                     ? calculateBowlingAverage(player.stats.economy, player.stats.wickets, player.stats.matches)
                                     : 0);
-                                return bowlingAvg > 0 ? bowlingAvg.toFixed(2) : '-';
+                                return bowlingAvg > 0 ? bowlingAvg.toFixed(2) : null;
                               })()}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
-                              {player.stats.strikeRate > 0 ? player.stats.strikeRate.toFixed(2) : '-'}
+                              {player.stats.strikeRate > 0 && player.stats.strikeRate.toFixed(2)}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
-                              {player.stats.fours > 0 || player.stats.sixes > 0 
-                                ? `${player.stats.fours}/${player.stats.sixes}` 
-                                : '-'}
+                              {(player.stats.fours > 0 || player.stats.sixes > 0) && 
+                                `${player.stats.fours}/${player.stats.sixes}`}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
-                              {player.stats.fifties > 0 || player.stats.hundreds > 0 
-                                ? `${player.stats.fifties}/${player.stats.hundreds}` 
-                                : '-'}
+                              {(player.stats.fifties > 0 || player.stats.hundreds > 0) && 
+                                `${player.stats.fifties}/${player.stats.hundreds}`}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
-                              {player.stats.bestBowling && player.stats.bestBowling !== '-' ? player.stats.bestBowling : '-'}
+                              {player.stats.bestBowling && player.stats.bestBowling !== '-' && player.stats.bestBowling.trim() !== '' 
+                                && player.stats.bestBowling}
                             </td>
                           </>
                         )}

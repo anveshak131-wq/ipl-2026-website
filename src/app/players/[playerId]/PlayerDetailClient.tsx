@@ -181,25 +181,31 @@ export default function PlayerDetailClient({ playerId }: PlayerDetailClientProps
                   </span>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-3 text-xs text-gray-300">
-                  <span>
-                    Age: <span className="font-semibold text-white">{age} yrs</span>
-                    {player.dateOfBirth && (
-                      <span className="ml-1 text-gray-400">
-                        ({formatDateDDMMYYYY(player.dateOfBirth)})
-                      </span>
-                    )}
-                  </span>
-                  {player.nationality !== 'Pakistan' && (
+                  {age > 0 && (
+                    <span>
+                      Age: <span className="font-semibold text-white">{age} yrs</span>
+                      {player.dateOfBirth && (
+                        <span className="ml-1 text-gray-400">
+                          ({formatDateDDMMYYYY(player.dateOfBirth)})
+                        </span>
+                      )}
+                    </span>
+                  )}
+                  {player.nationality && player.nationality !== 'Pakistan' && (
                     <span>
                       Nationality: <span className="font-semibold text-white">{player.nationality}</span>
                     </span>
                   )}
-                  <span>
-                    Batting: <span className="font-semibold text-white">{player.battingStyle}</span>
-                  </span>
-                  <span>
-                    Bowling: <span className="font-semibold text-white">{player.bowlingStyle}</span>
-                  </span>
+                  {player.battingStyle && player.battingStyle.trim() !== '' && (
+                    <span>
+                      Batting: <span className="font-semibold text-white">{player.battingStyle}</span>
+                    </span>
+                  )}
+                  {player.bowlingStyle && player.bowlingStyle.trim() !== '' && (
+                    <span>
+                      Bowling: <span className="font-semibold text-white">{player.bowlingStyle}</span>
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -209,15 +215,15 @@ export default function PlayerDetailClient({ playerId }: PlayerDetailClientProps
             <div className="grid grid-cols-3 gap-3 md:gap-4 text-center">
               <div className="rounded-2xl bg-black/40 border border-white/10 px-4 py-3">
                 <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Matches</p>
-                <p className="text-2xl font-black text-white">{stats.matches}</p>
+                <p className="text-2xl font-black text-white">{stats.matches > 0 ? stats.matches : '-'}</p>
               </div>
               <div className="rounded-2xl bg-black/40 border border-white/10 px-4 py-3">
                 <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Runs</p>
-                <p className="text-2xl font-black text-ipl-gold">{stats.runs}</p>
+                <p className="text-2xl font-black text-ipl-gold">{stats.runs > 0 ? stats.runs : '-'}</p>
               </div>
               <div className="rounded-2xl bg-black/40 border border-white/10 px-4 py-3">
                 <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Wickets</p>
-                <p className="text-2xl font-black text-emerald-400">{stats.wickets}</p>
+                <p className="text-2xl font-black text-emerald-400">{stats.wickets > 0 ? stats.wickets : '-'}</p>
               </div>
             </div>
             )}
@@ -258,15 +264,19 @@ export default function PlayerDetailClient({ playerId }: PlayerDetailClientProps
                 Recent form <span className="text-xs text-gray-400 font-normal">(season snapshot)</span>
               </h2>
               <div className="flex gap-3 overflow-x-auto pb-2">
-                {recentFormItems.map((item) => (
-                  <div
-                    key={item.label}
-                    className="min-w-[140px] rounded-2xl bg-black/40 border border-white/10 px-4 py-3 flex flex-col justify-between"
-                  >
-                    <p className="text-xs text-gray-400 mb-1">{item.label}</p>
-                    <p className="text-xl font-black text-white">{item.value}</p>
-                  </div>
-                ))}
+                {recentFormItems.map((item) => {
+                  const numericValue = parseFloat(item.value);
+                  const displayValue = !isNaN(numericValue) && numericValue > 0 ? item.value : '-';
+                  return (
+                    <div
+                      key={item.label}
+                      className="min-w-[140px] rounded-2xl bg-black/40 border border-white/10 px-4 py-3 flex flex-col justify-between"
+                    >
+                      <p className="text-xs text-gray-400 mb-1">{item.label}</p>
+                      <p className="text-xl font-black text-white">{displayValue}</p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -274,15 +284,15 @@ export default function PlayerDetailClient({ playerId }: PlayerDetailClientProps
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="rounded-2xl bg-black/40 border border-white/10 p-4">
                 <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Highest Score</p>
-                <p className="text-2xl font-black text-ipl-gold">{stats.highest}</p>
+                <p className="text-2xl font-black text-ipl-gold">{stats.highest > 0 ? stats.highest : '-'}</p>
               </div>
               <div className="rounded-2xl bg-black/40 border border-white/10 p-4">
                 <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Batting Average</p>
-                <p className="text-2xl font-black text-white">{stats.average.toFixed(2)}</p>
+                <p className="text-2xl font-black text-white">{stats.average > 0 ? stats.average.toFixed(2) : '-'}</p>
               </div>
               <div className="rounded-2xl bg-black/40 border border-white/10 p-4">
                 <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Strike Rate</p>
-                <p className="text-2xl font-black text-emerald-400">{stats.strikeRate.toFixed(1)}</p>
+                <p className="text-2xl font-black text-emerald-400">{stats.strikeRate > 0 ? stats.strikeRate.toFixed(1) : '-'}</p>
               </div>
             </div>
           </section>
@@ -293,21 +303,26 @@ export default function PlayerDetailClient({ playerId }: PlayerDetailClientProps
             <h2 className="text-lg md:text-xl font-bold text-white">Batting statistics</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {[ 
-                { label: 'Matches', value: stats.matches },
-                { label: 'Innings runs', value: stats.runs },
-                { label: 'Highest score', value: stats.highest },
-                { label: 'Average', value: stats.average.toFixed(2) },
-                { label: 'Strike rate', value: stats.strikeRate.toFixed(1) },
-                { label: 'Fours (4s)', value: stats.fours },
-                { label: 'Sixes (6s)', value: stats.sixes },
-                { label: 'Fifties (50s)', value: stats.fifties },
-                { label: 'Hundreds (100s)', value: stats.hundreds },
-              ].map((item) => (
-                <div key={item.label} className="rounded-2xl bg-black/40 border border-white/10 p-4">
-                  <p className="text-xs text-gray-400 mb-1">{item.label}</p>
-                  <p className="text-xl font-black text-white">{item.value}</p>
-                </div>
-              ))}
+                { label: 'Matches', value: stats.matches, isNumeric: true },
+                { label: 'Innings runs', value: stats.runs, isNumeric: true },
+                { label: 'Highest score', value: stats.highest, isNumeric: true },
+                { label: 'Average', value: stats.average, isNumeric: true, format: (v: number) => v.toFixed(2) },
+                { label: 'Strike rate', value: stats.strikeRate, isNumeric: true, format: (v: number) => v.toFixed(1) },
+                { label: 'Fours (4s)', value: stats.fours, isNumeric: true },
+                { label: 'Sixes (6s)', value: stats.sixes, isNumeric: true },
+                { label: 'Fifties (50s)', value: stats.fifties, isNumeric: true },
+                { label: 'Hundreds (100s)', value: stats.hundreds, isNumeric: true },
+              ].map((item) => {
+                const displayValue = item.isNumeric 
+                  ? (item.value > 0 ? (item.format ? item.format(item.value) : item.value.toString()) : '-')
+                  : item.value;
+                return (
+                  <div key={item.label} className="rounded-2xl bg-black/40 border border-white/10 p-4">
+                    <p className="text-xs text-gray-400 mb-1">{item.label}</p>
+                    <p className="text-xl font-black text-white">{displayValue}</p>
+                  </div>
+                );
+              })}
             </div>
           </section>
         )}
@@ -317,17 +332,27 @@ export default function PlayerDetailClient({ playerId }: PlayerDetailClientProps
             <h2 className="text-lg md:text-xl font-bold text-white">Bowling statistics</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {[ 
-                { label: 'Matches', value: stats.matches },
-                { label: 'Wickets', value: stats.wickets },
-                { label: 'Economy', value: stats.economy.toFixed(2) },
-                { label: 'Bowling average', value: bowlingAverage ? bowlingAverage.toFixed(2) : '-' },
-                { label: 'Best bowling', value: stats.bestBowling || '-' },
-              ].map((item) => (
-                <div key={item.label} className="rounded-2xl bg-black/40 border border-white/10 p-4">
-                  <p className="text-xs text-gray-400 mb-1">{item.label}</p>
-                  <p className="text-xl font-black text-white">{item.value}</p>
-                </div>
-              ))}
+                { label: 'Matches', value: stats.matches, isNumeric: true },
+                { label: 'Wickets', value: stats.wickets, isNumeric: true },
+                { label: 'Economy', value: stats.economy, isNumeric: true, format: (v: number) => v.toFixed(2) },
+                { label: 'Bowling average', value: bowlingAverage, isNumeric: true, format: (v: number) => v.toFixed(2) },
+                { label: 'Best bowling', value: stats.bestBowling, isNumeric: false },
+              ].map((item) => {
+                let displayValue: string;
+                if (item.isNumeric) {
+                  displayValue = item.value > 0 
+                    ? (item.format ? item.format(item.value) : item.value.toString())
+                    : '-';
+                } else {
+                  displayValue = item.value && item.value !== '-' ? item.value : '-';
+                }
+                return (
+                  <div key={item.label} className="rounded-2xl bg-black/40 border border-white/10 p-4">
+                    <p className="text-xs text-gray-400 mb-1">{item.label}</p>
+                    <p className="text-xl font-black text-white">{displayValue}</p>
+                  </div>
+                );
+              })}
             </div>
           </section>
         )}
