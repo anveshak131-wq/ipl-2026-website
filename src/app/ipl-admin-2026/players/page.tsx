@@ -93,6 +93,8 @@ export default function AdminPlayers() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
   const [lastCalculatedAge, setLastCalculatedAge] = useState<string>('');
   const [formData, setFormData] = useState<{
     name: string;
@@ -508,6 +510,51 @@ export default function AdminPlayers() {
     }
   };
 
+  const handleDeleteAllPlayers = () => {
+    setShowDeleteAllModal(true);
+  };
+
+  const confirmDeleteAll = async () => {
+    setIsDeletingAll(true);
+    try {
+      const token =
+        typeof window !== 'undefined'
+          ? localStorage.getItem('adminToken') || localStorage.getItem('auth_token')
+          : null;
+
+      if (!token) {
+        alert('Admin session expired. Please log in again.');
+        setIsDeletingAll(false);
+        setShowDeleteAllModal(false);
+        return;
+      }
+
+      const response = await fetch(`/api/players?deleteAll=true`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete all players');
+      }
+
+      const result = await response.json();
+      
+      // Refresh players list
+      await fetchData();
+      setShowDeleteAllModal(false);
+      alert(`Successfully deleted all ${result.deletedCount || players.length} players.`);
+    } catch (error: any) {
+      console.error('Error deleting all players:', error);
+      alert(`Failed to delete all players: ${error.message || 'Please try again.'}`);
+    } finally {
+      setIsDeletingAll(false);
+    }
+  };
+
   const cancelDelete = () => {
     setShowDeleteModal(false);
     setDeleteTarget(null);
@@ -647,6 +694,16 @@ export default function AdminPlayers() {
               </div>
               <div className="flex items-center gap-3">
                 <LeagueSwitch size="md" showLabel={false} />
+                <button
+                  onClick={handleDeleteAllPlayers}
+                  className="admin-btn-danger flex items-center gap-2"
+                  disabled={players.length === 0}
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Delete All Players
+                </button>
                 <button
                   onClick={handleAddPlayer}
                   className="admin-btn-primary flex items-center gap-2"
@@ -1749,6 +1806,65 @@ export default function AdminPlayers() {
               <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
             </svg>
             <p className="text-sm text-red-300">This will permanently remove all player data.</p>
+          </div>
+        </div>
+      </ModernDialog>
+
+      {/* Delete All Players Confirmation Modal */}
+      <ModernDialog
+        isOpen={showDeleteAllModal}
+        onClose={() => setShowDeleteAllModal(false)}
+        title="Delete All Players"
+        description={`Are you sure you want to delete ALL ${players.length} players? This action cannot be undone and will permanently remove all player data from the system.`}
+        variant="danger"
+        size="md"
+        icon={<CustomEmoji type="warning" size={24} />}
+        footer={
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowDeleteAllModal(false)}
+              disabled={isDeletingAll}
+              className="flex-1 px-4 py-3 rounded-lg bg-gray-700/50 hover:bg-gray-700 text-white font-semibold transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmDeleteAll}
+              disabled={isDeletingAll}
+              className="flex-1 px-4 py-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isDeletingAll ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Deleting All...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  Delete All Players
+                </>
+              )}
+            </button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          {/* Warning Badge */}
+          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 flex items-start gap-3">
+            <svg className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-red-300 mb-1">⚠️ Irreversible Action</p>
+              <p className="text-sm text-red-200">
+                This will permanently delete all {players.length} players from the database. This includes all IPL and WPL players. 
+                You will need to re-upload or manually add all players again.
+              </p>
+            </div>
           </div>
         </div>
       </ModernDialog>

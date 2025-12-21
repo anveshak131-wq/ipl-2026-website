@@ -525,7 +525,28 @@ export const onRequest = async (context) => {
 
       const url = new URL(request.url);
       const deleteAllWPL = url.searchParams.get('deleteAllWPL');
+      const deleteAll = url.searchParams.get('deleteAll');
       const playerId = url.searchParams.get('id');
+      
+      // Handle deletion of ALL players (both IPL and WPL)
+      if (deleteAll === 'true') {
+        const playersData = await env.IPL_CACHE.get('players', 'json');
+        const players = playersData || [];
+        const totalCount = players.length;
+        
+        console.log(`[BULK DELETE ALL] Removing all ${totalCount} players`);
+        
+        await env.IPL_CACHE.put('players', JSON.stringify([]));
+
+        return new Response(JSON.stringify({ 
+          success: true, 
+          message: `Deleted all ${totalCount} players`,
+          deletedCount: totalCount
+        }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
       
       // Handle bulk deletion of all WPL players
       if (deleteAllWPL === 'true') {
