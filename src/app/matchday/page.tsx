@@ -10,24 +10,7 @@ import AnimatedSection from '@/components/ui/AnimatedSection';
 import { useLeague } from '@/contexts/LeagueContext';
 import { api } from '@/lib/data';
 import { Match, Team, League } from '@/types';
-import { 
-  MapPin, 
-  Cloud, 
-  Thermometer, 
-  Wind, 
-  Clock, 
-  Calendar,
-  Sun,
-  CloudRain,
-  Eye,
-  Navigation,
-  Phone,
-  Car,
-  Train,
-  Info,
-  AlertTriangle,
-  CheckCircle
-} from 'lucide-react';
+import Playing11Display from '@/components/matches/Playing11Display';
 
 interface VenueInfo {
   name: string;
@@ -358,6 +341,11 @@ export default function MatchDayPage() {
                     </div>
                   </div>
                 </div>
+              </AnimatedSection>
+
+              {/* Playing XI */}
+              <AnimatedSection delay={0.25}>
+                <Playing11Display match={selectedMatch} />
               </AnimatedSection>
 
               {/* Weather & Conditions */}
