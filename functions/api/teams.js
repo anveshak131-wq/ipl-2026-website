@@ -214,9 +214,14 @@ async function handleGetRequest(context) {
     // Try to get teams from KV storage
     let teams = await env.IPL_CACHE.get('teams', 'json');
     
-    // Force refresh from default teams if CSK still has old color
-    if (teams && teams.find(t => t.shortName === 'CSK' && t.colors.primary === '#FFFF00')) {
-      console.log('CSK color fix: Clearing KV cache and using default teams');
+    // Force refresh from default teams if:
+    // 1. CSK has old color
+    // 2. WPL teams are missing
+    const hasCSKColorIssue = teams && teams.find(t => t.shortName === 'CSK' && t.colors.primary === '#FFFF00');
+    const hasWPLTeams = teams && teams.find(t => t.league === 'wpl');
+    
+    if (hasCSKColorIssue || !hasWPLTeams) {
+      console.log('Clearing KV cache and using default teams (CSK color fix:', !!hasCSKColorIssue, ', WPL teams missing:', !hasWPLTeams, ')');
       teams = defaultTeams;
       // Update KV storage with fresh data
       await env.IPL_CACHE.put('teams', JSON.stringify(teams));
