@@ -218,7 +218,7 @@ export const onRequest = async (context) => {
         });
       }
 
-      const newPlayer = await request.json();
+      const newPlayer = body; // Use the already parsed body
 
       if (!newPlayer.name || !newPlayer.role || !newPlayer.teamId) {
         return new Response(JSON.stringify({ error: 'Missing required fields: name, role, teamId' }), {
