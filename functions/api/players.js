@@ -47,11 +47,24 @@ export const onRequest = async (context) => {
       const playersData = await env.IPL_CACHE.get('players', 'json');
       let players = playersData || [];
       
-      // Ensure all players have league property (migration for existing data)
-      players = players.map(player => ({
-        ...player,
-        league: player.league || 'ipl' // Default to 'ipl' if missing
-      }));
+      // Normalize teamId values - ensure they're strings without "Team" prefix
+      players = players.map(player => {
+        let normalizedTeamId = String(player.teamId || '').trim();
+        // Remove "Team " prefix if present
+        if (normalizedTeamId.startsWith('Team ')) {
+          normalizedTeamId = normalizedTeamId.replace('Team ', '');
+        }
+        // Remove "team" prefix (case-insensitive)
+        if (normalizedTeamId.toLowerCase().startsWith('team')) {
+          normalizedTeamId = normalizedTeamId.replace(/^team/i, '');
+        }
+        
+        return {
+          ...player,
+          teamId: normalizedTeamId || player.teamId, // Use normalized or fallback to original
+          league: player.league || 'ipl' // Default to 'ipl' if missing
+        };
+      });
       
       // Filter by league if specified
       if (league && (league === 'ipl' || league === 'wpl')) {
