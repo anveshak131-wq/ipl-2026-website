@@ -14,9 +14,9 @@ interface UploadSummary {
 
 interface UploadResult {
   success: boolean;
-  summary: UploadSummary;
-  added: any[];
-  skipped: string[];
+  summary: UploadSummary & { existingPreserved?: number };
+  added: any[] | Array<{ name: string; team?: string; role?: string }>;
+  skipped: string[] | Array<{ name: string; reason?: string }>;
   error?: string;
   details?: string;
 }
@@ -55,17 +55,33 @@ export default function UploadPlayersCSV() {
     reader.onload = (e) => {
       const text = e.target?.result as string;
       const lines = text.trim().split('\n');
-      const headers = lines[0].split(',');
+      if (lines.length < 2) return;
+      
+      const headerLine = lines[0].toLowerCase();
+      const is2025Format = headerLine.includes('type') && headerLine.includes('sold');
+      
       const preview = lines.slice(1, 6).map(line => {
         const values = line.split(',');
-        return {
-          Player: values[0],
-          Team: values[1],
-          Role: values[2],
-          Price_Cr: values[3],
-          Category: values[4],
-          Nationality: values[5]
-        };
+        if (is2025Format) {
+          // 2025 format: Players, Team, Type, Base, Sold
+          return {
+            Player: values[0] || '',
+            Team: values[1] || '',
+            Type: values[2] || '',
+            Base: values[3] || '',
+            Sold: values[4] || ''
+          };
+        } else {
+          // 2026 format: Player, Team, Price_Cr, Role, Category, Nationality
+          return {
+            Player: values[0] || '',
+            Team: values[1] || '',
+            Role: values[2] || '',
+            Price_Cr: values[3] || '',
+            Category: values[4] || '',
+            Nationality: values[5] || ''
+          };
+        }
       });
       setPreviewData(preview);
     };
@@ -265,23 +281,51 @@ export default function UploadPlayersCSV() {
                 <table className="w-full border-collapse">
                   <thead>
                     <tr className="bg-white/5">
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Player</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Team</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Role</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Price (Cr)</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Category</th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Nationality</th>
+                      {previewData[0]?.Type ? (
+                        // 2025 format
+                        <>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Player</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Team</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Type</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Base</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Sold</th>
+                        </>
+                      ) : (
+                        // 2026 format
+                        <>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Player</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Team</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Role</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Price (Cr)</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Category</th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Nationality</th>
+                        </>
+                      )}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
                     {previewData.map((row, idx) => (
                       <tr key={idx} className="hover:bg-white/5">
-                        <td className="px-4 py-3 text-sm text-gray-300">{row.Player}</td>
-                        <td className="px-4 py-3 text-sm text-gray-300">{row.Team}</td>
-                        <td className="px-4 py-3 text-sm text-gray-300">{row.Role}</td>
-                        <td className="px-4 py-3 text-sm text-gray-300">{row.Price_Cr}</td>
-                        <td className="px-4 py-3 text-sm text-gray-300">{row.Category}</td>
-                        <td className="px-4 py-3 text-sm text-gray-300">{row.Nationality}</td>
+                        {row.Type ? (
+                          // 2025 format
+                          <>
+                            <td className="px-4 py-3 text-sm text-gray-300">{row.Player}</td>
+                            <td className="px-4 py-3 text-sm text-gray-300">{row.Team || '-'}</td>
+                            <td className="px-4 py-3 text-sm text-gray-300">{row.Type}</td>
+                            <td className="px-4 py-3 text-sm text-gray-300">{row.Base}</td>
+                            <td className="px-4 py-3 text-sm text-gray-300">{row.Sold}</td>
+                          </>
+                        ) : (
+                          // 2026 format
+                          <>
+                            <td className="px-4 py-3 text-sm text-gray-300">{row.Player}</td>
+                            <td className="px-4 py-3 text-sm text-gray-300">{row.Team}</td>
+                            <td className="px-4 py-3 text-sm text-gray-300">{row.Role}</td>
+                            <td className="px-4 py-3 text-sm text-gray-300">{row.Price_Cr}</td>
+                            <td className="px-4 py-3 text-sm text-gray-300">{row.Category}</td>
+                            <td className="px-4 py-3 text-sm text-gray-300">{row.Nationality}</td>
+                          </>
+                        )}
                       </tr>
                     ))}
                   </tbody>
@@ -341,9 +385,9 @@ export default function UploadPlayersCSV() {
                     {uploadResult.success ? 'Upload Successful!' : 'Upload Failed'}
                   </h3>
 
-                  {uploadResult.success && uploadResult.summary && (
+                      {uploadResult.success && uploadResult.summary && (
                     <div className="space-y-4">
-                      <div className="grid grid-cols-3 gap-4">
+                      <div className={`grid gap-4 ${uploadResult.summary.existingPreserved ? 'grid-cols-4' : 'grid-cols-3'}`}>
                         <div className="admin-glass p-4 rounded-lg">
                           <p className="text-gray-400 text-sm mb-1">Total Parsed</p>
                           <p className="text-2xl font-bold text-white">{uploadResult.summary.totalParsed}</p>
@@ -356,17 +400,29 @@ export default function UploadPlayersCSV() {
                           <p className="text-yellow-400 text-sm mb-1">Skipped (Duplicates)</p>
                           <p className="text-2xl font-bold text-yellow-400">{uploadResult.summary.skipped}</p>
                         </div>
+                        {uploadResult.summary.existingPreserved !== undefined && (
+                          <div className="admin-glass p-4 rounded-lg border-blue-500/30">
+                            <p className="text-blue-400 text-sm mb-1">Existing Preserved</p>
+                            <p className="text-2xl font-bold text-blue-400">{uploadResult.summary.existingPreserved}</p>
+                          </div>
+                        )}
                       </div>
 
                       {uploadResult.skipped && uploadResult.skipped.length > 0 && (
                         <div className="mt-4">
-                          <p className="text-gray-400 text-sm mb-2">Skipped Players (already exist):</p>
-                          <div className="flex flex-wrap gap-2">
-                            {uploadResult.skipped.map((name, idx) => (
-                              <span key={idx} className="px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-400 text-sm">
-                                {name}
-                              </span>
-                            ))}
+                          <p className="text-gray-400 text-sm mb-2">Skipped Players:</p>
+                          <div className="max-h-48 overflow-y-auto">
+                            <div className="flex flex-wrap gap-2">
+                              {uploadResult.skipped.map((item, idx) => {
+                                const name = typeof item === 'string' ? item : item.name;
+                                const reason = typeof item === 'object' ? item.reason : 'Duplicate';
+                                return (
+                                  <span key={idx} className="px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-400 text-sm" title={reason}>
+                                    {name}
+                                  </span>
+                                );
+                              })}
+                            </div>
                           </div>
                         </div>
                       )}
@@ -376,12 +432,19 @@ export default function UploadPlayersCSV() {
                           <p className="text-gray-400 text-sm mb-2">New Players Added:</p>
                           <div className="max-h-48 overflow-y-auto">
                             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                              {uploadResult.added.map((player, idx) => (
-                                <div key={idx} className="px-3 py-2 rounded-lg bg-green-500/10 border border-green-500/20">
-                                  <p className="text-white text-sm font-medium">{player.name}</p>
-                                  <p className="text-gray-400 text-xs">{player.role} • {player.nationality}</p>
-                                </div>
-                              ))}
+                              {uploadResult.added.map((player, idx) => {
+                                const name = typeof player === 'string' ? player : player.name;
+                                const team = typeof player === 'object' ? player.team : '';
+                                const role = typeof player === 'object' ? player.role : '';
+                                return (
+                                  <div key={idx} className="px-3 py-2 rounded-lg bg-green-500/10 border border-green-500/20">
+                                    <p className="text-white text-sm font-medium">{name}</p>
+                                    {team && role && (
+                                      <p className="text-gray-400 text-xs">{role} • {team}</p>
+                                    )}
+                                  </div>
+                                );
+                              })}
                             </div>
                           </div>
                         </div>
@@ -423,7 +486,11 @@ export default function UploadPlayersCSV() {
             <div className="space-y-3 text-gray-400 text-sm">
               <div className="flex items-start gap-2">
                 <CustomEmoji type="check" size={16} />
-                <p>CSV must have headers: <code className="text-gray-300">Player, Team, Price_Cr, Role, Category, Nationality</code></p>
+                <p><strong className="text-white">2026 Format:</strong> <code className="text-gray-300">Player, Team, Price_Cr, Role, Category, Nationality</code></p>
+              </div>
+              <div className="flex items-start gap-2">
+                <CustomEmoji type="check" size={16} />
+                <p><strong className="text-white">2025 Format:</strong> <code className="text-gray-300">Players, Team, Type, Base, Sold</code></p>
               </div>
               <div className="flex items-start gap-2">
                 <CustomEmoji type="check" size={16} />
@@ -431,19 +498,23 @@ export default function UploadPlayersCSV() {
               </div>
               <div className="flex items-start gap-2">
                 <CustomEmoji type="check" size={16} />
-                <p>Roles: Batter, WK-Batter, Bowler, All-Rounder</p>
+                <p>2026 Roles: Batter, WK-Batter, Bowler, All-Rounder</p>
               </div>
               <div className="flex items-start gap-2">
                 <CustomEmoji type="check" size={16} />
-                <p>Category: Capped or Uncapped</p>
+                <p>2025 Types: BAT, BOWL, AR, WK</p>
               </div>
               <div className="flex items-start gap-2">
-                <CustomEmoji type="check" size={16} />
-                <p>Nationality: Indian or Overseas</p>
+                <CustomEmoji type="warning" size={16} />
+                <p><strong className="text-yellow-400">Important:</strong> Players without teams (marked as "-" or empty) will be automatically skipped</p>
               </div>
               <div className="flex items-start gap-2">
                 <CustomEmoji type="info" size={16} />
                 <p>Players with matching names (case-insensitive) will be skipped to prevent duplicates</p>
+              </div>
+              <div className="flex items-start gap-2">
+                <CustomEmoji type="info" size={16} />
+                <p><strong className="text-blue-400">Data Protection:</strong> All existing players (including 2026 players) are preserved and never modified</p>
               </div>
             </div>
           </div>
