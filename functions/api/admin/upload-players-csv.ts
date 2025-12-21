@@ -170,54 +170,31 @@ function parseCSV(csvContent: string): any[] {
         }
       }
       
-      // Determine bowling and batting styles based on role
-      let bowlingStyle = 'N/A (Batsman)';
-      let battingStyle = 'Right-handed bat';
-      
-      if (mappedRole === 'Bowler') {
-        bowlingStyle = 'Right-arm medium-fast';
-        battingStyle = 'Right-handed bat';
-      } else if (mappedRole === 'All-rounder') {
-        bowlingStyle = 'Right-arm medium';
-        battingStyle = 'Right-handed bat';
-      } else if (mappedRole === 'Wicket-keeper') {
-        bowlingStyle = 'N/A (Wicket-keeper)';
-        battingStyle = 'Right-handed bat';
-      }
-      
-      // Generate realistic stats based on role
-      const baseMatches = Math.floor(Math.random() * 50) + 20;
-      const baseRuns = mappedRole === 'Bowler' ? Math.floor(Math.random() * 100) : 
-                       mappedRole === 'All-rounder' ? Math.floor(Math.random() * 1000) + 200 :
-                       Math.floor(Math.random() * 2000) + 500;
-      const baseWickets = mappedRole === 'Batsman' || mappedRole === 'Wicket-keeper' ? 0 :
-                         mappedRole === 'Bowler' ? Math.floor(Math.random() * 80) + 20 :
-                         Math.floor(Math.random() * 30) + 5;
-      
       const player = {
         name: playerName.trim(),
         role: mappedRole,
         teamId: teamId,
         league: 'ipl',
-        age: Math.floor(Math.random() * 15) + 20, // 20-35
-        nationality: finalNationality,
-        jerseyNumber: Math.floor(Math.random() * 99) + 1,
+        // Only use data from CSV, keep rest empty/default
+        age: 0, // Will need to be filled manually
+        nationality: finalNationality, // Guessed from name
+        jerseyNumber: 0, // Will need to be filled manually
         isCaptain: false,
-        bowlingStyle: bowlingStyle,
-        battingStyle: battingStyle,
+        bowlingStyle: '', // Empty - to be filled manually
+        battingStyle: '', // Empty - to be filled manually
         stats: {
-          matches: baseMatches,
-          runs: baseRuns,
-          wickets: baseWickets,
-          average: parseFloat((Math.random() * 35 + 15).toFixed(2)),
-          strikeRate: parseFloat((Math.random() * 50 + 120).toFixed(2)),
-          economy: mappedRole === 'Batsman' || mappedRole === 'Wicket-keeper' ? 0 : parseFloat((Math.random() * 3 + 6).toFixed(2)),
-          highest: Math.floor(Math.random() * 80) + 20,
-          fours: Math.floor(baseRuns / 15),
-          sixes: Math.floor(baseRuns / 25),
-          fifties: Math.floor(baseMatches / 8),
-          hundreds: mappedRole === 'Batsman' ? Math.floor(Math.random() * 3) : 0,
-          bestBowling: mappedRole === 'Batsman' || mappedRole === 'Wicket-keeper' ? '-' : `${Math.floor(Math.random() * 3) + 1}/${Math.floor(Math.random() * 20)}`
+          matches: 0,
+          runs: 0,
+          wickets: 0,
+          average: 0,
+          strikeRate: 0,
+          economy: 0,
+          highest: 0,
+          fours: 0,
+          sixes: 0,
+          fifties: 0,
+          hundreds: 0,
+          bestBowling: '-'
         },
         transferInfo: {
           lastAuctionYear: 2025,
@@ -252,61 +229,46 @@ function parseCSV(csvContent: string): any[] {
       const isIndian = nationality?.trim() === 'Indian';
       const finalNationality = isIndian ? 'India' : guessNationality(playerName);
       
-      // Determine bowling and batting styles based on role
-      let bowlingStyle = 'N/A (Batsman)';
-      let battingStyle = 'Right-handed bat';
-      
-      if (mappedRole === 'Bowler') {
-        bowlingStyle = 'Right-arm medium-fast';
-        battingStyle = 'Right-handed bat';
-      } else if (mappedRole === 'All-rounder') {
-        bowlingStyle = 'Right-arm medium';
-        battingStyle = 'Right-handed bat';
-      } else if (mappedRole === 'Wicket-keeper') {
-        bowlingStyle = 'N/A (Wicket-keeper)';
-        battingStyle = 'Right-handed bat';
+      // Parse price from CSV
+      let transferFee: number | undefined;
+      if (priceCr && priceCr.trim() && priceCr.trim() !== '-') {
+        const priceValue = parseFloat(priceCr.trim().replace(/[^\d.]/g, ''));
+        if (!isNaN(priceValue)) {
+          transferFee = priceValue;
+        }
       }
-      
-      // Generate realistic stats based on role and category
-      const isCapped = category?.trim() === 'Capped';
-      const baseMatches = isCapped ? Math.floor(Math.random() * 50) + 20 : Math.floor(Math.random() * 10) + 5;
-      const baseRuns = mappedRole === 'Bowler' ? Math.floor(Math.random() * 100) : 
-                       mappedRole === 'All-rounder' ? Math.floor(Math.random() * 1000) + 200 :
-                       Math.floor(Math.random() * 2000) + 500;
-      const baseWickets = mappedRole === 'Batsman' || mappedRole === 'Wicket-keeper' ? 0 :
-                         mappedRole === 'Bowler' ? Math.floor(Math.random() * 80) + 20 :
-                         Math.floor(Math.random() * 30) + 5;
       
       const player = {
         name: playerName.trim(),
         role: mappedRole,
         teamId: teamId,
         league: 'ipl',
-        age: Math.floor(Math.random() * 15) + 20, // 20-35
-        nationality: finalNationality,
-        jerseyNumber: Math.floor(Math.random() * 99) + 1,
+        // Only use data from CSV, keep rest empty/default
+        age: 0, // Will need to be filled manually
+        nationality: finalNationality, // From CSV or guessed
+        jerseyNumber: 0, // Will need to be filled manually
         isCaptain: false,
-        bowlingStyle: bowlingStyle,
-        battingStyle: battingStyle,
+        bowlingStyle: '', // Empty - to be filled manually
+        battingStyle: '', // Empty - to be filled manually
         stats: {
-          matches: baseMatches,
-          runs: baseRuns,
-          wickets: baseWickets,
-          average: parseFloat((Math.random() * 35 + 15).toFixed(2)),
-          strikeRate: parseFloat((Math.random() * 50 + 120).toFixed(2)),
-          economy: mappedRole === 'Batsman' || mappedRole === 'Wicket-keeper' ? 0 : parseFloat((Math.random() * 3 + 6).toFixed(2)),
-          highest: Math.floor(Math.random() * 80) + 20,
-          fours: Math.floor(baseRuns / 15),
-          sixes: Math.floor(baseRuns / 25),
-          fifties: Math.floor(baseMatches / 8),
-          hundreds: mappedRole === 'Batsman' ? Math.floor(Math.random() * 3) : 0,
-          bestBowling: mappedRole === 'Batsman' || mappedRole === 'Wicket-keeper' ? '-' : `${Math.floor(Math.random() * 3) + 1}/${Math.floor(Math.random() * 20)}`
+          matches: 0,
+          runs: 0,
+          wickets: 0,
+          average: 0,
+          strikeRate: 0,
+          economy: 0,
+          highest: 0,
+          fours: 0,
+          sixes: 0,
+          fifties: 0,
+          hundreds: 0,
+          bestBowling: '-'
         },
         transferInfo: {
           lastAuctionYear: 2026,
           acquiredVia: 'auction',
           transferable: false,
-          transferFee: priceCr ? parseFloat(priceCr.trim()) : undefined
+          transferFee: transferFee
         }
       };
       
