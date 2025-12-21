@@ -14,50 +14,50 @@ interface WPLTeamsManagerProps {
 const WPL_TEAMS_CONFIG = [
   {
     id: '11',
-    name: 'Mumbai Indians',
-    shortName: 'MI',
+    name: 'Mumbai Indians (WPL)',
+    shortName: 'MI-W',
     abbreviation: 'MI-W',
-    colors: { primary: '#004BA0', secondary: '#CE2921' },
+    colors: { primary: '#004BA0', secondary: '#FFD700' },
     home: 'Mumbai',
     founded: 2018,
     league: 'wpl' as const
   },
   {
     id: '12',
-    name: 'Royal Challengers Bangalore',
-    shortName: 'RCB',
+    name: 'Royal Challengers Bengaluru (WPL)',
+    shortName: 'RCB-W',
     abbreviation: 'RCB-W',
-    colors: { primary: '#000000', secondary: '#EC1C24' },
-    home: 'Bangalore',
+    colors: { primary: '#C8102E', secondary: '#FFD700' },
+    home: 'Bengaluru',
     founded: 2018,
     league: 'wpl' as const
   },
   {
     id: '13',
-    name: 'Delhi Capitals',
-    shortName: 'DC',
+    name: 'Delhi Capitals (WPL)',
+    shortName: 'DC-W',
     abbreviation: 'DC-W',
-    colors: { primary: '#004C93', secondary: '#EF1F26' },
+    colors: { primary: '#004BA0', secondary: '#DC2626' },
     home: 'Delhi',
     founded: 2018,
     league: 'wpl' as const
   },
   {
     id: '14',
-    name: 'Gujarat Giants',
+    name: 'Gujarat Giants (WPL)',
     shortName: 'GG',
-    abbreviation: 'GG-W',
-    colors: { primary: '#3A2254', secondary: '#E64991' },
+    abbreviation: 'GG',
+    colors: { primary: '#F97316', secondary: '#FFD700' },
     home: 'Ahmedabad',
     founded: 2018,
     league: 'wpl' as const
   },
   {
     id: '15',
-    name: 'UP Warriorz',
+    name: 'UP Warriorz (WPL)',
     shortName: 'UPW',
     abbreviation: 'UPW',
-    colors: { primary: '#B30713', secondary: '#F7E7CE' },
+    colors: { primary: '#059669', secondary: '#F97316' },
     home: 'Lucknow',
     founded: 2018,
     league: 'wpl' as const
@@ -162,51 +162,6 @@ export default function WPLTeamsManager({ onTeamsUpdate, className = '' }: WPLTe
     }
   };
 
-  const resetWPLTeams = async () => {
-    try {
-      setIsLoading(true);
-      setMessage(null);
-
-      // Delete all WPL teams via API
-      const wplTeams = teams.filter(t => t.league === 'wpl');
-      const deletedCount = [];
-      
-      for (const team of wplTeams) {
-        try {
-          const response = await fetch(`/api/teams?id=${team.id}`, {
-            method: 'DELETE',
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('adminToken') || 'demo-token'}`
-            }
-          });
-          
-          if (response.ok) {
-            deletedCount.push(team.id);
-          } else {
-            console.error(`Failed to delete team ${team.name}:`, await response.text());
-          }
-        } catch (error) {
-          console.error(`Error deleting team ${team.name}:`, error);
-        }
-      }
-
-      if (deletedCount.length > 0) {
-        const remainingTeams = teams.filter(t => t.league !== 'wpl');
-        setTeams(remainingTeams);
-        setIsSetupComplete(false);
-        onTeamsUpdate?.(remainingTeams);
-        setMessage({ type: 'info', text: `Deleted ${deletedCount.length} WPL teams. Please set up again.` });
-      } else {
-        setMessage({ type: 'error', text: 'Failed to delete any WPL teams' });
-      }
-    } catch (error) {
-      console.error('Error resetting WPL teams:', error);
-      setMessage({ type: 'error', text: 'Failed to reset WPL teams' });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
     <div className={`admin-card ${className}`}>
       <div className="mb-6">
@@ -295,17 +250,6 @@ export default function WPLTeamsManager({ onTeamsUpdate, className = '' }: WPLTe
               <CustomEmoji type="star" size={16} />
             )}
             Setup WPL Teams
-          </button>
-        )}
-        
-        {teams.length > 0 && (
-          <button
-            onClick={resetWPLTeams}
-            disabled={isLoading}
-            className="px-4 py-2 rounded-lg bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-all duration-200 flex items-center gap-2"
-          >
-            <CustomEmoji type="star" size={16} />
-            Reset Teams
           </button>
         )}
       </div>
