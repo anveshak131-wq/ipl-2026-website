@@ -99,16 +99,20 @@ export const onRequest = async (context) => {
       const hardcodedAdmins = [
         {
           id: '1',
-          username: 'admin',
+          name: 'Admin User',
           email: 'admin@ipl2026.com',
           role: 'super_admin',
+          createdAt: new Date().toISOString(),
+          lastLogin: null,
           type: 'hardcoded'
         },
         {
           id: '2',
-          username: 'manager',
+          name: 'Manager User',
           email: 'manager@ipl2026.com',
           role: 'admin',
+          createdAt: new Date().toISOString(),
+          lastLogin: null,
           type: 'hardcoded'
         }
       ];
@@ -117,9 +121,31 @@ export const onRequest = async (context) => {
       
       // Get KV-based admins
       if (env?.SPORTS_KV) {
-        // We need to scan for admin users
-        // For now, we'll return hardcoded admins
-        // In a real implementation, you'd have an index of admin emails
+        try {
+          // List all keys with user: prefix to find admin users
+          const list = await env.SPORTS_KV.list({ prefix: 'user:' });
+          
+          for (const key of list.keys) {
+            const userStr = await env.SPORTS_KV.get(key.name);
+            if (userStr) {
+              const user = JSON.parse(userStr);
+              // Only include admin users
+              if (['admin', 'super_admin', 'players_admin'].includes(user.role)) {
+                admins.push({
+                  id: user.id,
+                  name: user.name,
+                  email: user.email,
+                  role: user.role,
+                  createdAt: user.createdAt,
+                  lastLogin: user.lastLogin,
+                  type: 'kv'
+                });
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching KV admins:', error);
+        }
       }
 
       return new Response(
