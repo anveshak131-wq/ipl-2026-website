@@ -149,7 +149,7 @@ export const onRequest = async (context) => {
       }
 
       return new Response(
-        JSON.stringify({ admins }),
+        JSON.stringify({ success: true, admins }),
         { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
       );
     }
