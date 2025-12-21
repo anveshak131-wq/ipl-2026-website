@@ -47,6 +47,7 @@ export const onRequest = async (context) => {
       const url = new URL(request.url);
       const league = url.searchParams.get('league');
       const forceRefresh = url.searchParams.get('forceRefresh') === 'true';
+      const fixEllyse = url.searchParams.get('fixEllyse') === 'true';
       
       let playersData = await env.IPL_CACHE.get('players', 'json');
       let players = playersData || [];
@@ -57,6 +58,16 @@ export const onRequest = async (context) => {
         await env.IPL_CACHE.delete('players');
         playersData = await env.IPL_CACHE.get('players', 'json');
         players = playersData || [];
+      }
+
+      // Fix Ellyse Perry if requested
+      if (fixEllyse) {
+        const ellyseIndex = players.findIndex(p => p.id === '5' && p.name === 'Ellyse Perry');
+        if (ellyseIndex !== -1) {
+          players[ellyseIndex].teamId = '12';
+          await env.IPL_CACHE.put('players', JSON.stringify(players));
+          console.log('Ellyse Perry teamId fixed to 12 (RCB-W)');
+        }
       }
       
       // Log current state before any fixes
@@ -91,7 +102,7 @@ export const onRequest = async (context) => {
         'Harmanpreet Kaur': '11', // MI-W captain
         'Alyssa Healy': '11', // MI-W
         'Smriti Mandhana': '12', // RCB-W captain
-        'Ellyse Perry': '13', // DC-W captain
+        'Ellyse Perry': '12', // RCB-W
         'Deepti Sharma': '13', // DC-W
         'Sophie Devine': '15', // UP Warriorz captain
         'Pooja Vastrakar': '12', // RCB-W
