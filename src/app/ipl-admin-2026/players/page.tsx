@@ -234,7 +234,7 @@ export default function AdminPlayers() {
     setFormData({
       name: '',
       role: 'Batsman',
-      teamId: '',
+      teamId: selectedTeam === 'all' ? '' : selectedTeam, // Auto-select filtered team
       league: currentLeague, // Use current league from context
       age: '',
       dateOfBirth: '',
