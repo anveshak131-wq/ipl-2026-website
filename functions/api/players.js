@@ -116,9 +116,10 @@ export const onRequest = async (context) => {
       players = players.map(player => {
         let normalizedTeamId = normalizeTeamId(player.teamId);
         const playerLeague = player.league || 'ipl';
+        const isWPLPlayer = playerLeague === 'wpl' || wplTeamIds.includes(normalizedTeamId);
         
-        // Check if this player has a known correction
-        if (wplPlayerCorrections[player.name]) {
+        // Check if this player has a known correction (ONLY apply to WPL players)
+        if (isWPLPlayer && wplPlayerCorrections[player.name]) {
           const correctTeamId = wplPlayerCorrections[player.name];
           if (normalizedTeamId !== correctTeamId) {
             console.log(`[CORRECT] Player "${player.name}": teamId '${normalizedTeamId}' -> '${correctTeamId}' (known WPL player)`);
