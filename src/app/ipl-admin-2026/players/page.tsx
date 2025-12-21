@@ -128,7 +128,6 @@ export default function AdminPlayers() {
       bestBowling: string;
     };
   }>({
-  {
     name: '',
     role: 'Batsman',
     teamId: '',
@@ -158,11 +157,6 @@ export default function AdminPlayers() {
       highest: '',
       fours: '',
       sixes: '',
-      fifties: '',
-      hundreds: '',
-      bestBowling: ''
-    }
-  }
       fifties: '',
       hundreds: '',
       bestBowling: ''
