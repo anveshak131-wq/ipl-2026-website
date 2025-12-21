@@ -143,6 +143,62 @@ const defaultTeams = [
       { year: 2021, name: 'IPL Champions' }
     ],
     homeGrounds: ['M. A. Chidambaram Stadium']
+  },
+  // WPL Teams (IDs 11-15)
+  {
+    id: '11',
+    league: 'wpl',
+    name: 'Mumbai Indians (WPL)',
+    shortName: 'MI-W',
+    logo: '/logos/wpl_mi_logo_animated.svg',
+    description: 'The women\'s franchise of Mumbai Indians bringing championship pedigree',
+    colors: { primary: '#004BA0', secondary: '#FFD700' },
+    trophies: [],
+    homeGrounds: ['Wankhede Stadium']
+  },
+  {
+    id: '12',
+    league: 'wpl',
+    name: 'Royal Challengers Bengaluru (WPL)',
+    shortName: 'RCB-W',
+    logo: '/logos/wpl_rcb_logo_animated.svg',
+    description: 'The women\'s franchise of RCB with explosive talent',
+    colors: { primary: '#C8102E', secondary: '#FFD700' },
+    trophies: [],
+    homeGrounds: ['M. Chinnaswamy Stadium']
+  },
+  {
+    id: '13',
+    league: 'wpl',
+    name: 'Delhi Capitals (WPL)',
+    shortName: 'DC-W',
+    logo: '/logos/wpl_dc_logo_animated.svg',
+    description: 'The women\'s franchise of Delhi Capitals combining youth and experience',
+    colors: { primary: '#004BA0', secondary: '#DC2626' },
+    trophies: [],
+    homeGrounds: ['Arun Jaitley Stadium']
+  },
+  {
+    id: '14',
+    league: 'wpl',
+    name: 'Gujarat Giants (WPL)',
+    shortName: 'GG',
+    logo: '/logos/wpl_gg_logo_animated.svg',
+    description: 'The women\'s franchise of Gujarat Titans aiming for glory',
+    colors: { primary: '#F97316', secondary: '#FFD700' },
+    trophies: [],
+    homeGrounds: ['Narendra Modi Stadium']
+  },
+  {
+    id: '15',
+    league: 'wpl',
+    name: 'UP Warriorz (WPL)',
+    shortName: 'UPW',
+    logo: '/logos/wpl_upw_logo_animated.svg',
+    description: 'The women\'s franchise of UP Warriorz bringing fierce competition',
+    colors: { primary: '#059669', secondary: '#F97316' },
+    trophies: [],
+    homeGrounds: ['Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium']
   }
 ];
 
