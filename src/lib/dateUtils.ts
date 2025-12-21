@@ -97,6 +97,113 @@ export const isValidDate = (dateString: string, format: 'DD/MM/YYYY' | 'YYYY-MM-
 };
 
 /**
+ * Parse date from "Month DD, YYYY" to YYYY-MM-DD (for WPL)
+ * @param dateString - Date in "Month DD, YYYY" format
+ * @returns Date in YYYY-MM-DD format or empty string if invalid
+ */
+export const parseDateMonthDDYYYY = (dateString: string): string => {
+  if (!dateString) return '';
+  
+  try {
+    // Handle "Month DD, YYYY" format
+    const monthDayYearRegex = /^(\w+)\s+(\d{1,2}),\s*(\d{4})$/;
+    const match = dateString.match(monthDayYearRegex);
+    
+    if (match) {
+      const [, monthName, day, year] = match;
+      const months: { [key: string]: string } = {
+        'January': '01', 'February': '02', 'March': '03', 'April': '04',
+        'May': '05', 'June': '06', 'July': '07', 'August': '08',
+        'September': '09', 'October': '10', 'November': '11', 'December': '12'
+      };
+      
+      const monthNum = months[monthName];
+      if (!monthNum) {
+        console.error('Invalid month name:', monthName);
+        return '';
+      }
+      
+      const dayNum = parseInt(day, 10);
+      const yearNum = parseInt(year, 10);
+      
+      if (dayNum < 1 || dayNum > 31 || yearNum < 1900) {
+        console.error('Invalid date values:', { day, year });
+        return '';
+      }
+      
+      return `${yearNum}-${monthNum}-${String(dayNum).padStart(2, '0')}`;
+    }
+    
+    // Fallback: try parsing as regular date
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      console.error('Invalid date format:', dateString);
+      return '';
+    }
+    
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
+  } catch (error) {
+    console.error('Error parsing date:', error);
+    return '';
+  }
+};
+
+/**
+ * Validate date format for different leagues
+ * @param dateString - Date string to validate
+ * @param league - League type ('ipl' or 'wpl')
+ * @returns true if valid, false otherwise
+ */
+export const isValidDateForLeague = (dateString: string, league: 'ipl' | 'wpl'): boolean => {
+  if (!dateString) return false;
+  
+  if (league === 'wpl') {
+    // Check "Month DD, YYYY" format
+    const monthDayYearRegex = /^(\w+)\s+(\d{1,2}),\s*(\d{4})$/;
+    return monthDayYearRegex.test(dateString);
+  } else {
+    // Check DD/MM/YYYY format
+    const ddmmyyyyRegex = /^(0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/\d{4}$/;
+    return ddmmyyyyRegex.test(dateString);
+  }
+};
+
+/**
+ * Format date from YYYY-MM-DD to "Month DD, YYYY" (for WPL)
+ * @param dateString - Date in YYYY-MM-DD format
+ * @returns Formatted date in "Month DD, YYYY" format
+ */
+export const formatDateMonthDDYYYY = (dateString: string): string => {
+  if (!dateString) return '';
+  
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      console.error('Invalid date format:', dateString);
+      return '';
+    }
+    
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    
+    const month = months[date.getMonth()];
+    const day = date.getDate();
+    const year = date.getFullYear();
+    
+    return `${month} ${day}, ${year}`;
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return '';
+  }
+};
+
+/**
  * Get today's date in YYYY-MM-DD format
  * @returns Today's date as string
  */

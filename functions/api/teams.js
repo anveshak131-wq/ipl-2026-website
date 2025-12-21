@@ -148,8 +148,8 @@ const defaultTeams = [
   {
     id: '11',
     league: 'wpl',
-    name: 'Mumbai Indians (WPL)',
-    shortName: 'MI-W',
+    name: 'Mumbai Indians',
+    shortName: 'MI',
     logo: '/logos/wpl_mi_logo_animated.svg',
     description: 'The women\'s franchise of Mumbai Indians bringing championship pedigree',
     colors: { primary: '#004BA0', secondary: '#FFD700' },
@@ -159,19 +159,19 @@ const defaultTeams = [
   {
     id: '12',
     league: 'wpl',
-    name: 'Royal Challengers Bengaluru (WPL)',
-    shortName: 'RCB-W',
+    name: 'Royal Challengers Bangalore',
+    shortName: 'RCB',
     logo: '/logos/wpl_rcb_logo_animated.svg',
     description: 'The women\'s franchise of RCB with explosive talent',
-    colors: { primary: '#C8102E', secondary: '#FFD700' },
+    colors: { primary: '#EC1C24', secondary: '#FFD700' },
     trophies: [],
     homeGrounds: ['M. Chinnaswamy Stadium']
   },
   {
     id: '13',
     league: 'wpl',
-    name: 'Delhi Capitals (WPL)',
-    shortName: 'DC-W',
+    name: 'Delhi Capitals',
+    shortName: 'DC',
     logo: '/logos/wpl_dc_logo_animated.svg',
     description: 'The women\'s franchise of Delhi Capitals combining youth and experience',
     colors: { primary: '#004BA0', secondary: '#DC2626' },
@@ -181,10 +181,10 @@ const defaultTeams = [
   {
     id: '14',
     league: 'wpl',
-    name: 'Gujarat Giants (WPL)',
+    name: 'Gujarat Giants',
     shortName: 'GG',
     logo: '/logos/wpl_gg_logo_animated.svg',
-    description: 'The women\'s franchise of Gujarat Titans aiming for glory',
+    description: 'The women\'s franchise of Gujarat Giants aiming for glory',
     colors: { primary: '#F97316', secondary: '#FFD700' },
     trophies: [],
     homeGrounds: ['Narendra Modi Stadium']
@@ -192,7 +192,7 @@ const defaultTeams = [
   {
     id: '15',
     league: 'wpl',
-    name: 'UP Warriorz (WPL)',
+    name: 'UP Warriorz',
     shortName: 'UPW',
     logo: '/logos/wpl_upw_logo_animated.svg',
     description: 'The women\'s franchise of UP Warriorz bringing fierce competition',

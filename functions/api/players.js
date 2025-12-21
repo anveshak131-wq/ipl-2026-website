@@ -382,7 +382,33 @@ export const onRequest = async (context) => {
       }
 
       const url = new URL(request.url);
+      const deleteAllWPL = url.searchParams.get('deleteAllWPL');
       const playerId = url.searchParams.get('id');
+      
+      // Handle bulk deletion of all WPL players
+      if (deleteAllWPL === 'true') {
+        const playersData = await env.IPL_CACHE.get('players', 'json');
+        const players = playersData || [];
+        
+        // Filter out all WPL players
+        const wplPlayers = players.filter(p => (p.league || 'ipl') === 'wpl');
+        const nonWPLPlayers = players.filter(p => (p.league || 'ipl') !== 'wpl');
+        
+        console.log(`[BULK DELETE] Removing ${wplPlayers.length} WPL players`);
+        
+        await env.IPL_CACHE.put('players', JSON.stringify(nonWPLPlayers));
+
+        return new Response(JSON.stringify({ 
+          success: true, 
+          message: `Deleted ${wplPlayers.length} WPL players`,
+          deletedCount: wplPlayers.length
+        }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+      
+      // Handle single player deletion
       if (!playerId) {
         return new Response(JSON.stringify({ error: 'Player ID is required' }), {
           status: 400,

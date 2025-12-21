@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useLeague } from '@/contexts/LeagueContext';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import ModernDialog from '@/components/admin/ModernDialog';
+import LeagueSwitch from '@/components/admin/LeagueSwitch';
+import WPLTeamsManager from '@/components/admin/WPLTeamsManager';
 import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
-import { parseDateDDMMYYYY, formatDateDDMMYYYY, calculateAge, isValidDate } from '@/lib/dateUtils';
+import { parseDateDDMMYYYY, formatDateDDMMYYYY, calculateAge, isValidDate, formatDateMonthDDYYYY, parseDateMonthDDYYYY, isValidDateForLeague } from '@/lib/dateUtils';
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import FlagImage from '@/components/ui/FlagImage';
@@ -175,9 +177,12 @@ export default function AdminPlayers() {
 
   // Auto-calculate age when date of birth is entered or changed
   useEffect(() => {
-    if (formData.dateOfBirth && isValidDate(formData.dateOfBirth, 'DD/MM/YYYY')) {
+    if (formData.dateOfBirth && isValidDateForLeague(formData.dateOfBirth, currentLeague)) {
       try {
-        const dateOfBirthISO = parseDateDDMMYYYY(formData.dateOfBirth);
+        const dateOfBirthISO = currentLeague === 'wpl' 
+          ? parseDateMonthDDYYYY(formData.dateOfBirth)
+          : parseDateDDMMYYYY(formData.dateOfBirth);
+        
         if (dateOfBirthISO) {
           const calculatedAge = calculateAge(dateOfBirthISO);
           const calculatedAgeStr = calculatedAge.toString();
@@ -199,7 +204,7 @@ export default function AdminPlayers() {
       setLastCalculatedAge('');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.dateOfBirth]);
+  }, [formData.dateOfBirth, currentLeague]);
 
   const fetchData = async () => {
     try {
@@ -281,12 +286,25 @@ export default function AdminPlayers() {
         ? calculateBowlingAverage(player.stats.economy, player.stats.wickets, player.stats.matches)
         : 0);
     
-    // If player has DOB, calculate age and set it as last calculated
+    // If player has DOB, format it according to league and calculate age
     // Otherwise, reset last calculated age
-    const dobFormatted = player.dateOfBirth ? formatDateDDMMYYYY(player.dateOfBirth) : '';
-    if (dobFormatted && isValidDate(dobFormatted, 'DD/MM/YYYY')) {
-      const calculatedAge = calculateAge(parseDateDDMMYYYY(dobFormatted));
-      setLastCalculatedAge(calculatedAge.toString());
+    const dobFormatted = player.dateOfBirth 
+      ? (player.league === 'wpl' 
+          ? formatDateMonthDDYYYY(player.dateOfBirth)
+          : formatDateDDMMYYYY(player.dateOfBirth))
+      : '';
+    
+    if (dobFormatted) {
+      const dateISO = player.league === 'wpl' 
+        ? parseDateMonthDDYYYY(dobFormatted)
+        : parseDateDDMMYYYY(dobFormatted);
+      
+      if (dateISO) {
+        const calculatedAge = calculateAge(dateISO);
+        setLastCalculatedAge(calculatedAge.toString());
+      } else {
+        setLastCalculatedAge('');
+      }
     } else {
       setLastCalculatedAge('');
     }
@@ -353,11 +371,16 @@ export default function AdminPlayers() {
       let dateOfBirthISO = '';
       
       if (formData.dateOfBirth) {
-        if (!isValidDate(formData.dateOfBirth, 'DD/MM/YYYY')) {
-          alert('Invalid date format. Please use DD/MM/YYYY');
+        if (!isValidDateForLeague(formData.dateOfBirth, formData.league)) {
+          const expectedFormat = formData.league === 'wpl' ? 'Month DD, YYYY (e.g., July 18, 1996)' : 'DD/MM/YYYY';
+          alert(`Invalid date format. Please use ${expectedFormat}`);
           return;
         }
-        dateOfBirthISO = parseDateDDMMYYYY(formData.dateOfBirth);
+        
+        dateOfBirthISO = formData.league === 'wpl' 
+          ? parseDateMonthDDYYYY(formData.dateOfBirth)
+          : parseDateDDMMYYYY(formData.dateOfBirth);
+        
         // Auto-calculate age from DOB
         calculatedAge = calculateAge(dateOfBirthISO);
       }
@@ -618,18 +641,33 @@ export default function AdminPlayers() {
                 <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent mb-2">
                   Player Management
                 </h1>
-                <p className="text-gray-400 text-lg">Track and manage all IPL players</p>
+                <p className="text-gray-400 text-lg">
+                  Track and manage all {currentLeague === 'wpl' ? 'WPL' : 'IPL'} players
+                </p>
               </div>
-              <button
-                onClick={handleAddPlayer}
-                className="admin-btn-primary flex items-center gap-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Add New Player
-              </button>
+              <div className="flex items-center gap-3">
+                <LeagueSwitch size="md" showLabel={false} />
+                <button
+                  onClick={handleAddPlayer}
+                  className="admin-btn-primary flex items-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add New Player
+                </button>
+              </div>
             </div>
+
+            {/* WPL Teams Manager - Only show for WPL */}
+            {currentLeague === 'wpl' && (
+              <div className="mb-6">
+                <WPLTeamsManager 
+                  onTeamsUpdate={(teams) => setTeams(teams)}
+                  className="w-full"
+                />
+              </div>
+            )}
 
             {/* Statistics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
@@ -927,7 +965,7 @@ export default function AdminPlayers() {
                       Age
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      DOB (DD/MM/YYYY)
+                      DOB ({currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY'})
                     </th>
                     {currentLeague !== 'wpl' && (
                       <>
@@ -1060,7 +1098,11 @@ export default function AdminPlayers() {
                           {player.age}y
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                          {player.dateOfBirth ? formatDateDDMMYYYY(player.dateOfBirth) : '-'}
+                          {player.dateOfBirth ? (
+                            currentLeague === 'wpl' 
+                              ? formatDateMonthDDYYYY(player.dateOfBirth)
+                              : formatDateDDMMYYYY(player.dateOfBirth)
+                          ) : '-'}
                         </td>
                         {currentLeague !== 'wpl' && (
                           <>
@@ -1281,7 +1323,7 @@ export default function AdminPlayers() {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Date of Birth (DD/MM/YYYY)
+                          Date of Birth ({currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY'})
                         </label>
                         <input
                           type="text"
@@ -1290,11 +1332,15 @@ export default function AdminPlayers() {
                             setFormData({...formData, dateOfBirth: e.target.value});
                           }}
                           className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                          placeholder="DD/MM/YYYY (optional)"
+                          placeholder={currentLeague === 'wpl' ? 'July 18, 1996 (optional)' : 'DD/MM/YYYY (optional)'}
                         />
                         <p className="text-xs text-gray-500 mt-1">
-                          {formData.dateOfBirth && isValidDate(formData.dateOfBirth, 'DD/MM/YYYY') 
-                            ? `Age automatically calculated: ${calculateAge(parseDateDDMMYYYY(formData.dateOfBirth))} years` 
+                          {formData.dateOfBirth && isValidDateForLeague(formData.dateOfBirth, currentLeague) 
+                            ? `Age automatically calculated: ${calculateAge(
+                                currentLeague === 'wpl' 
+                                  ? parseDateMonthDDYYYY(formData.dateOfBirth)
+                                  : parseDateDDMMYYYY(formData.dateOfBirth)
+                              )} years` 
                             : 'Optional: If provided, age will be automatically calculated'}
                         </p>
                       </div>
