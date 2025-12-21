@@ -189,38 +189,12 @@ export const onRequest = async (context) => {
       }
     ];
 
-    // Check if teams already exist
-    const existingTeams = await env.IPL_CACHE.get('teams', 'json');
-    
-    if (existingTeams && existingTeams.length > 0) {
-      return new Response(JSON.stringify({
-        message: 'Teams data already exists',
-        teamsCount: existingTeams.length
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
-    // Seed with mock teams
-    await env.IPL_CACHE.put('teams', JSON.stringify(mockTeams));
-
-    // Check if players already exist
-    const existingPlayers = await env.IPL_CACHE.get('players', 'json') || [];
     const restoreIPL = url.searchParams.get('restoreIPL') === 'true';
     
-    if (existingPlayers.length > 0 && !restoreIPL) {
-      return new Response(JSON.stringify({
-        message: 'Data already exists',
-        playersCount: existingPlayers.length,
-        hint: 'Add ?restoreIPL=true to restore IPL players'
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
-    // If restoreIPL is true, merge IPL players with existing players
+    // Check if players already exist (for restore functionality)
+    const existingPlayers = await env.IPL_CACHE.get('players', 'json') || [];
+    
+    // If restoreIPL is true, skip team check and restore players directly
     if (restoreIPL && existingPlayers.length > 0) {
       // Get existing WPL players (teamIds 11-15 or league='wpl')
       const wplPlayers = existingPlayers.filter(p => {
