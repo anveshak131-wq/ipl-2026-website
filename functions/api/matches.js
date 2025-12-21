@@ -3,10 +3,12 @@
  * Handles GET, POST, PUT, DELETE operations for matches
  */
 
-// Mock teams for reference
+// Mock teams for reference (IPL + WPL)
 const mockTeams = [
+  // IPL Teams (IDs 1-10)
   {
     id: '1',
+    league: 'ipl',
     name: 'Royal Challengers Bengaluru',
     shortName: 'RCB',
     logo: '/logos/rcb_logo_new.svg',
@@ -14,6 +16,7 @@ const mockTeams = [
   },
   {
     id: '2',
+    league: 'ipl',
     name: 'Mumbai Indians',
     shortName: 'MI',
     logo: '/logos/mi_logo_new.svg',
@@ -21,6 +24,7 @@ const mockTeams = [
   },
   {
     id: '3',
+    league: 'ipl',
     name: 'Sunrisers Hyderabad',
     shortName: 'SRH',
     logo: '/logos/srh_logo_new.svg',
@@ -28,6 +32,7 @@ const mockTeams = [
   },
   {
     id: '4',
+    league: 'ipl',
     name: 'Gujarat Titans',
     shortName: 'GT',
     logo: '/logos/gt_logo_new.svg',
@@ -35,6 +40,7 @@ const mockTeams = [
   },
   {
     id: '5',
+    league: 'ipl',
     name: 'Punjab Kings',
     shortName: 'PBKS',
     logo: '/logos/kxip_logo_new.svg',
@@ -42,6 +48,7 @@ const mockTeams = [
   },
   {
     id: '6',
+    league: 'ipl',
     name: 'Delhi Capitals',
     shortName: 'DC',
     logo: '/logos/dc_logo_new.svg',
@@ -49,6 +56,7 @@ const mockTeams = [
   },
   {
     id: '7',
+    league: 'ipl',
     name: 'Lucknow Super Giants',
     shortName: 'LSG',
     logo: '/logos/lsg_logo_new.svg',
@@ -56,6 +64,7 @@ const mockTeams = [
   },
   {
     id: '8',
+    league: 'ipl',
     name: 'Rajasthan Royals',
     shortName: 'RR',
     logo: '/logos/rr_logo_new.svg',
@@ -63,6 +72,7 @@ const mockTeams = [
   },
   {
     id: '9',
+    league: 'ipl',
     name: 'Kolkata Knight Riders',
     shortName: 'KKR',
     logo: '/logos/kkr_logo_new.svg',
@@ -70,10 +80,52 @@ const mockTeams = [
   },
   {
     id: '10',
+    league: 'ipl',
     name: 'Chennai Super Kings',
     shortName: 'CSK',
     logo: '/logos/csk_logo_new.svg',
     colors: { primary: '#FFB90F', secondary: '#0081E8' }
+  },
+  // WPL Teams (IDs 11-15)
+  {
+    id: '11',
+    league: 'wpl',
+    name: 'Mumbai Indians (WPL)',
+    shortName: 'MI-W',
+    logo: '/logos/wpl_mi_logo_animated.svg',
+    colors: { primary: '#004BA0', secondary: '#FFD700' }
+  },
+  {
+    id: '12',
+    league: 'wpl',
+    name: 'Royal Challengers Bengaluru (WPL)',
+    shortName: 'RCB-W',
+    logo: '/logos/wpl_rcb_logo_animated.svg',
+    colors: { primary: '#C8102E', secondary: '#FFD700' }
+  },
+  {
+    id: '13',
+    league: 'wpl',
+    name: 'Delhi Capitals (WPL)',
+    shortName: 'DC-W',
+    logo: '/logos/wpl_dc_logo_animated.svg',
+    colors: { primary: '#004BA0', secondary: '#DC2626' }
+  },
+  {
+    id: '14',
+    league: 'wpl',
+    name: 'Gujarat Giants (WPL)',
+    shortName: 'GG',
+    logo: '/logos/wpl_gg_logo_animated.svg',
+    colors: { primary: '#F97316', secondary: '#FFD700' }
+  },
+  {
+    id: '15',
+    league: 'wpl',
+    name: 'UP Warriorz (WPL)',
+    shortName: 'UPW',
+    logo: '/logos/wpl_upw_logo_animated.svg',
+    colors: { primary: '#059669', secondary: '#F97316' }
   }
 ];
 
