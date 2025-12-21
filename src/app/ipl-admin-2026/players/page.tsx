@@ -145,7 +145,7 @@ export default function AdminPlayers() {
     // Transfer defaults
     lastAuctionYear: undefined,
     acquiredVia: 'auction',
-    transferable: true,
+    transferable: false,
     transferFee: '',
     transferNotes: '',
     stats: {
@@ -247,7 +247,7 @@ export default function AdminPlayers() {
       // Transfer defaults when creating a new player
       lastAuctionYear: undefined,
       acquiredVia: 'auction',
-      transferable: true,
+      transferable: false,
       transferFee: '',
       transferNotes: '',
       stats: {
@@ -329,7 +329,7 @@ export default function AdminPlayers() {
       // Transfer info mapping (if available)
       lastAuctionYear: player.transferInfo?.lastAuctionYear,
       acquiredVia: player.transferInfo?.acquiredVia || 'auction',
-      transferable: typeof player.transferInfo?.transferable === 'boolean' ? player.transferInfo!.transferable : true,
+      transferable: typeof player.transferInfo?.transferable === 'boolean' ? player.transferInfo!.transferable : false,
       transferFee: player.transferInfo?.transferFee ? String(player.transferInfo.transferFee) : '',
       transferNotes: player.transferInfo?.notes || '',
       stats: {
