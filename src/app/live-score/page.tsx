@@ -9,7 +9,9 @@ import Footer from '@/components/layout/Footer';
 import Emoji, { EmojiName } from '@/components/emoji/Emoji';
 import EmojiPicker from '@/components/emoji/EmojiPicker';
 import type { Match } from '@/types';
-import Playing11Display from '@/components/matches/Playing11Display';
+import AnimatedSection from '@/components/ui/AnimatedSection';
+import GradientText from '@/components/ui/GradientText';
+import GlassCard from '@/components/ui/GlassCard';
 
 interface LiveScoreData {
   matchId: string;
@@ -700,9 +702,6 @@ export default function LiveScorePage() {
                                 <p className="text-gray-400">No commentary yet</p>
                               )}
                             </div>
-
-                            {/* Playing XI */}
-                            <Playing11Display match={match} />
                           </div>
                         ) : (
                           <p className="text-gray-400 text-sm">Live score data is not available yet for this match.</p>

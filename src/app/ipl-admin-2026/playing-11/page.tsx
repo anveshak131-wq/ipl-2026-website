@@ -319,10 +319,6 @@ export default function Playing11Page() {
     try {
       const token = localStorage.getItem('adminToken');
       
-      // Calculate playing-11 visibility time (30 minutes before match)
-      const matchDateTime = new Date(`${selectedMatch.date}T${selectedMatch.time}`);
-      const visibilityTime = new Date(matchDateTime.getTime() - 30 * 60 * 1000); // 30 minutes before
-      
       // Update match with playing 11
       // Use the match update API format
       const response = await fetch(`/api/matches?id=${selectedMatch.id}`, {
@@ -343,8 +339,8 @@ export default function Playing11Page() {
           playing11: {
             team1: team1Playing11,
             team2: team2Playing11,
-          },
-          playing11VisibleAt: visibilityTime.toISOString()
+            setAt: new Date().toISOString(), // Timestamp when admin set playing 11
+          }
         }),
       });
 

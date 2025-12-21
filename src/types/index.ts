@@ -83,8 +83,8 @@ export interface Match {
   playing11?: {
     team1: string[]; // Array of player IDs for team 1
     team2: string[]; // Array of player IDs for team 2
+    setAt?: string; // ISO timestamp when playing11 was set (used to track when it became visible to users)
   };
-  playing11VisibleAt?: string; // ISO timestamp when playing-11 becomes visible to end users (typically 30 min before match)
   score?: {
     team1: {
       runs: number;
