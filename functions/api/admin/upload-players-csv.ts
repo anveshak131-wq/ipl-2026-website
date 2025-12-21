@@ -117,163 +117,100 @@ function guessNationality(name: string): string {
 }
 
 // Parse CSV content and convert to player objects
-// Supports both 2026 format (Player, Team, Price_Cr, Role, Category, Nationality)
-// and 2025 format (Players, Team, Type, Base, Sold)
+// Only extracts: Name, Team, Type (Role), Nationality
+// All other fields are kept empty/default
 function parseCSV(csvContent: string): any[] {
   const lines = csvContent.trim().split('\n');
   if (lines.length < 2) return [];
   
   const headerLine = lines[0].toLowerCase();
-  const is2025Format = headerLine.includes('type') && headerLine.includes('sold');
-  const is2026Format = headerLine.includes('price_cr') && headerLine.includes('category');
-  
   const dataLines = lines.slice(1).filter(line => line.trim());
   const players: any[] = [];
 
   dataLines.forEach((line) => {
     const columns = line.split(',');
     
-    if (is2025Format) {
-      // 2025 format: Players, Team, Type, Base, Sold
-      const [playerName, teamAbbr, playerType, basePrice, soldPrice] = columns;
-      
-      if (!playerName || !teamAbbr) return;
-      
-      const teamAbbrTrimmed = teamAbbr.trim();
-      
-      // Skip players with no team (unsold players)
-      if (!teamAbbrTrimmed || teamAbbrTrimmed === '-' || teamAbbrTrimmed === '') {
-        return;
-      }
-      
-      // Skip unsold players (check Sold column)
-      const soldPriceTrimmed = soldPrice?.trim() || '';
-      if (soldPriceTrimmed === 'Unsold' || soldPriceTrimmed === '') {
-        return;
-      }
-      
-      const teamId = teamMapping[teamAbbrTrimmed];
-      if (!teamId) {
-        console.warn(`Unknown team: ${teamAbbrTrimmed} for player ${playerName}`);
-        return;
-      }
-      
-      const mappedRole = roleMapping[playerType?.trim() || 'BAT'] || 'Batsman';
-      const finalNationality = guessNationality(playerName);
-      
-      // Parse sold price (remove any non-numeric characters except decimal point)
-      let transferFee: number | undefined;
-      if (soldPriceTrimmed && soldPriceTrimmed !== 'TBA' && soldPriceTrimmed !== 'Unsold') {
-        const priceValue = parseFloat(soldPriceTrimmed.replace(/[^\d.]/g, ''));
-        if (!isNaN(priceValue)) {
-          transferFee = priceValue;
-        }
-      }
-      
-      const player = {
-        name: playerName.trim(),
-        role: mappedRole,
-        teamId: teamId,
-        league: 'ipl',
-        // Only use data from CSV, keep rest empty/default
-        age: 0, // Will need to be filled manually
-        nationality: finalNationality, // Guessed from name
-        jerseyNumber: 0, // Will need to be filled manually
-        isCaptain: false,
-        bowlingStyle: '', // Empty - to be filled manually
-        battingStyle: '', // Empty - to be filled manually
-        stats: {
-          matches: 0,
-          runs: 0,
-          wickets: 0,
-          average: 0,
-          strikeRate: 0,
-          economy: 0,
-          highest: 0,
-          fours: 0,
-          sixes: 0,
-          fifties: 0,
-          hundreds: 0,
-          bestBowling: '-'
-        },
-        transferInfo: {
-          lastAuctionYear: 2025,
-          acquiredVia: 'auction',
-          transferable: false,
-          transferFee: transferFee
-        }
-      };
-      
-      players.push(player);
-      
-    } else if (is2026Format) {
-      // 2026 format: Player, Team, Price_Cr, Role, Category, Nationality
-      const [playerName, teamAbbr, priceCr, role, category, nationality] = columns;
-      
-      if (!playerName || !teamAbbr) return;
-      
-      const teamAbbrTrimmed = teamAbbr.trim();
-      
-      // Skip players with no team
-      if (!teamAbbrTrimmed || teamAbbrTrimmed === '-' || teamAbbrTrimmed === '') {
-        return;
-      }
-      
-      const teamId = teamMapping[teamAbbrTrimmed];
-      if (!teamId) {
-        console.warn(`Unknown team: ${teamAbbrTrimmed} for player ${playerName}`);
-        return;
-      }
-      
-      const mappedRole = roleMapping[role?.trim() || 'Batter'] || 'Batsman';
-      const isIndian = nationality?.trim() === 'Indian';
-      const finalNationality = isIndian ? 'India' : guessNationality(playerName);
-      
-      // Parse price from CSV
-      let transferFee: number | undefined;
-      if (priceCr && priceCr.trim() && priceCr.trim() !== '-') {
-        const priceValue = parseFloat(priceCr.trim().replace(/[^\d.]/g, ''));
-        if (!isNaN(priceValue)) {
-          transferFee = priceValue;
-        }
-      }
-      
-      const player = {
-        name: playerName.trim(),
-        role: mappedRole,
-        teamId: teamId,
-        league: 'ipl',
-        // Only use data from CSV, keep rest empty/default
-        age: 0, // Will need to be filled manually
-        nationality: finalNationality, // From CSV or guessed
-        jerseyNumber: 0, // Will need to be filled manually
-        isCaptain: false,
-        bowlingStyle: '', // Empty - to be filled manually
-        battingStyle: '', // Empty - to be filled manually
-        stats: {
-          matches: 0,
-          runs: 0,
-          wickets: 0,
-          average: 0,
-          strikeRate: 0,
-          economy: 0,
-          highest: 0,
-          fours: 0,
-          sixes: 0,
-          fifties: 0,
-          hundreds: 0,
-          bestBowling: '-'
-        },
-        transferInfo: {
-          lastAuctionYear: 2026,
-          acquiredVia: 'auction',
-          transferable: false,
-          transferFee: transferFee
-        }
-      };
-      
-      players.push(player);
+    // Try to find Name, Team, Type/Role, Nationality columns
+    // Handle different CSV formats by checking header positions
+    const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+    
+    // Find column indices
+    const nameIndex = headers.findIndex(h => h.includes('name') || h.includes('player'));
+    const teamIndex = headers.findIndex(h => h.includes('team'));
+    const typeIndex = headers.findIndex(h => h.includes('type') || h.includes('role'));
+    const nationalityIndex = headers.findIndex(h => h.includes('nationality') || h.includes('nation'));
+    
+    // Extract values
+    const playerName = nameIndex >= 0 ? columns[nameIndex]?.trim() : columns[0]?.trim();
+    const teamAbbr = teamIndex >= 0 ? columns[teamIndex]?.trim() : columns[1]?.trim();
+    const playerType = typeIndex >= 0 ? columns[typeIndex]?.trim() : columns[2]?.trim();
+    const nationality = nationalityIndex >= 0 ? columns[nationalityIndex]?.trim() : columns[3]?.trim();
+    
+    if (!playerName || !teamAbbr) return;
+    
+    const teamAbbrTrimmed = teamAbbr.trim();
+    
+    // Skip players with no team
+    if (!teamAbbrTrimmed || teamAbbrTrimmed === '-' || teamAbbrTrimmed === '') {
+      return;
     }
+    
+    const teamId = teamMapping[teamAbbrTrimmed];
+    if (!teamId) {
+      console.warn(`Unknown team: ${teamAbbrTrimmed} for player ${playerName}`);
+      return;
+    }
+    
+    // Map role/type
+    const mappedRole = roleMapping[playerType?.trim() || 'BAT'] || roleMapping[playerType?.trim() || 'Batter'] || 'Batsman';
+    
+    // Determine nationality
+    let finalNationality = 'India'; // Default
+    if (nationality && nationality.trim() && nationality.trim() !== '-') {
+      const nationalityTrimmed = nationality.trim();
+      if (nationalityTrimmed === 'Indian' || nationalityTrimmed === 'India') {
+        finalNationality = 'India';
+      } else if (nationalityTrimmed === 'Overseas') {
+        finalNationality = guessNationality(playerName);
+      } else {
+        // Use nationality as-is if it's a country name
+        finalNationality = nationalityTrimmed;
+      }
+    } else {
+      // Guess nationality if not provided
+      finalNationality = guessNationality(playerName);
+    }
+    
+    const player = {
+      name: playerName.trim(),
+      role: mappedRole,
+      teamId: teamId,
+      league: 'ipl',
+      nationality: finalNationality,
+      // All other fields kept empty (0/empty string) until manually added
+      age: 0, // Empty - to be filled manually
+      jerseyNumber: 0, // Empty - to be filled manually
+      isCaptain: false,
+      bowlingStyle: '', // Empty - to be filled manually
+      battingStyle: '', // Empty - to be filled manually
+      stats: {
+        matches: 0, // Empty - to be filled manually
+        runs: 0, // Empty - to be filled manually
+        wickets: 0, // Empty - to be filled manually
+        average: 0, // Empty - to be filled manually
+        strikeRate: 0, // Empty - to be filled manually
+        economy: 0, // Empty - to be filled manually
+        highest: 0, // Empty - to be filled manually
+        fours: 0, // Empty - to be filled manually
+        sixes: 0, // Empty - to be filled manually
+        fifties: 0, // Empty - to be filled manually
+        hundreds: 0, // Empty - to be filled manually
+        bestBowling: '-' // Empty - to be filled manually
+      }
+      // transferInfo not included - to be added manually if needed
+    };
+    
+    players.push(player);
   });
 
   return players;
