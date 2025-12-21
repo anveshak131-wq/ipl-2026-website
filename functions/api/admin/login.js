@@ -107,6 +107,11 @@ const ADMIN_USERS = {
   }
 };
 
+// Allowlist for admins who should only access players page
+const PLAYERS_ONLY_ADMINS = new Set([
+  'sumanthvallam20@gmail.com'
+]);
+
 // Password verification for KV users
 const verifyPassword = (password, salt, hashedPassword) => {
   const hash = crypto.createHash('sha256');
@@ -198,7 +203,11 @@ export const onRequest = async (context) => {
         }
       }
 
-      const token = generateToken(hardcodedUser);
+      const effectiveRole = PLAYERS_ONLY_ADMINS.has(hardcodedUser.email)
+        ? 'players_admin'
+        : hardcodedUser.role;
+
+      const token = generateToken({ ...hardcodedUser, role: effectiveRole });
 
       // Sync hardcoded admin into KV so that /api/auth and KV-protected
       // admin APIs (datasets, analytics, etc.) recognize this session.
@@ -224,7 +233,7 @@ export const onRequest = async (context) => {
           salt: existingUser?.salt,
           hashedPassword: existingUser?.hashedPassword,
           token,
-          role: hardcodedUser.role,
+          role: effectiveRole,
           isBlocked: existingUser?.isBlocked ?? false,
           createdAt: existingUser?.createdAt || nowIso,
           lastLogin: nowIso,
@@ -259,7 +268,7 @@ export const onRequest = async (context) => {
             id: hardcodedUser.id,
             username: hardcodedUser.username,
             email: hardcodedUser.email,
-            role: hardcodedUser.role
+            role: effectiveRole
           }
         }),
         {
@@ -280,7 +289,7 @@ export const onRequest = async (context) => {
         const user = JSON.parse(userData);
         
         // Only allow admin role users
-        if (user.role === 'admin' && verifyPassword(password, user.salt, user.hashedPassword)) {
+        if ((user.role === 'admin' || user.role === 'super_admin' || user.role === 'players_admin') && verifyPassword(password, user.salt, user.hashedPassword)) {
           // If TOTP is configured, require a valid 6-digit code
           if (totpSecret) {
             const ok2fa = await verifyTotpCode(totpSecret, totp);
@@ -310,10 +319,15 @@ export const onRequest = async (context) => {
             token = tokenBuffer.toString('hex');
           }
 
+          const allowListedRole = PLAYERS_ONLY_ADMINS.has(user.email) ? 'players_admin' : user.role;
+
           const updatedUser = {
             ...user,
             token,
             lastLogin: nowIso,
+            role: ['admin', 'super_admin', 'players_admin'].includes(user.role)
+              ? user.role
+              : allowListedRole,
           };
 
           // Store/refresh user in KV with 1 year TTL
