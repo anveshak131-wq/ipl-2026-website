@@ -173,9 +173,9 @@ export const onRequest = async (context) => {
       }
 
       // Validate role
-      if (!['admin', 'super_admin'].includes(role)) {
+      if (!['admin', 'super_admin', 'players_admin'].includes(role)) {
         return new Response(
-          JSON.stringify({ error: 'Role must be admin or super_admin' }),
+          JSON.stringify({ error: 'Role must be admin, super_admin, or players_admin' }),
           { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
