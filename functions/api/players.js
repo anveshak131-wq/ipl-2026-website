@@ -77,17 +77,41 @@ export const onRequest = async (context) => {
       // WPL team IDs are 11-15
       const wplTeamIds = ['11', '12', '13', '14', '15'];
       
-      // Aggressive migration: Fix league property based on teamId
-      // If a player has teamId 11-15 but league is 'ipl' (or missing), fix it to 'wpl'
+      // Known WPL player corrections (player name -> correct teamId)
+      const wplPlayerCorrections = {
+        'Harmanpreet Kaur': '11', // MI-W captain
+        'Alyssa Healy': '11', // MI-W
+        'Smriti Mandhana': '12', // RCB-W captain
+        'Ellyse Perry': '13', // DC-W captain
+        'Deepti Sharma': '13', // DC-W
+        'Sophie Devine': '15', // UP Warriorz captain
+        'Pooja Vastrakar': '12', // RCB-W
+        'Renuka Singh': '12', // RCB-W
+        'Devika Vaidya': '14', // Gujarat Giants
+        'Ashleigh Gardner': '14' // Gujarat Giants
+      };
+      
+      // Aggressive migration: Fix league property based on teamId and known player corrections
       let needsUpdate = false;
       players = players.map(player => {
-        const normalizedTeamId = normalizeTeamId(player.teamId);
+        let normalizedTeamId = normalizeTeamId(player.teamId);
         const playerLeague = player.league || 'ipl';
+        
+        // Check if this player has a known correction
+        if (wplPlayerCorrections[player.name]) {
+          const correctTeamId = wplPlayerCorrections[player.name];
+          if (normalizedTeamId !== correctTeamId) {
+            console.log(`[CORRECT] Player "${player.name}": teamId '${normalizedTeamId}' -> '${correctTeamId}' (known WPL player)`);
+            needsUpdate = true;
+            normalizedTeamId = correctTeamId;
+          }
+        }
+        
         const shouldBeWPL = wplTeamIds.includes(normalizedTeamId);
         
         // If player is on WPL team but marked as IPL, correct it
         if (shouldBeWPL && playerLeague !== 'wpl') {
-          console.log(`[FIX] Player "${player.name}": league '${playerLeague}' -> 'wpl' (teamId: ${player.teamId})`);
+          console.log(`[FIX] Player "${player.name}": league '${playerLeague}' -> 'wpl' (teamId: ${normalizedTeamId})`);
           needsUpdate = true;
           return {
             ...player,
@@ -98,7 +122,7 @@ export const onRequest = async (context) => {
         
         // Also normalize teamId for all players
         if (String(player.teamId) !== normalizedTeamId) {
-          console.log(`[FIX] Player "${player.name}": teamId '${player.teamId}' -> '${normalizedTeamId}'`);
+          console.log(`[NORMALIZE] Player "${player.name}": teamId '${player.teamId}' -> '${normalizedTeamId}'`);
           needsUpdate = true;
           return {
             ...player,
