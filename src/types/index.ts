@@ -51,6 +51,19 @@ export interface Player {
     hundreds: number;
     bestBowling: string; // Format: "wickets/runs" e.g., "4/21", "3/45"
   };
+  // Transfer and auction metadata (optional)
+  transferInfo?: {
+    // Year the player was last purchased at auction (e.g., 2026)
+    lastAuctionYear?: number;
+    // How the player was acquired: 'auction', 'trade', 'swap', 'retention', 'transfer'
+    acquiredVia?: 'auction' | 'trade' | 'swap' | 'retention' | 'transfer';
+    // Whether the player is eligible to be traded/transferred for the upcoming season
+    transferable?: boolean;
+    // Optional transfer fee (cash deal) in lakhs or base currency units
+    transferFee?: number;
+    // Free-form notes (e.g., "Confirmed trade to CSK on 2025-12-10")
+    notes?: string;
+  };
 }
 
 export type PlayoffType = 'qualifier1' | 'eliminator' | 'qualifier2' | 'final' | null;

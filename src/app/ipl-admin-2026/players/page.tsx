@@ -68,6 +68,9 @@ const BATTING_STYLES = [
   'All-rounder'
 ];
 
+// Current season for which transfer rules apply (used to enforce auction locks)
+const CURRENT_SEASON = 2027;
+
 // Mark this page as dynamic to prevent pre-rendering
 // Note: Removed for static export compatibility
 
@@ -102,6 +105,13 @@ export default function AdminPlayers() {
     bowlingStyle: string;
     customBowlingStyle: string;
     battingStyle: string;
+    // Transfer-related fields
+    lastAuctionYear?: number | undefined;
+    acquiredVia: 'auction' | 'trade' | 'swap' | 'retention' | 'transfer';
+    transferable: boolean;
+    transferFee?: string;
+    transferNotes?: string;
+
     stats: {
       matches: string;
       runs: string;
@@ -118,6 +128,7 @@ export default function AdminPlayers() {
       bestBowling: string;
     };
   }>({
+  {
     name: '',
     role: 'Batsman',
     teamId: '',
@@ -130,6 +141,12 @@ export default function AdminPlayers() {
     bowlingStyle: 'N/A (Batsman)',
     customBowlingStyle: '',
     battingStyle: 'Right-handed bat',
+    // Transfer defaults
+    lastAuctionYear: undefined,
+    acquiredVia: 'auction',
+    transferable: true,
+    transferFee: '',
+    transferNotes: '',
     stats: {
       matches: '',
       runs: '',
@@ -141,6 +158,11 @@ export default function AdminPlayers() {
       highest: '',
       fours: '',
       sixes: '',
+      fifties: '',
+      hundreds: '',
+      bestBowling: ''
+    }
+  }
       fifties: '',
       hundreds: '',
       bestBowling: ''
@@ -223,6 +245,12 @@ export default function AdminPlayers() {
       bowlingStyle: 'N/A (Batsman)',
       customBowlingStyle: '',
       battingStyle: 'Right-handed bat',
+      // Transfer defaults when creating a new player
+      lastAuctionYear: undefined,
+      acquiredVia: 'auction',
+      transferable: true,
+      transferFee: '',
+      transferNotes: '',
       stats: {
         matches: '',
         runs: '',
@@ -286,6 +314,12 @@ export default function AdminPlayers() {
       bowlingStyle: isPredefinedBowlingStyle ? existingBowlingStyle : 'N/A (Batsman)',
       customBowlingStyle: isPredefinedBowlingStyle ? '' : existingBowlingStyle,
       battingStyle: player.battingStyle || 'Right-handed bat',
+      // Transfer info mapping (if available)
+      lastAuctionYear: player.transferInfo?.lastAuctionYear,
+      acquiredVia: player.transferInfo?.acquiredVia || 'auction',
+      transferable: typeof player.transferInfo?.transferable === 'boolean' ? player.transferInfo!.transferable : true,
+      transferFee: player.transferInfo?.transferFee ? String(player.transferInfo.transferFee) : '',
+      transferNotes: player.transferInfo?.notes || '',
       stats: {
         matches: player.stats.matches.toString(),
         runs: player.stats.runs.toString(),
@@ -362,6 +396,14 @@ export default function AdminPlayers() {
           fifties: parseInt(formData.stats.fifties) || 0,
           hundreds: parseInt(formData.stats.hundreds) || 0,
           bestBowling: formData.stats.bestBowling || '-',
+        }
+      ,
+        transferInfo: {
+          lastAuctionYear: formData.lastAuctionYear ? Number(formData.lastAuctionYear) : undefined,
+          acquiredVia: formData.acquiredVia,
+          transferable: !!formData.transferable,
+          transferFee: formData.transferFee ? parseFloat(String(formData.transferFee)) : undefined,
+          notes: formData.transferNotes || undefined
         }
       };
 
@@ -1360,6 +1402,81 @@ export default function AdminPlayers() {
                         <label htmlFor="player-isCaptain" className="ml-2 text-sm font-medium text-gray-300">
                           Is Captain
                         </label>
+                      </div>
+
+                      {/* Transfer / Auction Info */}
+                      <div className="col-span-1 md:col-span-2 border-t border-white/5 pt-4">
+                        <h3 className="text-sm font-semibold text-white mb-2">Transfer / Auction Info</h3>
+                        {/* Determine if player is auction-locked for CURRENT_SEASON */}
+                        {(() => {
+                          const isAuctionLocked = typeof formData.lastAuctionYear !== 'undefined' &&
+                            formData.lastAuctionYear === 2026 &&
+                            formData.acquiredVia === 'auction' &&
+                            CURRENT_SEASON === 2027;
+                          return (
+                            <>
+                              {isAuctionLocked && (
+                                <div className="mb-2 text-sm text-yellow-300">Players bought at the IPL 2026 auction cannot be traded for the 2027 season (auction-locked).</div>
+                              )}
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">Last Auction Year</label>
+                                  <input
+                                    type="number"
+                                    value={formData.lastAuctionYear ?? ''}
+                                    onChange={(e) => setFormData({ ...formData, lastAuctionYear: e.target.value ? Number(e.target.value) : undefined })}
+                                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                                    placeholder="e.g., 2026"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">Acquired Via</label>
+                                  <select
+                                    value={formData.acquiredVia}
+                                    onChange={(e) => setFormData({ ...formData, acquiredVia: e.target.value as any })}
+                                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-ipl-gold"
+                                  >
+                                    <option value="auction">Auction</option>
+                                    <option value="retention">Retention</option>
+                                    <option value="trade">Trade</option>
+                                    <option value="swap">Swap</option>
+                                    <option value="transfer">Transfer</option>
+                                  </select>
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">Transferable</label>
+                                  <input
+                                    type="checkbox"
+                                    checked={!!formData.transferable}
+                                    onChange={(e) => setFormData({ ...formData, transferable: e.target.checked })}
+                                    disabled={typeof formData.lastAuctionYear !== 'undefined' && formData.lastAuctionYear === 2026 && formData.acquiredVia === 'auction' && CURRENT_SEASON === 2027}
+                                    className="w-4 h-4 bg-white/10 border border-white/20 rounded text-ipl-gold focus:outline-none focus:border-ipl-gold"
+                                  />
+                                </div>
+                                <div className="md:col-span-2">
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">Transfer Fee</label>
+                                  <input
+                                    type="text"
+                                    value={formData.transferFee ?? ''}
+                                    onChange={(e) => setFormData({ ...formData, transferFee: e.target.value })}
+                                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                                    placeholder="Optional cash deal value"
+                                  />
+                                </div>
+                                <div className="md:col-span-3">
+                                  <label className="block text-sm font-medium text-gray-300 mb-2">Notes</label>
+                                  <input
+                                    type="text"
+                                    value={formData.transferNotes ?? ''}
+                                    onChange={(e) => setFormData({ ...formData, transferNotes: e.target.value })}
+                                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                                    placeholder="E.g., Confirmed trade, cash deal details"
+                                  />
+                                </div>
+                              </div>
+                            </>
+                          );
+                        })()}
                       </div>
 
                     </div>
