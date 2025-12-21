@@ -31,6 +31,9 @@ async function getTeamNameById(players, teamId, league, env) {
   }
 }
 
+// Default sample players (both IPL and WPL)
+const defaultPlayers = [];
+
 export const onRequest = async (context) => {
   const { request, env } = context;
 
@@ -46,6 +49,22 @@ export const onRequest = async (context) => {
       
       let playersData = await env.IPL_CACHE.get('players', 'json');
       let players = playersData || [];
+      
+      // Log current state before any fixes
+      console.log('=== PLAYERS API GET ===');
+      console.log(`Total players in KV: ${players.length}`);
+      console.log(`Requested league: ${league}`);
+      
+      // Show sample of WPL players currently in KV
+      const wplPlayers = players.filter(p => (p.league || 'ipl') === 'wpl' || ['11', '12', '13', '14', '15'].includes(String(p.teamId)));
+      console.log(`WPL-related players found: ${wplPlayers.length}`);
+      if (wplPlayers.length > 0) {
+        console.log('Sample WPL players:', wplPlayers.slice(0, 3).map(p => ({
+          name: p.name,
+          teamId: p.teamId,
+          league: p.league
+        })));
+      }
       
       // Helper function to normalize team IDs
       const normalizeTeamId = (id) => {
@@ -68,7 +87,7 @@ export const onRequest = async (context) => {
         
         // If player is on WPL team but marked as IPL, correct it
         if (shouldBeWPL && playerLeague !== 'wpl') {
-          console.log(`Fixing player ${player.name}: changing league from '${playerLeague}' to 'wpl' (teamId: ${player.teamId} -> ${normalizedTeamId})`);
+          console.log(`[FIX] Player "${player.name}": league '${playerLeague}' -> 'wpl' (teamId: ${player.teamId})`);
           needsUpdate = true;
           return {
             ...player,
@@ -79,6 +98,7 @@ export const onRequest = async (context) => {
         
         // Also normalize teamId for all players
         if (String(player.teamId) !== normalizedTeamId) {
+          console.log(`[FIX] Player "${player.name}": teamId '${player.teamId}' -> '${normalizedTeamId}'`);
           needsUpdate = true;
           return {
             ...player,
@@ -101,9 +121,15 @@ export const onRequest = async (context) => {
       
       // Update KV storage if any corrections were made
       if (needsUpdate) {
-        console.log(`Updating KV storage with corrected player data (${players.length} players)`);
+        console.log(`[UPDATE] Writing corrected players to KV (${players.length} total)`);
         await env.IPL_CACHE.put('players', JSON.stringify(players));
+      } else {
+        console.log('[NO UPDATE] Players data is already correct');
       }
+      
+      // Show final WPL count
+      const wplPlayersAfter = players.filter(p => p.league === 'wpl');
+      console.log(`WPL players after fixes: ${wplPlayersAfter.length}`);
       
       // Filter by league if specified
       if (league && (league === 'ipl' || league === 'wpl')) {
@@ -111,6 +137,7 @@ export const onRequest = async (context) => {
           const playerLeague = player.league || 'ipl';
           return playerLeague === league;
         });
+        console.log(`Filtered to league '${league}': ${players.length} players`);
       }
       
       return new Response(JSON.stringify(players), {
