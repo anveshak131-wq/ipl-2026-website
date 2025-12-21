@@ -5,6 +5,7 @@
 
 export const onRequest = async (context) => {
   const { request, env } = context;
+  const url = new URL(request.url);
 
   // Only allow GET and OPTIONS
   if (request.method === 'OPTIONS') {
@@ -205,19 +206,61 @@ export const onRequest = async (context) => {
     await env.IPL_CACHE.put('teams', JSON.stringify(mockTeams));
 
     // Check if players already exist
-    const existingPlayers = await env.IPL_CACHE.get('players', 'json');
+    const existingPlayers = await env.IPL_CACHE.get('players', 'json') || [];
+    const restoreIPL = url.searchParams.get('restoreIPL') === 'true';
     
-    if (existingPlayers && existingPlayers.length > 0) {
+    if (existingPlayers.length > 0 && !restoreIPL) {
       return new Response(JSON.stringify({
         message: 'Data already exists',
-        playersCount: existingPlayers.length
+        playersCount: existingPlayers.length,
+        hint: 'Add ?restoreIPL=true to restore IPL players'
       }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' }
       });
     }
 
-    // Seed with mock players
+    // If restoreIPL is true, merge IPL players with existing players
+    if (restoreIPL && existingPlayers.length > 0) {
+      // Get existing WPL players (teamIds 11-15 or league='wpl')
+      const wplPlayers = existingPlayers.filter(p => {
+        const teamId = String(p.teamId || '').trim();
+        const league = p.league || 'ipl';
+        return league === 'wpl' || ['11', '12', '13', '14', '15'].includes(teamId);
+      });
+      
+      // Get existing IPL players to avoid duplicates
+      const existingIPLPlayerNames = existingPlayers
+        .filter(p => {
+          const teamId = String(p.teamId || '').trim();
+          const league = p.league || 'ipl';
+          return (league === 'ipl' && ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'].includes(teamId)) || 
+                 (league === 'ipl' && !['11', '12', '13', '14', '15'].includes(teamId));
+        })
+        .map(p => p.name.toLowerCase());
+      
+      // Add IPL players that don't already exist
+      const newIPLPlayers = mockPlayers.filter(p => 
+        !existingIPLPlayerNames.includes(p.name.toLowerCase())
+      );
+      
+      const allPlayers = [...wplPlayers, ...newIPLPlayers];
+      
+      await env.IPL_CACHE.put('players', JSON.stringify(allPlayers));
+      
+      return new Response(JSON.stringify({
+        message: 'IPL players restored successfully',
+        restored: newIPLPlayers.length,
+        existingWPL: wplPlayers.length,
+        totalPlayers: allPlayers.length,
+        restoredPlayers: newIPLPlayers.map(p => p.name)
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+      });
+    }
+
+    // Seed with mock players (initial seed)
     await env.IPL_CACHE.put('players', JSON.stringify(mockPlayers));
 
     return new Response(JSON.stringify({
