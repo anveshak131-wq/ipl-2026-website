@@ -1639,7 +1639,7 @@ export default function AdminPlayers() {
                           required
                         />
                         <p className="text-xs text-gray-500 mt-1">
-                          {formData.dateOfBirth && isValidDateForLeague(formData.dateOfBirth, currentLeague)
+                          {formData.dateOfBirth && formData.dateOfBirth.match(/^(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s*\d{4}$/)
                             ? 'Auto-calculated from date of birth (you can manually change if needed)'
                             : 'Enter age manually or provide date of birth to auto-calculate'}
                         </p>
@@ -1655,16 +1655,39 @@ export default function AdminPlayers() {
                           onChange={(e) => {
                             const newDateOfBirth = e.target.value;
                             
-                            // Test validation directly
-                            const testValidation = isValidDateForLeague('November 08, 1995', 'ipl');
-                            console.log('Direct test validation:', testValidation);
-                            
-                            // Auto-calculate and set age when valid date is entered
-                            if (newDateOfBirth && isValidDateForLeague(newDateOfBirth, currentLeague)) {
-                              const parsedDate = parseDateMonthDDYYYY(newDateOfBirth);
-                              const calculatedAge = calculateAge(parsedDate);
-                              setFormData(prev => ({...prev, dateOfBirth: newDateOfBirth, age: calculatedAge.toString()}));
-                              setLastCalculatedAge(calculatedAge.toString());
+                            // Simple direct approach for IPL - parse Month DD, YYYY format
+                            if (newDateOfBirth && newDateOfBirth.match(/^(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s*\d{4}$/)) {
+                              // Parse the date manually
+                              const parts = newDateOfBirth.split(' ');
+                              const monthName = parts[0];
+                              const dayPart = parts[1].replace(',', '');
+                              const year = parts[2];
+                              
+                              const monthMap: { [key: string]: number } = {
+                                'January': 0, 'February': 1, 'March': 2, 'April': 3,
+                                'May': 4, 'June': 5, 'July': 6, 'August': 7,
+                                'September': 8, 'October': 9, 'November': 10, 'December': 11
+                              };
+                              
+                              const month = monthMap[monthName];
+                              const day = parseInt(dayPart);
+                              
+                              if (month !== undefined && !isNaN(day)) {
+                                const birthDate = new Date(parseInt(year), month, day);
+                                const today = new Date();
+                                let age = today.getFullYear() - birthDate.getFullYear();
+                                const monthDiff = today.getMonth() - birthDate.getMonth();
+                                
+                                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                                  age--;
+                                }
+                                
+                                setFormData(prev => ({...prev, dateOfBirth: newDateOfBirth, age: age.toString()}));
+                                setLastCalculatedAge(age.toString());
+                              } else {
+                                setFormData(prev => ({...prev, dateOfBirth: newDateOfBirth}));
+                                setLastCalculatedAge('');
+                              }
                             } else {
                               setFormData(prev => ({...prev, dateOfBirth: newDateOfBirth}));
                               setLastCalculatedAge('');
@@ -1674,8 +1697,8 @@ export default function AdminPlayers() {
                           placeholder='July 18, 1996 (optional)'
                         />
                         <p className="text-xs text-gray-500 mt-1">
-                          {formData.dateOfBirth && isValidDateForLeague(formData.dateOfBirth, currentLeague) 
-                            ? `Age automatically calculated: ${calculateAge(parseDateMonthDDYYYY(formData.dateOfBirth))} years` 
+                          {formData.dateOfBirth && formData.dateOfBirth.match(/^(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s*\d{4}$/) 
+                            ? `Age automatically calculated: ${formData.age} years` 
                             : 'Optional: If provided, age will be automatically calculated'}
                         </p>
                       </div>
