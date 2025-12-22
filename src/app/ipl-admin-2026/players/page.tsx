@@ -1872,6 +1872,12 @@ export default function AdminPlayers() {
                             placeholder="e.g., 45"
                           />
                         </div>
+                        
+                        {/* Section Header */}
+                        <div className="col-span-full">
+                          <h4 className="text-md font-semibold text-blue-400 mb-3">Batting Statistics</h4>
+                        </div>
+                        
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
                             Batting Innings
@@ -2005,6 +2011,14 @@ export default function AdminPlayers() {
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
                             placeholder="e.g., 148.83"
                           />
+                        </div>
+                        
+                        {/* Divider Line */}
+                        <div className="col-span-full border-t border-white/20 my-4"></div>
+                        
+                        {/* Section Header */}
+                        <div className="col-span-full">
+                          <h4 className="text-md font-semibold text-green-400 mb-3">Bowling Statistics</h4>
                         </div>
                         
                         {/* Bowling Innings Stats */}
