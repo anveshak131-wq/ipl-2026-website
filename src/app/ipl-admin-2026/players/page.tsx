@@ -1661,7 +1661,7 @@ export default function AdminPlayers() {
                               const parts = newDateOfBirth.split(' ');
                               const monthName = parts[0];
                               const dayPart = parts[1].replace(',', '');
-                              const year = parts[2];
+                              const year = parseInt(parts[2]);
                               
                               const monthMap: { [key: string]: number } = {
                                 'January': 0, 'February': 1, 'March': 2, 'April': 3,
@@ -1672,18 +1672,25 @@ export default function AdminPlayers() {
                               const month = monthMap[monthName];
                               const day = parseInt(dayPart);
                               
-                              if (month !== undefined && !isNaN(day)) {
-                                const birthDate = new Date(parseInt(year), month, day);
+                              if (month !== undefined && !isNaN(day) && !isNaN(year)) {
+                                const birthDate = new Date(year, month, day);
                                 const today = new Date();
-                                let age = today.getFullYear() - birthDate.getFullYear();
-                                const monthDiff = today.getMonth() - birthDate.getMonth();
                                 
-                                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                                  age--;
+                                // Check if birth date is valid
+                                if (birthDate.getFullYear() === year && birthDate.getMonth() === month && birthDate.getDate() === day) {
+                                  let age = today.getFullYear() - birthDate.getFullYear();
+                                  const monthDiff = today.getMonth() - birthDate.getMonth();
+                                  
+                                  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                                    age--;
+                                  }
+                                  
+                                  setFormData(prev => ({...prev, dateOfBirth: newDateOfBirth, age: age.toString()}));
+                                  setLastCalculatedAge(age.toString());
+                                } else {
+                                  setFormData(prev => ({...prev, dateOfBirth: newDateOfBirth}));
+                                  setLastCalculatedAge('');
                                 }
-                                
-                                setFormData(prev => ({...prev, dateOfBirth: newDateOfBirth, age: age.toString()}));
-                                setLastCalculatedAge(age.toString());
                               } else {
                                 setFormData(prev => ({...prev, dateOfBirth: newDateOfBirth}));
                                 setLastCalculatedAge('');
