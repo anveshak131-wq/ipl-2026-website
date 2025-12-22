@@ -108,7 +108,7 @@ export default function AdminPlayers() {
     teamId: string;
     league: 'ipl' | 'wpl';
     age: string;
-    dateOfBirth: string; // DD/MM/YYYY format for input
+    dateOfBirth: string; // Month DD, YYYY format for input
     nationality: string;
     jerseyNumber: string;
     isCaptain: boolean;
@@ -444,15 +444,13 @@ export default function AdminPlayers() {
       let dateOfBirthISO = '';
       
       if (formData.dateOfBirth) {
-        if (!isValidDateForLeague(formData.dateOfBirth, formData.league)) {
-          const expectedFormat = formData.league === 'wpl' ? 'Month DD, YYYY (e.g., July 18, 1996)' : 'DD/MM/YYYY';
+        if (!isValidDateForLeague(formData.dateOfBirth, 'wpl')) {
+          const expectedFormat = 'Month DD, YYYY (e.g., July 18, 1996)';
           alert(`Invalid date format. Please use ${expectedFormat}`);
           return;
         }
         
-        dateOfBirthISO = formData.league === 'wpl' 
-          ? parseDateMonthDDYYYY(formData.dateOfBirth)
-          : parseDateDDMMYYYY(formData.dateOfBirth);
+        dateOfBirthISO = parseDateMonthDDYYYY(formData.dateOfBirth);
         
         // Auto-calculate age from DOB
         calculatedAge = calculateAge(dateOfBirthISO);
@@ -1272,7 +1270,7 @@ export default function AdminPlayers() {
                       Age
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      DOB ({currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY'})
+                      DOB (Month DD, YYYY)
                     </th>
                     {currentLeague !== 'wpl' && (
                       <>
