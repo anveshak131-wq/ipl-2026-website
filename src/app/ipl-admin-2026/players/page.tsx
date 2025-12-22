@@ -1641,7 +1641,7 @@ export default function AdminPlayers() {
                           required
                         />
                         <p className="text-xs text-gray-500 mt-1">
-                          {formData.dateOfBirth && isValidDate(formData.dateOfBirth, 'DD/MM/YYYY')
+                          {formData.dateOfBirth && isValidDateForLeague(formData.dateOfBirth, 'wpl')
                             ? 'Auto-calculated from date of birth (you can manually change if needed)'
                             : 'Enter age manually or provide date of birth to auto-calculate'}
                         </p>
@@ -1661,7 +1661,7 @@ export default function AdminPlayers() {
                           placeholder='July 18, 1996 (optional)'
                         />
                         <p className="text-xs text-gray-500 mt-1">
-                          {formData.dateOfBirth && isValidDate(formData.dateOfBirth, 'Month DD, YYYY') 
+                          {formData.dateOfBirth && isValidDateForLeague(formData.dateOfBirth, 'wpl') 
                             ? `Age automatically calculated: ${calculateAge(parseDateMonthDDYYYY(formData.dateOfBirth))} years` 
                             : 'Optional: If provided, age will be automatically calculated'}
                         </p>
