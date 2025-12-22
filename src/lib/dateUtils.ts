@@ -161,15 +161,9 @@ export const parseDateMonthDDYYYY = (dateString: string): string => {
 export const isValidDateForLeague = (dateString: string, league: 'ipl' | 'wpl'): boolean => {
   if (!dateString) return false;
   
-  if (league === 'wpl') {
-    // Check "Month DD, YYYY" format
-    const monthDayYearRegex = /^(\w+)\s+(\d{1,2}),\s*(\d{4})$/;
-    return monthDayYearRegex.test(dateString);
-  } else {
-    // Check DD/MM/YYYY format
-    const ddmmyyyyRegex = /^(0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/\d{4}$/;
-    return ddmmyyyyRegex.test(dateString);
-  }
+  // Both IPL and WPL now use "Month DD, YYYY" format
+  const monthDayYearRegex = /^(\w+)\s+(\d{1,2}),\s*(\d{4})$/;
+  return monthDayYearRegex.test(dateString);
 };
 
 /**
