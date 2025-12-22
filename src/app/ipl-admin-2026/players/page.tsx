@@ -1655,7 +1655,17 @@ export default function AdminPlayers() {
                           type="text"
                           value={formData.dateOfBirth}
                           onChange={(e) => {
-                            setFormData({...formData, dateOfBirth: e.target.value});
+                            const newDateOfBirth = e.target.value;
+                            setFormData({...formData, dateOfBirth: newDateOfBirth});
+                            
+                            // Auto-calculate and set age when valid date is entered
+                            if (newDateOfBirth && isValidDateForLeague(newDateOfBirth, 'wpl')) {
+                              const calculatedAge = calculateAge(parseDateMonthDDYYYY(newDateOfBirth));
+                              setFormData(prev => ({...prev, dateOfBirth: newDateOfBirth, age: calculatedAge.toString()}));
+                              setLastCalculatedAge(calculatedAge.toString());
+                            } else {
+                              setLastCalculatedAge('');
+                            }
                           }}
                           className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
                           placeholder='July 18, 1996 (optional)'
