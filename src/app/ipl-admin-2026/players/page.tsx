@@ -141,7 +141,6 @@ export default function AdminPlayers() {
       
       // Bowling innings stats
       bowlingInnings: string;
-      overs: string;
       balls: string;
       maidens: string;
       wickets: string;
@@ -190,7 +189,6 @@ export default function AdminPlayers() {
       
       // Bowling innings stats
       bowlingInnings: '',
-      overs: '',
       balls: '',
       maidens: '',
       wickets: '',
@@ -416,7 +414,6 @@ export default function AdminPlayers() {
         
         // Bowling innings stats
         bowlingInnings: (player.stats.bowlingInnings || 0).toString(),
-        overs: (player.stats.overs || '0.0'),
         balls: (player.stats.balls || 0).toString(),
         maidens: (player.stats.maidens || 0).toString(),
         wickets: player.stats.wickets.toString(),
@@ -498,7 +495,6 @@ export default function AdminPlayers() {
           
           // Bowling innings stats
           bowlingInnings: parseInt(formData.stats.bowlingInnings) || 0,
-          overs: formData.stats.overs || '0.0',
           balls: parseInt(formData.stats.balls) || 0,
           maidens: parseInt(formData.stats.maidens) || 0,
           wickets: parseInt(formData.stats.wickets) || 0,
@@ -2022,18 +2018,6 @@ export default function AdminPlayers() {
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, bowlingInnings: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
                             placeholder="0"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Overs
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.stats.overs}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, overs: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="0.0"
                           />
                         </div>
                         <div>
