@@ -1903,7 +1903,7 @@ export default function AdminPlayers() {
                             value={formData.stats.matches}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, matches: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 45"
+                            placeholder="e.g., 237"
                           />
                         </div>
                         
@@ -1921,7 +1921,7 @@ export default function AdminPlayers() {
                             value={formData.stats.battingInnings}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, battingInnings: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 42"
+                            placeholder="e.g., 237"
                           />
                         </div>
                         <div>
@@ -1933,7 +1933,7 @@ export default function AdminPlayers() {
                             value={formData.stats.notOuts}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, notOuts: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 8"
+                            placeholder="e.g., 39"
                           />
                         </div>
                         <div>
@@ -1945,7 +1945,7 @@ export default function AdminPlayers() {
                             value={formData.stats.runs}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, runs: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 1856"
+                            placeholder="e.g., 7263"
                           />
                         </div>
                         <div>
@@ -1957,7 +1957,7 @@ export default function AdminPlayers() {
                             value={formData.stats.ballsFaced}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, ballsFaced: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 1247"
+                            placeholder="e.g., 6136"
                           />
                         </div>
                         <div>
@@ -1969,7 +1969,7 @@ export default function AdminPlayers() {
                             value={formData.stats.highest}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, highest: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 98*"
+                            placeholder="e.g., 113*"
                           />
                         </div>
                         <div>
@@ -1981,7 +1981,7 @@ export default function AdminPlayers() {
                             value={formData.stats.fours}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, fours: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 156"
+                            placeholder="e.g., 643"
                           />
                         </div>
                         <div>
@@ -1993,7 +1993,7 @@ export default function AdminPlayers() {
                             value={formData.stats.sixes}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, sixes: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 42"
+                            placeholder="e.g., 217"
                           />
                         </div>
                         <div>
@@ -2005,7 +2005,7 @@ export default function AdminPlayers() {
                             value={formData.stats.fifties}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, fifties: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 12"
+                            placeholder="e.g., 64"
                           />
                         </div>
                         <div>
@@ -2017,7 +2017,7 @@ export default function AdminPlayers() {
                             value={formData.stats.hundreds}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, hundreds: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 3"
+                            placeholder="e.g., 1"
                           />
                         </div>
                         <div>
@@ -2030,7 +2030,7 @@ export default function AdminPlayers() {
                             value={formData.stats.battingAverage}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, battingAverage: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 44.19"
+                            placeholder="e.g., 36.20"
                           />
                         </div>
                         <div>
@@ -2043,7 +2043,7 @@ export default function AdminPlayers() {
                             value={formData.stats.battingStrikeRate}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, battingStrikeRate: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 148.83"
+                            placeholder="e.g., 118.44"
                           />
                         </div>
                         
