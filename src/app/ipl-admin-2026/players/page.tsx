@@ -1639,7 +1639,7 @@ export default function AdminPlayers() {
                           required
                         />
                         <p className="text-xs text-gray-500 mt-1">
-                          {formData.dateOfBirth && isValidDateForLeague(formData.dateOfBirth, 'wpl')
+                          {formData.dateOfBirth && isValidDateForLeague(formData.dateOfBirth, currentLeague)
                             ? 'Auto-calculated from date of birth (you can manually change if needed)'
                             : 'Enter age manually or provide date of birth to auto-calculate'}
                         </p>
@@ -1654,14 +1654,14 @@ export default function AdminPlayers() {
                           value={formData.dateOfBirth}
                           onChange={(e) => {
                             const newDateOfBirth = e.target.value;
-                            setFormData({...formData, dateOfBirth: newDateOfBirth});
                             
                             // Auto-calculate and set age when valid date is entered
-                            if (newDateOfBirth && isValidDateForLeague(newDateOfBirth, 'wpl')) {
+                            if (newDateOfBirth && isValidDateForLeague(newDateOfBirth, currentLeague)) {
                               const calculatedAge = calculateAge(parseDateMonthDDYYYY(newDateOfBirth));
                               setFormData(prev => ({...prev, dateOfBirth: newDateOfBirth, age: calculatedAge.toString()}));
                               setLastCalculatedAge(calculatedAge.toString());
                             } else {
+                              setFormData(prev => ({...prev, dateOfBirth: newDateOfBirth}));
                               setLastCalculatedAge('');
                             }
                           }}
@@ -1669,7 +1669,7 @@ export default function AdminPlayers() {
                           placeholder='July 18, 1996 (optional)'
                         />
                         <p className="text-xs text-gray-500 mt-1">
-                          {formData.dateOfBirth && isValidDateForLeague(formData.dateOfBirth, 'wpl') 
+                          {formData.dateOfBirth && isValidDateForLeague(formData.dateOfBirth, currentLeague) 
                             ? `Age automatically calculated: ${calculateAge(parseDateMonthDDYYYY(formData.dateOfBirth))} years` 
                             : 'Optional: If provided, age will be automatically calculated'}
                         </p>
