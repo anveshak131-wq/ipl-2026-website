@@ -43,7 +43,13 @@ export default function AdminLogin({ onLogin }: AdminLoginProps) {
         } catch (e) {
           // ignore if localStorage isn't available
         }
-        router.push('/ipl-admin-2026/dashboard');
+        
+        // Redirect based on user role
+        if (data.user?.role === 'players_admin') {
+          router.push('/ipl-admin-2026/players');
+        } else {
+          router.push('/ipl-admin-2026/dashboard');
+        }
       } else {
         setError(data.error || 'Invalid credentials');
       }

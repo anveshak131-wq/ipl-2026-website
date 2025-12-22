@@ -100,6 +100,14 @@ export default function AdminRouter() {
             const tokenPayload = JSON.parse(atob(token));
             if (tokenPayload.role === 'admin' || tokenPayload.role === 'super_admin' || tokenPayload.role === 'players_admin') {
               setUserRole(tokenPayload.role);
+              
+              // For players_admin, restrict to /players only even in fallback
+              if (tokenPayload.role === 'players_admin' && pathname !== '/ipl-admin-2026/players') {
+                router.push('/ipl-admin-2026/players');
+                setIsLoading(false);
+                return;
+              }
+              
               setIsAuthenticated(true);
               setIsLoading(false);
               return;
