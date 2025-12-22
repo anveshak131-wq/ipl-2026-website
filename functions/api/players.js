@@ -384,19 +384,33 @@ export const onRequest = async (context) => {
         bowlingStyle: newPlayer.bowlingStyle || 'N/A (Batsman)',
         battingStyle: newPlayer.battingStyle || 'Right-handed bat',
         stats: {
+          // General stats
           matches: parseInt(newPlayer.stats?.matches) || 0,
+          
+          // Batting innings stats
+          battingInnings: parseInt(newPlayer.stats?.battingInnings) || 0,
+          notOuts: parseInt(newPlayer.stats?.notOuts) || 0,
           runs: parseInt(newPlayer.stats?.runs) || 0,
-          wickets: parseInt(newPlayer.stats?.wickets) || 0,
-          average: parseFloat(newPlayer.stats?.average) || 0,
-          bowlingAverage: parseFloat(newPlayer.stats?.bowlingAverage) || 0,
-          strikeRate: parseFloat(newPlayer.stats?.strikeRate) || 0,
-          economy: parseFloat(newPlayer.stats?.economy) || 0,
-          highest: parseInt(newPlayer.stats?.highest) || 0,
+          ballsFaced: parseInt(newPlayer.stats?.ballsFaced) || 0,
+          highest: newPlayer.stats?.highest || '0',
           fours: parseInt(newPlayer.stats?.fours) || 0,
           sixes: parseInt(newPlayer.stats?.sixes) || 0,
           fifties: parseInt(newPlayer.stats?.fifties) || 0,
           hundreds: parseInt(newPlayer.stats?.hundreds) || 0,
+          battingAverage: parseFloat(newPlayer.stats?.battingAverage) || 0,
+          battingStrikeRate: parseFloat(newPlayer.stats?.battingStrikeRate) || 0,
+          
+          // Bowling innings stats
+          bowlingInnings: parseInt(newPlayer.stats?.bowlingInnings) || 0,
+          balls: parseInt(newPlayer.stats?.balls) || 0,
+          maidens: parseInt(newPlayer.stats?.maidens) || 0,
+          wickets: parseInt(newPlayer.stats?.wickets) || 0,
+          runsConceded: parseInt(newPlayer.stats?.runsConceded) || 0,
+          bowlingAverage: parseFloat(newPlayer.stats?.bowlingAverage) || 0,
+          bowlingStrikeRate: parseFloat(newPlayer.stats?.bowlingStrikeRate) || 0,
+          economy: parseFloat(newPlayer.stats?.economy) || 0,
           bestBowling: newPlayer.stats?.bestBowling || '-',
+          fiveWickets: parseInt(newPlayer.stats?.fiveWickets) || 0,
         },
       };
 
@@ -486,19 +500,33 @@ export const onRequest = async (context) => {
         bowlingStyle: updatedPlayer.bowlingStyle || 'N/A (Batsman)',
         battingStyle: updatedPlayer.battingStyle || 'Right-handed bat',
         stats: {
+          // General stats
           matches: parseInt(updatedPlayer.stats?.matches) || 0,
+          
+          // Batting innings stats
+          battingInnings: parseInt(updatedPlayer.stats?.battingInnings) || 0,
+          notOuts: parseInt(updatedPlayer.stats?.notOuts) || 0,
           runs: parseInt(updatedPlayer.stats?.runs) || 0,
-          wickets: parseInt(updatedPlayer.stats?.wickets) || 0,
-          average: parseFloat(updatedPlayer.stats?.average) || 0,
-          bowlingAverage: parseFloat(updatedPlayer.stats?.bowlingAverage) || 0,
-          strikeRate: parseFloat(updatedPlayer.stats?.strikeRate) || 0,
-          economy: parseFloat(updatedPlayer.stats?.economy) || 0,
-          highest: parseInt(updatedPlayer.stats?.highest) || 0,
+          ballsFaced: parseInt(updatedPlayer.stats?.ballsFaced) || 0,
+          highest: updatedPlayer.stats?.highest || '0',
           fours: parseInt(updatedPlayer.stats?.fours) || 0,
           sixes: parseInt(updatedPlayer.stats?.sixes) || 0,
           fifties: parseInt(updatedPlayer.stats?.fifties) || 0,
           hundreds: parseInt(updatedPlayer.stats?.hundreds) || 0,
+          battingAverage: parseFloat(updatedPlayer.stats?.battingAverage) || 0,
+          battingStrikeRate: parseFloat(updatedPlayer.stats?.battingStrikeRate) || 0,
+          
+          // Bowling innings stats
+          bowlingInnings: parseInt(updatedPlayer.stats?.bowlingInnings) || 0,
+          balls: parseInt(updatedPlayer.stats?.balls) || 0,
+          maidens: parseInt(updatedPlayer.stats?.maidens) || 0,
+          wickets: parseInt(updatedPlayer.stats?.wickets) || 0,
+          runsConceded: parseInt(updatedPlayer.stats?.runsConceded) || 0,
+          bowlingAverage: parseFloat(updatedPlayer.stats?.bowlingAverage) || 0,
+          bowlingStrikeRate: parseFloat(updatedPlayer.stats?.bowlingStrikeRate) || 0,
+          economy: parseFloat(updatedPlayer.stats?.economy) || 0,
           bestBowling: updatedPlayer.stats?.bestBowling || '-',
+          fiveWickets: parseInt(updatedPlayer.stats?.fiveWickets) || 0,
         },
       };
       

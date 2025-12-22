@@ -485,7 +485,7 @@ export default function AdminPlayers() {
           notOuts: parseInt(formData.stats.notOuts) || 0,
           runs: parseInt(formData.stats.runs) || 0,
           ballsFaced: parseInt(formData.stats.ballsFaced) || 0,
-          highest: parseInt(formData.stats.highest) || 0,
+          highest: formData.stats.highest || '0',
           fours: parseInt(formData.stats.fours) || 0,
           sixes: parseInt(formData.stats.sixes) || 0,
           fifties: parseInt(formData.stats.fifties) || 0,
