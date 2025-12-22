@@ -1429,19 +1429,19 @@ export default function AdminPlayers() {
                         {currentLeague !== 'wpl' && (
                           <>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-ipl-gold font-bold">
-                              {player.stats.runs > 0 && player.stats.runs}
+                              {player.stats.runs > 0 ? player.stats.runs : ''}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-400 font-bold">
-                              {player.stats.wickets > 0 && player.stats.wickets}
+                              {player.stats.wickets > 0 ? player.stats.wickets : ''}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-green-400 font-semibold">
-                              {player.stats.battingInnings > 0 && player.stats.battingInnings}
+                              {player.stats.battingInnings > 0 ? player.stats.battingInnings : ''}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-yellow-400 font-semibold">
-                              {player.stats.bowlingInnings > 0 && player.stats.bowlingInnings}
+                              {player.stats.bowlingInnings > 0 ? player.stats.bowlingInnings : ''}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-purple-400 font-semibold">
-                              {player.stats.battingAverage > 0 && player.stats.battingAverage.toFixed(2)}
+                              {player.stats.battingAverage > 0 ? player.stats.battingAverage.toFixed(2) : ''}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
                               {(() => {
@@ -1449,26 +1449,26 @@ export default function AdminPlayers() {
                                   (player.stats.wickets > 0 
                                     ? calculateBowlingAverage(player.stats.economy, player.stats.wickets, player.stats.matches)
                                     : 0);
-                                return bowlingAvg > 0 ? bowlingAvg.toFixed(2) : null;
+                                return bowlingAvg > 0 ? bowlingAvg.toFixed(2) : '';
                               })()}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
-                              {player.stats.battingStrikeRate > 0 && player.stats.battingStrikeRate.toFixed(2)}
+                              {player.stats.battingStrikeRate > 0 ? player.stats.battingStrikeRate.toFixed(2) : ''}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
-                              {player.stats.economy > 0 && player.stats.economy.toFixed(2)}
+                              {player.stats.economy > 0 ? player.stats.economy.toFixed(2) : ''}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
-                              {(player.stats.fours > 0 || player.stats.sixes > 0) && 
-                                `${player.stats.fours}/${player.stats.sixes}`}
+                              {(player.stats.fours > 0 || player.stats.sixes > 0) ? 
+                                `${player.stats.fours}/${player.stats.sixes}` : ''}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
-                              {(player.stats.fifties > 0 || player.stats.hundreds > 0) && 
-                                `${player.stats.fifties}/${player.stats.hundreds}`}
+                              {(player.stats.fifties > 0 || player.stats.hundreds > 0) ? 
+                                `${player.stats.fifties}/${player.stats.hundreds}` : ''}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
                               {player.stats.bestBowling && player.stats.bestBowling !== '-' && player.stats.bestBowling.trim() !== '' 
-                                && player.stats.bestBowling}
+                                ? player.stats.bestBowling : ''}
                             </td>
                           </>
                         )}
