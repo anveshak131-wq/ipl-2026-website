@@ -1630,12 +1630,16 @@ export default function AdminPlayers() {
                             const newAge = e.target.value;
                             console.log('Age field onChange:', newAge, 'lastCalculatedAge:', lastCalculatedAge, 'formData.age:', formData.age);
                             
-                            // When admin manually changes age, clear the last calculated age
-                            // so it won't be auto-overwritten, but only if it's actually different
-                            if (newAge !== lastCalculatedAge && newAge !== formData.age) {
-                              console.log('Clearing lastCalculatedAge');
-                              setLastCalculatedAge('');
+                            // Only update if this is a manual change (not from DOB calculation)
+                            // If the new age matches lastCalculatedAge, it's from DOB, so don't clear it
+                            if (newAge === lastCalculatedAge) {
+                              console.log('Age change from DOB calculation, ignoring');
+                              return; // Don't update anything if it's from DOB calculation
                             }
+                            
+                            // When admin manually changes age, clear the last calculated age
+                            console.log('Manual age change detected');
+                            setLastCalculatedAge('');
                             setFormData({...formData, age: newAge});
                           }}
                           className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
