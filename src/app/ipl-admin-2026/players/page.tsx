@@ -1654,10 +1654,17 @@ export default function AdminPlayers() {
                           value={formData.dateOfBirth}
                           onChange={(e) => {
                             const newDateOfBirth = e.target.value;
+                            console.log('IPL DOB onChange:', newDateOfBirth, 'League:', currentLeague);
                             
                             // Auto-calculate and set age when valid date is entered
-                            if (newDateOfBirth && isValidDateForLeague(newDateOfBirth, currentLeague)) {
-                              const calculatedAge = calculateAge(parseDateMonthDDYYYY(newDateOfBirth));
+                            const isValid = isValidDateForLeague(newDateOfBirth, currentLeague);
+                            console.log('Is valid date:', isValid);
+                            
+                            if (newDateOfBirth && isValid) {
+                              const parsedDate = parseDateMonthDDYYYY(newDateOfBirth);
+                              console.log('Parsed date:', parsedDate);
+                              const calculatedAge = calculateAge(parsedDate);
+                              console.log('Calculated age:', calculatedAge);
                               setFormData(prev => ({...prev, dateOfBirth: newDateOfBirth, age: calculatedAge.toString()}));
                               setLastCalculatedAge(calculatedAge.toString());
                             } else {
