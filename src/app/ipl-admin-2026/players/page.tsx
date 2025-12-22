@@ -1627,10 +1627,13 @@ export default function AdminPlayers() {
                           type="number"
                           value={formData.age}
                           onChange={(e) => {
+                            const newAge = e.target.value;
+                            console.log('Age field onChange:', newAge, 'lastCalculatedAge:', lastCalculatedAge, 'formData.age:', formData.age);
+                            
                             // When admin manually changes age, clear the last calculated age
                             // so it won't be auto-overwritten, but only if it's actually different
-                            const newAge = e.target.value;
                             if (newAge !== lastCalculatedAge && newAge !== formData.age) {
+                              console.log('Clearing lastCalculatedAge');
                               setLastCalculatedAge('');
                             }
                             setFormData({...formData, age: newAge});
@@ -1655,9 +1658,12 @@ export default function AdminPlayers() {
                           value={formData.dateOfBirth}
                           onChange={(e) => {
                             const newDateOfBirth = e.target.value;
+                            console.log('DOB onChange:', newDateOfBirth);
                             
                             // Create from scratch - simple and direct age calculation
                             if (newDateOfBirth && newDateOfBirth.match(/^(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s*\d{4}$/)) {
+                              console.log('DOB format matches');
+                              
                               // Parse "November 08, 1995" format
                               const monthMap: { [key: string]: number } = {
                                 'January': 0, 'February': 1, 'March': 2, 'April': 3,
@@ -1670,9 +1676,13 @@ export default function AdminPlayers() {
                               const day = parseInt(dayPart);
                               const year = parseInt(yearPart);
                               
+                              console.log('Parsed:', { monthName, month, day, year });
+                              
                               // Create birth date and calculate age
                               const birthDate = new Date(year, month, day);
                               const today = new Date();
+                              
+                              console.log('Dates:', { birthDate, today });
                               
                               // Simple age calculation
                               let age = today.getFullYear() - year;
@@ -1683,11 +1693,19 @@ export default function AdminPlayers() {
                                 age--;
                               }
                               
+                              console.log('Calculated age:', age);
+                              
                               // Set the calculated age without triggering age field onChange
                               const newAge = age.toString();
-                              setFormData(prev => ({...prev, dateOfBirth: newDateOfBirth, age: newAge}));
+                              console.log('Setting age to:', newAge);
+                              
+                              setFormData(prev => {
+                                console.log('Current formData.age:', prev.age);
+                                return {...prev, dateOfBirth: newDateOfBirth, age: newAge};
+                              });
                               setLastCalculatedAge(newAge);
                             } else {
+                              console.log('DOB format does not match');
                               setFormData(prev => ({...prev, dateOfBirth: newDateOfBirth}));
                               setLastCalculatedAge('');
                             }
