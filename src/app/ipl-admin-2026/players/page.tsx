@@ -355,11 +355,17 @@ export default function AdminPlayers() {
       ? formatDateMonthDDYYYY(player.dateOfBirth)
       : '';
     
-    if (dobFormatted) {
+    // Use saved age if available and > 0, otherwise calculate from DOB
+    let ageToUse = '';
+    if (player.age > 0) {
+      ageToUse = player.age.toString();
+      setLastCalculatedAge(player.age.toString());
+    } else if (dobFormatted) {
       const dateISO = parseDateMonthDDYYYY(dobFormatted);
       
       if (dateISO) {
         const calculatedAge = calculateAge(dateISO);
+        ageToUse = calculatedAge.toString();
         setLastCalculatedAge(calculatedAge.toString());
       } else {
         setLastCalculatedAge('');
@@ -377,7 +383,7 @@ export default function AdminPlayers() {
       role: player.role,
       teamId: player.teamId,
       league: player.league,
-      age: player.age > 0 ? player.age.toString() : '',
+      age: ageToUse,
       dateOfBirth: dobFormatted,
       nationality: player.nationality,
       jerseyNumber: player.jerseyNumber > 0 ? player.jerseyNumber.toString() : '',
