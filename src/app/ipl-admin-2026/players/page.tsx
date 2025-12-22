@@ -1628,11 +1628,12 @@ export default function AdminPlayers() {
                           value={formData.age}
                           onChange={(e) => {
                             // When admin manually changes age, clear the last calculated age
-                            // so it won't be auto-overwritten
-                            if (e.target.value !== lastCalculatedAge) {
+                            // so it won't be auto-overwritten, but only if it's actually different
+                            const newAge = e.target.value;
+                            if (newAge !== lastCalculatedAge && newAge !== formData.age) {
                               setLastCalculatedAge('');
                             }
-                            setFormData({...formData, age: e.target.value});
+                            setFormData({...formData, age: newAge});
                           }}
                           className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
                           placeholder="Enter age"
@@ -1682,9 +1683,10 @@ export default function AdminPlayers() {
                                 age--;
                               }
                               
-                              // Set the calculated age
-                              setFormData(prev => ({...prev, dateOfBirth: newDateOfBirth, age: age.toString()}));
-                              setLastCalculatedAge(age.toString());
+                              // Set the calculated age without triggering age field onChange
+                              const newAge = age.toString();
+                              setFormData(prev => ({...prev, dateOfBirth: newDateOfBirth, age: newAge}));
+                              setLastCalculatedAge(newAge);
                             } else {
                               setFormData(prev => ({...prev, dateOfBirth: newDateOfBirth}));
                               setLastCalculatedAge('');
