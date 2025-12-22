@@ -154,6 +154,187 @@ export const onRequest = async (context) => {
       );
     }
 
+    // PUT - Update existing admin
+    if (method === 'PUT') {
+      const url = new URL(request.url);
+      const adminId = url.searchParams.get('id');
+      
+      if (!adminId) {
+        return new Response(
+          JSON.stringify({ error: 'Admin ID is required for updates' }),
+          { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
+
+      const body = await request.json();
+      const { email, name, role, password } = body;
+
+      // Validate inputs
+      if (!email || !name) {
+        return new Response(
+          JSON.stringify({ error: 'Email and name are required' }),
+          { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid email format' }),
+          { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
+
+      // Validate password if provided
+      if (password && password.length > 0) {
+        if (password.length < 8) {
+          return new Response(
+            JSON.stringify({ error: 'Password must be at least 8 characters' }),
+            { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+          );
+        }
+
+        if (!/[A-Z]/.test(password)) {
+          return new Response(
+            JSON.stringify({ error: 'Password must contain uppercase letter' }),
+            { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+          );
+        }
+
+        if (!/[0-9]/.test(password)) {
+          return new Response(
+            JSON.stringify({ error: 'Password must contain number' }),
+            { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+          );
+        }
+      }
+
+      // Validate role
+      if (!['admin', 'super_admin', 'players_admin'].includes(role)) {
+        return new Response(
+          JSON.stringify({ error: 'Role must be admin, super_admin, or players_admin' }),
+          { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
+
+      // Prevent updating hardcoded admins
+      if (adminId === '1' || adminId === '2') {
+        return new Response(
+          JSON.stringify({ error: 'Cannot update hardcoded admin accounts' }),
+          { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
+
+      // Find and update the admin
+      try {
+        // Get all users to find the admin
+        const list = await env.SPORTS_KV.list({ prefix: 'user:' });
+        let adminFound = false;
+        let adminKey = null;
+
+        for (const key of list.keys) {
+          const userStr = await env.SPORTS_KV.get(key.name);
+          if (userStr) {
+            const user = JSON.parse(userStr);
+            if (user.id === adminId && ['admin', 'super_admin', 'players_admin'].includes(user.role)) {
+              adminFound = true;
+              adminKey = key.name;
+              break;
+            }
+          }
+        }
+
+        if (!adminFound || !adminKey) {
+          return new Response(
+            JSON.stringify({ error: 'Admin not found' }),
+            { status: 404, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+          );
+        }
+
+        // Get existing admin data
+        const existingAdminStr = await env.SPORTS_KV.get(adminKey);
+        const existingAdmin = JSON.parse(existingAdminStr);
+
+        // Check if email is being changed and if new email already exists
+        if (email !== existingAdmin.email) {
+          const emailCheck = await env.SPORTS_KV.get(`user:${email}`);
+          if (emailCheck) {
+            return new Response(
+              JSON.stringify({ error: 'Email already exists' }),
+              { status: 409, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+            );
+          }
+        }
+
+        // Update admin data
+        const updatedAdmin = {
+          ...existingAdmin,
+          email,
+          name,
+          role,
+          // Only update password if provided
+          ...(password && {
+            salt: generateSalt(),
+            hashedPassword: encryptPassword(password, generateSalt())
+          })
+        };
+
+        // Delete old user record if email changed
+        if (email !== existingAdmin.email) {
+          await env.SPORTS_KV.delete(adminKey);
+          await env.SPORTS_KV.delete(`token:${existingAdmin.token}`);
+        }
+
+        // Store updated admin
+        const newKey = `user:${email}`;
+        await env.SPORTS_KV.put(
+          newKey,
+          JSON.stringify(updatedAdmin),
+          {
+            expirationTtl: 365 * 24 * 60 * 60, // 1 year
+          }
+        );
+
+        // Update token mapping
+        await env.SPORTS_KV.put(
+          `token:${updatedAdmin.token}`,
+          JSON.stringify({
+            userId: updatedAdmin.id,
+            email,
+            role: updatedAdmin.role,
+            createdAt: new Date().toISOString(),
+          }),
+          {
+            expirationTtl: 365 * 24 * 60 * 60, // 1 year
+          }
+        );
+
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            message: 'Admin updated successfully',
+            admin: {
+              id: updatedAdmin.id,
+              name: updatedAdmin.name,
+              email: updatedAdmin.email,
+              role: updatedAdmin.role,
+              createdAt: updatedAdmin.createdAt,
+              lastLogin: updatedAdmin.lastLogin
+            }
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+
+      } catch (error) {
+        console.error('Error updating admin:', error);
+        return new Response(
+          JSON.stringify({ error: 'Failed to update admin' }),
+          { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
+    }
+
     // POST - Create new admin
     if (method === 'POST') {
       const body = await request.json();

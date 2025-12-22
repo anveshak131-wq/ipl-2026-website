@@ -21,6 +21,7 @@ export default function AdminManagement() {
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingAdmin, setEditingAdmin] = useState<AdminUser | null>(null);
   const [formData, setFormData] = useState({
     email: '',
     name: '',
@@ -94,15 +95,18 @@ export default function AdminManagement() {
     setError('');
     setSuccess('');
 
-    if (!formData.email || !formData.name || !formData.password) {
+    if (!formData.email || !formData.name || (!editingAdmin && !formData.password)) {
       setError('All fields are required');
       return;
     }
 
     try {
       const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
-      const response = await fetch('/api/admin/admins', {
-        method: 'POST',
+      const url = editingAdmin ? `/api/admin/admins?id=${editingAdmin.id}` : '/api/admin/admins';
+      const method = editingAdmin ? 'PUT' : 'POST';
+      
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
@@ -113,17 +117,29 @@ export default function AdminManagement() {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        setSuccess('Admin created successfully');
+        setSuccess(editingAdmin ? 'Admin updated successfully' : 'Admin created successfully');
         setFormData({ email: '', name: '', role: 'admin', password: '' });
+        setEditingAdmin(null);
         setShowCreateForm(false);
         fetchAdmins();
       } else {
-        setError(data.error || 'Failed to create admin');
+        setError(data.error || `Failed to ${editingAdmin ? 'update' : 'create'} admin`);
       }
     } catch (error) {
-      console.error('Error creating admin:', error);
-      setError('Failed to create admin');
+      console.error('Error:', error);
+      setError(`Failed to ${editingAdmin ? 'update' : 'create'} admin`);
     }
+  };
+
+  const handleEdit = (admin: AdminUser) => {
+    setEditingAdmin(admin);
+    setFormData({
+      email: admin.email,
+      name: admin.name,
+      role: admin.role,
+      password: ''
+    });
+    setShowCreateForm(true);
   };
 
   const handleDelete = async (adminId: string) => {
@@ -252,13 +268,22 @@ export default function AdminManagement() {
                           {admin.lastLogin ? new Date(admin.lastLogin).toLocaleDateString() : 'Never'}
                         </td>
                         <td className="p-4">
-                          <button
-                            onClick={() => handleDelete(admin.id)}
-                            className="text-red-400 hover:text-red-300 transition-colors"
-                            disabled={admin.role === 'super_admin'}
-                          >
-                            {admin.role === 'super_admin' ? 'Protected' : 'Delete'}
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleEdit(admin)}
+                              className="text-blue-400 hover:text-blue-300 transition-colors"
+                              disabled={admin.role === 'super_admin'}
+                            >
+                              {admin.role === 'super_admin' ? 'Protected' : 'Edit'}
+                            </button>
+                            <button
+                              onClick={() => handleDelete(admin.id)}
+                              className="text-red-400 hover:text-red-300 transition-colors"
+                              disabled={admin.role === 'super_admin'}
+                            >
+                              {admin.role === 'super_admin' ? 'Protected' : 'Delete'}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -268,11 +293,13 @@ export default function AdminManagement() {
             </div>
           </div>
 
-          {/* Create Admin Modal */}
+          {/* Create/Edit Admin Modal */}
           {showCreateForm && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
               <div className="bg-gray-900 rounded-xl border border-gray-800 p-6 w-full max-w-md">
-                <h2 className="text-2xl font-bold text-white mb-6">Create New Admin</h2>
+                <h2 className="text-2xl font-bold text-white mb-6">
+                  {editingAdmin ? 'Edit Admin' : 'Create New Admin'}
+                </h2>
                 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
@@ -298,13 +325,16 @@ export default function AdminManagement() {
                   </div>
 
                   <div>
-                    <label className="block text-gray-300 mb-2">Password</label>
+                    <label className="block text-gray-300 mb-2">
+                      Password {editingAdmin && '(leave blank to keep current)'}
+                    </label>
                     <input
                       type="password"
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:border-blue-500 focus:outline-none"
-                      required
+                      required={!editingAdmin}
+                      placeholder={editingAdmin ? 'Leave blank to keep current password' : ''}
                     />
                   </div>
 
@@ -326,11 +356,15 @@ export default function AdminManagement() {
                       type="submit"
                       className="flex-1 bg-ipl-blue text-white py-2 rounded-lg hover:bg-blue-600 transition-colors"
                     >
-                      Create Admin
+                      {editingAdmin ? 'Update Admin' : 'Create Admin'}
                     </button>
                     <button
                       type="button"
-                      onClick={() => setShowCreateForm(false)}
+                      onClick={() => {
+                        setShowCreateForm(false);
+                        setEditingAdmin(null);
+                        setFormData({ email: '', name: '', role: 'admin', password: '' });
+                      }}
                       className="flex-1 bg-gray-700 text-white py-2 rounded-lg hover:bg-gray-600 transition-colors"
                     >
                       Cancel
