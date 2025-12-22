@@ -352,15 +352,11 @@ export default function AdminPlayers() {
     // If player has DOB, format it according to league and calculate age
     // Otherwise, reset last calculated age
     const dobFormatted = player.dateOfBirth 
-      ? (player.league === 'wpl' 
-          ? formatDateMonthDDYYYY(player.dateOfBirth)
-          : formatDateDDMMYYYY(player.dateOfBirth))
+      ? formatDateMonthDDYYYY(player.dateOfBirth)
       : '';
     
     if (dobFormatted) {
-      const dateISO = player.league === 'wpl' 
-        ? parseDateMonthDDYYYY(dobFormatted)
-        : parseDateDDMMYYYY(dobFormatted);
+      const dateISO = parseDateMonthDDYYYY(dobFormatted);
       
       if (dateISO) {
         const calculatedAge = calculateAge(dateISO);
@@ -1420,11 +1416,7 @@ export default function AdminPlayers() {
                           {player.age > 0 && `${player.age}y`}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                          {player.dateOfBirth && (
-                            currentLeague === 'wpl' 
-                              ? formatDateMonthDDYYYY(player.dateOfBirth)
-                              : formatDateDDMMYYYY(player.dateOfBirth)
-                          )}
+                          {player.dateOfBirth && formatDateMonthDDYYYY(player.dateOfBirth)}
                         </td>
                         {currentLeague !== 'wpl' && (
                           <>
@@ -1657,7 +1649,7 @@ export default function AdminPlayers() {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Date of Birth ({currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY'})
+                          Date of Birth (Month DD, YYYY)
                         </label>
                         <input
                           type="text"
@@ -1666,15 +1658,11 @@ export default function AdminPlayers() {
                             setFormData({...formData, dateOfBirth: e.target.value});
                           }}
                           className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                          placeholder={currentLeague === 'wpl' ? 'July 18, 1996 (optional)' : 'DD/MM/YYYY (optional)'}
+                          placeholder='July 18, 1996 (optional)'
                         />
                         <p className="text-xs text-gray-500 mt-1">
-                          {formData.dateOfBirth && isValidDateForLeague(formData.dateOfBirth, currentLeague) 
-                            ? `Age automatically calculated: ${calculateAge(
-                                currentLeague === 'wpl' 
-                                  ? parseDateMonthDDYYYY(formData.dateOfBirth)
-                                  : parseDateDDMMYYYY(formData.dateOfBirth)
-                              )} years` 
+                          {formData.dateOfBirth && isValidDate(formData.dateOfBirth, 'Month DD, YYYY') 
+                            ? `Age automatically calculated: ${calculateAge(parseDateMonthDDYYYY(formData.dateOfBirth))} years` 
                             : 'Optional: If provided, age will be automatically calculated'}
                         </p>
                       </div>
