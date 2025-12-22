@@ -1655,29 +1655,32 @@ export default function AdminPlayers() {
                           onChange={(e) => {
                             const newDateOfBirth = e.target.value;
                             
-                            // Simple direct approach for IPL - parse Month DD, YYYY format
+                            // Use proven age calculation method from online reference
                             if (newDateOfBirth && newDateOfBirth.match(/^(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s*\d{4}$/)) {
-                              // Parse the date manually
-                              const parts = newDateOfBirth.split(' ');
-                              const monthName = parts[0];
-                              const dayPart = parts[1].replace(',', '');
-                              const year = parseInt(parts[2]);
-                              
-                              const monthMap: { [key: string]: number } = {
-                                'January': 0, 'February': 1, 'March': 2, 'April': 3,
-                                'May': 4, 'June': 5, 'July': 6, 'August': 7,
-                                'September': 8, 'October': 9, 'November': 10, 'December': 11
-                              };
-                              
-                              const month = monthMap[monthName];
-                              const day = parseInt(dayPart);
-                              
-                              if (month !== undefined && !isNaN(day) && !isNaN(year)) {
-                                const birthDate = new Date(year, month, day);
+                              try {
+                                // Convert Month DD, YYYY to MM/DD/YYYY format for JavaScript Date
+                                const monthMap: { [key: string]: string } = {
+                                  'January': '01', 'February': '02', 'March': '03', 'April': '04',
+                                  'May': '05', 'June': '06', 'July': '07', 'August': '08',
+                                  'September': '09', 'October': '10', 'November': '11', 'December': '12'
+                                };
+                                
+                                const parts = newDateOfBirth.split(' ');
+                                const monthName = parts[0];
+                                const dayPart = parts[1].replace(',', '');
+                                const year = parts[2];
+                                
+                                const monthNum = monthMap[monthName];
+                                const day = dayPart.padStart(2, '0');
+                                
+                                // Create date in MM/DD/YYYY format (JavaScript friendly)
+                                const jsDate = `${monthNum}/${day}/${year}`;
+                                
+                                // Use proven age calculation method
+                                const birthDate = new Date(new Date(jsDate).toISOString().substr(0, 10));
                                 const today = new Date();
                                 
-                                // Check if birth date is valid
-                                if (birthDate.getFullYear() === year && birthDate.getMonth() === month && birthDate.getDate() === day) {
+                                if (!isNaN(birthDate.getTime())) {
                                   let age = today.getFullYear() - birthDate.getFullYear();
                                   const monthDiff = today.getMonth() - birthDate.getMonth();
                                   
@@ -1691,7 +1694,7 @@ export default function AdminPlayers() {
                                   setFormData(prev => ({...prev, dateOfBirth: newDateOfBirth}));
                                   setLastCalculatedAge('');
                                 }
-                              } else {
+                              } catch (error) {
                                 setFormData(prev => ({...prev, dateOfBirth: newDateOfBirth}));
                                 setLastCalculatedAge('');
                               }
