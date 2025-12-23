@@ -14,7 +14,7 @@ import { parseDateDDMMYYYY, formatDateDDMMYYYY, calculateAge, isValidDate, forma
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import FlagImage from '@/components/ui/FlagImage';
-import { Search, Filter, Edit2, X, Users, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Plus, Trash2, Download, Upload, Shield, Activity, Hash } from 'lucide-react';
+import { Search, Filter, Edit2, X, Users, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Plus, Trash2, Download, Upload, Shield, Activity, Hash, Grid3x3, List, Eye, Star } from 'lucide-react';
 import '@/styles/flags.css';
 
 // Cricket-playing countries (exclude Pakistan – not part of IPL/WPL)
@@ -91,6 +91,9 @@ export default function AdminPlayers() {
   const [isCreatingBackup, setIsCreatingBackup] = useState(false);
   const [isRestoringBackup, setIsRestoringBackup] = useState<string | null>(null);
   const [lastCalculatedAge, setLastCalculatedAge] = useState<string>('');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [selectedRole, setSelectedRole] = useState<string>('all');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [formData, setFormData] = useState<{
     name: string;
     role: 'Batsman' | 'Bowler' | 'All-rounder' | 'Wicket-keeper';
@@ -927,6 +930,11 @@ export default function AdminPlayers() {
     player.nationality.toLowerCase().includes(searchQuery.toLowerCase())
   );
   
+  // Apply role filter
+  if (selectedRole !== 'all') {
+    searchFilteredPlayers = searchFilteredPlayers.filter(player => player.role === selectedRole);
+  }
+  
   // Safety check: Double-filter by team to ensure no players slip through
   if (selectedTeam !== 'all') {
     searchFilteredPlayers = searchFilteredPlayers.filter(player => {
@@ -980,6 +988,31 @@ export default function AdminPlayers() {
                 </div>
                 <div className="flex items-center gap-3 flex-wrap">
                 <LeagueSwitch size="md" showLabel={false} />
+                  {/* View Toggle */}
+                  <div className="flex items-center gap-1 bg-gray-800/50 rounded-xl p-1 border border-white/10">
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`p-2 rounded-lg transition-all duration-200 ${
+                        viewMode === 'grid'
+                          ? 'bg-blue-600 text-white shadow-lg'
+                          : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+                      }`}
+                      title="Grid View"
+                    >
+                      <Grid3x3 className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`p-2 rounded-lg transition-all duration-200 ${
+                        viewMode === 'list'
+                          ? 'bg-blue-600 text-white shadow-lg'
+                          : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+                      }`}
+                      title="List View"
+                    >
+                      <List className="w-5 h-5" />
+                    </button>
+                  </div>
                   <button
                     onClick={handleOpenBackupModal}
                     className="px-5 py-2.5 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white rounded-xl transition-all duration-200 flex items-center gap-2 font-medium shadow-lg hover:shadow-xl border border-white/10"
@@ -1133,6 +1166,49 @@ export default function AdminPlayers() {
                 />
               </div>
 
+                {/* Role Filter */}
+              <div className="relative md:min-w-[200px]">
+                <button
+                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                  className={`w-full bg-gray-800/50 border border-white/10 px-6 py-3.5 rounded-xl text-white font-medium flex items-center space-x-3 hover:bg-gray-700/50 hover:border-white/20 transition-all duration-300 h-full ${
+                    selectedRole !== 'all' ? 'border-blue-500/50 bg-blue-500/10' : ''
+                  }`}
+                >
+                  <Award className="w-5 h-5 text-purple-400 flex-shrink-0" />
+                  <span className="flex-1 text-left truncate">
+                    {selectedRole === 'all' ? 'All Roles' : selectedRole}
+                  </span>
+                  <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-300 flex-shrink-0 ${showAdvancedFilters ? 'rotate-180' : ''}`} />
+                </button>
+                {showAdvancedFilters && (
+                  <div className="absolute left-0 right-0 mt-2 bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden z-50">
+                    <div className="py-2">
+                      {['all', 'Batsman', 'Bowler', 'All-rounder', 'Wicket-keeper'].map((role) => (
+                        <button
+                          key={role}
+                          onClick={() => {
+                            setSelectedRole(role);
+                            setShowAdvancedFilters(false);
+                          }}
+                          className={`w-full px-6 py-3 text-left hover:bg-blue-500/20 transition-all duration-200 flex items-center justify-between ${
+                            selectedRole === role ? 'bg-blue-500/30 text-blue-200' : 'text-white'
+                          }`}
+                        >
+                          <span>{role === 'all' ? 'All Roles' : role}</span>
+                          {selectedRole === role && (
+                            <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
+                              <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
                 {/* Enhanced Team Filter Dropdown */}
               <div className="relative md:min-w-[320px]">
                 <button
@@ -1243,6 +1319,11 @@ export default function AdminPlayers() {
                       in <span className="text-blue-400 font-semibold">{teams.find(t => t.id === selectedTeam)?.name}</span>
                   </span>
                 )}
+                {selectedRole !== 'all' && (
+                  <span className="ml-2">
+                      • <span className="text-purple-400 font-semibold">{selectedRole}</span>
+                  </span>
+                )}
               </div>
               <div className="flex gap-2">
                 {searchQuery && (
@@ -1251,6 +1332,14 @@ export default function AdminPlayers() {
                       className="text-xs px-4 py-2 rounded-lg bg-gray-700/50 text-gray-300 hover:text-white hover:bg-gray-700 transition-all border border-white/10"
                   >
                     Clear Search
+                  </button>
+                )}
+                {selectedRole !== 'all' && (
+                  <button
+                    onClick={() => setSelectedRole('all')}
+                      className="text-xs px-4 py-2 rounded-lg bg-gray-700/50 text-gray-300 hover:text-white hover:bg-gray-700 transition-all border border-white/10"
+                  >
+                    All Roles
                   </button>
                 )}
                 {selectedTeam !== 'all' && (
@@ -1266,7 +1355,141 @@ export default function AdminPlayers() {
             </div>
           </div>
 
-          {/* Modern Players Table */}
+          {/* Players Display - Grid or List View */}
+          {viewMode === 'grid' ? (
+            /* Grid View */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {searchFilteredPlayers.length > 0 ? searchFilteredPlayers.map((player, idx) => {
+                const team = teams.find(t => String(t.id) === String(player.teamId));
+                const roleColors = {
+                  'Batsman': 'from-emerald-500/20 to-teal-600/20 border-emerald-500/30',
+                  'Bowler': 'from-cyan-500/20 to-blue-600/20 border-cyan-500/30',
+                  'All-rounder': 'from-purple-500/20 to-pink-600/20 border-purple-500/30',
+                  'Wicket-keeper': 'from-orange-500/20 to-red-600/20 border-orange-500/30'
+                };
+                const roleColor = roleColors[player.role] || 'from-gray-500/20 to-gray-600/20 border-gray-500/30';
+                
+                return (
+                  <div
+                    key={`${player.id}-${player.teamId}-${selectedTeam}-${idx}`}
+                    className={`group bg-gradient-to-br ${roleColor} rounded-2xl p-6 border backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] cursor-pointer animate-in fade-in slide-in-from-bottom-4`}
+                    style={{ animationDelay: `${idx * 50}ms` }}
+                    onClick={() => handleEditPlayer(player)}
+                  >
+                    {/* Player Header */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        {player.nationality && (
+                          <FlagImage nationality={player.nationality} size="sm" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-white font-bold text-lg truncate">{player.name}</h3>
+                          <p className="text-gray-400 text-sm truncate">{player.nationality}</p>
+                        </div>
+                      </div>
+                      {player.isCaptain && (
+                        <div className="flex-shrink-0">
+                          <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" title="Captain" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Team Badge */}
+                    {team && (
+                      <div className="flex items-center gap-2 mb-4">
+                        <div
+                          className="w-8 h-8 rounded-lg text-white font-bold text-xs flex items-center justify-center shadow-lg"
+                          style={{ backgroundColor: team.colors.primary }}
+                        >
+                          {team.shortName}
+                        </div>
+                        <span className="text-gray-300 text-sm font-medium truncate">{team.name}</span>
+                      </div>
+                    )}
+
+                    {/* Role Badge */}
+                    <div className="mb-4">
+                      <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold border ${
+                        player.role === 'Batsman' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
+                        player.role === 'Bowler' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
+                        player.role === 'All-rounder' ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' :
+                        'bg-orange-500/20 text-orange-400 border-orange-500/30'
+                      }`}>
+                        {player.role}
+                      </span>
+                    </div>
+
+                    {/* Stats Preview */}
+                    {currentLeague !== 'wpl' && (
+                      <div className="grid grid-cols-2 gap-3 mb-4 pt-4 border-t border-white/10">
+                        <div>
+                          <p className="text-xs text-gray-400 mb-1">Runs</p>
+                          <p className="text-ipl-gold font-bold text-lg">{player.stats.runs || 0}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-400 mb-1">Wickets</p>
+                          <p className="text-blue-400 font-bold text-lg">{player.stats.wickets || 0}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-400 mb-1">Avg</p>
+                          <p className="text-purple-400 font-semibold">{player.stats.average && player.stats.average > 0 ? player.stats.average.toFixed(2) : '-'}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-400 mb-1">SR</p>
+                          <p className="text-gray-300 font-semibold">{player.stats.strikeRate && player.stats.strikeRate > 0 ? player.stats.strikeRate.toFixed(1) : '-'}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Player Info */}
+                    <div className="flex items-center justify-between text-sm pt-4 border-t border-white/10">
+                      <div className="flex items-center gap-2 text-gray-400">
+                        {player.jerseyNumber > 0 && (
+                          <span className="inline-flex items-center justify-center w-6 h-6 bg-ipl-gold/20 text-ipl-gold rounded-full font-bold text-xs">
+                            #{player.jerseyNumber}
+                          </span>
+                        )}
+                        {player.age > 0 && (
+                          <span>{player.age}y</span>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditPlayer(player);
+                          }}
+                          className="p-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 hover:text-blue-200 rounded-lg transition-all duration-200 border border-blue-500/30 hover:border-blue-400/50"
+                          title="Edit"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeletePlayer(player.id, player.name);
+                          }}
+                          className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-200 rounded-lg transition-all duration-200 border border-red-500/30 hover:border-red-400/50"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }) : (
+                <div className="col-span-full flex flex-col items-center justify-center py-16">
+                  <div className="w-20 h-20 rounded-full bg-gray-800/50 flex items-center justify-center mb-4 border border-white/10">
+                    <Users className="w-10 h-10 text-gray-500" />
+                  </div>
+                  <p className="text-gray-300 text-lg font-semibold mb-2">No players found</p>
+                  <p className="text-gray-500 text-sm">Try adjusting your search or filters</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            /* List View - Modern Players Table */
           <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl border border-white/10 backdrop-blur-xl shadow-2xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -1585,6 +1808,7 @@ export default function AdminPlayers() {
               </table>
             </div>
           </div>
+          )}
 
           {/* Modern Summary Footer */}
           <div className="mt-6 bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl p-6 border border-white/10 backdrop-blur-xl shadow-xl">
@@ -1617,38 +1841,57 @@ export default function AdminPlayers() {
             </div>
           </div>
 
-          {/* Player Form Modal */}
+          {/* Enhanced Player Form Modal */}
           <ModernDialog
             isOpen={showForm}
             onClose={() => setShowForm(false)}
             title={editingPlayer ? 'Edit Player' : 'Add New Player'}
-            description={editingPlayer ? 'Update player information' : 'Add a new player to the database'}
+            description={editingPlayer ? 'Update player information and statistics' : 'Add a new player to the database'}
             variant="info"
             size="xl"
             icon={<CustomEmoji type="cricket-stumps" size={24} />}
-            contentClassName="max-h-[70vh] overflow-y-auto"
+            contentClassName="max-h-[75vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500/50 scrollbar-track-gray-700/50"
             footer={
               <div className="flex gap-4">
                 <button
                   type="submit"
                   form="player-form"
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold py-3 px-6 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200"
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 px-6 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center justify-center gap-2"
                 >
-                  {editingPlayer ? 'Update Player' : 'Add Player'}
+                  {editingPlayer ? (
+                    <>
+                      <Edit2 className="w-5 h-5" />
+                      Update Player
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-5 h-5" />
+                      Add Player
+                    </>
+                  )}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="flex-1 border border-white/10 bg-slate-800/60 text-white font-semibold py-3 px-6 rounded-xl hover:bg-slate-700/80 transition-all duration-200"
+                  className="flex-1 border border-white/10 bg-slate-800/60 hover:bg-slate-700/80 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200"
                 >
                   Cancel
                 </button>
               </div>
             }
           >
-            <form id="player-form" onSubmit={handleSubmit} className="space-y-6">
+            <form id="player-form" onSubmit={handleSubmit} className="space-y-8">
+                    {/* Section Header */}
+                    <div className="border-b border-white/10 pb-4">
+                      <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                        <User className="w-5 h-5 text-blue-400" />
+                        Basic Information
+                      </h3>
+                      <p className="text-sm text-gray-400 mt-1">Enter player's personal details and team assignment</p>
+                    </div>
+
                     {/* Basic Info */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
                           Player Name
@@ -1657,7 +1900,7 @@ export default function AdminPlayers() {
                           type="text"
                           value={formData.name}
                           onChange={(e) => setFormData({...formData, name: e.target.value})}
-                          className="admin-input w-full"
+                          className="w-full pl-4 pr-4 py-3 bg-gray-800/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
                           placeholder="Enter player name"
                           required
                         />
@@ -1678,7 +1921,7 @@ export default function AdminPlayers() {
                               allrounderType: newRole === 'All-rounder' ? formData.allrounderType : ''
                             });
                           }}
-                          className="admin-input w-full"
+                          className="w-full pl-4 pr-4 py-3 bg-gray-800/50 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
                         >
                           <option value="Batsman">Batsman</option>
                           <option value="Bowler">Bowler</option>
@@ -1695,7 +1938,7 @@ export default function AdminPlayers() {
                           <select
                             value={formData.allrounderType}
                             onChange={(e) => setFormData({...formData, allrounderType: e.target.value as any})}
-                            className="admin-input w-full"
+                            className="w-full pl-4 pr-4 py-3 bg-gray-800/50 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
                             required
                           >
                             <option value="">Select type</option>
