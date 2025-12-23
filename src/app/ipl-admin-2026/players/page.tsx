@@ -249,9 +249,22 @@ export default function AdminPlayers() {
   useEffect(() => {
     if (isAuthenticated) {
       fetchData();
+      // Reset team filter when league changes
+      setSelectedTeam('all');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentLeague]);
+
+  // Reset team filter if selected team is not in current league
+  useEffect(() => {
+    if (selectedTeam !== 'all' && teams.length > 0) {
+      const selectedTeamObj = teams.find(t => String(t.id) === String(selectedTeam));
+      if (!selectedTeamObj || selectedTeamObj.league !== currentLeague) {
+        setSelectedTeam('all');
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [teams, currentLeague]);
 
   const handleAddPlayer = () => {
     setEditingPlayer(null);
@@ -358,19 +371,19 @@ export default function AdminPlayers() {
       transferFee: player.transferInfo?.transferFee ? String(player.transferInfo.transferFee) : '',
       transferNotes: player.transferInfo?.notes || '',
       stats: {
-        matches: player.stats.matches.toString(),
-        runs: player.stats.runs.toString(),
-        wickets: player.stats.wickets.toString(),
-        average: player.stats.average.toString(),
-        bowlingAverage: bowlingAvg.toString(),
-        strikeRate: player.stats.strikeRate.toString(),
-        economy: player.stats.economy.toString(),
-        highest: player.stats.highest.toString(),
-        fours: player.stats.fours.toString(),
-        sixes: player.stats.sixes.toString(),
-        fifties: player.stats.fifties.toString(),
-        hundreds: player.stats.hundreds.toString(),
-        bestBowling: player.stats.bestBowling
+        matches: player.stats.matches > 0 ? player.stats.matches.toString() : '',
+        runs: player.stats.runs > 0 ? player.stats.runs.toString() : '',
+        wickets: player.stats.wickets > 0 ? player.stats.wickets.toString() : '',
+        average: player.stats.average > 0 ? player.stats.average.toString() : '',
+        bowlingAverage: bowlingAvg > 0 ? bowlingAvg.toString() : '',
+        strikeRate: player.stats.strikeRate > 0 ? player.stats.strikeRate.toString() : '',
+        economy: player.stats.economy > 0 ? player.stats.economy.toString() : '',
+        highest: player.stats.highest > 0 ? player.stats.highest.toString() : '',
+        fours: player.stats.fours > 0 ? player.stats.fours.toString() : '',
+        sixes: player.stats.sixes > 0 ? player.stats.sixes.toString() : '',
+        fifties: player.stats.fifties > 0 ? player.stats.fifties.toString() : '',
+        hundreds: player.stats.hundreds > 0 ? player.stats.hundreds.toString() : '',
+        bestBowling: player.stats.bestBowling && player.stats.bestBowling !== '-' && player.stats.bestBowling.trim() !== '' ? player.stats.bestBowling : ''
       }
     });
     setShowForm(true);
@@ -749,20 +762,30 @@ export default function AdminPlayers() {
     }
   };
 
-  // Filter and sort players
-  let filteredPlayers = selectedTeam === 'all' 
-    ? players 
-    : players.filter(player => {
-        // Only show players with a valid teamId when a specific team is selected
-        if (!player.teamId) {
-          return false; // Exclude players without a teamId
-        }
-        
-        // Ensure both values are strings for comparison
-        const playerTeamId = String(player.teamId).trim();
-        const selectedTeamId = String(selectedTeam).trim();
-        return playerTeamId === selectedTeamId;
-      });
+  // Filter players by league first, then by team
+  let filteredPlayers = players.filter(player => {
+    // Only show players from the current league
+    const playerLeague = player.league || 'ipl';
+    if (playerLeague !== currentLeague) {
+      return false;
+    }
+    return true;
+  });
+
+  // Then filter by team if a specific team is selected
+  if (selectedTeam !== 'all') {
+    filteredPlayers = filteredPlayers.filter(player => {
+      // Only show players with a valid teamId when a specific team is selected
+      if (!player.teamId) {
+        return false; // Exclude players without a teamId
+      }
+      
+      // Ensure both values are strings for comparison
+      const playerTeamId = String(player.teamId).trim();
+      const selectedTeamId = String(selectedTeam).trim();
+      return playerTeamId === selectedTeamId;
+    });
+  }
 
   // Apply sorting
   if (sortField) {
@@ -1093,43 +1116,48 @@ export default function AdminPlayers() {
                     {/* Divider */}
                     {teams.length > 0 && <div className="border-t border-white/10 my-2" />}
 
-                      {/* Team Options */}
-                      {teams.map((team) => {
-                        const teamPlayersCount = players.filter(p => String(p.teamId) === String(team.id)).length;
-                        return (
-                          <button
-                            key={team.id}
-                            onClick={() => {
-                              setSelectedTeam(team.id);
-                              setIsDropdownOpen(false);
-                            }}
-                            className={`w-full px-6 py-3.5 text-left hover:bg-blue-500/20 transition-all duration-200 flex items-center space-x-3 group ${
-                              selectedTeam === team.id ? 'bg-blue-500/30 text-blue-200' : 'text-white'
-                            }`}
-                          >
-                            <div 
-                              className="flex items-center justify-center w-10 h-10 rounded-xl text-white font-bold text-sm shadow-lg flex-shrink-0"
-                              style={{ backgroundColor: team.colors.primary }}
-                              title={team.name}
+                      {/* Team Options - Only show teams from current league */}
+                      {teams
+                        .filter(team => team.league === currentLeague)
+                        .map((team) => {
+                          const teamPlayersCount = players.filter(p => 
+                            String(p.teamId) === String(team.id) && 
+                            (p.league || 'ipl') === currentLeague
+                          ).length;
+                          return (
+                            <button
+                              key={team.id}
+                              onClick={() => {
+                                setSelectedTeam(team.id);
+                                setIsDropdownOpen(false);
+                              }}
+                              className={`w-full px-6 py-3.5 text-left hover:bg-blue-500/20 transition-all duration-200 flex items-center space-x-3 group ${
+                                selectedTeam === team.id ? 'bg-blue-500/30 text-blue-200' : 'text-white'
+                              }`}
                             >
-                              {team.shortName}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="font-semibold truncate">{team.name}</div>
-                              <div className="text-xs text-gray-400">
-                                {teamPlayersCount} player{teamPlayersCount !== 1 ? 's' : ''}
+                              <div 
+                                className="flex items-center justify-center w-10 h-10 rounded-xl text-white font-bold text-sm shadow-lg flex-shrink-0"
+                                style={{ backgroundColor: team.colors.primary }}
+                                title={team.name}
+                              >
+                                {team.shortName}
                               </div>
-                            </div>
-                            {selectedTeam === team.id && (
-                              <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
-                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                </svg>
+                              <div className="flex-1 min-w-0">
+                                <div className="font-semibold truncate">{team.name}</div>
+                                <div className="text-xs text-gray-400">
+                                  {teamPlayersCount} player{teamPlayersCount !== 1 ? 's' : ''}
+                                </div>
                               </div>
-                            )}
-                          </button>
-                        );
-                      })}
+                              {selectedTeam === team.id && (
+                                <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
+                                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                  </svg>
+                                </div>
+                              )}
+                            </button>
+                          );
+                        })}
                     </div>
                   </div>
                 </div>
@@ -1854,7 +1882,7 @@ export default function AdminPlayers() {
                             value={formData.stats.matches}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, matches: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="0"
+                            placeholder="Matches"
                           />
                         </div>
                         <div>
@@ -1866,7 +1894,7 @@ export default function AdminPlayers() {
                             value={formData.stats.runs}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, runs: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="0"
+                            placeholder="Runs"
                           />
                         </div>
                         <div>
@@ -1878,7 +1906,7 @@ export default function AdminPlayers() {
                             value={formData.stats.wickets}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, wickets: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="0"
+                            placeholder="Wickets"
                           />
                         </div>
                         <div>
@@ -1891,7 +1919,7 @@ export default function AdminPlayers() {
                             value={formData.stats.average}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, average: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="0.00"
+                            placeholder="e.g., 45.67"
                           />
                         </div>
                         <div>
@@ -1904,7 +1932,7 @@ export default function AdminPlayers() {
                             value={formData.stats.bowlingAverage}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, bowlingAverage: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="0.00"
+                            placeholder="e.g., 25.50"
                           />
                           <p className="text-xs text-gray-500 mt-1">Runs conceded per wicket</p>
                         </div>
@@ -1918,7 +1946,7 @@ export default function AdminPlayers() {
                             value={formData.stats.strikeRate}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, strikeRate: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="0.00"
+                            placeholder="e.g., 145.50"
                           />
                         </div>
                         <div>
@@ -1931,7 +1959,7 @@ export default function AdminPlayers() {
                             value={formData.stats.economy}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, economy: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="0.00"
+                            placeholder="e.g., 8.50"
                           />
                         </div>
                         <div>
@@ -1943,7 +1971,7 @@ export default function AdminPlayers() {
                             value={formData.stats.highest}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, highest: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="0"
+                            placeholder="Highest Score"
                           />
                         </div>
                         <div>
@@ -1955,7 +1983,7 @@ export default function AdminPlayers() {
                             value={formData.stats.fours}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, fours: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="0"
+                            placeholder="Fours"
                           />
                         </div>
                         <div>
@@ -1967,7 +1995,7 @@ export default function AdminPlayers() {
                             value={formData.stats.sixes}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, sixes: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="0"
+                            placeholder="Sixes"
                           />
                         </div>
                         <div>
@@ -1979,7 +2007,7 @@ export default function AdminPlayers() {
                             value={formData.stats.fifties}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, fifties: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="0"
+                            placeholder="Fifties"
                           />
                         </div>
                         <div>
@@ -1991,7 +2019,7 @@ export default function AdminPlayers() {
                             value={formData.stats.hundreds}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, hundreds: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="0"
+                            placeholder="Hundreds"
                           />
                         </div>
                         <div className="md:col-span-2">

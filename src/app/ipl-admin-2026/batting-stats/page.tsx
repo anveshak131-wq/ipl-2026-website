@@ -25,16 +25,16 @@ const BattingStatsPage = () => {
     age: '',
     jerseyNumber: '',
     stats: {
-      matches: 0,
-      battingInnings: 0,
-      notOuts: 0,
-      runs: 0,
-      ballsFaced: 0,
-      highest: 0,
-      fours: 0,
-      sixes: 0,
-      fifties: 0,
-      hundreds: 0,
+      matches: '',
+      battingInnings: '',
+      notOuts: '',
+      runs: '',
+      ballsFaced: '',
+      highest: '',
+      fours: '',
+      sixes: '',
+      fifties: '',
+      hundreds: '',
       battingAverage: '',
       battingStrikeRate: ''
     }
@@ -106,18 +106,18 @@ const BattingStatsPage = () => {
       age: player.age || '',
       jerseyNumber: player.jerseyNumber || '',
       stats: {
-        matches: player.stats?.matches || 0,
-        battingInnings: player.stats?.battingInnings || 0,
-        notOuts: player.stats?.notOuts || 0,
-        runs: player.stats?.runs || 0,
-        ballsFaced: player.stats?.ballsFaced || 0,
-        highest: player.stats?.highest || 0,
-        fours: player.stats?.fours || 0,
-        sixes: player.stats?.sixes || 0,
-        fifties: player.stats?.fifties || 0,
-        hundreds: player.stats?.hundreds || 0,
-        battingAverage: player.stats?.battingAverage || '',
-        battingStrikeRate: player.stats?.battingStrikeRate || ''
+        matches: player.stats?.matches > 0 ? player.stats.matches : '',
+        battingInnings: player.stats?.battingInnings > 0 ? player.stats.battingInnings : '',
+        notOuts: player.stats?.notOuts > 0 ? player.stats.notOuts : '',
+        runs: player.stats?.runs > 0 ? player.stats.runs : '',
+        ballsFaced: player.stats?.ballsFaced > 0 ? player.stats.ballsFaced : '',
+        highest: player.stats?.highest > 0 ? player.stats.highest : '',
+        fours: player.stats?.fours > 0 ? player.stats.fours : '',
+        sixes: player.stats?.sixes > 0 ? player.stats.sixes : '',
+        fifties: player.stats?.fifties > 0 ? player.stats.fifties : '',
+        hundreds: player.stats?.hundreds > 0 ? player.stats.hundreds : '',
+        battingAverage: player.stats?.battingAverage && player.stats.battingAverage !== '0' && player.stats.battingAverage !== '-' ? player.stats.battingAverage : '',
+        battingStrikeRate: player.stats?.battingStrikeRate && player.stats.battingStrikeRate !== '0' && player.stats.battingStrikeRate !== '-' ? player.stats.battingStrikeRate : ''
       }
     });
     setShowEditModal(true);
@@ -130,7 +130,18 @@ const BattingStatsPage = () => {
         ...editForm,
         stats: {
           ...editingPlayer.stats,
-          ...editForm.stats
+          matches: editForm.stats.matches === '' ? 0 : (typeof editForm.stats.matches === 'number' ? editForm.stats.matches : parseInt(editForm.stats.matches) || 0),
+          battingInnings: editForm.stats.battingInnings === '' ? 0 : (typeof editForm.stats.battingInnings === 'number' ? editForm.stats.battingInnings : parseInt(editForm.stats.battingInnings) || 0),
+          notOuts: editForm.stats.notOuts === '' ? 0 : (typeof editForm.stats.notOuts === 'number' ? editForm.stats.notOuts : parseInt(editForm.stats.notOuts) || 0),
+          runs: editForm.stats.runs === '' ? 0 : (typeof editForm.stats.runs === 'number' ? editForm.stats.runs : parseInt(editForm.stats.runs) || 0),
+          ballsFaced: editForm.stats.ballsFaced === '' ? 0 : (typeof editForm.stats.ballsFaced === 'number' ? editForm.stats.ballsFaced : parseInt(editForm.stats.ballsFaced) || 0),
+          highest: editForm.stats.highest === '' ? 0 : (typeof editForm.stats.highest === 'number' ? editForm.stats.highest : parseInt(editForm.stats.highest) || 0),
+          fours: editForm.stats.fours === '' ? 0 : (typeof editForm.stats.fours === 'number' ? editForm.stats.fours : parseInt(editForm.stats.fours) || 0),
+          sixes: editForm.stats.sixes === '' ? 0 : (typeof editForm.stats.sixes === 'number' ? editForm.stats.sixes : parseInt(editForm.stats.sixes) || 0),
+          fifties: editForm.stats.fifties === '' ? 0 : (typeof editForm.stats.fifties === 'number' ? editForm.stats.fifties : parseInt(editForm.stats.fifties) || 0),
+          hundreds: editForm.stats.hundreds === '' ? 0 : (typeof editForm.stats.hundreds === 'number' ? editForm.stats.hundreds : parseInt(editForm.stats.hundreds) || 0),
+          battingAverage: editForm.stats.battingAverage || '',
+          battingStrikeRate: editForm.stats.battingStrikeRate || ''
         }
       };
 
@@ -775,8 +786,9 @@ const BattingStatsPage = () => {
                 <input
                   type="number"
                   value={editForm.stats.matches}
-                  onChange={(e) => handleFormChange('stats.matches', parseInt(e.target.value) || 0)}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  onChange={(e) => handleFormChange('stats.matches', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        placeholder="Matches"
                 />
               </div>
                     <div className="relative">
@@ -787,8 +799,9 @@ const BattingStatsPage = () => {
                 <input
                   type="number"
                   value={editForm.stats.battingInnings}
-                  onChange={(e) => handleFormChange('stats.battingInnings', parseInt(e.target.value) || 0)}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  onChange={(e) => handleFormChange('stats.battingInnings', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        placeholder="Batting Innings"
                 />
               </div>
                     <div className="relative">
@@ -799,8 +812,9 @@ const BattingStatsPage = () => {
                 <input
                   type="number"
                   value={editForm.stats.notOuts}
-                  onChange={(e) => handleFormChange('stats.notOuts', parseInt(e.target.value) || 0)}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  onChange={(e) => handleFormChange('stats.notOuts', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        placeholder="Not Outs"
                 />
                     </div>
               </div>
@@ -821,8 +835,9 @@ const BattingStatsPage = () => {
                 <input
                   type="number"
                   value={editForm.stats.runs}
-                  onChange={(e) => handleFormChange('stats.runs', parseInt(e.target.value) || 0)}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-blue-500/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  onChange={(e) => handleFormChange('stats.runs', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-blue-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        placeholder="Runs"
                       />
                     </div>
                     <div className="relative bg-gradient-to-br from-purple-500/10 to-purple-600/5 p-4 rounded-xl border border-purple-500/20">
@@ -833,8 +848,9 @@ const BattingStatsPage = () => {
                       <input
                         type="number"
                         value={editForm.stats.highest}
-                        onChange={(e) => handleFormChange('stats.highest', parseInt(e.target.value) || 0)}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-purple-500/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                        onChange={(e) => handleFormChange('stats.highest', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-purple-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                        placeholder="Highest Score"
                 />
               </div>
                     <div className="relative bg-gradient-to-br from-pink-500/10 to-pink-600/5 p-4 rounded-xl border border-pink-500/20">
@@ -845,8 +861,9 @@ const BattingStatsPage = () => {
                 <input
                   type="number"
                   value={editForm.stats.ballsFaced}
-                  onChange={(e) => handleFormChange('stats.ballsFaced', parseInt(e.target.value) || 0)}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-pink-500/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all"
+                  onChange={(e) => handleFormChange('stats.ballsFaced', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-pink-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all"
+                        placeholder="Balls Faced"
                 />
               </div>
                     <div className="relative">
@@ -857,8 +874,9 @@ const BattingStatsPage = () => {
                 <input
                   type="number"
                   value={editForm.stats.fours}
-                  onChange={(e) => handleFormChange('stats.fours', parseInt(e.target.value) || 0)}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                  onChange={(e) => handleFormChange('stats.fours', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                        placeholder="Fours"
                 />
               </div>
                     <div className="relative">
@@ -869,8 +887,9 @@ const BattingStatsPage = () => {
                 <input
                   type="number"
                   value={editForm.stats.sixes}
-                  onChange={(e) => handleFormChange('stats.sixes', parseInt(e.target.value) || 0)}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all"
+                  onChange={(e) => handleFormChange('stats.sixes', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all"
+                        placeholder="Sixes"
                 />
                     </div>
               </div>
@@ -891,8 +910,9 @@ const BattingStatsPage = () => {
                 <input
                   type="number"
                   value={editForm.stats.fifties}
-                  onChange={(e) => handleFormChange('stats.fifties', parseInt(e.target.value) || 0)}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-orange-500/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                  onChange={(e) => handleFormChange('stats.fifties', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-orange-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                        placeholder="Fifties"
                 />
               </div>
                     <div className="relative bg-gradient-to-br from-pink-500/10 to-pink-600/5 p-4 rounded-xl border border-pink-500/20">
@@ -903,8 +923,9 @@ const BattingStatsPage = () => {
                 <input
                   type="number"
                   value={editForm.stats.hundreds}
-                  onChange={(e) => handleFormChange('stats.hundreds', parseInt(e.target.value) || 0)}
-                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-pink-500/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all"
+                  onChange={(e) => handleFormChange('stats.hundreds', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-pink-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all"
+                        placeholder="Hundreds"
                 />
               </div>
                     <div className="relative bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 p-4 rounded-xl border border-cyan-500/20">
