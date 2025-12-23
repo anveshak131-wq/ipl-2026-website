@@ -648,12 +648,46 @@ const BattingStatsPage = () => {
                           </td>
                           <td className="px-6 py-4">
                             <span className="text-white font-medium">
-                              {player.stats?.battingAverage || player.stats?.battingAverage === '0' ? '-' : (player.stats?.battingAverage || '-')}
+                              {(() => {
+                                // Try string field first
+                                if (player.stats?.battingAverage && player.stats.battingAverage !== '0' && player.stats.battingAverage !== '-') {
+                                  return player.stats.battingAverage;
+                                }
+                                // Try numeric field
+                                if (player.stats?.average && player.stats.average > 0) {
+                                  return player.stats.average.toFixed(2);
+                                }
+                                // Calculate from base stats
+                                const runs = player.stats?.runs || 0;
+                                const battingInnings = player.stats?.battingInnings || 0;
+                                const notOuts = player.stats?.notOuts || 0;
+                                const dismissals = battingInnings - notOuts;
+                                if (dismissals > 0 && runs > 0) {
+                                  return (runs / dismissals).toFixed(2);
+                                }
+                                return '-';
+                              })()}
                             </span>
                           </td>
                           <td className="px-6 py-4">
                             <span className="text-white font-medium">
-                              {player.stats?.battingStrikeRate || player.stats?.battingStrikeRate === '0' ? '-' : (player.stats?.battingStrikeRate || '-')}
+                              {(() => {
+                                // Try string field first
+                                if (player.stats?.battingStrikeRate && player.stats.battingStrikeRate !== '0' && player.stats.battingStrikeRate !== '-') {
+                                  return player.stats.battingStrikeRate;
+                                }
+                                // Try numeric field
+                                if (player.stats?.strikeRate && player.stats.strikeRate > 0) {
+                                  return player.stats.strikeRate.toFixed(1);
+                                }
+                                // Calculate from base stats
+                                const runs = player.stats?.runs || 0;
+                                const ballsFaced = player.stats?.ballsFaced || 0;
+                                if (ballsFaced > 0 && runs > 0) {
+                                  return ((runs * 100) / ballsFaced).toFixed(1);
+                                }
+                                return '-';
+                              })()}
                             </span>
                           </td>
                           <td className="px-6 py-4">
@@ -772,11 +806,43 @@ const BattingStatsPage = () => {
                                   </div>
                                   <div className="grid grid-cols-2 gap-2 mt-3">
                                     <div className="bg-gray-900/50 rounded-lg p-2 text-center">
-                                      <div className="text-blue-400 font-semibold">{player.stats?.battingAverage || '-'}</div>
+                                      <div className="text-blue-400 font-semibold">
+                                        {(() => {
+                                          if (player.stats?.battingAverage && player.stats.battingAverage !== '0' && player.stats.battingAverage !== '-') {
+                                            return player.stats.battingAverage;
+                                          }
+                                          if (player.stats?.average && player.stats.average > 0) {
+                                            return player.stats.average.toFixed(2);
+                                          }
+                                          const runs = player.stats?.runs || 0;
+                                          const battingInnings = player.stats?.battingInnings || 0;
+                                          const notOuts = player.stats?.notOuts || 0;
+                                          const dismissals = battingInnings - notOuts;
+                                          if (dismissals > 0 && runs > 0) {
+                                            return (runs / dismissals).toFixed(2);
+                                          }
+                                          return '-';
+                                        })()}
+                                      </div>
                                       <div className="text-xs text-gray-400">Avg</div>
                                     </div>
                                     <div className="bg-gray-900/50 rounded-lg p-2 text-center">
-                                      <div className="text-purple-400 font-semibold">{player.stats?.battingStrikeRate || '-'}</div>
+                                      <div className="text-purple-400 font-semibold">
+                                        {(() => {
+                                          if (player.stats?.battingStrikeRate && player.stats.battingStrikeRate !== '0' && player.stats.battingStrikeRate !== '-') {
+                                            return player.stats.battingStrikeRate;
+                                          }
+                                          if (player.stats?.strikeRate && player.stats.strikeRate > 0) {
+                                            return player.stats.strikeRate.toFixed(1);
+                                          }
+                                          const runs = player.stats?.runs || 0;
+                                          const ballsFaced = player.stats?.ballsFaced || 0;
+                                          if (ballsFaced > 0 && runs > 0) {
+                                            return ((runs * 100) / ballsFaced).toFixed(1);
+                                          }
+                                          return '-';
+                                        })()}
+                                      </div>
                                       <div className="text-xs text-gray-400">SR</div>
                                     </div>
                                   </div>
