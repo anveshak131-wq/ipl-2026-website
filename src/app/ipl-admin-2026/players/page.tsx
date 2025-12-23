@@ -1704,7 +1704,7 @@ export default function AdminPlayers() {
                           }}
                           className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
                           placeholder="Age"
-                          required
+                          required={!formData.dateOfBirth || formData.dateOfBirth.trim() === ''}
                         />
                         <p className="text-xs text-gray-500 mt-1">
                           {(() => {
@@ -1736,7 +1736,11 @@ export default function AdminPlayers() {
                                 // Additional debugging
                                 const testDate = new Date(parsedDate);
                                 console.log('Display - Test date object:', testDate, 'Is valid:', !isNaN(testDate.getTime()));
-                                return `Date parsed: ${parsedDate}, but age calculation returned 0. Please check the date.`;
+                                // Check if parsedDate contains NaN (invalid parsing)
+                                if (parsedDate.includes('NaN') || isNaN(testDate.getTime())) {
+                                  return `⚠ Invalid date format. Please use ${currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY or Month DD, YYYY'} format.`;
+                                }
+                                return `⚠ Age calculation returned 0. Please check the date format.`;
                               }
                             } else {
                               return `Invalid date format. Use ${currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY'} format (e.g., ${currentLeague === 'wpl' ? 'December 25, 1994' : '25/12/1994'})`;
@@ -1747,7 +1751,7 @@ export default function AdminPlayers() {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Date of Birth ({currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY'})
+                          Date of Birth ({currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY or Month DD, YYYY'})
                         </label>
                         <input
                           type="text"

@@ -676,7 +676,7 @@ const BattingStatsPage = () => {
                                   </div>
                                   <div className="flex items-center justify-between text-xs text-gray-400 mt-2">
                                     <span>HS: {player.stats?.highest || '-'}</span>
-                                    <span>{player.stats?.hundreds || 0}💯 / {player.stats?.fifties || 0}50</span>
+                                    <span>{player.stats?.hundreds || 0}💯 / {player.stats?.fifties || 0} 50</span>
                                   </div>
                                 </div>
 

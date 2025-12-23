@@ -65,15 +65,39 @@ export const parseDateDDMMYYYY = (dateString: string): string => {
   if (!dateString) return '';
   
   try {
-    const [day, month, year] = dateString.split('/');
+    // Trim whitespace
+    const trimmed = dateString.trim();
+    
+    // Check if the string contains '/' to ensure it's in DD/MM/YYYY format
+    if (!trimmed.includes('/')) {
+      return '';
+    }
+    
+    const parts = trimmed.split('/');
+    
+    // Must have exactly 3 parts
+    if (parts.length !== 3) {
+      return '';
+    }
+    
+    const [day, month, year] = parts;
+    
+    // Validate that all parts exist and are not empty
+    if (!day || !month || !year) {
+      return '';
+    }
     
     // Validate inputs
     const dayNum = parseInt(day, 10);
     const monthNum = parseInt(month, 10);
     const yearNum = parseInt(year, 10);
     
+    // Check if parsing resulted in NaN
+    if (isNaN(dayNum) || isNaN(monthNum) || isNaN(yearNum)) {
+      return '';
+    }
+    
     if (dayNum < 1 || dayNum > 31 || monthNum < 1 || monthNum > 12 || yearNum < 1900) {
-      console.error('Invalid date values:', { day, month, year });
       return '';
     }
     
@@ -147,16 +171,21 @@ export const parseDateMonthDDYYYY = (dateString: string): string => {
       return `${yearNum}-${monthNum}-${String(dayNum).padStart(2, '0')}`;
     }
     
-    // Fallback: try parsing as regular date
+    // Fallback: try parsing as regular date (this handles various formats)
     const date = new Date(trimmed);
     if (isNaN(date.getTime())) {
-      console.error('Invalid date format:', dateString);
       return '';
     }
     
+    // Validate that the parsed date makes sense (not too far in future/past)
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
+    
+    // Additional validation: year should be reasonable
+    if (year < 1900 || year > new Date().getFullYear()) {
+      return '';
+    }
     
     return `${year}-${month}-${day}`;
   } catch (error) {
