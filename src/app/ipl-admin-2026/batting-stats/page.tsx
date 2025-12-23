@@ -18,13 +18,22 @@ const BattingStatsPage = () => {
   const loadData = async () => {
     try {
       console.log('Loading data...');
+      console.log('Calling api.getPlayers...');
+      
       // Test basic API call
       const playersData = await api.getPlayers('ipl');
+      console.log('API call completed');
       console.log('Players loaded:', playersData.length, playersData);
+      console.log('Players data type:', typeof playersData);
+      console.log('Players data is array:', Array.isArray(playersData));
+      
       setPlayers(playersData);
     } catch (error) {
       console.error('Failed to load data:', error);
+      console.error('Error details:', error.message);
+      console.error('Error stack:', error.stack);
     } finally {
+      console.log('loadData finished, setting loading to false');
       setLoading(false);
     }
   };
