@@ -315,6 +315,25 @@ export default function AdminPlayers() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teams, currentLeague]);
 
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      // Check if click is outside both dropdowns
+      if (!target.closest('[data-filter-dropdown]')) {
+        setIsDropdownOpen(false);
+        setShowAdvancedFilters(false);
+      }
+    };
+
+    if (isDropdownOpen || showAdvancedFilters) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [isDropdownOpen, showAdvancedFilters]);
+
   const handleAddPlayer = () => {
     setEditingPlayer(null);
     setLastCalculatedAge(''); // Reset calculated age when adding new player
@@ -1167,9 +1186,12 @@ export default function AdminPlayers() {
               </div>
 
                 {/* Role Filter */}
-              <div className="relative md:min-w-[200px]">
+              <div className="relative md:min-w-[200px]" data-filter-dropdown>
                 <button
-                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                  onClick={() => {
+                    setShowAdvancedFilters(!showAdvancedFilters);
+                    setIsDropdownOpen(false); // Close team dropdown when role filter opens
+                  }}
                   className={`w-full bg-gray-800/50 border border-white/10 px-6 py-3.5 rounded-xl text-white font-medium flex items-center space-x-3 hover:bg-gray-700/50 hover:border-white/20 transition-all duration-300 h-full ${
                     selectedRole !== 'all' ? 'border-blue-500/50 bg-blue-500/10' : ''
                   }`}
@@ -1210,9 +1232,12 @@ export default function AdminPlayers() {
               </div>
 
                 {/* Enhanced Team Filter Dropdown */}
-              <div className="relative md:min-w-[320px]">
+              <div className="relative md:min-w-[320px]" data-filter-dropdown>
                 <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  onClick={() => {
+                    setIsDropdownOpen(!isDropdownOpen);
+                    setShowAdvancedFilters(false); // Close role filter when team dropdown opens
+                  }}
                     className="w-full bg-gray-800/50 border border-white/10 px-6 py-3.5 rounded-xl text-white font-medium flex items-center space-x-3 hover:bg-gray-700/50 hover:border-white/20 transition-all duration-300 group h-full"
                   >
                     <Filter className="w-5 h-5 text-blue-400 flex-shrink-0" />
