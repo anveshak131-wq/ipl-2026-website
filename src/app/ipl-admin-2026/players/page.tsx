@@ -503,18 +503,18 @@ export default function AdminPlayers() {
         bowlingStyle: finalBowlingStyle,
         battingStyle: formData.battingStyle,
         stats: {
-          matches: parseInt(formData.stats.matches) || 0,
-          runs: parseInt(formData.stats.runs) || 0,
-          wickets: parseInt(formData.stats.wickets) || 0,
-          average: parseFloat(formData.stats.average) || 0,
-          bowlingAverage: parseFloat(formData.stats.bowlingAverage) || 0,
-          strikeRate: parseFloat(formData.stats.strikeRate) || 0,
-          economy: parseFloat(formData.stats.economy) || 0,
-          highest: parseInt(formData.stats.highest) || 0,
-          fours: parseInt(formData.stats.fours) || 0,
-          sixes: parseInt(formData.stats.sixes) || 0,
-          fifties: parseInt(formData.stats.fifties) || 0,
-          hundreds: parseInt(formData.stats.hundreds) || 0,
+          matches: formData.stats.matches ? parseInt(formData.stats.matches) || 0 : 0,
+          runs: formData.stats.runs ? parseInt(formData.stats.runs) || 0 : 0,
+          wickets: formData.stats.wickets ? parseInt(formData.stats.wickets) || 0 : 0,
+          average: formData.stats.average && formData.stats.average.trim() !== '' ? parseFloat(formData.stats.average) : 0,
+          bowlingAverage: formData.stats.bowlingAverage && formData.stats.bowlingAverage.trim() !== '' ? parseFloat(formData.stats.bowlingAverage) : 0,
+          strikeRate: formData.stats.strikeRate && formData.stats.strikeRate.trim() !== '' ? parseFloat(formData.stats.strikeRate) : 0,
+          economy: formData.stats.economy && formData.stats.economy.trim() !== '' ? parseFloat(formData.stats.economy) : 0,
+          highest: formData.stats.highest ? parseInt(formData.stats.highest) || 0 : 0,
+          fours: formData.stats.fours ? parseInt(formData.stats.fours) || 0 : 0,
+          sixes: formData.stats.sixes ? parseInt(formData.stats.sixes) || 0 : 0,
+          fifties: formData.stats.fifties ? parseInt(formData.stats.fifties) || 0 : 0,
+          hundreds: formData.stats.hundreds ? parseInt(formData.stats.hundreds) || 0 : 0,
           bestBowling: formData.stats.bestBowling || '-',
         },
         transferInfo: {
@@ -1499,7 +1499,7 @@ export default function AdminPlayers() {
                               )}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">
-                              {player.stats.average > 0 ? (
+                              {player.stats.average && player.stats.average > 0 ? (
                                 <span className="text-purple-400 font-semibold">{player.stats.average.toFixed(2)}</span>
                               ) : (
                                 <span className="text-gray-500 italic">Avg</span>
@@ -1519,7 +1519,7 @@ export default function AdminPlayers() {
                               })()}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">
-                              {player.stats.strikeRate > 0 ? (
+                              {player.stats.strikeRate && player.stats.strikeRate > 0 ? (
                                 <span className="text-gray-300">{player.stats.strikeRate.toFixed(2)}</span>
                               ) : (
                                 <span className="text-gray-500 italic">SR</span>

@@ -492,8 +492,12 @@ export const onRequest = async (context) => {
           matches: updatedPlayer.stats?.matches !== undefined ? (parseInt(updatedPlayer.stats.matches) || 0) : (players[index].stats?.matches || 0),
           runs: updatedPlayer.stats?.runs !== undefined ? (parseInt(updatedPlayer.stats.runs) || 0) : (players[index].stats?.runs || 0),
           wickets: updatedPlayer.stats?.wickets !== undefined ? (parseInt(updatedPlayer.stats.wickets) || 0) : (players[index].stats?.wickets || 0),
-          average: updatedPlayer.stats?.average !== undefined ? (parseFloat(updatedPlayer.stats.average) || 0) : (players[index].stats?.average || 0),
-          strikeRate: updatedPlayer.stats?.strikeRate !== undefined ? (parseFloat(updatedPlayer.stats.strikeRate) || 0) : (players[index].stats?.strikeRate || 0),
+          average: updatedPlayer.stats?.average !== undefined && updatedPlayer.stats?.average !== null && updatedPlayer.stats?.average !== '' 
+            ? (typeof updatedPlayer.stats.average === 'number' ? updatedPlayer.stats.average : parseFloat(updatedPlayer.stats.average) || 0)
+            : (players[index].stats?.average || 0),
+          strikeRate: updatedPlayer.stats?.strikeRate !== undefined && updatedPlayer.stats?.strikeRate !== null && updatedPlayer.stats?.strikeRate !== ''
+            ? (typeof updatedPlayer.stats.strikeRate === 'number' ? updatedPlayer.stats.strikeRate : parseFloat(updatedPlayer.stats.strikeRate) || 0)
+            : (players[index].stats?.strikeRate || 0),
           economy: updatedPlayer.stats?.economy !== undefined ? (typeof updatedPlayer.stats.economy === 'string' ? (updatedPlayer.stats.economy || '') : (parseFloat(updatedPlayer.stats.economy) || 0)) : (players[index].stats?.economy || 0),
           highest: updatedPlayer.stats?.highest !== undefined ? (parseInt(updatedPlayer.stats.highest) || 0) : (players[index].stats?.highest || 0),
           fours: updatedPlayer.stats?.fours !== undefined ? (parseInt(updatedPlayer.stats.fours) || 0) : (players[index].stats?.fours || 0),
