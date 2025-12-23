@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAdminData } from '@/contexts/AdminDataContext';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import PlayersAdminSidebar from '@/components/admin/PlayersAdminSidebar';
-import { Search, Filter, Edit2, X, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Target as TargetIcon, Award as AwardIcon, Zap as ZapIcon, Hash, Activity } from 'lucide-react';
+import { Search, Filter, Edit2, X, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Target as TargetIcon, Award as AwardIcon, Zap as ZapIcon, Hash, Activity, LayoutGrid, Table2 } from 'lucide-react';
 
 const BattingStatsPage = () => {
   const router = useRouter();
@@ -18,6 +18,7 @@ const BattingStatsPage = () => {
   const [selectedTeam, setSelectedTeam] = useState('all');
   const [sortField, setSortField] = useState<string>('runs');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [viewMode, setViewMode] = useState<'table' | 'teams'>('table');
   const [editForm, setEditForm] = useState({
     name: '',
     role: '',
@@ -379,19 +380,43 @@ const BattingStatsPage = () => {
                   ))}
                 </select>
               </div>
+              <div className="flex gap-2 bg-gray-900/50 rounded-lg p-1 border border-gray-700">
+                <button
+                  onClick={() => setViewMode('table')}
+                  className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
+                    viewMode === 'table'
+                      ? 'bg-blue-600 text-white shadow-lg'
+                      : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  <Table2 className="w-4 h-4" />
+                  Table
+                </button>
+                <button
+                  onClick={() => setViewMode('teams')}
+                  className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
+                    viewMode === 'teams'
+                      ? 'bg-blue-600 text-white shadow-lg'
+                      : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                  Teams
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Players Table */}
+          {/* Players Table or Team Panels */}
           {filteredAndSortedPlayers.length === 0 ? (
             <div className="bg-gray-800/30 backdrop-blur rounded-2xl p-16 text-center border border-gray-700/50">
               <div className="w-20 h-20 bg-gray-700/50 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Search className="w-10 h-10 text-gray-500" />
-          </div>
+              </div>
               <h3 className="text-2xl font-bold text-white mb-3">No Players Found</h3>
               <p className="text-gray-400 text-lg mb-6">Try adjusting your search or filter criteria</p>
-        </div>
-      ) : (
+            </div>
+          ) : viewMode === 'table' ? (
             <div className="bg-gray-800/30 backdrop-blur rounded-2xl border border-gray-700/50 overflow-hidden shadow-xl">
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -539,8 +564,121 @@ const BattingStatsPage = () => {
                 </table>
               </div>
             </div>
+          ) : (
+            /* Team Panels View */
+            <div className="space-y-6">
+              {teams
+                .filter(team => {
+                  const teamPlayers = filteredAndSortedPlayers.filter(p => p.teamId === team.id);
+                  return teamPlayers.length > 0;
+                })
+                .map(team => {
+                  const teamPlayers = filteredAndSortedPlayers.filter(p => p.teamId === team.id);
+                  const teamRuns = teamPlayers.reduce((sum, p) => sum + (p.stats?.runs || 0), 0);
+                  const teamHundreds = teamPlayers.reduce((sum, p) => sum + (p.stats?.hundreds || 0), 0);
+                  const teamFifties = teamPlayers.reduce((sum, p) => sum + (p.stats?.fifties || 0), 0);
+
+                  return (
+                    <div key={team.id} className="bg-gray-800/30 backdrop-blur rounded-2xl border border-gray-700/50 overflow-hidden shadow-xl">
+                      {/* Team Header */}
+                      <div className="bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 p-6 border-b border-gray-700/50">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                              {team.shortName || team.name.charAt(0)}
+                            </div>
+                            <div>
+                              <h2 className="text-2xl font-bold text-white">{team.name}</h2>
+                              <p className="text-gray-400 text-sm mt-1">
+                                {teamPlayers.length} players • {teamPlayers.filter(p => p.stats?.battingInnings > 0).length} active batsmen
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex gap-4">
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-white">{teamRuns.toLocaleString()}</div>
+                              <div className="text-gray-400 text-xs">Total Runs</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-pink-400">{teamHundreds}</div>
+                              <div className="text-gray-400 text-xs">100s</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-orange-400">{teamFifties}</div>
+                              <div className="text-gray-400 text-xs">50s</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Team Players Grid */}
+                      <div className="p-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                          {teamPlayers.map((player) => {
+                            const runs = player.stats?.runs || 0;
+                            const maxRuns = Math.max(...teamPlayers.map(p => p.stats?.runs || 0), 1);
+                            const runsPercentage = (runs / maxRuns) * 100;
+
+                            return (
+                              <div
+                                key={player.id}
+                                className="bg-gradient-to-br from-gray-700/50 to-gray-800/50 rounded-xl p-5 border border-gray-600/50 hover:border-blue-500/50 transition-all hover:shadow-lg group"
+                              >
+                                <div className="flex items-center gap-3 mb-4">
+                                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                                    {player.name?.charAt(0) || '?'}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="font-semibold text-white truncate">{player.name || 'Unknown'}</div>
+                                    <div className="text-xs text-gray-400">{player.role}</div>
+                                  </div>
+                                </div>
+
+                                <div className="space-y-2 mb-4">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-gray-400 text-sm">Runs</span>
+                                    <span className="font-bold text-white">{runs.toLocaleString()}</span>
+                                  </div>
+                                  <div className="w-full h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                                    <div
+                                      className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all"
+                                      style={{ width: `${runsPercentage}%` }}
+                                    />
+                                  </div>
+                                  <div className="grid grid-cols-2 gap-2 mt-3">
+                                    <div className="bg-gray-900/50 rounded-lg p-2 text-center">
+                                      <div className="text-blue-400 font-semibold">{player.stats?.battingAverage || '-'}</div>
+                                      <div className="text-xs text-gray-400">Avg</div>
+                                    </div>
+                                    <div className="bg-gray-900/50 rounded-lg p-2 text-center">
+                                      <div className="text-purple-400 font-semibold">{player.stats?.battingStrikeRate || '-'}</div>
+                                      <div className="text-xs text-gray-400">SR</div>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center justify-between text-xs text-gray-400 mt-2">
+                                    <span>HS: {player.stats?.highest || '-'}</span>
+                                    <span>{player.stats?.hundreds || 0}💯 / {player.stats?.fifties || 0}50</span>
+                                  </div>
+                                </div>
+
+                                <button
+                                  onClick={() => handleEditPlayer(player)}
+                                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-all text-sm flex items-center justify-center gap-2 group-hover:scale-105"
+                                >
+                                  <Edit2 className="w-4 h-4" />
+                                  Edit Stats
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
           )}
-              </div>
+        </div>
 
         {/* Edit Modal */}
         {showEditModal && (
