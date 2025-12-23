@@ -330,29 +330,6 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         group: 'Main',
         shortcut: 'P',
       },
-      {
-        href: '/ipl-admin-2026/batting-stats',
-        label: 'Batting Stats',
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3v18h18" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 14l4-4 3 3 6-6" />
-          </svg>
-        ),
-        group: 'Main',
-        shortcut: 'B',
-      },
-      {
-        href: '/ipl-admin-2026/bowling-stats',
-        label: 'Bowling Stats',
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-        ),
-        group: 'Main',
-        shortcut: 'W',
-      },
     ],
     Content: [
       {

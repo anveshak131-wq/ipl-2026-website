@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdminData } from '@/contexts/AdminDataContext';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import PlayersAdminSidebar from '@/components/admin/PlayersAdminSidebar';
+import { Search, Filter, Edit2, X, TrendingDown, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc } from 'lucide-react';
 
 const BowlingStatsPage = () => {
   const router = useRouter();
@@ -13,8 +14,10 @@ const BowlingStatsPage = () => {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [editingPlayer, setEditingPlayer] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedTeam, setSelectedTeam] = useState(null);
-  const [showTeamPanel, setShowTeamPanel] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTeam, setSelectedTeam] = useState('all');
+  const [sortField, setSortField] = useState<string>('wickets');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [editForm, setEditForm] = useState({
     name: '',
     role: '',
@@ -56,7 +59,6 @@ const BowlingStatsPage = () => {
         const role = data.user?.role;
         setUserRole(role);
 
-        // Check if user has valid admin role
         if (role !== 'admin' && role !== 'super_admin' && role !== 'players_admin') {
           alert('Access denied. Admin privileges required.');
           router.push('/ipl-admin-2026');
@@ -78,7 +80,6 @@ const BowlingStatsPage = () => {
     setEditingPlayer(null);
   }, []);
 
-  // Handle ESC key to close modal
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && showEditModal) {
@@ -140,6 +141,7 @@ const BowlingStatsPage = () => {
       setEditingPlayer(null);
     } catch (error) {
       console.error('Failed to update player:', error);
+      alert('Failed to update player. Please try again.');
     }
   };
 
@@ -161,14 +163,97 @@ const BowlingStatsPage = () => {
     }
   };
 
-  const playersByTeam = teams.map(team => ({
-    team,
-    players: players.filter(player => player.teamId === team.id)
-  })).filter(teamGroup => teamGroup.players.length > 0);
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+  };
+
+  // Filter and sort players
+  const filteredAndSortedPlayers = useMemo(() => {
+    let filtered = players.filter(player => {
+      const matchesSearch = player.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           player.teamId?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesTeam = selectedTeam === 'all' || player.teamId === selectedTeam;
+      const hasBowlingStats = player.stats?.bowlingInnings > 0 || player.stats?.wickets > 0;
+      return matchesSearch && matchesTeam && hasBowlingStats;
+    });
+
+    filtered.sort((a, b) => {
+      let aVal, bVal;
+      
+      switch (sortField) {
+        case 'name':
+          aVal = a.name || '';
+          bVal = b.name || '';
+          break;
+        case 'wickets':
+          aVal = a.stats?.wickets || 0;
+          bVal = b.stats?.wickets || 0;
+          break;
+        case 'average':
+          aVal = parseFloat(a.stats?.bowlingAverage) || Infinity;
+          bVal = parseFloat(b.stats?.bowlingAverage) || Infinity;
+          break;
+        case 'economy':
+          aVal = parseFloat(a.stats?.economy) || Infinity;
+          bVal = parseFloat(b.stats?.economy) || Infinity;
+          break;
+        case 'strikeRate':
+          aVal = parseFloat(a.stats?.bowlingStrikeRate) || Infinity;
+          bVal = parseFloat(b.stats?.bowlingStrikeRate) || Infinity;
+          break;
+        case 'fiveWickets':
+          aVal = a.stats?.fiveWickets || 0;
+          bVal = b.stats?.fiveWickets || 0;
+          break;
+        default:
+          aVal = a.stats?.wickets || 0;
+          bVal = b.stats?.wickets || 0;
+      }
+
+      if (typeof aVal === 'string') {
+        return sortDirection === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+      }
+      return sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
+    });
+
+    return filtered;
+  }, [players, searchQuery, selectedTeam, sortField, sortDirection]);
+
+  // Calculate summary stats
+  const summaryStats = useMemo(() => {
+    const activeBowlers = players.filter(p => p.stats?.bowlingInnings > 0 || p.stats?.wickets > 0);
+    const totalWickets = activeBowlers.reduce((sum, p) => sum + (p.stats?.wickets || 0), 0);
+    const totalFiveWickets = activeBowlers.reduce((sum, p) => sum + (p.stats?.fiveWickets || 0), 0);
+    const totalMaidens = activeBowlers.reduce((sum, p) => sum + (p.stats?.maidens || 0), 0);
+    const economies = activeBowlers
+      .map(p => parseFloat(p.stats?.economy) || Infinity)
+      .filter(e => e !== Infinity);
+    const bestEconomy = economies.length > 0 ? Math.min(...economies) : 0;
+    const avgWickets = activeBowlers.length > 0 ? (totalWickets / activeBowlers.length).toFixed(1) : 0;
+
+    return { 
+      activeBowlers: activeBowlers.length, 
+      totalWickets, 
+      totalFiveWickets, 
+      totalMaidens, 
+      bestEconomy: bestEconomy.toFixed(2),
+      avgWickets: parseFloat(avgWickets)
+    };
+  }, [players]);
+
+  const SortIcon = ({ field }: { field: string }) => {
+    if (sortField !== field) return <SortAsc className="w-4 h-4 text-gray-500 opacity-0 group-hover:opacity-100" />;
+    return sortDirection === 'asc' ? <ChevronUp className="w-4 h-4 text-green-400" /> : <ChevronDown className="w-4 h-4 text-green-400" />;
+  };
 
   if (isCheckingAuth) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gray-950">
         <div className="text-white text-xl">Loading...</div>
       </div>
     );
@@ -176,7 +261,7 @@ const BowlingStatsPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gray-950">
         <div className="text-white text-xl">Loading bowling stats...</div>
       </div>
     );
@@ -184,440 +269,455 @@ const BowlingStatsPage = () => {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gray-950">
         <div className="text-red-400 text-xl">{error}</div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-900">
+    <div className="flex min-h-screen bg-gray-950">
       {userRole === 'players_admin' ? (
-        <PlayersAdminSidebar currentPage="/ipl-admin-2026/bowling-stats" />
+      <PlayersAdminSidebar currentPage="/ipl-admin-2026/bowling-stats" />
       ) : (
         <AdminSidebar currentPage="/ipl-admin-2026/bowling-stats" />
       )}
-      <div className="flex-1 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 min-h-screen">
+      <div className="flex-1 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 min-h-screen overflow-x-hidden">
         {/* Hero Header */}
-        <div className="bg-gradient-to-r from-green-600 via-blue-600 to-green-700 p-8 rounded-b-3xl shadow-2xl">
+        <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 p-8 shadow-2xl">
           <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
               <div>
-                <h1 className="text-4xl lg:text-5xl font-bold text-white mb-3 flex items-center gap-3">
-                  <div className="w-12 h-12 bg-white bg-opacity-20 backdrop-blur rounded-xl flex items-center justify-center">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
+                <h1 className="text-4xl lg:text-5xl font-bold text-white mb-2 flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
+                    <TrendingDown className="w-6 h-6 text-white" />
                   </div>
                   Bowling Statistics
                 </h1>
-                <p className="text-green-100 text-lg">Manage comprehensive bowling statistics and player performance</p>
+                <p className="text-green-100 text-lg">Comprehensive bowling performance analytics</p>
               </div>
-              <div className="flex items-center space-x-4">
-                <div className="text-right">
-                  <div className="text-3xl font-bold text-white">{players.filter(p => p.stats?.bowlingInnings > 0).length}</div>
-                  <div className="text-green-100 text-sm">Active Bowlers</div>
+              <div className="flex flex-wrap gap-4">
+                <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center min-w-[120px]">
+                  <div className="text-3xl font-bold text-white">{summaryStats.activeBowlers}</div>
+                  <div className="text-green-100 text-sm mt-1">Active Bowlers</div>
                 </div>
-                <div className="text-right">
+                <div className="bg-white/10 backdrop-blur rounded-xl p-4 text-center min-w-[120px]">
                   <div className="text-3xl font-bold text-white">{teams.length}</div>
-                  <div className="text-green-100 text-sm">Teams</div>
+                  <div className="text-green-100 text-sm mt-1">Teams</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto p-8">
-          {/* Stats Overview Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-gradient-to-br from-green-600 to-blue-600 rounded-xl p-6 shadow-xl border border-green-500 border-opacity-30">
+        <div className="max-w-7xl mx-auto p-6 lg:p-8">
+          {/* Summary Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
+            <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-xl p-5 shadow-lg border border-green-500/30">
               <div className="flex items-center justify-between mb-2">
-                <div className="text-green-100 text-sm font-medium">Total Wickets</div>
-                <svg className="w-5 h-5 text-green-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <Target className="w-5 h-5 text-green-200" />
               </div>
-              <div className="text-3xl font-bold text-white">
-                {players.reduce((sum, p) => sum + (p.stats?.wickets || 0), 0).toLocaleString()}
-              </div>
+              <div className="text-2xl font-bold text-white">{summaryStats.totalWickets.toLocaleString()}</div>
+              <div className="text-green-100 text-xs mt-1">Total Wickets</div>
             </div>
-            <div className="bg-gradient-to-br from-blue-600 to-cyan-600 rounded-xl p-6 shadow-xl border border-blue-500 border-opacity-30">
+            <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-xl p-5 shadow-lg border border-emerald-500/30">
               <div className="flex items-center justify-between mb-2">
-                <div className="text-blue-100 text-sm font-medium">Best Economy</div>
-                <svg className="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
+                <TrendingDown className="w-5 h-5 text-emerald-200" />
               </div>
-              <div className="text-3xl font-bold text-white">
-                {Math.min(...players.filter(p => p.stats?.economy && p.stats?.economy !== '').map(p => parseFloat(p.stats.economy) || Infinity), 99.99).toFixed(2)}
-              </div>
+              <div className="text-2xl font-bold text-white">{summaryStats.bestEconomy}</div>
+              <div className="text-emerald-100 text-xs mt-1">Best Economy</div>
             </div>
-            <div className="bg-gradient-to-br from-cyan-600 to-teal-600 rounded-xl p-6 shadow-xl border border-cyan-500 border-opacity-30">
+            <div className="bg-gradient-to-br from-teal-600 to-teal-700 rounded-xl p-5 shadow-lg border border-teal-500/30">
               <div className="flex items-center justify-between mb-2">
-                <div className="text-cyan-100 text-sm font-medium">5-Wicket Hauls</div>
-                <svg className="w-5 h-5 text-cyan-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                </svg>
+                <Award className="w-5 h-5 text-teal-200" />
               </div>
-              <div className="text-3xl font-bold text-white">
-                {players.reduce((sum, p) => sum + (p.stats?.fiveWickets || 0), 0)}
-              </div>
+              <div className="text-2xl font-bold text-white">{summaryStats.totalFiveWickets}</div>
+              <div className="text-teal-100 text-xs mt-1">5-Wicket Hauls</div>
             </div>
-            <div className="bg-gradient-to-br from-teal-600 to-green-600 rounded-xl p-6 shadow-xl border border-teal-500 border-opacity-30">
+            <div className="bg-gradient-to-br from-cyan-600 to-cyan-700 rounded-xl p-5 shadow-lg border border-cyan-500/30">
               <div className="flex items-center justify-between mb-2">
-                <div className="text-teal-100 text-sm font-medium">Maiden Overs</div>
-                <svg className="w-5 h-5 text-teal-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <Zap className="w-5 h-5 text-cyan-200" />
               </div>
-              <div className="text-3xl font-bold text-white">
-                {players.reduce((sum, p) => sum + (p.stats?.maidens || 0), 0)}
+              <div className="text-2xl font-bold text-white">{summaryStats.totalMaidens}</div>
+              <div className="text-cyan-100 text-xs mt-1">Maiden Overs</div>
+            </div>
+            <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-5 shadow-lg border border-blue-500/30">
+              <div className="flex items-center justify-between mb-2">
+                <Target className="w-5 h-5 text-blue-200" />
+              </div>
+              <div className="text-2xl font-bold text-white">{summaryStats.avgWickets}</div>
+              <div className="text-blue-100 text-xs mt-1">Avg Wickets/Bowler</div>
+            </div>
+            <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl p-5 shadow-lg border border-indigo-500/30">
+              <div className="flex items-center justify-between mb-2">
+                <Filter className="w-5 h-5 text-indigo-200" />
+              </div>
+              <div className="text-2xl font-bold text-white">{filteredAndSortedPlayers.length}</div>
+              <div className="text-indigo-100 text-xs mt-1">Filtered Players</div>
+            </div>
+          </div>
+
+          {/* Search and Filters */}
+          <div className="bg-gray-800/50 backdrop-blur rounded-xl p-6 mb-6 border border-gray-700/50">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search players..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 bg-gray-900/50 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
+              </div>
+              <div className="relative">
+                <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <select
+                  value={selectedTeam}
+                  onChange={(e) => setSelectedTeam(e.target.value)}
+                  className="pl-10 pr-8 py-2.5 bg-gray-900/50 border border-gray-700 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent appearance-none cursor-pointer"
+                >
+                  <option value="all">All Teams</option>
+                  {teams.map(team => (
+                    <option key={team.id} value={team.id}>{team.name}</option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>
 
-          {playersByTeam.length === 0 ? (
-            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-16 text-center border border-gray-700">
-              <div className="w-20 h-20 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg className="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold text-white mb-3">No Bowling Statistics Available</h3>
-              <p className="text-gray-400 text-lg mb-6">Players will appear here once they are added to teams with bowling statistics</p>
-              <div className="flex justify-center">
-                <a href="/ipl-admin-2026/players" className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  <span>Add Players</span>
-                </a>
-              </div>
-            </div>
-          ) : (
-            playersByTeam.map(({ team, players: teamPlayers }) => (
-              <div key={team.id} className="mb-8">
-                <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl p-6 border border-gray-700 shadow-xl">
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-blue-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-lg border border-green-400 border-opacity-30">
-                        {team.shortName}
-                      </div>
-                      <div>
-                        <h2 className="text-2xl font-bold text-white">{team.name}</h2>
-                        <p className="text-gray-400 text-sm mt-1">{teamPlayers.length} players • {teamPlayers.filter(p => p.stats?.bowlingInnings > 0).length} active bowlers</p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => {
-                        setSelectedTeam(team);
-                        setShowTeamPanel(true);
-                      }}
-                      className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-2"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                      <span>View Team Panel</span>
-                    </button>
-                  </div>
+          {/* Players Table */}
+          {filteredAndSortedPlayers.length === 0 ? (
+            <div className="bg-gray-800/30 backdrop-blur rounded-2xl p-16 text-center border border-gray-700/50">
+              <div className="w-20 h-20 bg-gray-700/50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Search className="w-10 h-10 text-gray-500" />
+          </div>
+              <h3 className="text-2xl font-bold text-white mb-3">No Players Found</h3>
+              <p className="text-gray-400 text-lg mb-6">Try adjusting your search or filter criteria</p>
+        </div>
+      ) : (
+            <div className="bg-gray-800/30 backdrop-blur rounded-2xl border border-gray-700/50 overflow-hidden shadow-xl">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-900/50 border-b border-gray-700">
+                    <tr>
+                      <th className="px-6 py-4 text-left">
+                        <button
+                          onClick={() => handleSort('name')}
+                          className="flex items-center gap-2 text-gray-300 hover:text-white font-semibold text-sm uppercase tracking-wider group"
+                        >
+                          Player
+                          <SortIcon field="name" />
+                        </button>
+                      </th>
+                      <th className="px-6 py-4 text-left">
+                        <button
+                          onClick={() => handleSort('wickets')}
+                          className="flex items-center gap-2 text-gray-300 hover:text-white font-semibold text-sm uppercase tracking-wider group"
+                        >
+                          Wickets
+                          <SortIcon field="wickets" />
+                        </button>
+                      </th>
+                      <th className="px-6 py-4 text-left">
+                        <button
+                          onClick={() => handleSort('average')}
+                          className="flex items-center gap-2 text-gray-300 hover:text-white font-semibold text-sm uppercase tracking-wider group"
+                        >
+                          Avg
+                          <SortIcon field="average" />
+                        </button>
+                      </th>
+                      <th className="px-6 py-4 text-left">
+                        <button
+                          onClick={() => handleSort('economy')}
+                          className="flex items-center gap-2 text-gray-300 hover:text-white font-semibold text-sm uppercase tracking-wider group"
+                        >
+                          Economy
+                          <SortIcon field="economy" />
+                        </button>
+                      </th>
+                      <th className="px-6 py-4 text-left">
+                        <button
+                          onClick={() => handleSort('strikeRate')}
+                          className="flex items-center gap-2 text-gray-300 hover:text-white font-semibold text-sm uppercase tracking-wider group"
+                        >
+                          SR
+                          <SortIcon field="strikeRate" />
+                        </button>
+                      </th>
+                      <th className="px-6 py-4 text-left text-gray-300 font-semibold text-sm uppercase tracking-wider">Innings</th>
+                      <th className="px-6 py-4 text-left text-gray-300 font-semibold text-sm uppercase tracking-wider">Overs</th>
+                      <th className="px-6 py-4 text-left text-gray-300 font-semibold text-sm uppercase tracking-wider">Maidens</th>
+                      <th className="px-6 py-4 text-left">
+                        <button
+                          onClick={() => handleSort('fiveWickets')}
+                          className="flex items-center gap-2 text-gray-300 hover:text-white font-semibold text-sm uppercase tracking-wider group"
+                        >
+                          5W
+                          <SortIcon field="fiveWickets" />
+                        </button>
+                      </th>
+                      <th className="px-6 py-4 text-left text-gray-300 font-semibold text-sm uppercase tracking-wider">Best</th>
+                      <th className="px-6 py-4 text-center text-gray-300 font-semibold text-sm uppercase tracking-wider">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-700/50">
+                    {filteredAndSortedPlayers.map((player) => {
+                      const team = teams.find(t => t.id === player.teamId);
+                      const wickets = player.stats?.wickets || 0;
+                      const maxWickets = Math.max(...filteredAndSortedPlayers.map(p => p.stats?.wickets || 0), 1);
+                      const wicketsPercentage = (wickets / maxWickets) * 100;
+                      const overs = player.stats?.balls ? Math.floor(player.stats.balls / 6) : 0;
+                      const balls = player.stats?.balls ? player.stats.balls % 6 : 0;
+                      const oversDisplay = overs > 0 ? `${overs}.${balls}` : '0.0';
 
-                  <div className="bg-gradient-to-br from-gray-700 to-gray-800 rounded-xl p-8 text-center border border-gray-600">
-                    <div className="w-16 h-16 bg-gray-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                    </div>
-                    <p className="text-gray-300 text-lg font-medium mb-2">Team Statistics Panel</p>
-                    <p className="text-gray-400">Click "View Team Panel" to see detailed bowling statistics for all {teamPlayers.length} players</p>
+                      return (
+                        <tr key={player.id} className="hover:bg-gray-800/50 transition-colors group">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-teal-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+                                {player.name?.charAt(0) || '?'}
+                  </div>
+                  <div>
+                                <div className="font-semibold text-white">{player.name || 'Unknown'}</div>
+                                <div className="text-sm text-gray-400">{team?.shortName || 'No Team'}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-white">{wickets}</span>
+                              <div className="w-16 h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full bg-gradient-to-r from-green-500 to-teal-500 transition-all"
+                                  style={{ width: `${wicketsPercentage}%` }}
+                                />
                   </div>
                 </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-white font-medium">
+                              {player.stats?.bowlingAverage || player.stats?.bowlingAverage === '0' ? '-' : (player.stats?.bowlingAverage || '-')}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-white font-medium">
+                              {player.stats?.economy || player.stats?.economy === '0' ? '-' : (player.stats?.economy || '-')}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-white font-medium">
+                              {player.stats?.bowlingStrikeRate || player.stats?.bowlingStrikeRate === '0' ? '-' : (player.stats?.bowlingStrikeRate || '-')}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-gray-300">{player.stats?.bowlingInnings || 0}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-gray-300">{oversDisplay}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-cyan-400 font-semibold">{player.stats?.maidens || 0}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-teal-400 font-semibold">{player.stats?.fiveWickets || 0}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="text-white font-semibold">{player.stats?.bestBowling || '-'}</span>
+                          </td>
+                          <td className="px-6 py-4">
+                <button
+                              onClick={() => handleEditPlayer(player)}
+                              className="mx-auto flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                              Edit
+                </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
-            ))
+            </div>
           )}
-        </div>
+              </div>
 
-        {/* Edit Player Modal */}
+        {/* Edit Modal */}
         {showEditModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-gray-800 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-              <h2 className="text-2xl font-bold text-white mb-6">Edit Player Stats</h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Player Name</label>
-                  <input
-                    type="text"
-                    value={editForm.name}
-                    onChange={(e) => handleFormChange('name', e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Role</label>
-                  <select
-                    value={editForm.role}
-                    onChange={(e) => handleFormChange('role', e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="Batsman">Batsman</option>
-                    <option value="Bowler">Bowler</option>
-                    <option value="All-rounder">All-rounder</option>
-                    <option value="Wicket-keeper">Wicket-keeper</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Age</label>
-                  <input
-                    type="number"
-                    value={editForm.age}
-                    onChange={(e) => handleFormChange('age', e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Jersey Number</label>
-                  <input
-                    type="text"
-                    value={editForm.jerseyNumber}
-                    onChange={(e) => handleFormChange('jerseyNumber', e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Matches</label>
-                  <input
-                    type="number"
-                    value={editForm.stats.matches}
-                    onChange={(e) => handleFormChange('stats.matches', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Bowling Innings</label>
-                  <input
-                    type="number"
-                    value={editForm.stats.bowlingInnings}
-                    onChange={(e) => handleFormChange('stats.bowlingInnings', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Balls</label>
-                  <input
-                    type="number"
-                    value={editForm.stats.balls}
-                    onChange={(e) => handleFormChange('stats.balls', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Maidens</label>
-                  <input
-                    type="number"
-                    value={editForm.stats.maidens}
-                    onChange={(e) => handleFormChange('stats.maidens', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Wickets</label>
-                  <input
-                    type="number"
-                    value={editForm.stats.wickets}
-                    onChange={(e) => handleFormChange('stats.wickets', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Runs Conceded</label>
-                  <input
-                    type="number"
-                    value={editForm.stats.runsConceded}
-                    onChange={(e) => handleFormChange('stats.runsConceded', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Bowling Average</label>
-                  <input
-                    type="text"
-                    value={editForm.stats.bowlingAverage}
-                    onChange={(e) => handleFormChange('stats.bowlingAverage', e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Bowling Strike Rate</label>
-                  <input
-                    type="text"
-                    value={editForm.stats.bowlingStrikeRate}
-                    onChange={(e) => handleFormChange('stats.bowlingStrikeRate', e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Economy</label>
-                  <input
-                    type="text"
-                    value={editForm.stats.economy}
-                    onChange={(e) => handleFormChange('stats.economy', e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Best Bowling</label>
-                  <input
-                    type="text"
-                    value={editForm.stats.bestBowling}
-                    onChange={(e) => handleFormChange('stats.bestBowling', e.target.value)}
-                    placeholder="e.g., 2/25"
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">5-Wicket Hauls</label>
-                  <input
-                    type="number"
-                    value={editForm.stats.fiveWickets}
-                    onChange={(e) => handleFormChange('stats.fiveWickets', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-              
-              <div className="flex justify-end space-x-4 mt-6">
-                <button
-                  onClick={handleCancelEdit}
-                  className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSavePlayer}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Team Panel */}
-        {showTeamPanel && (
-          <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden border border-gray-700">
-              {/* Header */}
-              <div className="bg-gradient-to-r from-green-600 to-blue-600 p-6 border-b border-gray-700">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-16 h-16 bg-white bg-opacity-20 backdrop-blur rounded-full flex items-center justify-center text-white font-bold text-2xl border-2 border-white border-opacity-30">
-                      {selectedTeam?.shortName}
-                    </div>
-                    <div>
-                      <h2 className="text-3xl font-bold text-white">{selectedTeam?.name}</h2>
-                      <p className="text-green-100 text-sm mt-1">Squad Management</p>
-                    </div>
-                  </div>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden border border-gray-700">
+              <div className="bg-gradient-to-r from-green-600 to-teal-600 p-6 border-b border-gray-700">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-white">Edit Bowling Statistics</h2>
                   <button
-                    onClick={() => setShowTeamPanel(false)}
-                    className="text-white hover:text-gray-200 text-3xl font-light transition-colors bg-white bg-opacity-10 hover:bg-opacity-20 rounded-full w-10 h-10 flex items-center justify-center"
+                    onClick={handleCancelEdit}
+                    className="text-white hover:text-gray-200 transition-colors bg-white/10 hover:bg-white/20 rounded-lg w-8 h-8 flex items-center justify-center"
                   >
-                    ×
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
               </div>
 
-              {/* Content */}
-              <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-                {players.filter(player => player.teamId === selectedTeam?.id).length === 0 ? (
-                  <div className="text-center py-16">
-                    <div className="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <svg className="w-12 h-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
-                    </div>
-                    <h3 className="text-xl font-semibold text-gray-300 mb-2">No Players Found</h3>
-                    <p className="text-gray-500">This team doesn't have any players yet. Add players to see them here.</p>
+              <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Player Name</label>
+                <input
+                  type="text"
+                  value={editForm.name}
+                  onChange={(e) => handleFormChange('name', e.target.value)}
+                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Role</label>
+                <select
+                  value={editForm.role}
+                  onChange={(e) => handleFormChange('role', e.target.value)}
+                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  <option value="Batsman">Batsman</option>
+                  <option value="Bowler">Bowler</option>
+                  <option value="All-rounder">All-rounder</option>
+                  <option value="Wicket-keeper">Wicket-keeper</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Jersey Number</label>
+                <input
+                  type="text"
+                  value={editForm.jerseyNumber}
+                  onChange={(e) => handleFormChange('jerseyNumber', e.target.value)}
+                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Matches</label>
+                <input
+                  type="number"
+                  value={editForm.stats.matches}
+                  onChange={(e) => handleFormChange('stats.matches', parseInt(e.target.value) || 0)}
+                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Bowling Innings</label>
+                <input
+                  type="number"
+                  value={editForm.stats.bowlingInnings}
+                  onChange={(e) => handleFormChange('stats.bowlingInnings', parseInt(e.target.value) || 0)}
+                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Balls</label>
+                <input
+                  type="number"
+                  value={editForm.stats.balls}
+                  onChange={(e) => handleFormChange('stats.balls', parseInt(e.target.value) || 0)}
+                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Maidens</label>
+                <input
+                  type="number"
+                  value={editForm.stats.maidens}
+                  onChange={(e) => handleFormChange('stats.maidens', parseInt(e.target.value) || 0)}
+                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Wickets</label>
+                <input
+                  type="number"
+                  value={editForm.stats.wickets}
+                  onChange={(e) => handleFormChange('stats.wickets', parseInt(e.target.value) || 0)}
+                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Runs Conceded</label>
+                <input
+                  type="number"
+                  value={editForm.stats.runsConceded}
+                  onChange={(e) => handleFormChange('stats.runsConceded', parseInt(e.target.value) || 0)}
+                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Bowling Average</label>
+                <input
+                  type="text"
+                  value={editForm.stats.bowlingAverage}
+                  onChange={(e) => handleFormChange('stats.bowlingAverage', e.target.value)}
+                      placeholder="e.g., 25.50"
+                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Bowling Strike Rate</label>
+                <input
+                  type="text"
+                  value={editForm.stats.bowlingStrikeRate}
+                  onChange={(e) => handleFormChange('stats.bowlingStrikeRate', e.target.value)}
+                      placeholder="e.g., 18.5"
+                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Economy</label>
+                <input
+                  type="text"
+                  value={editForm.stats.economy}
+                  onChange={(e) => handleFormChange('stats.economy', e.target.value)}
+                      placeholder="e.g., 8.25"
+                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Best Bowling</label>
+                <input
+                  type="text"
+                  value={editForm.stats.bestBowling}
+                  onChange={(e) => handleFormChange('stats.bestBowling', e.target.value)}
+                      placeholder="e.g., 5/25"
+                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">5-Wicket Hauls</label>
+                <input
+                  type="number"
+                  value={editForm.stats.fiveWickets}
+                  onChange={(e) => handleFormChange('stats.fiveWickets', parseInt(e.target.value) || 0)}
+                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
                   </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {players
-                      .filter(player => player.teamId === selectedTeam?.id)
-                      .map((player) => (
-                        <div key={player.id} className="group relative bg-gradient-to-br from-gray-700 to-gray-800 rounded-xl p-6 hover:from-gray-600 hover:to-gray-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl border border-gray-600 hover:border-green-500">
-                          {/* Player Avatar */}
-                          <div className="flex items-center mb-4">
-                            <div className="relative">
-                              <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg">
-                                {player.name.charAt(0)}
-                              </div>
-                              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                                <span className="text-white text-xs font-bold">{player.jerseyNumber || '#1'}</span>
-                              </div>
-                            </div>
-                            <div className="ml-4 flex-1">
-                              <h3 className="text-white font-semibold text-lg group-hover:text-green-300 transition-colors">{player.name}</h3>
-                              <p className="text-gray-400 text-sm">{player.role}</p>
-                            </div>
-                          </div>
-
-                          {/* Stats Grid */}
-                          <div className="grid grid-cols-2 gap-3 mb-4">
-                            <div className="bg-gray-900 bg-opacity-50 rounded-lg p-3 text-center">
-                              <div className="text-blue-400 text-2xl font-bold">{player.stats?.matches || 0}</div>
-                              <div className="text-gray-400 text-xs">Matches</div>
-                            </div>
-                            <div className="bg-gray-900 bg-opacity-50 rounded-lg p-3 text-center">
-                              <div className="text-green-400 text-2xl font-bold">{player.stats?.wickets || 0}</div>
-                              <div className="text-gray-400 text-xs">Wickets</div>
-                            </div>
-                            <div className="bg-gray-900 bg-opacity-50 rounded-lg p-3 text-center">
-                              <div className="text-yellow-400 text-2xl font-bold">{player.stats?.bowlingAverage || '-'}</div>
-                              <div className="text-gray-400 text-xs">Average</div>
-                            </div>
-                            <div className="bg-gray-900 bg-opacity-50 rounded-lg p-3 text-center">
-                              <div className="text-purple-400 text-2xl font-bold">{player.stats?.economy || '-'}</div>
-                              <div className="text-gray-400 text-xs">Economy</div>
-                            </div>
-                          </div>
-
-                          {/* Action Button */}
-                          <button
-                            onClick={() => handleEditPlayer(player)}
-                            className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-4 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                            <span>Edit Stats</span>
-                          </button>
-                        </div>
-                      ))}
-                  </div>
-                )}
               </div>
             </div>
+            
+              <div className="bg-gray-800/50 p-6 border-t border-gray-700 flex justify-end gap-4">
+              <button
+                onClick={handleCancelEdit}
+                  className="px-6 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSavePlayer}
+                  className="px-6 py-2.5 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white rounded-lg transition-colors font-medium"
+              >
+                Save Changes
+              </button>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+        </div>
     </div>
   );
 };
