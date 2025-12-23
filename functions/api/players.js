@@ -122,15 +122,50 @@ export const onRequest = async (context) => {
           }
         }
         
+        // BOWLING STATS MIGRATION
+        const wickets = player.stats.wickets || 0;
+        const runsConceded = player.stats.runsConceded || 0;
+        const balls = player.stats.balls || 0;
+        
+        // Calculate bowling average if missing or 0
+        let bowlingAverage = player.stats.bowlingAverage;
+        if ((!bowlingAverage || bowlingAverage === 0) && wickets > 0 && runsConceded >= 0) {
+          bowlingAverage = runsConceded / wickets;
+          playerNeedsUpdate = true;
+        } else if ((!bowlingAverage || bowlingAverage === 0) && player.stats.bowlingAverage && typeof player.stats.bowlingAverage === 'string' && player.stats.bowlingAverage !== '' && player.stats.bowlingAverage !== '0' && player.stats.bowlingAverage !== '-') {
+          const parsed = parseFloat(player.stats.bowlingAverage);
+          if (!isNaN(parsed) && parsed > 0) {
+            bowlingAverage = parsed;
+            playerNeedsUpdate = true;
+          }
+        }
+        
+        // Calculate economy if missing or 0
+        let economy = player.stats.economy;
+        if ((!economy || economy === 0) && balls > 0 && runsConceded >= 0) {
+          economy = (runsConceded * 6) / balls;
+          playerNeedsUpdate = true;
+        } else if ((!economy || economy === 0) && player.stats.economy && typeof player.stats.economy === 'string' && player.stats.economy !== '' && player.stats.economy !== '0' && player.stats.economy !== '-') {
+          const parsed = parseFloat(player.stats.economy);
+          if (!isNaN(parsed) && parsed > 0) {
+            economy = parsed;
+            playerNeedsUpdate = true;
+          }
+        }
+        
         if (playerNeedsUpdate) {
           needsMigration = true;
+          const updatedStats = {
+            ...player.stats,
+            average: average || player.stats.average || 0,
+            strikeRate: strikeRate || player.stats.strikeRate || 0
+          };
+          if (bowlingAverage !== undefined) updatedStats.bowlingAverage = bowlingAverage || 0;
+          if (economy !== undefined) updatedStats.economy = economy || 0;
+          
           return {
             ...player,
-            stats: {
-              ...player.stats,
-              average: average || player.stats.average || 0,
-              strikeRate: strikeRate || player.stats.strikeRate || 0
-            }
+            stats: updatedStats
           };
         }
         
@@ -139,7 +174,7 @@ export const onRequest = async (context) => {
       
       // Save migrated data back to KV if any changes were made
       if (needsMigration) {
-        console.log('Migration: Auto-calculated average/strikeRate for players');
+        console.log('Migration: Auto-calculated batting/bowling stats for players');
         await env.IPL_CACHE.put('players', JSON.stringify(players));
       }
       
@@ -638,7 +673,42 @@ export const onRequest = async (context) => {
           balls: updatedPlayer.stats?.balls !== undefined ? (parseInt(updatedPlayer.stats.balls) || 0) : (players[index].stats?.balls || 0),
           maidens: updatedPlayer.stats?.maidens !== undefined ? (parseInt(updatedPlayer.stats.maidens) || 0) : (players[index].stats?.maidens || 0),
           runsConceded: updatedPlayer.stats?.runsConceded !== undefined ? (parseInt(updatedPlayer.stats.runsConceded) || 0) : (players[index].stats?.runsConceded || 0),
-          bowlingAverage: updatedPlayer.stats?.bowlingAverage !== undefined ? (typeof updatedPlayer.stats.bowlingAverage === 'string' ? (updatedPlayer.stats.bowlingAverage || '') : (parseFloat(updatedPlayer.stats.bowlingAverage) || 0)) : (players[index].stats?.bowlingAverage || 0),
+          // Calculate bowling average - use provided value, or calculate from base stats, or use existing
+          bowlingAverage: (() => {
+            // If explicitly provided, use it
+            if (updatedPlayer.stats?.bowlingAverage !== undefined && updatedPlayer.stats?.bowlingAverage !== null && updatedPlayer.stats?.bowlingAverage !== '') {
+              const provided = typeof updatedPlayer.stats.bowlingAverage === 'number' ? updatedPlayer.stats.bowlingAverage : parseFloat(updatedPlayer.stats.bowlingAverage);
+              if (!isNaN(provided) && provided > 0) {
+                return provided;
+              }
+            }
+            // Otherwise, calculate from base stats
+            const wickets = updatedPlayer.stats?.wickets !== undefined ? (parseInt(updatedPlayer.stats.wickets) || 0) : (players[index].stats?.wickets || 0);
+            const runsConceded = updatedPlayer.stats?.runsConceded !== undefined ? (parseInt(updatedPlayer.stats.runsConceded) || 0) : (players[index].stats?.runsConceded || 0);
+            if (wickets > 0 && runsConceded >= 0) {
+              return runsConceded / wickets;
+            }
+            // Fallback to existing value
+            return players[index].stats?.bowlingAverage || 0;
+          })(),
+          // Calculate economy - use provided value, or calculate from base stats, or use existing
+          economy: (() => {
+            // If explicitly provided, use it
+            if (updatedPlayer.stats?.economy !== undefined && updatedPlayer.stats?.economy !== null && updatedPlayer.stats?.economy !== '') {
+              const provided = typeof updatedPlayer.stats.economy === 'number' ? updatedPlayer.stats.economy : parseFloat(updatedPlayer.stats.economy);
+              if (!isNaN(provided) && provided > 0) {
+                return provided;
+              }
+            }
+            // Otherwise, calculate from base stats
+            const balls = updatedPlayer.stats?.balls !== undefined ? (parseInt(updatedPlayer.stats.balls) || 0) : (players[index].stats?.balls || 0);
+            const runsConceded = updatedPlayer.stats?.runsConceded !== undefined ? (parseInt(updatedPlayer.stats.runsConceded) || 0) : (players[index].stats?.runsConceded || 0);
+            if (balls > 0 && runsConceded >= 0) {
+              return (runsConceded * 6) / balls;
+            }
+            // Fallback to existing value
+            return players[index].stats?.economy || 0;
+          })(),
           bowlingStrikeRate: updatedPlayer.stats?.bowlingStrikeRate !== undefined ? (updatedPlayer.stats.bowlingStrikeRate || '') : (players[index].stats?.bowlingStrikeRate || ''),
           fiveWickets: updatedPlayer.stats?.fiveWickets !== undefined ? (parseInt(updatedPlayer.stats.fiveWickets) || 0) : (players[index].stats?.fiveWickets || 0),
         },

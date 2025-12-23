@@ -123,18 +123,95 @@ const BowlingStatsPage = () => {
 
   const handleSavePlayer = async () => {
     try {
+      // Extract numeric values for calculations
+      const wickets = editForm.stats.wickets === '' ? (editingPlayer.stats?.wickets || 0) : (typeof editForm.stats.wickets === 'number' ? editForm.stats.wickets : parseInt(editForm.stats.wickets) || 0);
+      const runsConceded = editForm.stats.runsConceded === '' ? (editingPlayer.stats?.runsConceded || 0) : (typeof editForm.stats.runsConceded === 'number' ? editForm.stats.runsConceded : parseInt(editForm.stats.runsConceded) || 0);
+      const balls = editForm.stats.balls === '' ? (editingPlayer.stats?.balls || 0) : (typeof editForm.stats.balls === 'number' ? editForm.stats.balls : parseInt(editForm.stats.balls) || 0);
+      const overs = balls / 6; // Convert balls to overs for economy calculation
+
+      // User wants to manually enter values - prioritize manual input
+      let bowlingAverageNum = 0;
+      let economyNum = 0;
+      let bowlingStrikeRateNum = 0;
+
+      // If user manually entered bowling average, use it
+      if (editForm.stats.bowlingAverage !== '' && editForm.stats.bowlingAverage !== '0' && editForm.stats.bowlingAverage !== '-') {
+        const parsed = parseFloat(editForm.stats.bowlingAverage);
+        if (!isNaN(parsed)) {
+          bowlingAverageNum = parsed;
+        }
+      }
+
+      // If user manually entered economy, use it
+      if (editForm.stats.economy !== '' && editForm.stats.economy !== '0' && editForm.stats.economy !== '-') {
+        const parsed = parseFloat(editForm.stats.economy);
+        if (!isNaN(parsed)) {
+          economyNum = parsed;
+        }
+      }
+
+      // If user manually entered bowling strike rate, use it
+      if (editForm.stats.bowlingStrikeRate !== '' && editForm.stats.bowlingStrikeRate !== '0' && editForm.stats.bowlingStrikeRate !== '-') {
+        const parsed = parseFloat(editForm.stats.bowlingStrikeRate);
+        if (!isNaN(parsed)) {
+          bowlingStrikeRateNum = parsed;
+        }
+      }
+
+      // Only calculate if user didn't provide manual values
+      if (bowlingAverageNum === 0) {
+        // Bowling Average = Runs Conceded / Wickets
+        if (wickets > 0 && runsConceded >= 0) {
+          bowlingAverageNum = runsConceded / wickets;
+        } else {
+          bowlingAverageNum = editingPlayer.stats?.bowlingAverage || 0;
+        }
+      }
+
+      if (economyNum === 0) {
+        // Economy = (Runs Conceded * 6) / Balls
+        if (balls > 0 && runsConceded >= 0) {
+          economyNum = (runsConceded * 6) / balls;
+        } else {
+          economyNum = editingPlayer.stats?.economy || 0;
+        }
+      }
+
+      if (bowlingStrikeRateNum === 0) {
+        // Bowling Strike Rate = Balls / Wickets
+        if (wickets > 0 && balls > 0) {
+          bowlingStrikeRateNum = balls / wickets;
+        } else {
+          bowlingStrikeRateNum = 0;
+        }
+      }
+
+      // For string display fields - use manual input if provided, otherwise format the numeric value
+      const bowlingAverageStr = editForm.stats.bowlingAverage !== '' 
+        ? editForm.stats.bowlingAverage 
+        : (bowlingAverageNum > 0 ? bowlingAverageNum.toFixed(2) : (editingPlayer.stats?.bowlingAverage || ''));
+      
+      const economyStr = editForm.stats.economy !== '' 
+        ? editForm.stats.economy 
+        : (economyNum > 0 ? economyNum.toFixed(2) : (editingPlayer.stats?.economy || ''));
+      
+      const bowlingStrikeRateStr = editForm.stats.bowlingStrikeRate !== '' 
+        ? editForm.stats.bowlingStrikeRate 
+        : (bowlingStrikeRateNum > 0 ? bowlingStrikeRateNum.toFixed(1) : (editingPlayer.stats?.bowlingStrikeRate || ''));
+
       // Prepare stats object with proper type conversions
       const stats = {
         ...editingPlayer.stats, // Preserve existing stats
         matches: editForm.stats.matches === '' ? (editingPlayer.stats?.matches || 0) : (typeof editForm.stats.matches === 'number' ? editForm.stats.matches : parseInt(editForm.stats.matches) || 0),
         bowlingInnings: editForm.stats.bowlingInnings === '' ? (editingPlayer.stats?.bowlingInnings || 0) : (typeof editForm.stats.bowlingInnings === 'number' ? editForm.stats.bowlingInnings : parseInt(editForm.stats.bowlingInnings) || 0),
-        balls: editForm.stats.balls === '' ? (editingPlayer.stats?.balls || 0) : (typeof editForm.stats.balls === 'number' ? editForm.stats.balls : parseInt(editForm.stats.balls) || 0),
+        balls: balls,
         maidens: editForm.stats.maidens === '' ? (editingPlayer.stats?.maidens || 0) : (typeof editForm.stats.maidens === 'number' ? editForm.stats.maidens : parseInt(editForm.stats.maidens) || 0),
-        wickets: editForm.stats.wickets === '' ? (editingPlayer.stats?.wickets || 0) : (typeof editForm.stats.wickets === 'number' ? editForm.stats.wickets : parseInt(editForm.stats.wickets) || 0),
-        runsConceded: editForm.stats.runsConceded === '' ? (editingPlayer.stats?.runsConceded || 0) : (typeof editForm.stats.runsConceded === 'number' ? editForm.stats.runsConceded : parseInt(editForm.stats.runsConceded) || 0),
-        bowlingAverage: editForm.stats.bowlingAverage === '' ? (editingPlayer.stats?.bowlingAverage || '') : (editForm.stats.bowlingAverage || ''),
-        bowlingStrikeRate: editForm.stats.bowlingStrikeRate === '' ? (editingPlayer.stats?.bowlingStrikeRate || '') : (editForm.stats.bowlingStrikeRate || ''),
-        economy: editForm.stats.economy === '' ? (editingPlayer.stats?.economy || '') : (editForm.stats.economy || ''),
+        wickets: wickets,
+        runsConceded: runsConceded,
+        // String versions for admin display
+        bowlingAverage: bowlingAverageStr,
+        bowlingStrikeRate: bowlingStrikeRateStr,
+        economy: economyStr,
         bestBowling: editForm.stats.bestBowling === '' ? (editingPlayer.stats?.bestBowling || '') : (editForm.stats.bestBowling || ''),
         fiveWickets: editForm.stats.fiveWickets === '' ? (editingPlayer.stats?.fiveWickets || 0) : (typeof editForm.stats.fiveWickets === 'number' ? editForm.stats.fiveWickets : parseInt(editForm.stats.fiveWickets) || 0)
       };
@@ -147,8 +224,23 @@ const BowlingStatsPage = () => {
         jerseyNumber: editForm.jerseyNumber || editingPlayer.jerseyNumber,
         teamId: editingPlayer.teamId,
         league: editingPlayer.league,
-        stats: stats
+        stats: {
+          ...stats,
+          // CRITICAL: Explicitly ensure numeric fields are numbers and are always set
+          bowlingAverage: typeof bowlingAverageNum === 'number' ? bowlingAverageNum : parseFloat(String(bowlingAverageNum)) || 0,
+          economy: typeof economyNum === 'number' ? economyNum : parseFloat(String(economyNum)) || 0
+        }
       };
+
+      // Debug logging
+      console.log('Updating bowling player with stats:', {
+        bowlingAverage: updatedPlayer.stats.bowlingAverage,
+        economy: updatedPlayer.stats.economy,
+        bowlingStrikeRate: updatedPlayer.stats.bowlingStrikeRate,
+        wickets,
+        runsConceded,
+        balls
+      });
 
       await updatePlayer(editingPlayer.id, updatedPlayer);
       
@@ -541,17 +633,61 @@ const BowlingStatsPage = () => {
                           </td>
                           <td className="px-6 py-4">
                             <span className="text-white font-medium">
-                              {player.stats?.bowlingAverage || player.stats?.bowlingAverage === '0' ? '-' : (player.stats?.bowlingAverage || '-')}
+                              {(() => {
+                                // Try string field first
+                                if (player.stats?.bowlingAverage && typeof player.stats.bowlingAverage === 'string' && player.stats.bowlingAverage !== '0' && player.stats.bowlingAverage !== '-') {
+                                  return player.stats.bowlingAverage;
+                                }
+                                // Try numeric field
+                                if (player.stats?.bowlingAverage && typeof player.stats.bowlingAverage === 'number' && player.stats.bowlingAverage > 0) {
+                                  return player.stats.bowlingAverage.toFixed(2);
+                                }
+                                // Calculate from base stats
+                                const wickets = player.stats?.wickets || 0;
+                                const runsConceded = player.stats?.runsConceded || 0;
+                                if (wickets > 0 && runsConceded >= 0) {
+                                  return (runsConceded / wickets).toFixed(2);
+                                }
+                                return '-';
+                              })()}
                             </span>
                           </td>
                           <td className="px-6 py-4">
                             <span className="text-white font-medium">
-                              {player.stats?.economy || player.stats?.economy === '0' ? '-' : (player.stats?.economy || '-')}
+                              {(() => {
+                                // Try string field first
+                                if (player.stats?.economy && typeof player.stats.economy === 'string' && player.stats.economy !== '0' && player.stats.economy !== '-') {
+                                  return player.stats.economy;
+                                }
+                                // Try numeric field
+                                if (player.stats?.economy && typeof player.stats.economy === 'number' && player.stats.economy > 0) {
+                                  return player.stats.economy.toFixed(2);
+                                }
+                                // Calculate from base stats
+                                const balls = player.stats?.balls || 0;
+                                const runsConceded = player.stats?.runsConceded || 0;
+                                if (balls > 0 && runsConceded >= 0) {
+                                  return ((runsConceded * 6) / balls).toFixed(2);
+                                }
+                                return '-';
+                              })()}
                             </span>
                           </td>
                           <td className="px-6 py-4">
                             <span className="text-white font-medium">
-                              {player.stats?.bowlingStrikeRate || player.stats?.bowlingStrikeRate === '0' ? '-' : (player.stats?.bowlingStrikeRate || '-')}
+                              {(() => {
+                                // Try string field first
+                                if (player.stats?.bowlingStrikeRate && player.stats.bowlingStrikeRate !== '0' && player.stats.bowlingStrikeRate !== '-') {
+                                  return player.stats.bowlingStrikeRate;
+                                }
+                                // Calculate from base stats
+                                const wickets = player.stats?.wickets || 0;
+                                const balls = player.stats?.balls || 0;
+                                if (wickets > 0 && balls > 0) {
+                                  return (balls / wickets).toFixed(1);
+                                }
+                                return '-';
+                              })()}
                             </span>
                           </td>
                           <td className="px-6 py-4">
@@ -671,11 +807,41 @@ const BowlingStatsPage = () => {
                                   </div>
                                   <div className="grid grid-cols-2 gap-2 mt-3">
                                     <div className="bg-gray-900/50 rounded-lg p-2 text-center">
-                                      <div className="text-green-400 font-semibold">{player.stats?.bowlingAverage || '-'}</div>
+                                      <div className="text-green-400 font-semibold">
+                                        {(() => {
+                                          if (player.stats?.bowlingAverage && typeof player.stats.bowlingAverage === 'string' && player.stats.bowlingAverage !== '0' && player.stats.bowlingAverage !== '-') {
+                                            return player.stats.bowlingAverage;
+                                          }
+                                          if (player.stats?.bowlingAverage && typeof player.stats.bowlingAverage === 'number' && player.stats.bowlingAverage > 0) {
+                                            return player.stats.bowlingAverage.toFixed(2);
+                                          }
+                                          const wickets = player.stats?.wickets || 0;
+                                          const runsConceded = player.stats?.runsConceded || 0;
+                                          if (wickets > 0 && runsConceded >= 0) {
+                                            return (runsConceded / wickets).toFixed(2);
+                                          }
+                                          return '-';
+                                        })()}
+                                      </div>
                                       <div className="text-xs text-gray-400">Avg</div>
                                     </div>
                                     <div className="bg-gray-900/50 rounded-lg p-2 text-center">
-                                      <div className="text-emerald-400 font-semibold">{player.stats?.economy || '-'}</div>
+                                      <div className="text-emerald-400 font-semibold">
+                                        {(() => {
+                                          if (player.stats?.economy && typeof player.stats.economy === 'string' && player.stats.economy !== '0' && player.stats.economy !== '-') {
+                                            return player.stats.economy;
+                                          }
+                                          if (player.stats?.economy && typeof player.stats.economy === 'number' && player.stats.economy > 0) {
+                                            return player.stats.economy.toFixed(2);
+                                          }
+                                          const balls = player.stats?.balls || 0;
+                                          const runsConceded = player.stats?.runsConceded || 0;
+                                          if (balls > 0 && runsConceded >= 0) {
+                                            return ((runsConceded * 6) / balls).toFixed(2);
+                                          }
+                                          return '-';
+                                        })()}
+                                      </div>
                                       <div className="text-xs text-gray-400">Econ</div>
                                     </div>
                                   </div>
