@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAdminData } from '@/contexts/AdminDataContext';
+import AdminSidebar from '@/components/admin/AdminSidebar';
 
 const BowlingStatsPage = () => {
   const { players, teams, loading, error, updatePlayer } = useAdminData();
@@ -141,9 +142,11 @@ const BowlingStatsPage = () => {
   }
 
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold text-white mb-2">Bowling Statistics</h1>
-      <p className="text-gray-400 mb-8">Manage player bowling statistics by team</p>
+    <div className="flex min-h-screen bg-gray-900">
+      <AdminSidebar />
+      <div className="flex-1 p-8">
+        <h1 className="text-3xl font-bold text-white mb-2">Bowling Statistics</h1>
+        <p className="text-gray-400 mb-8">Manage player bowling statistics by team</p>
 
       {playersByTeam.length === 0 ? (
         <div className="text-center py-12">
@@ -434,6 +437,7 @@ const BowlingStatsPage = () => {
         </div>
       )}
     </div>
+  </div>
   );
 };
 
