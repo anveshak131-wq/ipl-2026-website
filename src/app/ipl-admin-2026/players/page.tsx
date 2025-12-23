@@ -1536,16 +1536,21 @@ export default function AdminPlayers() {
                   let roleBadgeColors: string;
                   let roleLabel: string;
                   
+                  // Debug: Log allrounderType for All-rounders
+                  if (player.role === 'All-rounder') {
+                    console.log(`Player: ${player.name}, allrounderType:`, player.allrounderType);
+                  }
+                  
                   if (player.role === 'All-rounder') {
                     if (player.allrounderType === 'Batting All-rounder') {
-                      // Batting All-rounder: Green/Emerald gradient (batting-focused)
-                      roleColors = 'from-emerald-500/25 via-green-500/20 to-teal-600/25 border-emerald-400/40';
-                      roleBadgeColors = 'bg-gradient-to-r from-emerald-500/30 to-green-500/30 text-emerald-200 border-emerald-400/50 shadow-lg shadow-emerald-500/20';
+                      // Batting All-rounder: Green/Emerald gradient (batting-focused) - MORE PROMINENT
+                      roleColors = 'from-emerald-600/30 via-green-500/25 to-emerald-500/30 border-emerald-300/50';
+                      roleBadgeColors = 'bg-gradient-to-r from-emerald-500/40 to-green-500/40 text-emerald-100 border-2 border-emerald-300/60 shadow-xl shadow-emerald-500/30';
                       roleLabel = 'Batting All-rounder';
                     } else if (player.allrounderType === 'Bowling All-rounder') {
-                      // Bowling All-rounder: Blue/Cyan gradient (bowling-focused)
-                      roleColors = 'from-cyan-500/25 via-blue-500/20 to-indigo-600/25 border-cyan-400/40';
-                      roleBadgeColors = 'bg-gradient-to-r from-cyan-500/30 to-blue-500/30 text-cyan-200 border-cyan-400/50 shadow-lg shadow-cyan-500/20';
+                      // Bowling All-rounder: Blue/Cyan gradient (bowling-focused) - MORE PROMINENT
+                      roleColors = 'from-cyan-600/30 via-blue-500/25 to-cyan-500/30 border-cyan-300/50';
+                      roleBadgeColors = 'bg-gradient-to-r from-cyan-500/40 to-blue-500/40 text-cyan-100 border-2 border-cyan-300/60 shadow-xl shadow-cyan-500/30';
                       roleLabel = 'Bowling All-rounder';
                     } else {
                       // Generic All-rounder: Purple/Pink gradient (default)
@@ -1581,12 +1586,12 @@ export default function AdminPlayers() {
                         'bg-gradient-to-br from-white/0 to-white/5 opacity-0 group-hover:opacity-100'
                       }`}></div>
                       
-                      {/* Subtle accent border for All-rounder types */}
+                      {/* Prominent accent border for All-rounder types */}
                       {player.role === 'All-rounder' && player.allrounderType && (
-                        <div className={`absolute top-0 left-0 right-0 h-1 ${
+                        <div className={`absolute top-0 left-0 right-0 h-2 ${
                           player.allrounderType === 'Batting All-rounder'
-                            ? 'bg-gradient-to-r from-emerald-400 via-green-400 to-emerald-400'
-                            : 'bg-gradient-to-r from-cyan-400 via-blue-400 to-cyan-400'
+                            ? 'bg-gradient-to-r from-emerald-500 via-green-400 to-emerald-500 shadow-lg shadow-emerald-500/50'
+                            : 'bg-gradient-to-r from-cyan-500 via-blue-400 to-cyan-500 shadow-lg shadow-cyan-500/50'
                         }`}></div>
                       )}
                       
@@ -1625,22 +1630,22 @@ export default function AdminPlayers() {
 
                         {/* Role Badge - Enhanced with All-rounder type differentiation */}
                         <div className="mb-4">
-                          <span className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border transition-all duration-300 hover:scale-105 ${roleBadgeColors}`}>
+                          <span className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border-2 transition-all duration-300 hover:scale-110 ${roleBadgeColors}`}>
                             {/* Icon based on role type */}
                             {player.role === 'All-rounder' && player.allrounderType === 'Batting All-rounder' && (
-                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                               </svg>
                             )}
                             {player.role === 'All-rounder' && player.allrounderType === 'Bowling All-rounder' && (
-                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clipRule="evenodd" />
                               </svg>
                             )}
                             {player.role === 'All-rounder' && !player.allrounderType && (
-                              <Award className="w-3.5 h-3.5" />
+                              <Award className="w-4 h-4" />
                             )}
-                            {roleLabel}
+                            <span className="font-extrabold">{roleLabel}</span>
                           </span>
                         </div>
 
