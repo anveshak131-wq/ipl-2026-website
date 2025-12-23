@@ -220,20 +220,39 @@ export default function AdminPlayers() {
         }
         
         if (dateOfBirthISO) {
+          // Debug: log the parsed date
+          console.log('useEffect - Parsed date:', dateOfBirthISO, 'Input:', formData.dateOfBirth);
           const calculatedAge = calculateAge(dateOfBirthISO);
-          const calculatedAgeStr = calculatedAge.toString();
+          console.log('useEffect - Calculated age:', calculatedAge);
           
-          // Only auto-update age if:
-          // 1. Age field is empty or "0", OR
-          // 2. Age matches the last calculated value (meaning it was auto-calculated before)
-          // This allows admin to manually override by typing a different age
-          if (!formData.age || formData.age === '' || formData.age === '0' || formData.age === lastCalculatedAge) {
-            setFormData(prev => ({ ...prev, age: calculatedAgeStr }));
-            setLastCalculatedAge(calculatedAgeStr);
+          // Only proceed if age calculation is valid (greater than 0)
+          if (calculatedAge > 0) {
+            const calculatedAgeStr = calculatedAge.toString();
+            
+            // Only auto-update age if:
+            // 1. Age field is empty, "0", or matches last calculated value
+            // This allows admin to manually override by typing a different age
+            if (!formData.age || formData.age === '' || formData.age === '0' || formData.age === lastCalculatedAge) {
+              console.log('useEffect - Updating age to:', calculatedAgeStr);
+              setFormData(prev => ({ ...prev, age: calculatedAgeStr }));
+              setLastCalculatedAge(calculatedAgeStr);
+            } else {
+              console.log('useEffect - Not updating age, current value:', formData.age, 'lastCalculated:', lastCalculatedAge);
+            }
+          } else {
+            // If age calculation returned 0, log for debugging but don't update
+            console.warn('useEffect - Age calculation returned 0 for date:', formData.dateOfBirth, 'Parsed:', dateOfBirthISO);
+            const testDate = new Date(dateOfBirthISO);
+            console.warn('useEffect - Test date object:', testDate, 'Is valid:', !isNaN(testDate.getTime()));
+            // Don't update age if calculation failed
+            if (formData.age === lastCalculatedAge && lastCalculatedAge) {
+              setFormData(prev => ({ ...prev, age: '' }));
+              setLastCalculatedAge('');
+            }
           }
         } else {
           // If date parsing failed, clear the age if it was auto-calculated
-          if (formData.age === lastCalculatedAge) {
+          if (formData.age === lastCalculatedAge && lastCalculatedAge) {
             setFormData(prev => ({ ...prev, age: '' }));
             setLastCalculatedAge('');
           }
@@ -241,14 +260,14 @@ export default function AdminPlayers() {
       } catch (error) {
         console.error('Error calculating age from date of birth:', error);
         // Clear age if calculation fails and it was auto-calculated
-        if (formData.age === lastCalculatedAge) {
+        if (formData.age === lastCalculatedAge && lastCalculatedAge) {
           setFormData(prev => ({ ...prev, age: '' }));
           setLastCalculatedAge('');
         }
       }
     } else if (!formData.dateOfBirth || formData.dateOfBirth.trim() === '') {
       // Reset last calculated age when DOB is cleared
-      if (formData.age === lastCalculatedAge) {
+      if (formData.age === lastCalculatedAge && lastCalculatedAge) {
         setFormData(prev => ({ ...prev, age: '' }));
       }
       setLastCalculatedAge('');
@@ -1694,13 +1713,31 @@ export default function AdminPlayers() {
                             }
                             
                             // Try to parse the date to see if it's valid
-                            const parsedDate = currentLeague === 'wpl' 
-                              ? parseDateMonthDDYYYY(formData.dateOfBirth)
-                              : (parseDateDDMMYYYY(formData.dateOfBirth) || parseDateMonthDDYYYY(formData.dateOfBirth));
+                            let parsedDate = '';
+                            if (currentLeague === 'wpl') {
+                              parsedDate = parseDateMonthDDYYYY(formData.dateOfBirth);
+                            } else {
+                              // For IPL, try DD/MM/YYYY format first
+                              parsedDate = parseDateDDMMYYYY(formData.dateOfBirth);
+                              // If that fails, try Month DD, YYYY format as fallback
+                              if (!parsedDate) {
+                                parsedDate = parseDateMonthDDYYYY(formData.dateOfBirth);
+                              }
+                            }
                             
                             if (parsedDate) {
+                              // Debug: log the parsed date
+                              console.log('Display - Parsed date:', parsedDate, 'Input:', formData.dateOfBirth);
                               const calculatedAge = calculateAge(parsedDate);
-                              return `Age automatically calculated: ${calculatedAge} years (you can manually change if needed)`;
+                              console.log('Display - Calculated age:', calculatedAge);
+                              if (calculatedAge > 0) {
+                                return `Age automatically calculated: ${calculatedAge} years (you can manually change if needed)`;
+                              } else {
+                                // Additional debugging
+                                const testDate = new Date(parsedDate);
+                                console.log('Display - Test date object:', testDate, 'Is valid:', !isNaN(testDate.getTime()));
+                                return `Date parsed: ${parsedDate}, but age calculation returned 0. Please check the date.`;
+                              }
                             } else {
                               return `Invalid date format. Use ${currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY'} format (e.g., ${currentLeague === 'wpl' ? 'December 25, 1994' : '25/12/1994'})`;
                             }
@@ -1728,13 +1765,34 @@ export default function AdminPlayers() {
                             }
                             
                             // Try to parse the date
-                            const parsedDate = currentLeague === 'wpl' 
-                              ? parseDateMonthDDYYYY(formData.dateOfBirth)
-                              : (parseDateDDMMYYYY(formData.dateOfBirth) || parseDateMonthDDYYYY(formData.dateOfBirth));
+                            let parsedDate = '';
+                            if (currentLeague === 'wpl') {
+                              parsedDate = parseDateMonthDDYYYY(formData.dateOfBirth);
+                            } else {
+                              // For IPL, try DD/MM/YYYY format first
+                              parsedDate = parseDateDDMMYYYY(formData.dateOfBirth);
+                              // If that fails, try Month DD, YYYY format as fallback
+                              if (!parsedDate) {
+                                parsedDate = parseDateMonthDDYYYY(formData.dateOfBirth);
+                              }
+                            }
                             
                             if (parsedDate) {
                               const calculatedAge = calculateAge(parsedDate);
-                              return `✓ Valid date. Age: ${calculatedAge} years`;
+                              if (calculatedAge > 0) {
+                                return `✓ Valid date. Age: ${calculatedAge} years`;
+                              } else {
+                                // If age is 0, the date might be in the future or there's a parsing issue
+                                const testDate = new Date(parsedDate);
+                                if (isNaN(testDate.getTime())) {
+                                  return `⚠ Date parsing issue. Parsed: ${parsedDate}`;
+                                }
+                                const today = new Date();
+                                if (testDate > today) {
+                                  return `⚠ Date is in the future. Please check the date.`;
+                                }
+                                return `⚠ Age calculation returned 0. Parsed date: ${parsedDate}`;
+                              }
                             } else {
                               return `⚠ Invalid format. Use ${currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY'} (e.g., ${currentLeague === 'wpl' ? 'December 25, 1994' : '25/12/1994'})`;
                             }

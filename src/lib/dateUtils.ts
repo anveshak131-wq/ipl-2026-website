@@ -8,13 +8,22 @@
  * @returns Age in years (auto-increments on birthday)
  */
 export const calculateAge = (dateOfBirth: string): number => {
-  if (!dateOfBirth) return 0;
+  if (!dateOfBirth || dateOfBirth.trim() === '') return 0;
+  
+  // Ensure the date string is trimmed
+  const trimmedDate = dateOfBirth.trim();
   
   const today = new Date();
-  const birthDate = new Date(dateOfBirth);
+  const birthDate = new Date(trimmedDate);
   
   if (isNaN(birthDate.getTime())) {
-    console.error('Invalid date format:', dateOfBirth);
+    console.error('Invalid date format:', trimmedDate);
+    return 0;
+  }
+  
+  // Check if the date is in the future
+  if (birthDate > today) {
+    console.error('Date of birth is in the future:', trimmedDate);
     return 0;
   }
   
@@ -26,7 +35,8 @@ export const calculateAge = (dateOfBirth: string): number => {
     age--;
   }
   
-  return age;
+  // Ensure age is not negative
+  return Math.max(0, age);
 };
 
 /**
@@ -105,9 +115,12 @@ export const parseDateMonthDDYYYY = (dateString: string): string => {
   if (!dateString) return '';
   
   try {
+    // Trim whitespace from the date string
+    const trimmed = dateString.trim();
+    
     // Handle "Month DD, YYYY" format
     const monthDayYearRegex = /^(\w+)\s+(\d{1,2}),\s*(\d{4})$/;
-    const match = dateString.match(monthDayYearRegex);
+    const match = trimmed.match(monthDayYearRegex);
     
     if (match) {
       const [, monthName, day, year] = match;
@@ -135,7 +148,7 @@ export const parseDateMonthDDYYYY = (dateString: string): string => {
     }
     
     // Fallback: try parsing as regular date
-    const date = new Date(dateString);
+    const date = new Date(trimmed);
     if (isNaN(date.getTime())) {
       console.error('Invalid date format:', dateString);
       return '';
