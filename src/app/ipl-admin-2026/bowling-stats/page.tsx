@@ -364,69 +364,98 @@ const BowlingStatsPage = () => {
 
       {/* Team Panel */}
       {showTeamPanel && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-white">
-                {selectedTeam?.name} - Players
-              </h2>
-              <button
-                onClick={() => setShowTeamPanel(false)}
-                className="text-gray-400 hover:text-white text-2xl"
-              >
-                ×
-              </button>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {players
-                .filter(player => player.teamId === selectedTeam?.id)
-                .map((player) => (
-                  <div key={player.id} className="bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition-colors">
-                    <div className="flex items-center mb-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold">
-                        {player.name.charAt(0)}
-                      </div>
-                      <div className="ml-3">
-                        <div className="text-white font-medium">{player.name}</div>
-                        <div className="text-gray-400 text-sm">#{player.jerseyNumber} • {player.role}</div>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-1 text-sm">
-                      <div className="flex justify-between text-gray-300">
-                        <span>Matches:</span>
-                        <span>{player.stats?.matches || 0}</span>
-                      </div>
-                      <div className="flex justify-between text-gray-300">
-                        <span>Wickets:</span>
-                        <span>{player.stats?.wickets || 0}</span>
-                      </div>
-                      <div className="flex justify-between text-gray-300">
-                        <span>Average:</span>
-                        <span>{player.stats?.bowlingAverage || '-'}</span>
-                      </div>
-                      <div className="flex justify-between text-gray-300">
-                        <span>Economy:</span>
-                        <span>{player.stats?.economy || '-'}</span>
-                      </div>
-                    </div>
-                    
-                    <button
-                      onClick={() => handleEditPlayer(player)}
-                      className="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm transition-colors"
-                    >
-                      Edit Stats
-                    </button>
+        <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden border border-gray-700">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-green-600 to-blue-600 p-6 border-b border-gray-700">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center space-x-4">
+                  <div className="w-16 h-16 bg-white bg-opacity-20 backdrop-blur rounded-full flex items-center justify-center text-white font-bold text-2xl border-2 border-white border-opacity-30">
+                    {selectedTeam?.shortName}
                   </div>
-                ))}
-            </div>
-            
-            {players.filter(player => player.teamId === selectedTeam?.id).length === 0 && (
-              <div className="text-center py-8">
-                <p className="text-gray-400">No players found in this team</p>
+                  <div>
+                    <h2 className="text-3xl font-bold text-white">{selectedTeam?.name}</h2>
+                    <p className="text-green-100 text-sm mt-1">Squad Management</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowTeamPanel(false)}
+                  className="text-white hover:text-gray-200 text-3xl font-light transition-colors bg-white bg-opacity-10 hover:bg-opacity-20 rounded-full w-10 h-10 flex items-center justify-center"
+                >
+                  ×
+                </button>
               </div>
-            )}
+            </div>
+
+            {/* Content */}
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+              {players.filter(player => player.teamId === selectedTeam?.id).length === 0 ? (
+                <div className="text-center py-16">
+                  <div className="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-12 h-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-300 mb-2">No Players Found</h3>
+                  <p className="text-gray-500">This team doesn't have any players yet. Add players to see them here.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {players
+                    .filter(player => player.teamId === selectedTeam?.id)
+                    .map((player) => (
+                      <div key={player.id} className="group relative bg-gradient-to-br from-gray-700 to-gray-800 rounded-xl p-6 hover:from-gray-600 hover:to-gray-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl border border-gray-600 hover:border-green-500">
+                        {/* Player Avatar */}
+                        <div className="flex items-center mb-4">
+                          <div className="relative">
+                            <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                              {player.name.charAt(0)}
+                            </div>
+                            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
+                              <span className="text-white text-xs font-bold">{player.jerseyNumber || '#1'}</span>
+                            </div>
+                          </div>
+                          <div className="ml-4 flex-1">
+                            <h3 className="text-white font-semibold text-lg group-hover:text-green-300 transition-colors">{player.name}</h3>
+                            <p className="text-gray-400 text-sm">{player.role}</p>
+                          </div>
+                        </div>
+
+                        {/* Stats Grid */}
+                        <div className="grid grid-cols-2 gap-3 mb-4">
+                          <div className="bg-gray-900 bg-opacity-50 rounded-lg p-3 text-center">
+                            <div className="text-blue-400 text-2xl font-bold">{player.stats?.matches || 0}</div>
+                            <div className="text-gray-400 text-xs">Matches</div>
+                          </div>
+                          <div className="bg-gray-900 bg-opacity-50 rounded-lg p-3 text-center">
+                            <div className="text-green-400 text-2xl font-bold">{player.stats?.wickets || 0}</div>
+                            <div className="text-gray-400 text-xs">Wickets</div>
+                          </div>
+                          <div className="bg-gray-900 bg-opacity-50 rounded-lg p-3 text-center">
+                            <div className="text-yellow-400 text-2xl font-bold">{player.stats?.bowlingAverage || '-'}</div>
+                            <div className="text-gray-400 text-xs">Average</div>
+                          </div>
+                          <div className="bg-gray-900 bg-opacity-50 rounded-lg p-3 text-center">
+                            <div className="text-purple-400 text-2xl font-bold">{player.stats?.economy || '-'}</div>
+                            <div className="text-gray-400 text-xs">Economy</div>
+                          </div>
+                        </div>
+
+                        {/* Action Button */}
+                        <button
+                          onClick={() => handleEditPlayer(player)}
+                          className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-4 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                          <span>Edit Stats</span>
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
