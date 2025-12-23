@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAdminData } from '@/contexts/AdminDataContext';
 import PlayersAdminSidebar from '@/components/admin/PlayersAdminSidebar';
 
@@ -35,6 +35,11 @@ const BattingStatsPage = () => {
     // Data is automatically loaded by the context
   }, []);
 
+  const handleCancelEdit = useCallback(() => {
+    setShowEditModal(false);
+    setEditingPlayer(null);
+  }, []);
+
   // Handle ESC key to close modal
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -50,7 +55,7 @@ const BattingStatsPage = () => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [showEditModal]);
+  }, [showEditModal, handleCancelEdit]);
 
   const handleEditPlayer = (player) => {
     setEditingPlayer(player);
@@ -99,11 +104,6 @@ const BattingStatsPage = () => {
     } catch (error) {
       console.error('Failed to update player:', error);
     }
-  };
-
-  const handleCancelEdit = () => {
-    setShowEditModal(false);
-    setEditingPlayer(null);
   };
 
   const handleFormChange = (field, value) => {
