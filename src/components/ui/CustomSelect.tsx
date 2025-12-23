@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronDown, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -37,6 +38,7 @@ export default function CustomSelect({
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0, width: 0 });
   const dropdownRef = useRef<HTMLDivElement>(null);
   const selectRef = useRef<HTMLDivElement>(null);
 
@@ -49,8 +51,19 @@ export default function CustomSelect({
       )
     : options;
 
-  // Close dropdown when clicking outside
+  // Calculate dropdown position and close when clicking outside
   useEffect(() => {
+    const updatePosition = () => {
+      if (selectRef.current && isOpen) {
+        const rect = selectRef.current.getBoundingClientRect();
+        setDropdownPosition({
+          top: rect.bottom + 8, // Use viewport coordinates for fixed positioning
+          left: rect.left,
+          width: rect.width,
+        });
+      }
+    };
+
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
@@ -64,10 +77,15 @@ export default function CustomSelect({
     };
 
     if (isOpen) {
+      updatePosition();
+      window.addEventListener('scroll', updatePosition, true);
+      window.addEventListener('resize', updatePosition);
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
+      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', updatePosition);
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isOpen]);
@@ -124,32 +142,36 @@ export default function CustomSelect({
         </div>
       </button>
 
-      {/* Dropdown Panel */}
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-40"
-              onClick={() => setIsOpen(false)}
-            />
+      {/* Dropdown Panel - Rendered via Portal to appear above modal */}
+      {typeof window !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {isOpen && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="fixed inset-0 z-[9998]"
+                onClick={() => setIsOpen(false)}
+              />
 
-            {/* Dropdown Menu */}
-            <motion.div
-              ref={dropdownRef}
-              initial={{ opacity: 0, y: -10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.95 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="absolute z-50 w-full mt-2 bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 rounded-xl border-2 border-white/10 shadow-2xl overflow-hidden backdrop-blur-xl"
-              style={{
-                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2)',
-              }}
-            >
+              {/* Dropdown Menu */}
+              <motion.div
+                ref={dropdownRef}
+                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+                className="fixed z-[9999] bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 rounded-xl border-2 border-white/10 shadow-2xl overflow-hidden backdrop-blur-xl"
+                style={{
+                  top: `${dropdownPosition.top}px`,
+                  left: `${dropdownPosition.left}px`,
+                  width: `${dropdownPosition.width || selectRef.current?.offsetWidth || 0}px`,
+                  boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.2)',
+                }}
+              >
               {/* Gradient accent line */}
               <div className="h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
 
@@ -236,7 +258,9 @@ export default function CustomSelect({
             </motion.div>
           </>
         )}
-      </AnimatePresence>
+      </AnimatePresence>,
+      document.body
+      )}
     </div>
   );
 }
