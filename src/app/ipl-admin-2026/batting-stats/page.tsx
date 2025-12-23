@@ -14,11 +14,17 @@ const BattingStatsPage = () => {
     jerseyNumber: '',
     stats: {
       matches: 0,
+      battingInnings: 0,
+      notOuts: 0,
       runs: 0,
-      battingAverage: '',
-      battingStrikeRate: '',
+      ballsFaced: 0,
+      highest: 0,
+      fours: 0,
+      sixes: 0,
       fifties: 0,
-      hundreds: 0
+      hundreds: 0,
+      battingAverage: '',
+      battingStrikeRate: ''
     }
   });
 
@@ -35,11 +41,17 @@ const BattingStatsPage = () => {
       jerseyNumber: player.jerseyNumber || '',
       stats: {
         matches: player.stats?.matches || 0,
+        battingInnings: player.stats?.battingInnings || 0,
+        notOuts: player.stats?.notOuts || 0,
         runs: player.stats?.runs || 0,
-        battingAverage: player.stats?.battingAverage || '',
-        battingStrikeRate: player.stats?.battingStrikeRate || '',
+        ballsFaced: player.stats?.ballsFaced || 0,
+        highest: player.stats?.highest || 0,
+        fours: player.stats?.fours || 0,
+        sixes: player.stats?.sixes || 0,
         fifties: player.stats?.fifties || 0,
-        hundreds: player.stats?.hundreds || 0
+        hundreds: player.stats?.hundreds || 0,
+        battingAverage: player.stats?.battingAverage || '',
+        battingStrikeRate: player.stats?.battingStrikeRate || ''
       }
     });
     setShowEditModal(true);
@@ -142,10 +154,17 @@ const BattingStatsPage = () => {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Role</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Age</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Matches</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Innings</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">NO</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Runs</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Average</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Strike Rate</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">50s/100s</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Balls</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Highest</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">4s</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">6s</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">50s</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">100s</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Avg</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">SR</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
@@ -173,16 +192,37 @@ const BattingStatsPage = () => {
                           {player.stats?.matches || 0}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                          {player.stats?.battingInnings || 0}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                          {player.stats?.notOuts || 0}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                           {player.stats?.runs || 0}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                          {player.stats?.ballsFaced || 0}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                          {player.stats?.highest || 0}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                          {player.stats?.fours || 0}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                          {player.stats?.sixes || 0}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                          {player.stats?.fifties || 0}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                          {player.stats?.hundreds || 0}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                           {player.stats?.battingAverage || '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                           {player.stats?.battingStrikeRate || '-'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                          {player.stats?.fifties || 0}/{player.stats?.hundreds || 0}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                           <button
@@ -264,6 +304,26 @@ const BattingStatsPage = () => {
               </div>
               
               <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Batting Innings</label>
+                <input
+                  type="number"
+                  value={editForm.stats.battingInnings}
+                  onChange={(e) => handleFormChange('stats.battingInnings', parseInt(e.target.value) || 0)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Not Outs</label>
+                <input
+                  type="number"
+                  value={editForm.stats.notOuts}
+                  onChange={(e) => handleFormChange('stats.notOuts', parseInt(e.target.value) || 0)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Runs</label>
                 <input
                   type="number"
@@ -274,21 +334,41 @@ const BattingStatsPage = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Batting Average</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Balls Faced</label>
                 <input
-                  type="text"
-                  value={editForm.stats.battingAverage}
-                  onChange={(e) => handleFormChange('stats.battingAverage', e.target.value)}
+                  type="number"
+                  value={editForm.stats.ballsFaced}
+                  onChange={(e) => handleFormChange('stats.ballsFaced', parseInt(e.target.value) || 0)}
                   className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Strike Rate</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Highest Score</label>
                 <input
-                  type="text"
-                  value={editForm.stats.battingStrikeRate}
-                  onChange={(e) => handleFormChange('stats.battingStrikeRate', e.target.value)}
+                  type="number"
+                  value={editForm.stats.highest}
+                  onChange={(e) => handleFormChange('stats.highest', parseInt(e.target.value) || 0)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Fours</label>
+                <input
+                  type="number"
+                  value={editForm.stats.fours}
+                  onChange={(e) => handleFormChange('stats.fours', parseInt(e.target.value) || 0)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Sixes</label>
+                <input
+                  type="number"
+                  value={editForm.stats.sixes}
+                  onChange={(e) => handleFormChange('stats.sixes', parseInt(e.target.value) || 0)}
                   className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -309,6 +389,26 @@ const BattingStatsPage = () => {
                   type="number"
                   value={editForm.stats.hundreds}
                   onChange={(e) => handleFormChange('stats.hundreds', parseInt(e.target.value) || 0)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Batting Average</label>
+                <input
+                  type="text"
+                  value={editForm.stats.battingAverage}
+                  onChange={(e) => handleFormChange('stats.battingAverage', e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Batting Strike Rate</label>
+                <input
+                  type="text"
+                  value={editForm.stats.battingStrikeRate}
+                  onChange={(e) => handleFormChange('stats.battingStrikeRate', e.target.value)}
                   className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
