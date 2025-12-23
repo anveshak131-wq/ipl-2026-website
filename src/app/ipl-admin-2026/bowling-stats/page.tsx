@@ -62,8 +62,11 @@ const BowlingStatsPage = () => {
   });
 
   useEffect(() => {
+    console.log('Bowling useEffect triggered, currentLeague:', currentLeague);
     if (currentLeague) {
       loadData();
+    } else {
+      console.log('Bowling - No currentLeague available');
     }
   }, [currentLeague]);
 

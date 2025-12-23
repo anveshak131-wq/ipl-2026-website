@@ -61,8 +61,11 @@ const BattingStatsPage = () => {
   });
 
   useEffect(() => {
+    console.log('useEffect triggered, currentLeague:', currentLeague);
     if (currentLeague) {
       loadData();
+    } else {
+      console.log('No currentLeague available');
     }
   }, [currentLeague]);
 
