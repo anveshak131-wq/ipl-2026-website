@@ -179,8 +179,8 @@ const BowlingStatsPage = () => {
       const matchesSearch = player.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            player.teamId?.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesTeam = selectedTeam === 'all' || player.teamId === selectedTeam;
-      const hasBowlingStats = player.stats?.bowlingInnings > 0 || player.stats?.wickets > 0;
-      return matchesSearch && matchesTeam && hasBowlingStats;
+      // Show all players, not just those with existing stats
+      return matchesSearch && matchesTeam;
     });
 
     filtered.sort((a, b) => {

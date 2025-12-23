@@ -181,8 +181,8 @@ const BattingStatsPage = () => {
       const matchesSearch = player.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            player.teamId?.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesTeam = selectedTeam === 'all' || player.teamId === selectedTeam;
-      const hasBattingStats = player.stats?.battingInnings > 0 || player.stats?.runs > 0;
-      return matchesSearch && matchesTeam && hasBattingStats;
+      // Show all players, not just those with existing stats
+      return matchesSearch && matchesTeam;
     });
 
     filtered.sort((a, b) => {
