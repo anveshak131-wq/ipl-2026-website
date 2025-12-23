@@ -28,6 +28,7 @@ export interface Player {
   league: League; // IPL or WPL
   name: string;
   role: 'Batsman' | 'Bowler' | 'All-rounder' | 'Wicket-keeper';
+  allrounderType?: 'Batting All-rounder' | 'Bowling All-rounder'; // Only for All-rounder role
   teamId: string;
   age: number;
   dateOfBirth?: string; // Format: YYYY-MM-DD, if provided age auto-increments

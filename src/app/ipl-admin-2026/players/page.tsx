@@ -94,6 +94,7 @@ export default function AdminPlayers() {
   const [formData, setFormData] = useState<{
     name: string;
     role: 'Batsman' | 'Bowler' | 'All-rounder' | 'Wicket-keeper';
+    allrounderType: 'Batting All-rounder' | 'Bowling All-rounder' | '';
     teamId: string;
     league: 'ipl' | 'wpl';
     age: string;
@@ -129,6 +130,7 @@ export default function AdminPlayers() {
   }>({
     name: '',
     role: 'Batsman',
+    allrounderType: '',
     teamId: '',
     league: currentLeague, // Use current league from context
     age: '',
@@ -166,10 +168,10 @@ export default function AdminPlayers() {
     const checkAuth = async () => {
       try {
         const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
-        if (!token) {
-          router.push('/ipl-admin-2026');
-          return;
-        }
+    if (!token) {
+      router.push('/ipl-admin-2026');
+      return;
+    }
 
         const response = await fetch(`/api/auth?action=verify&token=${token}`);
         const data = await response.json();
@@ -189,8 +191,8 @@ export default function AdminPlayers() {
           return;
         }
 
-        setIsAuthenticated(true);
-        fetchData();
+    setIsAuthenticated(true);
+    fetchData();
       } catch (error) {
         console.error('Auth error:', error);
         router.push('/ipl-admin-2026');
@@ -227,15 +229,15 @@ export default function AdminPlayers() {
           
           // Only proceed if age calculation is valid (greater than 0)
           if (calculatedAge > 0) {
-            const calculatedAgeStr = calculatedAge.toString();
-            
-            // Only auto-update age if:
+          const calculatedAgeStr = calculatedAge.toString();
+          
+          // Only auto-update age if:
             // 1. Age field is empty, "0", or matches last calculated value
-            // This allows admin to manually override by typing a different age
+          // This allows admin to manually override by typing a different age
             if (!formData.age || formData.age === '' || formData.age === '0' || formData.age === lastCalculatedAge) {
               console.log('useEffect - Updating age to:', calculatedAgeStr);
-              setFormData(prev => ({ ...prev, age: calculatedAgeStr }));
-              setLastCalculatedAge(calculatedAgeStr);
+            setFormData(prev => ({ ...prev, age: calculatedAgeStr }));
+            setLastCalculatedAge(calculatedAgeStr);
             } else {
               console.log('useEffect - Not updating age, current value:', formData.age, 'lastCalculated:', lastCalculatedAge);
             }
@@ -263,7 +265,7 @@ export default function AdminPlayers() {
         if (formData.age === lastCalculatedAge && lastCalculatedAge) {
           setFormData(prev => ({ ...prev, age: '' }));
           setLastCalculatedAge('');
-        }
+      }
       }
     } else if (!formData.dateOfBirth || formData.dateOfBirth.trim() === '') {
       // Reset last calculated age when DOB is cleared
@@ -316,6 +318,7 @@ export default function AdminPlayers() {
     setFormData({
       name: '',
       role: 'Batsman',
+      allrounderType: '',
       teamId: selectedTeam === 'all' ? '' : selectedTeam, // Auto-select filtered team
       league: currentLeague, // Use current league from context
       age: '',
@@ -398,6 +401,7 @@ export default function AdminPlayers() {
     setFormData({
       name: player.name,
       role: player.role,
+      allrounderType: player.allrounderType || '',
       teamId: player.teamId,
       league: player.league,
       age: player.age > 0 ? player.age.toString() : '',
@@ -488,6 +492,7 @@ export default function AdminPlayers() {
       const playerData = {
         name: formData.name,
         role: formData.role,
+        allrounderType: formData.role === 'All-rounder' && formData.allrounderType ? formData.allrounderType : undefined,
         teamId: formData.teamId,
         league: formData.league,
         dateOfBirth: dateOfBirthISO || undefined,
@@ -841,16 +846,16 @@ export default function AdminPlayers() {
   // Then filter by team if a specific team is selected
   if (selectedTeam !== 'all') {
     filteredPlayers = filteredPlayers.filter(player => {
-      // Only show players with a valid teamId when a specific team is selected
-      if (!player.teamId) {
-        return false; // Exclude players without a teamId
-      }
-      
-      // Ensure both values are strings for comparison
-      const playerTeamId = String(player.teamId).trim();
-      const selectedTeamId = String(selectedTeam).trim();
-      return playerTeamId === selectedTeamId;
-    });
+        // Only show players with a valid teamId when a specific team is selected
+        if (!player.teamId) {
+          return false; // Exclude players without a teamId
+        }
+        
+        // Ensure both values are strings for comparison
+        const playerTeamId = String(player.teamId).trim();
+        const selectedTeamId = String(selectedTeam).trim();
+        return playerTeamId === selectedTeamId;
+      });
   }
 
   // Apply sorting
@@ -949,7 +954,7 @@ export default function AdminPlayers() {
       {userRole === 'players_admin' ? (
         <PlayersAdminSidebar currentPage="/ipl-admin-2026/players" />
       ) : (
-        <AdminSidebar currentPage="/ipl-admin-2026/players" />
+      <AdminSidebar currentPage="/ipl-admin-2026/players" />
       )}
       <div className="flex-1">
         <div className="p-6 lg:p-8">
@@ -962,19 +967,19 @@ export default function AdminPlayers() {
                     <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
                       <Users className="w-8 h-8 text-white" />
                     </div>
-                    <div>
+              <div>
                       <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent mb-2">
-                        Player Management
-                      </h1>
+                  Player Management
+                </h1>
                       <p className="text-gray-300 text-lg flex items-center gap-2">
                         <Activity className="w-5 h-5 text-blue-400" />
-                        Track and manage all {currentLeague === 'wpl' ? 'WPL' : 'IPL'} players
-                      </p>
-                    </div>
+                  Track and manage all {currentLeague === 'wpl' ? 'WPL' : 'IPL'} players
+                </p>
+              </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 flex-wrap">
-                  <LeagueSwitch size="md" showLabel={false} />
+                <LeagueSwitch size="md" showLabel={false} />
                   <button
                     onClick={handleOpenBackupModal}
                     className="px-5 py-2.5 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white rounded-xl transition-all duration-200 flex items-center gap-2 font-medium shadow-lg hover:shadow-xl border border-white/10"
@@ -990,13 +995,13 @@ export default function AdminPlayers() {
                     <Trash2 className="w-5 h-5" />
                     Delete All
                   </button>
-                  <button
-                    onClick={handleAddPlayer}
+                <button
+                  onClick={handleAddPlayer}
                     className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl transition-all duration-200 flex items-center gap-2 font-semibold shadow-lg hover:shadow-xl hover:scale-105"
                   >
                     <Plus className="w-5 h-5" />
                     Add Player
-                  </button>
+                </button>
                 </div>
               </div>
             </div>
@@ -1113,71 +1118,71 @@ export default function AdminPlayers() {
           {/* Modern Search and Filter Section */}
           <div className="mb-8">
             <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl p-6 border border-white/10 backdrop-blur-xl shadow-xl">
-              <div className="flex gap-4 flex-col md:flex-row items-stretch">
+            <div className="flex gap-4 flex-col md:flex-row items-stretch">
                 {/* Enhanced Search Bar */}
-                <div className="relative flex-1">
+              <div className="relative flex-1">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2">
                     <Search className="w-5 h-5 text-gray-400" />
                   </div>
-                  <input
-                    type="text"
-                    placeholder="Search by player name, nationality..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                <input
+                  type="text"
+                  placeholder="Search by player name, nationality..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-12 pr-4 py-3.5 bg-gray-800/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
-                  />
-                </div>
+                />
+              </div>
 
                 {/* Enhanced Team Filter Dropdown */}
-                <div className="relative md:min-w-[320px]">
-                  <button
-                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              <div className="relative md:min-w-[320px]">
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     className="w-full bg-gray-800/50 border border-white/10 px-6 py-3.5 rounded-xl text-white font-medium flex items-center space-x-3 hover:bg-gray-700/50 hover:border-white/20 transition-all duration-300 group h-full"
                   >
                     <Filter className="w-5 h-5 text-blue-400 flex-shrink-0" />
-                    <span className="flex-1 text-left truncate flex items-center gap-2">
-                      {selectedTeam === 'all' 
+                  <span className="flex-1 text-left truncate flex items-center gap-2">
+                    {selectedTeam === 'all' 
                         ? <>All Teams</>
                         : <>{teams.find(t => t.id === selectedTeam)?.shortName || 'Select Team'}</>
-                      }
-                    </span>
+                    }
+                  </span>
                     <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-300 flex-shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`} />
-                  </button>
+                </button>
 
                   {/* Enhanced Dropdown Menu */}
-                  <div 
+                <div 
                     className={`absolute left-0 right-0 mt-2 bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden transition-all duration-300 ease-out origin-top z-50 ${
-                      isDropdownOpen 
-                        ? 'opacity-100 scale-y-100 max-h-[500px]' 
-                        : 'opacity-0 scale-y-0 max-h-0 pointer-events-none'
-                    }`}
-                  >
+                    isDropdownOpen 
+                      ? 'opacity-100 scale-y-100 max-h-[500px]' 
+                      : 'opacity-0 scale-y-0 max-h-0 pointer-events-none'
+                  }`}
+                >
                     <div className="py-2 max-h-[480px] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500/50 scrollbar-track-gray-700/50">
-                      {/* All Teams Option */}
-                      <button
-                        onClick={() => {
-                          setSelectedTeam('all');
-                          setIsDropdownOpen(false);
-                        }}
+                    {/* All Teams Option */}
+                    <button
+                      onClick={() => {
+                        setSelectedTeam('all');
+                        setIsDropdownOpen(false);
+                      }}
                         className={`w-full px-6 py-3.5 text-left hover:bg-blue-500/20 transition-all duration-200 flex items-center space-x-3 group ${
                           selectedTeam === 'all' ? 'bg-blue-500/30 text-blue-200' : 'text-white'
                         }`}
                       >
                         <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg">
                           <Users className="w-5 h-5 text-white" />
-                        </div>
-                        <div className="flex-1">
+                      </div>
+                      <div className="flex-1">
                           <div className="font-semibold">All Teams</div>
-                          <div className="text-xs text-gray-400">{players.length} total players</div>
-                        </div>
-                        {selectedTeam === 'all' && (
+                        <div className="text-xs text-gray-400">{players.length} total players</div>
+                      </div>
+                      {selectedTeam === 'all' && (
                           <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
                             <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
                           </div>
-                        )}
-                      </button>
+                      )}
+                    </button>
 
                     {/* Divider */}
                     {teams.length > 0 && <div className="border-t border-white/10 my-2" />}
@@ -1190,72 +1195,72 @@ export default function AdminPlayers() {
                             String(p.teamId) === String(team.id) && 
                             (p.league || 'ipl') === currentLeague
                           ).length;
-                          return (
-                            <button
-                              key={team.id}
-                              onClick={() => {
-                                setSelectedTeam(team.id);
-                                setIsDropdownOpen(false);
-                              }}
+                      return (
+                        <button
+                          key={team.id}
+                          onClick={() => {
+                            setSelectedTeam(team.id);
+                            setIsDropdownOpen(false);
+                          }}
                               className={`w-full px-6 py-3.5 text-left hover:bg-blue-500/20 transition-all duration-200 flex items-center space-x-3 group ${
                                 selectedTeam === team.id ? 'bg-blue-500/30 text-blue-200' : 'text-white'
-                              }`}
-                            >
-                              <div 
+                          }`}
+                        >
+                          <div 
                                 className="flex items-center justify-center w-10 h-10 rounded-xl text-white font-bold text-sm shadow-lg flex-shrink-0"
-                                style={{ backgroundColor: team.colors.primary }}
-                                title={team.name}
-                              >
-                                {team.shortName}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="font-semibold truncate">{team.name}</div>
-                                <div className="text-xs text-gray-400">
-                                  {teamPlayersCount} player{teamPlayersCount !== 1 ? 's' : ''}
-                                </div>
-                              </div>
-                              {selectedTeam === team.id && (
+                            style={{ backgroundColor: team.colors.primary }}
+                            title={team.name}
+                          >
+                            {team.shortName}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold truncate">{team.name}</div>
+                            <div className="text-xs text-gray-400">
+                              {teamPlayersCount} player{teamPlayersCount !== 1 ? 's' : ''}
+                            </div>
+                          </div>
+                          {selectedTeam === team.id && (
                                 <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
                                   <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                  </svg>
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
                                 </div>
-                              )}
-                            </button>
-                          );
-                        })}
-                    </div>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Results Info and Quick Actions */}
+            {/* Results Info and Quick Actions */}
               <div className="flex items-center justify-between flex-wrap gap-3 mt-4 pt-4 border-t border-white/10">
                 <div className="text-sm text-gray-300">
                   Showing <span className="font-bold text-white">{searchFilteredPlayers.length}</span> of <span className="font-bold text-white">{filteredPlayers.length}</span> players
-                  {selectedTeam !== 'all' && (
-                    <span className="ml-2">
+                {selectedTeam !== 'all' && (
+                  <span className="ml-2">
                       in <span className="text-blue-400 font-semibold">{teams.find(t => t.id === selectedTeam)?.name}</span>
-                    </span>
-                  )}
-                </div>
-                <div className="flex gap-2">
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery('')}
+                  </span>
+                )}
+              </div>
+              <div className="flex gap-2">
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
                       className="text-xs px-4 py-2 rounded-lg bg-gray-700/50 text-gray-300 hover:text-white hover:bg-gray-700 transition-all border border-white/10"
-                    >
-                      Clear Search
-                    </button>
-                  )}
-                  {selectedTeam !== 'all' && (
-                    <button
-                      onClick={() => setSelectedTeam('all')}
+                  >
+                    Clear Search
+                  </button>
+                )}
+                {selectedTeam !== 'all' && (
+                  <button
+                    onClick={() => setSelectedTeam('all')}
                       className="text-xs px-4 py-2 rounded-lg bg-gray-700/50 text-gray-300 hover:text-white hover:bg-gray-700 transition-all border border-white/10"
-                    >
-                      View All Teams
-                    </button>
-                  )}
+                  >
+                    View All Teams
+                  </button>
+                )}
                 </div>
               </div>
             </div>
@@ -1282,31 +1287,31 @@ export default function AdminPlayers() {
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
                       <div className="flex items-center gap-2">
                         <Hash className="w-4 h-4" />
-                        Jersey
+                      Jersey
                       </div>
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
                       <div className="flex items-center gap-2">
                         <Award className="w-4 h-4" />
-                        Role
+                      Role
                       </div>
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
                       <div className="flex items-center gap-2">
                         <Users className="w-4 h-4" />
-                        Team
+                      Team
                       </div>
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4" />
-                        Age
+                      Age
                       </div>
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4" />
-                        DOB ({currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY'})
+                      DOB ({currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY'})
                       </div>
                     </th>
                     {currentLeague !== 'wpl' && (
@@ -1362,25 +1367,25 @@ export default function AdminPlayers() {
                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
                           <div className="flex items-center gap-2">
                             <Activity className="w-4 h-4" />
-                            SR
+                          SR
                           </div>
                         </th>
                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
                           <div className="flex items-center gap-2">
                             <Zap className="w-4 h-4" />
-                            4s/6s
+                          4s/6s
                           </div>
                         </th>
                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
                           <div className="flex items-center gap-2">
                             <Award className="w-4 h-4" />
-                            50s/100s
+                          50s/100s
                           </div>
                         </th>
                         <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
                           <div className="flex items-center gap-2">
                             <Target className="w-4 h-4" />
-                            BBM
+                          BBM
                           </div>
                         </th>
                       </>
@@ -1388,7 +1393,7 @@ export default function AdminPlayers() {
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
                       <div className="flex items-center gap-2">
                         <Edit2 className="w-4 h-4" />
-                        Actions
+                      Actions
                       </div>
                     </th>
                   </tr>
@@ -1431,9 +1436,9 @@ export default function AdminPlayers() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           {player.jerseyNumber > 0 ? (
-                            <span className="inline-flex items-center justify-center w-8 h-8 bg-ipl-gold/20 text-ipl-gold rounded-full font-bold text-xs">
+                          <span className="inline-flex items-center justify-center w-8 h-8 bg-ipl-gold/20 text-ipl-gold rounded-full font-bold text-xs">
                               {player.jerseyNumber}
-                            </span>
+                          </span>
                           ) : (
                             <span className="text-gray-500 italic text-xs">Jersey</span>
                           )}
@@ -1470,7 +1475,7 @@ export default function AdminPlayers() {
                           {player.dateOfBirth ? (
                             <span className="text-gray-300">
                               {currentLeague === 'wpl' 
-                                ? formatDateMonthDDYYYY(player.dateOfBirth)
+                              ? formatDateMonthDDYYYY(player.dateOfBirth)
                                 : formatDateDDMMYYYY(player.dateOfBirth)}
                             </span>
                           ) : (
@@ -1586,26 +1591,26 @@ export default function AdminPlayers() {
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="text-sm text-gray-300">
                 <span className="font-bold text-white text-lg">{stats.total}</span> total players across <span className="font-bold text-white text-lg">{teams.length}</span> teams
-              </div>
+            </div>
               <div className="flex gap-6 text-sm flex-wrap justify-center">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
                   <span className="text-emerald-400 font-semibold">{stats.batsmen}</span>
                   <span className="text-gray-400">Batsmen</span>
-                </div>
+              </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-cyan-500"></div>
                   <span className="text-cyan-400 font-semibold">{stats.bowlers}</span>
                   <span className="text-gray-400">Bowlers</span>
-                </div>
+              </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-                  <span className="text-purple-400 font-semibold">{stats.allRounders}</span>
+                <span className="text-purple-400 font-semibold">{stats.allRounders}</span>
                   <span className="text-gray-400">All-rounders</span>
-                </div>
+              </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                  <span className="text-orange-400 font-semibold">{stats.wicketkeepers}</span>
+                <span className="text-orange-400 font-semibold">{stats.wicketkeepers}</span>
                   <span className="text-gray-400">Wicket-keepers</span>
                 </div>
               </div>
@@ -1664,7 +1669,15 @@ export default function AdminPlayers() {
                         </label>
                         <select
                           value={formData.role}
-                          onChange={(e) => setFormData({...formData, role: e.target.value as any})}
+                          onChange={(e) => {
+                            const newRole = e.target.value as any;
+                            setFormData({
+                              ...formData, 
+                              role: newRole,
+                              // Reset allrounderType if role is not All-rounder
+                              allrounderType: newRole === 'All-rounder' ? formData.allrounderType : ''
+                            });
+                          }}
                           className="admin-input w-full"
                         >
                           <option value="Batsman">Batsman</option>
@@ -1673,6 +1686,24 @@ export default function AdminPlayers() {
                           <option value="Wicket-keeper">Wicket-keeper</option>
                         </select>
                       </div>
+
+                      {formData.role === 'All-rounder' && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            All-rounder Type
+                          </label>
+                          <select
+                            value={formData.allrounderType}
+                            onChange={(e) => setFormData({...formData, allrounderType: e.target.value as any})}
+                            className="admin-input w-full"
+                            required
+                          >
+                            <option value="">Select type</option>
+                            <option value="Batting All-rounder">Batting All-rounder</option>
+                            <option value="Bowling All-rounder">Bowling All-rounder</option>
+                          </select>
+                        </div>
+                      )}
 
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
