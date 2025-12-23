@@ -14,6 +14,7 @@ import FlagImage from '@/components/ui/FlagImage';
 import '@/styles/flags.css';
 
 const BowlingStatsPage = () => {
+  console.log('BowlingStatsPage component rendered!');
   const { currentLeague } = useLeague();
   const router = useRouter();
   const [players, setPlayers] = useState<Player[]>([]);
