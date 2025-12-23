@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAdminData } from '@/contexts/AdminDataContext';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import PlayersAdminSidebar from '@/components/admin/PlayersAdminSidebar';
-import { Search, Filter, Edit2, X, TrendingDown, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc } from 'lucide-react';
+import { Search, Filter, Edit2, X, TrendingDown, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Target as TargetIcon, Award as AwardIcon, Zap as ZapIcon, Hash, Activity, Gauge } from 'lucide-react';
 
 const BowlingStatsPage = () => {
   const router = useRouter();
@@ -547,176 +547,271 @@ const BowlingStatsPage = () => {
 
         {/* Edit Modal */}
         {showEditModal && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
-            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden border border-gray-700">
-              <div className="bg-gradient-to-r from-green-600 to-teal-600 p-6 border-b border-gray-700">
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200">
+            <div className="bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800 rounded-3xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden border border-gray-700/50 animate-in zoom-in-95 duration-200">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 p-6 border-b border-gray-700/50">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-2xl font-bold text-white">Edit Bowling Statistics</h2>
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
+                      <Edit2 className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-white">Edit Bowling Statistics</h2>
+                      <p className="text-green-100 text-sm mt-0.5">{editForm.name || 'Player'}</p>
+                    </div>
+                  </div>
                   <button
                     onClick={handleCancelEdit}
-                    className="text-white hover:text-gray-200 transition-colors bg-white/10 hover:bg-white/20 rounded-lg w-8 h-8 flex items-center justify-center"
+                    className="text-white hover:text-gray-200 transition-all bg-white/10 hover:bg-white/20 rounded-xl w-10 h-10 flex items-center justify-center hover:scale-110"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
               </div>
 
-              <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Player Name</label>
-                <input
-                  type="text"
-                  value={editForm.name}
-                  onChange={(e) => handleFormChange('name', e.target.value)}
-                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Role</label>
-                <select
-                  value={editForm.role}
-                  onChange={(e) => handleFormChange('role', e.target.value)}
-                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                >
-                  <option value="Batsman">Batsman</option>
-                  <option value="Bowler">Bowler</option>
-                  <option value="All-rounder">All-rounder</option>
-                  <option value="Wicket-keeper">Wicket-keeper</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Jersey Number</label>
-                <input
-                  type="text"
-                  value={editForm.jerseyNumber}
-                  onChange={(e) => handleFormChange('jerseyNumber', e.target.value)}
-                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Matches</label>
-                <input
-                  type="number"
-                  value={editForm.stats.matches}
-                  onChange={(e) => handleFormChange('stats.matches', parseInt(e.target.value) || 0)}
-                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Bowling Innings</label>
-                <input
-                  type="number"
-                  value={editForm.stats.bowlingInnings}
-                  onChange={(e) => handleFormChange('stats.bowlingInnings', parseInt(e.target.value) || 0)}
-                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Balls</label>
-                <input
-                  type="number"
-                  value={editForm.stats.balls}
-                  onChange={(e) => handleFormChange('stats.balls', parseInt(e.target.value) || 0)}
-                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Maidens</label>
-                <input
-                  type="number"
-                  value={editForm.stats.maidens}
-                  onChange={(e) => handleFormChange('stats.maidens', parseInt(e.target.value) || 0)}
-                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Wickets</label>
-                <input
-                  type="number"
-                  value={editForm.stats.wickets}
-                  onChange={(e) => handleFormChange('stats.wickets', parseInt(e.target.value) || 0)}
-                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Runs Conceded</label>
-                <input
-                  type="number"
-                  value={editForm.stats.runsConceded}
-                  onChange={(e) => handleFormChange('stats.runsConceded', parseInt(e.target.value) || 0)}
-                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Bowling Average</label>
-                <input
-                  type="text"
-                  value={editForm.stats.bowlingAverage}
-                  onChange={(e) => handleFormChange('stats.bowlingAverage', e.target.value)}
-                      placeholder="e.g., 25.50"
-                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Bowling Strike Rate</label>
-                <input
-                  type="text"
-                  value={editForm.stats.bowlingStrikeRate}
-                  onChange={(e) => handleFormChange('stats.bowlingStrikeRate', e.target.value)}
-                      placeholder="e.g., 18.5"
-                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Economy</label>
-                <input
-                  type="text"
-                  value={editForm.stats.economy}
-                  onChange={(e) => handleFormChange('stats.economy', e.target.value)}
-                      placeholder="e.g., 8.25"
-                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Best Bowling</label>
-                <input
-                  type="text"
-                  value={editForm.stats.bestBowling}
-                  onChange={(e) => handleFormChange('stats.bestBowling', e.target.value)}
-                      placeholder="e.g., 5/25"
-                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">5-Wicket Hauls</label>
-                <input
-                  type="number"
-                  value={editForm.stats.fiveWickets}
-                  onChange={(e) => handleFormChange('stats.fiveWickets', parseInt(e.target.value) || 0)}
-                      className="w-full px-4 py-2.5 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
+              <div className="overflow-y-auto max-h-[calc(95vh-180px)]">
+                {/* Player Info Section */}
+                <div className="p-6 bg-gradient-to-r from-gray-800/50 to-gray-900/50 border-b border-gray-700/50">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="relative group">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-gray-300 mb-2">
+                        <User className="w-4 h-4 text-green-400" />
+                        Player Name
+                      </label>
+                      <input
+                        type="text"
+                        value={editForm.name}
+                        onChange={(e) => handleFormChange('name', e.target.value)}
+                        className="w-full pl-11 pr-4 py-3 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                        placeholder="Enter player name"
+                      />
+                      <User className="absolute left-3 top-9 w-5 h-5 text-gray-400 pointer-events-none" />
+                    </div>
+                    <div className="relative group">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-gray-300 mb-2">
+                        <Activity className="w-4 h-4 text-emerald-400" />
+                        Role
+                      </label>
+                      <select
+                        value={editForm.role}
+                        onChange={(e) => handleFormChange('role', e.target.value)}
+                        className="w-full pl-11 pr-4 py-3 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all appearance-none cursor-pointer"
+                      >
+                        <option value="Batsman">Batsman</option>
+                        <option value="Bowler">Bowler</option>
+                        <option value="All-rounder">All-rounder</option>
+                        <option value="Wicket-keeper">Wicket-keeper</option>
+                      </select>
+                      <Activity className="absolute left-3 top-9 w-5 h-5 text-gray-400 pointer-events-none" />
+                    </div>
+                    <div className="relative group">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-gray-300 mb-2">
+                        <Shirt className="w-4 h-4 text-teal-400" />
+                        Jersey Number
+                      </label>
+                      <input
+                        type="text"
+                        value={editForm.jerseyNumber}
+                        onChange={(e) => handleFormChange('jerseyNumber', e.target.value)}
+                        className="w-full pl-11 pr-4 py-3 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                        placeholder="#"
+                      />
+                      <Hash className="absolute left-3 top-9 w-5 h-5 text-gray-400 pointer-events-none" />
+                    </div>
                   </div>
+                </div>
+
+                {/* Main Statistics Section */}
+                <div className="p-6">
+                  <div className="mb-6">
+                    <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
+                      <BarChart3 className="w-5 h-5 text-green-400" />
+                      Match Statistics
+                    </h3>
+                    <p className="text-gray-400 text-sm">Basic match and innings information</p>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                    <div className="relative">
+                      <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2">
+                        <Calendar className="w-4 h-4 text-green-400" />
+                        Matches
+                      </label>
+                      <input
+                        type="number"
+                        value={editForm.stats.matches}
+                        onChange={(e) => handleFormChange('stats.matches', parseInt(e.target.value) || 0)}
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                      />
+                    </div>
+                    <div className="relative">
+                      <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2">
+                        <TargetIcon className="w-4 h-4 text-emerald-400" />
+                        Bowling Innings
+                      </label>
+                      <input
+                        type="number"
+                        value={editForm.stats.bowlingInnings}
+                        onChange={(e) => handleFormChange('stats.bowlingInnings', parseInt(e.target.value) || 0)}
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                      />
+                    </div>
+                    <div className="relative">
+                      <label className="flex items-center gap-2 text-sm font-medium text-gray-300 mb-2">
+                        <ZapIcon className="w-4 h-4 text-teal-400" />
+                        Balls
+                      </label>
+                      <input
+                        type="number"
+                        value={editForm.stats.balls}
+                        onChange={(e) => handleFormChange('stats.balls', parseInt(e.target.value) || 0)}
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mb-6">
+                    <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
+                      <TrendingDown className="w-5 h-5 text-green-400" />
+                      Bowling Performance
+                    </h3>
+                    <p className="text-gray-400 text-sm">Wickets, maidens, and runs conceded</p>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                    <div className="relative bg-gradient-to-br from-green-500/10 to-green-600/5 p-4 rounded-xl border border-green-500/20">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-green-300 mb-2">
+                        <TargetIcon className="w-4 h-4" />
+                        Wickets
+                      </label>
+                      <input
+                        type="number"
+                        value={editForm.stats.wickets}
+                        onChange={(e) => handleFormChange('stats.wickets', parseInt(e.target.value) || 0)}
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-green-500/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                      />
+                    </div>
+                    <div className="relative bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 p-4 rounded-xl border border-cyan-500/20">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-cyan-300 mb-2">
+                        <ZapIcon className="w-4 h-4" />
+                        Maidens
+                      </label>
+                      <input
+                        type="number"
+                        value={editForm.stats.maidens}
+                        onChange={(e) => handleFormChange('stats.maidens', parseInt(e.target.value) || 0)}
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-cyan-500/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all"
+                      />
+                    </div>
+                    <div className="relative bg-gradient-to-br from-teal-500/10 to-teal-600/5 p-4 rounded-xl border border-teal-500/20">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-teal-300 mb-2">
+                        <BarChart3 className="w-4 h-4" />
+                        Runs Conceded
+                      </label>
+                      <input
+                        type="number"
+                        value={editForm.stats.runsConceded}
+                        onChange={(e) => handleFormChange('stats.runsConceded', parseInt(e.target.value) || 0)}
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-teal-500/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mb-6">
+                    <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
+                      <Gauge className="w-5 h-5 text-emerald-400" />
+                      Averages & Milestones
+                    </h3>
+                    <p className="text-gray-400 text-sm">Economy, strike rate, averages, and best figures</p>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="relative bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 p-4 rounded-xl border border-emerald-500/20">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-emerald-300 mb-2">
+                        <Gauge className="w-4 h-4" />
+                        Economy
+                      </label>
+                      <input
+                        type="text"
+                        value={editForm.stats.economy}
+                        onChange={(e) => handleFormChange('stats.economy', e.target.value)}
+                        placeholder="e.g., 8.25"
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-emerald-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
+                      />
+                    </div>
+                    <div className="relative bg-gradient-to-br from-blue-500/10 to-blue-600/5 p-4 rounded-xl border border-blue-500/20">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-blue-300 mb-2">
+                        <BarChart3 className="w-4 h-4" />
+                        Bowling Average
+                      </label>
+                      <input
+                        type="text"
+                        value={editForm.stats.bowlingAverage}
+                        onChange={(e) => handleFormChange('stats.bowlingAverage', e.target.value)}
+                        placeholder="e.g., 25.50"
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-blue-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                      />
+                    </div>
+                    <div className="relative bg-gradient-to-br from-purple-500/10 to-purple-600/5 p-4 rounded-xl border border-purple-500/20">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-purple-300 mb-2">
+                        <ZapIcon className="w-4 h-4" />
+                        Strike Rate
+                      </label>
+                      <input
+                        type="text"
+                        value={editForm.stats.bowlingStrikeRate}
+                        onChange={(e) => handleFormChange('stats.bowlingStrikeRate', e.target.value)}
+                        placeholder="e.g., 18.5"
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-purple-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                      />
+                    </div>
+                    <div className="relative bg-gradient-to-br from-orange-500/10 to-orange-600/5 p-4 rounded-xl border border-orange-500/20">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-orange-300 mb-2">
+                        <AwardIcon className="w-4 h-4" />
+                        Best Bowling
+                      </label>
+                      <input
+                        type="text"
+                        value={editForm.stats.bestBowling}
+                        onChange={(e) => handleFormChange('stats.bestBowling', e.target.value)}
+                        placeholder="e.g., 5/25"
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-orange-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                      />
+                    </div>
+                    <div className="relative bg-gradient-to-br from-pink-500/10 to-pink-600/5 p-4 rounded-xl border border-pink-500/20">
+                      <label className="flex items-center gap-2 text-sm font-semibold text-pink-300 mb-2">
+                        <AwardIcon className="w-4 h-4" />
+                        5-Wicket Hauls
+                      </label>
+                      <input
+                        type="number"
+                        value={editForm.stats.fiveWickets}
+                        onChange={(e) => handleFormChange('stats.fiveWickets', parseInt(e.target.value) || 0)}
+                        className="w-full px-4 py-2.5 bg-gray-700/70 border border-pink-500/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-            
-              <div className="bg-gray-800/50 p-6 border-t border-gray-700 flex justify-end gap-4">
-              <button
-                onClick={handleCancelEdit}
-                  className="px-6 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSavePlayer}
-                  className="px-6 py-2.5 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white rounded-lg transition-colors font-medium"
-              >
-                Save Changes
-              </button>
+
+              {/* Footer */}
+              <div className="bg-gradient-to-r from-gray-800/80 to-gray-900/80 p-6 border-t border-gray-700/50 flex justify-end gap-4 backdrop-blur-sm">
+                <button
+                  onClick={handleCancelEdit}
+                  className="px-6 py-3 bg-gray-700/80 hover:bg-gray-600 text-white rounded-xl transition-all font-medium flex items-center gap-2 hover:scale-105"
+                >
+                  <X className="w-4 h-4" />
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSavePlayer}
+                  className="px-6 py-3 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white rounded-xl transition-all font-medium flex items-center gap-2 shadow-lg hover:shadow-xl hover:scale-105"
+                >
+                  <Edit2 className="w-4 h-4" />
+                  Save Changes
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
         </div>
     </div>
   );
