@@ -14,8 +14,13 @@ const BowlingStatsPage = () => {
     jerseyNumber: '',
     stats: {
       matches: 0,
+      bowlingInnings: 0,
+      balls: 0,
+      maidens: 0,
       wickets: 0,
+      runsConceded: 0,
       bowlingAverage: '',
+      bowlingStrikeRate: '',
       economy: '',
       bestBowling: '',
       fiveWickets: 0
@@ -35,8 +40,13 @@ const BowlingStatsPage = () => {
       jerseyNumber: player.jerseyNumber || '',
       stats: {
         matches: player.stats?.matches || 0,
+        bowlingInnings: player.stats?.bowlingInnings || 0,
+        balls: player.stats?.balls || 0,
+        maidens: player.stats?.maidens || 0,
         wickets: player.stats?.wickets || 0,
+        runsConceded: player.stats?.runsConceded || 0,
         bowlingAverage: player.stats?.bowlingAverage || '',
+        bowlingStrikeRate: player.stats?.bowlingStrikeRate || '',
         economy: player.stats?.economy || '',
         bestBowling: player.stats?.bestBowling || '',
         fiveWickets: player.stats?.fiveWickets || 0
@@ -142,9 +152,14 @@ const BowlingStatsPage = () => {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Role</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Age</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Matches</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Innings</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Balls</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Maidens</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Wickets</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Average</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Economy</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Runs</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Avg</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">SR</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Eco</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Best</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">5W</th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
@@ -174,10 +189,25 @@ const BowlingStatsPage = () => {
                           {player.stats?.matches || 0}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                          {player.stats?.bowlingInnings || 0}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                          {player.stats?.balls || 0}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                          {player.stats?.maidens || 0}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                           {player.stats?.wickets || 0}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                          {player.stats?.runsConceded || 0}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                           {player.stats?.bowlingAverage || '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                          {player.stats?.bowlingStrikeRate || '-'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                           {player.stats?.economy || '-'}
@@ -268,6 +298,36 @@ const BowlingStatsPage = () => {
               </div>
               
               <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Bowling Innings</label>
+                <input
+                  type="number"
+                  value={editForm.stats.bowlingInnings}
+                  onChange={(e) => handleFormChange('stats.bowlingInnings', parseInt(e.target.value) || 0)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Balls</label>
+                <input
+                  type="number"
+                  value={editForm.stats.balls}
+                  onChange={(e) => handleFormChange('stats.balls', parseInt(e.target.value) || 0)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Maidens</label>
+                <input
+                  type="number"
+                  value={editForm.stats.maidens}
+                  onChange={(e) => handleFormChange('stats.maidens', parseInt(e.target.value) || 0)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Wickets</label>
                 <input
                   type="number"
@@ -278,11 +338,31 @@ const BowlingStatsPage = () => {
               </div>
               
               <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Runs Conceded</label>
+                <input
+                  type="number"
+                  value={editForm.stats.runsConceded}
+                  onChange={(e) => handleFormChange('stats.runsConceded', parseInt(e.target.value) || 0)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">Bowling Average</label>
                 <input
                   type="text"
                   value={editForm.stats.bowlingAverage}
                   onChange={(e) => handleFormChange('stats.bowlingAverage', e.target.value)}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Bowling Strike Rate</label>
+                <input
+                  type="text"
+                  value={editForm.stats.bowlingStrikeRate}
+                  onChange={(e) => handleFormChange('stats.bowlingStrikeRate', e.target.value)}
                   className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -303,12 +383,13 @@ const BowlingStatsPage = () => {
                   type="text"
                   value={editForm.stats.bestBowling}
                   onChange={(e) => handleFormChange('stats.bestBowling', e.target.value)}
+                  placeholder="e.g., 2/25"
                   className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">5 Wickets</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">5-Wicket Hauls</label>
                 <input
                   type="number"
                   value={editForm.stats.fiveWickets}
