@@ -544,34 +544,42 @@ export const onRequest = async (context) => {
       const notOuts = updatedPlayer.stats?.notOuts !== undefined ? (parseInt(updatedPlayer.stats.notOuts) || 0) : (players[index].stats?.notOuts || 0);
       const ballsFaced = updatedPlayer.stats?.ballsFaced !== undefined ? (parseInt(updatedPlayer.stats.ballsFaced) || 0) : (players[index].stats?.ballsFaced || 0);
       
-      // ALWAYS calculate average and strikeRate from base stats
-      // This ensures consistency - we calculate from the actual data, not from potentially stale values
-      let calculatedAverage = 0;
-      const dismissals = battingInnings - notOuts;
-      if (dismissals > 0 && runs >= 0) {
-        calculatedAverage = runs / dismissals;
-      }
+      // PRIORITIZE manual input values if provided
+      // User wants to manually enter values, so respect their input
+      let finalAverage = 0;
+      let finalStrikeRate = 0;
       
-      let calculatedStrikeRate = 0;
-      if (ballsFaced > 0 && runs >= 0) {
-        calculatedStrikeRate = (runs * 100) / ballsFaced;
-      }
-      
-      // Use provided values ONLY if they are explicitly provided as numbers and valid
-      // Otherwise always use calculated values
-      let finalAverage = calculatedAverage;
+      // Check if user provided manual average value
       if (updatedPlayer.stats?.average !== undefined && updatedPlayer.stats?.average !== null && updatedPlayer.stats?.average !== '') {
         const provided = typeof updatedPlayer.stats.average === 'number' ? updatedPlayer.stats.average : parseFloat(updatedPlayer.stats.average);
-        if (!isNaN(provided) && provided > 0) {
+        if (!isNaN(provided)) {
           finalAverage = provided;
         }
       }
       
-      let finalStrikeRate = calculatedStrikeRate;
+      // Check if user provided manual strike rate value
       if (updatedPlayer.stats?.strikeRate !== undefined && updatedPlayer.stats?.strikeRate !== null && updatedPlayer.stats?.strikeRate !== '') {
         const provided = typeof updatedPlayer.stats.strikeRate === 'number' ? updatedPlayer.stats.strikeRate : parseFloat(updatedPlayer.stats.strikeRate);
-        if (!isNaN(provided) && provided > 0) {
+        if (!isNaN(provided)) {
           finalStrikeRate = provided;
+        }
+      }
+      
+      // Only calculate if user didn't provide manual values
+      if (finalAverage === 0) {
+        const dismissals = battingInnings - notOuts;
+        if (dismissals > 0 && runs > 0) {
+          finalAverage = runs / dismissals;
+        } else {
+          finalAverage = players[index].stats?.average || 0;
+        }
+      }
+      
+      if (finalStrikeRate === 0) {
+        if (ballsFaced > 0 && runs > 0) {
+          finalStrikeRate = (runs * 100) / ballsFaced;
+        } else {
+          finalStrikeRate = players[index].stats?.strikeRate || 0;
         }
       }
       
@@ -579,15 +587,13 @@ export const onRequest = async (context) => {
       console.log('API PUT: Stats calculation for player', updatedPlayer.id || updatedPlayer.name, {
         providedAverage: updatedPlayer.stats?.average,
         providedStrikeRate: updatedPlayer.stats?.strikeRate,
-        calculatedAverage,
-        calculatedStrikeRate,
         finalAverage,
         finalStrikeRate,
         runs,
         battingInnings,
         notOuts,
         ballsFaced,
-        dismissals
+        usingManualInput: (updatedPlayer.stats?.average !== undefined && updatedPlayer.stats?.average !== null && updatedPlayer.stats?.average !== '') || (updatedPlayer.stats?.strikeRate !== undefined && updatedPlayer.stats?.strikeRate !== null && updatedPlayer.stats?.strikeRate !== '')
       });
 
       players[index] = {

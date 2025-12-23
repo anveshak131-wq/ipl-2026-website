@@ -159,38 +159,12 @@ const BattingStatsPage = () => {
       const notOuts = editForm.stats.notOuts === '' ? (editingPlayer.stats?.notOuts || 0) : (typeof editForm.stats.notOuts === 'number' ? editForm.stats.notOuts : parseInt(editForm.stats.notOuts) || 0);
       const ballsFaced = editForm.stats.ballsFaced === '' ? (editingPlayer.stats?.ballsFaced || 0) : (typeof editForm.stats.ballsFaced === 'number' ? editForm.stats.ballsFaced : parseInt(editForm.stats.ballsFaced) || 0);
 
-      // ALWAYS calculate average and strikeRate from base stats first
-      // This ensures consistency between admin and end-user pages
-      const dismissals = battingInnings - notOuts;
-      let calculatedAverage = 0;
-      if (dismissals > 0 && runs >= 0) {
-        calculatedAverage = runs / dismissals;
-      } else if (runs === 0 && battingInnings === 0) {
-        // If no data, keep existing or set to 0
-        calculatedAverage = editingPlayer.stats?.average || 0;
-      }
-
-      let calculatedStrikeRate = 0;
-      if (ballsFaced > 0 && runs >= 0) {
-        calculatedStrikeRate = (runs * 100) / ballsFaced;
-      } else if (runs === 0 && ballsFaced === 0) {
-        // If no data, keep existing or set to 0
-        calculatedStrikeRate = editingPlayer.stats?.strikeRate || 0;
-      }
-
-      // For string display fields (battingAverage, battingStrikeRate):
-      // Use manual input if provided, otherwise use calculated values
-      const battingAverageStr = editForm.stats.battingAverage !== '' 
-        ? editForm.stats.battingAverage 
-        : (calculatedAverage > 0 ? calculatedAverage.toFixed(2) : (calculatedAverage === 0 && runs === 0 ? '0.00' : (editingPlayer.stats?.battingAverage || '')));
+      // User wants to manually enter values - prioritize manual input
+      // Parse manual input values if provided
+      let averageNum = 0;
+      let strikeRateNum = 0;
       
-      const battingStrikeRateStr = editForm.stats.battingStrikeRate !== '' 
-        ? editForm.stats.battingStrikeRate 
-        : (calculatedStrikeRate > 0 ? calculatedStrikeRate.toFixed(1) : (calculatedStrikeRate === 0 && runs === 0 ? '0.00' : (editingPlayer.stats?.battingStrikeRate || '')));
-
-      // For numeric fields (average, strikeRate) - ALWAYS use calculated values
-      // If user manually entered values, try to parse them, but prefer calculated
-      let averageNum = calculatedAverage;
+      // If user manually entered batting average, use it
       if (editForm.stats.battingAverage !== '' && editForm.stats.battingAverage !== '0' && editForm.stats.battingAverage !== '-') {
         const parsed = parseFloat(editForm.stats.battingAverage);
         if (!isNaN(parsed)) {
@@ -198,13 +172,40 @@ const BattingStatsPage = () => {
         }
       }
       
-      let strikeRateNum = calculatedStrikeRate;
+      // If user manually entered strike rate, use it
       if (editForm.stats.battingStrikeRate !== '' && editForm.stats.battingStrikeRate !== '0' && editForm.stats.battingStrikeRate !== '-') {
         const parsed = parseFloat(editForm.stats.battingStrikeRate);
         if (!isNaN(parsed)) {
           strikeRateNum = parsed;
         }
       }
+      
+      // Only calculate if user didn't provide manual values
+      if (averageNum === 0) {
+        const dismissals = battingInnings - notOuts;
+        if (dismissals > 0 && runs > 0) {
+          averageNum = runs / dismissals;
+        } else {
+          averageNum = editingPlayer.stats?.average || 0;
+        }
+      }
+      
+      if (strikeRateNum === 0) {
+        if (ballsFaced > 0 && runs > 0) {
+          strikeRateNum = (runs * 100) / ballsFaced;
+        } else {
+          strikeRateNum = editingPlayer.stats?.strikeRate || 0;
+        }
+      }
+
+      // For string display fields - use manual input if provided, otherwise format the numeric value
+      const battingAverageStr = editForm.stats.battingAverage !== '' 
+        ? editForm.stats.battingAverage 
+        : (averageNum > 0 ? averageNum.toFixed(2) : (editingPlayer.stats?.battingAverage || ''));
+      
+      const battingStrikeRateStr = editForm.stats.battingStrikeRate !== '' 
+        ? editForm.stats.battingStrikeRate 
+        : (strikeRateNum > 0 ? strikeRateNum.toFixed(1) : (editingPlayer.stats?.battingStrikeRate || ''));
 
       // Prepare stats object with proper type conversions
       // IMPORTANT: Set average and strikeRate AFTER spreading to ensure they override any old values
