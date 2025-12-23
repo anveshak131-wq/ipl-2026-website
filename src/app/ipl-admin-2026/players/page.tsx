@@ -1526,30 +1526,31 @@ export default function AdminPlayers() {
           {viewMode === 'grid' ? (
             /* Grid View */
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {searchFilteredPlayers.length > 0 ? searchFilteredPlayers.map((player, idx) => {
-                const team = teams.find(t => String(t.id) === String(player.teamId));
-                const roleColors = {
-                  'Batsman': 'from-emerald-500/20 to-teal-600/20 border-emerald-500/30',
-                  'Bowler': 'from-cyan-500/20 to-blue-600/20 border-cyan-500/30',
-                  'All-rounder': 'from-purple-500/20 to-pink-600/20 border-purple-500/30',
-                  'Wicket-keeper': 'from-orange-500/20 to-red-600/20 border-orange-500/30'
-                };
-                const roleColor = roleColors[player.role] || 'from-gray-500/20 to-gray-600/20 border-gray-500/30';
-                
-                return (
-                  <div
-                    key={`${player.id}-${player.teamId}-${selectedTeam}-${idx}`}
-                    className={`group relative bg-gradient-to-br ${roleColor} rounded-2xl p-6 border backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-[1.03] cursor-pointer overflow-hidden`}
-                    style={{ animationDelay: `${idx * 50}ms` }}
-                    onClick={() => handleEditPlayer(player)}
-                  >
-                    {/* Animated background glow on hover */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/0 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    
-                    {/* Content */}
-                    <div className="relative z-10">
-                    {/* Player Header */}
-                    <div className="flex items-start justify-between mb-4">
+              {searchFilteredPlayers.length > 0 ? (
+                searchFilteredPlayers.map((player, idx) => {
+                  const team = teams.find(t => String(t.id) === String(player.teamId));
+                  const roleColors = {
+                    'Batsman': 'from-emerald-500/20 to-teal-600/20 border-emerald-500/30',
+                    'Bowler': 'from-cyan-500/20 to-blue-600/20 border-cyan-500/30',
+                    'All-rounder': 'from-purple-500/20 to-pink-600/20 border-purple-500/30',
+                    'Wicket-keeper': 'from-orange-500/20 to-red-600/20 border-orange-500/30'
+                  };
+                  const roleColor = roleColors[player.role] || 'from-gray-500/20 to-gray-600/20 border-gray-500/30';
+                  
+                  return (
+                    <div
+                      key={`${player.id}-${player.teamId}-${selectedTeam}-${idx}`}
+                      className={`group relative bg-gradient-to-br ${roleColor} rounded-2xl p-6 border backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-[1.03] cursor-pointer overflow-hidden`}
+                      style={{ animationDelay: `${idx * 50}ms` }}
+                      onClick={() => handleEditPlayer(player)}
+                    >
+                      {/* Animated background glow on hover */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/0 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      
+                      {/* Content */}
+                      <div className="relative z-10">
+                        {/* Player Header */}
+                        <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         {player.nationality && (
                           <FlagImage nationality={player.nationality} size="sm" />
@@ -1648,9 +1649,10 @@ export default function AdminPlayers() {
                         </button>
                       </div>
                     </div>
-                  </div>
-                );
-              }) : (
+                    </div>
+                  );
+                })
+              ) : (
                 <div className="col-span-full flex flex-col items-center justify-center py-16">
                   <div className="w-20 h-20 rounded-full bg-gray-800/50 flex items-center justify-center mb-4 border border-white/10">
                     <Users className="w-10 h-10 text-gray-500" />
@@ -1797,7 +1799,8 @@ export default function AdminPlayers() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {searchFilteredPlayers.length > 0 ? searchFilteredPlayers
+                  {searchFilteredPlayers.length > 0 ? (
+                    searchFilteredPlayers
                     .filter(player => {
                       // Final safety check: If a team is selected, ensure player matches
                       if (selectedTeam !== 'all' && player.teamId) {
@@ -1966,7 +1969,8 @@ export default function AdminPlayers() {
                         </td>
                       </tr>
                     );
-                  }) : (
+                  })
+                  ) : (
                     <tr>
                       <td colSpan={currentLeague === 'wpl' ? 7 : 12} className="px-6 py-16 text-center">
                         <div className="flex flex-col items-center justify-center">
