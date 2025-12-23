@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useLeague } from '@/contexts/LeagueContext';
 import { api } from '@/lib/data';
+import AdminSidebar from '@/components/admin/AdminSidebar';
 
 const BowlingStatsPage = () => {
   const { currentLeague } = useLeague();
@@ -61,6 +62,7 @@ const BowlingStatsPage = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-900">
+      <AdminSidebar />
       <div className="flex-1 p-8">
         <h1 className="text-3xl font-bold text-white mb-2">Bowling Statistics</h1>
         <p className="text-gray-400 mb-8">Manage player bowling statistics by team</p>
