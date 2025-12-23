@@ -9,8 +9,6 @@ import LeagueSwitch from '@/components/admin/LeagueSwitch';
 import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
 import { formatDateMonthDDYYYY, parseDateMonthDDYYYY, calculateAge } from '@/lib/dateUtils';
-import { CustomEmoji } from '@/components/emoji/Emoji';
-import FlagImage from '@/components/ui/FlagImage';
 import '@/styles/flags.css';
 
 const BattingStatsPage = () => {
