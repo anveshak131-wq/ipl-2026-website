@@ -527,19 +527,19 @@ export default function AdminPlayers() {
         hundreds: 0,
         bestBowling: '-',
       } : {
-        matches: formData.stats.matches ? parseInt(formData.stats.matches) || 0 : 0,
-        runs: formData.stats.runs ? parseInt(formData.stats.runs) || 0 : 0,
-        wickets: formData.stats.wickets ? parseInt(formData.stats.wickets) || 0 : 0,
-        average: formData.stats.average && formData.stats.average.trim() !== '' ? parseFloat(formData.stats.average) : 0,
-        bowlingAverage: formData.stats.bowlingAverage && formData.stats.bowlingAverage.trim() !== '' ? parseFloat(formData.stats.bowlingAverage) : 0,
-        strikeRate: formData.stats.strikeRate && formData.stats.strikeRate.trim() !== '' ? parseFloat(formData.stats.strikeRate) : 0,
-        economy: formData.stats.economy && formData.stats.economy.trim() !== '' ? parseFloat(formData.stats.economy) : 0,
-        highest: formData.stats.highest ? parseInt(formData.stats.highest) || 0 : 0,
-        fours: formData.stats.fours ? parseInt(formData.stats.fours) || 0 : 0,
-        sixes: formData.stats.sixes ? parseInt(formData.stats.sixes) || 0 : 0,
-        fifties: formData.stats.fifties ? parseInt(formData.stats.fifties) || 0 : 0,
-        hundreds: formData.stats.hundreds ? parseInt(formData.stats.hundreds) || 0 : 0,
-        bestBowling: formData.stats.bestBowling || '-',
+          matches: formData.stats.matches ? parseInt(formData.stats.matches) || 0 : 0,
+          runs: formData.stats.runs ? parseInt(formData.stats.runs) || 0 : 0,
+          wickets: formData.stats.wickets ? parseInt(formData.stats.wickets) || 0 : 0,
+          average: formData.stats.average && formData.stats.average.trim() !== '' ? parseFloat(formData.stats.average) : 0,
+          bowlingAverage: formData.stats.bowlingAverage && formData.stats.bowlingAverage.trim() !== '' ? parseFloat(formData.stats.bowlingAverage) : 0,
+          strikeRate: formData.stats.strikeRate && formData.stats.strikeRate.trim() !== '' ? parseFloat(formData.stats.strikeRate) : 0,
+          economy: formData.stats.economy && formData.stats.economy.trim() !== '' ? parseFloat(formData.stats.economy) : 0,
+          highest: formData.stats.highest ? parseInt(formData.stats.highest) || 0 : 0,
+          fours: formData.stats.fours ? parseInt(formData.stats.fours) || 0 : 0,
+          sixes: formData.stats.sixes ? parseInt(formData.stats.sixes) || 0 : 0,
+          fifties: formData.stats.fifties ? parseInt(formData.stats.fifties) || 0 : 0,
+          hundreds: formData.stats.hundreds ? parseInt(formData.stats.hundreds) || 0 : 0,
+          bestBowling: formData.stats.bestBowling || '-',
       };
 
       const playerData = {
@@ -1002,36 +1002,52 @@ export default function AdminPlayers() {
       )}
       <div className="flex-1 relative">
         <div className="p-6 lg:p-8 relative">
-          {/* Modern Header */}
+          {/* Enhanced Modern Header */}
           <div className="mb-8">
-            <div className="bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 rounded-3xl p-8 mb-8 border border-white/10 backdrop-blur-xl shadow-2xl">
-              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+            <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900/30 to-purple-900/30 rounded-3xl p-8 mb-8 border border-white/10 backdrop-blur-xl shadow-2xl">
+              {/* Animated background pattern */}
+              <div className="absolute inset-0 opacity-10 overflow-hidden">
+                <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.1)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px]"></div>
+              </div>
+              
+              <div className="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                 <div className="flex-1">
-                  <div className="flex items-center gap-4 mb-3">
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
-                      <Users className="w-8 h-8 text-white" />
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="relative">
+                      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-2xl transform hover:scale-110 transition-transform duration-300">
+                        <Users className="w-10 h-10 text-white" />
                     </div>
-              <div>
-                      <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent mb-2">
+                      <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-4 border-slate-900 animate-pulse"></div>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h1 className="text-4xl lg:text-6xl font-extrabold bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent">
                   Player Management
                 </h1>
+                        <span className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-xs font-bold border border-blue-500/30">
+                          {currentLeague === 'wpl' ? 'WPL' : 'IPL'}
+                        </span>
+                      </div>
                       <p className="text-gray-300 text-lg flex items-center gap-2">
-                        <Activity className="w-5 h-5 text-blue-400" />
-                  Track and manage all {currentLeague === 'wpl' ? 'WPL' : 'IPL'} players
+                        <Activity className="w-5 h-5 text-blue-400 animate-pulse" />
+                        Manage and track all {currentLeague === 'wpl' ? 'WPL' : 'IPL'} players across {teams.length} teams
                 </p>
               </div>
                   </div>
                 </div>
+                
+                {/* Action Buttons Group */}
                 <div className="flex items-center gap-3 flex-wrap">
                 <LeagueSwitch size="md" showLabel={false} />
-                  {/* View Toggle */}
-                  <div className="flex items-center gap-1 bg-gray-800/50 rounded-xl p-1 border border-white/10">
+                  
+                  {/* View Toggle - Enhanced */}
+                  <div className="flex items-center gap-1 bg-gray-900/80 backdrop-blur-sm rounded-xl p-1.5 border border-white/10 shadow-lg">
                     <button
                       onClick={() => setViewMode('grid')}
-                      className={`p-2 rounded-lg transition-all duration-200 ${
+                      className={`p-2.5 rounded-lg transition-all duration-300 ${
                         viewMode === 'grid'
-                          ? 'bg-blue-600 text-white shadow-lg'
-                          : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg scale-105'
+                          : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
                       }`}
                       title="Grid View"
                     >
@@ -1039,34 +1055,37 @@ export default function AdminPlayers() {
                     </button>
                     <button
                       onClick={() => setViewMode('list')}
-                      className={`p-2 rounded-lg transition-all duration-200 ${
+                      className={`p-2.5 rounded-lg transition-all duration-300 ${
                         viewMode === 'list'
-                          ? 'bg-blue-600 text-white shadow-lg'
-                          : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+                          ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg scale-105'
+                          : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
                       }`}
                       title="List View"
                     >
                       <List className="w-5 h-5" />
                     </button>
                   </div>
+                  
                   <button
                     onClick={handleOpenBackupModal}
-                    className="px-5 py-2.5 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white rounded-xl transition-all duration-200 flex items-center gap-2 font-medium shadow-lg hover:shadow-xl border border-white/10"
+                    className="px-5 py-2.5 bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium shadow-lg hover:shadow-xl border border-white/10 hover:border-white/20"
                   >
                     <Download className="w-5 h-5" />
-                    Backups
+                    <span className="hidden sm:inline">Backups</span>
                   </button>
+                  
                   <button
                     onClick={handleDeleteAllPlayers}
-                    className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl transition-all duration-200 flex items-center gap-2 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed border border-red-500/30"
                     disabled={players.length === 0}
                   >
                     <Trash2 className="w-5 h-5" />
-                    Delete All
+                    <span className="hidden sm:inline">Delete All</span>
                   </button>
+                  
                 <button
                   onClick={handleAddPlayer}
-                    className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl transition-all duration-200 flex items-center gap-2 font-semibold shadow-lg hover:shadow-xl hover:scale-105"
+                    className="px-6 py-2.5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white rounded-xl transition-all duration-300 flex items-center gap-2 font-semibold shadow-lg hover:shadow-2xl hover:scale-105 border border-white/20"
                   >
                     <Plus className="w-5 h-5" />
                     Add Player
@@ -1085,139 +1104,236 @@ export default function AdminPlayers() {
               </div>
             )}
 
-            {/* Modern Statistics Cards */}
+            {/* Enhanced Statistics Cards with Progress Indicators */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6">
-              {/* Total Players */}
-              <div className="bg-gradient-to-br from-blue-500/20 to-indigo-600/20 rounded-2xl p-6 border border-blue-500/30 backdrop-blur-xl hover:from-blue-500/30 hover:to-indigo-600/30 transition-all duration-300 group shadow-xl">
+              {/* Total Players - Enhanced */}
+              <div className="group relative bg-gradient-to-br from-blue-600/30 via-indigo-600/20 to-blue-700/30 rounded-2xl p-6 border border-blue-500/40 backdrop-blur-xl hover:border-blue-400/60 transition-all duration-500 shadow-xl hover:shadow-2xl overflow-hidden">
+                {/* Animated background glow */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <Users className="w-7 h-7 text-white" />
+                    <div className="relative">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                        <Users className="w-8 h-8 text-white" />
+                      </div>
+                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-blue-600/30 animate-ping"></div>
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold text-white">{stats.total}</p>
-                    <p className="text-xs text-blue-200 font-medium">Total Players</p>
+                      <p className="text-4xl font-extrabold text-white mb-1">{stats.total}</p>
+                      <p className="text-xs text-blue-200 font-semibold uppercase tracking-wider">Total Players</p>
                   </div>
                 </div>
-                <div className="flex items-center justify-between pt-4 border-t border-blue-500/20">
-                  <span className="text-sm text-blue-100 font-medium">All squads</span>
-                  <div className="px-3 py-1 bg-blue-500/30 rounded-full text-xs font-semibold text-blue-100 border border-blue-400/50">
-                    Active
+                  
+                  {/* Progress Bar */}
+                  <div className="mb-3">
+                    <div className="h-1.5 bg-blue-900/50 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full transition-all duration-1000"
+                        style={{ width: '100%' }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between pt-3 border-t border-blue-500/30">
+                    <span className="text-xs text-blue-100 font-medium">All Teams</span>
+                    <div className="px-3 py-1 bg-blue-500/40 rounded-full text-xs font-bold text-white border border-blue-400/50 backdrop-blur-sm">
+                      {teams.length} Teams
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Batsmen */}
-              <div className="bg-gradient-to-br from-emerald-500/20 to-teal-600/20 rounded-2xl p-6 border border-emerald-500/30 backdrop-blur-xl hover:from-emerald-500/30 hover:to-teal-600/30 transition-all duration-300 group shadow-xl">
+              {/* Batsmen - Enhanced */}
+              <div className="group relative bg-gradient-to-br from-emerald-600/30 via-teal-600/20 to-emerald-700/30 rounded-2xl p-6 border border-emerald-500/40 backdrop-blur-xl hover:border-emerald-400/60 transition-all duration-500 shadow-xl hover:shadow-2xl overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 to-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <Target className="w-7 h-7 text-white" />
+                    <div className="relative">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                        <Target className="w-8 h-8 text-white" />
+                      </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold text-white">{stats.batsmen}</p>
-                    <p className="text-xs text-emerald-200 font-medium">Batsmen</p>
+                      <p className="text-4xl font-extrabold text-white mb-1">{stats.batsmen}</p>
+                      <p className="text-xs text-emerald-200 font-semibold uppercase tracking-wider">Batsmen</p>
                   </div>
                 </div>
-                <div className="flex items-center justify-between pt-4 border-t border-emerald-500/20">
-                  <span className="text-sm text-emerald-100 font-medium">Run scorers</span>
-                  <div className="px-3 py-1 bg-emerald-500/30 rounded-full text-xs font-semibold text-emerald-100 border border-emerald-400/50">
+                  
+                  {/* Progress Bar */}
+                  <div className="mb-3">
+                    <div className="h-1.5 bg-emerald-900/50 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full transition-all duration-1000"
+                        style={{ width: `${stats.total > 0 ? (stats.batsmen / stats.total) * 100 : 0}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between pt-3 border-t border-emerald-500/30">
+                    <span className="text-xs text-emerald-100 font-medium">Run Scorers</span>
+                    <div className="px-3 py-1 bg-emerald-500/40 rounded-full text-xs font-bold text-white border border-emerald-400/50 backdrop-blur-sm">
                     {stats.total > 0 ? ((stats.batsmen / stats.total) * 100).toFixed(0) : 0}%
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Bowlers */}
-              <div className="bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-2xl p-6 border border-cyan-500/30 backdrop-blur-xl hover:from-cyan-500/30 hover:to-blue-600/30 transition-all duration-300 group shadow-xl">
+              {/* Bowlers - Enhanced */}
+              <div className="group relative bg-gradient-to-br from-cyan-600/30 via-blue-600/20 to-cyan-700/30 rounded-2xl p-6 border border-cyan-500/40 backdrop-blur-xl hover:border-cyan-400/60 transition-all duration-500 shadow-xl hover:shadow-2xl overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/0 to-cyan-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <Zap className="w-7 h-7 text-white" />
+                    <div className="relative">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                        <Zap className="w-8 h-8 text-white" />
+                      </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold text-white">{stats.bowlers}</p>
-                    <p className="text-xs text-cyan-200 font-medium">Bowlers</p>
+                      <p className="text-4xl font-extrabold text-white mb-1">{stats.bowlers}</p>
+                      <p className="text-xs text-cyan-200 font-semibold uppercase tracking-wider">Bowlers</p>
                   </div>
                 </div>
-                <div className="flex items-center justify-between pt-4 border-t border-cyan-500/20">
-                  <span className="text-sm text-cyan-100 font-medium">Wicket takers</span>
-                  <div className="px-3 py-1 bg-cyan-500/30 rounded-full text-xs font-semibold text-cyan-100 border border-cyan-400/50">
+                  
+                  <div className="mb-3">
+                    <div className="h-1.5 bg-cyan-900/50 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full transition-all duration-1000"
+                        style={{ width: `${stats.total > 0 ? (stats.bowlers / stats.total) * 100 : 0}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between pt-3 border-t border-cyan-500/30">
+                    <span className="text-xs text-cyan-100 font-medium">Wicket Takers</span>
+                    <div className="px-3 py-1 bg-cyan-500/40 rounded-full text-xs font-bold text-white border border-cyan-400/50 backdrop-blur-sm">
                     {stats.total > 0 ? ((stats.bowlers / stats.total) * 100).toFixed(0) : 0}%
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* All-rounders */}
-              <div className="bg-gradient-to-br from-purple-500/20 to-pink-600/20 rounded-2xl p-6 border border-purple-500/30 backdrop-blur-xl hover:from-purple-500/30 hover:to-pink-600/30 transition-all duration-300 group shadow-xl">
+              {/* All-rounders - Enhanced */}
+              <div className="group relative bg-gradient-to-br from-purple-600/30 via-pink-600/20 to-purple-700/30 rounded-2xl p-6 border border-purple-500/40 backdrop-blur-xl hover:border-purple-400/60 transition-all duration-500 shadow-xl hover:shadow-2xl overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <Award className="w-7 h-7 text-white" />
+                    <div className="relative">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                        <Award className="w-8 h-8 text-white" />
+                      </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold text-white">{stats.allRounders}</p>
-                    <p className="text-xs text-purple-200 font-medium">All-rounders</p>
+                      <p className="text-4xl font-extrabold text-white mb-1">{stats.allRounders}</p>
+                      <p className="text-xs text-purple-200 font-semibold uppercase tracking-wider">All-rounders</p>
                   </div>
                 </div>
-                <div className="flex items-center justify-between pt-4 border-t border-purple-500/20">
-                  <span className="text-sm text-purple-100 font-medium">Versatile</span>
-                  <div className="px-3 py-1 bg-purple-500/30 rounded-full text-xs font-semibold text-purple-100 border border-purple-400/50">
+                  
+                  <div className="mb-3">
+                    <div className="h-1.5 bg-purple-900/50 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-purple-400 to-pink-400 rounded-full transition-all duration-1000"
+                        style={{ width: `${stats.total > 0 ? (stats.allRounders / stats.total) * 100 : 0}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between pt-3 border-t border-purple-500/30">
+                    <span className="text-xs text-purple-100 font-medium">Versatile</span>
+                    <div className="px-3 py-1 bg-purple-500/40 rounded-full text-xs font-bold text-white border border-purple-400/50 backdrop-blur-sm">
                     {stats.total > 0 ? ((stats.allRounders / stats.total) * 100).toFixed(0) : 0}%
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Wicket-keepers */}
-              <div className="bg-gradient-to-br from-orange-500/20 to-red-600/20 rounded-2xl p-6 border border-orange-500/30 backdrop-blur-xl hover:from-orange-500/30 hover:to-red-600/30 transition-all duration-300 group shadow-xl">
+              {/* Wicket-keepers - Enhanced */}
+              <div className="group relative bg-gradient-to-br from-orange-600/30 via-red-600/20 to-orange-700/30 rounded-2xl p-6 border border-orange-500/40 backdrop-blur-xl hover:border-orange-400/60 transition-all duration-500 shadow-xl hover:shadow-2xl overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/0 to-orange-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <div className="relative z-10">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <Shield className="w-7 h-7 text-white" />
+                    <div className="relative">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                        <Shield className="w-8 h-8 text-white" />
+                      </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-3xl font-bold text-white">{stats.wicketkeepers}</p>
-                    <p className="text-xs text-orange-200 font-medium">Wicket-keepers</p>
+                      <p className="text-4xl font-extrabold text-white mb-1">{stats.wicketkeepers}</p>
+                      <p className="text-xs text-orange-200 font-semibold uppercase tracking-wider">Wicket-keepers</p>
                   </div>
                 </div>
-                <div className="flex items-center justify-between pt-4 border-t border-orange-500/20">
-                  <span className="text-sm text-orange-100 font-medium">Behind stumps</span>
-                  <div className="px-3 py-1 bg-orange-500/30 rounded-full text-xs font-semibold text-orange-100 border border-orange-400/50">
+                  
+                  <div className="mb-3">
+                    <div className="h-1.5 bg-orange-900/50 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-orange-400 to-red-400 rounded-full transition-all duration-1000"
+                        style={{ width: `${stats.total > 0 ? (stats.wicketkeepers / stats.total) * 100 : 0}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between pt-3 border-t border-orange-500/30">
+                    <span className="text-xs text-orange-100 font-medium">Behind Stumps</span>
+                    <div className="px-3 py-1 bg-orange-500/40 rounded-full text-xs font-bold text-white border border-orange-400/50 backdrop-blur-sm">
                     {stats.total > 0 ? ((stats.wicketkeepers / stats.total) * 100).toFixed(0) : 0}%
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Modern Search and Filter Section */}
+          {/* Enhanced Search and Filter Section */}
           <div className="mb-8 relative z-10">
-            <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl p-6 border border-white/10 backdrop-blur-xl shadow-xl overflow-visible">
-            <div className="flex gap-4 flex-col md:flex-row items-stretch relative">
+            <div className="relative bg-gradient-to-br from-slate-800/80 via-gray-800/60 to-slate-900/80 rounded-2xl p-6 border border-white/10 backdrop-blur-xl shadow-2xl overflow-visible">
+              {/* Subtle glow effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
+              
+              <div className="relative z-10 flex gap-4 flex-col md:flex-row items-stretch">
                 {/* Enhanced Search Bar */}
-              <div className="relative flex-1">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2">
-                    <Search className="w-5 h-5 text-gray-400" />
+                <div className="relative flex-1 group">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
+                    <Search className={`w-5 h-5 transition-colors duration-300 ${searchQuery ? 'text-blue-400' : 'text-gray-400 group-hover:text-gray-300'}`} />
                   </div>
                 <input
                   type="text"
                   placeholder="Search by player name, nationality..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3.5 bg-gray-800/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
-                />
-              </div>
+                    className="w-full pl-12 pr-4 py-4 bg-gray-900/70 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 hover:border-white/20 shadow-lg"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-gray-700/50 hover:bg-gray-700 text-gray-400 hover:text-white transition-all"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
 
-                {/* Role Filter */}
+                {/* Role Filter - Enhanced */}
               <div className="relative md:min-w-[200px] z-[100]" data-filter-dropdown>
                 <button
                   onClick={() => {
                     setShowAdvancedFilters(!showAdvancedFilters);
                     setIsDropdownOpen(false); // Close team dropdown when role filter opens
                   }}
-                  className={`w-full bg-gray-800/50 border border-white/10 px-6 py-3.5 rounded-xl text-white font-medium flex items-center space-x-3 hover:bg-gray-700/50 hover:border-white/20 transition-all duration-300 h-full ${
-                    selectedRole !== 'all' ? 'border-blue-500/50 bg-blue-500/10' : ''
+                  className={`w-full bg-gray-900/70 border px-6 py-4 rounded-xl text-white font-medium flex items-center space-x-3 transition-all duration-300 h-full shadow-lg ${
+                    selectedRole !== 'all' 
+                      ? 'border-purple-500/50 bg-purple-500/10 hover:border-purple-400/60' 
+                      : 'border-white/10 hover:border-white/20 hover:bg-gray-800/70'
                   }`}
                 >
-                  <Award className="w-5 h-5 text-purple-400 flex-shrink-0" />
+                  <Award className={`w-5 h-5 flex-shrink-0 transition-colors ${selectedRole !== 'all' ? 'text-purple-400' : 'text-gray-400'}`} />
                   <span className="flex-1 text-left truncate">
                     {selectedRole === 'all' ? 'All Roles' : selectedRole}
                   </span>
-                  <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-300 flex-shrink-0 ${showAdvancedFilters ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-5 h-5 transition-all duration-300 flex-shrink-0 ${showAdvancedFilters ? 'rotate-180 text-purple-400' : 'text-gray-400'}`} />
                 </button>
                 {showAdvancedFilters && (
                   <div className="absolute left-0 right-0 top-full mt-2 bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden z-[9999]">
@@ -1255,16 +1371,20 @@ export default function AdminPlayers() {
                     setIsDropdownOpen(!isDropdownOpen);
                     setShowAdvancedFilters(false); // Close role filter when team dropdown opens
                   }}
-                    className="w-full bg-gray-800/50 border border-white/10 px-6 py-3.5 rounded-xl text-white font-medium flex items-center space-x-3 hover:bg-gray-700/50 hover:border-white/20 transition-all duration-300 group h-full"
+                    className={`w-full bg-gray-900/70 border px-6 py-4 rounded-xl text-white font-medium flex items-center space-x-3 transition-all duration-300 group h-full shadow-lg ${
+                      selectedTeam !== 'all'
+                        ? 'border-blue-500/50 bg-blue-500/10 hover:border-blue-400/60'
+                        : 'border-white/10 hover:border-white/20 hover:bg-gray-800/70'
+                    }`}
                   >
-                    <Filter className="w-5 h-5 text-blue-400 flex-shrink-0" />
+                    <Filter className={`w-5 h-5 flex-shrink-0 transition-colors ${selectedTeam !== 'all' ? 'text-blue-400' : 'text-gray-400'}`} />
                   <span className="flex-1 text-left truncate flex items-center gap-2">
                     {selectedTeam === 'all' 
                         ? <>All Teams</>
                         : <>{teams.find(t => t.id === selectedTeam)?.shortName || 'Select Team'}</>
                     }
                   </span>
-                    <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-300 flex-shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-5 h-5 transition-all duration-300 flex-shrink-0 ${isDropdownOpen ? 'rotate-180 text-blue-400' : 'text-gray-400'}`} />
                 </button>
 
                   {/* Enhanced Dropdown Menu */}
@@ -1352,44 +1472,49 @@ export default function AdminPlayers() {
               </div>
             </div>
 
-            {/* Results Info and Quick Actions */}
+            {/* Enhanced Results Info and Quick Actions */}
               <div className="flex items-center justify-between flex-wrap gap-3 mt-4 pt-4 border-t border-white/10">
+                <div className="flex items-center gap-3 flex-wrap">
                 <div className="text-sm text-gray-300">
-                  Showing <span className="font-bold text-white">{searchFilteredPlayers.length}</span> of <span className="font-bold text-white">{filteredPlayers.length}</span> players
+                    Showing <span className="font-bold text-white text-base">{searchFilteredPlayers.length}</span> of <span className="font-bold text-white text-base">{filteredPlayers.length}</span> players
+                  </div>
                 {selectedTeam !== 'all' && (
-                  <span className="ml-2">
-                      in <span className="text-blue-400 font-semibold">{teams.find(t => t.id === selectedTeam)?.name}</span>
-                  </span>
-                )}
-                {selectedRole !== 'all' && (
-                  <span className="ml-2">
-                      • <span className="text-purple-400 font-semibold">{selectedRole}</span>
-                  </span>
-                )}
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/20 border border-blue-500/30 rounded-lg">
+                      <Users className="w-3.5 h-3.5 text-blue-400" />
+                      <span className="text-xs text-blue-300 font-medium">{teams.find(t => t.id === selectedTeam)?.name}</span>
+                    </div>
+                  )}
+                  {selectedRole !== 'all' && (
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-500/20 border border-purple-500/30 rounded-lg">
+                      <Award className="w-3.5 h-3.5 text-purple-400" />
+                      <span className="text-xs text-purple-300 font-medium">{selectedRole}</span>
               </div>
-              <div className="flex gap-2">
+                  )}
+                </div>
+                <div className="flex gap-2 flex-wrap">
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                      className="text-xs px-4 py-2 rounded-lg bg-gray-700/50 text-gray-300 hover:text-white hover:bg-gray-700 transition-all border border-white/10"
+                      className="text-xs px-4 py-2 rounded-lg bg-gray-700/60 hover:bg-gray-700 text-gray-300 hover:text-white transition-all border border-white/10 hover:border-white/20 shadow-md hover:shadow-lg"
                   >
+                      <X className="w-3 h-3 inline mr-1" />
                     Clear Search
                   </button>
                 )}
-                {selectedRole !== 'all' && (
-                  <button
-                    onClick={() => setSelectedRole('all')}
-                      className="text-xs px-4 py-2 rounded-lg bg-gray-700/50 text-gray-300 hover:text-white hover:bg-gray-700 transition-all border border-white/10"
-                  >
-                    All Roles
+                  {selectedRole !== 'all' && (
+                    <button
+                      onClick={() => setSelectedRole('all')}
+                      className="text-xs px-4 py-2 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 hover:text-purple-100 transition-all border border-purple-500/30 hover:border-purple-400/50 shadow-md hover:shadow-lg"
+                    >
+                      All Roles
                   </button>
                 )}
                 {selectedTeam !== 'all' && (
                   <button
                     onClick={() => setSelectedTeam('all')}
-                      className="text-xs px-4 py-2 rounded-lg bg-gray-700/50 text-gray-300 hover:text-white hover:bg-gray-700 transition-all border border-white/10"
+                      className="text-xs px-4 py-2 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 hover:text-blue-100 transition-all border border-blue-500/30 hover:border-blue-400/50 shadow-md hover:shadow-lg"
                   >
-                    View All Teams
+                      All Teams
                   </button>
                 )}
                 </div>
@@ -1414,10 +1539,15 @@ export default function AdminPlayers() {
                 return (
                   <div
                     key={`${player.id}-${player.teamId}-${selectedTeam}-${idx}`}
-                    className={`group bg-gradient-to-br ${roleColor} rounded-2xl p-6 border backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] cursor-pointer animate-in fade-in slide-in-from-bottom-4`}
+                    className={`group relative bg-gradient-to-br ${roleColor} rounded-2xl p-6 border backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-[1.03] cursor-pointer overflow-hidden`}
                     style={{ animationDelay: `${idx * 50}ms` }}
                     onClick={() => handleEditPlayer(player)}
                   >
+                    {/* Animated background glow on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/0 to-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    
+                    {/* Content */}
+                    <div className="relative z-10">
                     {/* Player Header */}
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -1501,20 +1631,20 @@ export default function AdminPlayers() {
                             e.stopPropagation();
                             handleEditPlayer(player);
                           }}
-                          className="p-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 hover:text-blue-200 rounded-lg transition-all duration-200 border border-blue-500/30 hover:border-blue-400/50"
+                          className="p-2.5 bg-blue-500/20 hover:bg-blue-500/40 text-blue-300 hover:text-blue-100 rounded-xl transition-all duration-300 border border-blue-500/30 hover:border-blue-400/60 hover:scale-110 shadow-lg hover:shadow-blue-500/20 group/btn"
                           title="Edit"
                         >
-                          <Edit2 className="w-4 h-4" />
+                          <Edit2 className="w-4 h-4 group-hover/btn:rotate-12 transition-transform duration-300" />
                         </button>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeletePlayer(player.id, player.name);
                           }}
-                          className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-200 rounded-lg transition-all duration-200 border border-red-500/30 hover:border-red-400/50"
+                          className="p-2.5 bg-red-500/20 hover:bg-red-500/40 text-red-300 hover:text-red-100 rounded-xl transition-all duration-300 border border-red-500/30 hover:border-red-400/60 hover:scale-110 shadow-lg hover:shadow-red-500/20 group/btn"
                           title="Delete"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="w-4 h-4 group-hover/btn:rotate-12 transition-transform duration-300" />
                         </button>
                       </div>
                     </div>
@@ -1531,11 +1661,14 @@ export default function AdminPlayers() {
               )}
             </div>
           ) : (
-            /* List View - Modern Players Table */
-          <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl border border-white/10 backdrop-blur-xl shadow-2xl overflow-hidden">
-            <div className="overflow-x-auto">
+            /* List View - Enhanced Modern Players Table */
+            <div className="relative bg-gradient-to-br from-slate-800/80 via-gray-800/60 to-slate-900/80 rounded-2xl border border-white/10 backdrop-blur-xl shadow-2xl overflow-hidden">
+              {/* Subtle glow */}
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 opacity-0 hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+              
+              <div className="relative overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gradient-to-r from-gray-800/80 to-gray-900/80 border-b border-white/10">
+                  <thead className="bg-gradient-to-r from-gray-900/90 via-slate-900/90 to-gray-900/90 border-b border-white/10 backdrop-blur-sm sticky top-0 z-10">
                   <tr>
                     <th className="px-6 py-4 text-left">
                       <button
@@ -1675,7 +1808,7 @@ export default function AdminPlayers() {
                     .map((player, idx) => {
                     const team = teams.find(t => String(t.id) === String(player.teamId));
                     return (
-                      <tr key={`${player.id}-${player.teamId}-${selectedTeam}-${idx}`} className="hover:bg-white/5 transition-colors duration-200 group">
+                      <tr key={`${player.id}-${player.teamId}-${selectedTeam}-${idx}`} className="hover:bg-gradient-to-r hover:from-blue-500/10 hover:to-purple-500/10 transition-all duration-300 group border-b border-white/5">
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <div className="flex items-center space-x-3">
                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-ipl-gold to-ipl-purple flex items-center justify-center text-white font-bold text-xs">
@@ -1817,16 +1950,16 @@ export default function AdminPlayers() {
                           <div className="flex space-x-2">
                             <button 
                               onClick={() => handleEditPlayer(player)}
-                              className="px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 hover:text-blue-200 rounded-lg transition-all duration-200 flex items-center gap-2 border border-blue-500/30 hover:border-blue-400/50 font-medium"
+                              className="px-4 py-2.5 bg-blue-500/20 hover:bg-blue-500/40 text-blue-300 hover:text-blue-100 rounded-xl transition-all duration-300 flex items-center gap-2 border border-blue-500/30 hover:border-blue-400/60 font-medium shadow-lg hover:shadow-blue-500/20 hover:scale-105 group/btn"
                             >
-                              <Edit2 className="w-4 h-4" />
+                              <Edit2 className="w-4 h-4 group-hover/btn:rotate-12 transition-transform duration-300" />
                               Edit
                             </button>
                             <button 
                               onClick={() => handleDeletePlayer(player.id, player.name)}
-                              className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-200 rounded-lg transition-all duration-200 flex items-center gap-2 border border-red-500/30 hover:border-red-400/50 font-medium"
+                              className="px-4 py-2.5 bg-red-500/20 hover:bg-red-500/40 text-red-300 hover:text-red-100 rounded-xl transition-all duration-300 flex items-center gap-2 border border-red-500/30 hover:border-red-400/60 font-medium shadow-lg hover:shadow-red-500/20 hover:scale-105 group/btn"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-4 h-4 group-hover/btn:rotate-12 transition-transform duration-300" />
                               Delete
                             </button>
                           </div>
@@ -2757,4 +2890,5 @@ export default function AdminPlayers() {
     </div>
   );
 }
+
 
