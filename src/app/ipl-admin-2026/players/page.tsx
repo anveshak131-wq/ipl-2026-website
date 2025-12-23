@@ -2030,66 +2030,83 @@ export default function AdminPlayers() {
             variant="info"
             size="xl"
             icon={<CustomEmoji type="cricket-stumps" size={24} />}
-            contentClassName="max-h-[75vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500/50 scrollbar-track-gray-700/50"
+            contentClassName="max-h-[80vh] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500/50 scrollbar-track-gray-700/50"
             footer={
               <div className="flex gap-4">
                 <button
                   type="submit"
                   form="player-form"
-                  className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 px-6 rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-200 flex items-center justify-center gap-2"
+                  className="flex-1 bg-gradient-to-r from-blue-500 via-blue-600 to-purple-600 hover:from-blue-600 hover:via-purple-600 hover:to-purple-700 text-white font-semibold py-3.5 px-8 rounded-xl hover:shadow-2xl hover:shadow-blue-500/25 hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2.5 group"
                 >
                   {editingPlayer ? (
                     <>
-                      <Edit2 className="w-5 h-5" />
-                      Update Player
+                      <Edit2 className="w-5 h-5 group-hover:rotate-12 transition-transform duration-300" />
+                      <span>Update Player</span>
                     </>
                   ) : (
                     <>
-                      <Plus className="w-5 h-5" />
-                      Add Player
+                      <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+                      <span>Add Player</span>
                     </>
                   )}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="flex-1 border border-white/10 bg-slate-800/60 hover:bg-slate-700/80 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200"
+                  className="flex-1 border-2 border-white/20 bg-slate-800/80 hover:bg-slate-700/90 hover:border-white/30 text-white font-semibold py-3.5 px-8 rounded-xl transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-2"
                 >
-                  Cancel
+                  <X className="w-4 h-4" />
+                  <span>Cancel</span>
                 </button>
               </div>
             }
           >
-            <form id="player-form" onSubmit={handleSubmit} className="space-y-8">
-                    {/* Section Header */}
-                    <div className="border-b border-white/10 pb-4">
-                      <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                        <User className="w-5 h-5 text-blue-400" />
-                        Basic Information
-                      </h3>
-                      <p className="text-sm text-gray-400 mt-1">Enter player's personal details and team assignment</p>
+            <form id="player-form" onSubmit={handleSubmit} className="space-y-6">
+                    {/* Section Header - Enhanced */}
+                    <div className="relative overflow-hidden bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-pink-500/10 rounded-2xl p-6 border border-white/10 backdrop-blur-sm">
+                      <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.05)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px] opacity-50"></div>
+                      <div className="relative flex items-center gap-4">
+                        <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-400/30 flex items-center justify-center shadow-lg">
+                          <User className="w-7 h-7 text-blue-300" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-2xl font-bold text-white flex items-center gap-2">
+                            Basic Information
+                          </h3>
+                          <p className="text-sm text-gray-300 mt-1">Enter player's personal details and team assignment</p>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Basic Info */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                    {/* Basic Info - Enhanced Card Layout */}
+                    <div className="bg-gradient-to-br from-gray-800/40 to-gray-900/40 rounded-2xl p-6 border border-white/10 backdrop-blur-sm">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="group">
+                          <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                            <User className="w-4 h-4 text-blue-400" />
                           Player Name
+                            <span className="text-red-400">*</span>
                         </label>
+                          <div className="relative">
                         <input
                           type="text"
                           value={formData.name}
                           onChange={(e) => setFormData({...formData, name: e.target.value})}
-                          className="w-full pl-4 pr-4 py-3 bg-gray-800/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+                              className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
                           placeholder="Enter player name"
                           required
                         />
+                            <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                          </div>
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                        <div className="group">
+                          <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                            <Award className="w-4 h-4 text-purple-400" />
                           Role
+                            <span className="text-red-400">*</span>
                         </label>
+                          <div className="relative">
                         <select
                           value={formData.role}
                           onChange={(e) => {
@@ -2101,56 +2118,74 @@ export default function AdminPlayers() {
                               allrounderType: newRole === 'All-rounder' ? formData.allrounderType : ''
                             });
                           }}
-                          className="w-full pl-4 pr-4 py-3 bg-gray-800/50 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+                              className="w-full pl-12 pr-10 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all appearance-none cursor-pointer hover:border-white/20 group-hover:bg-gray-800/70"
                         >
                           <option value="Batsman">Batsman</option>
                           <option value="Bowler">Bowler</option>
                           <option value="All-rounder">All-rounder</option>
                           <option value="Wicket-keeper">Wicket-keeper</option>
                         </select>
+                            <Award className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                          </div>
                       </div>
 
                       {formData.role === 'All-rounder' && (
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                          <div className="group md:col-span-2">
+                            <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                              <Target className="w-4 h-4 text-orange-400" />
                             All-rounder Type
+                              <span className="text-red-400">*</span>
                           </label>
+                            <div className="relative">
                           <select
                             value={formData.allrounderType}
                             onChange={(e) => setFormData({...formData, allrounderType: e.target.value as any})}
-                            className="w-full pl-4 pr-4 py-3 bg-gray-800/50 border border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+                                className="w-full pl-12 pr-10 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all appearance-none cursor-pointer hover:border-white/20 group-hover:bg-gray-800/70"
                             required
                           >
                             <option value="">Select type</option>
                             <option value="Batting All-rounder">Batting All-rounder</option>
                             <option value="Bowling All-rounder">Bowling All-rounder</option>
                           </select>
+                              <Target className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                            </div>
                         </div>
                       )}
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                        <div className="group">
+                          <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                            <Shield className="w-4 h-4 text-emerald-400" />
                           League
+                            <span className="text-red-400">*</span>
                         </label>
+                          <div className="relative">
                         <select
                           value={formData.league}
                           onChange={(e) => setFormData({...formData, league: e.target.value as 'ipl' | 'wpl'})}
-                          className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-ipl-gold"
+                              className="w-full pl-12 pr-10 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all appearance-none cursor-pointer hover:border-white/20 group-hover:bg-gray-800/70"
                           required
                         >
                           <option value="ipl">IPL (Indian Premier League)</option>
                           <option value="wpl">WPL (Women's Premier League)</option>
                         </select>
+                            <Shield className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                          </div>
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                        <div className="group">
+                          <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                            <Users className="w-4 h-4 text-cyan-400" />
                           Team
+                            <span className="text-red-400">*</span>
                         </label>
+                          <div className="relative">
                         <select
                           value={formData.teamId}
                           onChange={(e) => setFormData({...formData, teamId: e.target.value})}
-                          className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-ipl-gold"
+                              className="w-full pl-12 pr-10 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all appearance-none cursor-pointer hover:border-white/20 group-hover:bg-gray-800/70"
                           required
                         >
                           <option value="">Select a team</option>
@@ -2160,12 +2195,34 @@ export default function AdminPlayers() {
                             </option>
                           ))}
                         </select>
+                            <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                          </div>
+                        </div>
+                      </div>
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Age
+                    {/* Personal Details Section */}
+                    <div className="relative overflow-hidden bg-gradient-to-br from-purple-500/10 via-pink-500/5 to-orange-500/10 rounded-2xl p-6 border border-white/10 backdrop-blur-sm">
+                      <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.05)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px] opacity-50"></div>
+                      <div className="relative">
+                        <div className="flex items-center gap-4 mb-6">
+                          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-400/30 flex items-center justify-center shadow-lg">
+                            <Calendar className="w-7 h-7 text-purple-300" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-2xl font-bold text-white">Personal Details</h3>
+                            <p className="text-sm text-gray-300 mt-1">Player's age, date of birth, and nationality</p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="group">
+                            <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                              <Calendar className="w-4 h-4 text-purple-400" />
+                              Age
+                              {(!formData.dateOfBirth || formData.dateOfBirth.trim() === '') && <span className="text-red-400">*</span>}
                         </label>
+                            <div className="relative">
                         <input
                           type="number"
                           value={formData.age === '0' || formData.age === 0 ? '' : formData.age}
@@ -2178,14 +2235,21 @@ export default function AdminPlayers() {
                             }
                             setFormData({...formData, age: newValue});
                           }}
-                          className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                          placeholder="Age"
+                                className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                placeholder="Enter age"
                           required={!formData.dateOfBirth || formData.dateOfBirth.trim() === ''}
                         />
-                        <p className="text-xs text-gray-500 mt-1">
+                              <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                            </div>
+                            <p className="text-xs text-gray-400 mt-2 flex items-center gap-1.5">
                           {(() => {
                             if (!formData.dateOfBirth || formData.dateOfBirth.trim() === '') {
-                              return 'Enter age manually or provide date of birth to auto-calculate';
+                                  return (
+                                    <>
+                                      <span className="text-gray-500">💡</span>
+                                      <span>Enter age manually or provide date of birth to auto-calculate</span>
+                                    </>
+                                  );
                             }
                             
                             // Try to parse the date to see if it's valid
@@ -2202,46 +2266,70 @@ export default function AdminPlayers() {
                             }
                             
                             if (parsedDate) {
-                              // Debug: log the parsed date
-                              console.log('Display - Parsed date:', parsedDate, 'Input:', formData.dateOfBirth);
                               const calculatedAge = calculateAge(parsedDate);
-                              console.log('Display - Calculated age:', calculatedAge);
                               if (calculatedAge > 0) {
-                                return `Age automatically calculated: ${calculatedAge} years (you can manually change if needed)`;
+                                    return (
+                                      <>
+                                        <span className="text-emerald-400">✓</span>
+                                        <span className="text-emerald-300">Age automatically calculated: {calculatedAge} years (you can manually change if needed)</span>
+                                      </>
+                                    );
                               } else {
-                                // Additional debugging
                                 const testDate = new Date(parsedDate);
-                                console.log('Display - Test date object:', testDate, 'Is valid:', !isNaN(testDate.getTime()));
-                                // Check if parsedDate contains NaN (invalid parsing)
                                 if (parsedDate.includes('NaN') || isNaN(testDate.getTime())) {
-                                  return `⚠ Invalid date format. Please use ${currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY or Month DD, YYYY'} format.`;
-                                }
-                                return `⚠ Age calculation returned 0. Please check the date format.`;
+                                      return (
+                                        <>
+                                          <span className="text-yellow-400">⚠</span>
+                                          <span className="text-yellow-300">Invalid date format. Please use {currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY or Month DD, YYYY'} format.</span>
+                                        </>
+                                      );
+                                    }
+                                    return (
+                                      <>
+                                        <span className="text-yellow-400">⚠</span>
+                                        <span className="text-yellow-300">Age calculation returned 0. Please check the date format.</span>
+                                      </>
+                                    );
                               }
                             } else {
-                              return `Invalid date format. Use ${currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY'} format (e.g., ${currentLeague === 'wpl' ? 'December 25, 1994' : '25/12/1994'})`;
+                                  return (
+                                    <>
+                                      <span className="text-yellow-400">⚠</span>
+                                      <span className="text-yellow-300">Invalid date format. Use {currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY'} format (e.g., {currentLeague === 'wpl' ? 'December 25, 1994' : '25/12/1994'})</span>
+                                    </>
+                                  );
                             }
                           })()}
                         </p>
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Date of Birth ({currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY or Month DD, YYYY'})
+                          <div className="group">
+                            <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                              <Calendar className="w-4 h-4 text-pink-400" />
+                              Date of Birth
+                              <span className="text-xs text-gray-400 font-normal">({currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY or Month DD, YYYY'})</span>
                         </label>
+                            <div className="relative">
                         <input
                           type="text"
                           value={formData.dateOfBirth}
                           onChange={(e) => {
                             setFormData({...formData, dateOfBirth: e.target.value});
                           }}
-                          className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                                className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
                           placeholder={currentLeague === 'wpl' ? 'December 25, 1994 (optional)' : '25/12/1994 or December 25, 1994 (optional)'}
                         />
-                        <p className="text-xs text-gray-400 mt-1">
+                              <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                            </div>
+                            <p className="text-xs text-gray-400 mt-2 flex items-center gap-1.5">
                           {(() => {
                             if (!formData.dateOfBirth || formData.dateOfBirth.trim() === '') {
-                              return 'Optional: If provided, age will be automatically calculated';
+                                  return (
+                                    <>
+                                      <span className="text-gray-500">💡</span>
+                                      <span>Optional: If provided, age will be automatically calculated</span>
+                                    </>
+                                  );
                             }
                             
                             // Try to parse the date
@@ -2260,34 +2348,61 @@ export default function AdminPlayers() {
                             if (parsedDate) {
                               const calculatedAge = calculateAge(parsedDate);
                               if (calculatedAge > 0) {
-                                return `✓ Valid date. Age: ${calculatedAge} years`;
+                                    return (
+                                      <>
+                                        <span className="text-emerald-400">✓</span>
+                                        <span className="text-emerald-300">Valid date. Age: {calculatedAge} years</span>
+                                      </>
+                                    );
                               } else {
-                                // If age is 0, the date might be in the future or there's a parsing issue
                                 const testDate = new Date(parsedDate);
                                 if (isNaN(testDate.getTime())) {
-                                  return `⚠ Date parsing issue. Parsed: ${parsedDate}`;
+                                      return (
+                                        <>
+                                          <span className="text-yellow-400">⚠</span>
+                                          <span className="text-yellow-300">Date parsing issue. Parsed: {parsedDate}</span>
+                                        </>
+                                      );
                                 }
                                 const today = new Date();
                                 if (testDate > today) {
-                                  return `⚠ Date is in the future. Please check the date.`;
-                                }
-                                return `⚠ Age calculation returned 0. Parsed date: ${parsedDate}`;
+                                      return (
+                                        <>
+                                          <span className="text-yellow-400">⚠</span>
+                                          <span className="text-yellow-300">Date is in the future. Please check the date.</span>
+                                        </>
+                                      );
+                                    }
+                                    return (
+                                      <>
+                                        <span className="text-yellow-400">⚠</span>
+                                        <span className="text-yellow-300">Age calculation returned 0. Parsed date: {parsedDate}</span>
+                                      </>
+                                    );
                               }
                             } else {
-                              return `⚠ Invalid format. Use ${currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY'} (e.g., ${currentLeague === 'wpl' ? 'December 25, 1994' : '25/12/1994'})`;
+                                  return (
+                                    <>
+                                      <span className="text-yellow-400">⚠</span>
+                                      <span className="text-yellow-300">Invalid format. Use {currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY'} (e.g., {currentLeague === 'wpl' ? 'December 25, 1994' : '25/12/1994'})</span>
+                                    </>
+                                  );
                             }
                           })()}
                         </p>
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          <div className="group">
+                            <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                              <FlagImage nationality={formData.nationality || 'India'} size="sm" />
                           Nationality
+                              <span className="text-red-400">*</span>
                         </label>
+                            <div className="relative">
                         <select
                           value={formData.nationality}
                           onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
-                          className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-ipl-gold"
+                                className="w-full pl-12 pr-10 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all appearance-none cursor-pointer hover:border-white/20 group-hover:bg-gray-800/70"
                           required
                         >
                           <option value="">Select nationality</option>
@@ -2297,39 +2412,67 @@ export default function AdminPlayers() {
                             </option>
                           ))}
                         </select>
+                              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                    {/* Player Details Section */}
+                    <div className="relative overflow-hidden bg-gradient-to-br from-cyan-500/10 via-blue-500/5 to-indigo-500/10 rounded-2xl p-6 border border-white/10 backdrop-blur-sm">
+                      <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.05)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px] opacity-50"></div>
+                      <div className="relative">
+                        <div className="flex items-center gap-4 mb-6">
+                          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-400/30 flex items-center justify-center shadow-lg">
+                            <Shirt className="w-7 h-7 text-cyan-300" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-2xl font-bold text-white">Player Details</h3>
+                            <p className="text-sm text-gray-300 mt-1">Jersey number, playing styles, and captain status</p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="group">
+                            <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                              <Hash className="w-4 h-4 text-cyan-400" />
                           Jersey Number
                         </label>
                         <div className="flex items-center gap-3">
+                              <div className="relative flex-1">
                           <input
                             type="number"
                             value={formData.jerseyNumber}
                             onChange={(e) => setFormData({ ...formData, jerseyNumber: e.target.value })}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="Enter jersey number or leave blank"
+                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  placeholder="Enter jersey number"
                           />
+                                <Hash className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                              </div>
                           <button
                             type="button"
                             onClick={() => setFormData({ ...formData, jerseyNumber: '' })}
-                            className="px-3 py-1.5 rounded-lg text-xs font-semibold border border-white/20 text-gray-200 hover:bg-white/10 transition-colors"
+                                className="px-4 py-3.5 rounded-xl text-sm font-semibold border-2 border-white/20 bg-gray-800/60 text-gray-200 hover:bg-gray-700/80 hover:border-white/30 transition-all"
                           >
                             N/A
                           </button>
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">Use N/A if a jersey number is not assigned yet.</p>
+                            <p className="text-xs text-gray-400 mt-2 flex items-center gap-1.5">
+                              <span className="text-gray-500">💡</span>
+                              <span>Use N/A if a jersey number is not assigned yet</span>
+                            </p>
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          <div className="group">
+                            <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                              <Zap className="w-4 h-4 text-blue-400" />
                           Bowling Style
                         </label>
+                            <div className="relative">
                         <select
                           value={formData.bowlingStyle}
                           onChange={(e) => setFormData({ ...formData, bowlingStyle: e.target.value })}
-                          className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-ipl-gold"
+                                className="w-full pl-12 pr-10 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all appearance-none cursor-pointer hover:border-white/20 group-hover:bg-gray-800/70"
                         >
                           {BOWLING_STYLES.map((style) => (
                             <option key={style} value={style}>
@@ -2337,26 +2480,35 @@ export default function AdminPlayers() {
                             </option>
                           ))}
                         </select>
-                        <p className="text-xs text-gray-500 mt-1">
-                          If the exact style is not in the list, enter a custom bowling style below.
-                        </p>
+                              <Zap className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                            </div>
+                            <p className="text-xs text-gray-400 mt-2 flex items-center gap-1.5">
+                              <span className="text-gray-500">💡</span>
+                              <span>If the exact style is not in the list, enter a custom bowling style below</span>
+                            </p>
+                            <div className="relative mt-3">
                         <input
                           type="text"
                           value={formData.customBowlingStyle}
                           onChange={(e) => setFormData({ ...formData, customBowlingStyle: e.target.value })}
-                          className="mt-2 w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                                className="w-full pl-12 pr-4 py-3 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all hover:border-white/20"
                           placeholder="Custom bowling style (optional)"
                         />
+                              <Zap className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                            </div>
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                          <div className="group">
+                            <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                              <Activity className="w-4 h-4 text-indigo-400" />
                           Batting Style
                         </label>
+                            <div className="relative">
                         <select
                           value={formData.battingStyle}
                           onChange={(e) => setFormData({ ...formData, battingStyle: e.target.value })}
-                          className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-ipl-gold"
+                                className="w-full pl-12 pr-10 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all appearance-none cursor-pointer hover:border-white/20 group-hover:bg-gray-800/70"
                         >
                           {BATTING_STYLES.map((style) => (
                             <option key={style} value={style}>
@@ -2364,24 +2516,43 @@ export default function AdminPlayers() {
                             </option>
                           ))}
                         </select>
+                              <Activity className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                            </div>
                       </div>
 
-                      <div className="flex items-center">
+                          <div className="group md:col-span-2">
+                            <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 rounded-xl border-2 border-yellow-500/20 hover:border-yellow-500/30 transition-all">
                         <input
                           type="checkbox"
                           id="player-isCaptain"
                           checked={formData.isCaptain}
                           onChange={(e) => setFormData({ ...formData, isCaptain: e.target.checked })}
-                          className="w-4 h-4 bg-white/10 border border-white/20 rounded text-ipl-gold focus:outline-none focus:border-ipl-gold"
+                                className="w-5 h-5 rounded bg-gray-800/60 border-2 border-white/20 text-yellow-500 focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 cursor-pointer transition-all"
                         />
-                        <label htmlFor="player-isCaptain" className="ml-2 text-sm font-medium text-gray-300">
-                          Is Captain
+                              <label htmlFor="player-isCaptain" className="flex items-center gap-2 text-sm font-semibold text-gray-200 cursor-pointer">
+                                <Star className="w-5 h-5 text-yellow-400" />
+                                <span>Is Captain</span>
                         </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                       </div>
 
-                      {/* Transfer / Auction Info */}
-                      <div className="col-span-1 md:col-span-2 border-t border-white/5 pt-4">
-                        <h3 className="text-sm font-semibold text-white mb-2">Transfer / Auction Info</h3>
+                    {/* Transfer / Auction Info Section */}
+                    <div className="relative overflow-hidden bg-gradient-to-br from-amber-500/10 via-yellow-500/5 to-orange-500/10 rounded-2xl p-6 border border-white/10 backdrop-blur-sm">
+                      <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.05)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px] opacity-50"></div>
+                      <div className="relative">
+                        <div className="flex items-center gap-4 mb-6">
+                          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-500/20 to-yellow-500/20 border border-amber-400/30 flex items-center justify-center shadow-lg">
+                            <TrendingUp className="w-7 h-7 text-amber-300" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-2xl font-bold text-white">Transfer / Auction Info</h3>
+                            <p className="text-sm text-gray-300 mt-1">Player acquisition details and transfer information</p>
+                          </div>
+                        </div>
                         {/* Determine if player is auction-locked for CURRENT_SEASON */}
                         {(() => {
                           const isAuctionLocked = typeof formData.lastAuctionYear !== 'undefined' &&
@@ -2391,25 +2562,38 @@ export default function AdminPlayers() {
                           return (
                             <>
                               {isAuctionLocked && (
-                                <div className="mb-2 text-sm text-yellow-300">Players bought at the IPL 2026 auction cannot be traded for the 2027 season (auction-locked).</div>
+                                <div className="mb-4 p-4 bg-yellow-500/20 border-2 border-yellow-500/30 rounded-xl flex items-center gap-3">
+                                  <span className="text-2xl">⚠️</span>
+                                  <p className="text-sm text-yellow-200 font-medium">Players bought at the IPL 2026 auction cannot be traded for the 2027 season (auction-locked).</p>
+                                </div>
                               )}
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-300 mb-2">Last Auction Year</label>
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="group">
+                                  <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                                    <Calendar className="w-4 h-4 text-amber-400" />
+                                    Last Auction Year
+                                  </label>
+                                  <div className="relative">
                                   <input
                                     type="number"
                                     value={formData.lastAuctionYear ?? ''}
                                     onChange={(e) => setFormData({ ...formData, lastAuctionYear: e.target.value ? Number(e.target.value) : undefined })}
-                                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                                      className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
                                     placeholder="e.g., 2026"
                                   />
+                                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                                 </div>
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-300 mb-2">Acquired Via</label>
+                                </div>
+                                <div className="group">
+                                  <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                                    <TrendingUp className="w-4 h-4 text-yellow-400" />
+                                    Acquired Via
+                                  </label>
+                                  <div className="relative">
                                   <select
                                     value={formData.acquiredVia}
                                     onChange={(e) => setFormData({ ...formData, acquiredVia: e.target.value as any })}
-                                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-ipl-gold"
+                                      className="w-full pl-12 pr-10 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-all appearance-none cursor-pointer hover:border-white/20 group-hover:bg-gray-800/70"
                                   >
                                     <option value="auction">Auction</option>
                                     <option value="retention">Retention</option>
@@ -2417,213 +2601,296 @@ export default function AdminPlayers() {
                                     <option value="swap">Swap</option>
                                     <option value="transfer">Transfer</option>
                                   </select>
+                                    <TrendingUp className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                                 </div>
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-300 mb-2">Transferable</label>
+                                </div>
+                                <div className="group">
+                                  <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                                    <Activity className="w-4 h-4 text-orange-400" />
+                                    Transferable
+                                  </label>
+                                  <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-orange-500/10 to-amber-500/10 rounded-xl border-2 border-orange-500/20 hover:border-orange-500/30 transition-all">
                                   <input
                                     type="checkbox"
                                     checked={!!formData.transferable}
                                     onChange={(e) => setFormData({ ...formData, transferable: e.target.checked })}
                                     disabled={typeof formData.lastAuctionYear !== 'undefined' && formData.lastAuctionYear === 2026 && formData.acquiredVia === 'auction' && CURRENT_SEASON === 2027}
-                                    className="w-4 h-4 bg-white/10 border border-white/20 rounded text-ipl-gold focus:outline-none focus:border-ipl-gold"
+                                      className="w-5 h-5 rounded bg-gray-800/60 border-2 border-white/20 text-orange-500 focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                   />
+                                    <span className="text-sm font-semibold text-gray-200">Allow Transfer</span>
                                 </div>
-                                <div className="md:col-span-2">
-                                  <label className="block text-sm font-medium text-gray-300 mb-2">Transfer Fee</label>
+                                </div>
+                                <div className="group md:col-span-2">
+                                  <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                                    <TrendingUp className="w-4 h-4 text-amber-400" />
+                                    Transfer Fee
+                                  </label>
+                                  <div className="relative">
                                   <input
                                     type="text"
                                     value={formData.transferFee ?? ''}
                                     onChange={(e) => setFormData({ ...formData, transferFee: e.target.value })}
-                                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                                      className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
                                     placeholder="Optional cash deal value"
                                   />
+                                    <TrendingUp className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                                 </div>
-                                <div className="md:col-span-3">
-                                  <label className="block text-sm font-medium text-gray-300 mb-2">Notes</label>
+                                </div>
+                                <div className="group md:col-span-3">
+                                  <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                                    <BarChart3 className="w-4 h-4 text-yellow-400" />
+                                    Notes
+                                  </label>
+                                  <div className="relative">
                                   <input
                                     type="text"
                                     value={formData.transferNotes ?? ''}
                                     onChange={(e) => setFormData({ ...formData, transferNotes: e.target.value })}
-                                    className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                                      className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
                                     placeholder="E.g., Confirmed trade, cash deal details"
                                   />
+                                    <BarChart3 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                  </div>
                                 </div>
                               </div>
                             </>
                           );
                         })()}
                       </div>
-
                     </div>
 
                     {/* Stats - Only show for IPL */}
                     {formData.league !== 'wpl' && (
-                      <div>
-                        <h3 className="text-lg font-semibold text-white mb-4">Player Statistics</h3>
+                      <div className="relative overflow-hidden bg-gradient-to-br from-emerald-500/10 via-teal-500/5 to-cyan-500/10 rounded-2xl p-6 border border-white/10 backdrop-blur-sm">
+                        <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.05)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px] opacity-50"></div>
+                        <div className="relative">
+                          <div className="flex items-center gap-4 mb-6">
+                            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border border-emerald-400/30 flex items-center justify-center shadow-lg">
+                              <BarChart3 className="w-7 h-7 text-emerald-300" />
+                            </div>
+                            <div className="flex-1">
+                              <h3 className="text-2xl font-bold text-white">Player Statistics</h3>
+                              <p className="text-sm text-gray-300 mt-1">Performance metrics and career statistics</p>
+                            </div>
+                          </div>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            <div className="group">
+                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                                <BarChart3 className="w-4 h-4 text-emerald-400" />
                             Matches
                           </label>
+                              <div className="relative">
                           <input
                             type="number"
                             value={formData.stats.matches}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, matches: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
                             placeholder="Matches"
                           />
+                                <BarChart3 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                              </div>
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Runs
-                          </label>
-                          <input
-                            type="number"
-                            value={formData.stats.runs}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, runs: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="Runs"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Wickets
-                          </label>
-                          <input
-                            type="number"
-                            value={formData.stats.wickets}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, wickets: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="Wickets"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Batting Average
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={formData.stats.average}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, average: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 45.67"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Bowling Average
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={formData.stats.bowlingAverage}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, bowlingAverage: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 25.50"
-                          />
-                          <p className="text-xs text-gray-500 mt-1">Runs conceded per wicket</p>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Strike Rate
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={formData.stats.strikeRate}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, strikeRate: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 145.50"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Economy
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={formData.stats.economy}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, economy: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 8.50"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Highest Score
-                          </label>
-                          <input
-                            type="number"
-                            value={formData.stats.highest}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, highest: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="Highest Score"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Fours
-                          </label>
-                          <input
-                            type="number"
-                            value={formData.stats.fours}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, fours: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="Fours"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Sixes
-                          </label>
-                          <input
-                            type="number"
-                            value={formData.stats.sixes}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, sixes: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="Sixes"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Fifties (50s)
-                          </label>
-                          <input
-                            type="number"
-                            value={formData.stats.fifties}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, fifties: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="Fifties"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Hundreds (100s)
-                          </label>
-                          <input
-                            type="number"
-                            value={formData.stats.hundreds}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, hundreds: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="Hundreds"
-                          />
-                        </div>
-                        <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Best Bowling (BBM)
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.stats.bestBowling}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, bestBowling: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 4/21 or 3/45"
-                          />
+                            <div className="group">
+                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                                <TrendingUp className="w-4 h-4 text-emerald-400" />
+                                Runs
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  value={formData.stats.runs}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, runs: e.target.value}})}
+                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  placeholder="Runs"
+                                />
+                                <TrendingUp className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                              </div>
+                            </div>
+                            <div className="group">
+                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                                <Target className="w-4 h-4 text-teal-400" />
+                                Wickets
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  value={formData.stats.wickets}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, wickets: e.target.value}})}
+                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  placeholder="Wickets"
+                                />
+                                <Target className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                              </div>
+                            </div>
+                            <div className="group">
+                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                                <BarChart3 className="w-4 h-4 text-cyan-400" />
+                                Batting Average
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  value={formData.stats.average}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, average: e.target.value}})}
+                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  placeholder="e.g., 45.67"
+                                />
+                                <BarChart3 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                              </div>
+                            </div>
+                            <div className="group">
+                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                                <Target className="w-4 h-4 text-teal-400" />
+                                Bowling Average
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  value={formData.stats.bowlingAverage}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, bowlingAverage: e.target.value}})}
+                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  placeholder="e.g., 25.50"
+                                />
+                                <Target className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                              </div>
+                              <p className="text-xs text-gray-400 mt-2">Runs conceded per wicket</p>
+                            </div>
+                            <div className="group">
+                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                                <Zap className="w-4 h-4 text-cyan-400" />
+                                Strike Rate
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  value={formData.stats.strikeRate}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, strikeRate: e.target.value}})}
+                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  placeholder="e.g., 145.50"
+                                />
+                                <Zap className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                              </div>
+                            </div>
+                            <div className="group">
+                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                                <Activity className="w-4 h-4 text-teal-400" />
+                                Economy
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  value={formData.stats.economy}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, economy: e.target.value}})}
+                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  placeholder="e.g., 8.50"
+                                />
+                                <Activity className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                              </div>
+                            </div>
+                            <div className="group">
+                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                                <Award className="w-4 h-4 text-emerald-400" />
+                                Highest Score
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  value={formData.stats.highest}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, highest: e.target.value}})}
+                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  placeholder="Highest Score"
+                                />
+                                <Award className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                              </div>
+                            </div>
+                            <div className="group">
+                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                                <BarChart3 className="w-4 h-4 text-cyan-400" />
+                                Fours
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  value={formData.stats.fours}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, fours: e.target.value}})}
+                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  placeholder="Fours"
+                                />
+                                <BarChart3 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                              </div>
+                            </div>
+                            <div className="group">
+                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                                <Zap className="w-4 h-4 text-teal-400" />
+                                Sixes
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  value={formData.stats.sixes}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, sixes: e.target.value}})}
+                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  placeholder="Sixes"
+                                />
+                                <Zap className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                              </div>
+                            </div>
+                            <div className="group">
+                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                                <Award className="w-4 h-4 text-emerald-400" />
+                                Fifties (50s)
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  value={formData.stats.fifties}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, fifties: e.target.value}})}
+                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  placeholder="Fifties"
+                                />
+                                <Award className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                              </div>
+                            </div>
+                            <div className="group">
+                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                                <Star className="w-4 h-4 text-cyan-400" />
+                                Hundreds (100s)
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="number"
+                                  value={formData.stats.hundreds}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, hundreds: e.target.value}})}
+                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  placeholder="Hundreds"
+                                />
+                                <Star className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                              </div>
+                            </div>
+                            <div className="group md:col-span-2">
+                              <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
+                                <Target className="w-4 h-4 text-teal-400" />
+                                Best Bowling (BBM)
+                              </label>
+                              <div className="relative">
+                                <input
+                                  type="text"
+                                  value={formData.stats.bestBowling}
+                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, bestBowling: e.target.value}})}
+                                  className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
+                                  placeholder="e.g., 4/21 or 3/45"
+                                />
+                                <Target className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
                     )}
             </form>
           </ModernDialog>
