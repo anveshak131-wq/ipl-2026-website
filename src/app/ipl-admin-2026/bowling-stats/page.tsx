@@ -344,8 +344,7 @@ const BowlingStatsPage = () => {
         </div>
       </div>
     )}
-  </div>
-);
+  );
 };
 
 export default BowlingStatsPage;

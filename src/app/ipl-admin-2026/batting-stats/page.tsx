@@ -339,6 +339,7 @@ const BattingStatsPage = () => {
       </div>
     </div>
   )}
-);
+  );
+};
 
 export default BattingStatsPage;
