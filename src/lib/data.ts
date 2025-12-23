@@ -783,5 +783,92 @@ export const api = {
       console.error('Error updating settings:', error);
       throw error;
     }
+  },
+
+  // Player API
+  updatePlayer: async (playerId: string, updatedPlayer: Partial<Player>): Promise<Player> => {
+    try {
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
+
+      const response = await fetch('/api/players', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ id: playerId, ...updatedPlayer })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        const errorMessage = errorData.error || `Failed to update player: ${response.status} ${response.statusText}`;
+        console.error('API error response:', errorData);
+        throw new Error(errorMessage);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating player:', error);
+      throw error;
+    }
+  },
+
+  createPlayer: async (player: Omit<Player, 'id'>): Promise<Player> => {
+    try {
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
+
+      const response = await fetch('/api/players', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(player)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        const errorMessage = errorData.error || `Failed to create player: ${response.status} ${response.statusText}`;
+        console.error('API error response:', errorData);
+        throw new Error(errorMessage);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating player:', error);
+      throw error;
+    }
+  },
+
+  deletePlayer: async (playerId: string): Promise<void> => {
+    try {
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
+
+      const response = await fetch(`/api/players?id=${playerId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        const errorMessage = errorData.error || `Failed to delete player: ${response.status} ${response.statusText}`;
+        throw new Error(errorMessage);
+      }
+    } catch (error) {
+      console.error('Error deleting player:', error);
+      throw error;
+    }
   }
 };

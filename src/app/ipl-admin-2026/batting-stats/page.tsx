@@ -125,24 +125,32 @@ const BattingStatsPage = () => {
 
   const handleSavePlayer = async () => {
     try {
+      // Prepare stats object with proper type conversions
+      const stats = {
+        ...editingPlayer.stats, // Preserve existing stats
+        matches: editForm.stats.matches === '' ? (editingPlayer.stats?.matches || 0) : (typeof editForm.stats.matches === 'number' ? editForm.stats.matches : parseInt(editForm.stats.matches) || 0),
+        battingInnings: editForm.stats.battingInnings === '' ? (editingPlayer.stats?.battingInnings || 0) : (typeof editForm.stats.battingInnings === 'number' ? editForm.stats.battingInnings : parseInt(editForm.stats.battingInnings) || 0),
+        notOuts: editForm.stats.notOuts === '' ? (editingPlayer.stats?.notOuts || 0) : (typeof editForm.stats.notOuts === 'number' ? editForm.stats.notOuts : parseInt(editForm.stats.notOuts) || 0),
+        runs: editForm.stats.runs === '' ? (editingPlayer.stats?.runs || 0) : (typeof editForm.stats.runs === 'number' ? editForm.stats.runs : parseInt(editForm.stats.runs) || 0),
+        ballsFaced: editForm.stats.ballsFaced === '' ? (editingPlayer.stats?.ballsFaced || 0) : (typeof editForm.stats.ballsFaced === 'number' ? editForm.stats.ballsFaced : parseInt(editForm.stats.ballsFaced) || 0),
+        highest: editForm.stats.highest === '' ? (editingPlayer.stats?.highest || 0) : (typeof editForm.stats.highest === 'number' ? editForm.stats.highest : parseInt(editForm.stats.highest) || 0),
+        fours: editForm.stats.fours === '' ? (editingPlayer.stats?.fours || 0) : (typeof editForm.stats.fours === 'number' ? editForm.stats.fours : parseInt(editForm.stats.fours) || 0),
+        sixes: editForm.stats.sixes === '' ? (editingPlayer.stats?.sixes || 0) : (typeof editForm.stats.sixes === 'number' ? editForm.stats.sixes : parseInt(editForm.stats.sixes) || 0),
+        fifties: editForm.stats.fifties === '' ? (editingPlayer.stats?.fifties || 0) : (typeof editForm.stats.fifties === 'number' ? editForm.stats.fifties : parseInt(editForm.stats.fifties) || 0),
+        hundreds: editForm.stats.hundreds === '' ? (editingPlayer.stats?.hundreds || 0) : (typeof editForm.stats.hundreds === 'number' ? editForm.stats.hundreds : parseInt(editForm.stats.hundreds) || 0),
+        battingAverage: editForm.stats.battingAverage === '' ? (editingPlayer.stats?.battingAverage || '') : (editForm.stats.battingAverage || ''),
+        battingStrikeRate: editForm.stats.battingStrikeRate === '' ? (editingPlayer.stats?.battingStrikeRate || '') : (editForm.stats.battingStrikeRate || '')
+      };
+
       const updatedPlayer = {
-        ...editingPlayer,
-        ...editForm,
-        stats: {
-          ...editingPlayer.stats,
-          matches: editForm.stats.matches === '' ? 0 : (typeof editForm.stats.matches === 'number' ? editForm.stats.matches : parseInt(editForm.stats.matches) || 0),
-          battingInnings: editForm.stats.battingInnings === '' ? 0 : (typeof editForm.stats.battingInnings === 'number' ? editForm.stats.battingInnings : parseInt(editForm.stats.battingInnings) || 0),
-          notOuts: editForm.stats.notOuts === '' ? 0 : (typeof editForm.stats.notOuts === 'number' ? editForm.stats.notOuts : parseInt(editForm.stats.notOuts) || 0),
-          runs: editForm.stats.runs === '' ? 0 : (typeof editForm.stats.runs === 'number' ? editForm.stats.runs : parseInt(editForm.stats.runs) || 0),
-          ballsFaced: editForm.stats.ballsFaced === '' ? 0 : (typeof editForm.stats.ballsFaced === 'number' ? editForm.stats.ballsFaced : parseInt(editForm.stats.ballsFaced) || 0),
-          highest: editForm.stats.highest === '' ? 0 : (typeof editForm.stats.highest === 'number' ? editForm.stats.highest : parseInt(editForm.stats.highest) || 0),
-          fours: editForm.stats.fours === '' ? 0 : (typeof editForm.stats.fours === 'number' ? editForm.stats.fours : parseInt(editForm.stats.fours) || 0),
-          sixes: editForm.stats.sixes === '' ? 0 : (typeof editForm.stats.sixes === 'number' ? editForm.stats.sixes : parseInt(editForm.stats.sixes) || 0),
-          fifties: editForm.stats.fifties === '' ? 0 : (typeof editForm.stats.fifties === 'number' ? editForm.stats.fifties : parseInt(editForm.stats.fifties) || 0),
-          hundreds: editForm.stats.hundreds === '' ? 0 : (typeof editForm.stats.hundreds === 'number' ? editForm.stats.hundreds : parseInt(editForm.stats.hundreds) || 0),
-          battingAverage: editForm.stats.battingAverage || '',
-          battingStrikeRate: editForm.stats.battingStrikeRate || ''
-        }
+        id: editingPlayer.id,
+        name: editForm.name || editingPlayer.name,
+        role: editForm.role || editingPlayer.role,
+        age: editForm.age || editingPlayer.age,
+        jerseyNumber: editForm.jerseyNumber || editingPlayer.jerseyNumber,
+        teamId: editingPlayer.teamId,
+        league: editingPlayer.league,
+        stats: stats
       };
 
       await updatePlayer(editingPlayer.id, updatedPlayer);
@@ -155,7 +163,7 @@ const BattingStatsPage = () => {
       setEditingPlayer(null);
     } catch (error) {
       console.error('Failed to update player:', error);
-      alert('Failed to update player. Please try again.');
+      alert(`Failed to update player: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`);
     }
   };
 

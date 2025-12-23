@@ -123,13 +123,31 @@ const BowlingStatsPage = () => {
 
   const handleSavePlayer = async () => {
     try {
+      // Prepare stats object with proper type conversions
+      const stats = {
+        ...editingPlayer.stats, // Preserve existing stats
+        matches: editForm.stats.matches === '' ? (editingPlayer.stats?.matches || 0) : (typeof editForm.stats.matches === 'number' ? editForm.stats.matches : parseInt(editForm.stats.matches) || 0),
+        bowlingInnings: editForm.stats.bowlingInnings === '' ? (editingPlayer.stats?.bowlingInnings || 0) : (typeof editForm.stats.bowlingInnings === 'number' ? editForm.stats.bowlingInnings : parseInt(editForm.stats.bowlingInnings) || 0),
+        balls: editForm.stats.balls === '' ? (editingPlayer.stats?.balls || 0) : (typeof editForm.stats.balls === 'number' ? editForm.stats.balls : parseInt(editForm.stats.balls) || 0),
+        maidens: editForm.stats.maidens === '' ? (editingPlayer.stats?.maidens || 0) : (typeof editForm.stats.maidens === 'number' ? editForm.stats.maidens : parseInt(editForm.stats.maidens) || 0),
+        wickets: editForm.stats.wickets === '' ? (editingPlayer.stats?.wickets || 0) : (typeof editForm.stats.wickets === 'number' ? editForm.stats.wickets : parseInt(editForm.stats.wickets) || 0),
+        runsConceded: editForm.stats.runsConceded === '' ? (editingPlayer.stats?.runsConceded || 0) : (typeof editForm.stats.runsConceded === 'number' ? editForm.stats.runsConceded : parseInt(editForm.stats.runsConceded) || 0),
+        bowlingAverage: editForm.stats.bowlingAverage === '' ? (editingPlayer.stats?.bowlingAverage || '') : (editForm.stats.bowlingAverage || ''),
+        bowlingStrikeRate: editForm.stats.bowlingStrikeRate === '' ? (editingPlayer.stats?.bowlingStrikeRate || '') : (editForm.stats.bowlingStrikeRate || ''),
+        economy: editForm.stats.economy === '' ? (editingPlayer.stats?.economy || '') : (editForm.stats.economy || ''),
+        bestBowling: editForm.stats.bestBowling === '' ? (editingPlayer.stats?.bestBowling || '') : (editForm.stats.bestBowling || ''),
+        fiveWickets: editForm.stats.fiveWickets === '' ? (editingPlayer.stats?.fiveWickets || 0) : (typeof editForm.stats.fiveWickets === 'number' ? editForm.stats.fiveWickets : parseInt(editForm.stats.fiveWickets) || 0)
+      };
+
       const updatedPlayer = {
-        ...editingPlayer,
-        ...editForm,
-        stats: {
-          ...editingPlayer.stats,
-          ...editForm.stats
-        }
+        id: editingPlayer.id,
+        name: editForm.name || editingPlayer.name,
+        role: editForm.role || editingPlayer.role,
+        age: editForm.age || editingPlayer.age,
+        jerseyNumber: editForm.jerseyNumber || editingPlayer.jerseyNumber,
+        teamId: editingPlayer.teamId,
+        league: editingPlayer.league,
+        stats: stats
       };
 
       await updatePlayer(editingPlayer.id, updatedPlayer);
@@ -142,7 +160,7 @@ const BowlingStatsPage = () => {
       setEditingPlayer(null);
     } catch (error) {
       console.error('Failed to update player:', error);
-      alert('Failed to update player. Please try again.');
+      alert(`Failed to update player: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.`);
     }
   };
 
