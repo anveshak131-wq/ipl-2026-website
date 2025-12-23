@@ -71,14 +71,20 @@ const BowlingStatsPage = () => {
   const loadData = async () => {
     try {
       setLoading(true);
+      console.log('Loading bowling data for league:', currentLeague);
+      
       const [playersData, teamsData] = await Promise.all([
         api.getPlayers(currentLeague),
         api.getTeams(currentLeague)
       ]);
+      
+      console.log('Bowling - Players loaded:', playersData.length, playersData);
+      console.log('Bowling - Teams loaded:', teamsData.length, teamsData);
+      
       setPlayers(playersData);
       setTeams(teamsData);
     } catch (error) {
-      console.error('Failed to load data:', error);
+      console.error('Failed to load bowling data:', error);
     } finally {
       setLoading(false);
     }
@@ -89,6 +95,8 @@ const BowlingStatsPage = () => {
     team,
     players: players.filter(player => player.teamId === team.id)
   })).filter(teamGroup => teamGroup.players.length > 0);
+
+  console.log('Bowling - Players by team:', playersByTeam);
 
   const handleEditPlayer = (player: Player) => {
     setEditingPlayer(player);

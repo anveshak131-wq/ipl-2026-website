@@ -70,10 +70,16 @@ const BattingStatsPage = () => {
   const loadData = async () => {
     try {
       setLoading(true);
+      console.log('Loading data for league:', currentLeague);
+      
       const [playersData, teamsData] = await Promise.all([
         api.getPlayers(currentLeague),
         api.getTeams(currentLeague)
       ]);
+      
+      console.log('Players loaded:', playersData.length, playersData);
+      console.log('Teams loaded:', teamsData.length, teamsData);
+      
       setPlayers(playersData);
       setTeams(teamsData);
     } catch (error) {
@@ -88,6 +94,8 @@ const BattingStatsPage = () => {
     team,
     players: players.filter(player => player.teamId === team.id)
   })).filter(teamGroup => teamGroup.players.length > 0);
+
+  console.log('Players by team:', playersByTeam);
 
   const handleEditPlayer = (player: Player) => {
     setEditingPlayer(player);
