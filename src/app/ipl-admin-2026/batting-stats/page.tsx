@@ -123,11 +123,9 @@ const BattingStatsPage = () => {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-900">
-      <AdminSidebar />
-      <div className="flex-1 p-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Batting Statistics</h1>
-        <p className="text-gray-400 mb-8">Manage player batting statistics by team</p>
+    <div className="p-8">
+      <h1 className="text-3xl font-bold text-white mb-2">Batting Statistics</h1>
+      <p className="text-gray-400 mb-8">Manage player batting statistics by team</p>
 
         {playersByTeam.length === 0 ? (
           <div className="text-center py-12">
@@ -211,8 +209,6 @@ const BattingStatsPage = () => {
           </div>
         ))
       )}
-    </div>
-  </div>
 
   {/* Edit Player Modal */}
   {showEditModal && (
