@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { api } from '@/lib/data';
 
 const BowlingStatsPage = () => {
   const [teams, setTeams] = useState([]);
@@ -16,13 +15,48 @@ const BowlingStatsPage = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [playersData, teamsData] = await Promise.all([
-        api.getPlayers('ipl'),
-        api.getTeams('ipl')
-      ]);
       
-      setPlayers(playersData);
-      setTeams(teamsData);
+      // Use backup data from KV storage
+      const response = await fetch('/api/admin/backup-players?action=list');
+      if (!response.ok) {
+        throw new Error('Failed to load backups');
+      }
+      
+      const data = await response.json();
+      
+      if (data.backups && data.backups.length > 0) {
+        // Get the latest backup
+        const latestBackup = data.backups[0];
+        
+        // Restore the backup to get player data
+        const restoreResponse = await fetch(`/api/admin/backup-players?action=restore&backupKey=${encodeURIComponent(latestBackup.key)}`);
+        if (!restoreResponse.ok) {
+          throw new Error('Failed to restore backup');
+        }
+        
+        const restoreData = await restoreResponse.json();
+        
+        // Filter for IPL players only
+        const iplPlayers = restoreData.restored.players.filter(player => 
+          (player.league || 'ipl') === 'ipl'
+        );
+        
+        setPlayers(iplPlayers);
+        
+        // Create teams from player data
+        const uniqueTeams = [...new Set(iplPlayers.map(player => player.teamId))].map(teamId => {
+          const player = iplPlayers.find(p => p.teamId === teamId);
+          return {
+            id: teamId,
+            name: player.teamId, // Use teamId as name for now
+            shortName: player.teamId.substring(0, 3).toUpperCase()
+          };
+        });
+        
+        setTeams(uniqueTeams);
+      } else {
+        setError('No backup data found');
+      }
     } catch (error) {
       console.error('Failed to load data:', error);
       setError('Failed to load data');
@@ -115,22 +149,22 @@ const BowlingStatsPage = () => {
                             {player.age || '-'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                            {player.stats.matches}
+                            {player.stats?.matches || 0}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                            {player.stats.wickets}
+                            {player.stats?.wickets || 0}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                            {player.stats.bowlingAverage || '-'}
+                            {player.stats?.bowlingAverage || '-'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                            {player.stats.economy || '-'}
+                            {player.stats?.economy || '-'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                            {player.stats.bestBowling || '-'}
+                            {player.stats?.bestBowling || '-'}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                            {player.stats.fiveWickets || 0}
+                            {player.stats?.fiveWickets || 0}
                           </td>
                         </tr>
                       ))}
