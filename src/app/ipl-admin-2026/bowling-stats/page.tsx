@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAdminData } from '@/contexts/AdminDataContext';
-import PlayersAdminSidebar from '@/components/admin/PlayersAdminSidebar';
+import AdminSidebar from '@/components/admin/AdminSidebar';
 
 const BowlingStatsPage = () => {
   const { players, teams, loading, error, updatePlayer } = useAdminData();
@@ -145,7 +145,7 @@ const BowlingStatsPage = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-900">
-      <PlayersAdminSidebar currentPage="/ipl-admin-2026/bowling-stats" />
+      <AdminSidebar currentPage="/ipl-admin-2026/bowling-stats" />
       <div className="flex-1 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 min-h-screen">
         {/* Hero Header */}
         <div className="bg-gradient-to-r from-green-600 via-blue-600 to-green-700 p-8 rounded-b-3xl shadow-2xl">
