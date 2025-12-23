@@ -1,8 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useLeague } from '@/contexts/LeagueContext';
+import { api } from '@/lib/data';
 
 const BowlingStatsPage = () => {
+  const { currentLeague } = useLeague();
   const [teams, setTeams] = useState([]);
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -10,53 +13,18 @@ const BowlingStatsPage = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [currentLeague]);
 
   const loadData = async () => {
     try {
       setLoading(true);
       
-      // Use backup data from KV storage
-      const response = await fetch('/api/admin/backup-players?action=list');
-      if (!response.ok) {
-        throw new Error('Failed to load backups');
-      }
+      // Use the same API approach as the players page
+      const playersData = await api.getPlayers(undefined, currentLeague);
+      const teamsData = await api.getTeams(currentLeague);
       
-      const data = await response.json();
-      
-      if (data.backups && data.backups.length > 0) {
-        // Get the latest backup
-        const latestBackup = data.backups[0];
-        
-        // Restore the backup to get player data
-        const restoreResponse = await fetch(`/api/admin/backup-players?action=restore&backupKey=${encodeURIComponent(latestBackup.key)}`);
-        if (!restoreResponse.ok) {
-          throw new Error('Failed to restore backup');
-        }
-        
-        const restoreData = await restoreResponse.json();
-        
-        // Filter for IPL players only
-        const iplPlayers = restoreData.restored.players.filter(player => 
-          (player.league || 'ipl') === 'ipl'
-        );
-        
-        setPlayers(iplPlayers);
-        
-        // Create teams from player data
-        const uniqueTeams = [...new Set(iplPlayers.map(player => player.teamId))].map(teamId => {
-          const player = iplPlayers.find(p => p.teamId === teamId);
-          return {
-            id: teamId,
-            name: player.teamId, // Use teamId as name for now
-            shortName: player.teamId.substring(0, 3).toUpperCase()
-          };
-        });
-        
-        setTeams(uniqueTeams);
-      } else {
-        setError('No backup data found');
-      }
+      setPlayers(playersData);
+      setTeams(teamsData);
     } catch (error) {
       console.error('Failed to load data:', error);
       setError('Failed to load data');
