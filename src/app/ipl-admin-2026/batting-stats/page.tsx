@@ -32,6 +32,23 @@ const BattingStatsPage = () => {
     // Data is automatically loaded by the context
   }, []);
 
+  // Handle ESC key to close modal
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showEditModal) {
+        handleCancelEdit();
+      }
+    };
+
+    if (showEditModal) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showEditModal]);
+
   const handleEditPlayer = (player) => {
     setEditingPlayer(player);
     setEditForm({
