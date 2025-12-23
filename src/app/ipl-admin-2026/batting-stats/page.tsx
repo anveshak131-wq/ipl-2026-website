@@ -125,21 +125,65 @@ const BattingStatsPage = () => {
 
   const handleSavePlayer = async () => {
     try {
+      // Extract numeric values for calculations
+      const runs = editForm.stats.runs === '' ? (editingPlayer.stats?.runs || 0) : (typeof editForm.stats.runs === 'number' ? editForm.stats.runs : parseInt(editForm.stats.runs) || 0);
+      const battingInnings = editForm.stats.battingInnings === '' ? (editingPlayer.stats?.battingInnings || 0) : (typeof editForm.stats.battingInnings === 'number' ? editForm.stats.battingInnings : parseInt(editForm.stats.battingInnings) || 0);
+      const notOuts = editForm.stats.notOuts === '' ? (editingPlayer.stats?.notOuts || 0) : (typeof editForm.stats.notOuts === 'number' ? editForm.stats.notOuts : parseInt(editForm.stats.notOuts) || 0);
+      const ballsFaced = editForm.stats.ballsFaced === '' ? (editingPlayer.stats?.ballsFaced || 0) : (typeof editForm.stats.ballsFaced === 'number' ? editForm.stats.ballsFaced : parseInt(editForm.stats.ballsFaced) || 0);
+
+      // Calculate average: runs / (battingInnings - notOuts)
+      // Only calculate if we have valid data (battingInnings - notOuts > 0)
+      const dismissals = battingInnings - notOuts;
+      let calculatedAverage = 0;
+      if (dismissals > 0 && runs > 0) {
+        calculatedAverage = runs / dismissals;
+      }
+
+      // Calculate strike rate: (runs * 100) / ballsFaced
+      // Only calculate if we have valid data (ballsFaced > 0)
+      let calculatedStrikeRate = 0;
+      if (ballsFaced > 0 && runs > 0) {
+        calculatedStrikeRate = (runs * 100) / ballsFaced;
+      }
+
+      // Use form input if provided, otherwise use calculated values, otherwise use existing values
+      const battingAverageStr = editForm.stats.battingAverage !== '' 
+        ? editForm.stats.battingAverage 
+        : (calculatedAverage > 0 ? calculatedAverage.toFixed(2) : (editingPlayer.stats?.battingAverage || ''));
+      
+      const battingStrikeRateStr = editForm.stats.battingStrikeRate !== '' 
+        ? editForm.stats.battingStrikeRate 
+        : (calculatedStrikeRate > 0 ? calculatedStrikeRate.toFixed(1) : (editingPlayer.stats?.battingStrikeRate || ''));
+
+      // Convert string inputs to numbers for average and strikeRate fields
+      // If form has manual input, parse it; otherwise use calculated value
+      const averageNum = editForm.stats.battingAverage !== '' && editForm.stats.battingAverage !== '0' && editForm.stats.battingAverage !== '-'
+        ? parseFloat(editForm.stats.battingAverage) || calculatedAverage
+        : calculatedAverage;
+      
+      const strikeRateNum = editForm.stats.battingStrikeRate !== '' && editForm.stats.battingStrikeRate !== '0' && editForm.stats.battingStrikeRate !== '-'
+        ? parseFloat(editForm.stats.battingStrikeRate) || calculatedStrikeRate
+        : calculatedStrikeRate;
+
       // Prepare stats object with proper type conversions
       const stats = {
         ...editingPlayer.stats, // Preserve existing stats
         matches: editForm.stats.matches === '' ? (editingPlayer.stats?.matches || 0) : (typeof editForm.stats.matches === 'number' ? editForm.stats.matches : parseInt(editForm.stats.matches) || 0),
-        battingInnings: editForm.stats.battingInnings === '' ? (editingPlayer.stats?.battingInnings || 0) : (typeof editForm.stats.battingInnings === 'number' ? editForm.stats.battingInnings : parseInt(editForm.stats.battingInnings) || 0),
-        notOuts: editForm.stats.notOuts === '' ? (editingPlayer.stats?.notOuts || 0) : (typeof editForm.stats.notOuts === 'number' ? editForm.stats.notOuts : parseInt(editForm.stats.notOuts) || 0),
-        runs: editForm.stats.runs === '' ? (editingPlayer.stats?.runs || 0) : (typeof editForm.stats.runs === 'number' ? editForm.stats.runs : parseInt(editForm.stats.runs) || 0),
-        ballsFaced: editForm.stats.ballsFaced === '' ? (editingPlayer.stats?.ballsFaced || 0) : (typeof editForm.stats.ballsFaced === 'number' ? editForm.stats.ballsFaced : parseInt(editForm.stats.ballsFaced) || 0),
+        battingInnings: battingInnings,
+        notOuts: notOuts,
+        runs: runs,
+        ballsFaced: ballsFaced,
         highest: editForm.stats.highest === '' ? (editingPlayer.stats?.highest || 0) : (typeof editForm.stats.highest === 'number' ? editForm.stats.highest : parseInt(editForm.stats.highest) || 0),
         fours: editForm.stats.fours === '' ? (editingPlayer.stats?.fours || 0) : (typeof editForm.stats.fours === 'number' ? editForm.stats.fours : parseInt(editForm.stats.fours) || 0),
         sixes: editForm.stats.sixes === '' ? (editingPlayer.stats?.sixes || 0) : (typeof editForm.stats.sixes === 'number' ? editForm.stats.sixes : parseInt(editForm.stats.sixes) || 0),
         fifties: editForm.stats.fifties === '' ? (editingPlayer.stats?.fifties || 0) : (typeof editForm.stats.fifties === 'number' ? editForm.stats.fifties : parseInt(editForm.stats.fifties) || 0),
         hundreds: editForm.stats.hundreds === '' ? (editingPlayer.stats?.hundreds || 0) : (typeof editForm.stats.hundreds === 'number' ? editForm.stats.hundreds : parseInt(editForm.stats.hundreds) || 0),
-        battingAverage: editForm.stats.battingAverage === '' ? (editingPlayer.stats?.battingAverage || '') : (editForm.stats.battingAverage || ''),
-        battingStrikeRate: editForm.stats.battingStrikeRate === '' ? (editingPlayer.stats?.battingStrikeRate || '') : (editForm.stats.battingStrikeRate || '')
+        // String versions for admin display
+        battingAverage: battingAverageStr,
+        battingStrikeRate: battingStrikeRateStr,
+        // Numeric versions for end-user pages
+        average: averageNum,
+        strikeRate: strikeRateNum
       };
 
       const updatedPlayer = {
