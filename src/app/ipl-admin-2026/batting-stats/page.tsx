@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useAdminData } from '@/contexts/AdminDataContext';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 
 const BattingStatsPage = () => {
   const { players, teams, loading, error, updatePlayer } = useAdminData();
