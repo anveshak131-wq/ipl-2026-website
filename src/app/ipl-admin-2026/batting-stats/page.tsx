@@ -1,16 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useLeague } from '@/contexts/LeagueContext';
-import { api } from '@/lib/data';
+import { useAdminData } from '@/contexts/AdminDataContext';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 
 const BattingStatsPage = () => {
-  const { currentLeague } = useLeague();
-  const [teams, setTeams] = useState([]);
-  const [players, setPlayers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { players, teams, loading, error, updatePlayer } = useAdminData();
   const [editingPlayer, setEditingPlayer] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editForm, setEditForm] = useState({
@@ -29,26 +24,8 @@ const BattingStatsPage = () => {
   });
 
   useEffect(() => {
-    loadData();
-  }, [currentLeague]);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      
-      // Use the same API approach as the players page
-      const playersData = await api.getPlayers(undefined, currentLeague);
-      const teamsData = await api.getTeams(currentLeague);
-      
-      setPlayers(playersData);
-      setTeams(teamsData);
-    } catch (error) {
-      console.error('Failed to load data:', error);
-      setError('Failed to load data');
-    } finally {
-      setLoading(false);
-    }
-  };
+    // Data is automatically loaded by the context
+  }, []);
 
   const handleEditPlayer = (player) => {
     setEditingPlayer(player);
@@ -71,7 +48,7 @@ const BattingStatsPage = () => {
 
   const handleSavePlayer = async () => {
     try {
-      // Update the player data
+      // Update the player data using context
       const updatedPlayer = {
         ...editingPlayer,
         ...editForm,
@@ -81,17 +58,18 @@ const BattingStatsPage = () => {
         }
       };
 
-      // Call API to update player
-      await api.updatePlayer(updatedPlayer.id, updatedPlayer);
+      await updatePlayer(editingPlayer.id, updatedPlayer);
       
-      // Reload data to reflect changes
-      await loadData();
+      // Dispatch custom event to notify other pages
+      window.dispatchEvent(new CustomEvent('admin-data-updated', {
+        detail: { type: 'player-updated', playerId: editingPlayer.id }
+      }));
       
       setShowEditModal(false);
       setEditingPlayer(null);
     } catch (error) {
       console.error('Failed to update player:', error);
-      setError('Failed to update player');
+      // Error is already handled by the context
     }
   };
 

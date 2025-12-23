@@ -6,6 +6,7 @@ import { Search } from 'lucide-react';
 import AdminLogin from '@/components/admin/AdminLogin';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { LeagueProvider } from '@/contexts/LeagueContext';
+import { AdminDataProvider } from '@/contexts/AdminDataContext';
 
 export default function AdminLayout({
   children,
@@ -83,7 +84,8 @@ export default function AdminLayout({
   // Show admin layout with sidebar for authenticated users
   return (
     <LeagueProvider>
-      <div className="min-h-screen bg-ipl-dark flex flex-col">
+      <AdminDataProvider>
+        <div className="min-h-screen bg-ipl-dark flex flex-col">
         <div className="flex-1 flex flex-col">
           <div className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur-sm border-b border-white/10">
             <div className="px-6 py-3">
@@ -138,6 +140,7 @@ export default function AdminLayout({
           </div>
         )}
       </div>
+      </AdminDataProvider>
     </LeagueProvider>
   );
 }

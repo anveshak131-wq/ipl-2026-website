@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLeague } from '@/contexts/LeagueContext';
+import { useAdminData } from '@/contexts/AdminDataContext';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import ModernDialog from '@/components/admin/ModernDialog';
 import LeagueSwitch from '@/components/admin/LeagueSwitch';
@@ -79,10 +80,9 @@ const CURRENT_SEASON = 2027;
 export default function AdminPlayers() {
   const router = useRouter();
   const { currentLeague } = useLeague();
+  const { players, teams, loading, error, updatePlayer, refreshData } = useAdminData();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [teams, setTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
