@@ -3,12 +3,14 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdminData } from '@/contexts/AdminDataContext';
+import { useLeague } from '@/contexts/LeagueContext';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import PlayersAdminSidebar from '@/components/admin/PlayersAdminSidebar';
 import { Search, Filter, Edit2, X, TrendingDown, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Target as TargetIcon, Award as AwardIcon, Zap as ZapIcon, Hash, Activity, Gauge, LayoutGrid, Table2 } from 'lucide-react';
 
 const BowlingStatsPage = () => {
   const router = useRouter();
+  const { currentLeague } = useLeague();
   const { players, teams, loading, error, updatePlayer } = useAdminData();
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -283,14 +285,16 @@ const BowlingStatsPage = () => {
     }
   };
 
-  // Filter and sort players
+  // Filter and sort players - Only show IPL players (WPL doesn't need stats)
   const filteredAndSortedPlayers = useMemo(() => {
     let filtered = players.filter(player => {
+      // Only show IPL players
+      const isIPL = (player.league || 'ipl') === 'ipl';
       const matchesSearch = player.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            player.teamId?.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesTeam = selectedTeam === 'all' || player.teamId === selectedTeam;
       // Show all players, not just those with existing stats
-      return matchesSearch && matchesTeam;
+      return isIPL && matchesSearch && matchesTeam;
     });
 
     filtered.sort((a, b) => {
@@ -337,7 +341,7 @@ const BowlingStatsPage = () => {
 
   // Calculate summary stats
   const summaryStats = useMemo(() => {
-    const activeBowlers = players.filter(p => p.stats?.bowlingInnings > 0 || p.stats?.wickets > 0);
+    const activeBowlers = players.filter(p => (p.league || 'ipl') === 'ipl' && (p.stats?.bowlingInnings > 0 || p.stats?.wickets > 0));
     const totalWickets = activeBowlers.reduce((sum, p) => sum + (p.stats?.wickets || 0), 0);
     const totalFiveWickets = activeBowlers.reduce((sum, p) => sum + (p.stats?.fiveWickets || 0), 0);
     const totalMaidens = activeBowlers.reduce((sum, p) => sum + (p.stats?.maidens || 0), 0);
@@ -382,6 +386,31 @@ const BowlingStatsPage = () => {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-950">
         <div className="text-red-400 text-xl">{error}</div>
+      </div>
+    );
+  }
+
+  // Hide bowling stats page for WPL (stats not needed)
+  if (currentLeague === 'wpl') {
+    return (
+      <div className="flex min-h-screen bg-gray-950">
+        {userRole === 'players_admin' ? (
+          <PlayersAdminSidebar currentPage="/ipl-admin-2026/bowling-stats" />
+        ) : (
+          <AdminSidebar currentPage="/ipl-admin-2026/bowling-stats" />
+        )}
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center p-8">
+            <div className="text-6xl mb-4">🎯</div>
+            <h1 className="text-3xl font-bold text-white mb-4">Bowling Statistics Not Available</h1>
+            <p className="text-gray-400 text-lg mb-6">
+              Bowling statistics are not required for WPL players.
+            </p>
+            <p className="text-gray-500 text-sm">
+              Switch to IPL league to view bowling statistics.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }
