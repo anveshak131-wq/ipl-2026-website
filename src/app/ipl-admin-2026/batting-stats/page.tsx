@@ -148,39 +148,145 @@ const BattingStatsPage = () => {
   return (
     <div className="flex min-h-screen bg-gray-900">
       <AdminSidebar />
-      <div className="flex-1 p-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Batting Statistics</h1>
-        <p className="text-gray-400 mb-8">Manage player batting statistics by team</p>
+      <div className="flex-1 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 min-h-screen">
+        {/* Hero Header */}
+        <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 p-8 rounded-b-3xl shadow-2xl">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-4xl lg:text-5xl font-bold text-white mb-3 flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white bg-opacity-20 backdrop-blur rounded-xl flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  </div>
+                  Batting Statistics
+                </h1>
+                <p className="text-blue-100 text-lg">Manage comprehensive batting statistics and player performance</p>
+              </div>
+              <div className="flex items-center space-x-4">
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-white">{players.filter(p => p.stats?.battingInnings > 0).length}</div>
+                  <div className="text-blue-100 text-sm">Active Batsmen</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-white">{teams.length}</div>
+                  <div className="text-blue-100 text-sm">Teams</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto p-8">
+          {/* Stats Overview Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl p-6 shadow-xl border border-blue-500 border-opacity-30">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-blue-100 text-sm font-medium">Total Runs</div>
+                <svg className="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              </div>
+              <div className="text-3xl font-bold text-white">
+                {players.reduce((sum, p) => sum + (p.stats?.runs || 0), 0).toLocaleString()}
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl p-6 shadow-xl border border-purple-500 border-opacity-30">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-purple-100 text-sm font-medium">Highest Score</div>
+                <svg className="w-5 h-5 text-purple-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="text-3xl font-bold text-white">
+                {Math.max(...players.map(p => p.stats?.highest || 0), 0)}
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-pink-600 to-red-600 rounded-xl p-6 shadow-xl border border-pink-500 border-opacity-30">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-pink-100 text-sm font-medium">Centuries</div>
+                <svg className="w-5 h-5 text-pink-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                </svg>
+              </div>
+              <div className="text-3xl font-bold text-white">
+                {players.reduce((sum, p) => sum + (p.stats?.hundreds || 0), 0)}
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-red-600 to-orange-600 rounded-xl p-6 shadow-xl border border-red-500 border-opacity-30">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-red-100 text-sm font-medium">Half Centuries</div>
+                <svg className="w-5 h-5 text-red-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <div className="text-3xl font-bold text-white">
+                {players.reduce((sum, p) => sum + (p.stats?.fifties || 0), 0)}
+              </div>
+            </div>
+          </div>
 
       {playersByTeam.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-400 text-lg">No players found</p>
-          <p className="text-gray-500 mt-2">Players will appear here once they are added to teams</p>
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-16 text-center border border-gray-700">
+          <div className="w-20 h-20 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg className="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </div>
+          <h3 className="text-2xl font-bold text-white mb-3">No Batting Statistics Available</h3>
+          <p className="text-gray-400 text-lg mb-6">Players will appear here once they are added to teams with batting statistics</p>
+          <div className="flex justify-center">
+            <a href="/ipl-admin-2026/players" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Add Players</span>
+            </a>
+          </div>
         </div>
       ) : (
         playersByTeam.map(({ team, players: teamPlayers }) => (
           <div key={team.id} className="mb-8">
-            <div className="flex items-center mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                {team.shortName}
+            <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl p-6 border border-gray-700 shadow-xl">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-lg border border-blue-400 border-opacity-30">
+                    {team.shortName}
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">{team.name}</h2>
+                    <p className="text-gray-400 text-sm mt-1">{teamPlayers.length} players • {teamPlayers.filter(p => p.stats?.battingInnings > 0).length} active batsmen</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setSelectedTeam(team);
+                    setShowTeamPanel(true);
+                  }}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <span>View Team Panel</span>
+                </button>
               </div>
-              <h2 className="text-2xl font-bold text-white ml-4">{team.name}</h2>
-              <button
-                onClick={() => {
-                  setSelectedTeam(team);
-                  setShowTeamPanel(true);
-                }}
-                className="ml-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
-              >
-                View Team Panel
-              </button>
-            </div>
 
-            <div className="bg-gray-800 rounded-lg p-6 text-center">
-              <p className="text-gray-400">Click "View Team Panel" to see {teamPlayers.length} players in this team</p>
+              <div className="bg-gradient-to-br from-gray-700 to-gray-800 rounded-xl p-8 text-center border border-gray-600">
+                <div className="w-16 h-16 bg-gray-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </div>
+                <p className="text-gray-300 text-lg font-medium mb-2">Team Statistics Panel</p>
+                <p className="text-gray-400">Click "View Team Panel" to see detailed batting statistics for all {teamPlayers.length} players</p>
+              </div>
             </div>
           </div>
-        ))
+        ))}
       )}
 
       {/* Edit Player Modal */}

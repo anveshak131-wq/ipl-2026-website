@@ -146,39 +146,145 @@ const BowlingStatsPage = () => {
   return (
     <div className="flex min-h-screen bg-gray-900">
       <AdminSidebar />
-      <div className="flex-1 p-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Bowling Statistics</h1>
-        <p className="text-gray-400 mb-8">Manage player bowling statistics by team</p>
-
-      {playersByTeam.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-400 text-lg">No players found</p>
-          <p className="text-gray-500 mt-2">Players will appear here once they are added to teams</p>
-        </div>
-      ) : (
-        playersByTeam.map(({ team, players: teamPlayers }) => (
-          <div key={team.id} className="mb-8">
-            <div className="flex items-center mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                {team.shortName}
+      <div className="flex-1 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 min-h-screen">
+        {/* Hero Header */}
+        <div className="bg-gradient-to-r from-green-600 via-blue-600 to-green-700 p-8 rounded-b-3xl shadow-2xl">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-4xl lg:text-5xl font-bold text-white mb-3 flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white bg-opacity-20 backdrop-blur rounded-xl flex items-center justify-center">
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  Bowling Statistics
+                </h1>
+                <p className="text-green-100 text-lg">Manage comprehensive bowling statistics and player performance</p>
               </div>
-              <h2 className="text-2xl font-bold text-white ml-4">{team.name}</h2>
-              <button
-                onClick={() => {
-                  setSelectedTeam(team);
-                  setShowTeamPanel(true);
-                }}
-                className="ml-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
-              >
-                View Team Panel
-              </button>
-            </div>
-
-            <div className="bg-gray-800 rounded-lg p-6 text-center">
-              <p className="text-gray-400">Click "View Team Panel" to see {teamPlayers.length} players in this team</p>
+              <div className="flex items-center space-x-4">
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-white">{players.filter(p => p.stats?.bowlingInnings > 0).length}</div>
+                  <div className="text-green-100 text-sm">Active Bowlers</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-white">{teams.length}</div>
+                  <div className="text-green-100 text-sm">Teams</div>
+                </div>
+              </div>
             </div>
           </div>
-        ))
+        </div>
+
+        <div className="max-w-7xl mx-auto p-8">
+          {/* Stats Overview Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div className="bg-gradient-to-br from-green-600 to-blue-600 rounded-xl p-6 shadow-xl border border-green-500 border-opacity-30">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-green-100 text-sm font-medium">Total Wickets</div>
+                <svg className="w-5 h-5 text-green-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="text-3xl font-bold text-white">
+                {players.reduce((sum, p) => sum + (p.stats?.wickets || 0), 0).toLocaleString()}
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-blue-600 to-cyan-600 rounded-xl p-6 shadow-xl border border-blue-500 border-opacity-30">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-blue-100 text-sm font-medium">Best Economy</div>
+                <svg className="w-5 h-5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+              </div>
+              <div className="text-3xl font-bold text-white">
+                {Math.min(...players.filter(p => p.stats?.economy && p.stats?.economy !== '').map(p => parseFloat(p.stats.economy) || Infinity), 99.99).toFixed(2)}
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-cyan-600 to-teal-600 rounded-xl p-6 shadow-xl border border-cyan-500 border-opacity-30">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-cyan-100 text-sm font-medium">5-Wicket Hauls</div>
+                <svg className="w-5 h-5 text-cyan-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                </svg>
+              </div>
+              <div className="text-3xl font-bold text-white">
+                {players.reduce((sum, p) => sum + (p.stats?.fiveWickets || 0), 0)}
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-teal-600 to-green-600 rounded-xl p-6 shadow-xl border border-teal-500 border-opacity-30">
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-teal-100 text-sm font-medium">Maiden Overs</div>
+                <svg className="w-5 h-5 text-teal-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="text-3xl font-bold text-white">
+                {players.reduce((sum, p) => sum + (p.stats?.maidens || 0), 0)}
+              </div>
+            </div>
+          </div>
+
+      {playersByTeam.length === 0 ? (
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-16 text-center border border-gray-700">
+          <div className="w-20 h-20 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg className="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <h3 className="text-2xl font-bold text-white mb-3">No Bowling Statistics Available</h3>
+          <p className="text-gray-400 text-lg mb-6">Players will appear here once they are added to teams with bowling statistics</p>
+          <div className="flex justify-center">
+            <a href="/ipl-admin-2026/players" className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-2">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Add Players</span>
+            </a>
+          </div>
+        </div>
+      ) : (
+        {playersByTeam.map(({ team, players: teamPlayers }) => (
+          <div key={team.id} className="mb-8">
+            <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl p-6 border border-gray-700 shadow-xl">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-blue-600 rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-lg border border-green-400 border-opacity-30">
+                    {team.shortName}
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">{team.name}</h2>
+                    <p className="text-gray-400 text-sm mt-1">{teamPlayers.length} players • {teamPlayers.filter(p => p.stats?.bowlingInnings > 0).length} active bowlers</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setSelectedTeam(team);
+                    setShowTeamPanel(true);
+                  }}
+                  className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <span>View Team Panel</span>
+                </button>
+              </div>
+
+              <div className="bg-gradient-to-br from-gray-700 to-gray-800 rounded-xl p-8 text-center border border-gray-600">
+                <div className="w-16 h-16 bg-gray-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </div>
+                <p className="text-gray-300 text-lg font-medium mb-2">Team Statistics Panel</p>
+                <p className="text-gray-400">Click "View Team Panel" to see detailed bowling statistics for all {teamPlayers.length} players</p>
+              </div>
+            </div>
+          </div>
+        ))}
       )}
 
       {/* Edit Player Modal */}
