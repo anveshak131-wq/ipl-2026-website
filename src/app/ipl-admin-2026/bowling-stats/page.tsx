@@ -8,6 +8,8 @@ const BowlingStatsPage = () => {
   const { players, teams, loading, error, updatePlayer } = useAdminData();
   const [editingPlayer, setEditingPlayer] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedTeam, setSelectedTeam] = useState(null);
+  const [showTeamPanel, setShowTeamPanel] = useState(false);
   const [editForm, setEditForm] = useState({
     name: '',
     role: '',
@@ -161,6 +163,15 @@ const BowlingStatsPage = () => {
                 {team.shortName}
               </div>
               <h2 className="text-2xl font-bold text-white ml-4">{team.name}</h2>
+              <button
+                onClick={() => {
+                  setSelectedTeam(team);
+                  setShowTeamPanel(true);
+                }}
+                className="ml-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+              >
+                View Team Panel
+              </button>
             </div>
 
             <div className="bg-gray-800 rounded-lg overflow-hidden">
@@ -433,6 +444,75 @@ const BowlingStatsPage = () => {
                 Save Changes
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Team Panel */}
+      {showTeamPanel && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-white">
+                {selectedTeam?.name} - Players
+              </h2>
+              <button
+                onClick={() => setShowTeamPanel(false)}
+                className="text-gray-400 hover:text-white text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {players
+                .filter(player => player.teamId === selectedTeam?.id)
+                .map((player) => (
+                  <div key={player.id} className="bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition-colors">
+                    <div className="flex items-center mb-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                        {player.name.charAt(0)}
+                      </div>
+                      <div className="ml-3">
+                        <div className="text-white font-medium">{player.name}</div>
+                        <div className="text-gray-400 text-sm">#{player.jerseyNumber} • {player.role}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between text-gray-300">
+                        <span>Matches:</span>
+                        <span>{player.stats?.matches || 0}</span>
+                      </div>
+                      <div className="flex justify-between text-gray-300">
+                        <span>Wickets:</span>
+                        <span>{player.stats?.wickets || 0}</span>
+                      </div>
+                      <div className="flex justify-between text-gray-300">
+                        <span>Average:</span>
+                        <span>{player.stats?.bowlingAverage || '-'}</span>
+                      </div>
+                      <div className="flex justify-between text-gray-300">
+                        <span>Economy:</span>
+                        <span>{player.stats?.economy || '-'}</span>
+                      </div>
+                    </div>
+                    
+                    <button
+                      onClick={() => handleEditPlayer(player)}
+                      className="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-sm transition-colors"
+                    >
+                      Edit Stats
+                    </button>
+                  </div>
+                ))}
+            </div>
+            
+            {players.filter(player => player.teamId === selectedTeam?.id).length === 0 && (
+              <div className="text-center py-8">
+                <p className="text-gray-400">No players found in this team</p>
+              </div>
+            )}
           </div>
         </div>
       )}
