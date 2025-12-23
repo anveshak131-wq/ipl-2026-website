@@ -100,6 +100,34 @@ const BattingStatsPage = () => {
 
   const handleEditPlayer = (player) => {
     setEditingPlayer(player);
+    
+    // Calculate average and strike rate from existing stats if available
+    const runs = player.stats?.runs || 0;
+    const battingInnings = player.stats?.battingInnings || 0;
+    const notOuts = player.stats?.notOuts || 0;
+    const ballsFaced = player.stats?.ballsFaced || 0;
+    
+    // Calculate from base stats
+    const dismissals = battingInnings - notOuts;
+    let calculatedAvg = 0;
+    if (dismissals > 0 && runs > 0) {
+      calculatedAvg = runs / dismissals;
+    }
+    
+    let calculatedSR = 0;
+    if (ballsFaced > 0 && runs > 0) {
+      calculatedSR = (runs * 100) / ballsFaced;
+    }
+    
+    // Prefer string versions for display, fallback to calculated from numeric, then to numeric directly
+    const displayAvg = player.stats?.battingAverage && player.stats.battingAverage !== '0' && player.stats.battingAverage !== '-'
+      ? player.stats.battingAverage
+      : (calculatedAvg > 0 ? calculatedAvg.toFixed(2) : (player.stats?.average > 0 ? player.stats.average.toFixed(2) : ''));
+    
+    const displaySR = player.stats?.battingStrikeRate && player.stats.battingStrikeRate !== '0' && player.stats.battingStrikeRate !== '-'
+      ? player.stats.battingStrikeRate
+      : (calculatedSR > 0 ? calculatedSR.toFixed(1) : (player.stats?.strikeRate > 0 ? player.stats.strikeRate.toFixed(1) : ''));
+    
     setEditForm({
       name: player.name || '',
       role: player.role || '',
@@ -107,17 +135,17 @@ const BattingStatsPage = () => {
       jerseyNumber: player.jerseyNumber || '',
       stats: {
         matches: player.stats?.matches > 0 ? player.stats.matches : '',
-        battingInnings: player.stats?.battingInnings > 0 ? player.stats.battingInnings : '',
-        notOuts: player.stats?.notOuts > 0 ? player.stats.notOuts : '',
-        runs: player.stats?.runs > 0 ? player.stats.runs : '',
-        ballsFaced: player.stats?.ballsFaced > 0 ? player.stats.ballsFaced : '',
+        battingInnings: battingInnings > 0 ? battingInnings : '',
+        notOuts: notOuts > 0 ? notOuts : '',
+        runs: runs > 0 ? runs : '',
+        ballsFaced: ballsFaced > 0 ? ballsFaced : '',
         highest: player.stats?.highest > 0 ? player.stats.highest : '',
         fours: player.stats?.fours > 0 ? player.stats.fours : '',
         sixes: player.stats?.sixes > 0 ? player.stats.sixes : '',
         fifties: player.stats?.fifties > 0 ? player.stats.fifties : '',
         hundreds: player.stats?.hundreds > 0 ? player.stats.hundreds : '',
-        battingAverage: player.stats?.battingAverage && player.stats.battingAverage !== '0' && player.stats.battingAverage !== '-' ? player.stats.battingAverage : '',
-        battingStrikeRate: player.stats?.battingStrikeRate && player.stats.battingStrikeRate !== '0' && player.stats.battingStrikeRate !== '-' ? player.stats.battingStrikeRate : ''
+        battingAverage: displayAvg,
+        battingStrikeRate: displaySR
       }
     });
     setShowEditModal(true);
@@ -131,41 +159,55 @@ const BattingStatsPage = () => {
       const notOuts = editForm.stats.notOuts === '' ? (editingPlayer.stats?.notOuts || 0) : (typeof editForm.stats.notOuts === 'number' ? editForm.stats.notOuts : parseInt(editForm.stats.notOuts) || 0);
       const ballsFaced = editForm.stats.ballsFaced === '' ? (editingPlayer.stats?.ballsFaced || 0) : (typeof editForm.stats.ballsFaced === 'number' ? editForm.stats.ballsFaced : parseInt(editForm.stats.ballsFaced) || 0);
 
-      // Calculate average: runs / (battingInnings - notOuts)
-      // Only calculate if we have valid data (battingInnings - notOuts > 0)
+      // ALWAYS calculate average and strikeRate from base stats first
+      // This ensures consistency between admin and end-user pages
       const dismissals = battingInnings - notOuts;
       let calculatedAverage = 0;
-      if (dismissals > 0 && runs > 0) {
+      if (dismissals > 0 && runs >= 0) {
         calculatedAverage = runs / dismissals;
+      } else if (runs === 0 && battingInnings === 0) {
+        // If no data, keep existing or set to 0
+        calculatedAverage = editingPlayer.stats?.average || 0;
       }
 
-      // Calculate strike rate: (runs * 100) / ballsFaced
-      // Only calculate if we have valid data (ballsFaced > 0)
       let calculatedStrikeRate = 0;
-      if (ballsFaced > 0 && runs > 0) {
+      if (ballsFaced > 0 && runs >= 0) {
         calculatedStrikeRate = (runs * 100) / ballsFaced;
+      } else if (runs === 0 && ballsFaced === 0) {
+        // If no data, keep existing or set to 0
+        calculatedStrikeRate = editingPlayer.stats?.strikeRate || 0;
       }
 
-      // Use form input if provided, otherwise use calculated values, otherwise use existing values
+      // For string display fields (battingAverage, battingStrikeRate):
+      // Use manual input if provided, otherwise use calculated values
       const battingAverageStr = editForm.stats.battingAverage !== '' 
         ? editForm.stats.battingAverage 
-        : (calculatedAverage > 0 ? calculatedAverage.toFixed(2) : (editingPlayer.stats?.battingAverage || ''));
+        : (calculatedAverage > 0 ? calculatedAverage.toFixed(2) : (calculatedAverage === 0 && runs === 0 ? '0.00' : (editingPlayer.stats?.battingAverage || '')));
       
       const battingStrikeRateStr = editForm.stats.battingStrikeRate !== '' 
         ? editForm.stats.battingStrikeRate 
-        : (calculatedStrikeRate > 0 ? calculatedStrikeRate.toFixed(1) : (editingPlayer.stats?.battingStrikeRate || ''));
+        : (calculatedStrikeRate > 0 ? calculatedStrikeRate.toFixed(1) : (calculatedStrikeRate === 0 && runs === 0 ? '0.00' : (editingPlayer.stats?.battingStrikeRate || '')));
 
-      // Convert string inputs to numbers for average and strikeRate fields
-      // If form has manual input, parse it; otherwise use calculated value
-      const averageNum = editForm.stats.battingAverage !== '' && editForm.stats.battingAverage !== '0' && editForm.stats.battingAverage !== '-'
-        ? parseFloat(editForm.stats.battingAverage) || calculatedAverage
-        : calculatedAverage;
+      // For numeric fields (average, strikeRate) - ALWAYS use calculated values
+      // If user manually entered values, try to parse them, but prefer calculated
+      let averageNum = calculatedAverage;
+      if (editForm.stats.battingAverage !== '' && editForm.stats.battingAverage !== '0' && editForm.stats.battingAverage !== '-') {
+        const parsed = parseFloat(editForm.stats.battingAverage);
+        if (!isNaN(parsed)) {
+          averageNum = parsed;
+        }
+      }
       
-      const strikeRateNum = editForm.stats.battingStrikeRate !== '' && editForm.stats.battingStrikeRate !== '0' && editForm.stats.battingStrikeRate !== '-'
-        ? parseFloat(editForm.stats.battingStrikeRate) || calculatedStrikeRate
-        : calculatedStrikeRate;
+      let strikeRateNum = calculatedStrikeRate;
+      if (editForm.stats.battingStrikeRate !== '' && editForm.stats.battingStrikeRate !== '0' && editForm.stats.battingStrikeRate !== '-') {
+        const parsed = parseFloat(editForm.stats.battingStrikeRate);
+        if (!isNaN(parsed)) {
+          strikeRateNum = parsed;
+        }
+      }
 
       // Prepare stats object with proper type conversions
+      // IMPORTANT: Set average and strikeRate AFTER spreading to ensure they override any old values
       const stats = {
         ...editingPlayer.stats, // Preserve existing stats
         matches: editForm.stats.matches === '' ? (editingPlayer.stats?.matches || 0) : (typeof editForm.stats.matches === 'number' ? editForm.stats.matches : parseInt(editForm.stats.matches) || 0),
@@ -181,7 +223,7 @@ const BattingStatsPage = () => {
         // String versions for admin display
         battingAverage: battingAverageStr,
         battingStrikeRate: battingStrikeRateStr,
-        // Numeric versions for end-user pages
+        // Numeric versions for end-user pages - CRITICAL: Always set these explicitly
         average: averageNum,
         strikeRate: strikeRateNum
       };
@@ -194,8 +236,25 @@ const BattingStatsPage = () => {
         jerseyNumber: editForm.jerseyNumber || editingPlayer.jerseyNumber,
         teamId: editingPlayer.teamId,
         league: editingPlayer.league,
-        stats: stats
+        stats: {
+          ...stats,
+          // CRITICAL: Explicitly ensure average and strikeRate are numbers and are always set
+          average: typeof averageNum === 'number' ? averageNum : parseFloat(String(averageNum)) || 0,
+          strikeRate: typeof strikeRateNum === 'number' ? strikeRateNum : parseFloat(String(strikeRateNum)) || 0
+        }
       };
+
+      // Debug logging
+      console.log('Updating player with stats:', {
+        average: updatedPlayer.stats.average,
+        strikeRate: updatedPlayer.stats.strikeRate,
+        battingAverage: updatedPlayer.stats.battingAverage,
+        battingStrikeRate: updatedPlayer.stats.battingStrikeRate,
+        runs,
+        battingInnings,
+        notOuts,
+        ballsFaced
+      });
 
       await updatePlayer(editingPlayer.id, updatedPlayer);
       
