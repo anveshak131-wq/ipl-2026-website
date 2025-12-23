@@ -983,8 +983,8 @@ export default function AdminPlayers() {
       ) : (
       <AdminSidebar currentPage="/ipl-admin-2026/players" />
       )}
-      <div className="flex-1">
-        <div className="p-6 lg:p-8">
+      <div className="flex-1 relative">
+        <div className="p-6 lg:p-8 relative">
           {/* Modern Header */}
           <div className="mb-8">
             <div className="bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 rounded-3xl p-8 mb-8 border border-white/10 backdrop-blur-xl shadow-2xl">
@@ -1168,9 +1168,9 @@ export default function AdminPlayers() {
           </div>
 
           {/* Modern Search and Filter Section */}
-          <div className="mb-8">
-            <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl p-6 border border-white/10 backdrop-blur-xl shadow-xl">
-            <div className="flex gap-4 flex-col md:flex-row items-stretch">
+          <div className="mb-8 relative z-10">
+            <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl p-6 border border-white/10 backdrop-blur-xl shadow-xl overflow-visible">
+            <div className="flex gap-4 flex-col md:flex-row items-stretch relative">
                 {/* Enhanced Search Bar */}
               <div className="relative flex-1">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2">
@@ -1186,7 +1186,7 @@ export default function AdminPlayers() {
               </div>
 
                 {/* Role Filter */}
-              <div className="relative md:min-w-[200px] z-50" data-filter-dropdown>
+              <div className="relative md:min-w-[200px] z-[100]" data-filter-dropdown>
                 <button
                   onClick={() => {
                     setShowAdvancedFilters(!showAdvancedFilters);
@@ -1203,7 +1203,7 @@ export default function AdminPlayers() {
                   <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-300 flex-shrink-0 ${showAdvancedFilters ? 'rotate-180' : ''}`} />
                 </button>
                 {showAdvancedFilters && (
-                  <div className="absolute left-0 right-0 mt-2 bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden z-[9999]">
+                  <div className="absolute left-0 right-0 top-full mt-2 bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden z-[9999]">
                     <div className="py-2">
                       {['all', 'Batsman', 'Bowler', 'All-rounder', 'Wicket-keeper'].map((role) => (
                         <button
@@ -1232,7 +1232,7 @@ export default function AdminPlayers() {
               </div>
 
                 {/* Enhanced Team Filter Dropdown */}
-              <div className="relative md:min-w-[320px] z-50" data-filter-dropdown>
+              <div className="relative md:min-w-[320px] z-[100]" data-filter-dropdown>
                 <button
                   onClick={() => {
                     setIsDropdownOpen(!isDropdownOpen);
@@ -1252,7 +1252,7 @@ export default function AdminPlayers() {
 
                   {/* Enhanced Dropdown Menu */}
                 <div 
-                    className={`absolute left-0 right-0 mt-2 bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden transition-all duration-300 ease-out origin-top z-[9999] ${
+                    className={`absolute left-0 right-0 top-full mt-2 bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden transition-all duration-300 ease-out origin-top z-[9999] ${
                     isDropdownOpen 
                       ? 'opacity-100 scale-y-100 max-h-[500px]' 
                       : 'opacity-0 scale-y-0 max-h-0 pointer-events-none'
