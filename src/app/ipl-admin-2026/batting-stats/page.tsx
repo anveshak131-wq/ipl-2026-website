@@ -483,6 +483,8 @@ const BattingStatsPage = () => {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
+                  id="search-players"
+                  name="searchPlayers"
                   placeholder="Search players..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -838,6 +840,8 @@ const BattingStatsPage = () => {
                       </label>
                 <input
                   type="text"
+                  id="edit-player-name"
+                  name="playerName"
                   value={editForm.name}
                   onChange={(e) => handleFormChange('name', e.target.value)}
                         className="w-full pl-11 pr-4 py-3 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
@@ -851,6 +855,8 @@ const BattingStatsPage = () => {
                         Role
                       </label>
                 <select
+                  id="edit-player-role"
+                  name="playerRole"
                   value={editForm.role}
                   onChange={(e) => handleFormChange('role', e.target.value)}
                         className="w-full pl-11 pr-4 py-3 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none cursor-pointer"
@@ -869,6 +875,8 @@ const BattingStatsPage = () => {
                       </label>
                 <input
                   type="text"
+                  id="edit-player-jersey"
+                  name="playerJerseyNumber"
                   value={editForm.jerseyNumber}
                   onChange={(e) => handleFormChange('jerseyNumber', e.target.value)}
                         className="w-full pl-11 pr-4 py-3 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
@@ -896,6 +904,8 @@ const BattingStatsPage = () => {
                       </label>
                 <input
                   type="number"
+                  id="edit-stats-matches"
+                  name="statsMatches"
                   value={editForm.stats.matches}
                   onChange={(e) => handleFormChange('stats.matches', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                         className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
@@ -909,6 +919,8 @@ const BattingStatsPage = () => {
                       </label>
                 <input
                   type="number"
+                  id="edit-stats-batting-innings"
+                  name="statsBattingInnings"
                   value={editForm.stats.battingInnings}
                   onChange={(e) => handleFormChange('stats.battingInnings', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                         className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
@@ -922,6 +934,8 @@ const BattingStatsPage = () => {
                       </label>
                 <input
                   type="number"
+                  id="edit-stats-not-outs"
+                  name="statsNotOuts"
                   value={editForm.stats.notOuts}
                   onChange={(e) => handleFormChange('stats.notOuts', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                         className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
@@ -945,6 +959,8 @@ const BattingStatsPage = () => {
                       </label>
                 <input
                   type="number"
+                  id="edit-stats-runs"
+                  name="statsRuns"
                   value={editForm.stats.runs}
                   onChange={(e) => handleFormChange('stats.runs', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                         className="w-full px-4 py-2.5 bg-gray-700/70 border border-blue-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
@@ -958,6 +974,8 @@ const BattingStatsPage = () => {
                       </label>
                       <input
                         type="number"
+                        id="edit-stats-highest"
+                        name="statsHighest"
                         value={editForm.stats.highest}
                         onChange={(e) => handleFormChange('stats.highest', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                         className="w-full px-4 py-2.5 bg-gray-700/70 border border-purple-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
@@ -971,6 +989,8 @@ const BattingStatsPage = () => {
                       </label>
                 <input
                   type="number"
+                  id="edit-stats-balls-faced"
+                  name="statsBallsFaced"
                   value={editForm.stats.ballsFaced}
                   onChange={(e) => handleFormChange('stats.ballsFaced', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                         className="w-full px-4 py-2.5 bg-gray-700/70 border border-pink-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all"
@@ -984,6 +1004,8 @@ const BattingStatsPage = () => {
                       </label>
                 <input
                   type="number"
+                  id="edit-stats-fours"
+                  name="statsFours"
                   value={editForm.stats.fours}
                   onChange={(e) => handleFormChange('stats.fours', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                         className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
@@ -997,6 +1019,8 @@ const BattingStatsPage = () => {
                       </label>
                 <input
                   type="number"
+                  id="edit-stats-sixes"
+                  name="statsSixes"
                   value={editForm.stats.sixes}
                   onChange={(e) => handleFormChange('stats.sixes', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                         className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all"
@@ -1020,6 +1044,8 @@ const BattingStatsPage = () => {
                       </label>
                 <input
                   type="number"
+                  id="edit-stats-fifties"
+                  name="statsFifties"
                   value={editForm.stats.fifties}
                   onChange={(e) => handleFormChange('stats.fifties', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                         className="w-full px-4 py-2.5 bg-gray-700/70 border border-orange-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
@@ -1033,6 +1059,8 @@ const BattingStatsPage = () => {
                       </label>
                 <input
                   type="number"
+                  id="edit-stats-hundreds"
+                  name="statsHundreds"
                   value={editForm.stats.hundreds}
                   onChange={(e) => handleFormChange('stats.hundreds', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                         className="w-full px-4 py-2.5 bg-gray-700/70 border border-pink-500/30 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all"
@@ -1046,6 +1074,8 @@ const BattingStatsPage = () => {
                       </label>
                 <input
                   type="text"
+                  id="edit-stats-batting-average"
+                  name="statsBattingAverage"
                   value={editForm.stats.battingAverage}
                   onChange={(e) => handleFormChange('stats.battingAverage', e.target.value)}
                         placeholder="e.g., 45.67"
@@ -1059,6 +1089,8 @@ const BattingStatsPage = () => {
                       </label>
                 <input
                   type="text"
+                  id="edit-stats-batting-strike-rate"
+                  name="statsBattingStrikeRate"
                   value={editForm.stats.battingStrikeRate}
                   onChange={(e) => handleFormChange('stats.battingStrikeRate', e.target.value)}
                         placeholder="e.g., 145.50"
