@@ -286,6 +286,7 @@ const BowlingStatsPage = () => {
           </div>
         ))}
       )}
+        </div>
 
       {/* Edit Player Modal */}
       {showEditModal && (
@@ -565,6 +566,7 @@ const BowlingStatsPage = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };

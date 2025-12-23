@@ -288,6 +288,7 @@ const BattingStatsPage = () => {
           </div>
         ))}
       )}
+        </div>
 
       {/* Edit Player Modal */}
       {showEditModal && (
@@ -576,6 +577,7 @@ const BattingStatsPage = () => {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 };
