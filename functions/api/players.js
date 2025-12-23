@@ -538,6 +538,58 @@ export const onRequest = async (context) => {
         });
       }
 
+      // Extract base stats for calculation - use updated values if provided, otherwise existing
+      const runs = updatedPlayer.stats?.runs !== undefined ? (parseInt(updatedPlayer.stats.runs) || 0) : (players[index].stats?.runs || 0);
+      const battingInnings = updatedPlayer.stats?.battingInnings !== undefined ? (parseInt(updatedPlayer.stats.battingInnings) || 0) : (players[index].stats?.battingInnings || 0);
+      const notOuts = updatedPlayer.stats?.notOuts !== undefined ? (parseInt(updatedPlayer.stats.notOuts) || 0) : (players[index].stats?.notOuts || 0);
+      const ballsFaced = updatedPlayer.stats?.ballsFaced !== undefined ? (parseInt(updatedPlayer.stats.ballsFaced) || 0) : (players[index].stats?.ballsFaced || 0);
+      
+      // ALWAYS calculate average and strikeRate from base stats
+      // This ensures consistency - we calculate from the actual data, not from potentially stale values
+      let calculatedAverage = 0;
+      const dismissals = battingInnings - notOuts;
+      if (dismissals > 0 && runs >= 0) {
+        calculatedAverage = runs / dismissals;
+      }
+      
+      let calculatedStrikeRate = 0;
+      if (ballsFaced > 0 && runs >= 0) {
+        calculatedStrikeRate = (runs * 100) / ballsFaced;
+      }
+      
+      // Use provided values ONLY if they are explicitly provided as numbers and valid
+      // Otherwise always use calculated values
+      let finalAverage = calculatedAverage;
+      if (updatedPlayer.stats?.average !== undefined && updatedPlayer.stats?.average !== null && updatedPlayer.stats?.average !== '') {
+        const provided = typeof updatedPlayer.stats.average === 'number' ? updatedPlayer.stats.average : parseFloat(updatedPlayer.stats.average);
+        if (!isNaN(provided) && provided > 0) {
+          finalAverage = provided;
+        }
+      }
+      
+      let finalStrikeRate = calculatedStrikeRate;
+      if (updatedPlayer.stats?.strikeRate !== undefined && updatedPlayer.stats?.strikeRate !== null && updatedPlayer.stats?.strikeRate !== '') {
+        const provided = typeof updatedPlayer.stats.strikeRate === 'number' ? updatedPlayer.stats.strikeRate : parseFloat(updatedPlayer.stats.strikeRate);
+        if (!isNaN(provided) && provided > 0) {
+          finalStrikeRate = provided;
+        }
+      }
+      
+      // Log the calculation for debugging
+      console.log('API PUT: Stats calculation for player', updatedPlayer.id || updatedPlayer.name, {
+        providedAverage: updatedPlayer.stats?.average,
+        providedStrikeRate: updatedPlayer.stats?.strikeRate,
+        calculatedAverage,
+        calculatedStrikeRate,
+        finalAverage,
+        finalStrikeRate,
+        runs,
+        battingInnings,
+        notOuts,
+        ballsFaced,
+        dismissals
+      });
+
       players[index] = {
         ...players[index], // Preserve existing properties
         id: updatedPlayer.id,
@@ -557,40 +609,11 @@ export const onRequest = async (context) => {
           ...players[index].stats,
           // Standard stats - update if provided
           matches: updatedPlayer.stats?.matches !== undefined ? (parseInt(updatedPlayer.stats.matches) || 0) : (players[index].stats?.matches || 0),
-          runs: updatedPlayer.stats?.runs !== undefined ? (parseInt(updatedPlayer.stats.runs) || 0) : (players[index].stats?.runs || 0),
+          runs: runs,
           wickets: updatedPlayer.stats?.wickets !== undefined ? (parseInt(updatedPlayer.stats.wickets) || 0) : (players[index].stats?.wickets || 0),
-          // Calculate average - use provided value, or calculate from base stats, or use existing
-          average: (() => {
-            // If explicitly provided, use it
-            if (updatedPlayer.stats?.average !== undefined && updatedPlayer.stats?.average !== null && updatedPlayer.stats?.average !== '') {
-              return typeof updatedPlayer.stats.average === 'number' ? updatedPlayer.stats.average : parseFloat(updatedPlayer.stats.average) || 0;
-            }
-            // Otherwise, calculate from base stats
-            const runs = updatedPlayer.stats?.runs !== undefined ? (parseInt(updatedPlayer.stats.runs) || 0) : (players[index].stats?.runs || 0);
-            const battingInnings = updatedPlayer.stats?.battingInnings !== undefined ? (parseInt(updatedPlayer.stats.battingInnings) || 0) : (players[index].stats?.battingInnings || 0);
-            const notOuts = updatedPlayer.stats?.notOuts !== undefined ? (parseInt(updatedPlayer.stats.notOuts) || 0) : (players[index].stats?.notOuts || 0);
-            const dismissals = battingInnings - notOuts;
-            if (dismissals > 0 && runs > 0) {
-              return runs / dismissals;
-            }
-            // Fallback to existing value
-            return players[index].stats?.average || 0;
-          })(),
-          // Calculate strikeRate - use provided value, or calculate from base stats, or use existing
-          strikeRate: (() => {
-            // If explicitly provided, use it
-            if (updatedPlayer.stats?.strikeRate !== undefined && updatedPlayer.stats?.strikeRate !== null && updatedPlayer.stats?.strikeRate !== '') {
-              return typeof updatedPlayer.stats.strikeRate === 'number' ? updatedPlayer.stats.strikeRate : parseFloat(updatedPlayer.stats.strikeRate) || 0;
-            }
-            // Otherwise, calculate from base stats
-            const runs = updatedPlayer.stats?.runs !== undefined ? (parseInt(updatedPlayer.stats.runs) || 0) : (players[index].stats?.runs || 0);
-            const ballsFaced = updatedPlayer.stats?.ballsFaced !== undefined ? (parseInt(updatedPlayer.stats.ballsFaced) || 0) : (players[index].stats?.ballsFaced || 0);
-            if (ballsFaced > 0 && runs > 0) {
-              return (runs * 100) / ballsFaced;
-            }
-            // Fallback to existing value
-            return players[index].stats?.strikeRate || 0;
-          })(),
+          // CRITICAL: Always set average and strikeRate explicitly
+          average: finalAverage,
+          strikeRate: finalStrikeRate,
           economy: updatedPlayer.stats?.economy !== undefined ? (typeof updatedPlayer.stats.economy === 'string' ? (updatedPlayer.stats.economy || '') : (parseFloat(updatedPlayer.stats.economy) || 0)) : (players[index].stats?.economy || 0),
           highest: updatedPlayer.stats?.highest !== undefined ? (parseInt(updatedPlayer.stats.highest) || 0) : (players[index].stats?.highest || 0),
           fours: updatedPlayer.stats?.fours !== undefined ? (parseInt(updatedPlayer.stats.fours) || 0) : (players[index].stats?.fours || 0),
@@ -621,6 +644,20 @@ export const onRequest = async (context) => {
       }
 
       await env.IPL_CACHE.put('players', JSON.stringify(players));
+
+      // Log the saved player stats to verify
+      console.log('API PUT: Saved player stats:', {
+        playerId: players[index].id,
+        playerName: players[index].name,
+        average: players[index].stats.average,
+        strikeRate: players[index].stats.strikeRate,
+        battingAverage: players[index].stats.battingAverage,
+        battingStrikeRate: players[index].stats.battingStrikeRate,
+        runs: players[index].stats.runs,
+        battingInnings: players[index].stats.battingInnings,
+        notOuts: players[index].stats.notOuts,
+        ballsFaced: players[index].stats.ballsFaced
+      });
 
       return new Response(JSON.stringify(players[index]), {
         status: 200,
