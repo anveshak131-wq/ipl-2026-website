@@ -11,6 +11,22 @@ const BowlingStatsPage = () => {
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [editingPlayer, setEditingPlayer] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    role: '',
+    age: '',
+    jerseyNumber: '',
+    stats: {
+      matches: 0,
+      wickets: 0,
+      bowlingAverage: '',
+      economy: '',
+      bestBowling: '',
+      fiveWickets: 0
+    }
+  });
 
   useEffect(() => {
     loadData();
@@ -31,6 +47,74 @@ const BowlingStatsPage = () => {
       setError('Failed to load data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEditPlayer = (player) => {
+    setEditingPlayer(player);
+    setEditForm({
+      name: player.name || '',
+      role: player.role || '',
+      age: player.age || '',
+      jerseyNumber: player.jerseyNumber || '',
+      stats: {
+        matches: player.stats?.matches || 0,
+        wickets: player.stats?.wickets || 0,
+        bowlingAverage: player.stats?.bowlingAverage || '',
+        economy: player.stats?.economy || '',
+        bestBowling: player.stats?.bestBowling || '',
+        fiveWickets: player.stats?.fiveWickets || 0
+      }
+    });
+    setShowEditModal(true);
+  };
+
+  const handleSavePlayer = async () => {
+    try {
+      // Update the player data
+      const updatedPlayer = {
+        ...editingPlayer,
+        ...editForm,
+        stats: {
+          ...editingPlayer.stats,
+          ...editForm.stats
+        }
+      };
+
+      // Call API to update player
+      await api.updatePlayer(updatedPlayer.id, updatedPlayer);
+      
+      // Reload data to reflect changes
+      await loadData();
+      
+      setShowEditModal(false);
+      setEditingPlayer(null);
+    } catch (error) {
+      console.error('Failed to update player:', error);
+      setError('Failed to update player');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setShowEditModal(false);
+    setEditingPlayer(null);
+  };
+
+  const handleFormChange = (field, value) => {
+    if (field.startsWith('stats.')) {
+      const statField = field.replace('stats.', '');
+      setEditForm(prev => ({
+        ...prev,
+        stats: {
+          ...prev.stats,
+          [statField]: value
+        }
+      }));
+    } else {
+      setEditForm(prev => ({
+        ...prev,
+        [field]: value
+      }));
     }
   };
 
@@ -96,6 +180,7 @@ const BowlingStatsPage = () => {
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Economy</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Best</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">5W</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-700">
@@ -136,6 +221,14 @@ const BowlingStatsPage = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                             {player.stats?.fiveWickets || 0}
                           </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                            <button
+                              onClick={() => handleEditPlayer(player)}
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors"
+                            >
+                              Edit
+                            </button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -144,10 +237,141 @@ const BowlingStatsPage = () => {
               </div>
             </div>
           ))
-        )}
+        ))}
       </div>
     </div>
-  );
+
+    {/* Edit Player Modal */}
+    {showEditModal && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-gray-800 rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <h2 className="text-2xl font-bold text-white mb-6">Edit Player Stats</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Player Name</label>
+              <input
+                type="text"
+                value={editForm.name}
+                onChange={(e) => handleFormChange('name', e.target.value)}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Role</label>
+              <select
+                value={editForm.role}
+                onChange={(e) => handleFormChange('role', e.target.value)}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="Batsman">Batsman</option>
+                <option value="Bowler">Bowler</option>
+                <option value="All-rounder">All-rounder</option>
+                <option value="Wicket-keeper">Wicket-keeper</option>
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Age</label>
+              <input
+                type="number"
+                value={editForm.age}
+                onChange={(e) => handleFormChange('age', e.target.value)}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Jersey Number</label>
+              <input
+                type="text"
+                value={editForm.jerseyNumber}
+                onChange={(e) => handleFormChange('jerseyNumber', e.target.value)}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Matches</label>
+              <input
+                type="number"
+                value={editForm.stats.matches}
+                onChange={(e) => handleFormChange('stats.matches', parseInt(e.target.value) || 0)}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Wickets</label>
+              <input
+                type="number"
+                value={editForm.stats.wickets}
+                onChange={(e) => handleFormChange('stats.wickets', parseInt(e.target.value) || 0)}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Bowling Average</label>
+              <input
+                type="text"
+                value={editForm.stats.bowlingAverage}
+                onChange={(e) => handleFormChange('stats.bowlingAverage', e.target.value)}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Economy</label>
+              <input
+                type="text"
+                value={editForm.stats.economy}
+                onChange={(e) => handleFormChange('stats.economy', e.target.value)}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Best Bowling</label>
+              <input
+                type="text"
+                value={editForm.stats.bestBowling}
+                onChange={(e) => handleFormChange('stats.bestBowling', e.target.value)}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">5 Wickets</label>
+              <input
+                type="number"
+                value={editForm.stats.fiveWickets}
+                onChange={(e) => handleFormChange('stats.fiveWickets', parseInt(e.target.value) || 0)}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+          
+          <div className="flex justify-end space-x-4 mt-6">
+            <button
+              onClick={handleCancelEdit}
+              className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSavePlayer}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+            >
+              Save Changes
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+  </div>
+);
 };
 
 export default BowlingStatsPage;
