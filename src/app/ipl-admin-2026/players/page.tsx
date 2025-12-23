@@ -1551,104 +1551,105 @@ export default function AdminPlayers() {
                       <div className="relative z-10">
                         {/* Player Header */}
                         <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        {player.nationality && (
-                          <FlagImage nationality={player.nationality} size="sm" />
+                          <div className="flex items-center gap-3 flex-1 min-w-0">
+                            {player.nationality && (
+                              <FlagImage nationality={player.nationality} size="sm" />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-white font-bold text-lg truncate">{player.name}</h3>
+                              <p className="text-gray-400 text-sm truncate">{player.nationality}</p>
+                            </div>
+                          </div>
+                          {player.isCaptain && (
+                            <div className="flex-shrink-0">
+                              <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" title="Captain" />
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Team Badge */}
+                        {team && (
+                          <div className="flex items-center gap-2 mb-4">
+                            <div
+                              className="w-8 h-8 rounded-lg text-white font-bold text-xs flex items-center justify-center shadow-lg"
+                              style={{ backgroundColor: team.colors.primary }}
+                            >
+                              {team.shortName}
+                            </div>
+                            <span className="text-gray-300 text-sm font-medium truncate">{team.name}</span>
+                          </div>
                         )}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="text-white font-bold text-lg truncate">{player.name}</h3>
-                          <p className="text-gray-400 text-sm truncate">{player.nationality}</p>
-                        </div>
-                      </div>
-                      {player.isCaptain && (
-                        <div className="flex-shrink-0">
-                          <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" title="Captain" />
-                        </div>
-                      )}
-                    </div>
 
-                    {/* Team Badge */}
-                    {team && (
-                      <div className="flex items-center gap-2 mb-4">
-                        <div
-                          className="w-8 h-8 rounded-lg text-white font-bold text-xs flex items-center justify-center shadow-lg"
-                          style={{ backgroundColor: team.colors.primary }}
-                        >
-                          {team.shortName}
-                        </div>
-                        <span className="text-gray-300 text-sm font-medium truncate">{team.name}</span>
-                      </div>
-                    )}
-
-                    {/* Role Badge */}
-                    <div className="mb-4">
-                      <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold border ${
-                        player.role === 'Batsman' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
-                        player.role === 'Bowler' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
-                        player.role === 'All-rounder' ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' :
-                        'bg-orange-500/20 text-orange-400 border-orange-500/30'
-                      }`}>
-                        {player.role}
-                      </span>
-                    </div>
-
-                    {/* Stats Preview */}
-                    {currentLeague !== 'wpl' && (
-                      <div className="grid grid-cols-2 gap-3 mb-4 pt-4 border-t border-white/10">
-                        <div>
-                          <p className="text-xs text-gray-400 mb-1">Runs</p>
-                          <p className="text-ipl-gold font-bold text-lg">{player.stats.runs || 0}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-400 mb-1">Wickets</p>
-                          <p className="text-blue-400 font-bold text-lg">{player.stats.wickets || 0}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-400 mb-1">Avg</p>
-                          <p className="text-purple-400 font-semibold">{player.stats.average && player.stats.average > 0 ? player.stats.average.toFixed(2) : '-'}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-400 mb-1">SR</p>
-                          <p className="text-gray-300 font-semibold">{player.stats.strikeRate && player.stats.strikeRate > 0 ? player.stats.strikeRate.toFixed(1) : '-'}</p>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Player Info */}
-                    <div className="flex items-center justify-between text-sm pt-4 border-t border-white/10">
-                      <div className="flex items-center gap-2 text-gray-400">
-                        {player.jerseyNumber > 0 && (
-                          <span className="inline-flex items-center justify-center w-6 h-6 bg-ipl-gold/20 text-ipl-gold rounded-full font-bold text-xs">
-                            #{player.jerseyNumber}
+                        {/* Role Badge */}
+                        <div className="mb-4">
+                          <span className={`inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold border ${
+                            player.role === 'Batsman' ? 'bg-green-500/20 text-green-400 border-green-500/30' :
+                            player.role === 'Bowler' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
+                            player.role === 'All-rounder' ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' :
+                            'bg-orange-500/20 text-orange-400 border-orange-500/30'
+                          }`}>
+                            {player.role}
                           </span>
+                        </div>
+
+                        {/* Stats Preview */}
+                        {currentLeague !== 'wpl' && (
+                          <div className="grid grid-cols-2 gap-3 mb-4 pt-4 border-t border-white/10">
+                            <div>
+                              <p className="text-xs text-gray-400 mb-1">Runs</p>
+                              <p className="text-ipl-gold font-bold text-lg">{player.stats.runs || 0}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-400 mb-1">Wickets</p>
+                              <p className="text-blue-400 font-bold text-lg">{player.stats.wickets || 0}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-400 mb-1">Avg</p>
+                              <p className="text-purple-400 font-semibold">{player.stats.average && player.stats.average > 0 ? player.stats.average.toFixed(2) : '-'}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-400 mb-1">SR</p>
+                              <p className="text-gray-300 font-semibold">{player.stats.strikeRate && player.stats.strikeRate > 0 ? player.stats.strikeRate.toFixed(1) : '-'}</p>
+                            </div>
+                          </div>
                         )}
-                        {player.age > 0 && (
-                          <span>{player.age}y</span>
-                        )}
+
+                        {/* Player Info */}
+                        <div className="flex items-center justify-between text-sm pt-4 border-t border-white/10">
+                          <div className="flex items-center gap-2 text-gray-400">
+                            {player.jerseyNumber > 0 && (
+                              <span className="inline-flex items-center justify-center w-6 h-6 bg-ipl-gold/20 text-ipl-gold rounded-full font-bold text-xs">
+                                #{player.jerseyNumber}
+                              </span>
+                            )}
+                            {player.age > 0 && (
+                              <span>{player.age}y</span>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditPlayer(player);
+                              }}
+                              className="p-2.5 bg-blue-500/20 hover:bg-blue-500/40 text-blue-300 hover:text-blue-100 rounded-xl transition-all duration-300 border border-blue-500/30 hover:border-blue-400/60 hover:scale-110 shadow-lg hover:shadow-blue-500/20 group/btn"
+                              title="Edit"
+                            >
+                              <Edit2 className="w-4 h-4 group-hover/btn:rotate-12 transition-transform duration-300" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeletePlayer(player.id, player.name);
+                              }}
+                              className="p-2.5 bg-red-500/20 hover:bg-red-500/40 text-red-300 hover:text-red-100 rounded-xl transition-all duration-300 border border-red-500/30 hover:border-red-400/60 hover:scale-110 shadow-lg hover:shadow-red-500/20 group/btn"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4 group-hover/btn:rotate-12 transition-transform duration-300" />
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditPlayer(player);
-                          }}
-                          className="p-2.5 bg-blue-500/20 hover:bg-blue-500/40 text-blue-300 hover:text-blue-100 rounded-xl transition-all duration-300 border border-blue-500/30 hover:border-blue-400/60 hover:scale-110 shadow-lg hover:shadow-blue-500/20 group/btn"
-                          title="Edit"
-                        >
-                          <Edit2 className="w-4 h-4 group-hover/btn:rotate-12 transition-transform duration-300" />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeletePlayer(player.id, player.name);
-                          }}
-                          className="p-2.5 bg-red-500/20 hover:bg-red-500/40 text-red-300 hover:text-red-100 rounded-xl transition-all duration-300 border border-red-500/30 hover:border-red-400/60 hover:scale-110 shadow-lg hover:shadow-red-500/20 group/btn"
-                          title="Delete"
-                        >
-                          <Trash2 className="w-4 h-4 group-hover/btn:rotate-12 transition-transform duration-300" />
-                        </button>
-                      </div>
-                    </div>
                     </div>
                   );
                 })
