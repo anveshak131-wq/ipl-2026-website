@@ -14,6 +14,7 @@ import { parseDateDDMMYYYY, formatDateDDMMYYYY, calculateAge, isValidDate, forma
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import FlagImage from '@/components/ui/FlagImage';
+import CustomSelect from '@/components/ui/CustomSelect';
 import { Search, Filter, Edit2, X, Users, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Plus, Trash2, Download, Upload, Shield, Activity, Hash, Grid3x3, List, Eye, Star } from 'lucide-react';
 import '@/styles/flags.css';
 
@@ -2106,31 +2107,27 @@ export default function AdminPlayers() {
                           Role
                             <span className="text-red-400">*</span>
                         </label>
-                          <div className="relative">
-                            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                        <select
+                          <CustomSelect
                           value={formData.role}
-                          onChange={(e) => {
-                            const newRole = e.target.value as any;
+                            onChange={(newRole) => {
                             setFormData({
                               ...formData, 
-                              role: newRole,
+                                role: newRole as any,
                               // Reset allrounderType if role is not All-rounder
                               allrounderType: newRole === 'All-rounder' ? formData.allrounderType : ''
                             });
                           }}
-                              className="relative w-full pl-12 pr-12 py-3.5 bg-gradient-to-br from-gray-800/80 to-gray-900/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 focus:bg-gray-800/90 transition-all duration-300 appearance-none cursor-pointer hover:border-purple-500/30 hover:bg-gray-800/80 hover:shadow-lg hover:shadow-purple-500/10 group-hover:scale-[1.01]"
-                        >
-                          <option value="Batsman" className="bg-gray-900 text-white">Batsman</option>
-                          <option value="Bowler" className="bg-gray-900 text-white">Bowler</option>
-                          <option value="All-rounder" className="bg-gray-900 text-white">All-rounder</option>
-                          <option value="Wicket-keeper" className="bg-gray-900 text-white">Wicket-keeper</option>
-                        </select>
-                            <Award className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-400 pointer-events-none transition-colors duration-300 group-hover:text-purple-300" />
-                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                              <ChevronDown className="w-5 h-5 text-gray-400 transition-all duration-300 group-hover:text-purple-400 group-hover:rotate-180" />
-                            </div>
-                          </div>
+                            options={[
+                              { value: 'Batsman', label: 'Batsman' },
+                              { value: 'Bowler', label: 'Bowler' },
+                              { value: 'All-rounder', label: 'All-rounder' },
+                              { value: 'Wicket-keeper', label: 'Wicket-keeper' },
+                            ]}
+                            placeholder="Select role"
+                            icon={<Award className="w-5 h-5" />}
+                            iconColor="text-purple-400"
+                            required
+                          />
                       </div>
 
                       {formData.role === 'All-rounder' && (
@@ -2140,23 +2137,18 @@ export default function AdminPlayers() {
                             All-rounder Type
                               <span className="text-red-400">*</span>
                           </label>
-                            <div className="relative">
-                              <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-amber-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                          <select
+                            <CustomSelect
                             value={formData.allrounderType}
-                            onChange={(e) => setFormData({...formData, allrounderType: e.target.value as any})}
-                                className="relative w-full pl-12 pr-12 py-3.5 bg-gradient-to-br from-gray-800/80 to-gray-900/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 focus:bg-gray-800/90 transition-all duration-300 appearance-none cursor-pointer hover:border-orange-500/30 hover:bg-gray-800/80 hover:shadow-lg hover:shadow-orange-500/10 group-hover:scale-[1.01]"
+                              onChange={(value) => setFormData({...formData, allrounderType: value as any})}
+                              options={[
+                                { value: 'Batting All-rounder', label: 'Batting All-rounder' },
+                                { value: 'Bowling All-rounder', label: 'Bowling All-rounder' },
+                              ]}
+                              placeholder="Select type"
+                              icon={<Target className="w-5 h-5" />}
+                              iconColor="text-orange-400"
                             required
-                          >
-                            <option value="" className="bg-gray-900 text-white">Select type</option>
-                            <option value="Batting All-rounder" className="bg-gray-900 text-white">Batting All-rounder</option>
-                            <option value="Bowling All-rounder" className="bg-gray-900 text-white">Bowling All-rounder</option>
-                          </select>
-                              <Target className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-orange-400 pointer-events-none transition-colors duration-300 group-hover:text-orange-300" />
-                              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                                <ChevronDown className="w-5 h-5 text-gray-400 transition-all duration-300 group-hover:text-orange-400 group-hover:rotate-180" />
-                              </div>
-                            </div>
+                            />
                         </div>
                       )}
 
@@ -2166,22 +2158,18 @@ export default function AdminPlayers() {
                           League
                             <span className="text-red-400">*</span>
                         </label>
-                          <div className="relative">
-                            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                        <select
+                          <CustomSelect
                           value={formData.league}
-                          onChange={(e) => setFormData({...formData, league: e.target.value as 'ipl' | 'wpl'})}
-                              className="relative w-full pl-12 pr-12 py-3.5 bg-gradient-to-br from-gray-800/80 to-gray-900/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 focus:bg-gray-800/90 transition-all duration-300 appearance-none cursor-pointer hover:border-emerald-500/30 hover:bg-gray-800/80 hover:shadow-lg hover:shadow-emerald-500/10 group-hover:scale-[1.01]"
+                            onChange={(value) => setFormData({...formData, league: value as 'ipl' | 'wpl'})}
+                            options={[
+                              { value: 'ipl', label: 'IPL (Indian Premier League)' },
+                              { value: 'wpl', label: 'WPL (Women\'s Premier League)' },
+                            ]}
+                            placeholder="Select league"
+                            icon={<Shield className="w-5 h-5" />}
+                            iconColor="text-emerald-400"
                           required
-                        >
-                              <option value="ipl" className="bg-gray-900 text-white">IPL (Indian Premier League)</option>
-                              <option value="wpl" className="bg-gray-900 text-white">WPL (Women's Premier League)</option>
-                        </select>
-                            <Shield className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-400 pointer-events-none transition-colors duration-300 group-hover:text-emerald-300" />
-                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                              <ChevronDown className="w-5 h-5 text-gray-400 transition-all duration-300 group-hover:text-emerald-400 group-hover:rotate-180" />
-                            </div>
-                          </div>
+                          />
                       </div>
 
                         <div className="group">
@@ -2190,26 +2178,21 @@ export default function AdminPlayers() {
                           Team
                             <span className="text-red-400">*</span>
                         </label>
-                          <div className="relative">
-                            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                        <select
+                          <CustomSelect
                           value={formData.teamId}
-                          onChange={(e) => setFormData({...formData, teamId: e.target.value})}
-                              className="relative w-full pl-12 pr-12 py-3.5 bg-gradient-to-br from-gray-800/80 to-gray-900/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 focus:bg-gray-800/90 transition-all duration-300 appearance-none cursor-pointer hover:border-cyan-500/30 hover:bg-gray-800/80 hover:shadow-lg hover:shadow-cyan-500/10 group-hover:scale-[1.01]"
+                            onChange={(value) => setFormData({...formData, teamId: value})}
+                            options={teams
+                              .filter(team => team.league === formData.league)
+                              .map(team => ({
+                                value: team.id,
+                                label: team.name,
+                              }))}
+                            placeholder="Select a team"
+                            icon={<Users className="w-5 h-5" />}
+                            iconColor="text-cyan-400"
                           required
-                        >
-                              <option value="" className="bg-gray-900 text-white">Select a team</option>
-                          {teams.filter(team => team.league === formData.league).map(team => (
-                                <option key={team.id} value={team.id} className="bg-gray-900 text-white">
-                              {team.name}
-                            </option>
-                          ))}
-                        </select>
-                            <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-cyan-400 pointer-events-none transition-colors duration-300 group-hover:text-cyan-300" />
-                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                              <ChevronDown className="w-5 h-5 text-gray-400 transition-all duration-300 group-hover:text-cyan-400 group-hover:rotate-180" />
-                            </div>
-                          </div>
+                            searchable
+                          />
                         </div>
                       </div>
                       </div>
@@ -2410,25 +2393,20 @@ export default function AdminPlayers() {
                           Nationality
                               <span className="text-red-400">*</span>
                         </label>
-                            <div className="relative">
-                              <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-amber-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                        <select
+                            <CustomSelect
                           value={formData.nationality}
-                          onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
-                                className="relative w-full pl-12 pr-12 py-3.5 bg-gradient-to-br from-gray-800/80 to-gray-900/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 focus:bg-gray-800/90 transition-all duration-300 appearance-none cursor-pointer hover:border-orange-500/30 hover:bg-gray-800/80 hover:shadow-lg hover:shadow-orange-500/10 group-hover:scale-[1.01]"
+                              onChange={(value) => setFormData({ ...formData, nationality: value })}
+                              options={CRICKET_COUNTRIES.map((country) => ({
+                                value: country,
+                                label: country,
+                                icon: <FlagImage nationality={country} size="sm" />,
+                              }))}
+                              placeholder="Select nationality"
+                              icon={<FlagImage nationality={formData.nationality || 'India'} size="sm" />}
+                              iconColor="text-orange-400"
                           required
-                        >
-                                <option value="" className="bg-gray-900 text-white">Select nationality</option>
-                          {CRICKET_COUNTRIES.map((country) => (
-                                  <option key={country} value={country} className="bg-gray-900 text-white">
-                              {country}
-                            </option>
-                          ))}
-                        </select>
-                              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                                <ChevronDown className="w-5 h-5 text-gray-400 transition-all duration-300 group-hover:text-orange-400 group-hover:rotate-180" />
-                              </div>
-                            </div>
+                              searchable
+                            />
                           </div>
                         </div>
                       </div>
@@ -2483,24 +2461,18 @@ export default function AdminPlayers() {
                               <Zap className="w-4 h-4 text-blue-400" />
                           Bowling Style
                         </label>
-                            <div className="relative">
-                              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                        <select
+                            <CustomSelect
                           value={formData.bowlingStyle}
-                          onChange={(e) => setFormData({ ...formData, bowlingStyle: e.target.value })}
-                                className="relative w-full pl-12 pr-12 py-3.5 bg-gradient-to-br from-gray-800/80 to-gray-900/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:bg-gray-800/90 transition-all duration-300 appearance-none cursor-pointer hover:border-blue-500/30 hover:bg-gray-800/80 hover:shadow-lg hover:shadow-blue-500/10 group-hover:scale-[1.01]"
-                        >
-                          {BOWLING_STYLES.map((style) => (
-                                  <option key={style} value={style} className="bg-gray-900 text-white">
-                              {style}
-                            </option>
-                          ))}
-                        </select>
-                              <Zap className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-400 pointer-events-none transition-colors duration-300 group-hover:text-blue-300" />
-                              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                                <ChevronDown className="w-5 h-5 text-gray-400 transition-all duration-300 group-hover:text-blue-400 group-hover:rotate-180" />
-                              </div>
-                            </div>
+                              onChange={(value) => setFormData({ ...formData, bowlingStyle: value })}
+                              options={BOWLING_STYLES.map((style) => ({
+                                value: style,
+                                label: style,
+                              }))}
+                              placeholder="Select bowling style"
+                              icon={<Zap className="w-5 h-5" />}
+                              iconColor="text-blue-400"
+                              searchable
+                            />
                             <p className="text-xs text-gray-400 mt-2 flex items-center gap-1.5">
                               <span className="text-gray-500">💡</span>
                               <span>If the exact style is not in the list, enter a custom bowling style below</span>
@@ -2522,24 +2494,18 @@ export default function AdminPlayers() {
                               <Activity className="w-4 h-4 text-indigo-400" />
                           Batting Style
                         </label>
-                            <div className="relative">
-                              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                        <select
+                            <CustomSelect
                           value={formData.battingStyle}
-                          onChange={(e) => setFormData({ ...formData, battingStyle: e.target.value })}
-                                className="relative w-full pl-12 pr-12 py-3.5 bg-gradient-to-br from-gray-800/80 to-gray-900/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 focus:bg-gray-800/90 transition-all duration-300 appearance-none cursor-pointer hover:border-indigo-500/30 hover:bg-gray-800/80 hover:shadow-lg hover:shadow-indigo-500/10 group-hover:scale-[1.01]"
-                        >
-                          {BATTING_STYLES.map((style) => (
-                                  <option key={style} value={style} className="bg-gray-900 text-white">
-                              {style}
-                            </option>
-                          ))}
-                        </select>
-                              <Activity className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-indigo-400 pointer-events-none transition-colors duration-300 group-hover:text-indigo-300" />
-                              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                                <ChevronDown className="w-5 h-5 text-gray-400 transition-all duration-300 group-hover:text-indigo-400 group-hover:rotate-180" />
-                              </div>
-                            </div>
+                              onChange={(value) => setFormData({ ...formData, battingStyle: value })}
+                              options={BATTING_STYLES.map((style) => ({
+                                value: style,
+                                label: style,
+                              }))}
+                              placeholder="Select batting style"
+                              icon={<Activity className="w-5 h-5" />}
+                              iconColor="text-indigo-400"
+                              searchable
+                            />
                       </div>
 
                           <div className="group md:col-span-2">
@@ -2610,24 +2576,20 @@ export default function AdminPlayers() {
                                     <TrendingUp className="w-4 h-4 text-yellow-400" />
                                     Acquired Via
                                   </label>
-                                  <div className="relative">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 to-amber-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
-                                  <select
+                                  <CustomSelect
                                     value={formData.acquiredVia}
-                                    onChange={(e) => setFormData({ ...formData, acquiredVia: e.target.value as any })}
-                                      className="relative w-full pl-12 pr-12 py-3.5 bg-gradient-to-br from-gray-800/80 to-gray-900/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 focus:bg-gray-800/90 transition-all duration-300 appearance-none cursor-pointer hover:border-yellow-500/30 hover:bg-gray-800/80 hover:shadow-lg hover:shadow-yellow-500/10 group-hover:scale-[1.01]"
-                                  >
-                                    <option value="auction" className="bg-gray-900 text-white">Auction</option>
-                                    <option value="retention" className="bg-gray-900 text-white">Retention</option>
-                                    <option value="trade" className="bg-gray-900 text-white">Trade</option>
-                                    <option value="swap" className="bg-gray-900 text-white">Swap</option>
-                                    <option value="transfer" className="bg-gray-900 text-white">Transfer</option>
-                                  </select>
-                                    <TrendingUp className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-yellow-400 pointer-events-none transition-colors duration-300 group-hover:text-yellow-300" />
-                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                                      <ChevronDown className="w-5 h-5 text-gray-400 transition-all duration-300 group-hover:text-yellow-400 group-hover:rotate-180" />
-                                    </div>
-                                </div>
+                                    onChange={(value) => setFormData({ ...formData, acquiredVia: value as any })}
+                                    options={[
+                                      { value: 'auction', label: 'Auction' },
+                                      { value: 'retention', label: 'Retention' },
+                                      { value: 'trade', label: 'Trade' },
+                                      { value: 'swap', label: 'Swap' },
+                                      { value: 'transfer', label: 'Transfer' },
+                                    ]}
+                                    placeholder="Select acquisition method"
+                                    icon={<TrendingUp className="w-5 h-5" />}
+                                    iconColor="text-yellow-400"
+                                  />
                                 </div>
                                 <div className="group">
                                   <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
