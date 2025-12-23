@@ -202,30 +202,55 @@ export default function AdminPlayers() {
 
   // Auto-calculate age when date of birth is entered or changed
   useEffect(() => {
-    if (formData.dateOfBirth && isValidDateForLeague(formData.dateOfBirth, currentLeague)) {
+    if (formData.dateOfBirth && formData.dateOfBirth.trim() !== '') {
       try {
-        const dateOfBirthISO = currentLeague === 'wpl' 
-          ? parseDateMonthDDYYYY(formData.dateOfBirth)
-          : parseDateDDMMYYYY(formData.dateOfBirth);
+        let dateOfBirthISO = '';
+        
+        // Try to parse in the expected format for the current league first
+        if (currentLeague === 'wpl') {
+          dateOfBirthISO = parseDateMonthDDYYYY(formData.dateOfBirth);
+        } else {
+          // For IPL, try DD/MM/YYYY format first
+          dateOfBirthISO = parseDateDDMMYYYY(formData.dateOfBirth);
+          
+          // If that fails, try Month DD, YYYY format as fallback
+          if (!dateOfBirthISO) {
+            dateOfBirthISO = parseDateMonthDDYYYY(formData.dateOfBirth);
+          }
+        }
         
         if (dateOfBirthISO) {
           const calculatedAge = calculateAge(dateOfBirthISO);
           const calculatedAgeStr = calculatedAge.toString();
           
           // Only auto-update age if:
-          // 1. Age field is empty, OR
+          // 1. Age field is empty or "0", OR
           // 2. Age matches the last calculated value (meaning it was auto-calculated before)
           // This allows admin to manually override by typing a different age
-          if (!formData.age || formData.age === '' || formData.age === lastCalculatedAge) {
+          if (!formData.age || formData.age === '' || formData.age === '0' || formData.age === lastCalculatedAge) {
             setFormData(prev => ({ ...prev, age: calculatedAgeStr }));
             setLastCalculatedAge(calculatedAgeStr);
+          }
+        } else {
+          // If date parsing failed, clear the age if it was auto-calculated
+          if (formData.age === lastCalculatedAge) {
+            setFormData(prev => ({ ...prev, age: '' }));
+            setLastCalculatedAge('');
           }
         }
       } catch (error) {
         console.error('Error calculating age from date of birth:', error);
+        // Clear age if calculation fails and it was auto-calculated
+        if (formData.age === lastCalculatedAge) {
+          setFormData(prev => ({ ...prev, age: '' }));
+          setLastCalculatedAge('');
+        }
       }
-    } else if (!formData.dateOfBirth) {
+    } else if (!formData.dateOfBirth || formData.dateOfBirth.trim() === '') {
       // Reset last calculated age when DOB is cleared
+      if (formData.age === lastCalculatedAge) {
+        setFormData(prev => ({ ...prev, age: '' }));
+      }
       setLastCalculatedAge('');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1648,23 +1673,38 @@ export default function AdminPlayers() {
                         </label>
                         <input
                           type="number"
-                          value={formData.age}
+                          value={formData.age === '0' || formData.age === 0 ? '' : formData.age}
                           onChange={(e) => {
                             // When admin manually changes age, clear the last calculated age
                             // so it won't be auto-overwritten
-                            if (e.target.value !== lastCalculatedAge) {
+                            const newValue = e.target.value;
+                            if (newValue !== lastCalculatedAge) {
                               setLastCalculatedAge('');
                             }
-                            setFormData({...formData, age: e.target.value});
+                            setFormData({...formData, age: newValue});
                           }}
                           className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                          placeholder="Enter age"
+                          placeholder="Age"
                           required
                         />
                         <p className="text-xs text-gray-500 mt-1">
-                          {formData.dateOfBirth && isValidDate(formData.dateOfBirth, 'DD/MM/YYYY')
-                            ? 'Auto-calculated from date of birth (you can manually change if needed)'
-                            : 'Enter age manually or provide date of birth to auto-calculate'}
+                          {(() => {
+                            if (!formData.dateOfBirth || formData.dateOfBirth.trim() === '') {
+                              return 'Enter age manually or provide date of birth to auto-calculate';
+                            }
+                            
+                            // Try to parse the date to see if it's valid
+                            const parsedDate = currentLeague === 'wpl' 
+                              ? parseDateMonthDDYYYY(formData.dateOfBirth)
+                              : (parseDateDDMMYYYY(formData.dateOfBirth) || parseDateMonthDDYYYY(formData.dateOfBirth));
+                            
+                            if (parsedDate) {
+                              const calculatedAge = calculateAge(parsedDate);
+                              return `Age automatically calculated: ${calculatedAge} years (you can manually change if needed)`;
+                            } else {
+                              return `Invalid date format. Use ${currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY'} format (e.g., ${currentLeague === 'wpl' ? 'December 25, 1994' : '25/12/1994'})`;
+                            }
+                          })()}
                         </p>
                       </div>
 
@@ -1679,16 +1719,26 @@ export default function AdminPlayers() {
                             setFormData({...formData, dateOfBirth: e.target.value});
                           }}
                           className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                          placeholder={currentLeague === 'wpl' ? 'July 18, 1996 (optional)' : 'DD/MM/YYYY (optional)'}
+                          placeholder={currentLeague === 'wpl' ? 'December 25, 1994 (optional)' : '25/12/1994 or December 25, 1994 (optional)'}
                         />
-                        <p className="text-xs text-gray-500 mt-1">
-                          {formData.dateOfBirth && isValidDateForLeague(formData.dateOfBirth, currentLeague) 
-                            ? `Age automatically calculated: ${calculateAge(
-                                currentLeague === 'wpl' 
-                                  ? parseDateMonthDDYYYY(formData.dateOfBirth)
-                                  : parseDateDDMMYYYY(formData.dateOfBirth)
-                              )} years` 
-                            : 'Optional: If provided, age will be automatically calculated'}
+                        <p className="text-xs text-gray-400 mt-1">
+                          {(() => {
+                            if (!formData.dateOfBirth || formData.dateOfBirth.trim() === '') {
+                              return 'Optional: If provided, age will be automatically calculated';
+                            }
+                            
+                            // Try to parse the date
+                            const parsedDate = currentLeague === 'wpl' 
+                              ? parseDateMonthDDYYYY(formData.dateOfBirth)
+                              : (parseDateDDMMYYYY(formData.dateOfBirth) || parseDateMonthDDYYYY(formData.dateOfBirth));
+                            
+                            if (parsedDate) {
+                              const calculatedAge = calculateAge(parsedDate);
+                              return `✓ Valid date. Age: ${calculatedAge} years`;
+                            } else {
+                              return `⚠ Invalid format. Use ${currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY'} (e.g., ${currentLeague === 'wpl' ? 'December 25, 1994' : '25/12/1994'})`;
+                            }
+                          })()}
                         </p>
                       </div>
 
