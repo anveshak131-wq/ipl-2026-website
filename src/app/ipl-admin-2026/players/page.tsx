@@ -452,19 +452,35 @@ export default function AdminPlayers() {
       let calculatedAge = parseInt(formData.age) || 0;
       let dateOfBirthISO = '';
       
-      if (formData.dateOfBirth) {
-        if (!isValidDateForLeague(formData.dateOfBirth, formData.league)) {
-          const expectedFormat = formData.league === 'wpl' ? 'Month DD, YYYY (e.g., July 18, 1996)' : 'DD/MM/YYYY';
+      if (formData.dateOfBirth && formData.dateOfBirth.trim() !== '') {
+        // For IPL, try DD/MM/YYYY format first, then Month DD, YYYY as fallback
+        // For WPL, use Month DD, YYYY format
+        if (formData.league === 'wpl') {
+          dateOfBirthISO = parseDateMonthDDYYYY(formData.dateOfBirth);
+        } else {
+          // For IPL, try DD/MM/YYYY format first
+          dateOfBirthISO = parseDateDDMMYYYY(formData.dateOfBirth);
+          // If that fails, try Month DD, YYYY format as fallback
+          if (!dateOfBirthISO) {
+            dateOfBirthISO = parseDateMonthDDYYYY(formData.dateOfBirth);
+          }
+        }
+        
+        // Validate the parsed date
+        if (!dateOfBirthISO) {
+          const expectedFormat = formData.league === 'wpl' 
+            ? 'Month DD, YYYY (e.g., July 18, 1996)' 
+            : 'DD/MM/YYYY or Month DD, YYYY (e.g., 25/12/1994 or December 25, 1994)';
           alert(`Invalid date format. Please use ${expectedFormat}`);
           return;
         }
         
-        dateOfBirthISO = formData.league === 'wpl' 
-          ? parseDateMonthDDYYYY(formData.dateOfBirth)
-          : parseDateDDMMYYYY(formData.dateOfBirth);
-        
         // Auto-calculate age from DOB
         calculatedAge = calculateAge(dateOfBirthISO);
+        if (calculatedAge <= 0) {
+          // If age calculation failed, use the manually entered age
+          calculatedAge = parseInt(formData.age) || 0;
+        }
       }
       
       const finalBowlingStyle = formData.customBowlingStyle.trim() || formData.bowlingStyle;
@@ -477,7 +493,7 @@ export default function AdminPlayers() {
         dateOfBirth: dateOfBirthISO || undefined,
         age: calculatedAge,
         nationality: formData.nationality,
-        jerseyNumber: parseInt(formData.jerseyNumber),
+        jerseyNumber: parseInt(formData.jerseyNumber) || 0,
         isCaptain: formData.isCaptain,
         bowlingStyle: finalBowlingStyle,
         battingStyle: formData.battingStyle,
@@ -495,8 +511,7 @@ export default function AdminPlayers() {
           fifties: parseInt(formData.stats.fifties) || 0,
           hundreds: parseInt(formData.stats.hundreds) || 0,
           bestBowling: formData.stats.bestBowling || '-',
-        }
-      ,
+        },
         transferInfo: {
           lastAuctionYear: formData.lastAuctionYear ? Number(formData.lastAuctionYear) : undefined,
           acquiredVia: formData.acquiredVia,
@@ -518,8 +533,12 @@ export default function AdminPlayers() {
         });
 
         if (!response.ok) {
-          throw new Error('Failed to update player');
+          const errorData = await response.json().catch(() => ({ error: 'Failed to update player' }));
+          throw new Error(errorData.error || 'Failed to update player');
         }
+        
+        const updatedPlayer = await response.json();
+        console.log('Player updated successfully:', updatedPlayer);
       } else {
         // Create new player
         const response = await fetch('/api/players', {
@@ -532,16 +551,19 @@ export default function AdminPlayers() {
         });
 
         if (!response.ok) {
-          throw new Error('Failed to create player');
+          const errorData = await response.json().catch(() => ({ error: 'Failed to create player' }));
+          throw new Error(errorData.error || 'Failed to create player');
         }
       }
 
       // Refresh players list
       await fetchData();
       setShowForm(false);
+      setEditingPlayer(null);
     } catch (error) {
       console.error('Error saving player:', error);
-      alert('Failed to save player. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save player. Please try again.';
+      alert(errorMessage);
     }
   };
 
