@@ -130,3 +130,4 @@ const allPlayers = [...auctionPlayers, ...additionalPlayers];
 console.log(JSON.stringify(allPlayers, null, 2));
 console.error(`\nTotal players: ${allPlayers.length} (${auctionPlayers.length} auction + ${additionalPlayers.length} additional)`);
 
+

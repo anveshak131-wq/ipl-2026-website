@@ -566,7 +566,6 @@ const BowlingStatsPage = () => {
         </div>
       )}
     </div>
-  </div>
   );
 };
 

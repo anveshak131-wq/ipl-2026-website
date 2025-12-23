@@ -280,9 +280,8 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
 
     fetchPendingCounts();
     const interval = setInterval(fetchPendingCounts, 30000); // Refresh every 30 seconds
-
     return () => clearInterval(interval);
-  }, [currentLeague]);
+  }, []);
 
   // Consolidated menu groups for cleaner navigation
   const menuGroups: { [key: string]: MenuItem[] } = useMemo(() => ({
@@ -330,41 +329,6 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         ),
         group: 'Main',
         shortcut: 'P',
-      },
-      {
-        href: '/ipl-admin-2026/batting-stats',
-        label: 'Batting Stats',
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-          </svg>
-        ),
-        group: 'Main',
-        shortcut: 'B',
-      },
-      {
-        href: '/ipl-admin-2026/bowling-stats',
-        label: 'Bowling Stats',
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-        ),
-        group: 'Main',
-        shortcut: 'W',
-      },
-    ],
-    Management: [
-      {
-        href: '/ipl-admin-2026/admins',
-        label: 'Admin Management',
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-          </svg>
-        ),
-        group: 'Management',
-        shortcut: 'A',
       },
     ],
     Content: [
@@ -424,7 +388,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
         group: 'Content',
       }] : []),
     ],
-Tools: [
+    Tools: [
       {
         href: '/ipl-admin-2026/players/upload',
         label: 'Upload Players CSV',

@@ -577,7 +577,6 @@ const BattingStatsPage = () => {
         </div>
       )}
     </div>
-  </div>
   );
 };
 

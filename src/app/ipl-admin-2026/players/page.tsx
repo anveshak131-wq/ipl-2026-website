@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLeague } from '@/contexts/LeagueContext';
-import { useAdminData } from '@/contexts/AdminDataContext';
-import PlayersAdminSidebar from '@/components/admin/PlayersAdminSidebar';
+import AdminSidebar from '@/components/admin/AdminSidebar';
 import ModernDialog from '@/components/admin/ModernDialog';
 import LeagueSwitch from '@/components/admin/LeagueSwitch';
 import WPLTeamsManager from '@/components/admin/WPLTeamsManager';
@@ -80,9 +79,9 @@ const CURRENT_SEASON = 2027;
 export default function AdminPlayers() {
   const router = useRouter();
   const { currentLeague } = useLeague();
-  const { players, teams, loading, error, updatePlayer, refreshData } = useAdminData();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
@@ -108,7 +107,7 @@ export default function AdminPlayers() {
     teamId: string;
     league: 'ipl' | 'wpl';
     age: string;
-    dateOfBirth: string; // Month DD, YYYY format for input
+    dateOfBirth: string; // DD/MM/YYYY format for input
     nationality: string;
     jerseyNumber: string;
     isCaptain: boolean;
@@ -123,33 +122,19 @@ export default function AdminPlayers() {
     transferNotes?: string;
 
     stats: {
-      // General stats
       matches: string;
-      
-      // Batting innings stats
-      battingInnings: string;
-      notOuts: string;
       runs: string;
-      ballsFaced: string;
+      wickets: string;
+      average: string;
+      bowlingAverage: string;
+      strikeRate: string;
+      economy: string;
       highest: string;
       fours: string;
       sixes: string;
       fifties: string;
       hundreds: string;
-      battingAverage: string;
-      battingStrikeRate: string;
-      
-      // Bowling innings stats
-      bowlingInnings: string;
-      balls: string;
-      maidens: string;
-      wickets: string;
-      runsConceded: string;
-      bowlingAverage: string;
-      bowlingStrikeRate: string;
-      economy: string;
       bestBowling: string;
-      fiveWickets: string;
     };
   }>({
     name: '',
@@ -171,71 +156,30 @@ export default function AdminPlayers() {
     transferFee: '',
     transferNotes: '',
     stats: {
-      // General stats
       matches: '',
-      
-      // Batting innings stats
-      battingInnings: '',
-      notOuts: '',
       runs: '',
-      ballsFaced: '',
+      wickets: '',
+      average: '',
+      bowlingAverage: '',
+      strikeRate: '',
+      economy: '',
       highest: '',
       fours: '',
       sixes: '',
       fifties: '',
       hundreds: '',
-      battingAverage: '',
-      battingStrikeRate: '',
-      
-      // Bowling innings stats
-      bowlingInnings: '',
-      balls: '',
-      maidens: '',
-      wickets: '',
-      runsConceded: '',
-      bowlingAverage: '',
-      bowlingStrikeRate: '',
-      economy: '',
-      bestBowling: '',
-      fiveWickets: ''
+      bestBowling: ''
     }
   });
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
-        if (!token) {
-          router.push('/ipl-admin-2026');
-          return;
-        }
-
-        const response = await fetch(`/api/auth?action=verify&token=${token}`);
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-          router.push('/ipl-admin-2026');
-          return;
-        }
-
-        const role = data.user?.role;
-        setUserRole(role);
-
-        if (role !== 'admin' && role !== 'super_admin' && role !== 'players_admin') {
-          alert('Access denied. Admin privileges required.');
-          router.push('/');
-          return;
-        }
-
-        setIsAuthenticated(true);
-        fetchData();
-      } catch (error) {
-        console.error('Auth error:', error);
-        router.push('/ipl-admin-2026');
-      }
-    };
-
-    checkAuth();
+    const token = localStorage.getItem('adminToken');
+    if (!token) {
+      router.push('/ipl-admin-2026');
+      return;
+    }
+    setIsAuthenticated(true);
+    fetchData();
   }, [router]);
 
   // Auto-calculate age when date of birth is entered or changed
@@ -352,20 +296,18 @@ export default function AdminPlayers() {
     // If player has DOB, format it according to league and calculate age
     // Otherwise, reset last calculated age
     const dobFormatted = player.dateOfBirth 
-      ? formatDateMonthDDYYYY(player.dateOfBirth)
+      ? (player.league === 'wpl' 
+          ? formatDateMonthDDYYYY(player.dateOfBirth)
+          : formatDateDDMMYYYY(player.dateOfBirth))
       : '';
     
-    // Use saved age if available and > 0, otherwise calculate from DOB
-    let ageToUse = '';
-    if (player.age > 0) {
-      ageToUse = player.age.toString();
-      setLastCalculatedAge(player.age.toString());
-    } else if (dobFormatted) {
-      const dateISO = parseDateMonthDDYYYY(dobFormatted);
+    if (dobFormatted) {
+      const dateISO = player.league === 'wpl' 
+        ? parseDateMonthDDYYYY(dobFormatted)
+        : parseDateDDMMYYYY(dobFormatted);
       
       if (dateISO) {
         const calculatedAge = calculateAge(dateISO);
-        ageToUse = calculatedAge.toString();
         setLastCalculatedAge(calculatedAge.toString());
       } else {
         setLastCalculatedAge('');
@@ -383,7 +325,7 @@ export default function AdminPlayers() {
       role: player.role,
       teamId: player.teamId,
       league: player.league,
-      age: ageToUse,
+      age: player.age > 0 ? player.age.toString() : '',
       dateOfBirth: dobFormatted,
       nationality: player.nationality,
       jerseyNumber: player.jerseyNumber > 0 ? player.jerseyNumber.toString() : '',
@@ -398,33 +340,19 @@ export default function AdminPlayers() {
       transferFee: player.transferInfo?.transferFee ? String(player.transferInfo.transferFee) : '',
       transferNotes: player.transferInfo?.notes || '',
       stats: {
-        // General stats
-        matches: player.stats.matches > 0 ? player.stats.matches.toString() : '',
-        
-        // Batting innings stats
-        battingInnings: (player.stats.battingInnings || 0) > 0 ? player.stats.battingInnings.toString() : '',
-        notOuts: (player.stats.notOuts || 0) > 0 ? player.stats.notOuts.toString() : '',
-        runs: player.stats.runs > 0 ? player.stats.runs.toString() : '',
-        ballsFaced: (player.stats.ballsFaced || 0) > 0 ? player.stats.ballsFaced.toString() : '',
-        highest: player.stats.highest && player.stats.highest !== '0' ? player.stats.highest.toString() : '',
-        fours: player.stats.fours > 0 ? player.stats.fours.toString() : '',
-        sixes: player.stats.sixes > 0 ? player.stats.sixes.toString() : '',
-        fifties: player.stats.fifties > 0 ? player.stats.fifties.toString() : '',
-        hundreds: player.stats.hundreds > 0 ? player.stats.hundreds.toString() : '',
-        battingAverage: (player.stats.battingAverage || 0) > 0 ? player.stats.battingAverage.toString() : '',
-        battingStrikeRate: (player.stats.battingStrikeRate || player.stats.strikeRate || 0) > 0 ? (player.stats.battingStrikeRate || player.stats.strikeRate).toString() : '',
-        
-        // Bowling innings stats
-        bowlingInnings: (player.stats.bowlingInnings || 0) > 0 ? player.stats.bowlingInnings.toString() : '',
-        balls: (player.stats.balls || 0) > 0 ? player.stats.balls.toString() : '',
-        maidens: (player.stats.maidens || 0) > 0 ? player.stats.maidens.toString() : '',
-        wickets: player.stats.wickets > 0 ? player.stats.wickets.toString() : '',
-        runsConceded: (player.stats.runsConceded || 0) > 0 ? player.stats.runsConceded.toString() : '',
-        bowlingAverage: bowlingAvg > 0 ? bowlingAvg.toString() : '',
-        bowlingStrikeRate: (player.stats.bowlingStrikeRate || 0) > 0 ? player.stats.bowlingStrikeRate.toString() : '',
-        economy: player.stats.economy > 0 ? player.stats.economy.toString() : '',
-        bestBowling: player.stats.bestBowling && player.stats.bestBowling !== '-' && player.stats.bestBowling.trim() !== '' ? player.stats.bestBowling : '',
-        fiveWickets: (player.stats.fiveWickets || 0) > 0 ? player.stats.fiveWickets.toString() : '',
+        matches: player.stats.matches.toString(),
+        runs: player.stats.runs.toString(),
+        wickets: player.stats.wickets.toString(),
+        average: player.stats.average.toString(),
+        bowlingAverage: bowlingAvg.toString(),
+        strikeRate: player.stats.strikeRate.toString(),
+        economy: player.stats.economy.toString(),
+        highest: player.stats.highest.toString(),
+        fours: player.stats.fours.toString(),
+        sixes: player.stats.sixes.toString(),
+        fifties: player.stats.fifties.toString(),
+        hundreds: player.stats.hundreds.toString(),
+        bestBowling: player.stats.bestBowling
       }
     });
     setShowForm(true);
@@ -450,13 +378,15 @@ export default function AdminPlayers() {
       let dateOfBirthISO = '';
       
       if (formData.dateOfBirth) {
-        if (!isValidDateForLeague(formData.dateOfBirth, 'wpl')) {
-          const expectedFormat = 'Month DD, YYYY (e.g., July 18, 1996)';
+        if (!isValidDateForLeague(formData.dateOfBirth, formData.league)) {
+          const expectedFormat = formData.league === 'wpl' ? 'Month DD, YYYY (e.g., July 18, 1996)' : 'DD/MM/YYYY';
           alert(`Invalid date format. Please use ${expectedFormat}`);
           return;
         }
         
-        dateOfBirthISO = parseDateMonthDDYYYY(formData.dateOfBirth);
+        dateOfBirthISO = formData.league === 'wpl' 
+          ? parseDateMonthDDYYYY(formData.dateOfBirth)
+          : parseDateDDMMYYYY(formData.dateOfBirth);
         
         // Auto-calculate age from DOB
         calculatedAge = calculateAge(dateOfBirthISO);
@@ -477,33 +407,19 @@ export default function AdminPlayers() {
         bowlingStyle: finalBowlingStyle,
         battingStyle: formData.battingStyle,
         stats: {
-          // General stats
           matches: parseInt(formData.stats.matches) || 0,
-          
-          // Batting innings stats
-          battingInnings: parseInt(formData.stats.battingInnings) || 0,
-          notOuts: parseInt(formData.stats.notOuts) || 0,
           runs: parseInt(formData.stats.runs) || 0,
-          ballsFaced: parseInt(formData.stats.ballsFaced) || 0,
-          highest: formData.stats.highest || '0',
+          wickets: parseInt(formData.stats.wickets) || 0,
+          average: parseFloat(formData.stats.average) || 0,
+          bowlingAverage: parseFloat(formData.stats.bowlingAverage) || 0,
+          strikeRate: parseFloat(formData.stats.strikeRate) || 0,
+          economy: parseFloat(formData.stats.economy) || 0,
+          highest: parseInt(formData.stats.highest) || 0,
           fours: parseInt(formData.stats.fours) || 0,
           sixes: parseInt(formData.stats.sixes) || 0,
           fifties: parseInt(formData.stats.fifties) || 0,
           hundreds: parseInt(formData.stats.hundreds) || 0,
-          battingAverage: parseFloat(formData.stats.battingAverage) || 0,
-          battingStrikeRate: parseFloat(formData.stats.battingStrikeRate) || 0,
-          
-          // Bowling innings stats
-          bowlingInnings: parseInt(formData.stats.bowlingInnings) || 0,
-          balls: parseInt(formData.stats.balls) || 0,
-          maidens: parseInt(formData.stats.maidens) || 0,
-          wickets: parseInt(formData.stats.wickets) || 0,
-          runsConceded: parseInt(formData.stats.runsConceded) || 0,
-          bowlingAverage: parseFloat(formData.stats.bowlingAverage) || 0,
-          bowlingStrikeRate: parseFloat(formData.stats.bowlingStrikeRate) || 0,
-          economy: parseFloat(formData.stats.economy) || 0,
           bestBowling: formData.stats.bestBowling || '-',
-          fiveWickets: parseInt(formData.stats.fiveWickets) || 0,
         }
       ,
         transferInfo: {
@@ -923,7 +839,7 @@ export default function AdminPlayers() {
 
   return (
     <div className="flex min-h-screen bg-gray-950">
-      <PlayersAdminSidebar currentPage="/ipl-admin-2026/players" />
+      <AdminSidebar currentPage="/ipl-admin-2026/players" />
       <div className="flex-1">
         <div className="p-8">
           {/* Header */}
@@ -933,57 +849,35 @@ export default function AdminPlayers() {
                 <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent mb-2">
                   Player Management
                 </h1>
-                <p className="text-gray-400 text-lg">Manage players, teams, and statistics</p>
+                <p className="text-gray-400 text-lg">
+                  Track and manage all {currentLeague === 'wpl' ? 'WPL' : 'IPL'} players
+                </p>
               </div>
-              
-              {/* Stats Navigation */}
-              <div className="flex space-x-4">
-                <a
-                  href="/ipl-admin-2026/batting-stats"
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-2"
+              <div className="flex items-center gap-3">
+                <LeagueSwitch size="md" showLabel={false} />
+                <button
+                  onClick={handleOpenBackupModal}
+                  className="admin-btn-secondary flex items-center gap-2"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
-                  <span>Batting Stats</span>
-                </a>
-                <a
-                  href="/ipl-admin-2026/bowling-stats"
-                  className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center space-x-2"
+                  Backups
+                </button>
+                <button
+                  onClick={handleDeleteAllPlayers}
+                  className="admin-btn-danger flex items-center gap-2"
+                  disabled={players.length === 0}
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  <span>Bowling Stats</span>
-                </a>
-              </div>
-            </div>
-            
-            {/* Action Buttons */}
-            <div className="flex space-x-4">
-              <button
-                onClick={handleOpenBackupModal}
-                className="admin-btn-secondary flex items-center gap-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                Backups
-              </button>
-              <button
-                onClick={handleDeleteAllPlayers}
-                className="admin-btn-danger flex items-center gap-2"
-                disabled={players.length === 0}
-              >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
                   Delete All Players
-              </button>
-              <button
-                onClick={handleAddPlayer}
-                className="admin-btn-primary flex items-center gap-2"
-              >
+                </button>
+                <button
+                  onClick={handleAddPlayer}
+                  className="admin-btn-primary flex items-center gap-2"
+                >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
@@ -1298,7 +1192,7 @@ export default function AdminPlayers() {
                       Age
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      DOB (Month DD, YYYY)
+                      DOB ({currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY'})
                     </th>
                     {currentLeague !== 'wpl' && (
                       <>
@@ -1324,12 +1218,6 @@ export default function AdminPlayers() {
                             )}
                           </button>
                         </th>
-                        <th className="px-6 py-4 text-left text-xs font-medium text-green-400 uppercase tracking-wider">
-                          Batting Innings
-                        </th>
-                        <th className="px-6 py-4 text-left text-xs font-medium text-yellow-400 uppercase tracking-wider">
-                          Bowling Innings
-                        </th>
                         <th className="px-6 py-4 text-left">
                           <button
                             onClick={() => handleSort('battingAverage')}
@@ -1353,10 +1241,7 @@ export default function AdminPlayers() {
                           </button>
                         </th>
                         <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                          Batting SR
-                        </th>
-                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                          Economy
+                          SR
                         </th>
                         <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                           4s/6s
@@ -1442,24 +1327,22 @@ export default function AdminPlayers() {
                           {player.age > 0 && `${player.age}y`}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                          {player.dateOfBirth && formatDateMonthDDYYYY(player.dateOfBirth)}
+                          {player.dateOfBirth && (
+                            currentLeague === 'wpl' 
+                              ? formatDateMonthDDYYYY(player.dateOfBirth)
+                              : formatDateDDMMYYYY(player.dateOfBirth)
+                          )}
                         </td>
                         {currentLeague !== 'wpl' && (
                           <>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-ipl-gold font-bold">
-                              {player.stats.runs > 0 ? player.stats.runs : ''}
+                              {player.stats.runs > 0 && player.stats.runs}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-400 font-bold">
-                              {player.stats.wickets > 0 ? player.stats.wickets : ''}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-green-400 font-semibold">
-                              {player.stats.battingInnings > 0 ? player.stats.battingInnings : ''}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-yellow-400 font-semibold">
-                              {player.stats.bowlingInnings > 0 ? player.stats.bowlingInnings : ''}
+                              {player.stats.wickets > 0 && player.stats.wickets}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-purple-400 font-semibold">
-                              {player.stats.battingAverage > 0 ? player.stats.battingAverage.toFixed(2) : ''}
+                              {player.stats.average > 0 && player.stats.average.toFixed(2)}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
                               {(() => {
@@ -1467,26 +1350,23 @@ export default function AdminPlayers() {
                                   (player.stats.wickets > 0 
                                     ? calculateBowlingAverage(player.stats.economy, player.stats.wickets, player.stats.matches)
                                     : 0);
-                                return bowlingAvg > 0 ? bowlingAvg.toFixed(2) : '';
+                                return bowlingAvg > 0 ? bowlingAvg.toFixed(2) : null;
                               })()}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
-                              {player.stats.battingStrikeRate > 0 ? player.stats.battingStrikeRate.toFixed(2) : ''}
+                              {player.stats.strikeRate > 0 && player.stats.strikeRate.toFixed(2)}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
-                              {player.stats.economy > 0 ? player.stats.economy.toFixed(2) : ''}
+                              {(player.stats.fours > 0 || player.stats.sixes > 0) && 
+                                `${player.stats.fours}/${player.stats.sixes}`}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
-                              {(player.stats.fours > 0 || player.stats.sixes > 0) ? 
-                                `${player.stats.fours}/${player.stats.sixes}` : ''}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
-                              {(player.stats.fifties > 0 || player.stats.hundreds > 0) ? 
-                                `${player.stats.fifties}/${player.stats.hundreds}` : ''}
+                              {(player.stats.fifties > 0 || player.stats.hundreds > 0) && 
+                                `${player.stats.fifties}/${player.stats.hundreds}`}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
                               {player.stats.bestBowling && player.stats.bestBowling !== '-' && player.stats.bestBowling.trim() !== '' 
-                                ? player.stats.bestBowling : ''}
+                                && player.stats.bestBowling}
                             </td>
                           </>
                         )}
@@ -1655,27 +1535,19 @@ export default function AdminPlayers() {
                           type="number"
                           value={formData.age}
                           onChange={(e) => {
-                            const newAge = e.target.value;
-                            console.log('Age field onChange:', newAge, 'lastCalculatedAge:', lastCalculatedAge, 'formData.age:', formData.age);
-                            
-                            // Only update if this is a manual change (not from DOB calculation)
-                            // If the new age matches lastCalculatedAge, it's from DOB, so don't clear it
-                            if (newAge === lastCalculatedAge) {
-                              console.log('Age change from DOB calculation, ignoring');
-                              return; // Don't update anything if it's from DOB calculation
-                            }
-                            
                             // When admin manually changes age, clear the last calculated age
-                            console.log('Manual age change detected');
-                            setLastCalculatedAge('');
-                            setFormData({...formData, age: newAge});
+                            // so it won't be auto-overwritten
+                            if (e.target.value !== lastCalculatedAge) {
+                              setLastCalculatedAge('');
+                            }
+                            setFormData({...formData, age: e.target.value});
                           }}
                           className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
                           placeholder="Enter age"
                           required
                         />
                         <p className="text-xs text-gray-500 mt-1">
-                          {formData.dateOfBirth && formData.dateOfBirth.match(/^(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s*\d{4}$/)
+                          {formData.dateOfBirth && isValidDate(formData.dateOfBirth, 'DD/MM/YYYY')
                             ? 'Auto-calculated from date of birth (you can manually change if needed)'
                             : 'Enter age manually or provide date of birth to auto-calculate'}
                         </p>
@@ -1683,71 +1555,24 @@ export default function AdminPlayers() {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                          Date of Birth (Month DD, YYYY)
+                          Date of Birth ({currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY'})
                         </label>
                         <input
                           type="text"
                           value={formData.dateOfBirth}
                           onChange={(e) => {
-                            const newDateOfBirth = e.target.value;
-                            console.log('DOB onChange:', newDateOfBirth);
-                            
-                            // Create from scratch - simple and direct age calculation
-                            if (newDateOfBirth && newDateOfBirth.match(/^(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s*\d{4}$/)) {
-                              console.log('DOB format matches');
-                              
-                              // Parse "November 08, 1995" format
-                              const monthMap: { [key: string]: number } = {
-                                'January': 0, 'February': 1, 'March': 2, 'April': 3,
-                                'May': 4, 'June': 5, 'July': 6, 'August': 7,
-                                'September': 8, 'October': 9, 'November': 10, 'December': 11
-                              };
-                              
-                              const [monthName, dayPart, yearPart] = newDateOfBirth.replace(',', '').split(' ');
-                              const month = monthMap[monthName];
-                              const day = parseInt(dayPart);
-                              const year = parseInt(yearPart);
-                              
-                              console.log('Parsed:', { monthName, month, day, year });
-                              
-                              // Create birth date and calculate age
-                              const birthDate = new Date(year, month, day);
-                              const today = new Date();
-                              
-                              console.log('Dates:', { birthDate, today });
-                              
-                              // Simple age calculation
-                              let age = today.getFullYear() - year;
-                              const hasHadBirthday = today.getMonth() > month || 
-                                                   (today.getMonth() === month && today.getDate() >= day);
-                              
-                              if (!hasHadBirthday) {
-                                age--;
-                              }
-                              
-                              console.log('Calculated age:', age);
-                              
-                              // Set the calculated age without triggering age field onChange
-                              const newAge = age.toString();
-                              console.log('Setting age to:', newAge);
-                              
-                              setFormData(prev => {
-                                console.log('Current formData.age:', prev.age);
-                                return {...prev, dateOfBirth: newDateOfBirth, age: newAge};
-                              });
-                              setLastCalculatedAge(newAge);
-                            } else {
-                              console.log('DOB format does not match');
-                              setFormData(prev => ({...prev, dateOfBirth: newDateOfBirth}));
-                              setLastCalculatedAge('');
-                            }
+                            setFormData({...formData, dateOfBirth: e.target.value});
                           }}
                           className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                          placeholder='July 18, 1996 (optional)'
+                          placeholder={currentLeague === 'wpl' ? 'July 18, 1996 (optional)' : 'DD/MM/YYYY (optional)'}
                         />
                         <p className="text-xs text-gray-500 mt-1">
-                          {formData.dateOfBirth && formData.dateOfBirth.match(/^(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s*\d{4}$/) 
-                            ? `Age automatically calculated: ${formData.age} years` 
+                          {formData.dateOfBirth && isValidDateForLeague(formData.dateOfBirth, currentLeague) 
+                            ? `Age automatically calculated: ${calculateAge(
+                                currentLeague === 'wpl' 
+                                  ? parseDateMonthDDYYYY(formData.dateOfBirth)
+                                  : parseDateDDMMYYYY(formData.dateOfBirth)
+                              )} years` 
                             : 'Optional: If provided, age will be automatically calculated'}
                         </p>
                       </div>
@@ -1942,37 +1767,7 @@ export default function AdminPlayers() {
                             value={formData.stats.matches}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, matches: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 237"
-                          />
-                        </div>
-                        
-                        {/* Section Header */}
-                        <div className="col-span-full">
-                          <h4 className="text-md font-semibold text-blue-400 mb-3">Batting Statistics</h4>
-                        </div>
-                        
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Batting Innings
-                          </label>
-                          <input
-                            type="number"
-                            value={formData.stats.battingInnings}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, battingInnings: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 237"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Not Outs
-                          </label>
-                          <input
-                            type="number"
-                            value={formData.stats.notOuts}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, notOuts: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 39"
+                            placeholder="0"
                           />
                         </div>
                         <div>
@@ -1984,151 +1779,7 @@ export default function AdminPlayers() {
                             value={formData.stats.runs}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, runs: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 7263"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Balls Faced
-                          </label>
-                          <input
-                            type="number"
-                            value={formData.stats.ballsFaced}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, ballsFaced: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 6136"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Highest Score
-                          </label>
-                          <input
-                            type="text"
-                            value={formData.stats.highest}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, highest: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 113*"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            4s
-                          </label>
-                          <input
-                            type="number"
-                            value={formData.stats.fours}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, fours: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 643"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            6s
-                          </label>
-                          <input
-                            type="number"
-                            value={formData.stats.sixes}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, sixes: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 217"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            50s
-                          </label>
-                          <input
-                            type="number"
-                            value={formData.stats.fifties}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, fifties: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 64"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            100s
-                          </label>
-                          <input
-                            type="number"
-                            value={formData.stats.hundreds}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, hundreds: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 1"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Batting Average
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={formData.stats.battingAverage}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, battingAverage: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 36.20"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Batting Strike Rate
-                          </label>
-                          <input
-                            type="number"
-                            step="0.01"
-                            value={formData.stats.battingStrikeRate}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, battingStrikeRate: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 118.44"
-                          />
-                        </div>
-                        
-                        {/* Divider Line */}
-                        <div className="col-span-full border-t border-white/20 my-4"></div>
-                        
-                        {/* Section Header */}
-                        <div className="col-span-full">
-                          <h4 className="text-md font-semibold text-green-400 mb-3">Bowling Statistics</h4>
-                        </div>
-                        
-                        {/* Bowling Innings Stats */}
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Bowling Innings
-                          </label>
-                          <input
-                            type="number"
-                            value={formData.stats.bowlingInnings}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, bowlingInnings: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 38"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Balls
-                          </label>
-                          <input
-                            type="number"
-                            value={formData.stats.balls}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, balls: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 912"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Maidens
-                          </label>
-                          <input
-                            type="number"
-                            value={formData.stats.maidens}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, maidens: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 12"
+                            placeholder="0"
                           />
                         </div>
                         <div>
@@ -2140,19 +1791,20 @@ export default function AdminPlayers() {
                             value={formData.stats.wickets}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, wickets: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 28"
+                            placeholder="0"
                           />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Runs Conceded
+                            Batting Average
                           </label>
                           <input
                             type="number"
-                            value={formData.stats.runsConceded}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, runsConceded: e.target.value}})}
+                            step="0.01"
+                            value={formData.stats.average}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, average: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 756"
+                            placeholder="0.00"
                           />
                         </div>
                         <div>
@@ -2165,23 +1817,22 @@ export default function AdminPlayers() {
                             value={formData.stats.bowlingAverage}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, bowlingAverage: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 27.00"
+                            placeholder="0.00"
                           />
                           <p className="text-xs text-gray-500 mt-1">Runs conceded per wicket</p>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Bowling Strike Rate
+                            Strike Rate
                           </label>
                           <input
                             type="number"
                             step="0.01"
-                            value={formData.stats.bowlingStrikeRate}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, bowlingStrikeRate: e.target.value}})}
+                            value={formData.stats.strikeRate}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, strikeRate: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 32.57"
+                            placeholder="0.00"
                           />
-                          <p className="text-xs text-gray-500 mt-1">Balls per wicket</p>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -2193,32 +1844,79 @@ export default function AdminPlayers() {
                             value={formData.stats.economy}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, economy: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 7.85"
+                            placeholder="0.00"
                           />
-                          <p className="text-xs text-gray-500 mt-1">Runs per over</p>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Best Bowling
+                            Highest Score
+                          </label>
+                          <input
+                            type="number"
+                            value={formData.stats.highest}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, highest: e.target.value}})}
+                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                            placeholder="0"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Fours
+                          </label>
+                          <input
+                            type="number"
+                            value={formData.stats.fours}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, fours: e.target.value}})}
+                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                            placeholder="0"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Sixes
+                          </label>
+                          <input
+                            type="number"
+                            value={formData.stats.sixes}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, sixes: e.target.value}})}
+                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                            placeholder="0"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Fifties (50s)
+                          </label>
+                          <input
+                            type="number"
+                            value={formData.stats.fifties}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, fifties: e.target.value}})}
+                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                            placeholder="0"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Hundreds (100s)
+                          </label>
+                          <input
+                            type="number"
+                            value={formData.stats.hundreds}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, hundreds: e.target.value}})}
+                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                            placeholder="0"
+                          />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Best Bowling (BBM)
                           </label>
                           <input
                             type="text"
                             value={formData.stats.bestBowling}
                             onChange={(e) => setFormData({...formData, stats: {...formData.stats, bestBowling: e.target.value}})}
                             className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 4/21"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">
-                            5-Wicket Hauls
-                          </label>
-                          <input
-                            type="number"
-                            value={formData.stats.fiveWickets}
-                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, fiveWickets: e.target.value}})}
-                            className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-                            placeholder="e.g., 2"
+                            placeholder="e.g., 4/21 or 3/45"
                           />
                         </div>
                       </div>
