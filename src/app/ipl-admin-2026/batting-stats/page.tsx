@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAdminData } from '@/contexts/AdminDataContext';
-import AdminSidebar from '@/components/admin/AdminSidebar';
+import PlayersAdminSidebar from '@/components/admin/PlayersAdminSidebar';
 
 const BattingStatsPage = () => {
   const { players, teams, loading, error, updatePlayer } = useAdminData();
@@ -147,7 +147,7 @@ const BattingStatsPage = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-900">
-      <AdminSidebar />
+      <PlayersAdminSidebar currentPage="/ipl-admin-2026/batting-stats" />
       <div className="flex-1 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 min-h-screen">
         {/* Hero Header */}
         <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 p-8 rounded-b-3xl shadow-2xl">

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLeague } from '@/contexts/LeagueContext';
 import { useAdminData } from '@/contexts/AdminDataContext';
-import AdminSidebar from '@/components/admin/AdminSidebar';
+import PlayersAdminSidebar from '@/components/admin/PlayersAdminSidebar';
 import ModernDialog from '@/components/admin/ModernDialog';
 import LeagueSwitch from '@/components/admin/LeagueSwitch';
 import WPLTeamsManager from '@/components/admin/WPLTeamsManager';
@@ -923,7 +923,7 @@ export default function AdminPlayers() {
 
   return (
     <div className="flex min-h-screen bg-gray-950">
-      {userRole !== 'players_admin' && <AdminSidebar currentPage="/ipl-admin-2026/players" />}
+      <PlayersAdminSidebar currentPage="/ipl-admin-2026/players" />
       <div className="flex-1">
         <div className="p-8">
           {/* Header */}
