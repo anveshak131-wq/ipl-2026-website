@@ -1,11 +1,16 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAdminData } from '@/contexts/AdminDataContext';
 import AdminSidebar from '@/components/admin/AdminSidebar';
+import PlayersAdminSidebar from '@/components/admin/PlayersAdminSidebar';
 
 const BattingStatsPage = () => {
+  const router = useRouter();
   const { players, teams, loading, error, updatePlayer } = useAdminData();
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [editingPlayer, setEditingPlayer] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState(null);
@@ -31,9 +36,43 @@ const BattingStatsPage = () => {
     }
   });
 
+  // Check authentication and role
   useEffect(() => {
-    // Data is automatically loaded by the context
-  }, []);
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
+        if (!token) {
+          router.push('/ipl-admin-2026');
+          return;
+        }
+
+        const response = await fetch(`/api/auth?action=verify&token=${token}`);
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          router.push('/ipl-admin-2026');
+          return;
+        }
+
+        const role = data.user?.role;
+        setUserRole(role);
+
+        // Check if user has valid admin role
+        if (role !== 'admin' && role !== 'super_admin' && role !== 'players_admin') {
+          alert('Access denied. Admin privileges required.');
+          router.push('/ipl-admin-2026');
+          return;
+        }
+
+        setIsCheckingAuth(false);
+      } catch (error) {
+        console.error('Auth error:', error);
+        router.push('/ipl-admin-2026');
+      }
+    };
+
+    checkAuth();
+  }, [router]);
 
   const handleCancelEdit = useCallback(() => {
     setShowEditModal(false);
@@ -129,6 +168,14 @@ const BattingStatsPage = () => {
     players: players.filter(player => player.teamId === team.id)
   })).filter(teamGroup => teamGroup.players.length > 0);
 
+  if (isCheckingAuth) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -147,7 +194,11 @@ const BattingStatsPage = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-900">
-      <AdminSidebar currentPage="/ipl-admin-2026/batting-stats" />
+      {userRole === 'players_admin' ? (
+        <PlayersAdminSidebar currentPage="/ipl-admin-2026/batting-stats" />
+      ) : (
+        <AdminSidebar currentPage="/ipl-admin-2026/batting-stats" />
+      )}
       <div className="flex-1 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 min-h-screen">
         {/* Hero Header */}
         <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-700 p-8 rounded-b-3xl shadow-2xl">

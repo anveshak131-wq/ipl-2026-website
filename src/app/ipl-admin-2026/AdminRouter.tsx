@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { LeagueProvider } from '@/contexts/LeagueContext';
 import AdminSidebar from '@/components/admin/AdminSidebar';
+import PlayersAdminSidebar from '@/components/admin/PlayersAdminSidebar';
 import GlobalSearch from '@/components/admin/GlobalSearch';
 import AdminDashboard from './dashboard/page';
 import AdminMatches from './matches/page';
@@ -83,8 +84,13 @@ export default function AdminRouter() {
             return;
           }
 
-          // For players_admin, restrict to /players only
-          if (role === 'players_admin' && pathname !== '/ipl-admin-2026/players') {
+          // For players_admin, restrict to players pages only
+          const allowedPlayersPages = [
+            '/ipl-admin-2026/players',
+            '/ipl-admin-2026/batting-stats',
+            '/ipl-admin-2026/bowling-stats'
+          ];
+          if (role === 'players_admin' && !allowedPlayersPages.includes(pathname)) {
             router.push('/ipl-admin-2026/players');
             setIsLoading(false);
             return;
@@ -101,8 +107,13 @@ export default function AdminRouter() {
             if (tokenPayload.role === 'admin' || tokenPayload.role === 'super_admin' || tokenPayload.role === 'players_admin') {
               setUserRole(tokenPayload.role);
               
-              // For players_admin, restrict to /players only even in fallback
-              if (tokenPayload.role === 'players_admin' && pathname !== '/ipl-admin-2026/players') {
+              // For players_admin, restrict to players pages only even in fallback
+              const allowedPlayersPages = [
+                '/ipl-admin-2026/players',
+                '/ipl-admin-2026/batting-stats',
+                '/ipl-admin-2026/bowling-stats'
+              ];
+              if (tokenPayload.role === 'players_admin' && !allowedPlayersPages.includes(pathname)) {
                 router.push('/ipl-admin-2026/players');
                 setIsLoading(false);
                 return;
@@ -200,10 +211,21 @@ export default function AdminRouter() {
     return <AdminDashboard />;
   };
 
+  // Check if current page is accessible by players_admin
+  const isPlayersPage = [
+    '/ipl-admin-2026/players',
+    '/ipl-admin-2026/batting-stats',
+    '/ipl-admin-2026/bowling-stats'
+  ].includes(pathname);
+
   return (
     <LeagueProvider>
       <div className="flex min-h-screen bg-ipl-dark">
-        {userRole !== 'players_admin' && <AdminSidebar currentPage={pathname} />}
+        {userRole === 'players_admin' ? (
+          isPlayersPage && <PlayersAdminSidebar currentPage={pathname} />
+        ) : (
+          <AdminSidebar currentPage={pathname} />
+        )}
         <div className="flex-1">
           {renderPage()}
         </div>
