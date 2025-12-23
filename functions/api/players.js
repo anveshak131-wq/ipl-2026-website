@@ -76,6 +76,73 @@ export const onRequest = async (context) => {
       console.log(`Total players in KV: ${players.length}`);
       console.log(`Requested league: ${league}`);
       
+      // MIGRATION: Auto-calculate average and strikeRate from base stats if missing
+      // This ensures end-user pages always have numeric values
+      let needsMigration = false;
+      players = players.map(player => {
+        if (!player.stats) return player;
+        
+        const runs = player.stats.runs || 0;
+        const battingInnings = player.stats.battingInnings || 0;
+        const notOuts = player.stats.notOuts || 0;
+        const ballsFaced = player.stats.ballsFaced || 0;
+        
+        let playerNeedsUpdate = false;
+        let average = player.stats.average;
+        let strikeRate = player.stats.strikeRate;
+        
+        // Calculate average if missing or 0
+        if (!average || average === 0) {
+          const dismissals = battingInnings - notOuts;
+          if (dismissals > 0 && runs > 0) {
+            average = runs / dismissals;
+            playerNeedsUpdate = true;
+          } else if (player.stats.battingAverage && player.stats.battingAverage !== '' && player.stats.battingAverage !== '0' && player.stats.battingAverage !== '-') {
+            // Fallback to parsing battingAverage string
+            const parsed = parseFloat(player.stats.battingAverage);
+            if (!isNaN(parsed) && parsed > 0) {
+              average = parsed;
+              playerNeedsUpdate = true;
+            }
+          }
+        }
+        
+        // Calculate strikeRate if missing or 0
+        if (!strikeRate || strikeRate === 0) {
+          if (ballsFaced > 0 && runs > 0) {
+            strikeRate = (runs * 100) / ballsFaced;
+            playerNeedsUpdate = true;
+          } else if (player.stats.battingStrikeRate && player.stats.battingStrikeRate !== '' && player.stats.battingStrikeRate !== '0' && player.stats.battingStrikeRate !== '-') {
+            // Fallback to parsing battingStrikeRate string
+            const parsed = parseFloat(player.stats.battingStrikeRate);
+            if (!isNaN(parsed) && parsed > 0) {
+              strikeRate = parsed;
+              playerNeedsUpdate = true;
+            }
+          }
+        }
+        
+        if (playerNeedsUpdate) {
+          needsMigration = true;
+          return {
+            ...player,
+            stats: {
+              ...player.stats,
+              average: average || player.stats.average || 0,
+              strikeRate: strikeRate || player.stats.strikeRate || 0
+            }
+          };
+        }
+        
+        return player;
+      });
+      
+      // Save migrated data back to KV if any changes were made
+      if (needsMigration) {
+        console.log('Migration: Auto-calculated average/strikeRate for players');
+        await env.IPL_CACHE.put('players', JSON.stringify(players));
+      }
+      
       // Diagnostic mode - return detailed breakdown
       if (diagnostic) {
         const iplPlayers = players.filter(p => {
@@ -492,12 +559,38 @@ export const onRequest = async (context) => {
           matches: updatedPlayer.stats?.matches !== undefined ? (parseInt(updatedPlayer.stats.matches) || 0) : (players[index].stats?.matches || 0),
           runs: updatedPlayer.stats?.runs !== undefined ? (parseInt(updatedPlayer.stats.runs) || 0) : (players[index].stats?.runs || 0),
           wickets: updatedPlayer.stats?.wickets !== undefined ? (parseInt(updatedPlayer.stats.wickets) || 0) : (players[index].stats?.wickets || 0),
-          average: updatedPlayer.stats?.average !== undefined && updatedPlayer.stats?.average !== null && updatedPlayer.stats?.average !== '' 
-            ? (typeof updatedPlayer.stats.average === 'number' ? updatedPlayer.stats.average : parseFloat(updatedPlayer.stats.average) || 0)
-            : (players[index].stats?.average || 0),
-          strikeRate: updatedPlayer.stats?.strikeRate !== undefined && updatedPlayer.stats?.strikeRate !== null && updatedPlayer.stats?.strikeRate !== ''
-            ? (typeof updatedPlayer.stats.strikeRate === 'number' ? updatedPlayer.stats.strikeRate : parseFloat(updatedPlayer.stats.strikeRate) || 0)
-            : (players[index].stats?.strikeRate || 0),
+          // Calculate average - use provided value, or calculate from base stats, or use existing
+          average: (() => {
+            // If explicitly provided, use it
+            if (updatedPlayer.stats?.average !== undefined && updatedPlayer.stats?.average !== null && updatedPlayer.stats?.average !== '') {
+              return typeof updatedPlayer.stats.average === 'number' ? updatedPlayer.stats.average : parseFloat(updatedPlayer.stats.average) || 0;
+            }
+            // Otherwise, calculate from base stats
+            const runs = updatedPlayer.stats?.runs !== undefined ? (parseInt(updatedPlayer.stats.runs) || 0) : (players[index].stats?.runs || 0);
+            const battingInnings = updatedPlayer.stats?.battingInnings !== undefined ? (parseInt(updatedPlayer.stats.battingInnings) || 0) : (players[index].stats?.battingInnings || 0);
+            const notOuts = updatedPlayer.stats?.notOuts !== undefined ? (parseInt(updatedPlayer.stats.notOuts) || 0) : (players[index].stats?.notOuts || 0);
+            const dismissals = battingInnings - notOuts;
+            if (dismissals > 0 && runs > 0) {
+              return runs / dismissals;
+            }
+            // Fallback to existing value
+            return players[index].stats?.average || 0;
+          })(),
+          // Calculate strikeRate - use provided value, or calculate from base stats, or use existing
+          strikeRate: (() => {
+            // If explicitly provided, use it
+            if (updatedPlayer.stats?.strikeRate !== undefined && updatedPlayer.stats?.strikeRate !== null && updatedPlayer.stats?.strikeRate !== '') {
+              return typeof updatedPlayer.stats.strikeRate === 'number' ? updatedPlayer.stats.strikeRate : parseFloat(updatedPlayer.stats.strikeRate) || 0;
+            }
+            // Otherwise, calculate from base stats
+            const runs = updatedPlayer.stats?.runs !== undefined ? (parseInt(updatedPlayer.stats.runs) || 0) : (players[index].stats?.runs || 0);
+            const ballsFaced = updatedPlayer.stats?.ballsFaced !== undefined ? (parseInt(updatedPlayer.stats.ballsFaced) || 0) : (players[index].stats?.ballsFaced || 0);
+            if (ballsFaced > 0 && runs > 0) {
+              return (runs * 100) / ballsFaced;
+            }
+            // Fallback to existing value
+            return players[index].stats?.strikeRate || 0;
+          })(),
           economy: updatedPlayer.stats?.economy !== undefined ? (typeof updatedPlayer.stats.economy === 'string' ? (updatedPlayer.stats.economy || '') : (parseFloat(updatedPlayer.stats.economy) || 0)) : (players[index].stats?.economy || 0),
           highest: updatedPlayer.stats?.highest !== undefined ? (parseInt(updatedPlayer.stats.highest) || 0) : (players[index].stats?.highest || 0),
           fours: updatedPlayer.stats?.fours !== undefined ? (parseInt(updatedPlayer.stats.fours) || 0) : (players[index].stats?.fours || 0),
