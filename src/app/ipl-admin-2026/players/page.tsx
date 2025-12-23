@@ -1186,7 +1186,7 @@ export default function AdminPlayers() {
               </div>
 
                 {/* Role Filter */}
-              <div className="relative md:min-w-[200px]" data-filter-dropdown>
+              <div className="relative md:min-w-[200px] z-50" data-filter-dropdown>
                 <button
                   onClick={() => {
                     setShowAdvancedFilters(!showAdvancedFilters);
@@ -1203,7 +1203,7 @@ export default function AdminPlayers() {
                   <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-300 flex-shrink-0 ${showAdvancedFilters ? 'rotate-180' : ''}`} />
                 </button>
                 {showAdvancedFilters && (
-                  <div className="absolute left-0 right-0 mt-2 bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden z-50">
+                  <div className="absolute left-0 right-0 mt-2 bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden z-[9999]">
                     <div className="py-2">
                       {['all', 'Batsman', 'Bowler', 'All-rounder', 'Wicket-keeper'].map((role) => (
                         <button
@@ -1232,7 +1232,7 @@ export default function AdminPlayers() {
               </div>
 
                 {/* Enhanced Team Filter Dropdown */}
-              <div className="relative md:min-w-[320px]" data-filter-dropdown>
+              <div className="relative md:min-w-[320px] z-50" data-filter-dropdown>
                 <button
                   onClick={() => {
                     setIsDropdownOpen(!isDropdownOpen);
@@ -1252,7 +1252,7 @@ export default function AdminPlayers() {
 
                   {/* Enhanced Dropdown Menu */}
                 <div 
-                    className={`absolute left-0 right-0 mt-2 bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden transition-all duration-300 ease-out origin-top z-50 ${
+                    className={`absolute left-0 right-0 mt-2 bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden transition-all duration-300 ease-out origin-top z-[9999] ${
                     isDropdownOpen 
                       ? 'opacity-100 scale-y-100 max-h-[500px]' 
                       : 'opacity-0 scale-y-0 max-h-0 pointer-events-none'
