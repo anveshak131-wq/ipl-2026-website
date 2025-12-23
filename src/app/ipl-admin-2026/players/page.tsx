@@ -14,20 +14,8 @@ import { parseDateDDMMYYYY, formatDateDDMMYYYY, calculateAge, isValidDate, forma
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import FlagImage from '@/components/ui/FlagImage';
+import { Search, Filter, Edit2, X, Users, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Plus, Trash2, Download, Upload, Shield, Activity, Hash } from 'lucide-react';
 import '@/styles/flags.css';
-
-// Sort icons
-const ChevronUpIcon = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-  </svg>
-);
-
-const ChevronDownIcon = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-  </svg>
-);
 
 // Cricket-playing countries (exclude Pakistan – not part of IPL/WPL)
 const CRICKET_COUNTRIES = [
@@ -868,55 +856,59 @@ export default function AdminPlayers() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-950">
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
       {userRole === 'players_admin' ? (
         <PlayersAdminSidebar currentPage="/ipl-admin-2026/players" />
       ) : (
         <AdminSidebar currentPage="/ipl-admin-2026/players" />
       )}
       <div className="flex-1">
-        <div className="p-8">
-          {/* Header */}
+        <div className="p-6 lg:p-8">
+          {/* Modern Header */}
           <div className="mb-8">
-            <div className="flex justify-between items-start mb-6">
-              <div>
-                <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent mb-2">
-                  Player Management
-                </h1>
-                <p className="text-gray-400 text-lg">
-                  Track and manage all {currentLeague === 'wpl' ? 'WPL' : 'IPL'} players
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <LeagueSwitch size="md" showLabel={false} />
-                <button
-                  onClick={handleOpenBackupModal}
-                  className="admin-btn-secondary flex items-center gap-2"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  Backups
-                </button>
-                <button
-                  onClick={handleDeleteAllPlayers}
-                  className="admin-btn-danger flex items-center gap-2"
-                  disabled={players.length === 0}
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                  Delete All Players
-                </button>
-                <button
-                  onClick={handleAddPlayer}
-                  className="admin-btn-primary flex items-center gap-2"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                  Add New Player
-                </button>
+            <div className="bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-pink-600/20 rounded-3xl p-8 mb-8 border border-white/10 backdrop-blur-xl shadow-2xl">
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                <div className="flex-1">
+                  <div className="flex items-center gap-4 mb-3">
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+                      <Users className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                      <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent mb-2">
+                        Player Management
+                      </h1>
+                      <p className="text-gray-300 text-lg flex items-center gap-2">
+                        <Activity className="w-5 h-5 text-blue-400" />
+                        Track and manage all {currentLeague === 'wpl' ? 'WPL' : 'IPL'} players
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <LeagueSwitch size="md" showLabel={false} />
+                  <button
+                    onClick={handleOpenBackupModal}
+                    className="px-5 py-2.5 bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white rounded-xl transition-all duration-200 flex items-center gap-2 font-medium shadow-lg hover:shadow-xl border border-white/10"
+                  >
+                    <Download className="w-5 h-5" />
+                    Backups
+                  </button>
+                  <button
+                    onClick={handleDeleteAllPlayers}
+                    className="px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl transition-all duration-200 flex items-center gap-2 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled={players.length === 0}
+                  >
+                    <Trash2 className="w-5 h-5" />
+                    Delete All
+                  </button>
+                  <button
+                    onClick={handleAddPlayer}
+                    className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl transition-all duration-200 flex items-center gap-2 font-semibold shadow-lg hover:shadow-xl hover:scale-105"
+                  >
+                    <Plus className="w-5 h-5" />
+                    Add Player
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -930,108 +922,98 @@ export default function AdminPlayers() {
               </div>
             )}
 
-            {/* Statistics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            {/* Modern Statistics Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-6">
               {/* Total Players */}
-              <div className="admin-card group">
+              <div className="bg-gradient-to-br from-blue-500/20 to-indigo-600/20 rounded-2xl p-6 border border-blue-500/30 backdrop-blur-xl hover:from-blue-500/30 hover:to-indigo-600/30 transition-all duration-300 group shadow-xl">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
-                    </svg>
+                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <Users className="w-7 h-7 text-white" />
                   </div>
                   <div className="text-right">
                     <p className="text-3xl font-bold text-white">{stats.total}</p>
-                    <p className="text-xs text-gray-400">Total Players</p>
+                    <p className="text-xs text-blue-200 font-medium">Total Players</p>
                   </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-300 font-medium">All squads combined</span>
-                  <div className="admin-badge-success">
+                <div className="flex items-center justify-between pt-4 border-t border-blue-500/20">
+                  <span className="text-sm text-blue-100 font-medium">All squads</span>
+                  <div className="px-3 py-1 bg-blue-500/30 rounded-full text-xs font-semibold text-blue-100 border border-blue-400/50">
                     Active
                   </div>
                 </div>
               </div>
 
               {/* Batsmen */}
-              <div className="admin-card group">
+              <div className="bg-gradient-to-br from-emerald-500/20 to-teal-600/20 rounded-2xl p-6 border border-emerald-500/30 backdrop-blur-xl hover:from-emerald-500/30 hover:to-teal-600/30 transition-all duration-300 group shadow-xl">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" />
-                    </svg>
+                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <Target className="w-7 h-7 text-white" />
                   </div>
                   <div className="text-right">
                     <p className="text-3xl font-bold text-white">{stats.batsmen}</p>
-                    <p className="text-xs text-gray-400">Batsmen</p>
+                    <p className="text-xs text-emerald-200 font-medium">Batsmen</p>
                   </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-300 font-medium">Run scorers</span>
-                  <div className="admin-badge-neutral">
+                <div className="flex items-center justify-between pt-4 border-t border-emerald-500/20">
+                  <span className="text-sm text-emerald-100 font-medium">Run scorers</span>
+                  <div className="px-3 py-1 bg-emerald-500/30 rounded-full text-xs font-semibold text-emerald-100 border border-emerald-400/50">
                     {stats.total > 0 ? ((stats.batsmen / stats.total) * 100).toFixed(0) : 0}%
                   </div>
                 </div>
               </div>
 
               {/* Bowlers */}
-              <div className="admin-card group">
+              <div className="bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-2xl p-6 border border-cyan-500/30 backdrop-blur-xl hover:from-cyan-500/30 hover:to-blue-600/30 transition-all duration-300 group shadow-xl">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                    </svg>
+                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <Zap className="w-7 h-7 text-white" />
                   </div>
                   <div className="text-right">
                     <p className="text-3xl font-bold text-white">{stats.bowlers}</p>
-                    <p className="text-xs text-gray-400">Bowlers</p>
+                    <p className="text-xs text-cyan-200 font-medium">Bowlers</p>
                   </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-300 font-medium">Wicket takers</span>
-                  <div className="admin-badge-neutral">
+                <div className="flex items-center justify-between pt-4 border-t border-cyan-500/20">
+                  <span className="text-sm text-cyan-100 font-medium">Wicket takers</span>
+                  <div className="px-3 py-1 bg-cyan-500/30 rounded-full text-xs font-semibold text-cyan-100 border border-cyan-400/50">
                     {stats.total > 0 ? ((stats.bowlers / stats.total) * 100).toFixed(0) : 0}%
                   </div>
                 </div>
               </div>
 
               {/* All-rounders */}
-              <div className="admin-card group">
+              <div className="bg-gradient-to-br from-purple-500/20 to-pink-600/20 rounded-2xl p-6 border border-purple-500/30 backdrop-blur-xl hover:from-purple-500/30 hover:to-pink-600/30 transition-all duration-300 group shadow-xl">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
-                    </svg>
+                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <Award className="w-7 h-7 text-white" />
                   </div>
                   <div className="text-right">
                     <p className="text-3xl font-bold text-white">{stats.allRounders}</p>
-                    <p className="text-xs text-gray-400">All-rounders</p>
+                    <p className="text-xs text-purple-200 font-medium">All-rounders</p>
                   </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-300 font-medium">Versatile players</span>
-                  <div className="admin-badge-neutral">
+                <div className="flex items-center justify-between pt-4 border-t border-purple-500/20">
+                  <span className="text-sm text-purple-100 font-medium">Versatile</span>
+                  <div className="px-3 py-1 bg-purple-500/30 rounded-full text-xs font-semibold text-purple-100 border border-purple-400/50">
                     {stats.total > 0 ? ((stats.allRounders / stats.total) * 100).toFixed(0) : 0}%
                   </div>
                 </div>
               </div>
 
               {/* Wicket-keepers */}
-              <div className="admin-card group">
+              <div className="bg-gradient-to-br from-orange-500/20 to-red-600/20 rounded-2xl p-6 border border-orange-500/30 backdrop-blur-xl hover:from-orange-500/30 hover:to-red-600/30 transition-all duration-300 group shadow-xl">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg">
-                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z" />
-                    </svg>
+                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                    <Shield className="w-7 h-7 text-white" />
                   </div>
                   <div className="text-right">
                     <p className="text-3xl font-bold text-white">{stats.wicketkeepers}</p>
-                    <p className="text-xs text-gray-400">Wicket-keepers</p>
+                    <p className="text-xs text-orange-200 font-medium">Wicket-keepers</p>
                   </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-300 font-medium">Behind the stumps</span>
-                  <div className="admin-badge-neutral">
+                <div className="flex items-center justify-between pt-4 border-t border-orange-500/20">
+                  <span className="text-sm text-orange-100 font-medium">Behind stumps</span>
+                  <div className="px-3 py-1 bg-orange-500/30 rounded-full text-xs font-semibold text-orange-100 border border-orange-400/50">
                     {stats.total > 0 ? ((stats.wicketkeepers / stats.total) * 100).toFixed(0) : 0}%
                   </div>
                 </div>
@@ -1039,257 +1021,281 @@ export default function AdminPlayers() {
             </div>
           </div>
 
-          {/* Search and Filter Section */}
-          <div className="mb-8 space-y-4">
-            {/* Search Bar and Team Filter Row */}
-            <div className="flex gap-4 flex-col md:flex-row items-stretch">
-              {/* Search Bar */}
-              <div className="relative flex-1">
-                <svg className="absolute left-4 top-3.5 w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Search by player name, nationality..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="admin-input w-full pl-12 pr-4 py-3"
-                />
-              </div>
+          {/* Modern Search and Filter Section */}
+          <div className="mb-8">
+            <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl p-6 border border-white/10 backdrop-blur-xl shadow-xl">
+              <div className="flex gap-4 flex-col md:flex-row items-stretch">
+                {/* Enhanced Search Bar */}
+                <div className="relative flex-1">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2">
+                    <Search className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search by player name, nationality..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-12 pr-4 py-3.5 bg-gray-800/50 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+                  />
+                </div>
 
-              {/* Team Filter Dropdown */}
-              <div className="relative md:min-w-[320px]">
-                <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="w-full glass-effect px-6 py-3 rounded-lg text-white font-medium flex items-center space-x-3 hover:bg-white/10 transition-all duration-300 group h-full"
-                >
-                  <svg 
-                    className="w-5 h-5 text-ipl-gold flex-shrink-0" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
+                {/* Enhanced Team Filter Dropdown */}
+                <div className="relative md:min-w-[320px]">
+                  <button
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="w-full bg-gray-800/50 border border-white/10 px-6 py-3.5 rounded-xl text-white font-medium flex items-center space-x-3 hover:bg-gray-700/50 hover:border-white/20 transition-all duration-300 group h-full"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                  </svg>
-                  <span className="flex-1 text-left truncate flex items-center gap-2">
-                    {selectedTeam === 'all' 
-                      ? <><CustomEmoji type="trophy" size={14} /> All Teams</>
-                      : <><CustomEmoji type="cricket" size={14} /> {teams.find(t => t.id === selectedTeam)?.shortName || 'Select'}</>
-                    }
-                  </span>
-                  <svg 
-                    className={`w-5 h-5 text-gray-400 transition-transform duration-300 flex-shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`}
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </button>
+                    <Filter className="w-5 h-5 text-blue-400 flex-shrink-0" />
+                    <span className="flex-1 text-left truncate flex items-center gap-2">
+                      {selectedTeam === 'all' 
+                        ? <>All Teams</>
+                        : <>{teams.find(t => t.id === selectedTeam)?.shortName || 'Select Team'}</>
+                      }
+                    </span>
+                    <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-300 flex-shrink-0 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
 
-                {/* Dropdown Menu */}
-                <div 
-                  className={`absolute left-0 right-0 mt-2 glass-effect rounded-lg shadow-xl overflow-hidden transition-all duration-300 ease-out origin-top z-50 ${
-                    isDropdownOpen 
-                      ? 'opacity-100 scale-y-100 max-h-[500px]' 
-                      : 'opacity-0 scale-y-0 max-h-0 pointer-events-none'
-                  }`}
-                >
-                  <div className="py-2 max-h-[480px] overflow-y-auto scrollbar-thin scrollbar-thumb-ipl-gold/50 scrollbar-track-white/5">
-                    {/* All Teams Option */}
-                    <button
-                      onClick={() => {
-                        setSelectedTeam('all');
-                        setIsDropdownOpen(false);
-                      }}
-                      className={`w-full px-6 py-3.5 text-left hover:bg-white/10 transition-all duration-200 flex items-center space-x-3 group ${
-                        selectedTeam === 'all' ? 'bg-ipl-gold/20 text-ipl-gold' : 'text-white'
-                      }`}
-                    >
-                      <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-ipl-gold to-ipl-purple">
-                        <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
-                        </svg>
-                      </div>
-                      <div className="flex-1">
-                        <div className="font-semibold flex items-center gap-2"><CustomEmoji type="trophy" size={16} /> All Teams</div>
-                        <div className="text-xs text-gray-400">{players.length} total players</div>
-                      </div>
-                      {selectedTeam === 'all' && (
-                        <svg className="w-5 h-5 text-ipl-gold flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                      )}
-                    </button>
+                  {/* Enhanced Dropdown Menu */}
+                  <div 
+                    className={`absolute left-0 right-0 mt-2 bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden transition-all duration-300 ease-out origin-top z-50 ${
+                      isDropdownOpen 
+                        ? 'opacity-100 scale-y-100 max-h-[500px]' 
+                        : 'opacity-0 scale-y-0 max-h-0 pointer-events-none'
+                    }`}
+                  >
+                    <div className="py-2 max-h-[480px] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500/50 scrollbar-track-gray-700/50">
+                      {/* All Teams Option */}
+                      <button
+                        onClick={() => {
+                          setSelectedTeam('all');
+                          setIsDropdownOpen(false);
+                        }}
+                        className={`w-full px-6 py-3.5 text-left hover:bg-blue-500/20 transition-all duration-200 flex items-center space-x-3 group ${
+                          selectedTeam === 'all' ? 'bg-blue-500/30 text-blue-200' : 'text-white'
+                        }`}
+                      >
+                        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg">
+                          <Users className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-semibold">All Teams</div>
+                          <div className="text-xs text-gray-400">{players.length} total players</div>
+                        </div>
+                        {selectedTeam === 'all' && (
+                          <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
+                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                        )}
+                      </button>
 
                     {/* Divider */}
                     {teams.length > 0 && <div className="border-t border-white/10 my-2" />}
 
-                    {/* Team Options */}
-                    {teams.map((team) => {
-                      const teamPlayersCount = players.filter(p => String(p.teamId) === String(team.id)).length;
-                      return (
-                        <button
-                          key={team.id}
-                          onClick={() => {
-                            setSelectedTeam(team.id);
-                            setIsDropdownOpen(false);
-                          }}
-                          className={`w-full px-6 py-3.5 text-left hover:bg-white/10 transition-all duration-200 flex items-center space-x-3 group ${
-                            selectedTeam === team.id ? 'bg-ipl-gold/20 text-ipl-gold' : 'text-white'
-                          }`}
-                        >
-                          <div 
-                            className="flex items-center justify-center w-10 h-10 rounded-full text-white font-bold text-sm shadow-lg flex-shrink-0"
-                            style={{ backgroundColor: team.colors.primary }}
-                            title={team.name}
+                      {/* Team Options */}
+                      {teams.map((team) => {
+                        const teamPlayersCount = players.filter(p => String(p.teamId) === String(team.id)).length;
+                        return (
+                          <button
+                            key={team.id}
+                            onClick={() => {
+                              setSelectedTeam(team.id);
+                              setIsDropdownOpen(false);
+                            }}
+                            className={`w-full px-6 py-3.5 text-left hover:bg-blue-500/20 transition-all duration-200 flex items-center space-x-3 group ${
+                              selectedTeam === team.id ? 'bg-blue-500/30 text-blue-200' : 'text-white'
+                            }`}
                           >
-                            {team.shortName}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-semibold truncate">{team.name}</div>
-                            <div className="text-xs text-gray-400">
-                              {teamPlayersCount} player{teamPlayersCount !== 1 ? 's' : ''}
+                            <div 
+                              className="flex items-center justify-center w-10 h-10 rounded-xl text-white font-bold text-sm shadow-lg flex-shrink-0"
+                              style={{ backgroundColor: team.colors.primary }}
+                              title={team.name}
+                            >
+                              {team.shortName}
                             </div>
-                          </div>
-                          {selectedTeam === team.id && (
-                            <svg className="w-5 h-5 text-ipl-gold flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          )}
-                        </button>
-                      );
-                    })}
+                            <div className="flex-1 min-w-0">
+                              <div className="font-semibold truncate">{team.name}</div>
+                              <div className="text-xs text-gray-400">
+                                {teamPlayersCount} player{teamPlayersCount !== 1 ? 's' : ''}
+                              </div>
+                            </div>
+                            {selectedTeam === team.id && (
+                              <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
+                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Results Info and Quick Actions */}
-            <div className="flex items-center justify-between flex-wrap gap-3">
-              <div className="text-sm text-gray-400">
-                <span className="font-semibold text-white">{searchFilteredPlayers.length}</span> of <span className="font-semibold text-white">{filteredPlayers.length}</span> players
-                {selectedTeam !== 'all' && (
-                  <span className="ml-2">
-                    in <span className="text-ipl-gold font-semibold">{teams.find(t => t.id === selectedTeam)?.name}</span>
-                  </span>
-                )}
-              </div>
-              <div className="flex gap-2">
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="text-xs px-3 py-1.5 rounded-lg bg-white/10 text-gray-300 hover:text-white hover:bg-white/20 transition-all"
-                  >
-                    Clear Search
-                  </button>
-                )}
-                {selectedTeam !== 'all' && (
-                  <button
-                    onClick={() => setSelectedTeam('all')}
-                    className="text-xs px-3 py-1.5 rounded-lg bg-white/10 text-gray-300 hover:text-white hover:bg-white/20 transition-all"
-                  >
-                    View All Teams
-                  </button>
-                )}
+              {/* Results Info and Quick Actions */}
+              <div className="flex items-center justify-between flex-wrap gap-3 mt-4 pt-4 border-t border-white/10">
+                <div className="text-sm text-gray-300">
+                  Showing <span className="font-bold text-white">{searchFilteredPlayers.length}</span> of <span className="font-bold text-white">{filteredPlayers.length}</span> players
+                  {selectedTeam !== 'all' && (
+                    <span className="ml-2">
+                      in <span className="text-blue-400 font-semibold">{teams.find(t => t.id === selectedTeam)?.name}</span>
+                    </span>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="text-xs px-4 py-2 rounded-lg bg-gray-700/50 text-gray-300 hover:text-white hover:bg-gray-700 transition-all border border-white/10"
+                    >
+                      Clear Search
+                    </button>
+                  )}
+                  {selectedTeam !== 'all' && (
+                    <button
+                      onClick={() => setSelectedTeam('all')}
+                      className="text-xs px-4 py-2 rounded-lg bg-gray-700/50 text-gray-300 hover:text-white hover:bg-gray-700 transition-all border border-white/10"
+                    >
+                      View All Teams
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Players Table */}
-          <div className="admin-card overflow-hidden">
+          {/* Modern Players Table */}
+          <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl border border-white/10 backdrop-blur-xl shadow-2xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-white/5">
+                <thead className="bg-gradient-to-r from-gray-800/80 to-gray-900/80 border-b border-white/10">
                   <tr>
                     <th className="px-6 py-4 text-left">
                       <button
                         onClick={() => handleSort('name')}
-                        className="flex items-center gap-2 text-xs font-medium text-gray-400 uppercase tracking-wider hover:text-white transition-colors"
+                        className="flex items-center gap-2 text-xs font-semibold text-gray-300 uppercase tracking-wider hover:text-white transition-colors group"
                       >
+                        <User className="w-4 h-4" />
                         Name
                         {sortField === 'name' && (
-                          sortDirection === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />
+                          sortDirection === 'asc' ? <ChevronUp className="w-4 h-4 text-blue-400" /> : <ChevronDown className="w-4 h-4 text-blue-400" />
                         )}
                       </button>
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      Jersey
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                      <div className="flex items-center gap-2">
+                        <Hash className="w-4 h-4" />
+                        Jersey
+                      </div>
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      Role
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                      <div className="flex items-center gap-2">
+                        <Award className="w-4 h-4" />
+                        Role
+                      </div>
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      Team
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4" />
+                        Team
+                      </div>
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      Age
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4" />
+                        Age
+                      </div>
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      DOB ({currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY'})
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4" />
+                        DOB ({currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY'})
+                      </div>
                     </th>
                     {currentLeague !== 'wpl' && (
                       <>
                         <th className="px-6 py-4 text-left">
                           <button
                             onClick={() => handleSort('runs')}
-                            className="flex items-center gap-2 text-xs font-medium text-gray-400 uppercase tracking-wider hover:text-white transition-colors"
+                            className="flex items-center gap-2 text-xs font-semibold text-gray-300 uppercase tracking-wider hover:text-white transition-colors group"
                           >
+                            <TrendingUp className="w-4 h-4" />
                             Runs
                             {sortField === 'runs' && (
-                              sortDirection === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />
+                              sortDirection === 'asc' ? <ChevronUp className="w-4 h-4 text-blue-400" /> : <ChevronDown className="w-4 h-4 text-blue-400" />
                             )}
                           </button>
                         </th>
                         <th className="px-6 py-4 text-left">
                           <button
                             onClick={() => handleSort('wickets')}
-                            className="flex items-center gap-2 text-xs font-medium text-gray-400 uppercase tracking-wider hover:text-white transition-colors"
+                            className="flex items-center gap-2 text-xs font-semibold text-gray-300 uppercase tracking-wider hover:text-white transition-colors group"
                           >
+                            <Target className="w-4 h-4" />
                             Wickets
                             {sortField === 'wickets' && (
-                              sortDirection === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />
+                              sortDirection === 'asc' ? <ChevronUp className="w-4 h-4 text-blue-400" /> : <ChevronDown className="w-4 h-4 text-blue-400" />
                             )}
                           </button>
                         </th>
                         <th className="px-6 py-4 text-left">
                           <button
                             onClick={() => handleSort('battingAverage')}
-                            className="flex items-center gap-2 text-xs font-medium text-gray-400 uppercase tracking-wider hover:text-white transition-colors"
+                            className="flex items-center gap-2 text-xs font-semibold text-gray-300 uppercase tracking-wider hover:text-white transition-colors group"
                           >
+                            <BarChart3 className="w-4 h-4" />
                             Batting Avg
                             {sortField === 'battingAverage' && (
-                              sortDirection === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />
+                              sortDirection === 'asc' ? <ChevronUp className="w-4 h-4 text-blue-400" /> : <ChevronDown className="w-4 h-4 text-blue-400" />
                             )}
                           </button>
                         </th>
                         <th className="px-6 py-4 text-left">
                           <button
                             onClick={() => handleSort('bowlingAverage')}
-                            className="flex items-center gap-2 text-xs font-medium text-gray-400 uppercase tracking-wider hover:text-white transition-colors"
+                            className="flex items-center gap-2 text-xs font-semibold text-gray-300 uppercase tracking-wider hover:text-white transition-colors group"
                           >
+                            <BarChart3 className="w-4 h-4" />
                             Bowling Avg
                             {sortField === 'bowlingAverage' && (
-                              sortDirection === 'asc' ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />
+                              sortDirection === 'asc' ? <ChevronUp className="w-4 h-4 text-blue-400" /> : <ChevronDown className="w-4 h-4 text-blue-400" />
                             )}
                           </button>
                         </th>
-                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                          SR
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                          <div className="flex items-center gap-2">
+                            <Activity className="w-4 h-4" />
+                            SR
+                          </div>
                         </th>
-                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                          4s/6s
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                          <div className="flex items-center gap-2">
+                            <Zap className="w-4 h-4" />
+                            4s/6s
+                          </div>
                         </th>
-                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                          50s/100s
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                          <div className="flex items-center gap-2">
+                            <Award className="w-4 h-4" />
+                            50s/100s
+                          </div>
                         </th>
-                        <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                          BBM
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                          <div className="flex items-center gap-2">
+                            <Target className="w-4 h-4" />
+                            BBM
+                          </div>
                         </th>
                       </>
                     )}
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                      Actions
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                      <div className="flex items-center gap-2">
+                        <Edit2 className="w-4 h-4" />
+                        Actions
+                      </div>
                     </th>
                   </tr>
                 </thead>
@@ -1305,7 +1311,7 @@ export default function AdminPlayers() {
                     .map((player, idx) => {
                     const team = teams.find(t => String(t.id) === String(player.teamId));
                     return (
-                      <tr key={`${player.id}-${player.teamId}-${selectedTeam}-${idx}`} className="hover:bg-white/5">
+                      <tr key={`${player.id}-${player.teamId}-${selectedTeam}-${idx}`} className="hover:bg-white/5 transition-colors duration-200 group">
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <div className="flex items-center space-x-3">
                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-ipl-gold to-ipl-purple flex items-center justify-center text-white font-bold text-xs">
@@ -1329,11 +1335,13 @@ export default function AdminPlayers() {
                             )}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                          {player.jerseyNumber > 0 && (
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          {player.jerseyNumber > 0 ? (
                             <span className="inline-flex items-center justify-center w-8 h-8 bg-ipl-gold/20 text-ipl-gold rounded-full font-bold text-xs">
                               {player.jerseyNumber}
                             </span>
+                          ) : (
+                            <span className="text-gray-500 italic text-xs">Jersey</span>
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -1357,65 +1365,104 @@ export default function AdminPlayers() {
                             <span className="text-gray-300 font-medium">{team?.name}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-semibold">
-                          {player.age > 0 && `${player.age}y`}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          {player.age > 0 ? (
+                            <span className="text-gray-300 font-semibold">{`${player.age}y`}</span>
+                          ) : (
+                            <span className="text-gray-500 italic text-xs">Age</span>
+                          )}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                          {player.dateOfBirth && (
-                            currentLeague === 'wpl' 
-                              ? formatDateMonthDDYYYY(player.dateOfBirth)
-                              : formatDateDDMMYYYY(player.dateOfBirth)
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          {player.dateOfBirth ? (
+                            <span className="text-gray-300">
+                              {currentLeague === 'wpl' 
+                                ? formatDateMonthDDYYYY(player.dateOfBirth)
+                                : formatDateDDMMYYYY(player.dateOfBirth)}
+                            </span>
+                          ) : (
+                            <span className="text-gray-500 italic text-xs">DOB</span>
                           )}
                         </td>
                         {currentLeague !== 'wpl' && (
                           <>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-ipl-gold font-bold">
-                              {player.stats.runs > 0 && player.stats.runs}
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">
+                              {player.stats.runs > 0 ? (
+                                <span className="text-ipl-gold font-bold">{player.stats.runs}</span>
+                              ) : (
+                                <span className="text-gray-500 italic">Runs</span>
+                              )}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-400 font-bold">
-                              {player.stats.wickets > 0 && player.stats.wickets}
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">
+                              {player.stats.wickets > 0 ? (
+                                <span className="text-blue-400 font-bold">{player.stats.wickets}</span>
+                              ) : (
+                                <span className="text-gray-500 italic">Wickets</span>
+                              )}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-purple-400 font-semibold">
-                              {player.stats.average > 0 && player.stats.average.toFixed(2)}
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">
+                              {player.stats.average > 0 ? (
+                                <span className="text-purple-400 font-semibold">{player.stats.average.toFixed(2)}</span>
+                              ) : (
+                                <span className="text-gray-500 italic">Avg</span>
+                              )}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">
                               {(() => {
                                 const bowlingAvg = player.stats.bowlingAverage ?? 
                                   (player.stats.wickets > 0 
                                     ? calculateBowlingAverage(player.stats.economy, player.stats.wickets, player.stats.matches)
                                     : 0);
-                                return bowlingAvg > 0 ? bowlingAvg.toFixed(2) : null;
+                                return bowlingAvg > 0 ? (
+                                  <span className="text-gray-300">{bowlingAvg.toFixed(2)}</span>
+                                ) : (
+                                  <span className="text-gray-500 italic">Bowl Avg</span>
+                                );
                               })()}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
-                              {player.stats.strikeRate > 0 && player.stats.strikeRate.toFixed(2)}
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">
+                              {player.stats.strikeRate > 0 ? (
+                                <span className="text-gray-300">{player.stats.strikeRate.toFixed(2)}</span>
+                              ) : (
+                                <span className="text-gray-500 italic">SR</span>
+                              )}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
-                              {(player.stats.fours > 0 || player.stats.sixes > 0) && 
-                                `${player.stats.fours}/${player.stats.sixes}`}
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">
+                              {(player.stats.fours > 0 || player.stats.sixes > 0) ? (
+                                <span className="text-gray-300">{`${player.stats.fours}/${player.stats.sixes}`}</span>
+                              ) : (
+                                <span className="text-gray-500 italic">4s/6s</span>
+                              )}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
-                              {(player.stats.fifties > 0 || player.stats.hundreds > 0) && 
-                                `${player.stats.fifties}/${player.stats.hundreds}`}
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">
+                              {(player.stats.fifties > 0 || player.stats.hundreds > 0) ? (
+                                <span className="text-gray-300">{`${player.stats.fifties}/${player.stats.hundreds}`}</span>
+                              ) : (
+                                <span className="text-gray-500 italic">50s/100s</span>
+                              )}
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-mono">
-                              {player.stats.bestBowling && player.stats.bestBowling !== '-' && player.stats.bestBowling.trim() !== '' 
-                                && player.stats.bestBowling}
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono">
+                              {player.stats.bestBowling && player.stats.bestBowling !== '-' && player.stats.bestBowling.trim() !== '' ? (
+                                <span className="text-gray-300">{player.stats.bestBowling}</span>
+                              ) : (
+                                <span className="text-gray-500 italic">BBM</span>
+                              )}
                             </td>
                           </>
                         )}
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
                           <div className="flex space-x-2">
                             <button 
                               onClick={() => handleEditPlayer(player)}
-                              className="text-ipl-gold hover:text-ipl-purple transition-colors"
+                              className="px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 hover:text-blue-200 rounded-lg transition-all duration-200 flex items-center gap-2 border border-blue-500/30 hover:border-blue-400/50 font-medium"
                             >
+                              <Edit2 className="w-4 h-4" />
                               Edit
                             </button>
                             <button 
                               onClick={() => handleDeletePlayer(player.id, player.name)}
-                              className="text-red-400 hover:text-red-300 transition-colors"
+                              className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-300 hover:text-red-200 rounded-lg transition-all duration-200 flex items-center gap-2 border border-red-500/30 hover:border-red-400/50 font-medium"
                             >
+                              <Trash2 className="w-4 h-4" />
                               Delete
                             </button>
                           </div>
@@ -1424,13 +1471,13 @@ export default function AdminPlayers() {
                     );
                   }) : (
                     <tr>
-                      <td colSpan={currentLeague === 'wpl' ? 7 : 12} className="px-6 py-12 text-center">
+                      <td colSpan={currentLeague === 'wpl' ? 7 : 12} className="px-6 py-16 text-center">
                         <div className="flex flex-col items-center justify-center">
-                          <svg className="w-16 h-16 text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          <p className="text-gray-400 text-lg font-medium">No players found</p>
-                          <p className="text-gray-500 text-sm mt-1">Try adjusting your search or filters</p>
+                          <div className="w-20 h-20 rounded-full bg-gray-800/50 flex items-center justify-center mb-4 border border-white/10">
+                            <Users className="w-10 h-10 text-gray-500" />
+                          </div>
+                          <p className="text-gray-300 text-lg font-semibold mb-2">No players found</p>
+                          <p className="text-gray-500 text-sm">Try adjusting your search or filters</p>
                         </div>
                       </td>
                     </tr>
@@ -1440,27 +1487,33 @@ export default function AdminPlayers() {
             </div>
           </div>
 
-          {/* Summary Footer */}
-          <div className="mt-6 admin-glass rounded-xl p-4 flex justify-between items-center">
-            <div className="text-sm text-gray-400">
-              <span className="font-semibold text-white">{stats.total}</span> total players in <span className="font-semibold text-white">{teams.length}</span> teams
-            </div>
-            <div className="flex gap-6 text-sm">
-              <div>
-                <span className="text-green-400 font-semibold">{stats.batsmen}</span>
-                <span className="text-gray-500 ml-1">Batsmen</span>
+          {/* Modern Summary Footer */}
+          <div className="mt-6 bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl p-6 border border-white/10 backdrop-blur-xl shadow-xl">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <div className="text-sm text-gray-300">
+                <span className="font-bold text-white text-lg">{stats.total}</span> total players across <span className="font-bold text-white text-lg">{teams.length}</span> teams
               </div>
-              <div>
-                <span className="text-blue-400 font-semibold">{stats.bowlers}</span>
-                <span className="text-gray-500 ml-1">Bowlers</span>
-              </div>
-              <div>
-                <span className="text-purple-400 font-semibold">{stats.allRounders}</span>
-                <span className="text-gray-500 ml-1">All-rounders</span>
-              </div>
-              <div>
-                <span className="text-orange-400 font-semibold">{stats.wicketkeepers}</span>
-                <span className="text-gray-500 ml-1">Wicket-keepers</span>
+              <div className="flex gap-6 text-sm flex-wrap justify-center">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
+                  <span className="text-emerald-400 font-semibold">{stats.batsmen}</span>
+                  <span className="text-gray-400">Batsmen</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-cyan-500"></div>
+                  <span className="text-cyan-400 font-semibold">{stats.bowlers}</span>
+                  <span className="text-gray-400">Bowlers</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+                  <span className="text-purple-400 font-semibold">{stats.allRounders}</span>
+                  <span className="text-gray-400">All-rounders</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                  <span className="text-orange-400 font-semibold">{stats.wicketkeepers}</span>
+                  <span className="text-gray-400">Wicket-keepers</span>
+                </div>
               </div>
             </div>
           </div>
