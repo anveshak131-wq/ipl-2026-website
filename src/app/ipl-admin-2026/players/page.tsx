@@ -2107,6 +2107,7 @@ export default function AdminPlayers() {
                             <span className="text-red-400">*</span>
                         </label>
                           <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                         <select
                           value={formData.role}
                           onChange={(e) => {
@@ -2118,15 +2119,17 @@ export default function AdminPlayers() {
                               allrounderType: newRole === 'All-rounder' ? formData.allrounderType : ''
                             });
                           }}
-                              className="w-full pl-12 pr-10 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all appearance-none cursor-pointer hover:border-white/20 group-hover:bg-gray-800/70"
+                              className="relative w-full pl-12 pr-12 py-3.5 bg-gradient-to-br from-gray-800/80 to-gray-900/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 focus:bg-gray-800/90 transition-all duration-300 appearance-none cursor-pointer hover:border-purple-500/30 hover:bg-gray-800/80 hover:shadow-lg hover:shadow-purple-500/10 group-hover:scale-[1.01]"
                         >
-                          <option value="Batsman">Batsman</option>
-                          <option value="Bowler">Bowler</option>
-                          <option value="All-rounder">All-rounder</option>
-                          <option value="Wicket-keeper">Wicket-keeper</option>
+                          <option value="Batsman" className="bg-gray-900 text-white">Batsman</option>
+                          <option value="Bowler" className="bg-gray-900 text-white">Bowler</option>
+                          <option value="All-rounder" className="bg-gray-900 text-white">All-rounder</option>
+                          <option value="Wicket-keeper" className="bg-gray-900 text-white">Wicket-keeper</option>
                         </select>
-                            <Award className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                            <Award className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-400 pointer-events-none transition-colors duration-300 group-hover:text-purple-300" />
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                              <ChevronDown className="w-5 h-5 text-gray-400 transition-all duration-300 group-hover:text-purple-400 group-hover:rotate-180" />
+                            </div>
                           </div>
                       </div>
 
@@ -2138,18 +2141,21 @@ export default function AdminPlayers() {
                               <span className="text-red-400">*</span>
                           </label>
                             <div className="relative">
+                              <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-amber-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                           <select
                             value={formData.allrounderType}
                             onChange={(e) => setFormData({...formData, allrounderType: e.target.value as any})}
-                                className="w-full pl-12 pr-10 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all appearance-none cursor-pointer hover:border-white/20 group-hover:bg-gray-800/70"
+                                className="relative w-full pl-12 pr-12 py-3.5 bg-gradient-to-br from-gray-800/80 to-gray-900/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 focus:bg-gray-800/90 transition-all duration-300 appearance-none cursor-pointer hover:border-orange-500/30 hover:bg-gray-800/80 hover:shadow-lg hover:shadow-orange-500/10 group-hover:scale-[1.01]"
                             required
                           >
-                            <option value="">Select type</option>
-                            <option value="Batting All-rounder">Batting All-rounder</option>
-                            <option value="Bowling All-rounder">Bowling All-rounder</option>
+                            <option value="" className="bg-gray-900 text-white">Select type</option>
+                            <option value="Batting All-rounder" className="bg-gray-900 text-white">Batting All-rounder</option>
+                            <option value="Bowling All-rounder" className="bg-gray-900 text-white">Bowling All-rounder</option>
                           </select>
-                              <Target className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                              <Target className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-orange-400 pointer-events-none transition-colors duration-300 group-hover:text-orange-300" />
+                              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                <ChevronDown className="w-5 h-5 text-gray-400 transition-all duration-300 group-hover:text-orange-400 group-hover:rotate-180" />
+                              </div>
                             </div>
                         </div>
                       )}
@@ -2161,17 +2167,20 @@ export default function AdminPlayers() {
                             <span className="text-red-400">*</span>
                         </label>
                           <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                         <select
                           value={formData.league}
                           onChange={(e) => setFormData({...formData, league: e.target.value as 'ipl' | 'wpl'})}
-                              className="w-full pl-12 pr-10 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all appearance-none cursor-pointer hover:border-white/20 group-hover:bg-gray-800/70"
+                              className="relative w-full pl-12 pr-12 py-3.5 bg-gradient-to-br from-gray-800/80 to-gray-900/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 focus:bg-gray-800/90 transition-all duration-300 appearance-none cursor-pointer hover:border-emerald-500/30 hover:bg-gray-800/80 hover:shadow-lg hover:shadow-emerald-500/10 group-hover:scale-[1.01]"
                           required
                         >
-                          <option value="ipl">IPL (Indian Premier League)</option>
-                          <option value="wpl">WPL (Women's Premier League)</option>
+                              <option value="ipl" className="bg-gray-900 text-white">IPL (Indian Premier League)</option>
+                              <option value="wpl" className="bg-gray-900 text-white">WPL (Women's Premier League)</option>
                         </select>
-                            <Shield className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                            <Shield className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-400 pointer-events-none transition-colors duration-300 group-hover:text-emerald-300" />
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                              <ChevronDown className="w-5 h-5 text-gray-400 transition-all duration-300 group-hover:text-emerald-400 group-hover:rotate-180" />
+                            </div>
                           </div>
                       </div>
 
@@ -2182,21 +2191,24 @@ export default function AdminPlayers() {
                             <span className="text-red-400">*</span>
                         </label>
                           <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                         <select
                           value={formData.teamId}
                           onChange={(e) => setFormData({...formData, teamId: e.target.value})}
-                              className="w-full pl-12 pr-10 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all appearance-none cursor-pointer hover:border-white/20 group-hover:bg-gray-800/70"
+                              className="relative w-full pl-12 pr-12 py-3.5 bg-gradient-to-br from-gray-800/80 to-gray-900/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 focus:bg-gray-800/90 transition-all duration-300 appearance-none cursor-pointer hover:border-cyan-500/30 hover:bg-gray-800/80 hover:shadow-lg hover:shadow-cyan-500/10 group-hover:scale-[1.01]"
                           required
                         >
-                          <option value="">Select a team</option>
+                              <option value="" className="bg-gray-900 text-white">Select a team</option>
                           {teams.filter(team => team.league === formData.league).map(team => (
-                            <option key={team.id} value={team.id}>
+                                <option key={team.id} value={team.id} className="bg-gray-900 text-white">
                               {team.name}
                             </option>
                           ))}
                         </select>
-                            <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                            <Users className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-cyan-400 pointer-events-none transition-colors duration-300 group-hover:text-cyan-300" />
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                              <ChevronDown className="w-5 h-5 text-gray-400 transition-all duration-300 group-hover:text-cyan-400 group-hover:rotate-180" />
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -2399,20 +2411,23 @@ export default function AdminPlayers() {
                               <span className="text-red-400">*</span>
                         </label>
                             <div className="relative">
+                              <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 to-amber-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                         <select
                           value={formData.nationality}
                           onChange={(e) => setFormData({ ...formData, nationality: e.target.value })}
-                                className="w-full pl-12 pr-10 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all appearance-none cursor-pointer hover:border-white/20 group-hover:bg-gray-800/70"
+                                className="relative w-full pl-12 pr-12 py-3.5 bg-gradient-to-br from-gray-800/80 to-gray-900/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 focus:bg-gray-800/90 transition-all duration-300 appearance-none cursor-pointer hover:border-orange-500/30 hover:bg-gray-800/80 hover:shadow-lg hover:shadow-orange-500/10 group-hover:scale-[1.01]"
                           required
                         >
-                          <option value="">Select nationality</option>
+                                <option value="" className="bg-gray-900 text-white">Select nationality</option>
                           {CRICKET_COUNTRIES.map((country) => (
-                            <option key={country} value={country}>
+                                  <option key={country} value={country} className="bg-gray-900 text-white">
                               {country}
                             </option>
                           ))}
                         </select>
-                              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                <ChevronDown className="w-5 h-5 text-gray-400 transition-all duration-300 group-hover:text-orange-400 group-hover:rotate-180" />
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -2469,19 +2484,22 @@ export default function AdminPlayers() {
                           Bowling Style
                         </label>
                             <div className="relative">
+                              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                         <select
                           value={formData.bowlingStyle}
                           onChange={(e) => setFormData({ ...formData, bowlingStyle: e.target.value })}
-                                className="w-full pl-12 pr-10 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all appearance-none cursor-pointer hover:border-white/20 group-hover:bg-gray-800/70"
+                                className="relative w-full pl-12 pr-12 py-3.5 bg-gradient-to-br from-gray-800/80 to-gray-900/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 focus:bg-gray-800/90 transition-all duration-300 appearance-none cursor-pointer hover:border-blue-500/30 hover:bg-gray-800/80 hover:shadow-lg hover:shadow-blue-500/10 group-hover:scale-[1.01]"
                         >
                           {BOWLING_STYLES.map((style) => (
-                            <option key={style} value={style}>
+                                  <option key={style} value={style} className="bg-gray-900 text-white">
                               {style}
                             </option>
                           ))}
                         </select>
-                              <Zap className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                              <Zap className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-400 pointer-events-none transition-colors duration-300 group-hover:text-blue-300" />
+                              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                <ChevronDown className="w-5 h-5 text-gray-400 transition-all duration-300 group-hover:text-blue-400 group-hover:rotate-180" />
+                              </div>
                             </div>
                             <p className="text-xs text-gray-400 mt-2 flex items-center gap-1.5">
                               <span className="text-gray-500">💡</span>
@@ -2505,19 +2523,22 @@ export default function AdminPlayers() {
                           Batting Style
                         </label>
                             <div className="relative">
+                              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                         <select
                           value={formData.battingStyle}
                           onChange={(e) => setFormData({ ...formData, battingStyle: e.target.value })}
-                                className="w-full pl-12 pr-10 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all appearance-none cursor-pointer hover:border-white/20 group-hover:bg-gray-800/70"
+                                className="relative w-full pl-12 pr-12 py-3.5 bg-gradient-to-br from-gray-800/80 to-gray-900/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500/50 focus:bg-gray-800/90 transition-all duration-300 appearance-none cursor-pointer hover:border-indigo-500/30 hover:bg-gray-800/80 hover:shadow-lg hover:shadow-indigo-500/10 group-hover:scale-[1.01]"
                         >
                           {BATTING_STYLES.map((style) => (
-                            <option key={style} value={style}>
+                                  <option key={style} value={style} className="bg-gray-900 text-white">
                               {style}
                             </option>
                           ))}
                         </select>
-                              <Activity className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                              <Activity className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-indigo-400 pointer-events-none transition-colors duration-300 group-hover:text-indigo-300" />
+                              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                <ChevronDown className="w-5 h-5 text-gray-400 transition-all duration-300 group-hover:text-indigo-400 group-hover:rotate-180" />
+                              </div>
                             </div>
                       </div>
 
@@ -2590,19 +2611,22 @@ export default function AdminPlayers() {
                                     Acquired Via
                                   </label>
                                   <div className="relative">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/10 to-amber-500/10 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                                   <select
                                     value={formData.acquiredVia}
                                     onChange={(e) => setFormData({ ...formData, acquiredVia: e.target.value as any })}
-                                      className="w-full pl-12 pr-10 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 transition-all appearance-none cursor-pointer hover:border-white/20 group-hover:bg-gray-800/70"
+                                      className="relative w-full pl-12 pr-12 py-3.5 bg-gradient-to-br from-gray-800/80 to-gray-900/60 border-2 border-white/10 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:border-yellow-500/50 focus:bg-gray-800/90 transition-all duration-300 appearance-none cursor-pointer hover:border-yellow-500/30 hover:bg-gray-800/80 hover:shadow-lg hover:shadow-yellow-500/10 group-hover:scale-[1.01]"
                                   >
-                                    <option value="auction">Auction</option>
-                                    <option value="retention">Retention</option>
-                                    <option value="trade">Trade</option>
-                                    <option value="swap">Swap</option>
-                                    <option value="transfer">Transfer</option>
+                                    <option value="auction" className="bg-gray-900 text-white">Auction</option>
+                                    <option value="retention" className="bg-gray-900 text-white">Retention</option>
+                                    <option value="trade" className="bg-gray-900 text-white">Trade</option>
+                                    <option value="swap" className="bg-gray-900 text-white">Swap</option>
+                                    <option value="transfer" className="bg-gray-900 text-white">Transfer</option>
                                   </select>
-                                    <TrendingUp className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                                    <TrendingUp className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-yellow-400 pointer-events-none transition-colors duration-300 group-hover:text-yellow-300" />
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                      <ChevronDown className="w-5 h-5 text-gray-400 transition-all duration-300 group-hover:text-yellow-400 group-hover:rotate-180" />
+                                    </div>
                                 </div>
                                 </div>
                                 <div className="group">
@@ -2689,208 +2713,208 @@ export default function AdminPlayers() {
                             placeholder="Matches"
                           />
                                 <BarChart3 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                              </div>
+                        </div>
                         </div>
                             <div className="group">
                               <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
                                 <TrendingUp className="w-4 h-4 text-emerald-400" />
-                                Runs
-                              </label>
+                            Runs
+                          </label>
                               <div className="relative">
-                                <input
-                                  type="number"
-                                  value={formData.stats.runs}
-                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, runs: e.target.value}})}
+                          <input
+                            type="number"
+                            value={formData.stats.runs}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, runs: e.target.value}})}
                                   className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
-                                  placeholder="Runs"
-                                />
+                            placeholder="Runs"
+                          />
                                 <TrendingUp className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                              </div>
+                        </div>
                             </div>
                             <div className="group">
                               <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
                                 <Target className="w-4 h-4 text-teal-400" />
-                                Wickets
-                              </label>
+                            Wickets
+                          </label>
                               <div className="relative">
-                                <input
-                                  type="number"
-                                  value={formData.stats.wickets}
-                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, wickets: e.target.value}})}
+                          <input
+                            type="number"
+                            value={formData.stats.wickets}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, wickets: e.target.value}})}
                                   className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
-                                  placeholder="Wickets"
-                                />
+                            placeholder="Wickets"
+                          />
                                 <Target className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                              </div>
+                        </div>
                             </div>
                             <div className="group">
                               <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
                                 <BarChart3 className="w-4 h-4 text-cyan-400" />
-                                Batting Average
-                              </label>
+                            Batting Average
+                          </label>
                               <div className="relative">
-                                <input
-                                  type="number"
-                                  step="0.01"
-                                  value={formData.stats.average}
-                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, average: e.target.value}})}
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={formData.stats.average}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, average: e.target.value}})}
                                   className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
-                                  placeholder="e.g., 45.67"
-                                />
+                            placeholder="e.g., 45.67"
+                          />
                                 <BarChart3 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                              </div>
+                        </div>
                             </div>
                             <div className="group">
                               <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
                                 <Target className="w-4 h-4 text-teal-400" />
-                                Bowling Average
-                              </label>
+                            Bowling Average
+                          </label>
                               <div className="relative">
-                                <input
-                                  type="number"
-                                  step="0.01"
-                                  value={formData.stats.bowlingAverage}
-                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, bowlingAverage: e.target.value}})}
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={formData.stats.bowlingAverage}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, bowlingAverage: e.target.value}})}
                                   className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
-                                  placeholder="e.g., 25.50"
-                                />
+                            placeholder="e.g., 25.50"
+                          />
                                 <Target className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                              </div>
+                        </div>
                               <p className="text-xs text-gray-400 mt-2">Runs conceded per wicket</p>
                             </div>
                             <div className="group">
                               <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
                                 <Zap className="w-4 h-4 text-cyan-400" />
-                                Strike Rate
-                              </label>
+                            Strike Rate
+                          </label>
                               <div className="relative">
-                                <input
-                                  type="number"
-                                  step="0.01"
-                                  value={formData.stats.strikeRate}
-                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, strikeRate: e.target.value}})}
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={formData.stats.strikeRate}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, strikeRate: e.target.value}})}
                                   className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
-                                  placeholder="e.g., 145.50"
-                                />
+                            placeholder="e.g., 145.50"
+                          />
                                 <Zap className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                              </div>
+                        </div>
                             </div>
                             <div className="group">
                               <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
                                 <Activity className="w-4 h-4 text-teal-400" />
-                                Economy
-                              </label>
+                            Economy
+                          </label>
                               <div className="relative">
-                                <input
-                                  type="number"
-                                  step="0.01"
-                                  value={formData.stats.economy}
-                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, economy: e.target.value}})}
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={formData.stats.economy}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, economy: e.target.value}})}
                                   className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
-                                  placeholder="e.g., 8.50"
-                                />
+                            placeholder="e.g., 8.50"
+                          />
                                 <Activity className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                              </div>
+                        </div>
                             </div>
                             <div className="group">
                               <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
                                 <Award className="w-4 h-4 text-emerald-400" />
-                                Highest Score
-                              </label>
+                            Highest Score
+                          </label>
                               <div className="relative">
-                                <input
-                                  type="number"
-                                  value={formData.stats.highest}
-                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, highest: e.target.value}})}
+                          <input
+                            type="number"
+                            value={formData.stats.highest}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, highest: e.target.value}})}
                                   className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
-                                  placeholder="Highest Score"
-                                />
+                            placeholder="Highest Score"
+                          />
                                 <Award className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                              </div>
+                        </div>
                             </div>
                             <div className="group">
                               <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
                                 <BarChart3 className="w-4 h-4 text-cyan-400" />
-                                Fours
-                              </label>
+                            Fours
+                          </label>
                               <div className="relative">
-                                <input
-                                  type="number"
-                                  value={formData.stats.fours}
-                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, fours: e.target.value}})}
+                          <input
+                            type="number"
+                            value={formData.stats.fours}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, fours: e.target.value}})}
                                   className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
-                                  placeholder="Fours"
-                                />
+                            placeholder="Fours"
+                          />
                                 <BarChart3 className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                              </div>
+                        </div>
                             </div>
                             <div className="group">
                               <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
                                 <Zap className="w-4 h-4 text-teal-400" />
-                                Sixes
-                              </label>
+                            Sixes
+                          </label>
                               <div className="relative">
-                                <input
-                                  type="number"
-                                  value={formData.stats.sixes}
-                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, sixes: e.target.value}})}
+                          <input
+                            type="number"
+                            value={formData.stats.sixes}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, sixes: e.target.value}})}
                                   className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
-                                  placeholder="Sixes"
-                                />
+                            placeholder="Sixes"
+                          />
                                 <Zap className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                              </div>
+                        </div>
                             </div>
                             <div className="group">
                               <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
                                 <Award className="w-4 h-4 text-emerald-400" />
-                                Fifties (50s)
-                              </label>
+                            Fifties (50s)
+                          </label>
                               <div className="relative">
-                                <input
-                                  type="number"
-                                  value={formData.stats.fifties}
-                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, fifties: e.target.value}})}
+                          <input
+                            type="number"
+                            value={formData.stats.fifties}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, fifties: e.target.value}})}
                                   className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
-                                  placeholder="Fifties"
-                                />
+                            placeholder="Fifties"
+                          />
                                 <Award className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                              </div>
+                        </div>
                             </div>
                             <div className="group">
                               <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
                                 <Star className="w-4 h-4 text-cyan-400" />
-                                Hundreds (100s)
-                              </label>
+                            Hundreds (100s)
+                          </label>
                               <div className="relative">
-                                <input
-                                  type="number"
-                                  value={formData.stats.hundreds}
-                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, hundreds: e.target.value}})}
+                          <input
+                            type="number"
+                            value={formData.stats.hundreds}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, hundreds: e.target.value}})}
                                   className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
-                                  placeholder="Hundreds"
-                                />
+                            placeholder="Hundreds"
+                          />
                                 <Star className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                              </div>
+                        </div>
                             </div>
                             <div className="group md:col-span-2">
                               <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
                                 <Target className="w-4 h-4 text-teal-400" />
-                                Best Bowling (BBM)
-                              </label>
+                            Best Bowling (BBM)
+                          </label>
                               <div className="relative">
-                                <input
-                                  type="text"
-                                  value={formData.stats.bestBowling}
-                                  onChange={(e) => setFormData({...formData, stats: {...formData.stats, bestBowling: e.target.value}})}
+                          <input
+                            type="text"
+                            value={formData.stats.bestBowling}
+                            onChange={(e) => setFormData({...formData, stats: {...formData.stats, bestBowling: e.target.value}})}
                                   className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500/50 focus:border-teal-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
-                                  placeholder="e.g., 4/21 or 3/45"
-                                />
+                            placeholder="e.g., 4/21 or 3/45"
+                          />
                                 <Target className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                               </div>
                             </div>
-                          </div>
                         </div>
                       </div>
+                    </div>
                     )}
             </form>
           </ModernDialog>
