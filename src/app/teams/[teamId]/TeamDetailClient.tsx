@@ -774,7 +774,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                           onClick={() => setNationalityFilter(option.id as any)}
                           className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
                             nationalityFilter === option.id
-                              ? 'bg-white text-gray-900'
+                              ? 'bg-white text-blue-600'
                               : 'text-gray-300 hover:text-white'
                           }`}
                         >
@@ -798,7 +798,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                           onClick={() => setBattingStyleFilter(option.id as any)}
                           className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
                             battingStyleFilter === option.id
-                              ? 'bg-white text-gray-900'
+                              ? 'bg-white text-blue-600'
                               : 'text-gray-300 hover:text-white'
                           }`}
                         >
