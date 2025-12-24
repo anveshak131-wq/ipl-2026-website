@@ -387,68 +387,187 @@ function TeamsPageContent() {
                 <div className="absolute bottom-10 right-20 w-96 h-96 bg-ipl-gold/10 rounded-full blur-3xl -z-10 animate-float" style={{ animationDelay: '1s' }} />
 
                 <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {/* Hero Header */}
+                    {/* Enhanced Hero Header */}
                     <AnimatedSection direction="down" delay={0.1}>
                         <motion.div 
-                            className="mb-8"
+                            className="mb-12 relative"
                             initial={{ opacity: 0, y: -30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6 }}
                         >
+                            {/* Background Glow Effect */}
+                            <div className="absolute -top-20 -left-20 w-96 h-96 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-full blur-3xl animate-pulse" />
+                            
+                            <div className="relative z-10">
                             <motion.div 
-                                className="inline-flex items-center space-x-2 mb-4"
+                                    className="inline-flex items-center space-x-2 mb-6 group"
                                 whileHover={{ scale: 1.05 }}
                             >
-                                <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2 hover:bg-white/15 transition-all duration-300 cursor-default">
-                                    <Icon name="cricket" size={16} /> IPL 2026 TEAMS
+                                    <span className="px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 border border-white/20 backdrop-blur-xl text-white flex items-center gap-2 hover:from-blue-500/30 hover:via-purple-500/30 hover:to-pink-500/30 transition-all duration-300 shadow-lg shadow-blue-500/20">
+                                        <Icon name="cricket" size={18} /> 
+                                        <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent font-extrabold">
+                                            IPL 2026 TEAMS
+                                        </span>
                                 </span>
                             </motion.div>
+                                
                             <motion.h1 
-                                className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight"
+                                    className="text-6xl md:text-7xl lg:text-8xl font-black text-white mb-6 tracking-tight leading-tight"
                                 initial={{ opacity: 0, scale: 0.9 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ duration: 0.6, delay: 0.2 }}
                             >
-                                Meet the <GradientText gradient="from-blue-400 via-purple-400 to-pink-400" animate>Champions</GradientText>
+                                    <span className="block mb-2">Meet the</span>
+                                    <GradientText gradient="from-blue-400 via-purple-400 to-pink-400" animate className="text-7xl md:text-8xl lg:text-9xl">
+                                        Champions
+                                    </GradientText>
                             </motion.h1>
+                                
                             <motion.p 
-                                className="text-gray-300 text-lg max-w-2xl"
+                                    className="text-gray-300 text-xl md:text-2xl max-w-3xl leading-relaxed mb-8"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 transition={{ duration: 0.6, delay: 0.3 }}
                             >
-                                Explore all 10 elite franchises competing for glory in the world's biggest T20 league
+                                    Explore all <span className="font-bold text-white">{totalTeams} elite franchises</span> competing for glory in the world's biggest T20 league. Discover squads, stats, and legendary moments.
                             </motion.p>
+                                
+                                {/* Quick Action Buttons */}
+                                <motion.div 
+                                    className="flex flex-wrap items-center gap-4"
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.6, delay: 0.4 }}
+                                >
+                                    <motion.button
+                                        onClick={() => setShowComparison(true)}
+                                        className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 flex items-center gap-2 group"
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
+                                        <CustomEmoji type="target" size={20} />
+                                        Compare Teams
+                                        <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                        </svg>
+                                    </motion.button>
+                                    
+                                    <motion.button
+                                        onClick={() => router.push('/stats')}
+                                        className="px-6 py-3 rounded-xl bg-white/10 backdrop-blur-xl border border-white/20 text-white font-bold hover:bg-white/20 transition-all duration-300 flex items-center gap-2"
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                    >
+                                        <CustomEmoji type="chart" size={20} />
+                                        View Statistics
+                                    </motion.button>
+                                </motion.div>
+                            </div>
                         </motion.div>
                     </AnimatedSection>
 
-                    {/* Quick Stats Cards */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-                        <div className="rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/30 px-4 py-3 backdrop-blur-sm hover:scale-105 transition-transform duration-300">
-                            <p className="text-xs uppercase tracking-wide text-blue-300 font-semibold">Teams</p>
-                            <p className="text-2xl font-black text-white">{totalTeams}</p>
+                    {/* Enhanced Quick Stats Cards */}
+                    <motion.div 
+                        className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6 mb-10"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.5 }}
+                    >
+                        <motion.div 
+                            className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/20 via-blue-600/15 to-blue-700/10 border border-blue-500/30 backdrop-blur-xl p-6 hover:border-blue-400/50 transition-all duration-500"
+                            whileHover={{ scale: 1.05, y: -5 }}
+                            style={{ boxShadow: '0 8px 32px rgba(59, 130, 246, 0.2)' }}
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                            <div className="relative z-10">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <Icon name="team" size={24} className="text-blue-300" />
                         </div>
-                        <div className="rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-600/10 border border-purple-500/30 px-4 py-3 backdrop-blur-sm hover:scale-105 transition-transform duration-300">
-                            <p className="text-xs uppercase tracking-wide text-purple-300 font-semibold">Players</p>
-                            <p className="text-2xl font-black text-white">{totalPlayers}</p>
+                                    <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
                         </div>
-                        <div className="rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/30 px-4 py-3 backdrop-blur-sm hover:scale-105 transition-transform duration-300">
-                            <p className="text-xs uppercase tracking-wide text-amber-300 font-semibold">Overseas</p>
-                            <p className="text-2xl font-black text-white">{totalOverseas}</p>
+                                <p className="text-xs uppercase tracking-wider text-blue-300 font-bold mb-2">Teams</p>
+                                <p className="text-4xl font-black text-white mb-1">{totalTeams}</p>
+                                <p className="text-xs text-blue-200/70">Elite Franchises</p>
                         </div>
-                        <div className="rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/30 px-4 py-3 backdrop-blur-sm hover:scale-105 transition-transform duration-300">
-                            <p className="text-xs uppercase tracking-wide text-emerald-300 font-semibold">Captains</p>
-                            <p className="text-2xl font-black text-white">{totalCaptains}</p>
+                        </motion.div>
+                        
+                        <motion.div 
+                            className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500/20 via-purple-600/15 to-purple-700/10 border border-purple-500/30 backdrop-blur-xl p-6 hover:border-purple-400/50 transition-all duration-500"
+                            whileHover={{ scale: 1.05, y: -5 }}
+                            style={{ boxShadow: '0 8px 32px rgba(168, 85, 247, 0.2)' }}
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                            <div className="relative z-10">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <CustomEmoji type="people" size={24} />
                         </div>
+                                    <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
                     </div>
+                                <p className="text-xs uppercase tracking-wider text-purple-300 font-bold mb-2">Players</p>
+                                <p className="text-4xl font-black text-white mb-1">{totalPlayers}</p>
+                                <p className="text-xs text-purple-200/70">Total Squad Size</p>
+                            </div>
+                        </motion.div>
+                        
+                        <motion.div 
+                            className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500/20 via-amber-600/15 to-amber-700/10 border border-amber-500/30 backdrop-blur-xl p-6 hover:border-amber-400/50 transition-all duration-500"
+                            whileHover={{ scale: 1.05, y: -5 }}
+                            style={{ boxShadow: '0 8px 32px rgba(245, 158, 11, 0.2)' }}
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/0 to-amber-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                            <div className="relative z-10">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <CustomEmoji type="globe" size={24} />
+                                    </div>
+                                    <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                        </div>
+                                <p className="text-xs uppercase tracking-wider text-amber-300 font-bold mb-2">Overseas</p>
+                                <p className="text-4xl font-black text-white mb-1">{totalOverseas}</p>
+                                <p className="text-xs text-amber-200/70">International Stars</p>
+                        </div>
+                        </motion.div>
+                        
+                        <motion.div 
+                            className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/20 via-emerald-600/15 to-emerald-700/10 border border-emerald-500/30 backdrop-blur-xl p-6 hover:border-emerald-400/50 transition-all duration-500"
+                            whileHover={{ scale: 1.05, y: -5 }}
+                            style={{ boxShadow: '0 8px 32px rgba(16, 185, 129, 0.2)' }}
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 to-emerald-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                            <div className="relative z-10">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                        <CustomEmoji type="lightning" size={24} />
+                        </div>
+                                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                        </div>
+                                <p className="text-xs uppercase tracking-wider text-emerald-300 font-bold mb-2">Captains</p>
+                                <p className="text-4xl font-black text-white mb-1">{totalCaptains}</p>
+                                <p className="text-xs text-emerald-200/70">Team Leaders</p>
+                    </div>
+                        </motion.div>
+                    </motion.div>
 
-                    {/* Sticky Filter Toolbar */}
-                    <div className="sticky top-16 md:top-20 z-40 -mx-4 px-4 sm:mx-0 sm:px-0 mb-8 backdrop-blur-xl bg-slate-900/80 border-y border-white/10 py-4 shadow-lg">
-                        <div className="flex flex-col gap-4">
-                            {/* Search Bar */}
+                    {/* Enhanced Sticky Filter Toolbar */}
+                    <motion.div 
+                        className="sticky top-16 md:top-20 z-40 -mx-4 px-4 sm:mx-0 sm:px-0 mb-10"
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.6 }}
+                    >
+                        <div className="relative overflow-hidden rounded-2xl backdrop-blur-2xl bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border border-white/10 shadow-2xl">
+                            {/* Animated Background Gradient */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 opacity-0 hover:opacity-100 transition-opacity duration-500" />
+                            
+                            <div className="relative z-10 p-6 flex flex-col gap-6">
+                                {/* Enhanced Search Bar */}
+                                <div className="relative group">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-xl blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-500" />
                             <div className="relative">
-                                <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-400">
-                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-gray-400 group-focus-within:text-blue-400 transition-colors">
+                                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                     </svg>
                                 </span>
@@ -457,58 +576,69 @@ function TeamsPageContent() {
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     placeholder="Search teams by name or abbreviation..."
-                                    className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-800/60 border border-white/15 text-white placeholder-gray-400 focus:outline-none focus:border-ipl-gold focus:ring-2 focus:ring-ipl-gold/30 transition-all"
+                                            className="w-full pl-14 pr-12 py-4 rounded-xl bg-slate-800/60 border-2 border-white/15 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all text-lg"
                                 />
                                 {searchTerm && (
-                                    <button
+                                            <motion.button
                                         onClick={() => setSearchTerm('')}
-                                        className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-white transition-colors"
+                                                className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-white transition-colors"
+                                                whileHover={{ scale: 1.1 }}
+                                                whileTap={{ scale: 0.9 }}
                                     >
-                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                         </svg>
-                                    </button>
+                                            </motion.button>
                                 )}
+                                    </div>
                             </div>
 
-                            {/* Filters and Sort Row */}
-                            <div className="flex flex-wrap items-center gap-3">
+                                {/* Enhanced Filters and Sort Row */}
+                                <div className="flex flex-wrap items-center gap-4">
                                 {/* Title Filter Chips */}
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-sm text-gray-300 font-bold uppercase tracking-wider flex items-center gap-2">
+                                            <CustomEmoji type="trophy" size={18} />
+                                            Titles:
+                                        </span>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-xs text-gray-400 font-semibold uppercase tracking-wide">Titles:</span>
                                     {(['all', '0', '1', '2+'] as TitleFilter[]).map((filter) => (
-                                        <button
+                                                <motion.button
                                             key={filter}
                                             onClick={() => setTitleFilter(filter)}
-                                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${titleFilter === filter
-                                                ? 'bg-ipl-gold text-slate-900 shadow-lg shadow-ipl-gold/40'
-                                                : 'bg-slate-800/60 text-gray-300 border border-white/10 hover:border-ipl-gold/50'
-                                                }`}
+                                                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 ${
+                                                        titleFilter === filter
+                                                            ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-900 shadow-lg shadow-amber-500/50'
+                                                            : 'bg-slate-800/60 text-gray-300 border-2 border-white/10 hover:border-amber-500/50 hover:bg-slate-700/60'
+                                                    }`}
+                                                    whileHover={{ scale: 1.05 }}
+                                                    whileTap={{ scale: 0.95 }}
                                                 >
                                                 {filter === 'all' ? 'All' : filter === '2+' ? (
-                                                    <span className="flex items-center gap-1">
-                                                        2+ <CustomEmoji type="trophy" size={14} />
+                                                        <span className="flex items-center gap-1.5">
+                                                            2+ <CustomEmoji type="trophy" size={16} />
                                                     </span>
                                                 ) : filter === '0' ? 'No titles' : (
-                                                    <span className="flex items-center gap-1">
-                                                        1 <CustomEmoji type="trophy" size={14} />
+                                                        <span className="flex items-center gap-1.5">
+                                                            1 <CustomEmoji type="trophy" size={16} />
                                                     </span>
                                                 )}
-                                                </button>
+                                                </motion.button>
                                                 ))}
+                                        </div>
                                                 </div>
 
-                                <div className="h-6 w-px bg-white/10" />
+                                    <div className="h-8 w-px bg-gradient-to-b from-transparent via-white/20 to-transparent" />
 
                                 {/* Home Ground Filter */}
                                 {allHomeGrounds.length > 0 && (
                                     <>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-xs text-gray-400 font-semibold uppercase tracking-wide">Ground:</span>
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-sm text-gray-300 font-bold uppercase tracking-wider">Ground:</span>
                                             <select
                                                 value={homeGroundFilter}
                                                 onChange={(e) => setHomeGroundFilter(e.target.value)}
-                                                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800/60 text-white border border-white/10 focus:border-ipl-gold focus:outline-none hover:border-ipl-gold/50 transition-all cursor-pointer"
+                                                    className="px-4 py-2 rounded-xl text-sm font-bold bg-slate-800/60 text-white border-2 border-white/10 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-blue-500/50 transition-all cursor-pointer"
                                             >
                                                 <option value="all">All Grounds</option>
                                                 {allHomeGrounds.map(ground => (
@@ -516,17 +646,17 @@ function TeamsPageContent() {
                                                 ))}
                                             </select>
                                         </div>
-                                        <div className="h-6 w-px bg-white/10" />
+                                            <div className="h-8 w-px bg-gradient-to-b from-transparent via-white/20 to-transparent" />
                                     </>
                                 )}
 
                                 {/* Sort Dropdown */}
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xs text-gray-400 font-semibold uppercase tracking-wide">Sort:</span>
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-sm text-gray-300 font-bold uppercase tracking-wider">Sort:</span>
                                     <select
                                         value={sortBy}
                                         onChange={(e) => setSortBy(e.target.value as SortOption)}
-                                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800/60 text-white border border-white/10 focus:border-ipl-gold focus:outline-none hover:border-ipl-gold/50 transition-all cursor-pointer"
+                                            className="px-4 py-2 rounded-xl text-sm font-bold bg-slate-800/60 text-white border-2 border-white/10 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-blue-500/50 transition-all cursor-pointer"
                                     >
                                         <option value="name">Name (A-Z)</option>
                                         <option value="titles">Titles (Most first)</option>
@@ -535,106 +665,137 @@ function TeamsPageContent() {
                                     </select>
                                 </div>
 
-                                <div className="h-6 w-px bg-white/10" />
+                                    <div className="h-8 w-px bg-gradient-to-b from-transparent via-white/20 to-transparent" />
 
                                 {/* View Toggle */}
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xs text-gray-400 font-semibold uppercase tracking-wide">View:</span>
-                                    <div className="flex rounded-lg border border-white/10 overflow-hidden">
-                                        <button
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-sm text-gray-300 font-bold uppercase tracking-wider">View:</span>
+                                        <div className="flex rounded-xl border-2 border-white/10 overflow-hidden bg-slate-800/60">
+                                            <motion.button
                                             onClick={() => setViewMode('grid')}
-                                            className={`px-3 py-1.5 text-xs font-bold transition-all ${
+                                                className={`px-4 py-2 text-sm font-bold transition-all ${
                                                 viewMode === 'grid'
-                                                    ? 'bg-ipl-gold text-slate-900'
-                                                    : 'bg-slate-800/60 text-gray-300 hover:bg-white/10'
+                                                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
+                                                        : 'text-gray-300 hover:bg-white/10'
                                             }`}
+                                                whileHover={{ scale: 1.05 }}
+                                                whileTap={{ scale: 0.95 }}
                                         >
                                             Grid
-                                        </button>
-                                        <button
+                                            </motion.button>
+                                            <motion.button
                                             onClick={() => setViewMode('list')}
-                                            className={`px-3 py-1.5 text-xs font-bold transition-all ${
+                                                className={`px-4 py-2 text-sm font-bold transition-all ${
                                                 viewMode === 'list'
-                                                    ? 'bg-ipl-gold text-slate-900'
-                                                    : 'bg-slate-800/60 text-gray-300 hover:bg-white/10'
+                                                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
+                                                        : 'text-gray-300 hover:bg-white/10'
                                             }`}
+                                                whileHover={{ scale: 1.05 }}
+                                                whileTap={{ scale: 0.95 }}
                                         >
                                             List
-                                        </button>
+                                            </motion.button>
                                     </div>
                                 </div>
 
-                                <div className="h-6 w-px bg-white/10" />
-
-                                {/* Comparison Tool */}
-                                <button
-                                    onClick={() => setShowComparison(true)}
-                                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-500/20 text-purple-300 border border-purple-500/50 hover:bg-purple-500/30 transition-all flex items-center gap-1.5"
-                                >
-                                    <CustomEmoji type="target" size={14} /> Compare
-                                </button>
-
-                                <div className="h-6 w-px bg-white/10" />
+                                    <div className="h-8 w-px bg-gradient-to-b from-transparent via-white/20 to-transparent" />
 
                                 {/* Favorites Toggle */}
                                 {favorites.length > 0 && (
-                                    <button
+                                        <motion.button
                                         onClick={() => setShowFavoritesFirst(!showFavoritesFirst)}
-                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${showFavoritesFirst
-                                                ? 'bg-rose-500/20 text-rose-300 border border-rose-500/50'
-                                                : 'bg-slate-800/60 text-gray-300 border border-white/10 hover:border-rose-500/50'
+                                            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
+                                                showFavoritesFirst
+                                                    ? 'bg-gradient-to-r from-rose-500/30 to-pink-500/30 text-rose-300 border-2 border-rose-500/50 shadow-lg shadow-rose-500/20'
+                                                    : 'bg-slate-800/60 text-gray-300 border-2 border-white/10 hover:border-rose-500/50 hover:bg-slate-700/60'
                                             }`}
+                                            whileHover={{ scale: 1.05 }}
+                                            whileTap={{ scale: 0.95 }}
                                         >
-                                            <CustomEmoji type="star" size={14} /> Favorites first
-                                        </button>
+                                            <CustomEmoji type="star" size={18} /> 
+                                            <span>Favorites</span>
+                                        </motion.button>
                                         )}
 
                                 {/* Clear Filters */}
                                 {hasActiveFilters && (
                                     <>
                                         <div className="flex-1" />
-                                        <button
+                                            <motion.button
                                             onClick={clearFilters}
-                                            className="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-500/20 text-red-300 border border-red-500/50 hover:bg-red-500/30 transition-all"
+                                                className="px-4 py-2 rounded-xl text-sm font-bold bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-300 border-2 border-red-500/50 hover:from-red-500/30 hover:to-red-600/30 transition-all flex items-center gap-2"
+                                                whileHover={{ scale: 1.05 }}
+                                                whileTap={{ scale: 0.95 }}
                                         >
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
                                             Clear all
-                                        </button>
+                                            </motion.button>
                                     </>
                                 )}
                             </div>
 
-                            {/* Results Count */}
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-gray-400">
-                                    Showing <span className="font-bold text-white">{filteredAndSortedTeams.length}</span> of <span className="font-bold text-white">{totalTeams}</span> teams
+                                {/* Enhanced Results Count */}
+                                <div className="flex items-center justify-between pt-4 border-t border-white/10">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm text-gray-400">
+                                            Showing <span className="font-bold text-white text-base">{filteredAndSortedTeams.length}</span> of <span className="font-bold text-white text-base">{totalTeams}</span> teams
                                 </span>
+                                        {hasActiveFilters && (
+                                            <span className="px-2 py-1 rounded-lg text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                                                Filtered
+                                            </span>
+                                        )}
                             </div>
                         </div>
                     </div>
+                        </div>
+                    </motion.div>
 
-                    {/* Teams Grid */}
+                    {/* Enhanced Teams Grid */}
                     {isLoading ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <motion.div 
+                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                        >
                             {[...Array(6)].map((_, i) => (
                                 <TeamCardSkeleton key={i} delay={i * 100} />
                             ))}
-                        </div>
+                        </motion.div>
                     ) : filteredAndSortedTeams.length === 0 ? (
-                        <div className="text-center py-20 animate-fade-in">
-                            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-slate-800/60 border border-white/10 mb-6">
-                                <Icon name="team" size={48} />
-                            </div>
-                            <h3 className="text-2xl font-bold text-white mb-3">No teams found</h3>
-                            <p className="text-gray-400 max-w-md mx-auto mb-8">
+                        <motion.div 
+                            className="text-center py-20"
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <motion.div 
+                                className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br from-slate-800/60 to-slate-900/60 border-2 border-white/10 mb-8"
+                                animate={{ rotate: [0, 10, -10, 0] }}
+                                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                            >
+                                <Icon name="team" size={64} className="text-gray-400" />
+                            </motion.div>
+                            <h3 className="text-3xl font-black text-white mb-4 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                                No teams found
+                            </h3>
+                            <p className="text-gray-400 text-lg max-w-md mx-auto mb-8">
                                 {searchTerm ? `No teams match "${searchTerm}"` : 'No teams match your filters'}
                             </p>
-                            <button
+                            <motion.button
                                 onClick={clearFilters}
-                                className="px-6 py-3 rounded-xl bg-gradient-to-r from-ipl-blue-light to-ipl-purple text-white font-bold hover:shadow-xl transition-all"
+                                className="px-8 py-4 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold hover:shadow-2xl hover:shadow-purple-500/50 transition-all flex items-center gap-2 mx-auto"
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
                             >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
                                 Clear all filters
-                            </button>
-                        </div>
+                            </motion.button>
+                        </motion.div>
                     ) : (
                         <motion.div 
                             className={viewMode === 'grid' 
