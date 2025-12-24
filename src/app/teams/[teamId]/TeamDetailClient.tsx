@@ -1141,7 +1141,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
   );
 }
 
-// Premium Player Card Component - Complete Redesign
+// Modern Player Card Component - Redesigned with Best UI/UX
 function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyPlayers }: PlayerCardProps) {
   const stats = player.stats || {};
 
@@ -1184,61 +1184,36 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
   return (
     <motion.div
       onClick={onClick}
-      initial={{ opacity: 0, y: 50, scale: 0.9, rotateX: -10 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 0.7, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ scale: 1.1, y: -15, rotateY: 8, rotateX: 5, z: 50 }}
-      className="group relative overflow-visible rounded-[2rem] backdrop-blur-2xl p-8 border-[3px] cursor-pointer transition-all duration-700"
+      initial={{ opacity: 0, y: 30, scale: 0.95 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.5, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ y: -8, scale: 1.02 }}
+      className="group relative overflow-hidden rounded-2xl cursor-pointer transition-all duration-300"
       style={{
-        background: `linear-gradient(135deg, ${primaryColor.light}60, ${secondaryColor.light}50, ${primaryColor.light}40)`,
-        borderColor: isKeyPlayer ? 'rgba(250, 204, 21, 0.8)' : `${primaryColor.medium}70`,
+        background: `linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95))`,
         boxShadow: isKeyPlayer
-          ? `0 0 60px rgba(250, 204, 21, 0.6), 0 25px 60px ${primaryColor.glow}40, inset 0 0 80px ${primaryColor.glow}15, 0 0 0 1px rgba(250, 204, 21, 0.3)`
-          : `0 25px 60px ${primaryColor.glow}35, inset 0 0 60px ${primaryColor.glow}10, 0 0 0 1px ${primaryColor.medium}30`,
-        transformStyle: 'preserve-3d',
-        perspective: '1000px'
+          ? `0 8px 32px ${primaryColor.glow}40, 0 0 0 1px ${primaryColor.solid}40`
+          : `0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05)`,
       }}
     >
-      {/* Premium Glow Effect on Hover */}
+      {/* Animated Gradient Background */}
       <motion.div 
-        className="absolute -inset-4 rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-3xl -z-10"
+        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         style={{
-          background: `radial-gradient(ellipse at center, ${primaryColor.medium}70, ${secondaryColor.medium}50, transparent 70%)`
-        }}
-        animate={{
-          scale: [1, 1.1, 1],
-          opacity: [0, 1, 0]
-        }}
-        transition={{
-          duration: 3,
-          repeat: Infinity,
-          ease: "easeInOut"
+          background: `linear-gradient(135deg, ${primaryColor.solid}15, ${secondaryColor.solid}10, transparent)`,
         }}
       />
       
-      {/* Premium Animated Background Pattern */}
-      <div 
-        className="absolute inset-0 opacity-[0.04] group-hover:opacity-[0.12] transition-opacity duration-700"
-        style={{
-          backgroundImage: `
-            radial-gradient(circle at 2px 2px, ${primaryColor.solid} 1.5px, transparent 0),
-            linear-gradient(45deg, transparent 48%, ${primaryColor.solid}20 49%, ${primaryColor.solid}20 51%, transparent 52%)
-          `,
-          backgroundSize: '30px 30px, 20px 20px'
-        }}
-      />
-      
-      {/* Top Accent Bar for Key Players */}
+      {/* Top Accent Line for Key Players */}
       {isKeyPlayer && (
         <motion.div 
-          className="absolute top-0 left-0 right-0 h-2 rounded-t-[2rem]"
+          className="absolute top-0 left-0 right-0 h-1"
           style={{
-            background: `linear-gradient(to right, transparent, rgba(250, 204, 21, 0.8), transparent)`,
-            boxShadow: `0 0 30px rgba(250, 204, 21, 0.6)`
+            background: `linear-gradient(to right, transparent, ${primaryColor.solid}, transparent)`,
           }}
           animate={{
-            opacity: [0.6, 1, 0.6]
+            opacity: [0.5, 1, 0.5]
           }}
           transition={{
             duration: 2,
@@ -1248,262 +1223,187 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
         />
       )}
       
-      {/* Premium Jersey Number */}
+      {/* Jersey Number Badge */}
       <motion.div
-        className="absolute top-6 right-6 w-20 h-20 rounded-2xl flex items-center justify-center font-black text-3xl shadow-2xl z-10 text-white"
+        className="absolute top-4 right-4 w-14 h-14 rounded-xl flex items-center justify-center font-bold text-xl z-10"
         style={{
           background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
-          boxShadow: `0 10px 40px ${primaryColor.glow}70, inset 0 4px 15px rgba(255,255,255,0.3), inset 0 -4px 15px rgba(0,0,0,0.2)`,
+          color: '#FFFFFF',
+          boxShadow: `0 4px 16px ${primaryColor.glow}50`,
         }}
-        whileHover={{ scale: 1.25, rotate: 20, z: 100 }}
-        transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
+        whileHover={{ scale: 1.1, rotate: 5 }}
+        transition={{ duration: 0.2 }}
       >
-        <span className="drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
         {player.jerseyNumber > 0 ? player.jerseyNumber : 'N/A'}
-        </span>
       </motion.div>
 
-      {/* Premium Hover Shimmer Effect */}
-      <motion.div 
-        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 overflow-hidden"
-        initial={false}
-      >
-        <motion.div 
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-          style={{ transform: 'skewX(-20deg)' }}
-          animate={{
-            x: ['-200%', '200%']
-          }}
-          transition={{
-            duration: 1.5,
-            repeat: Infinity,
-            repeatDelay: 2,
-            ease: "easeInOut"
-          }}
-        />
-      </motion.div>
+      {/* Player Info Section */}
+      <div className="relative z-10 p-6">
+        <div className="flex items-start gap-4 mb-4 pr-16">
+          {player.nationality && (
+            <motion.div
+              className="relative"
+              whileHover={{ scale: 1.15, rotate: 5 }}
+              transition={{ duration: 0.2 }}
+            >
+              <FlagImage nationality={player.nationality} size="md" />
+            </motion.div>
+          )}
+          <div className="flex-1 min-w-0">
+            <h3 
+              className="text-xl font-bold mb-1 truncate text-gray-100 group-hover:text-white transition-colors" 
+            >
+              {player.name}
+            </h3>
+            <p 
+              className="text-sm font-semibold text-gray-400 mb-2"
+              style={{ color: primaryColor.solid }}
+            >
+              {player.role}
+            </p>
+            {player.allrounderType && (
+              <span 
+                className="inline-block px-2 py-1 rounded-md text-xs font-medium"
+                style={{
+                  background: `${primaryColor.solid}20`,
+                  color: primaryColor.solid,
+                }}
+              >
+                {player.allrounderType}
+              </span>
+            )}
+          </div>
+        </div>
 
-      {/* Premium Player Name Section */}
-      <div className="flex items-start gap-4 mb-6 pr-24 relative z-10">
-        {player.nationality && (
-          <motion.div
-            className="relative"
-            whileHover={{ scale: 1.3, rotate: 15, z: 50 }}
-            transition={{ duration: 0.3, type: "spring" }}
-          >
-            <div className="absolute inset-0 rounded-full blur-lg opacity-50 group-hover:opacity-100 transition-opacity"
-                 style={{ background: primaryColor.medium }} />
-            <div className="relative">
-              <FlagImage nationality={player.nationality} size="lg" />
-            </div>
-          </motion.div>
+        {/* Badges Section */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          {player.isCaptain && (
+            <motion.span 
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
+              style={{
+                background: `${primaryColor.solid}20`,
+                color: primaryColor.solid,
+              }}
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.2 }}
+            >
+              <StarIcon className="w-3.5 h-3.5" color={primaryColor.solid} filled />
+              Captain
+            </motion.span>
+          )}
+          {player.nationality !== 'India' && (
+            <motion.span 
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
+              style={{
+                background: 'rgba(59, 130, 246, 0.2)',
+                color: '#60A5FA',
+              }}
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.2 }}
+            >
+              <GlobeIcon className="w-3.5 h-3.5" color="#60A5FA" />
+              Foreign
+            </motion.span>
+          )}
+          {isKeyPlayer && (
+            <motion.span 
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
+              style={{
+                background: 'rgba(245, 158, 11, 0.2)',
+                color: '#FBBF24',
+              }}
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.2 }}
+            >
+              <StarIcon className="w-3.5 h-3.5" color="#FBBF24" filled />
+              Key Player
+            </motion.span>
+          )}
+        </div>
+
+        {/* Role Tags */}
+        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {tags.slice(0, 3).map((tag: string, tagIndex) => (
+              <motion.span
+                key={tag}
+                className="px-2.5 py-1 rounded-md text-xs font-medium"
+                style={{
+                  background: `${primaryColor.solid}15`,
+                  color: primaryColor.solid,
+                }}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.2, delay: tagIndex * 0.05 }}
+                whileHover={{ scale: 1.05 }}
+              >
+                {tag}
+              </motion.span>
+            ))}
+          </div>
         )}
-        <div className="flex-1 min-w-0">
-          <motion.h3 
-            className="text-3xl font-black mb-2 truncate leading-tight" 
-            style={{ 
-              color: primaryColor.textOnLight,
-              textShadow: `0 4px 20px ${primaryColor.glow}60, 0 2px 8px rgba(0,0,0,0.8)`,
-              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
-            }}
+
+        {/* Stats Section */}
+        <div className="grid grid-cols-3 gap-3 pt-4 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+          <motion.div 
+            className="text-center"
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.2 }}
           >
-          {player.name}
-          </motion.h3>
-          <motion.p 
-            className="text-base font-bold uppercase tracking-widest mb-1" 
-            style={{ 
-              color: `${primaryColor.textOnLight}95`,
-              letterSpacing: '0.2em',
-              textShadow: '0 2px 8px rgba(0,0,0,0.5)'
-            }}
-          >
-        {player.role}
-          </motion.p>
-          {player.allrounderType && (
-            <span className="inline-block px-3 py-1 rounded-lg text-xs font-bold mt-2"
-                  style={{
-                    background: `linear-gradient(135deg, ${primaryColor.medium}40, ${secondaryColor.medium}40)`,
-                    color: primaryColor.textOnLight,
-                    border: `1px solid ${primaryColor.medium}60`
-                  }}>
-              {player.allrounderType}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Premium Badges Section */}
-      <div className="flex flex-wrap gap-3 mb-5 relative z-10">
-        {player.isCaptain && (
-          <motion.span 
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold shadow-lg border-2"
-            style={{
-              background: 'linear-gradient(135deg, rgba(250, 204, 21, 0.3), rgba(251, 191, 36, 0.3))',
-              color: '#FCD34D',
-              borderColor: 'rgba(250, 204, 21, 0.6)',
-              boxShadow: '0 4px 20px rgba(250, 204, 21, 0.4)'
-            }}
-            whileHover={{ scale: 1.1, y: -2 }}
-            transition={{ duration: 0.2 }}
-          >
-            <StarIcon className="w-4 h-4" color="#FCD34D" filled />
-            <span className="drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">Captain</span>
-          </motion.span>
-        )}
-        {player.nationality !== 'India' && (
-          <motion.span 
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold shadow-lg border-2"
-            style={{
-              background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(37, 99, 235, 0.3))',
-              color: '#93C5FD',
-              borderColor: 'rgba(59, 130, 246, 0.6)',
-              boxShadow: '0 4px 20px rgba(59, 130, 246, 0.4)'
-            }}
-            whileHover={{ scale: 1.1, y: -2 }}
-            transition={{ duration: 0.2 }}
-          >
-            <GlobeIcon className="w-4 h-4" color="#93C5FD" />
-            <span className="drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">Foreign</span>
-          </motion.span>
-        )}
-        {isKeyPlayer && (
-          <motion.span 
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold shadow-lg border-2"
-            style={{
-              background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(217, 119, 6, 0.3))',
-              color: '#FBBF24',
-              borderColor: 'rgba(245, 158, 11, 0.6)',
-              boxShadow: '0 4px 20px rgba(245, 158, 11, 0.5)'
-            }}
-            whileHover={{ scale: 1.1, y: -2 }}
-            transition={{ duration: 0.2 }}
-            animate={{
-              boxShadow: [
-                '0 4px 20px rgba(245, 158, 11, 0.5)',
-                '0 8px 30px rgba(245, 158, 11, 0.7)',
-                '0 4px 20px rgba(245, 158, 11, 0.5)'
-              ]
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          >
-            <StarIcon className="w-4 h-4" color="#FBBF24" filled />
-            <span className="drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">Key Player</span>
-          </motion.span>
-        )}
-      </div>
-
-      {/* Premium Role Tags */}
-      {tags.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-6 relative z-10">
-          {tags.slice(0, 4).map((tag: string, tagIndex) => (
-            <motion.span
-              key={tag}
-              className="px-3 py-1.5 rounded-lg text-xs font-bold border backdrop-blur-sm"
-              style={{
-                background: `linear-gradient(135deg, ${primaryColor.light}30, ${secondaryColor.light}30)`,
-                borderColor: `${primaryColor.medium}50`,
-                color: primaryColor.textOnLight,
-                boxShadow: `0 2px 10px ${primaryColor.glow}20`
-              }}
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.3, delay: tagIndex * 0.1 }}
-              whileHover={{ scale: 1.15, y: -2 }}
-            >
-              {tag}
-            </motion.span>
-          ))}
-        </div>
-      )}
-
-      {/* Enhanced Stats with Icons */}
-      <div className="grid grid-cols-3 gap-4 pt-5 border-t-2" style={{ borderColor: `${primaryColor.medium}60` }}>
-        <motion.div 
-          className="text-center group/stat"
-          whileHover={{ scale: 1.1, y: -3 }}
-          transition={{ duration: 0.2 }}
-        >
-          <div className="relative">
-            <div className="absolute inset-0 rounded-xl opacity-0 group-hover/stat:opacity-100 transition-opacity duration-300 blur-lg"
-                 style={{ background: primaryColor.medium }} />
-            <div className="relative p-3 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 group-hover/stat:border-white/30 transition-all">
-              <p className="text-3xl font-black mb-1" style={{ 
-                color: primaryColor.text,
-                textShadow: `0 0 20px ${primaryColor.glow}40`
-              }}>
+            <div className="p-3 rounded-lg" style={{ background: `${primaryColor.solid}10` }}>
+              <p className="text-2xl font-bold mb-1 text-gray-100" style={{ color: primaryColor.solid }}>
                 {stats.matches || 0}
               </p>
-              <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: primaryColor.textOnLight }}>
-            Matches
-          </p>
-        </div>
-          </div>
-        </motion.div>
-        <motion.div 
-          className="text-center group/stat"
-          whileHover={{ scale: 1.1, y: -3 }}
-          transition={{ duration: 0.2 }}
-        >
-          <div className="relative">
-            <div className="absolute inset-0 rounded-xl opacity-0 group-hover/stat:opacity-100 transition-opacity duration-300 blur-lg"
-                 style={{ background: secondaryColor.medium }} />
-            <div className="relative p-3 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 group-hover/stat:border-white/30 transition-all">
-              <p className="text-3xl font-black mb-1" style={{ 
-                color: secondaryColor.text || primaryColor.text,
-                textShadow: `0 0 20px ${secondaryColor.glow || primaryColor.glow}40`
-              }}>
+              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">
+                Matches
+              </p>
+            </div>
+          </motion.div>
+          <motion.div 
+            className="text-center"
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="p-3 rounded-lg" style={{ background: `${secondaryColor.solid}10` }}>
+              <p className="text-2xl font-bold mb-1 text-gray-100" style={{ color: secondaryColor.solid || primaryColor.solid }}>
                 {stats.runs || 0}
               </p>
-              <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: primaryColor.textOnLight }}>
-            Runs
-          </p>
-        </div>
-          </div>
-        </motion.div>
-        <motion.div 
-          className="text-center group/stat"
-          whileHover={{ scale: 1.1, y: -3 }}
-          transition={{ duration: 0.2 }}
-        >
-          <div className="relative">
-            <div className="absolute inset-0 rounded-xl opacity-0 group-hover/stat:opacity-100 transition-opacity duration-300 blur-lg"
-                 style={{ background: primaryColor.medium }} />
-            <div className="relative p-3 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 group-hover/stat:border-white/30 transition-all">
-              <p className="text-3xl font-black mb-1" style={{ 
-                color: primaryColor.text,
-                textShadow: `0 0 20px ${primaryColor.glow}40`
-              }}>
+              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">
+                Runs
+              </p>
+            </div>
+          </motion.div>
+          <motion.div 
+            className="text-center"
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="p-3 rounded-lg" style={{ background: `${primaryColor.solid}10` }}>
+              <p className="text-2xl font-bold mb-1 text-gray-100" style={{ color: primaryColor.solid }}>
                 {stats.wickets || 0}
               </p>
-              <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: primaryColor.textOnLight }}>
-            Wickets
-          </p>
+              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">
+                Wickets
+              </p>
+            </div>
+          </motion.div>
         </div>
-          </div>
+
+        {/* Hover Arrow Indicator */}
+        <motion.div 
+          className="absolute bottom-4 right-4 w-8 h-8 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300"
+          style={{
+            background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
+          }}
+          whileHover={{ x: 3, scale: 1.1 }}
+          transition={{ duration: 0.2 }}
+        >
+          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
         </motion.div>
       </div>
-
-      {/* Enhanced Hover Arrow with glow */}
-      <motion.div 
-        className="absolute bottom-4 right-4 w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-10"
-        style={{
-          background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
-          boxShadow: `0 0 20px ${primaryColor.glow}60`
-        }}
-        whileHover={{ x: 5, scale: 1.2, rotate: 15 }}
-        transition={{ duration: 0.2 }}
-      >
-        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      </motion.div>
     </motion.div>
   );
 }
