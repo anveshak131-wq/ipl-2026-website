@@ -6,7 +6,7 @@ import Footer from '@/components/layout/Footer';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
-import { calculateAge, formatDateDDMMYYYY } from '@/lib/dateUtils';
+import { calculateAge, formatDateMonthDDYYYY } from '@/lib/dateUtils';
 
 interface PlayerDetailClientProps {
   playerId: string;
@@ -186,7 +186,7 @@ export default function PlayerDetailClient({ playerId }: PlayerDetailClientProps
                       Age: <span className="font-semibold text-white">{age} yrs</span>
                       {player.dateOfBirth && (
                         <span className="ml-1 text-gray-400">
-                          ({formatDateDDMMYYYY(player.dateOfBirth)})
+                          ({formatDateMonthDDYYYY(player.dateOfBirth)})
                         </span>
                       )}
                     </span>

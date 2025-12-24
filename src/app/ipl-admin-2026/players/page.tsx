@@ -10,7 +10,7 @@ import LeagueSwitch from '@/components/admin/LeagueSwitch';
 import WPLTeamsManager from '@/components/admin/WPLTeamsManager';
 import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
-import { parseDateDDMMYYYY, formatDateDDMMYYYY, calculateAge, isValidDate, formatDateMonthDDYYYY, parseDateMonthDDYYYY, isValidDateForLeague } from '@/lib/dateUtils';
+import { parseDateDDMMYYYY, calculateAge, isValidDate, formatDateMonthDDYYYY, parseDateMonthDDYYYY, isValidDateForLeague } from '@/lib/dateUtils';
 import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import FlagImage from '@/components/ui/FlagImage';
@@ -399,7 +399,7 @@ export default function AdminPlayers() {
     const dobFormatted = player.dateOfBirth 
       ? (player.league === 'wpl' 
           ? formatDateMonthDDYYYY(player.dateOfBirth)
-          : formatDateDDMMYYYY(player.dateOfBirth))
+          : formatDateMonthDDYYYY(player.dateOfBirth))
       : '';
     
     if (dobFormatted) {
@@ -2022,7 +2022,7 @@ export default function AdminPlayers() {
                             <span className="text-gray-300">
                               {currentLeague === 'wpl' 
                               ? formatDateMonthDDYYYY(player.dateOfBirth)
-                                : formatDateDDMMYYYY(player.dateOfBirth)}
+                                : formatDateMonthDDYYYY(player.dateOfBirth)}
                             </span>
                           ) : (
                             <span className="text-gray-500 italic text-xs">DOB</span>

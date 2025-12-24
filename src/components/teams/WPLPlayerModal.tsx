@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Player, Team } from '@/types';
 import { WPLColors } from '@/lib/wplColors';
-import { formatDateDDMMYYYY, calculateAge } from '@/lib/dateUtils';
+import { formatDateMonthDDYYYY, calculateAge } from '@/lib/dateUtils';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import { X } from 'lucide-react';
 import FlagImage from '@/components/ui/FlagImage';
@@ -245,7 +245,7 @@ export default function WPLPlayerModal({ player, team, isOpen, onClose }: WPLPla
                         {age} years
                         {player.dateOfBirth && (
                           <span className="text-sm font-normal ml-2" style={{ color: WPLColors.textMuted }}>
-                            ({formatDateDDMMYYYY(player.dateOfBirth)})
+                            ({formatDateMonthDDYYYY(player.dateOfBirth)})
                           </span>
                         )}
                       </p>

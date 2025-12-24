@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
 import { getOptimalTextColor } from '@/lib/colorUtils';
-import { formatDateDDMMYYYY, calculateAge } from '@/lib/dateUtils';
+import { formatDateMonthDDYYYY, calculateAge } from '@/lib/dateUtils';
 import FlagImage from '@/components/ui/FlagImage';
 import { X, Star, Globe, Calendar, TrendingUp, Award, Target, Activity, Zap, BarChart3 } from 'lucide-react';
 import { calculateOverallPerformance, OverallPerformance } from '@/lib/playerPerformance';
