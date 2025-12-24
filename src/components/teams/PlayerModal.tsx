@@ -7,7 +7,8 @@ import { api } from '@/lib/data';
 import { getOptimalTextColor } from '@/lib/colorUtils';
 import { formatDateDDMMYYYY, calculateAge } from '@/lib/dateUtils';
 import FlagImage from '@/components/ui/FlagImage';
-import { X, Star, Globe, Calendar, TrendingUp, Award, Target, Activity, Zap } from 'lucide-react';
+import { X, Star, Globe, Calendar, TrendingUp, Award, Target, Activity, Zap, BarChart3 } from 'lucide-react';
+import { calculateOverallPerformance, OverallPerformance } from '@/lib/playerPerformance';
 
 interface PlayerModalProps {
   player: Player | null;
@@ -52,14 +53,6 @@ function adjustOpacity(rgbaColor: string, opacity: number): string {
 
 export default function PlayerModal({ player, isOpen, onClose, teamColors, teamData }: PlayerModalProps) {
   const [teamColorsState, setTeamColorsState] = useState<{ primary: string; secondary: string } | null>(teamColors || null);
-
-  // Calculate bowling average from economy and wickets if not provided
-  const calculateBowlingAverage = (economy: number, wickets: number, matches: number): number => {
-    if (wickets === 0) return 0;
-    const estimatedOvers = matches * 4;
-    const runsConceded = economy * estimatedOvers;
-    return runsConceded / wickets;
-  };
 
   useEffect(() => {
     if (teamColors) {
@@ -132,6 +125,9 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
   const runsPerMatch = player.stats.matches > 0 
     ? Math.round(player.stats.runs / player.stats.matches * 10) / 10 
     : 0;
+
+  // Calculate overall performance using the comprehensive calculation system
+  const overallPerformance = calculateOverallPerformance(player);
 
   // Get role border color
   const getRoleBorderColor = () => {
@@ -602,107 +598,107 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                           background: `linear-gradient(to right, ${primaryColor.solid}, ${secondaryColor.solid})`,
                         }}
                       />
-                      <Activity className="w-4 h-4" style={{ color: primaryColor.solid }} />
-                Overall Performance
+                      <BarChart3 className="w-4 h-4" style={{ color: primaryColor.solid }} />
+                      Overall Performance Rating
                     </motion.h4>
-              
-                    {/* For Bowlers */}
-              {player.role === 'Bowler' && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {[
-                          { label: 'Matches', value: player.stats.matches },
-                    { label: 'Total Wickets', value: player.stats.wickets },
-                          { label: 'Wickets/Match', value: (player.stats.matches > 0 ? (player.stats.wickets / player.stats.matches).toFixed(2) : 0) },
-                  ].map((stat, index) => (
-                          <motion.div
-                      key={index}
-                            className="p-5 rounded-xl border text-center relative overflow-hidden group"
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.3, delay: 1.0 + index * 0.1 }}
-                            whileHover={{ scale: 1.05, y: -3 }}
-                      style={{
-                        background: `linear-gradient(135deg, ${secondaryColor.light}, ${primaryColor.light})`,
-                              borderColor: `${(secondaryColor.medium || primaryColor.medium)}40`,
-                      }}
-                    >
-                      <p 
-                              className="text-2xl font-bold mb-1 text-gray-100"
-                      >
-                        {stat.value}
-                      </p>
-                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                              {stat.label}
-                            </p>
-                          </motion.div>
-                  ))}
-                </div>
-              )}
 
-                    {/* For All-rounders */}
-              {player.role === 'All-rounder' && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {[
-                          { label: 'Matches', value: player.stats.matches },
-                    { label: 'Runs/Match', value: runsPerMatch },
-                    { label: 'Wickets/Match', value: (player.stats.matches > 0 ? (player.stats.wickets / player.stats.matches).toFixed(2) : 0) },
-                  ].map((stat, index) => (
-                          <motion.div
-                      key={index}
-                            className="p-5 rounded-xl border text-center relative overflow-hidden group"
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.3, delay: 1.0 + index * 0.1 }}
-                            whileHover={{ scale: 1.05, y: -3 }}
-                      style={{
-                        background: `linear-gradient(135deg, ${secondaryColor.light}, ${primaryColor.light})`,
-                              borderColor: `${(secondaryColor.medium || primaryColor.medium)}40`,
-                      }}
-                    >
-                      <p 
-                              className="text-2xl font-bold mb-1 text-gray-100"
-                      >
-                        {stat.value}
-                      </p>
-                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                              {stat.label}
-                            </p>
-                          </motion.div>
-                  ))}
-                </div>
-              )}
-
-                    {/* For Batsmen and Wicket-keepers */}
-              {(player.role === 'Batsman' || player.role === 'Wicket-keeper') && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {[
-                          { label: 'Matches', value: player.stats.matches },
-                    { label: 'Boundaries/Match', value: boundariesPerMatch },
-                    { label: 'Runs/Match', value: runsPerMatch },
-                  ].map((stat, index) => (
-                          <motion.div
-                      key={index}
-                            className="p-5 rounded-xl border text-center relative overflow-hidden group"
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.3, delay: 1.0 + index * 0.1 }}
-                            whileHover={{ scale: 1.05, y: -3 }}
+                    {/* Overall Rating Card */}
+                    <motion.div
+                      className="mb-6 p-6 rounded-xl border relative overflow-hidden"
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.4, delay: 1.0 }}
+                      whileHover={{ scale: 1.02, y: -2 }}
                       style={{
                         background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-                              borderColor: `${primaryColor.medium}40`,
+                        borderColor: `${primaryColor.medium}50`,
+                      }}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <p className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-1">
+                            Performance Rating
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {overallPerformance.summary}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <motion.div
+                            className="text-4xl font-bold mb-1"
+                            style={{ color: primaryColor.solid }}
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ duration: 0.5, delay: 1.1, type: "spring" }}
+                          >
+                            {overallPerformance.rating.toFixed(1)}
+                          </motion.div>
+                          <p className="text-xs text-gray-400">out of 100</p>
+                    </div>
+                </div>
+                      
+                      {/* Rating Bar */}
+                      <div className="w-full h-2 bg-gray-800/50 rounded-full overflow-hidden">
+                        <motion.div
+                          className="h-full rounded-full"
+                      style={{
+                            background: `linear-gradient(to right, ${primaryColor.solid}, ${secondaryColor.solid})`,
+                          }}
+                          initial={{ width: 0 }}
+                          animate={{ width: `${overallPerformance.rating}%` }}
+                          transition={{ duration: 1, delay: 1.2, ease: "easeOut" }}
+                        />
+                    </div>
+                    </motion.div>
+
+                    {/* Performance Breakdown */}
+                    {overallPerformance.breakdown.length > 0 && (
+                      <div>
+                        <p className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">
+                          Performance Breakdown
+                        </p>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                          {overallPerformance.breakdown
+                            .filter(item => item.weight > 0) // Only show metrics with weight
+                            .map((item, index) => (
+                            <motion.div
+                      key={index}
+                              className="p-4 rounded-lg border text-center relative overflow-hidden group"
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ duration: 0.3, delay: 1.2 + index * 0.05 }}
+                              whileHover={{ scale: 1.05, y: -2 }}
+                      style={{
+                        background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+                                borderColor: `${primaryColor.medium}40`,
                       }}
                     >
                       <p 
-                              className="text-2xl font-bold mb-1 text-gray-100"
-                      >
-                        {stat.value}
-                      </p>
-                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
-                              {stat.label}
-                            </p>
-                          </motion.div>
+                                className="text-xl font-bold mb-1 text-gray-100"
+                              >
+                                {item.value}
+                              </p>
+                              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">
+                                {item.label}
+                              </p>
+                              <div className="w-full h-1 bg-gray-800/50 rounded-full overflow-hidden mt-2">
+                                <motion.div
+                                  className="h-full rounded-full"
+                                  style={{
+                                    background: primaryColor.solid,
+                                  }}
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${(item.weight / 30) * 100}%` }}
+                                  transition={{ duration: 0.6, delay: 1.3 + index * 0.05 }}
+                                />
+                    </div>
+                              <p className="text-[10px] text-gray-500 mt-1">
+                                {item.weight.toFixed(1)} pts
+                              </p>
+                            </motion.div>
                   ))}
                 </div>
+                      </div>
                     )}
                   </motion.div>
                 </motion.div>
