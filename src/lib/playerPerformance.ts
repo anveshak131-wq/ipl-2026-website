@@ -84,21 +84,28 @@ export function calculateBatterPerformance(player: Player): OverallPerformance {
   const milestonesScore = Math.min(25, (weightedMilestonesPerMatch / 2) * 25);
   
   // Separate scores for 50s and 100s to show individual contribution
-  // 50s: 0-1 per match = 0-12 points (consistency)
+  // Based on Virat Kohli's stats: 50 fifties in 237 matches = 0.211 per match
+  // Scale: 0-0.25 per match = 0-12 points (Kohli's 0.211 = ~10.1 points)
   const fiftiesPerMatch = matches > 0 ? fifties / matches : 0;
-  const fiftiesScore = Math.min(12, (fiftiesPerMatch / 1) * 12);
+  const fiftiesScore = Math.min(12, (fiftiesPerMatch / 0.25) * 12);
   
-  // 100s: 0-0.5 per match = 0-13 points (big scores, weighted more)
+  // Based on Virat Kohli's stats: 7 hundreds in 237 matches = 0.0295 per match
+  // Scale: 0-0.05 per match = 0-13 points (Kohli's 0.0295 = ~7.7 points)
   const hundredsPerMatch = matches > 0 ? hundreds / matches : 0;
-  const hundredsScore = Math.min(13, (hundredsPerMatch / 0.5) * 13);
+  const hundredsScore = Math.min(13, (hundredsPerMatch / 0.05) * 13);
   
   // Runs per match: 0-50 = 0-10 points
+  // Virat Kohli: 7263 runs / 237 matches = 30.65 runs/match (baseline)
   const rpmScore = Math.min(10, (runsPerMatch / 50) * 10);
+  
+  // Total Runs: Based on Virat Kohli's 7263 runs as reference
+  // Scale: 0-8000 runs = 0-10 points (Kohli's 7263 = ~9.1 points)
+  const totalRunsScore = Math.min(10, (runs / 8000) * 10);
   
   // Highest Score Bonus: 0-200 = 0-5 points
   const highestScore = Math.min(5, (highest / 200) * 5);
   
-  const totalRating = avgScore + srScore + boundaryScore + milestonesScore + rpmScore + highestScore;
+  const totalRating = avgScore + srScore + boundaryScore + milestonesScore + rpmScore + totalRunsScore + highestScore;
   
   // Generate summary based on rating
   let summary = 'Emerging Talent';
@@ -113,6 +120,7 @@ export function calculateBatterPerformance(player: Player): OverallPerformance {
   return {
     rating: Math.min(Math.round(totalRating * 10) / 10, 100), // Cap at 100
     breakdown: [
+      { label: 'Total Runs', value: runs > 0 ? runs.toLocaleString() : '-', weight: totalRunsScore },
       { label: 'Batting Avg', value: battingAvg > 0 ? battingAvg.toFixed(2) : '-', weight: avgScore },
       { label: 'Strike Rate', value: strikeRate > 0 ? strikeRate.toFixed(1) : '-', weight: srScore },
       { label: '50s', value: fifties > 0 ? `${fifties} fifties` : '-', weight: fiftiesScore },
