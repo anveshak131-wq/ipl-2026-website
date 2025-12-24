@@ -206,6 +206,35 @@ export default function AdminPlayers() {
     checkAuth();
   }, [router]);
 
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      
+      // Check if click is outside filter dropdowns
+      const filterDropdowns = document.querySelectorAll('[data-filter-dropdown]');
+      let clickedInside = false;
+      
+      filterDropdowns.forEach((dropdown) => {
+        if (dropdown.contains(target)) {
+          clickedInside = true;
+        }
+      });
+      
+      if (!clickedInside) {
+        setIsDropdownOpen(false);
+        setShowAdvancedFilters(false);
+      }
+    };
+
+    // Add event listener
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   // Auto-calculate age when date of birth is entered or changed
   useEffect(() => {
     if (formData.dateOfBirth && formData.dateOfBirth.trim() !== '') {
@@ -1396,12 +1425,9 @@ export default function AdminPlayers() {
                 </button>
 
                   {/* Enhanced Dropdown Menu */}
+                {isDropdownOpen && (
                 <div 
-                    className={`absolute left-0 right-0 top-full mt-2 bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden transition-all duration-300 ease-out origin-top z-[9999] ${
-                    isDropdownOpen 
-                      ? 'opacity-100 scale-y-100 max-h-[500px]' 
-                      : 'opacity-0 scale-y-0 max-h-0 pointer-events-none'
-                  }`}
+                    className="absolute left-0 right-0 top-full mt-2 bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden z-[9999]"
                 >
                     <div className="py-2 max-h-[480px] overflow-y-auto scrollbar-thin scrollbar-thumb-blue-500/50 scrollbar-track-gray-700/50">
                     {/* All Teams Option */}
@@ -1477,6 +1503,7 @@ export default function AdminPlayers() {
                     })}
                   </div>
                 </div>
+                )}
               </div>
             </div>
 
