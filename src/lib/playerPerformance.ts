@@ -71,41 +71,42 @@ export function calculateBatterPerformance(player: Player): OverallPerformance {
   
   // Normalize and weight components (out of 100)
   // Batting Average: 0-50 = 0-25 points, 50+ = 25 points
-  const avgScore = Math.min(25, (battingAvg / 50) * 25);
+  const avgScore = Math.max(0, Math.min(25, (battingAvg / 50) * 25));
   
   // Strike Rate: 100-150 = 0-20 points, 150+ = 20 points
-  const srScore = Math.min(20, ((strikeRate - 100) / 50) * 20);
+  // Ensure no negative values if strike rate is below 100
+  const srScore = Math.max(0, Math.min(20, ((strikeRate - 100) / 50) * 20));
   
   // Boundary Percentage: 0-50% = 0-15 points
-  const boundaryScore = Math.min(15, (boundaryPercentage / 50) * 15);
+  const boundaryScore = Math.max(0, Math.min(15, (boundaryPercentage / 50) * 15));
   
   // Milestones (50s and 100s): Increased weight - 0-2 per match = 0-25 points
   // This gives significant importance to consistency and big scores
-  const milestonesScore = Math.min(25, (weightedMilestonesPerMatch / 2) * 25);
+  const milestonesScore = Math.max(0, Math.min(25, (weightedMilestonesPerMatch / 2) * 25));
   
   // Separate scores for 50s and 100s to show individual contribution
   // Based on Virat Kohli's stats: 50 fifties in 237 matches = 0.211 per match
   // Scale: 0-0.25 per match = 0-12 points (Kohli's 0.211 = ~10.1 points)
   const fiftiesPerMatch = matches > 0 ? fifties / matches : 0;
-  const fiftiesScore = Math.min(12, (fiftiesPerMatch / 0.25) * 12);
+  const fiftiesScore = Math.max(0, Math.min(12, (fiftiesPerMatch / 0.25) * 12));
   
   // Based on Virat Kohli's stats: 7 hundreds in 237 matches = 0.0295 per match
   // Scale: 0-0.05 per match = 0-13 points (Kohli's 0.0295 = ~7.7 points)
   const hundredsPerMatch = matches > 0 ? hundreds / matches : 0;
-  const hundredsScore = Math.min(13, (hundredsPerMatch / 0.05) * 13);
+  const hundredsScore = Math.max(0, Math.min(13, (hundredsPerMatch / 0.05) * 13));
   
   // Runs per match: 0-50 = 0-10 points
   // Virat Kohli: 7263 runs / 237 matches = 30.65 runs/match (baseline)
-  const rpmScore = Math.min(10, (runsPerMatch / 50) * 10);
+  const rpmScore = Math.max(0, Math.min(10, (runsPerMatch / 50) * 10));
   
   // Total Runs: Based on Virat Kohli's 7263 runs as reference
   // Scale: 0-8000 runs = 0-10 points (Kohli's 7263 = ~9.1 points)
-  const totalRunsScore = Math.min(10, (runs / 8000) * 10);
+  const totalRunsScore = Math.max(0, Math.min(10, (runs / 8000) * 10));
   
   // Highest Score Bonus: 0-200 = 0-5 points
-  const highestScore = Math.min(5, (highest / 200) * 5);
+  const highestScore = Math.max(0, Math.min(5, (highest / 200) * 5));
   
-  const totalRating = avgScore + srScore + boundaryScore + milestonesScore + rpmScore + totalRunsScore + highestScore;
+  const totalRating = Math.max(0, avgScore + srScore + boundaryScore + milestonesScore + rpmScore + totalRunsScore + highestScore);
   
   // Generate summary based on rating
   let summary = 'Emerging Talent';
@@ -199,9 +200,9 @@ export function calculateBowlerPerformance(player: Player): OverallPerformance {
     : bowlingSR > 0 && bowlingSR <= 15 ? 25 : 0;
   
   // Wickets per match: 1-2 = 20 points, >2 = 20 points
-  const wpmScore = Math.min(20, (wicketsPerMatch / 2) * 20);
+  const wpmScore = Math.max(0, Math.min(20, (wicketsPerMatch / 2) * 20));
   
-  const totalRating = avgScore + economyScore + srScore + wpmScore;
+  const totalRating = Math.max(0, avgScore + economyScore + srScore + wpmScore);
   
   // Generate summary based on rating
   let summary = 'Emerging Talent';
@@ -293,8 +294,8 @@ export function calculateAllRounderPerformance(player: Player): OverallPerforman
   
   // Normalize and weight components (out of 100)
   // Batting contribution (40 points)
-  const battingAvgScore = Math.min(20, (battingAvg / 50) * 20);
-  const battingSRScore = Math.min(20, ((battingSR - 100) / 50) * 20);
+  const battingAvgScore = Math.max(0, Math.min(20, (battingAvg / 50) * 20));
+  const battingSRScore = Math.max(0, Math.min(20, ((battingSR - 100) / 50) * 20));
   
   // Bowling contribution (40 points)
   const bowlingAvgScore = bowlingAvg > 0 && bowlingAvg <= 25
@@ -327,7 +328,7 @@ export function calculateAllRounderPerformance(player: Player): OverallPerforman
   const balanceDiff = Math.abs((battingAvgScore + battingSRScore) - (bowlingAvgScore + economyScore));
   const balanceBonus = Math.max(0, 10 - (balanceDiff / 10)); // Max 10 points for perfect balance
   
-  const totalRating = battingContribution + bowlingContribution + indexScore + balanceBonus;
+  const totalRating = Math.max(0, battingContribution + bowlingContribution + indexScore + balanceBonus);
   
   // Generate summary based on rating and type
   let summary = 'Emerging Talent';
