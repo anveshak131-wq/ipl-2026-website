@@ -1551,7 +1551,6 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
             >
               <motion.p 
                 className="text-2xl font-bold mb-1 text-white"
-                style={{ color: primaryColor.solid }}
                 initial={{ scale: 0 }}
                 whileInView={{ scale: 1 }}
                 viewport={{ once: true }}
@@ -1564,7 +1563,7 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
               >
                 {stats.matches || 0}
               </motion.p>
-              <p className="text-xs font-medium text-gray-300 uppercase tracking-wide">
+              <p className="text-xs font-medium text-gray-200 uppercase tracking-wide">
             Matches
           </p>
             </motion.div>
@@ -1591,7 +1590,6 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
             >
               <motion.p 
                 className="text-2xl font-bold mb-1 text-white"
-                style={{ color: secondaryColor.solid || primaryColor.solid }}
                 initial={{ scale: 0 }}
                 whileInView={{ scale: 1 }}
                 viewport={{ once: true }}
@@ -1604,7 +1602,7 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
               >
                 {stats.runs || 0}
               </motion.p>
-              <p className="text-xs font-medium text-gray-300 uppercase tracking-wide">
+              <p className="text-xs font-medium text-gray-200 uppercase tracking-wide">
             Runs
           </p>
             </motion.div>
@@ -1631,7 +1629,6 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
             >
               <motion.p 
                 className="text-2xl font-bold mb-1 text-white"
-                style={{ color: primaryColor.solid }}
                 initial={{ scale: 0 }}
                 whileInView={{ scale: 1 }}
                 viewport={{ once: true }}
@@ -1644,7 +1641,7 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
               >
                 {stats.wickets || 0}
               </motion.p>
-              <p className="text-xs font-medium text-gray-300 uppercase tracking-wide">
+              <p className="text-xs font-medium text-gray-200 uppercase tracking-wide">
             Wickets
           </p>
             </motion.div>
