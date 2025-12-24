@@ -1181,6 +1181,18 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
       keyPlayers.allRoundXFactorIds?.includes(player.id)
     );
 
+  // Determine border color based on role
+  const getBorderColor = () => {
+    if (isKeyPlayer) return primaryColor.solid;
+    if (player.role === 'Batsman') return '#F59E0B'; // Amber
+    if (player.role === 'Bowler') return '#3B82F6'; // Blue
+    if (player.role === 'All-rounder') return '#A855F7'; // Purple
+    if (player.role === 'Wicket-keeper') return '#EC4899'; // Pink
+    return primaryColor.solid;
+  };
+
+  const borderColor = getBorderColor();
+
   return (
     <motion.div
       onClick={onClick}
@@ -1189,12 +1201,13 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.5, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
       whileHover={{ y: -8, scale: 1.02 }}
-      className="group relative overflow-hidden rounded-2xl cursor-pointer transition-all duration-300"
+      className="group relative overflow-hidden rounded-2xl cursor-pointer transition-all duration-300 border-2"
       style={{
         background: `linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95))`,
+        borderColor: borderColor,
         boxShadow: isKeyPlayer
-          ? `0 8px 32px ${primaryColor.glow}40, 0 0 0 1px ${primaryColor.solid}40`
-          : `0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05)`,
+          ? `0 8px 32px ${primaryColor.glow}40, 0 0 0 2px ${borderColor}60`
+          : `0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 2px ${borderColor}50`,
       }}
     >
       {/* Animated Gradient Background */}
@@ -1240,7 +1253,7 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
       {/* Player Info Section */}
       <div className="relative z-10 p-6">
         <div className="flex items-start gap-4 mb-4 pr-16">
-          {player.nationality && (
+        {player.nationality && (
             <motion.div
               className="relative"
               whileHover={{ scale: 1.15, rotate: 5 }}
@@ -1251,16 +1264,16 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
           )}
           <div className="flex-1 min-w-0">
             <h3 
-              className="text-xl font-bold mb-1 truncate text-gray-100 group-hover:text-white transition-colors" 
+              className="text-xl font-bold mb-1 truncate text-white group-hover:text-white transition-colors" 
             >
-              {player.name}
-            </h3>
+          {player.name}
+        </h3>
             <p 
-              className="text-sm font-semibold text-gray-400 mb-2"
-              style={{ color: primaryColor.solid }}
+              className="text-sm font-semibold mb-2"
+              style={{ color: borderColor }}
             >
-              {player.role}
-            </p>
+        {player.role}
+      </p>
             {player.allrounderType && (
               <span 
                 className="inline-block px-2 py-1 rounded-md text-xs font-medium"
@@ -1281,13 +1294,14 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
             <motion.span 
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
               style={{
-                background: `${primaryColor.solid}20`,
-                color: primaryColor.solid,
+                background: `${primaryColor.solid}25`,
+                color: '#FFD700',
+                border: `1px solid ${primaryColor.solid}50`,
               }}
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.2 }}
             >
-              <StarIcon className="w-3.5 h-3.5" color={primaryColor.solid} filled />
+              <StarIcon className="w-3.5 h-3.5" color="#FFD700" filled />
               Captain
             </motion.span>
           )}
@@ -1295,13 +1309,14 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
             <motion.span 
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
               style={{
-                background: 'rgba(59, 130, 246, 0.2)',
-                color: '#60A5FA',
+                background: 'rgba(59, 130, 246, 0.25)',
+                color: '#93C5FD',
+                border: '1px solid rgba(59, 130, 246, 0.5)',
               }}
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.2 }}
             >
-              <GlobeIcon className="w-3.5 h-3.5" color="#60A5FA" />
+              <GlobeIcon className="w-3.5 h-3.5" color="#93C5FD" />
               Foreign
             </motion.span>
           )}
@@ -1309,13 +1324,14 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
             <motion.span 
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
               style={{
-                background: 'rgba(245, 158, 11, 0.2)',
-                color: '#FBBF24',
+                background: 'rgba(245, 158, 11, 0.25)',
+                color: '#FCD34D',
+                border: '1px solid rgba(245, 158, 11, 0.5)',
               }}
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.2 }}
             >
-              <StarIcon className="w-3.5 h-3.5" color="#FBBF24" filled />
+              <StarIcon className="w-3.5 h-3.5" color="#FCD34D" filled />
               Key Player
             </motion.span>
           )}
@@ -1329,8 +1345,9 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
                 key={tag}
                 className="px-2.5 py-1 rounded-md text-xs font-medium"
                 style={{
-                  background: `${primaryColor.solid}15`,
-                  color: primaryColor.solid,
+                  background: `${borderColor}20`,
+                  color: borderColor,
+                  border: `1px solid ${borderColor}40`,
                 }}
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
@@ -1345,64 +1362,64 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
         )}
 
         {/* Stats Section */}
-        <div className="grid grid-cols-3 gap-3 pt-4 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+        <div className="grid grid-cols-3 gap-3 pt-4 border-t" style={{ borderColor: `${borderColor}30` }}>
           <motion.div 
             className="text-center"
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="p-3 rounded-lg" style={{ background: `${primaryColor.solid}10` }}>
-              <p className="text-2xl font-bold mb-1 text-gray-100" style={{ color: primaryColor.solid }}>
+            <div className="p-3 rounded-lg" style={{ background: `${primaryColor.solid}15` }}>
+              <p className="text-2xl font-bold mb-1 text-white" style={{ color: primaryColor.solid }}>
                 {stats.matches || 0}
               </p>
-              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">
-                Matches
-              </p>
-            </div>
+              <p className="text-xs font-medium text-gray-300 uppercase tracking-wide">
+            Matches
+          </p>
+        </div>
           </motion.div>
           <motion.div 
             className="text-center"
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="p-3 rounded-lg" style={{ background: `${secondaryColor.solid}10` }}>
-              <p className="text-2xl font-bold mb-1 text-gray-100" style={{ color: secondaryColor.solid || primaryColor.solid }}>
+            <div className="p-3 rounded-lg" style={{ background: `${secondaryColor.solid}15` }}>
+              <p className="text-2xl font-bold mb-1 text-white" style={{ color: secondaryColor.solid || primaryColor.solid }}>
                 {stats.runs || 0}
               </p>
-              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">
-                Runs
-              </p>
-            </div>
+              <p className="text-xs font-medium text-gray-300 uppercase tracking-wide">
+            Runs
+          </p>
+        </div>
           </motion.div>
           <motion.div 
             className="text-center"
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="p-3 rounded-lg" style={{ background: `${primaryColor.solid}10` }}>
-              <p className="text-2xl font-bold mb-1 text-gray-100" style={{ color: primaryColor.solid }}>
+            <div className="p-3 rounded-lg" style={{ background: `${primaryColor.solid}15` }}>
+              <p className="text-2xl font-bold mb-1 text-white" style={{ color: primaryColor.solid }}>
                 {stats.wickets || 0}
               </p>
-              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide">
-                Wickets
-              </p>
-            </div>
-          </motion.div>
+              <p className="text-xs font-medium text-gray-300 uppercase tracking-wide">
+            Wickets
+          </p>
         </div>
+          </motion.div>
+      </div>
 
         {/* Hover Arrow Indicator */}
-        <motion.div 
+      <motion.div 
           className="absolute bottom-4 right-4 w-8 h-8 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300"
           style={{
             background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
           }}
           whileHover={{ x: 3, scale: 1.1 }}
           transition={{ duration: 0.2 }}
-        >
-          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </motion.div>
+      >
+        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </motion.div>
       </div>
     </motion.div>
   );
