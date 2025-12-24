@@ -1181,13 +1181,13 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
       keyPlayers.allRoundXFactorIds?.includes(player.id)
     );
 
-  // Determine border color based on role
+  // Determine border color based on role (no pink/purple)
   const getBorderColor = () => {
     if (isKeyPlayer) return primaryColor.solid;
     if (player.role === 'Batsman') return '#F59E0B'; // Amber
     if (player.role === 'Bowler') return '#3B82F6'; // Blue
-    if (player.role === 'All-rounder') return '#A855F7'; // Purple
-    if (player.role === 'Wicket-keeper') return '#EC4899'; // Pink
+    if (player.role === 'All-rounder') return '#10B981'; // Emerald/Green
+    if (player.role === 'Wicket-keeper') return '#F97316'; // Orange
     return primaryColor.solid;
   };
 
@@ -1196,37 +1196,74 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
   return (
     <motion.div
       onClick={onClick}
-      initial={{ opacity: 0, y: 30, scale: 0.95 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      initial={{ opacity: 0, y: 40, scale: 0.9, rotateX: -5 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ y: -8, scale: 1.02 }}
-      className="group relative overflow-hidden rounded-2xl cursor-pointer transition-all duration-300 border-2"
+      transition={{ 
+        duration: 0.6, 
+        delay: index * 0.05, 
+        ease: [0.22, 1, 0.36, 1],
+        type: "spring",
+        stiffness: 100
+      }}
+      whileHover={{ 
+        y: -12, 
+        scale: 1.03,
+        rotateY: 2,
+        transition: { duration: 0.3, ease: "easeOut" }
+      }}
+      className="group relative overflow-hidden rounded-3xl cursor-pointer transition-all duration-300 border-2"
       style={{
         background: `linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95))`,
         borderColor: borderColor,
         boxShadow: isKeyPlayer
-          ? `0 8px 32px ${primaryColor.glow}40, 0 0 0 2px ${borderColor}60`
+          ? `0 8px 32px ${primaryColor.glow}40, 0 0 0 2px ${borderColor}60, inset 0 0 20px ${borderColor}20`
           : `0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 2px ${borderColor}50`,
       }}
     >
-      {/* Animated Gradient Background */}
+      {/* Animated Gradient Background with Pulse */}
       <motion.div 
-        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        className="absolute inset-0 opacity-0 group-hover:opacity-100"
         style={{
           background: `linear-gradient(135deg, ${primaryColor.solid}15, ${secondaryColor.solid}10, transparent)`,
+        }}
+        animate={{
+          opacity: [0, 0.3, 0]
+        }}
+        transition={{
+          duration: 3,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+      
+      {/* Animated Border Glow */}
+      <motion.div
+        className="absolute -inset-0.5 rounded-3xl opacity-0 group-hover:opacity-100 -z-10 blur-md"
+        style={{
+          background: `linear-gradient(135deg, ${borderColor}, ${borderColor}80, transparent)`,
+        }}
+        animate={{
+          scale: [1, 1.05, 1],
+          opacity: [0, 0.6, 0]
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          ease: "easeInOut"
         }}
       />
       
       {/* Top Accent Line for Key Players */}
       {isKeyPlayer && (
         <motion.div 
-          className="absolute top-0 left-0 right-0 h-1"
+          className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl"
           style={{
             background: `linear-gradient(to right, transparent, ${primaryColor.solid}, transparent)`,
           }}
           animate={{
-            opacity: [0.5, 1, 0.5]
+            opacity: [0.5, 1, 0.5],
+            scaleX: [0.8, 1, 0.8]
           }}
           transition={{
             duration: 2,
@@ -1236,189 +1273,419 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
         />
       )}
       
-      {/* Jersey Number Badge */}
+      {/* Jersey Number Badge with Enhanced Animation */}
       <motion.div
-        className="absolute top-4 right-4 w-14 h-14 rounded-xl flex items-center justify-center font-bold text-xl z-10"
+        className="absolute top-4 right-4 w-16 h-16 rounded-2xl flex items-center justify-center font-bold text-xl z-10"
         style={{
           background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
           color: '#FFFFFF',
           boxShadow: `0 4px 16px ${primaryColor.glow}50`,
         }}
-        whileHover={{ scale: 1.1, rotate: 5 }}
-        transition={{ duration: 0.2 }}
+        initial={{ scale: 0, rotate: -180 }}
+        whileInView={{ scale: 1, rotate: 0 }}
+        viewport={{ once: true }}
+        transition={{ 
+          duration: 0.5, 
+          delay: index * 0.05 + 0.2,
+          type: "spring",
+          stiffness: 200
+        }}
+        whileHover={{ 
+          scale: 1.15, 
+          rotate: 10,
+          boxShadow: `0 8px 24px ${primaryColor.glow}70`
+        }}
+      >
+        <motion.span
+          animate={{
+            y: [0, -3, 0]
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut"
+        }}
       >
         {player.jerseyNumber > 0 ? player.jerseyNumber : 'N/A'}
+        </motion.span>
       </motion.div>
 
       {/* Player Info Section */}
       <div className="relative z-10 p-6">
-        <div className="flex items-start gap-4 mb-4 pr-16">
+        <motion.div 
+          className="flex items-start gap-4 mb-4 pr-20"
+          initial={{ opacity: 0, x: -20 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: index * 0.05 + 0.3 }}
+        >
         {player.nationality && (
             <motion.div
               className="relative"
-              whileHover={{ scale: 1.15, rotate: 5 }}
-              transition={{ duration: 0.2 }}
+              initial={{ scale: 0, rotate: -180 }}
+              whileInView={{ scale: 1, rotate: 0 }}
+              viewport={{ once: true }}
+              transition={{ 
+                duration: 0.4, 
+                delay: index * 0.05 + 0.4,
+                type: "spring",
+                stiffness: 200
+              }}
+              whileHover={{ 
+                scale: 1.2, 
+                rotate: 15,
+                transition: { duration: 0.2 }
+              }}
             >
               <FlagImage nationality={player.nationality} size="md" />
             </motion.div>
           )}
           <div className="flex-1 min-w-0">
-            <h3 
-              className="text-xl font-bold mb-1 truncate text-white group-hover:text-white transition-colors" 
+            <motion.h3 
+              className="text-xl font-bold mb-1 truncate text-white group-hover:text-white transition-colors"
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: index * 0.05 + 0.35 }}
+              whileHover={{ scale: 1.05, x: 5 }}
             >
           {player.name}
-        </h3>
-            <p 
+            </motion.h3>
+            <motion.p 
               className="text-sm font-semibold mb-2"
               style={{ color: borderColor }}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: index * 0.05 + 0.4 }}
             >
         {player.role}
-      </p>
+            </motion.p>
             {player.allrounderType && (
-              <span 
-                className="inline-block px-2 py-1 rounded-md text-xs font-medium"
+              <motion.span 
+                className="inline-block px-3 py-1 rounded-full text-xs font-medium"
                 style={{
-                  background: `${primaryColor.solid}20`,
-                  color: primaryColor.solid,
+                  background: `${borderColor}25`,
+                  color: borderColor,
+                  border: `1px solid ${borderColor}40`,
                 }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.3, delay: index * 0.05 + 0.45 }}
+                whileHover={{ scale: 1.1 }}
               >
                 {player.allrounderType}
-              </span>
+              </motion.span>
             )}
           </div>
-        </div>
+        </motion.div>
 
-        {/* Badges Section */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          {player.isCaptain && (
+        {/* Badges Section with Stagger Animation */}
+        <motion.div 
+          className="flex flex-wrap gap-2 mb-4"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.4, delay: index * 0.05 + 0.5 }}
+        >
+        {player.isCaptain && (
             <motion.span 
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
               style={{
                 background: `${primaryColor.solid}25`,
                 color: '#FFD700',
                 border: `1px solid ${primaryColor.solid}50`,
               }}
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.2 }}
+              initial={{ opacity: 0, scale: 0.8, x: -10 }}
+              whileInView={{ opacity: 1, scale: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.3, delay: index * 0.05 + 0.55 }}
+              whileHover={{ 
+                scale: 1.1, 
+                y: -2,
+                boxShadow: `0 4px 12px ${primaryColor.glow}40`
+              }}
             >
-              <StarIcon className="w-3.5 h-3.5" color="#FFD700" filled />
-              Captain
+              <motion.div
+                animate={{ rotate: [0, 360] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+              >
+                <StarIcon className="w-3.5 h-3.5" color="#FFD700" filled />
+              </motion.div>
+            Captain
             </motion.span>
-          )}
-          {player.nationality !== 'India' && (
+        )}
+        {player.nationality !== 'India' && (
             <motion.span 
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
               style={{
                 background: 'rgba(59, 130, 246, 0.25)',
                 color: '#93C5FD',
                 border: '1px solid rgba(59, 130, 246, 0.5)',
               }}
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.2 }}
+              initial={{ opacity: 0, scale: 0.8, x: -10 }}
+              whileInView={{ opacity: 1, scale: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.3, delay: index * 0.05 + 0.6 }}
+              whileHover={{ 
+                scale: 1.1, 
+                y: -2,
+                boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)'
+              }}
             >
               <GlobeIcon className="w-3.5 h-3.5" color="#93C5FD" />
-              Foreign
+            Foreign
             </motion.span>
-          )}
-          {isKeyPlayer && (
+        )}
+        {isKeyPlayer && (
             <motion.span 
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
               style={{
                 background: 'rgba(245, 158, 11, 0.25)',
                 color: '#FCD34D',
                 border: '1px solid rgba(245, 158, 11, 0.5)',
               }}
-              whileHover={{ scale: 1.05 }}
-              transition={{ duration: 0.2 }}
+              initial={{ opacity: 0, scale: 0.8, x: -10 }}
+              whileInView={{ opacity: 1, scale: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.3, delay: index * 0.05 + 0.65 }}
+              whileHover={{ 
+                scale: 1.1, 
+                y: -2,
+                boxShadow: '0 4px 12px rgba(245, 158, 11, 0.4)'
+              }}
+              animate={{
+                boxShadow: [
+                  '0 0 0 rgba(245, 158, 11, 0.4)',
+                  '0 0 10px rgba(245, 158, 11, 0.6)',
+                  '0 0 0 rgba(245, 158, 11, 0.4)'
+                ]
+              }}
+              transition={{
+                boxShadow: {
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }
+              }}
             >
-              <StarIcon className="w-3.5 h-3.5" color="#FCD34D" filled />
-              Key Player
+              <motion.div
+                animate={{ rotate: [0, 360] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              >
+                <StarIcon className="w-3.5 h-3.5" color="#FCD34D" filled />
+              </motion.div>
+            Key Player
             </motion.span>
-          )}
-        </div>
+        )}
+        </motion.div>
 
-        {/* Role Tags */}
-        {tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
+        {/* Role Tags with Stagger Animation */}
+      {tags.length > 0 && (
+          <motion.div 
+            className="flex flex-wrap gap-2 mb-4"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4, delay: index * 0.05 + 0.7 }}
+          >
             {tags.slice(0, 3).map((tag: string, tagIndex) => (
               <motion.span
-                key={tag}
-                className="px-2.5 py-1 rounded-md text-xs font-medium"
+              key={tag}
+                className="px-3 py-1.5 rounded-full text-xs font-medium"
                 style={{
                   background: `${borderColor}20`,
                   color: borderColor,
                   border: `1px solid ${borderColor}40`,
                 }}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                whileInView={{ opacity: 1, scale: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.2, delay: tagIndex * 0.05 }}
-                whileHover={{ scale: 1.05 }}
-              >
-                {tag}
+                transition={{ 
+                  duration: 0.3, 
+                  delay: index * 0.05 + 0.75 + tagIndex * 0.1,
+                  type: "spring",
+                  stiffness: 200
+                }}
+                whileHover={{ 
+                  scale: 1.15, 
+                  y: -3,
+                  boxShadow: `0 4px 12px ${borderColor}40`
+                }}
+            >
+              {tag}
               </motion.span>
             ))}
-          </div>
+          </motion.div>
         )}
 
-        {/* Stats Section */}
-        <div className="grid grid-cols-3 gap-3 pt-4 border-t" style={{ borderColor: `${borderColor}30` }}>
+        {/* Stats Section with Enhanced Animations */}
+        <motion.div 
+          className="grid grid-cols-3 gap-3 pt-4 border-t"
+          style={{ borderColor: `${borderColor}30` }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: index * 0.05 + 0.8 }}
+        >
           <motion.div 
-            className="text-center"
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.2 }}
+            className="text-center group/stat"
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.3, delay: index * 0.05 + 0.85 }}
+            whileHover={{ 
+              scale: 1.1, 
+              y: -5,
+              transition: { duration: 0.2, type: "spring", stiffness: 300 }
+            }}
           >
-            <div className="p-3 rounded-lg" style={{ background: `${primaryColor.solid}15` }}>
-              <p className="text-2xl font-bold mb-1 text-white" style={{ color: primaryColor.solid }}>
+            <motion.div 
+              className="p-3 rounded-2xl"
+              style={{ background: `${primaryColor.solid}15` }}
+              whileHover={{
+                background: `${primaryColor.solid}25`,
+                boxShadow: `0 8px 20px ${primaryColor.glow}30`
+              }}
+            >
+              <motion.p 
+                className="text-2xl font-bold mb-1 text-white"
+                style={{ color: primaryColor.solid }}
+                initial={{ scale: 0 }}
+                whileInView={{ scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ 
+                  duration: 0.4, 
+                  delay: index * 0.05 + 0.9,
+                  type: "spring",
+                  stiffness: 200
+                }}
+              >
                 {stats.matches || 0}
-              </p>
+              </motion.p>
               <p className="text-xs font-medium text-gray-300 uppercase tracking-wide">
             Matches
           </p>
-        </div>
+            </motion.div>
           </motion.div>
           <motion.div 
-            className="text-center"
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.2 }}
+            className="text-center group/stat"
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.3, delay: index * 0.05 + 0.9 }}
+            whileHover={{ 
+              scale: 1.1, 
+              y: -5,
+              transition: { duration: 0.2, type: "spring", stiffness: 300 }
+            }}
           >
-            <div className="p-3 rounded-lg" style={{ background: `${secondaryColor.solid}15` }}>
-              <p className="text-2xl font-bold mb-1 text-white" style={{ color: secondaryColor.solid || primaryColor.solid }}>
+            <motion.div 
+              className="p-3 rounded-2xl"
+              style={{ background: `${secondaryColor.solid}15` }}
+              whileHover={{
+                background: `${secondaryColor.solid}25`,
+                boxShadow: `0 8px 20px ${secondaryColor.glow || primaryColor.glow}30`
+              }}
+            >
+              <motion.p 
+                className="text-2xl font-bold mb-1 text-white"
+                style={{ color: secondaryColor.solid || primaryColor.solid }}
+                initial={{ scale: 0 }}
+                whileInView={{ scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ 
+                  duration: 0.4, 
+                  delay: index * 0.05 + 0.95,
+                  type: "spring",
+                  stiffness: 200
+                }}
+              >
                 {stats.runs || 0}
-              </p>
+              </motion.p>
               <p className="text-xs font-medium text-gray-300 uppercase tracking-wide">
             Runs
           </p>
-        </div>
+            </motion.div>
           </motion.div>
           <motion.div 
-            className="text-center"
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.2 }}
+            className="text-center group/stat"
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.3, delay: index * 0.05 + 0.95 }}
+            whileHover={{ 
+              scale: 1.1, 
+              y: -5,
+              transition: { duration: 0.2, type: "spring", stiffness: 300 }
+            }}
           >
-            <div className="p-3 rounded-lg" style={{ background: `${primaryColor.solid}15` }}>
-              <p className="text-2xl font-bold mb-1 text-white" style={{ color: primaryColor.solid }}>
+            <motion.div 
+              className="p-3 rounded-2xl"
+              style={{ background: `${primaryColor.solid}15` }}
+              whileHover={{
+                background: `${primaryColor.solid}25`,
+                boxShadow: `0 8px 20px ${primaryColor.glow}30`
+              }}
+            >
+              <motion.p 
+                className="text-2xl font-bold mb-1 text-white"
+                style={{ color: primaryColor.solid }}
+                initial={{ scale: 0 }}
+                whileInView={{ scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ 
+                  duration: 0.4, 
+                  delay: index * 0.05 + 1.0,
+                  type: "spring",
+                  stiffness: 200
+                }}
+              >
                 {stats.wickets || 0}
-              </p>
+              </motion.p>
               <p className="text-xs font-medium text-gray-300 uppercase tracking-wide">
             Wickets
           </p>
-        </div>
+            </motion.div>
           </motion.div>
-      </div>
+        </motion.div>
 
-        {/* Hover Arrow Indicator */}
+        {/* Hover Arrow Indicator with Animation */}
       <motion.div 
-          className="absolute bottom-4 right-4 w-8 h-8 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300"
+          className="absolute bottom-4 right-4 w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100"
           style={{
             background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
+            boxShadow: `0 4px 16px ${primaryColor.glow}50`,
           }}
-          whileHover={{ x: 3, scale: 1.1 }}
-          transition={{ duration: 0.2 }}
-      >
-        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
+          initial={{ scale: 0, rotate: -180 }}
+          whileHover={{ 
+            x: 5, 
+            scale: 1.15,
+            boxShadow: `0 8px 24px ${primaryColor.glow}70`
+          }}
+          transition={{ 
+            duration: 0.3,
+            type: "spring",
+            stiffness: 200
+          }}
+        >
+          <motion.svg 
+            className="w-5 h-5 text-white" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+            animate={{
+              x: [0, 3, 0]
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+          </motion.svg>
       </motion.div>
       </div>
     </motion.div>
