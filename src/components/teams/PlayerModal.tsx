@@ -63,11 +63,14 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
 
   // Real-time player updates - refresh player data when updated
   usePlayerUpdates(async (playerId: string) => {
-    if (!currentPlayer || !playerId || currentPlayer.id !== playerId) return;
+    if (!currentPlayer) return;
+    
+    // If specific player ID provided, only update if it matches
+    if (playerId && currentPlayer.id !== playerId) return;
     
     try {
       const allPlayers = await api.getPlayers();
-      const updatedPlayer = allPlayers.find(p => p.id === playerId);
+      const updatedPlayer = allPlayers.find(p => p.id === currentPlayer.id);
       if (updatedPlayer) {
         setCurrentPlayer(updatedPlayer);
         console.log('Player modal: Updated player data for', updatedPlayer.name);
@@ -75,7 +78,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
     } catch (error) {
       console.error('Error refreshing player data in modal:', error);
     }
-  }, [currentPlayer]);
+  }, [currentPlayer?.id]);
 
   useEffect(() => {
     if (teamColors) {

@@ -570,6 +570,11 @@ export default function AdminPlayers() {
         
         const updatedPlayer = await response.json();
         console.log('Player updated successfully:', updatedPlayer);
+        
+        // Dispatch real-time update event
+        window.dispatchEvent(new CustomEvent('admin-data-updated', {
+          detail: { type: 'player-updated', playerId: editingPlayer.id }
+        }));
       } else {
         // Create new player
         const response = await fetch('/api/players', {
@@ -585,6 +590,13 @@ export default function AdminPlayers() {
           const errorData = await response.json().catch(() => ({ error: 'Failed to create player' }));
           throw new Error(errorData.error || 'Failed to create player');
         }
+        
+        const newPlayer = await response.json();
+        
+        // Dispatch real-time update event for new player
+        window.dispatchEvent(new CustomEvent('admin-data-updated', {
+          detail: { type: 'player-created', playerId: newPlayer.id }
+        }));
       }
 
       // Refresh players list
@@ -620,7 +632,8 @@ export default function AdminPlayers() {
         return;
       }
 
-      const response = await fetch(`/api/players?id=${deleteTarget.id}`, {
+      const deletedPlayerId = deleteTarget.id;
+      const response = await fetch(`/api/players?id=${deletedPlayerId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -630,6 +643,11 @@ export default function AdminPlayers() {
       if (!response.ok) {
         throw new Error('Failed to delete player');
       }
+
+      // Dispatch real-time update event
+      window.dispatchEvent(new CustomEvent('admin-data-updated', {
+        detail: { type: 'player-deleted', playerId: deletedPlayerId }
+      }));
 
       // Refresh players list
       await fetchData();

@@ -373,7 +373,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
     } catch (error) {
       console.error('Error refreshing team data after player update:', error);
     }
-  }, [teamData, league, selectedPlayer]);
+  }, [teamData?.id, league, selectedPlayer?.id]);
 
   // Fetch matches and compute season snapshot once team data is available
   useEffect(() => {
