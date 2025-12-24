@@ -159,14 +159,26 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
   useEffect(() => {
     const fetchTeamData = async () => {
       try {
+        // Handle different route formats: shortName (RCB, MI), numeric (1, 2), or team prefix (team1, team2)
         const numericId = teamId.replace('team', '');
+        const shortNameUpper = teamId.toUpperCase();
+        const shortNameLower = teamId.toLowerCase();
         
         // Fetch teams with league filter if provided
         const teamsUrl = league ? `/api/teams?league=${league}` : '/api/teams';
         const teamsResponse = await fetch(teamsUrl);
         if (teamsResponse.ok) {
           const allTeams = await teamsResponse.json();
-          const team = allTeams.find((t: Team) => t.id === numericId || t.id === teamId);
+          // Try to find team by shortName first (RCB, MI, etc.), then by ID
+          let team = allTeams.find((t: Team) => 
+            t.shortName?.toLowerCase() === shortNameLower || 
+            t.shortName?.toUpperCase() === shortNameUpper
+          );
+          
+          // Fallback to ID matching if shortName not found (for backward compatibility)
+          if (!team) {
+            team = allTeams.find((t: Team) => t.id === numericId || t.id === teamId);
+          }
           
           if (team) {
             // Fetch players using api helper for better error handling and ID normalization

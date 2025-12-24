@@ -145,7 +145,8 @@ export default function TeamsShowcase() {
               onMouseEnter={() => setHoveredTeam(team.id)}
               onMouseLeave={() => setHoveredTeam(null)}
               onClick={() => {
-                const teamRoute = team.id.startsWith('team') ? team.id : `team${team.id}`;
+                // Use team shortName for cleaner URLs (RCB, MI, CSK, etc.)
+                const teamRoute = team.shortName?.toLowerCase() || (team.id.startsWith('team') ? team.id : `team${team.id}`);
                 // Use league-specific route for WPL teams
                 const basePath = team.league === 'wpl' ? '/wpl/teams' : '/teams';
                 router.push(`${basePath}/${teamRoute}`);

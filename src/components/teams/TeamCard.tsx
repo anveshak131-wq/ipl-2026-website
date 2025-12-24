@@ -22,8 +22,8 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
   const isRCBStaticExport = animatedLogo.endsWith('rcb_logo_premium.svg');
 
   const handleViewFullSquad = () => {
-    // Ensure team ID has 'team' prefix for the route
-    const teamRoute = team.id.startsWith('team') ? team.id : `team${team.id}`;
+    // Use team shortName for cleaner URLs (RCB, MI, CSK, etc.)
+    const teamRoute = team.shortName?.toLowerCase() || (team.id.startsWith('team') ? team.id : `team${team.id}`);
     // Use league-specific route for WPL teams
     const basePath = team.league === 'wpl' ? '/wpl/teams' : '/teams';
     router.push(`${basePath}/${teamRoute}`);
