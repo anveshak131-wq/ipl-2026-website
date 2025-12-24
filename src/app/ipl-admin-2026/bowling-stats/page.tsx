@@ -27,17 +27,17 @@ const BowlingStatsPage = () => {
     age: '',
     jerseyNumber: '',
     stats: {
-      matches: 0,
-      bowlingInnings: 0,
-      balls: 0,
-      maidens: 0,
-      wickets: 0,
-      runsConceded: 0,
+      matches: '',
+      bowlingInnings: '',
+      balls: '',
+      maidens: '',
+      wickets: '',
+      runsConceded: '',
       bowlingAverage: '',
       bowlingStrikeRate: '',
       economy: '',
       bestBowling: '',
-      fiveWickets: 0
+      fiveWickets: ''
     }
   });
 
@@ -107,17 +107,17 @@ const BowlingStatsPage = () => {
       age: player.age || '',
       jerseyNumber: player.jerseyNumber || '',
       stats: {
-        matches: player.stats?.matches || 0,
-        bowlingInnings: player.stats?.bowlingInnings || 0,
-        balls: player.stats?.balls || 0,
-        maidens: player.stats?.maidens || 0,
-        wickets: player.stats?.wickets || 0,
-        runsConceded: player.stats?.runsConceded || 0,
+        matches: player.stats?.matches > 0 ? player.stats.matches : '',
+        bowlingInnings: player.stats?.bowlingInnings > 0 ? player.stats.bowlingInnings : '',
+        balls: player.stats?.balls > 0 ? player.stats.balls : '',
+        maidens: player.stats?.maidens > 0 ? player.stats.maidens : '',
+        wickets: player.stats?.wickets > 0 ? player.stats.wickets : '',
+        runsConceded: player.stats?.runsConceded > 0 ? player.stats.runsConceded : '',
         bowlingAverage: player.stats?.bowlingAverage || '',
         bowlingStrikeRate: player.stats?.bowlingStrikeRate || '',
         economy: player.stats?.economy || '',
         bestBowling: player.stats?.bestBowling || '',
-        fiveWickets: player.stats?.fiveWickets || 0
+        fiveWickets: player.stats?.fiveWickets > 0 ? player.stats.fiveWickets : ''
       }
     });
     setShowEditModal(true);
@@ -1040,7 +1040,7 @@ const BowlingStatsPage = () => {
                 <input
                   type="number"
                   value={editForm.stats.matches}
-                  onChange={(e) => handleFormChange('stats.matches', parseInt(e.target.value) || 0)}
+                  onChange={(e) => handleFormChange('stats.matches', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                         className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
                 />
               </div>
@@ -1052,7 +1052,7 @@ const BowlingStatsPage = () => {
                 <input
                   type="number"
                   value={editForm.stats.bowlingInnings}
-                  onChange={(e) => handleFormChange('stats.bowlingInnings', parseInt(e.target.value) || 0)}
+                  onChange={(e) => handleFormChange('stats.bowlingInnings', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                         className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
                 />
               </div>
@@ -1064,7 +1064,7 @@ const BowlingStatsPage = () => {
                 <input
                   type="number"
                   value={editForm.stats.balls}
-                  onChange={(e) => handleFormChange('stats.balls', parseInt(e.target.value) || 0)}
+                  onChange={(e) => handleFormChange('stats.balls', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                         className="w-full px-4 py-2.5 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
                 />
               </div>
@@ -1086,7 +1086,7 @@ const BowlingStatsPage = () => {
                 <input
                   type="number"
                   value={editForm.stats.wickets}
-                  onChange={(e) => handleFormChange('stats.wickets', parseInt(e.target.value) || 0)}
+                  onChange={(e) => handleFormChange('stats.wickets', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                         className="w-full px-4 py-2.5 bg-gray-700/70 border border-green-500/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
                       />
                     </div>
@@ -1098,7 +1098,7 @@ const BowlingStatsPage = () => {
                       <input
                         type="number"
                         value={editForm.stats.maidens}
-                        onChange={(e) => handleFormChange('stats.maidens', parseInt(e.target.value) || 0)}
+                        onChange={(e) => handleFormChange('stats.maidens', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                         className="w-full px-4 py-2.5 bg-gray-700/70 border border-cyan-500/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all"
                 />
               </div>
@@ -1110,7 +1110,7 @@ const BowlingStatsPage = () => {
                 <input
                   type="number"
                   value={editForm.stats.runsConceded}
-                  onChange={(e) => handleFormChange('stats.runsConceded', parseInt(e.target.value) || 0)}
+                  onChange={(e) => handleFormChange('stats.runsConceded', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                         className="w-full px-4 py-2.5 bg-gray-700/70 border border-teal-500/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-all"
                 />
                     </div>
@@ -1184,7 +1184,7 @@ const BowlingStatsPage = () => {
                 <input
                   type="number"
                   value={editForm.stats.fiveWickets}
-                  onChange={(e) => handleFormChange('stats.fiveWickets', parseInt(e.target.value) || 0)}
+                  onChange={(e) => handleFormChange('stats.fiveWickets', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                         className="w-full px-4 py-2.5 bg-gray-700/70 border border-pink-500/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-pink-500 transition-all"
                 />
                     </div>
