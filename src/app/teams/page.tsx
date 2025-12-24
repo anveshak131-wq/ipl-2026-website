@@ -833,8 +833,6 @@ function TeamsPageContent() {
                                         }}
                                         style={{ perspective: 1000 }}
                                         className="relative group"
-                                        onMouseEnter={() => setHoveredTeam(team.id)}
-                                        onMouseLeave={() => setHoveredTeam(null)}
                                     >
                                         {/* Enhanced Glow effect on hover */}
                                         <div 
@@ -850,17 +848,6 @@ function TeamsPageContent() {
                                             isFavorite={favorites.includes(team.id)}
                                             onToggleFavorite={() => toggleFavorite(team.id)}
                                         />
-                                        
-                                        {hoveredTeam === team.id && (
-                                            <motion.div
-                                                initial={{ opacity: 0, y: 10 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                exit={{ opacity: 0, y: 10 }}
-                                                transition={{ duration: 0.3 }}
-                                            >
-                                            <TeamQuickStatsPreview team={team} matches={matches} />
-                                            </motion.div>
-                                        )}
                                     </motion.div>
                                 ))}
                             </AnimatePresence>
