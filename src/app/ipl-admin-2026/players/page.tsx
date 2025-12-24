@@ -1583,9 +1583,9 @@ export default function AdminPlayers() {
                       </svg>
                     );
                   } else if (player.role === 'Bowler') {
-                    // Bowler: Indigo/Blue gradient (different from Bowling All-rounder's cyan)
-                    roleColors = 'from-indigo-600/30 via-blue-500/25 to-purple-500/30 border-indigo-300/50';
-                    roleBadgeColors = 'bg-gradient-to-r from-indigo-500/40 to-blue-500/40 text-indigo-100 border-2 border-indigo-300/60 shadow-xl shadow-indigo-500/30';
+                    // Bowler: Deep Blue/Navy gradient (different from Bowling All-rounder's cyan)
+                    roleColors = 'from-slate-700/30 via-blue-600/25 to-slate-800/30 border-slate-400/50';
+                    roleBadgeColors = 'bg-gradient-to-r from-slate-600/40 to-blue-600/40 text-slate-100 border-2 border-slate-400/60 shadow-xl shadow-slate-500/30';
                     roleLabel = 'Bowler';
                     roleIcon = (
                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -1621,7 +1621,7 @@ export default function AdminPlayers() {
                         player.role === 'Batsman'
                           ? 'bg-gradient-to-br from-amber-500/0 to-yellow-500/10 opacity-0 group-hover:opacity-100' :
                         player.role === 'Bowler'
-                          ? 'bg-gradient-to-br from-indigo-500/0 to-blue-500/10 opacity-0 group-hover:opacity-100' :
+                          ? 'bg-gradient-to-br from-slate-500/0 to-blue-600/10 opacity-0 group-hover:opacity-100' :
                         player.role === 'Wicket-keeper'
                           ? 'bg-gradient-to-br from-rose-500/0 to-pink-500/10 opacity-0 group-hover:opacity-100' :
                         'bg-gradient-to-br from-white/0 to-white/5 opacity-0 group-hover:opacity-100'
@@ -1639,7 +1639,7 @@ export default function AdminPlayers() {
                         <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 shadow-lg shadow-amber-500/50"></div>
                       )}
                       {player.role === 'Bowler' && (
-                        <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-indigo-500 via-blue-400 to-indigo-500 shadow-lg shadow-indigo-500/50"></div>
+                        <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-slate-600 via-blue-500 to-slate-600 shadow-lg shadow-slate-500/50"></div>
                       )}
                       {player.role === 'Wicket-keeper' && (
                         <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-rose-500 via-pink-400 to-rose-500 shadow-lg shadow-rose-500/50"></div>
@@ -1960,7 +1960,7 @@ export default function AdminPlayers() {
                             } else {
                               const roleColorMap = {
                                 'Batsman': 'bg-gradient-to-r from-amber-500/40 to-yellow-500/40 text-amber-100 border-2 border-amber-300/60 shadow-xl shadow-amber-500/30',
-                                'Bowler': 'bg-gradient-to-r from-indigo-500/40 to-blue-500/40 text-indigo-100 border-2 border-indigo-300/60 shadow-xl shadow-indigo-500/30',
+                                'Bowler': 'bg-gradient-to-r from-slate-600/40 to-blue-600/40 text-slate-100 border-2 border-slate-400/60 shadow-xl shadow-slate-500/30',
                                 'Wicket-keeper': 'bg-gradient-to-r from-rose-500/40 to-pink-500/40 text-rose-100 border-2 border-rose-300/60 shadow-xl shadow-rose-500/30'
                               };
                               roleBadgeColors = roleColorMap[player.role as keyof typeof roleColorMap] || 'bg-gray-500/20 text-gray-400 border-gray-500/30';
