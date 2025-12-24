@@ -313,6 +313,38 @@ const BattingStatsPage = () => {
     });
 
     filtered.sort((a, b) => {
+      // First, sort by role/type priority
+      const getRolePriority = (player: any) => {
+        if (player.role === 'Batsman') return 1;
+        if (player.role === 'Wicket-keeper') return 2;
+        if (player.role === 'All-rounder' && player.allrounderType === 'Batting All-rounder') return 3;
+        if (player.role === 'All-rounder' && player.allrounderType === 'Bowling All-rounder') return 4;
+        if (player.role === 'All-rounder') return 5; // Generic all-rounder
+        if (player.role === 'Bowler') return 6;
+        return 99; // Unknown role
+      };
+
+      const aRolePriority = getRolePriority(a);
+      const bRolePriority = getRolePriority(b);
+      
+      if (aRolePriority !== bRolePriority) {
+        return aRolePriority - bRolePriority;
+      }
+
+      // If same role, sort by date of birth (if available)
+      if (a.dateOfBirth && b.dateOfBirth) {
+        const aDate = new Date(a.dateOfBirth).getTime();
+        const bDate = new Date(b.dateOfBirth).getTime();
+        if (aDate !== bDate) {
+          return aDate - bDate; // Older players first (earlier date)
+        }
+      } else if (a.dateOfBirth && !b.dateOfBirth) {
+        return -1; // a has DOB, b doesn't - a comes first
+      } else if (!a.dateOfBirth && b.dateOfBirth) {
+        return 1; // b has DOB, a doesn't - b comes first
+      }
+
+      // If same role and no DOB or same DOB, sort by the selected field
       let aVal, bVal;
       
       switch (sortField) {
