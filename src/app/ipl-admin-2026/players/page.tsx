@@ -543,10 +543,17 @@ export default function AdminPlayers() {
           bestBowling: formData.stats.bestBowling || '-',
       };
 
+      // Ensure allrounderType is properly set for All-rounders
+      const allrounderTypeValue = formData.role === 'All-rounder' && formData.allrounderType && formData.allrounderType.trim() !== '' 
+        ? formData.allrounderType 
+        : undefined;
+      
+      console.log('Saving player - Role:', formData.role, 'All-rounder Type:', allrounderTypeValue, 'Form allrounderType:', formData.allrounderType);
+
       const playerData = {
         name: formData.name,
         role: formData.role,
-        allrounderType: formData.role === 'All-rounder' && formData.allrounderType ? formData.allrounderType : undefined,
+        allrounderType: allrounderTypeValue,
         teamId: formData.teamId,
         league: formData.league,
         dateOfBirth: dateOfBirthISO || undefined,
@@ -2204,11 +2211,12 @@ export default function AdminPlayers() {
                           <CustomSelect
                           value={formData.role}
                             onChange={(newRole) => {
+                            console.log('Role changed to:', newRole, 'Current allrounderType:', formData.allrounderType);
                             setFormData({
                               ...formData, 
                                 role: newRole as any,
-                              // Reset allrounderType if role is not All-rounder
-                              allrounderType: newRole === 'All-rounder' ? formData.allrounderType : ''
+                              // Reset allrounderType if role is not All-rounder, otherwise keep it
+                              allrounderType: newRole === 'All-rounder' ? (formData.allrounderType || '') : ''
                             });
                           }}
                             options={[
@@ -2232,8 +2240,11 @@ export default function AdminPlayers() {
                               <span className="text-red-400">*</span>
                           </label>
                             <CustomSelect
-                            value={formData.allrounderType}
-                              onChange={(value) => setFormData({...formData, allrounderType: value as any})}
+                            value={formData.allrounderType || ''}
+                              onChange={(value) => {
+                                console.log('All-rounder type changed to:', value);
+                                setFormData({...formData, allrounderType: value as any});
+                              }}
                               options={[
                                 { value: 'Batting All-rounder', label: 'Batting All-rounder' },
                                 { value: 'Bowling All-rounder', label: 'Bowling All-rounder' },
