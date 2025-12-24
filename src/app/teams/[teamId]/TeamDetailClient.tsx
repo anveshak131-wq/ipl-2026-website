@@ -48,6 +48,7 @@ import RCBLottie from '@/components/ui/RCBLottie';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { getOptimalTextColor } from '@/lib/colorUtils';
 import FlagImage from '@/components/ui/FlagImage';
+import { usePlayerUpdates } from '@/hooks/usePlayerUpdates';
 
 interface TeamDetailClientProps {
   teamId: string;
@@ -310,6 +311,69 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
 
     fetchTeamData();
   }, [teamId, league]);
+
+  // Real-time player updates - refresh team data when players are updated
+  usePlayerUpdates(async (playerId: string) => {
+    if (!teamData) return;
+    
+    try {
+      const teamLeague = league || (teamData.league as 'ipl' | 'wpl') || 'ipl';
+      const allPlayers = await api.getPlayers(undefined, teamLeague);
+      
+      // Normalize IDs for matching
+      const normalizeId = (id: string | number | undefined): string => {
+        if (!id) return '';
+        const str = String(id).trim();
+        const numMatch = str.replace(/^team/i, '').match(/^\d+$/);
+        return numMatch ? numMatch[0] : str.toLowerCase();
+      };
+      
+      const normalizedTeamId = normalizeId(teamData.id);
+      const teamIdVariations = [
+        String(teamData.id),
+        normalizedTeamId,
+        `team${normalizedTeamId}`,
+        String(teamData.id).replace(/^team/i, ''),
+        String(teamData.id).toLowerCase(),
+        String(teamData.id).toUpperCase()
+      ];
+      
+      const teamPlayers = allPlayers.filter((p: Player) => {
+        const normalizedPlayerTeamId = normalizeId(p.teamId);
+        const playerTeamIdVariations = [
+          String(p.teamId),
+          normalizedPlayerTeamId,
+          `team${normalizedPlayerTeamId}`,
+          String(p.teamId).replace(/^team/i, ''),
+          String(p.teamId).toLowerCase(),
+          String(p.teamId).toUpperCase()
+        ];
+        
+        return teamIdVariations.some(tv => 
+          playerTeamIdVariations.some(pv => pv === tv)
+        );
+      });
+      
+      const finalPlayers = teamPlayers.length > 0 
+        ? teamPlayers 
+        : (teamData.players || []);
+      
+      setTeamData(prev => prev ? {
+        ...prev,
+        players: sortPlayersByRoleAndAge(finalPlayers)
+      } : null);
+      
+      // If the updated player is currently selected in the modal, update it
+      if (selectedPlayer && playerId && selectedPlayer.id === playerId) {
+        const updatedPlayer = allPlayers.find(p => p.id === playerId);
+        if (updatedPlayer) {
+          setSelectedPlayer(updatedPlayer);
+        }
+      }
+    } catch (error) {
+      console.error('Error refreshing team data after player update:', error);
+    }
+  }, [teamData, league, selectedPlayer]);
 
   // Fetch matches and compute season snapshot once team data is available
   useEffect(() => {

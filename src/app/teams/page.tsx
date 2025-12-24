@@ -175,6 +175,90 @@ function TeamsPageContent() {
         fetchTeams();
     }, [currentLeague]);
 
+    // Real-time player updates - refresh teams when players are updated
+    useEffect(() => {
+        const handlePlayerUpdate = async (event: CustomEvent) => {
+            const { type } = event.detail || {};
+            
+            if (type === 'player-updated' || type === 'player-created' || type === 'player-deleted') {
+                console.log('Player update detected, refreshing teams...');
+                // Re-fetch teams and players
+                try {
+                    const [teamsData, playersData, matchesData] = await Promise.all([
+                        api.getTeams(currentLeague),
+                        api.getPlayers(undefined, currentLeague).catch(() => []),
+                        api.getMatches(currentLeague).catch(() => [])
+                    ]);
+
+                    const normalizeId = (id: string | number | undefined): string => {
+                        if (!id) return '';
+                        const str = String(id).trim();
+                        const numMatch = str.replace(/^team/i, '').match(/^\d+$/);
+                        return numMatch ? numMatch[0] : str.toLowerCase();
+                    };
+                    
+                    const teamsWithPlayers = teamsData
+                        .filter(team => {
+                            if (currentLeague === 'wpl' && isPlaceholderTeam(team)) {
+                                return false;
+                            }
+                            return true;
+                        })
+                        .map(team => {
+                            const normalizedTeamId = normalizeId(team.id);
+                            const teamIdVariations = [
+                                String(team.id),
+                                normalizedTeamId,
+                                `team${normalizedTeamId}`,
+                                String(team.id).replace(/^team/i, ''),
+                                String(team.id).toLowerCase(),
+                                String(team.id).toUpperCase()
+                            ];
+                            
+                            const fetchedPlayers = (playersData || []).filter(player => {
+                                const leagueMatch = !player.league || !currentLeague || player.league === currentLeague;
+                                if (!leagueMatch) return false;
+                                
+                                const normalizedPlayerTeamId = normalizeId(player.teamId);
+                                const playerTeamIdVariations = [
+                                    String(player.teamId),
+                                    normalizedPlayerTeamId,
+                                    `team${normalizedPlayerTeamId}`,
+                                    String(player.teamId).replace(/^team/i, ''),
+                                    String(player.teamId).toLowerCase(),
+                                    String(player.teamId).toUpperCase()
+                                ];
+                                
+                                return teamIdVariations.some(tv => 
+                                    playerTeamIdVariations.some(pv => pv === tv)
+                                );
+                            });
+                            
+                            const finalPlayers = fetchedPlayers.length > 0 
+                                ? fetchedPlayers 
+                                : (team.players || []);
+                            
+                            return {
+                                ...team,
+                                players: finalPlayers
+                            };
+                        });
+
+                    setTeams(teamsWithPlayers);
+                    setMatches(matchesData || []);
+                } catch (error) {
+                    console.error('Error refreshing teams after player update:', error);
+                }
+            }
+        };
+
+        window.addEventListener('admin-data-updated', handlePlayerUpdate as EventListener);
+        
+        return () => {
+            window.removeEventListener('admin-data-updated', handlePlayerUpdate as EventListener);
+        };
+    }, [currentLeague]);
+
     const toggleFavorite = (teamId: string) => {
         const newFavorites = favorites.includes(teamId)
             ? favorites.filter(id => id !== teamId)

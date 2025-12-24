@@ -9,6 +9,7 @@ import { formatDateDDMMYYYY, calculateAge } from '@/lib/dateUtils';
 import FlagImage from '@/components/ui/FlagImage';
 import { X, Star, Globe, Calendar, TrendingUp, Award, Target, Activity, Zap, BarChart3 } from 'lucide-react';
 import { calculateOverallPerformance, OverallPerformance } from '@/lib/playerPerformance';
+import { usePlayerUpdates } from '@/hooks/usePlayerUpdates';
 
 interface PlayerModalProps {
   player: Player | null;
@@ -53,6 +54,28 @@ function adjustOpacity(rgbaColor: string, opacity: number): string {
 
 export default function PlayerModal({ player, isOpen, onClose, teamColors, teamData }: PlayerModalProps) {
   const [teamColorsState, setTeamColorsState] = useState<{ primary: string; secondary: string } | null>(teamColors || null);
+  const [currentPlayer, setCurrentPlayer] = useState<Player | null>(player);
+
+  // Update current player when prop changes
+  useEffect(() => {
+    setCurrentPlayer(player);
+  }, [player]);
+
+  // Real-time player updates - refresh player data when updated
+  usePlayerUpdates(async (playerId: string) => {
+    if (!currentPlayer || !playerId || currentPlayer.id !== playerId) return;
+    
+    try {
+      const allPlayers = await api.getPlayers();
+      const updatedPlayer = allPlayers.find(p => p.id === playerId);
+      if (updatedPlayer) {
+        setCurrentPlayer(updatedPlayer);
+        console.log('Player modal: Updated player data for', updatedPlayer.name);
+      }
+    } catch (error) {
+      console.error('Error refreshing player data in modal:', error);
+    }
+  }, [currentPlayer]);
 
   useEffect(() => {
     if (teamColors) {
@@ -60,9 +83,9 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
       return;
     }
     
-    if (!teamColors && player?.teamId) {
+    if (!teamColors && currentPlayer?.teamId) {
       api.getTeams().then((teams) => {
-        const team = teams.find(t => t.id === player.teamId);
+        const team = teams.find(t => t.id === currentPlayer.teamId);
         if (team) {
           setTeamColorsState(team.colors);
         }
@@ -70,7 +93,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
         console.error('Error fetching team colors:', error);
       });
     }
-  }, [player?.teamId, teamColors]);
+  }, [currentPlayer?.teamId, teamColors]);
 
   // Close modal on Escape key
   useEffect(() => {
@@ -92,7 +115,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen || !player) return null;
+  if (!isOpen || !currentPlayer) return null;
 
   // Default colors if team colors are not available
   const defaultColors = {
@@ -105,7 +128,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
   const secondaryColor = createColorVariations(colors.secondary);
 
   // Check if player is from WPL
-  const isWPLPlayer = player.league === 'wpl' || teamData?.league === 'wpl';
+  const isWPLPlayer = currentPlayer.league === 'wpl' || teamData?.league === 'wpl';
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -119,24 +142,24 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
   };
 
   // Calculate derived stats
-  const boundariesPerMatch = player.stats.matches > 0 
-    ? Math.round((player.stats.fours + player.stats.sixes) / player.stats.matches * 10) / 10 
+  const boundariesPerMatch = currentPlayer.stats?.matches > 0 
+    ? Math.round(((currentPlayer.stats?.fours || 0) + (currentPlayer.stats?.sixes || 0)) / currentPlayer.stats.matches * 10) / 10 
     : 0;
-  const runsPerMatch = player.stats.matches > 0 
-    ? Math.round(player.stats.runs / player.stats.matches * 10) / 10 
+  const runsPerMatch = currentPlayer.stats?.matches > 0 
+    ? Math.round((currentPlayer.stats?.runs || 0) / currentPlayer.stats.matches * 10) / 10 
     : 0;
 
   // Calculate overall performance using the comprehensive calculation system
-  const overallPerformance = calculateOverallPerformance(player);
+  const overallPerformance = calculateOverallPerformance(currentPlayer);
 
   // Get role border color
   const getRoleBorderColor = () => {
-    if (player.role === 'Batsman') return '#F59E0B'; // Amber
-    if (player.role === 'Bowler') return '#10B981'; // Emerald
-    if (player.role === 'Wicket-keeper') return '#F97316'; // Orange
-    if (player.role === 'All-rounder') {
-      if (player.allrounderType === 'Batting All-rounder') return '#10B981'; // Emerald
-      if (player.allrounderType === 'Bowling All-rounder') return '#3B82F6'; // Blue
+    if (currentPlayer.role === 'Batsman') return '#F59E0B'; // Amber
+    if (currentPlayer.role === 'Bowler') return '#10B981'; // Emerald
+    if (currentPlayer.role === 'Wicket-keeper') return '#F97316'; // Orange
+    if (currentPlayer.role === 'All-rounder') {
+      if (currentPlayer.allrounderType === 'Batting All-rounder') return '#10B981'; // Emerald
+      if (currentPlayer.allrounderType === 'Bowling All-rounder') return '#3B82F6'; // Blue
       return '#10B981'; // Default Emerald
     }
     return primaryColor.solid;
@@ -237,11 +260,11 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                           textShadow: '0 2px 8px rgba(0,0,0,0.5)'
                   }}
                 >
-                  {getInitials(player.name)}
+                  {getInitials(currentPlayer.name)}
                 </span>
 
                 {/* Captain badge */}
-                {player.isCaptain && (
+                {currentPlayer.isCaptain && (
                         <motion.div 
                           className="absolute -top-2 -right-2 w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-lg border-2 border-yellow-500/50 z-10"
                           animate={{
@@ -258,7 +281,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                 )}
 
                 {/* Special Achievement Badge - Highest Run Scorer */}
-                {player.name.toLowerCase().includes('virat kohli') && (
+                {currentPlayer.name.toLowerCase().includes('virat kohli') && (
                   <motion.div 
                     className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 shadow-lg border-2 border-amber-400/50 z-10"
                     initial={{ opacity: 0, y: 10 }}
@@ -282,7 +305,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4, delay: 0.1 }}
                 >
-                  {player.name}
+                  {currentPlayer.name}
                     </motion.h2>
                     
                     <motion.div 
@@ -302,9 +325,9 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                         transition={{ duration: 0.2 }}
                   >
                         <Target className="w-3.5 h-3.5" />
-                    {player.role}
-                        {player.allrounderType && (
-                          <span className="ml-1 text-[10px] opacity-80">({player.allrounderType})</span>
+                    {currentPlayer.role}
+                        {currentPlayer.allrounderType && (
+                          <span className="ml-1 text-[10px] opacity-80">({currentPlayer.allrounderType})</span>
                         )}
                       </motion.span>
                       
@@ -314,20 +337,20 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                         transition={{ duration: 0.2 }}
                       >
                         <Calendar className="w-3.5 h-3.5" />
-                    {(player.dateOfBirth ? calculateAge(player.dateOfBirth) : player.age) > 0 
-                          ? `${player.dateOfBirth ? calculateAge(player.dateOfBirth) : player.age} yrs`
+                    {(currentPlayer.dateOfBirth ? calculateAge(currentPlayer.dateOfBirth) : currentPlayer.age) > 0 
+                          ? `${currentPlayer.dateOfBirth ? calculateAge(currentPlayer.dateOfBirth) : currentPlayer.age} yrs`
                           : 'Age N/A'}
                       </motion.span>
                       
-                      {player.nationality && player.nationality !== 'Pakistan' && (
+                      {currentPlayer.nationality && currentPlayer.nationality !== 'Pakistan' && (
                         <motion.span 
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-800/50 border border-gray-700/50 text-gray-300"
                           whileHover={{ scale: 1.05 }}
                           transition={{ duration: 0.2 }}
                         >
                           <Globe className="w-3.5 h-3.5" />
-                        <FlagImage nationality={player.nationality} size="sm" />
-                          {player.nationality}
+                        <FlagImage nationality={currentPlayer.nationality} size="sm" />
+                          {currentPlayer.nationality}
                         </motion.span>
                       )}
 
@@ -344,12 +367,12 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                         transition={{ duration: 0.3, delay: 0.3 }}
                         whileHover={{ scale: 1.1 }}
               >
-                {player.jerseyNumber > 0 ? player.jerseyNumber : 'N/A'}
+                {currentPlayer.jerseyNumber > 0 ? currentPlayer.jerseyNumber : 'N/A'}
                       </motion.div>
                     </motion.div>
 
                     {/* Special Achievement Badges for Virat Kohli */}
-                    {player.name.toLowerCase().includes('virat kohli') && (
+                    {currentPlayer.name.toLowerCase().includes('virat kohli') && (
                       <div className="mt-3 w-full flex flex-wrap items-center justify-center gap-2">
                         <motion.div 
                           className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-2 border-amber-400/50"
@@ -418,9 +441,9 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {(() => {
-                const isBowler = player.role === 'Bowler';
-                const isAllRounder = player.role === 'All-rounder';
-                    const highlightBatting = isAllRounder || player.role === 'Batsman' || player.role === 'Wicket-keeper';
+                const isBowler = currentPlayer.role === 'Bowler';
+                const isAllRounder = currentPlayer.role === 'All-rounder';
+                    const highlightBatting = isAllRounder || currentPlayer.role === 'Batsman' || currentPlayer.role === 'Wicket-keeper';
                 const highlightBowling = isBowler || isAllRounder;
                 
                 return (
@@ -441,7 +464,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                       <p 
                             className="text-xl font-bold mb-1 text-gray-100"
                       >
-                        {player.battingStyle && player.battingStyle.trim() !== '' ? player.battingStyle : 'N/A'}
+                        {currentPlayer.battingStyle && currentPlayer.battingStyle.trim() !== '' ? currentPlayer.battingStyle : 'N/A'}
                       </p>
                       <p 
                             className="text-xs font-semibold uppercase tracking-wider text-gray-400"
@@ -466,7 +489,7 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                       <p 
                             className="text-xl font-bold mb-1 text-gray-100"
                       >
-                        {player.bowlingStyle && player.bowlingStyle.trim() !== '' ? player.bowlingStyle : 'N/A'}
+                        {currentPlayer.bowlingStyle && currentPlayer.bowlingStyle.trim() !== '' ? currentPlayer.bowlingStyle : 'N/A'}
                       </p>
                       <p 
                             className="text-xs font-semibold uppercase tracking-wider text-gray-400"
@@ -529,18 +552,18 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                     </motion.h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       {[
-                        { label: 'Matches', value: player.stats.matches, isNumeric: true },
-                        { label: 'Innings', value: (player.stats as any).battingInnings || 0, isNumeric: true },
-                        { label: 'Not Outs', value: (player.stats as any).notOuts || 0, isNumeric: true },
-                  { label: 'Total Runs', value: player.stats.runs, isNumeric: true },
-                        { label: 'Balls Faced', value: (player.stats as any).ballsFaced || 0, isNumeric: true },
-                        { label: 'Highest', value: player.stats.highest, isNumeric: true },
-                  { label: 'Batting Avg', value: player.stats.average, isNumeric: true, format: (v: number) => v.toFixed(2) },
-                  { label: 'Strike Rate', value: player.stats.strikeRate, isNumeric: true, format: (v: number) => v.toFixed(1) },
-                        { label: 'Fours', value: player.stats.fours, isNumeric: true },
-                        { label: 'Sixes', value: player.stats.sixes, isNumeric: true },
-                        { label: 'Fifties', value: player.stats.fifties, isNumeric: true },
-                        { label: 'Hundreds', value: player.stats.hundreds, isNumeric: true },
+                        { label: 'Matches', value: currentPlayer.stats?.matches || 0, isNumeric: true },
+                        { label: 'Innings', value: (currentPlayer.stats as any)?.battingInnings || 0, isNumeric: true },
+                        { label: 'Not Outs', value: (currentPlayer.stats as any)?.notOuts || 0, isNumeric: true },
+                  { label: 'Total Runs', value: currentPlayer.stats?.runs || 0, isNumeric: true },
+                        { label: 'Balls Faced', value: (currentPlayer.stats as any)?.ballsFaced || 0, isNumeric: true },
+                        { label: 'Highest', value: currentPlayer.stats?.highest || 0, isNumeric: true },
+                  { label: 'Batting Avg', value: currentPlayer.stats?.average || 0, isNumeric: true, format: (v: number) => v.toFixed(2) },
+                  { label: 'Strike Rate', value: currentPlayer.stats?.strikeRate || 0, isNumeric: true, format: (v: number) => v.toFixed(1) },
+                        { label: 'Fours', value: currentPlayer.stats?.fours || 0, isNumeric: true },
+                        { label: 'Sixes', value: currentPlayer.stats?.sixes || 0, isNumeric: true },
+                        { label: 'Fifties', value: currentPlayer.stats?.fifties || 0, isNumeric: true },
+                        { label: 'Hundreds', value: currentPlayer.stats?.hundreds || 0, isNumeric: true },
                 ].map((stat, index) => {
                   const displayValue = stat.isNumeric 
                     ? (stat.value > 0 ? (stat.format ? stat.format(stat.value) : stat.value.toString()) : '-')
@@ -593,31 +616,31 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                     </motion.h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[
-                  { label: 'Matches', value: player.stats.matches, isNumeric: true },
-                  { label: 'Bowling Innings', value: (player.stats as any).bowlingInnings || 0, isNumeric: true },
-                  { label: 'Balls', value: (player.stats as any).balls || 0, isNumeric: true },
-                  { label: 'Overs', value: (player.stats as any).balls ? ((player.stats as any).balls / 6).toFixed(1) : '0', isNumeric: false },
-                  { label: 'Maidens', value: (player.stats as any).maidens || 0, isNumeric: true },
-                  { label: 'Runs Conceded', value: (player.stats as any).runsConceded || 0, isNumeric: true },
-                  { label: 'Wickets', value: player.stats.wickets, isNumeric: true },
+                  { label: 'Matches', value: currentPlayer.stats?.matches || 0, isNumeric: true },
+                  { label: 'Bowling Innings', value: (currentPlayer.stats as any)?.bowlingInnings || 0, isNumeric: true },
+                  { label: 'Balls', value: (currentPlayer.stats as any)?.balls || 0, isNumeric: true },
+                  { label: 'Overs', value: (currentPlayer.stats as any)?.balls ? ((currentPlayer.stats as any).balls / 6).toFixed(1) : '0', isNumeric: false },
+                  { label: 'Maidens', value: (currentPlayer.stats as any)?.maidens || 0, isNumeric: true },
+                  { label: 'Runs Conceded', value: (currentPlayer.stats as any)?.runsConceded || 0, isNumeric: true },
+                  { label: 'Wickets', value: currentPlayer.stats?.wickets || 0, isNumeric: true },
                   { 
-                          label: 'Bowling Avg', 
+                    label: 'Bowling Avg', 
                     value: (() => {
-                      const bowlingAvg = player.stats.bowlingAverage ?? 
-                        (player.stats.wickets > 0 
-                          ? calculateBowlingAverage(player.stats.economy, player.stats.wickets, player.stats.matches)
+                      const bowlingAvg = currentPlayer.stats?.bowlingAverage ?? 
+                        ((currentPlayer.stats?.wickets || 0) > 0 
+                          ? calculateBowlingAverage(currentPlayer.stats?.economy || 0, currentPlayer.stats?.wickets || 0, currentPlayer.stats?.matches || 0)
                           : 0);
                       return bowlingAvg;
                     })(),
                     isNumeric: true,
                     format: (v: number) => v.toFixed(2)
                   },
-                  { label: 'Economy', value: player.stats.economy, isNumeric: true, format: (v: number) => v.toFixed(2) },
+                  { label: 'Economy', value: currentPlayer.stats?.economy || 0, isNumeric: true, format: (v: number) => v.toFixed(2) },
                   { 
                     label: 'Bowling SR', 
                     value: (() => {
-                      const balls = (player.stats as any).balls || 0;
-                      const wickets = player.stats.wickets || 0;
+                      const balls = (currentPlayer.stats as any)?.balls || 0;
+                      const wickets = currentPlayer.stats?.wickets || 0;
                       if (wickets > 0 && balls > 0) {
                         return (balls / wickets).toFixed(1);
                       }
@@ -625,8 +648,8 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                     })(),
                     isNumeric: false
                   },
-                  { label: 'Best Bowling', value: player.stats.bestBowling, isNumeric: false },
-                  { label: '5 Wickets', value: (player.stats as any).fiveWickets || 0, isNumeric: true },
+                  { label: 'Best Bowling', value: currentPlayer.stats?.bestBowling || '-', isNumeric: false },
+                  { label: '5 Wickets', value: (currentPlayer.stats as any)?.fiveWickets || 0, isNumeric: true },
                 ].map((stat, index) => {
                   let displayValue: string;
                   if (stat.isNumeric) {
