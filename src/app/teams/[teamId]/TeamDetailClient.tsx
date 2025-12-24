@@ -451,202 +451,327 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
       <Navbar />
       
       <main className="relative overflow-hidden">
-        {/* Hero Section */}
+        {/* Enhanced Hero Section */}
         <motion.div 
-          className="relative min-h-screen flex items-center"
+          className="relative min-h-[90vh] flex items-center overflow-hidden"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 1 }}
         >
-          {/* Animated Background */}
+          {/* Premium Animated Background */}
           <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-gray-800 to-gray-900" />
+            {/* Base gradient */}
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-gray-900 to-black" />
             
-            {/* Team color gradient orbs with parallax */}
+            {/* Enhanced Team color gradient orbs with parallax */}
             <motion.div 
-              className="absolute w-[800px] h-[800px] rounded-full blur-3xl opacity-30"
+              className="absolute w-[1000px] h-[1000px] rounded-full blur-[120px] opacity-40"
               style={{
-                background: `radial-gradient(circle, ${primaryColor.medium}, transparent)`,
-                top: '-10%',
-                right: '-5%',
+                background: `radial-gradient(circle, ${primaryColor.solid}60, ${primaryColor.solid}30, transparent)`,
+                top: '-15%',
+                right: '-10%',
               }}
               animate={{
-                y: [0, -30, 0],
-                scale: [1, 1.1, 1],
+                y: [0, -50, 0],
+                scale: [1, 1.2, 1],
+                opacity: [0.4, 0.6, 0.4],
               }}
               transition={{
-                duration: 8,
+                duration: 12,
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
             />
             <motion.div 
-              className="absolute w-[600px] h-[600px] rounded-full blur-3xl opacity-25"
+              className="absolute w-[800px] h-[800px] rounded-full blur-[100px] opacity-35"
               style={{
-                background: `radial-gradient(circle, ${secondaryColor.medium}, transparent)`,
-                bottom: '-10%',
+                background: `radial-gradient(circle, ${secondaryColor.solid}60, ${secondaryColor.solid}30, transparent)`,
+                bottom: '-15%',
                 left: '-10%',
               }}
               animate={{
-                y: [0, 30, 0],
-                scale: [1, 1.15, 1],
+                y: [0, 50, 0],
+                scale: [1, 1.25, 1],
+                opacity: [0.35, 0.55, 0.35],
               }}
               transition={{
-                duration: 10,
+                duration: 15,
                 repeat: Infinity,
                 ease: "easeInOut",
                 delay: 0.5
               }}
             />
             
-            {/* Subtle dot pattern */}
-            <div className="absolute inset-0 opacity-[0.02]" style={{
-              backgroundImage: `radial-gradient(circle, ${primaryColor.solid} 1px, transparent 1px)`,
-              backgroundSize: '40px 40px'
+            {/* Animated mesh gradient overlay */}
+            <div 
+              className="absolute inset-0 opacity-20"
+              style={{
+                background: `linear-gradient(135deg, ${primaryColor.solid}20, transparent 50%, ${secondaryColor.solid}20)`,
+              }}
+            />
+            
+            {/* Enhanced dot pattern */}
+            <div className="absolute inset-0 opacity-[0.03]" style={{
+              backgroundImage: `radial-gradient(circle, ${primaryColor.solid} 1.5px, transparent 1.5px)`,
+              backgroundSize: '50px 50px'
             }} />
+            
+            {/* Animated grid pattern */}
+            <div 
+              className="absolute inset-0 opacity-[0.02]"
+              style={{
+                backgroundImage: `
+                  linear-gradient(${primaryColor.solid}40 1px, transparent 1px),
+                  linear-gradient(90deg, ${primaryColor.solid}40 1px, transparent 1px)
+                `,
+                backgroundSize: '60px 60px'
+              }}
+            />
           </div>
 
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-20">
-            {/* Back Button */}
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16">
+            {/* Enhanced Back Button */}
             <AnimatedSection direction="left" delay={0.2}>
               <motion.button 
                 onClick={() => router.push(isWPL ? '/wpl/teams' : '/teams')}
-                className="mb-12 flex items-center gap-3 text-gray-400 hover:text-white transition-all duration-300 group"
-                whileHover={{ x: -5 }}
+                className="mb-16 flex items-center gap-4 text-gray-300 hover:text-white transition-all duration-300 group"
+                whileHover={{ x: -8 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <div className="w-10 h-10 rounded-full bg-white/5 backdrop-blur-md flex items-center justify-center border border-white/10 group-hover:border-white/30 group-hover:scale-110 transition-all">
-                  <svg className="w-5 h-5 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                <motion.div 
+                  className="w-12 h-12 rounded-2xl backdrop-blur-xl flex items-center justify-center border-2 transition-all duration-300"
+                  style={{
+                    background: `linear-gradient(135deg, ${primaryColor.light}30, ${secondaryColor.light}30)`,
+                    borderColor: `${primaryColor.medium}50`,
+                  }}
+                  whileHover={{ 
+                    scale: 1.1,
+                    borderColor: primaryColor.medium,
+                    boxShadow: `0 0 30px ${primaryColor.glow}40`
+                  }}
+                >
+                  <svg className="w-6 h-6 transform group-hover:-translate-x-2 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                   </svg>
-                </div>
-                <span className="font-semibold">Back to Teams</span>
+                </motion.div>
+                <span className="font-bold text-lg">Back to Teams</span>
               </motion.button>
             </AnimatedSection>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-              {/* Left: Team Info */}
-              <AnimatedSection direction="right" delay={0.3} className="space-y-8">
-                {/* Team Badge with League Logo - Fixed spacing */}
-                <div className="inline-flex items-center gap-4 px-6 py-3 rounded-full backdrop-blur-xl border shadow-xl transition-all duration-300 hover:scale-105"
-                     style={{
-                       background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-                       borderColor: primaryColor.medium
-                     }}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+              {/* Left: Enhanced Team Info */}
+              <AnimatedSection direction="right" delay={0.3} className="space-y-10">
+                {/* Premium Team Badge */}
+                <motion.div 
+                  className="inline-flex items-center gap-4 px-8 py-4 rounded-2xl backdrop-blur-2xl border-2 shadow-2xl transition-all duration-500 group"
+                  style={{
+                    background: `linear-gradient(135deg, ${primaryColor.light}40, ${secondaryColor.light}40)`,
+                    borderColor: primaryColor.medium,
+                    boxShadow: `0 10px 40px ${primaryColor.glow}30`
+                  }}
+                  whileHover={{ scale: 1.05, y: -5 }}
+                  transition={{ duration: 0.3 }}
+                >
                   {!isWPL && (
-                    <div className="w-5 h-5">
+                    <motion.div 
+                      className="w-6 h-6"
+                      whileHover={{ rotate: 360 }}
+                      transition={{ duration: 0.6 }}
+                    >
                       <IPLLogo size="sm" />
-                    </div>
+                    </motion.div>
                   )}
                   {isWPL && (
-                    <span className="px-2 py-0.5 rounded text-xs font-bold bg-gradient-to-r from-purple-500 to-pink-500 text-white">WPL</span>
+                    <span className="px-3 py-1 rounded-lg text-xs font-bold bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg">WPL</span>
                   )}
-                  <span className="text-sm font-bold tracking-wider whitespace-nowrap" style={{ color: primaryColor.textOnLight }}>{teamData.shortName}</span>
-                </div>
+                  <span className="text-base font-black tracking-wider whitespace-nowrap" style={{ color: primaryColor.textOnLight }}>
+                    {teamData.shortName}
+                  </span>
+                  <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                </motion.div>
 
-                {/* Team Name */}
+                {/* Enhanced Team Name */}
                 <div>
                   <motion.h1 
-                    className="text-6xl md:text-7xl lg:text-8xl font-black mb-6 leading-none tracking-tighter"
-                    initial={{ opacity: 0, y: 30 }}
+                    className="text-7xl md:text-8xl lg:text-9xl font-black mb-8 leading-[0.9] tracking-tight"
+                    initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.4 }}
+                    transition={{ duration: 1, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
                     style={{
                       background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid}, ${primaryColor.solid})`,
                       backgroundSize: '200% auto',
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
                       backgroundClip: 'text',
-                      textShadow: `0 0 60px ${primaryColor.glow}, 0 4px 20px rgba(0,0,0,0.5)`,
-                      animation: 'gradient-shift 3s ease infinite'
+                      filter: `drop-shadow(0 0 80px ${primaryColor.glow}) drop-shadow(0 4px 20px rgba(0,0,0,0.8))`,
                     }}
                   >
                     {teamData.name}
                   </motion.h1>
                   
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="h-1 w-24 rounded-full shadow-lg transition-all duration-500"
+                  {/* Enhanced Accent Line */}
+                  <motion.div 
+                    className="flex items-center gap-6 mb-8"
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: 'auto' }}
+                    transition={{ duration: 1, delay: 0.6 }}
+                  >
+                    <div className="h-1.5 w-32 rounded-full shadow-2xl"
                          style={{
                            background: `linear-gradient(to right, ${primaryColor.solid}, ${secondaryColor.solid})`,
-                           boxShadow: `0 0 20px ${primaryColor.glow}`
+                           boxShadow: `0 0 30px ${primaryColor.glow}60`
                          }} />
-                    <div className="flex gap-2">
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: primaryColor.solid }} />
-                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: secondaryColor.solid }} />
+                    <div className="flex gap-3">
+                      <motion.div 
+                        className="w-3 h-3 rounded-full shadow-lg"
+                        style={{ 
+                          backgroundColor: primaryColor.solid,
+                          boxShadow: `0 0 20px ${primaryColor.glow}`
+                        }}
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      />
+                      <motion.div 
+                        className="w-3 h-3 rounded-full shadow-lg"
+                        style={{ 
+                          backgroundColor: secondaryColor.solid,
+                          boxShadow: `0 0 20px ${secondaryColor.glow || primaryColor.glow}`
+                        }}
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 2, repeat: Infinity, delay: 0.3 }}
+                      />
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
                 
-                {/* Description */}
-                <p className="text-xl leading-relaxed max-w-xl text-white">
+                {/* Enhanced Description */}
+                <motion.p 
+                  className="text-2xl leading-relaxed max-w-2xl text-gray-200 font-medium"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.7 }}
+                  style={{
+                    textShadow: '0 2px 10px rgba(0,0,0,0.5)'
+                  }}
+                >
                   {teamData.description}
-                </p>
+                </motion.p>
                 
-                {/* Color Swatches */}
-                <div className="flex gap-6">
-                  <div className="group text-center">
+                {/* Enhanced Color Swatches */}
+                <div className="flex gap-8 pt-4">
+                  <motion.div 
+                    className="group text-center"
+                    whileHover={{ scale: 1.1, y: -5 }}
+                    transition={{ duration: 0.2 }}
+                  >
                     <div className="relative">
-                      <div className="absolute inset-0 rounded-2xl blur-lg opacity-50 transition-opacity duration-300 group-hover:opacity-75"
+                      <div className="absolute inset-0 rounded-3xl blur-xl opacity-60 transition-opacity duration-300 group-hover:opacity-100"
                            style={{ backgroundColor: primaryColor.solid }} />
-                      <div 
-                        className="relative w-16 h-16 rounded-2xl shadow-xl transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 border-2 border-white/20"
-                        style={{ backgroundColor: primaryColor.solid }}
+                      <motion.div 
+                        className="relative w-20 h-20 rounded-3xl shadow-2xl border-2 border-white/30 transition-all duration-300"
+                        style={{ 
+                          backgroundColor: primaryColor.solid,
+                          boxShadow: `0 10px 40px ${primaryColor.glow}50`
+                        }}
+                        whileHover={{ rotate: 12, scale: 1.15 }}
                       />
                     </div>
-                    <p className="text-gray-400 text-xs font-semibold mt-3 uppercase tracking-wider">Primary</p>
-                  </div>
-                  <div className="group text-center">
+                    <p className="text-gray-300 text-sm font-bold mt-4 uppercase tracking-widest">Primary</p>
+                  </motion.div>
+                  <motion.div 
+                    className="group text-center"
+                    whileHover={{ scale: 1.1, y: -5 }}
+                    transition={{ duration: 0.2 }}
+                  >
                     <div className="relative">
-                      <div className="absolute inset-0 rounded-2xl blur-lg opacity-50 transition-opacity duration-300 group-hover:opacity-75"
+                      <div className="absolute inset-0 rounded-3xl blur-xl opacity-60 transition-opacity duration-300 group-hover:opacity-100"
                            style={{ backgroundColor: secondaryColor.solid }} />
-                      <div 
-                        className="relative w-16 h-16 rounded-2xl shadow-xl transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 border-2 border-white/20"
-                        style={{ backgroundColor: secondaryColor.solid }}
+                      <motion.div 
+                        className="relative w-20 h-20 rounded-3xl shadow-2xl border-2 border-white/30 transition-all duration-300"
+                        style={{ 
+                          backgroundColor: secondaryColor.solid,
+                          boxShadow: `0 10px 40px ${secondaryColor.glow || primaryColor.glow}50`
+                        }}
+                        whileHover={{ rotate: -12, scale: 1.15 }}
                       />
                     </div>
-                    <p className="text-gray-400 text-xs font-semibold mt-3 uppercase tracking-wider">Secondary</p>
-                  </div>
+                    <p className="text-gray-300 text-sm font-bold mt-4 uppercase tracking-widest">Secondary</p>
+                  </motion.div>
                 </div>
               </AnimatedSection>
 
-              {/* Right: Team Logo from /logos folder */}
+              {/* Right: Premium Team Logo */}
               <AnimatedSection direction="left" delay={0.5} className="relative flex items-center justify-center">
-                {/* Glow effect */}
-                <div className="absolute inset-0 rounded-full blur-3xl opacity-30 animate-pulse"
-                     style={{ 
-                       background: `radial-gradient(circle, ${primaryColor.medium}, ${secondaryColor.medium})`,
-                       animationDuration: '3s'
-                     }} />
+                {/* Enhanced Glow effect */}
+                <motion.div 
+                  className="absolute inset-0 rounded-full blur-[150px] opacity-40"
+                  style={{ 
+                    background: `radial-gradient(circle, ${primaryColor.solid}60, ${secondaryColor.solid}40, transparent)`,
+                  }}
+                  animate={{
+                    opacity: [0.4, 0.6, 0.4],
+                    scale: [1, 1.1, 1],
+                  }}
+                  transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                />
                 
-                {/* Rotating ring */}
-                <div className="absolute inset-0 animate-spin-slow">
+                {/* Enhanced Rotating ring */}
+                <motion.div 
+                  className="absolute inset-0"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                >
                   <svg className="w-full h-full" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="45" fill="none" stroke={primaryColor.light} strokeWidth="0.5" strokeDasharray="5,5" />
+                    <circle cx="50" cy="50" r="45" fill="none" stroke={primaryColor.medium} strokeWidth="1" strokeDasharray="8,4" opacity="0.4" />
                   </svg>
-                </div>
+                </motion.div>
 
-                {/* Logo Container with enhanced animations */}
+                {/* Premium Logo Container */}
                 <div className="relative group">
-                  <div className="absolute -inset-4 rounded-full opacity-50 group-hover:opacity-75 blur-2xl transition-all duration-500 animate-pulse"
-                       style={{
-                         background: `conic-gradient(from 0deg, ${primaryColor.solid}, ${secondaryColor.solid}, ${primaryColor.solid})`
-                       }} />
+                  {/* Outer glow ring */}
+                  <motion.div 
+                    className="absolute -inset-8 rounded-full opacity-60 blur-3xl"
+                    style={{
+                      background: `conic-gradient(from 0deg, ${primaryColor.solid}, ${secondaryColor.solid}, ${primaryColor.solid})`
+                    }}
+                    animate={{
+                      rotate: [0, 360],
+                      opacity: [0.6, 0.8, 0.6],
+                    }}
+                    transition={{
+                      rotate: { duration: 8, repeat: Infinity, ease: "linear" },
+                      opacity: { duration: 3, repeat: Infinity, ease: "easeInOut" }
+                    }}
+                  />
                   
-                  <div className="relative w-80 h-80 md:w-96 md:h-96 rounded-full flex items-center justify-center backdrop-blur-xl border-2 shadow-2xl transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 animate-glow-pulse overflow-visible"
-                       style={{
-                         background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-                         borderColor: primaryColor.medium,
-                         boxShadow: `0 0 40px ${primaryColor.glow}, 0 0 80px ${secondaryColor.glow}40`
-                       }}>
-                    {/* Rotating gradient ring */}
-                    <div className="absolute inset-0 rounded-full opacity-30 animate-spin-slow"
-                         style={{
-                           background: `conic-gradient(from 0deg, transparent, ${primaryColor.solid}40, transparent)`
-                         }} />
+                  {/* Main logo container */}
+                  <motion.div 
+                    className="relative w-[400px] h-[400px] md:w-[500px] md:h-[500px] rounded-[3rem] flex items-center justify-center backdrop-blur-2xl border-[3px] shadow-[0_0_80px_rgba(0,0,0,0.5)] overflow-visible"
+                    style={{
+                      background: `linear-gradient(135deg, ${primaryColor.light}50, ${secondaryColor.light}50, ${primaryColor.light}30)`,
+                      borderColor: `${primaryColor.medium}80`,
+                      boxShadow: `0 0 60px ${primaryColor.glow}60, 0 0 120px ${secondaryColor.glow || primaryColor.glow}40, inset 0 0 60px ${primaryColor.glow}20`
+                    }}
+                    whileHover={{ scale: 1.05, rotate: 2 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    {/* Animated gradient overlay */}
+                    <motion.div 
+                      className="absolute inset-0 rounded-[3rem] opacity-30"
+                      style={{
+                        background: `conic-gradient(from 0deg, transparent, ${primaryColor.solid}30, transparent, ${secondaryColor.solid}30, transparent)`
+                      }}
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                    />
                     
-                    {/* Actual Team Logo from /logos - Animated or Lottie */}
+                    {/* Actual Team Logo */}
                     {teamLogoPath.endsWith('.json') ? (
-                      <div className="w-3/4 h-3/4 relative z-10">
+                      <div className="w-4/5 h-4/5 relative z-10">
                         <RCBLottie className="w-full h-full" />
                       </div>
                     ) : teamLogoPath.endsWith('rcb_logo_premium.svg') ? (
@@ -654,30 +779,55 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                         <RCBLionLogo className="w-full h-full" />
                       </div>
                     ) : (
-                      <img 
+                      <motion.img 
                         src={teamLogoPath}
                         alt={`${teamData.shortName} logo`}
-                        className="w-3/4 h-3/4 object-contain drop-shadow-2xl animate-float relative z-10 transform group-hover:scale-110 transition-transform duration-500"
+                        className="w-4/5 h-4/5 object-contain drop-shadow-[0_0_40px_rgba(0,0,0,0.8)] relative z-10"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = fallbackLogoPath;
+                        }}
+                        animate={{ 
+                          y: [0, -10, 0],
+                          scale: [1, 1.02, 1]
+                        }}
+                        transition={{ 
+                          duration: 4, 
+                          repeat: Infinity, 
+                          ease: "easeInOut" 
                         }}
                       />
                     )}
                     
-                    {/* League Logo Badge with enhanced animation - Positioned to avoid overlap with team logo */}
+                    {/* Premium League Logo Badge */}
                     {!isWPL && (
-                      <div className="absolute bottom-1 right-1 md:bottom-2 md:right-2 w-12 h-12 md:w-14 md:h-14 rounded-full backdrop-blur-xl border-2 border-white/30 flex items-center justify-center shadow-xl transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 bg-gradient-to-br from-blue-900/80 to-purple-900/80 z-20">
-                        <div className="w-7 h-7 md:w-8 md:h-8">
+                      <motion.div 
+                        className="absolute bottom-4 right-4 w-16 h-16 md:w-20 md:h-20 rounded-2xl backdrop-blur-2xl border-2 border-white/40 flex items-center justify-center shadow-2xl z-20"
+                        style={{
+                          background: `linear-gradient(135deg, rgba(30, 58, 138, 0.9), rgba(88, 28, 135, 0.9))`,
+                          boxShadow: `0 10px 40px rgba(59, 130, 246, 0.6)`
+                        }}
+                        whileHover={{ scale: 1.15, rotate: 15 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <div className="w-10 h-10 md:w-12 md:h-12">
                           <IPLLogo animated />
                         </div>
-                      </div>
+                      </motion.div>
                     )}
                     {isWPL && (
-                      <div className="absolute bottom-1 right-1 md:bottom-2 md:right-2 w-12 h-12 md:w-14 md:h-14 rounded-full backdrop-blur-xl border-2 border-white/30 flex items-center justify-center shadow-xl transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 bg-gradient-to-br from-purple-900/80 to-pink-900/80 z-20">
-                        <span className="text-xs md:text-sm font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">WPL</span>
-                      </div>
+                      <motion.div 
+                        className="absolute bottom-4 right-4 w-16 h-16 md:w-20 md:h-20 rounded-2xl backdrop-blur-2xl border-2 border-white/40 flex items-center justify-center shadow-2xl z-20"
+                        style={{
+                          background: `linear-gradient(135deg, rgba(88, 28, 135, 0.9), rgba(219, 39, 119, 0.9))`,
+                          boxShadow: `0 10px 40px rgba(168, 85, 247, 0.6)`
+                        }}
+                        whileHover={{ scale: 1.15, rotate: 15 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <span className="text-sm md:text-base font-black bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">WPL</span>
+                      </motion.div>
                     )}
-                  </div>
+                  </motion.div>
                 </div>
               </AnimatedSection>
             </div>
@@ -686,57 +836,117 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
           <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent pointer-events-none" />
         </motion.div>
 
-        {/* Stats Section with Custom Icons */}
-        <AnimatedSection direction="up" delay={0.2} className="relative z-20 -mt-20 mb-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        {/* Premium Stats Section */}
+        <AnimatedSection direction="up" delay={0.2} className="relative z-20 -mt-32 mb-24">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+            {/* Section Header */}
+            <motion.div
+              className="text-center mb-12"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+            >
+              <h2 className="text-4xl md:text-5xl font-black mb-4 bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+                Team Overview
+              </h2>
+              <div className="h-1 w-24 bg-gradient-to-r from-transparent via-white/50 to-transparent mx-auto rounded-full" />
+            </motion.div>
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {[
-                { label: 'Squad Size', value: teamData.players?.length || 0, Icon: UsersIcon },
-                { label: 'Captains', value: teamData.players?.filter(p => p.isCaptain).length || 0, Icon: StarIcon },
-                { label: 'Foreign', value: teamData.players?.filter(p => p.nationality !== 'India').length || 0, Icon: GlobeIcon },
-                { label: 'All-rounders', value: teamData.players?.filter(p => p.role === 'All-rounder').length || 0, Icon: AllRounderIcon }
+                { label: 'Squad Size', value: teamData.players?.length || 0, Icon: UsersIcon, color: 'blue' },
+                { label: 'Captains', value: teamData.players?.filter(p => p.isCaptain).length || 0, Icon: StarIcon, color: 'yellow' },
+                { label: 'Foreign', value: teamData.players?.filter(p => p.nationality !== 'India').length || 0, Icon: GlobeIcon, color: 'green' },
+                { label: 'All-rounders', value: teamData.players?.filter(p => p.role === 'All-rounder').length || 0, Icon: AllRounderIcon, color: 'purple' }
               ].map((stat, index) => (
                 <motion.div
                   key={index}
-                  initial={{ opacity: 0, y: 50 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, y: 60, scale: 0.9 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  whileHover={{ scale: 1.05, y: -5 }}
-                  className="group relative overflow-hidden rounded-3xl backdrop-blur-xl p-8 border shadow-xl transition-all duration-500 hover:shadow-2xl"
+                  transition={{ duration: 0.7, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                  whileHover={{ scale: 1.08, y: -10, rotateY: 5 }}
+                  className="group relative overflow-hidden rounded-3xl backdrop-blur-2xl p-8 border-2 shadow-2xl transition-all duration-500"
                   style={{
-                    background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-                    borderColor: primaryColor.medium,
-                    boxShadow: `0 10px 30px ${primaryColor.glow}20`
+                    background: `linear-gradient(135deg, ${primaryColor.light}50, ${secondaryColor.light}50, ${primaryColor.light}30)`,
+                    borderColor: `${primaryColor.medium}60`,
+                    boxShadow: `0 20px 60px ${primaryColor.glow}30, inset 0 0 40px ${primaryColor.glow}10`,
+                    transformStyle: 'preserve-3d',
+                    perspective: '1000px'
                   }}
                 >
+                  {/* Enhanced Glow on Hover */}
+                  <div 
+                    className="absolute -inset-2 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-2xl -z-10"
+                    style={{
+                      background: `radial-gradient(circle, ${primaryColor.medium}60, ${secondaryColor.medium}40, transparent)`
+                    }}
+                  />
+                  
                   {/* League Logo Watermark */}
                   {!isWPL && (
-                    <div className="absolute top-3 right-3 w-8 h-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <div className="absolute top-4 right-4 w-10 h-10 opacity-5 group-hover:opacity-15 transition-opacity">
                       <IPLLogo animated />
                     </div>
                   )}
                   {isWPL && (
-                    <div className="absolute top-3 right-3 px-2 py-1 rounded opacity-10 group-hover:opacity-20 transition-opacity bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30">
+                    <div className="absolute top-4 right-4 px-3 py-1.5 rounded-lg opacity-5 group-hover:opacity-15 transition-opacity bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30">
                       <span className="text-xs font-bold text-purple-300">WPL</span>
                     </div>
                   )}
                   
+                  {/* Icon with enhanced animation */}
                   <motion.div 
-                    className="mb-4 transform group-hover:scale-110 group-hover:rotate-6 transition-all duration-300"
-                    whileHover={{ rotate: 12, scale: 1.1 }}
+                    className="mb-6 relative"
+                    whileHover={{ rotate: 360, scale: 1.2 }}
+                    transition={{ duration: 0.6 }}
                   >
-                    <stat.Icon className="w-12 h-12" color={primaryColor.solid} />
+                    <div className="absolute inset-0 rounded-2xl blur-xl opacity-50 group-hover:opacity-100 transition-opacity"
+                         style={{ background: primaryColor.medium }} />
+                    <div className="relative">
+                      <stat.Icon className="w-16 h-16" color={primaryColor.solid} />
+                    </div>
                   </motion.div>
-                  <p className="text-5xl font-black mb-2 transform group-hover:scale-110 transition-transform duration-300" style={{ color: primaryColor.text }}>
+                  
+                  {/* Value with enhanced styling */}
+                  <p className="text-6xl font-black mb-3 transform group-hover:scale-110 transition-transform duration-300" 
+                     style={{ 
+                       color: primaryColor.text,
+                       textShadow: `0 0 30px ${primaryColor.glow}50`,
+                       filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))'
+                     }}>
                     <AnimatedCounter value={stat.value} />
                   </p>
-                  <p className="text-sm font-semibold uppercase tracking-wider transition-colors duration-300" style={{ color: primaryColor.textOnLight }}>{stat.label}</p>
                   
-                  {/* Hover shimmer effect */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                  {/* Label */}
+                  <p className="text-sm font-bold uppercase tracking-widest transition-colors duration-300" 
+                     style={{ 
+                       color: primaryColor.textOnLight,
+                       letterSpacing: '0.15em'
+                     }}>
+                    {stat.label}
+                  </p>
+                  
+                  {/* Enhanced Hover shimmer effect */}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 overflow-hidden">
+                    <motion.div 
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                      initial={{ x: '-100%' }}
+                      whileHover={{ x: '200%' }}
+                      transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}
+                      style={{ transform: 'skewX(-20deg)' }}
+                    />
                   </div>
+                  
+                  {/* Bottom accent line */}
+                  <div 
+                    className="absolute bottom-0 left-0 right-0 h-1 rounded-b-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    style={{
+                      background: `linear-gradient(to right, ${primaryColor.solid}, ${secondaryColor.solid})`,
+                      boxShadow: `0 0 20px ${primaryColor.glow}`
+                    }}
+                  />
                 </motion.div>
               ))}
             </div>
@@ -880,85 +1090,113 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
           </div>
         </AnimatedSection>
 
-        {/* Tab Navigation - Fixed overlap with proper spacing */}
-        <AnimatedSection direction="up" delay={0.3} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 mt-12">
-          <div className="flex flex-col items-center gap-4">
-            {/* IPL Logo Badge - Moved outside and above the tab container */}
+        {/* Premium Tab Navigation */}
+        <AnimatedSection direction="up" delay={0.3} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20 mt-16">
+          <div className="flex flex-col items-center gap-8">
+            {/* Enhanced League Logo Badge */}
             <motion.div 
-              className="w-12 h-12 rounded-full backdrop-blur-xl border-2 border-white/30 flex items-center justify-center shadow-xl z-10" 
+              className="relative w-16 h-16 rounded-2xl backdrop-blur-2xl border-[3px] flex items-center justify-center shadow-2xl z-10" 
               style={{
                 background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
                 borderColor: primaryColor.medium,
+                boxShadow: `0 10px 40px ${primaryColor.glow}50`
               }}
-              whileHover={{ scale: 1.1, rotate: 360 }}
-              transition={{ duration: 0.5 }}
+              whileHover={{ scale: 1.15, rotate: 360 }}
+              transition={{ duration: 0.6, type: "spring" }}
             >
-              <div className="w-7 h-7">
+              <div className="absolute inset-0 rounded-2xl opacity-50 blur-xl"
+                   style={{ background: primaryColor.medium }} />
+              <div className="relative w-10 h-10">
                 <IPLLogo animated />
               </div>
             </motion.div>
             
-            {/* Tab Container - Premium Design with Team Colors */}
+            {/* Premium Tab Container */}
             <motion.div 
-              className="relative inline-flex gap-2 p-1.5 rounded-2xl backdrop-blur-xl border-2 shadow-xl"
-                 style={{
-                   background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-                   borderColor: primaryColor.medium,
-                   boxShadow: `0 10px 30px ${primaryColor.glow}20`
-                 }}>
+              className="relative inline-flex gap-3 p-2 rounded-3xl backdrop-blur-2xl border-[3px] shadow-2xl"
+              style={{
+                background: `linear-gradient(135deg, ${primaryColor.light}50, ${secondaryColor.light}50, ${primaryColor.light}30)`,
+                borderColor: `${primaryColor.medium}70`,
+                boxShadow: `0 20px 60px ${primaryColor.glow}30, inset 0 0 40px ${primaryColor.glow}10`
+              }}
+            >
+              {/* Background glow */}
+              <div 
+                className="absolute -inset-2 rounded-3xl opacity-30 blur-2xl -z-10"
+                style={{
+                  background: `radial-gradient(ellipse, ${primaryColor.medium}60, transparent)`
+                }}
+              />
+              
               {[
-                { id: 'squad', label: 'Squad' },
-                { id: 'stats', label: 'Stats' },
-                { id: 'about', label: 'About' }
+                { id: 'squad', label: 'Squad', icon: '👥' },
+                { id: 'stats', label: 'Stats', icon: '📊' },
+                { id: 'about', label: 'About', icon: 'ℹ️' }
               ].map((tab) => (
-                <button
+                <motion.button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`group relative overflow-hidden px-8 py-4 rounded-xl font-bold text-lg transition-all duration-500 whitespace-nowrap transform ${
-                    activeTab === tab.id ? 'scale-105' : 'hover:scale-105'
+                  className={`group relative overflow-hidden px-10 py-5 rounded-2xl font-black text-lg transition-all duration-500 whitespace-nowrap ${
+                    activeTab === tab.id ? 'scale-110' : 'hover:scale-105'
                   }`}
                   style={activeTab === tab.id ? {
                     background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
                     color: '#FFFFFF',
-                    boxShadow: `0 10px 30px ${primaryColor.glow}40, 0 0 40px ${secondaryColor.glow}20`,
-                    border: `2px solid ${primaryColor.medium}`,
+                    boxShadow: `0 15px 40px ${primaryColor.glow}60, 0 0 60px ${secondaryColor.glow || primaryColor.glow}30, inset 0 0 30px ${primaryColor.glow}20`,
+                    border: `3px solid ${primaryColor.medium}`,
                   } : {
                     background: 'transparent',
                     color: primaryColor.textOnLight,
-                    border: '2px solid transparent',
+                    border: '3px solid transparent',
                   }}
-                  onMouseEnter={(e) => {
-                    if (activeTab !== tab.id) {
-                      e.currentTarget.style.color = primaryColor.textOnLight;
-                      e.currentTarget.style.background = `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`;
-                      e.currentTarget.style.borderColor = `${primaryColor.medium}60`;
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (activeTab !== tab.id) {
-                      e.currentTarget.style.color = primaryColor.textOnLight;
-                      e.currentTarget.style.background = 'transparent';
-                      e.currentTarget.style.borderColor = 'transparent';
-                    }
-                  }}
+                  whileHover={activeTab !== tab.id ? { 
+                    scale: 1.08,
+                    background: `linear-gradient(135deg, ${primaryColor.light}60, ${secondaryColor.light}60)`,
+                    borderColor: `${primaryColor.medium}60`
+                  } : {}}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  {/* Shimmer effect for active tab */}
+                  {/* Active tab shimmer */}
                   {activeTab === tab.id && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                    <motion.div 
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                      animate={{
+                        x: ['-200%', '200%']
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        repeatDelay: 1,
+                        ease: "easeInOut"
+                      }}
+                      style={{ transform: 'skewX(-20deg)' }}
+                    />
                   )}
                   
-                  <span className="relative z-10">{tab.label}</span>
+                  <span className="relative z-10 flex items-center gap-2">
+                    <span className="text-xl">{tab.icon}</span>
+                    {tab.label}
+                  </span>
                   
-                  {/* Glow effect for active tab */}
+                  {/* Active tab glow */}
                   {activeTab === tab.id && (
-                    <div 
-                      className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-lg -z-10"
+                    <motion.div 
+                      className="absolute inset-0 rounded-2xl opacity-50 blur-xl -z-10"
                       style={{
-                        background: `radial-gradient(circle, ${primaryColor.medium}, transparent)`,
+                        background: `radial-gradient(circle, ${primaryColor.medium}80, transparent)`,
+                      }}
+                      animate={{
+                        opacity: [0.5, 0.8, 0.5],
+                        scale: [1, 1.1, 1]
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeInOut"
                       }}
                     />
                   )}
-                </button>
+                </motion.button>
               ))}
             </motion.div>
           </div>
@@ -1068,30 +1306,75 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                 </div>
               </div>
 
-              {/* Desired order: Batters, Wicket-keepers, All-rounders, Bowlers */}
+              {/* Premium Player Sections */}
               {[
-                { title: 'Batters', players: batsmen, Icon: BatsmanIcon },
-                { title: 'Wicket-keepers', players: wicketkeepers, Icon: WicketKeeperIcon },
-                { title: 'All-rounders', players: allRounders, Icon: AllRounderIcon },
-                { title: 'Bowlers', players: bowlers, Icon: BowlerIcon }
+                { title: 'Batters', players: batsmen, Icon: BatsmanIcon, color: 'amber' },
+                { title: 'Wicket-keepers', players: wicketkeepers, Icon: WicketKeeperIcon, color: 'rose' },
+                { title: 'All-rounders', players: allRounders, Icon: AllRounderIcon, color: 'purple' },
+                { title: 'Bowlers', players: bowlers, Icon: BowlerIcon, color: 'blue' }
               ].map((section, sectionIndex) => (
                 section.players.length > 0 && (
-                  <AnimatedSection key={sectionIndex} direction="up" delay={sectionIndex * 0.1}>
-                    <motion.h3 
-                      className="text-3xl font-black mb-8 flex items-center gap-4" 
-                      style={{ color: primaryColor.text }}
-                      whileHover={{ scale: 1.02 }}
+                  <AnimatedSection key={sectionIndex} direction="up" delay={sectionIndex * 0.15} className="mb-16">
+                    {/* Premium Section Header */}
+                    <motion.div 
+                      className="mb-10 flex items-center gap-6"
+                      initial={{ opacity: 0, x: -30 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.6 }}
                     >
                       <motion.div
-                        whileHover={{ rotate: 360 }}
-                        transition={{ duration: 0.6 }}
+                        className="relative"
+                        whileHover={{ rotate: 360, scale: 1.1 }}
+                        transition={{ duration: 0.6, type: "spring" }}
                       >
-                        <section.Icon className="w-10 h-10" color={primaryColor.solid} />
+                        <div className="absolute inset-0 rounded-2xl blur-xl opacity-50"
+                             style={{ background: primaryColor.medium }} />
+                        <div className="relative p-4 rounded-2xl backdrop-blur-xl border-2"
+                             style={{
+                               background: `linear-gradient(135deg, ${primaryColor.light}40, ${secondaryColor.light}40)`,
+                               borderColor: primaryColor.medium,
+                               boxShadow: `0 10px 30px ${primaryColor.glow}30`
+                             }}>
+                          <section.Icon className="w-12 h-12" color={primaryColor.solid} />
+                        </div>
                       </motion.div>
-                      {section.title}
-                      <span className="text-lg font-normal" style={{ color: primaryColor.textOnLight }}>({section.players.length})</span>
-                    </motion.h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div className="flex-1">
+                        <motion.h3 
+                          className="text-4xl md:text-5xl font-black mb-2" 
+                          style={{ 
+                            color: primaryColor.text,
+                            textShadow: `0 4px 20px ${primaryColor.glow}50`
+                          }}
+                          whileHover={{ scale: 1.05 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          {section.title}
+                        </motion.h3>
+                        <div className="h-1 w-24 rounded-full"
+                             style={{
+                               background: `linear-gradient(to right, ${primaryColor.solid}, ${secondaryColor.solid})`,
+                               boxShadow: `0 0 20px ${primaryColor.glow}`
+                             }} />
+                      </div>
+                      <motion.div
+                        className="px-6 py-3 rounded-2xl backdrop-blur-xl border-2"
+                        style={{
+                          background: `linear-gradient(135deg, ${primaryColor.light}40, ${secondaryColor.light}40)`,
+                          borderColor: primaryColor.medium,
+                          boxShadow: `0 8px 25px ${primaryColor.glow}30`
+                        }}
+                        whileHover={{ scale: 1.1 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <span className="text-2xl font-black" style={{ color: primaryColor.text }}>
+                          {section.players.length}
+                        </span>
+                      </motion.div>
+                    </motion.div>
+                    
+                    {/* Premium Player Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                       {section.players.map((player, playerIndex) => (
                         isWPL ? (
                           <WPLPlayerCard
@@ -1354,7 +1637,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
   );
 }
 
-// Player Card Component with enhanced animations and role tags
+// Premium Player Card Component - Complete Redesign
 function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyPlayers }: PlayerCardProps) {
   const stats = player.stats || {};
 
@@ -1397,115 +1680,241 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
   return (
     <motion.div
       onClick={onClick}
-      initial={{ opacity: 0, y: 30, scale: 0.95 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.6, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ scale: 1.08, y: -12, rotateY: 5 }}
-      className="group relative overflow-hidden rounded-3xl backdrop-blur-2xl p-6 border-2 cursor-pointer transition-all duration-500 shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.4)]"
+      initial={{ opacity: 0, y: 50, scale: 0.9, rotateX: -10 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{ duration: 0.7, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ scale: 1.1, y: -15, rotateY: 8, rotateX: 5, z: 50 }}
+      className="group relative overflow-visible rounded-[2rem] backdrop-blur-2xl p-8 border-[3px] cursor-pointer transition-all duration-700"
       style={{
-        background: `linear-gradient(135deg, ${primaryColor.light}40, ${secondaryColor.light}40, ${primaryColor.light}20)`,
-        borderColor: isKeyPlayer ? 'rgba(250, 204, 21, 0.6)' : `${primaryColor.medium}60`,
+        background: `linear-gradient(135deg, ${primaryColor.light}60, ${secondaryColor.light}50, ${primaryColor.light}40)`,
+        borderColor: isKeyPlayer ? 'rgba(250, 204, 21, 0.8)' : `${primaryColor.medium}70`,
         boxShadow: isKeyPlayer
-          ? `0 0 40px rgba(250, 204, 21, 0.5), 0 15px 40px ${primaryColor.glow}30, inset 0 0 60px ${primaryColor.glow}10`
-          : `0 15px 40px ${primaryColor.glow}25, inset 0 0 40px ${primaryColor.glow}5`,
+          ? `0 0 60px rgba(250, 204, 21, 0.6), 0 25px 60px ${primaryColor.glow}40, inset 0 0 80px ${primaryColor.glow}15, 0 0 0 1px rgba(250, 204, 21, 0.3)`
+          : `0 25px 60px ${primaryColor.glow}35, inset 0 0 60px ${primaryColor.glow}10, 0 0 0 1px ${primaryColor.medium}30`,
         transformStyle: 'preserve-3d',
         perspective: '1000px'
       }}
     >
-      {/* Enhanced Glow Effect on Hover */}
-      <div 
-        className="absolute -inset-2 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-2xl -z-10"
+      {/* Premium Glow Effect on Hover */}
+      <motion.div 
+        className="absolute -inset-4 rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-3xl -z-10"
         style={{
-          background: `radial-gradient(circle, ${primaryColor.medium}60, ${secondaryColor.medium}40, transparent)`
+          background: `radial-gradient(ellipse at center, ${primaryColor.medium}70, ${secondaryColor.medium}50, transparent 70%)`
+        }}
+        animate={{
+          scale: [1, 1.1, 1],
+          opacity: [0, 1, 0]
+        }}
+        transition={{
+          duration: 3,
+          repeat: Infinity,
+          ease: "easeInOut"
         }}
       />
       
-      {/* Jersey Number with enhanced animation */}
+      {/* Premium Animated Background Pattern */}
+      <div 
+        className="absolute inset-0 opacity-[0.04] group-hover:opacity-[0.12] transition-opacity duration-700"
+        style={{
+          backgroundImage: `
+            radial-gradient(circle at 2px 2px, ${primaryColor.solid} 1.5px, transparent 0),
+            linear-gradient(45deg, transparent 48%, ${primaryColor.solid}20 49%, ${primaryColor.solid}20 51%, transparent 52%)
+          `,
+          backgroundSize: '30px 30px, 20px 20px'
+        }}
+      />
+      
+      {/* Top Accent Bar for Key Players */}
+      {isKeyPlayer && (
+        <motion.div 
+          className="absolute top-0 left-0 right-0 h-2 rounded-t-[2rem]"
+          style={{
+            background: `linear-gradient(to right, transparent, rgba(250, 204, 21, 0.8), transparent)`,
+            boxShadow: `0 0 30px rgba(250, 204, 21, 0.6)`
+          }}
+          animate={{
+            opacity: [0.6, 1, 0.6]
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+      )}
+      
+      {/* Premium Jersey Number */}
       <motion.div
-        className="absolute top-4 right-4 w-16 h-16 rounded-2xl flex items-center justify-center font-black text-2xl shadow-2xl transform z-10 text-white"
+        className="absolute top-6 right-6 w-20 h-20 rounded-2xl flex items-center justify-center font-black text-3xl shadow-2xl z-10 text-white"
         style={{
           background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
-          boxShadow: `0 8px 25px ${primaryColor.glow}60, inset 0 2px 10px rgba(255,255,255,0.2)`,
+          boxShadow: `0 10px 40px ${primaryColor.glow}70, inset 0 4px 15px rgba(255,255,255,0.3), inset 0 -4px 15px rgba(0,0,0,0.2)`,
         }}
-        whileHover={{ scale: 1.2, rotate: 15 }}
-        transition={{ duration: 0.3 }}
+        whileHover={{ scale: 1.25, rotate: 20, z: 100 }}
+        transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
       >
-        {player.jerseyNumber > 0 ? player.jerseyNumber : 'N/A'}
+        <span className="drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
+          {player.jerseyNumber > 0 ? player.jerseyNumber : 'N/A'}
+        </span>
       </motion.div>
 
-      {/* Enhanced Hover shimmer effect */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-      </div>
-      
-      {/* Animated Background Pattern */}
-      <div 
-        className="absolute inset-0 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500"
-        style={{
-          backgroundImage: `radial-gradient(circle at 2px 2px, ${primaryColor.solid} 1px, transparent 0)`,
-          backgroundSize: '24px 24px'
-        }}
-      />
+      {/* Premium Hover Shimmer Effect */}
+      <motion.div 
+        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 overflow-hidden"
+        initial={false}
+      >
+        <motion.div 
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+          style={{ transform: 'skewX(-20deg)' }}
+          animate={{
+            x: ['-200%', '200%']
+          }}
+          transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            repeatDelay: 2,
+            ease: "easeInOut"
+          }}
+        />
+      </motion.div>
 
-      {/* Player Name with enhanced styling */}
-      <div className="flex items-center gap-3 mb-3 pr-20">
+      {/* Premium Player Name Section */}
+      <div className="flex items-start gap-4 mb-6 pr-24 relative z-10">
         {player.nationality && (
           <motion.div
-            whileHover={{ scale: 1.2, rotate: 10 }}
-            transition={{ duration: 0.2 }}
+            className="relative"
+            whileHover={{ scale: 1.3, rotate: 15, z: 50 }}
+            transition={{ duration: 0.3, type: "spring" }}
           >
-            <FlagImage nationality={player.nationality} size="md" />
+            <div className="absolute inset-0 rounded-full blur-lg opacity-50 group-hover:opacity-100 transition-opacity"
+                 style={{ background: primaryColor.medium }} />
+            <div className="relative">
+              <FlagImage nationality={player.nationality} size="lg" />
+            </div>
           </motion.div>
         )}
         <div className="flex-1 min-w-0">
-          <h3 className="text-2xl font-black mb-1 truncate" style={{ 
-            color: primaryColor.textOnLight,
-            textShadow: `0 2px 10px ${primaryColor.glow}40`
-          }}>
+          <motion.h3 
+            className="text-3xl font-black mb-2 truncate leading-tight" 
+            style={{ 
+              color: primaryColor.textOnLight,
+              textShadow: `0 4px 20px ${primaryColor.glow}60, 0 2px 8px rgba(0,0,0,0.8)`,
+              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
+            }}
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.2 }}
+          >
             {player.name}
-          </h3>
-          <p className="text-sm font-bold uppercase tracking-wider" style={{ 
-            color: `${primaryColor.textOnLight}90`,
-            letterSpacing: '0.1em'
-          }}>
+          </motion.h3>
+          <motion.p 
+            className="text-base font-bold uppercase tracking-widest mb-1" 
+            style={{ 
+              color: `${primaryColor.textOnLight}95`,
+              letterSpacing: '0.2em',
+              textShadow: '0 2px 8px rgba(0,0,0,0.5)'
+            }}
+          >
             {player.role}
-          </p>
+          </motion.p>
+          {player.allrounderType && (
+            <span className="inline-block px-3 py-1 rounded-lg text-xs font-bold mt-2"
+                  style={{
+                    background: `linear-gradient(135deg, ${primaryColor.medium}40, ${secondaryColor.medium}40)`,
+                    color: primaryColor.textOnLight,
+                    border: `1px solid ${primaryColor.medium}60`
+                  }}>
+              {player.allrounderType}
+            </span>
+          )}
         </div>
       </div>
 
-      {/* Badges with Custom Icons */}
-      <div className="flex flex-wrap gap-2 mb-3">
+      {/* Premium Badges Section */}
+      <div className="flex flex-wrap gap-3 mb-5 relative z-10">
         {player.isCaptain && (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-yellow-500/20 text-yellow-300 border border-yellow-500/30">
-            <StarIcon className="w-3 h-3" color="#FCD34D" filled />
-            Captain
-          </span>
+          <motion.span 
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold shadow-lg border-2"
+            style={{
+              background: 'linear-gradient(135deg, rgba(250, 204, 21, 0.3), rgba(251, 191, 36, 0.3))',
+              color: '#FCD34D',
+              borderColor: 'rgba(250, 204, 21, 0.6)',
+              boxShadow: '0 4px 20px rgba(250, 204, 21, 0.4)'
+            }}
+            whileHover={{ scale: 1.1, y: -2 }}
+            transition={{ duration: 0.2 }}
+          >
+            <StarIcon className="w-4 h-4" color="#FCD34D" filled />
+            <span className="drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">Captain</span>
+          </motion.span>
         )}
         {player.nationality !== 'India' && (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
-            <GlobeIcon className="w-3 h-3" color="#93C5FD" />
-            Foreign
-          </span>
+          <motion.span 
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold shadow-lg border-2"
+            style={{
+              background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(37, 99, 235, 0.3))',
+              color: '#93C5FD',
+              borderColor: 'rgba(59, 130, 246, 0.6)',
+              boxShadow: '0 4px 20px rgba(59, 130, 246, 0.4)'
+            }}
+            whileHover={{ scale: 1.1, y: -2 }}
+            transition={{ duration: 0.2 }}
+          >
+            <GlobeIcon className="w-4 h-4" color="#93C5FD" />
+            <span className="drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">Foreign</span>
+          </motion.span>
         )}
         {isKeyPlayer && (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-400/20 text-amber-200 border border-amber-400/40">
-            <StarIcon className="w-3 h-3" color="#FBBF24" filled />
-            Key Player
-          </span>
+          <motion.span 
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold shadow-lg border-2"
+            style={{
+              background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(217, 119, 6, 0.3))',
+              color: '#FBBF24',
+              borderColor: 'rgba(245, 158, 11, 0.6)',
+              boxShadow: '0 4px 20px rgba(245, 158, 11, 0.5)'
+            }}
+            whileHover={{ scale: 1.1, y: -2 }}
+            transition={{ duration: 0.2 }}
+            animate={{
+              boxShadow: [
+                '0 4px 20px rgba(245, 158, 11, 0.5)',
+                '0 8px 30px rgba(245, 158, 11, 0.7)',
+                '0 4px 20px rgba(245, 158, 11, 0.5)'
+              ]
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
+            <StarIcon className="w-4 h-4" color="#FBBF24" filled />
+            <span className="drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">Key Player</span>
+          </motion.span>
         )}
       </div>
 
-      {/* Derived role tags */}
+      {/* Premium Role Tags */}
       {tags.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-4">
-          {tags.slice(0, 4).map((tag: string) => (
-            <span
+        <div className="flex flex-wrap gap-2 mb-6 relative z-10">
+          {tags.slice(0, 4).map((tag: string, tagIndex) => (
+            <motion.span
               key={tag}
-              className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-black/20 border border-white/10 text-gray-100"
+              className="px-3 py-1.5 rounded-lg text-xs font-bold border backdrop-blur-sm"
+              style={{
+                background: `linear-gradient(135deg, ${primaryColor.light}30, ${secondaryColor.light}30)`,
+                borderColor: `${primaryColor.medium}50`,
+                color: primaryColor.textOnLight,
+                boxShadow: `0 2px 10px ${primaryColor.glow}20`
+              }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.3, delay: tagIndex * 0.1 }}
+              whileHover={{ scale: 1.15, y: -2 }}
             >
               {tag}
-            </span>
+            </motion.span>
           ))}
         </div>
       )}
