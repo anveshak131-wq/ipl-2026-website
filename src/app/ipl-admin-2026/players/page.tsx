@@ -206,35 +206,6 @@ export default function AdminPlayers() {
     checkAuth();
   }, [router]);
 
-  // Close dropdowns when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      
-      // Check if click is outside filter dropdowns
-      const filterDropdowns = document.querySelectorAll('[data-filter-dropdown]');
-      let clickedInside = false;
-      
-      filterDropdowns.forEach((dropdown) => {
-        if (dropdown.contains(target)) {
-          clickedInside = true;
-        }
-      });
-      
-      if (!clickedInside) {
-        setIsDropdownOpen(false);
-        setShowAdvancedFilters(false);
-      }
-    };
-
-    // Add event listener
-    document.addEventListener('mousedown', handleClickOutside);
-    
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
-
   // Auto-calculate age when date of birth is entered or changed
   useEffect(() => {
     if (formData.dateOfBirth && formData.dateOfBirth.trim() !== '') {
