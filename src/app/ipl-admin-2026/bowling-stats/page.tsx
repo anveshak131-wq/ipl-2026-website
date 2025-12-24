@@ -316,7 +316,18 @@ const BowlingStatsPage = () => {
         return aRolePriority - bRolePriority;
       }
 
-      // If same role, sort by date of birth (if available)
+      // If same role, sort by age (highest age first)
+      // First try to use age field directly
+      const aAge = a.age || 0;
+      const bAge = b.age || 0;
+      
+      if (aAge > 0 || bAge > 0) {
+        if (aAge !== bAge) {
+          return bAge - aAge; // Highest age first (descending)
+        }
+      }
+      
+      // If age not available, use date of birth (older = earlier date = comes first)
       if (a.dateOfBirth && b.dateOfBirth) {
         const aDate = new Date(a.dateOfBirth).getTime();
         const bDate = new Date(b.dateOfBirth).getTime();
