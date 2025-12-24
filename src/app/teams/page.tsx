@@ -799,15 +799,15 @@ function TeamsPageContent() {
                     ) : (
                         <motion.div 
                             className={viewMode === 'grid' 
-                                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-                                : "space-y-4"
+                                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
+                                : "space-y-6"
                             }
                             initial="hidden"
                             animate="visible"
                             variants={{
                                 visible: {
                                     transition: {
-                                        staggerChildren: 0.1,
+                                        staggerChildren: 0.08,
                                     },
                                 },
                             }}
@@ -819,31 +819,47 @@ function TeamsPageContent() {
                                         layout
                                         initial={{ opacity: 0, y: 50, scale: 0.9, rotateY: -15 }}
                                         animate={{ opacity: 1, y: 0, scale: 1, rotateY: 0 }}
-                                        exit={{ opacity: 0, scale: 0.8, rotateY: 15 }}
+                                        exit={{ opacity: 0, scale: 0.8, rotateY: 15, y: -20 }}
                                         transition={{
-                                            duration: 0.5,
+                                            duration: 0.6,
                                             delay: index * 0.05,
                                             ease: [0.22, 1, 0.36, 1],
                                         }}
                                         whileHover={{ 
-                                            y: -12, 
-                                            scale: 1.03,
+                                            y: -15, 
+                                            scale: 1.05,
                                             rotateY: 5,
-                                            transition: { duration: 0.3 }
+                                            transition: { duration: 0.3, ease: "easeOut" }
                                         }}
                                         style={{ perspective: 1000 }}
-                                        className="relative"
+                                        className="relative group"
                                         onMouseEnter={() => setHoveredTeam(team.id)}
                                         onMouseLeave={() => setHoveredTeam(null)}
                                     >
+                                        {/* Enhanced Glow effect on hover */}
+                                        <div 
+                                            className="absolute -inset-1 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10"
+                                            style={{
+                                                background: `linear-gradient(135deg, ${team.colors.primary}40, ${team.colors.secondary}40)`
+                                            }}
+                                        />
+                                        
                                         <EnhancedTeamCard
                                             team={team}
                                             onPlayerClick={handlePlayerClick}
                                             isFavorite={favorites.includes(team.id)}
                                             onToggleFavorite={() => toggleFavorite(team.id)}
                                         />
+                                        
                                         {hoveredTeam === team.id && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: 10 }}
+                                                transition={{ duration: 0.3 }}
+                                            >
                                             <TeamQuickStatsPreview team={team} matches={matches} />
+                                            </motion.div>
                                         )}
                                     </motion.div>
                                 ))}
@@ -853,60 +869,128 @@ function TeamsPageContent() {
 
                     {/* Enhanced Statistics Section */}
                     {!isLoading && teams.length > 0 && (
-                        <div className="mt-20 animate-fade-in">
-                            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 p-8 md:p-12 group hover:border-ipl-gold/50 transition-all duration-500">
-                                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                                    <div className="absolute inset-0 bg-gradient-to-br from-ipl-gold/10 to-ipl-purple/10 animate-gradient" />
+                        <motion.div 
+                            className="mt-24"
+                            initial={{ opacity: 0, y: 50 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.8 }}
+                        >
+                            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 backdrop-blur-2xl border-2 border-white/10 p-8 md:p-16 group hover:border-blue-500/50 transition-all duration-700 shadow-2xl">
+                                {/* Animated Background Effects */}
+                                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 animate-gradient" />
+                                    <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+                                    <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
                                 </div>
 
-                                <div className="relative text-center">
-                                    <div className="inline-flex items-center space-x-2 mb-4">
-                                        <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/10 border border-white/20 text-ipl-gold flex items-center gap-2">
-                                            <Icon name="stats" size={16} /> LEAGUE INSIGHTS
+                                <div className="relative z-10">
+                                    <motion.div 
+                                        className="text-center mb-12"
+                                        initial={{ opacity: 0, y: -20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ duration: 0.6 }}
+                                    >
+                                        <motion.div 
+                                            className="inline-flex items-center space-x-2 mb-6"
+                                            whileHover={{ scale: 1.05 }}
+                                        >
+                                            <span className="px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 border border-white/20 backdrop-blur-xl text-white flex items-center gap-2 shadow-lg">
+                                                <Icon name="stats" size={20} /> 
+                                                <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent font-extrabold">
+                                                    LEAGUE INSIGHTS
                                         </span>
-                                    </div>
-                                    <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
-                                        Championship <span className="bg-gradient-to-r from-ipl-gold to-ipl-purple bg-clip-text text-transparent">Breakdown</span>
+                                            </span>
+                                        </motion.div>
+                                        
+                                        <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 leading-tight">
+                                            Championship{' '}
+                                            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                                                Breakdown
+                                            </span>
                                     </h2>
-                                    <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
-                                        Historical performance metrics across all IPL franchises
-                                    </p>
+                                        
+                                        <p className="text-gray-300 text-lg md:text-xl mb-12 max-w-3xl mx-auto leading-relaxed">
+                                            Historical performance metrics and championship legacy across all IPL franchises
+                                        </p>
+                                    </motion.div>
 
-                                    {/* Trophy Distribution */}
-                                    <div className="max-w-3xl mx-auto mb-8">
-                                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                                    {/* Enhanced Trophy Distribution */}
+                                    <motion.div 
+                                        className="max-w-4xl mx-auto mb-12"
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        whileInView={{ opacity: 1, scale: 1 }}
+                                        viewport={{ once: true }}
+                                        transition={{ duration: 0.6, delay: 0.2 }}
+                                    >
+                                        <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
                                             {teams
                                                 .filter(t => t.trophies && t.trophies.length > 0)
                                                 .sort((a, b) => (b.trophies?.length || 0) - (a.trophies?.length || 0))
                                                 .slice(0, 5)
-                                                .map((team) => (
-                                                    <div key={team.id} className="text-center">
-                                                        <div className="text-sm font-bold text-gray-400 mb-2">{team.shortName}</div>
-                                                        <div className="flex items-center justify-center gap-1">
+                                                .map((team, index) => (
+                                                    <motion.div 
+                                                        key={team.id} 
+                                                        className="text-center group"
+                                                        initial={{ opacity: 0, y: 20 }}
+                                                        whileInView={{ opacity: 1, y: 0 }}
+                                                        viewport={{ once: true }}
+                                                        transition={{ duration: 0.5, delay: index * 0.1 }}
+                                                        whileHover={{ scale: 1.1, y: -5 }}
+                                                    >
+                                                        <div className="mb-4 p-4 rounded-2xl bg-gradient-to-br from-white/5 to-white/0 border border-white/10 group-hover:border-amber-500/50 transition-all duration-300">
+                                                            <div className="text-lg font-black text-white mb-3" style={{ color: team.colors.primary }}>
+                                                                {team.shortName}
+                                                            </div>
+                                                            <div className="flex items-center justify-center gap-2 mb-2">
                                                             {[...Array(team.trophies?.length || 0)].map((_, i) => (
-                                                                <CustomEmoji key={i} type="trophy" size={24} />
+                                                                    <motion.span
+                                                                        key={i}
+                                                                        initial={{ scale: 0, rotate: -180 }}
+                                                                        whileInView={{ scale: 1, rotate: 0 }}
+                                                                        viewport={{ once: true }}
+                                                                        transition={{ duration: 0.5, delay: i * 0.1 }}
+                                                                        whileHover={{ scale: 1.3, rotate: 15 }}
+                                                                    >
+                                                                        <CustomEmoji type="trophy" size={32} />
+                                                                    </motion.span>
                                                             ))}
                                                         </div>
-                                                        <div className="text-xs text-gray-500 mt-1">{team.trophies?.length} titles</div>
+                                                            <div className="text-sm font-bold text-amber-300 mt-2">
+                                                                {team.trophies?.length} {team.trophies?.length === 1 ? 'Title' : 'Titles'}
                                                     </div>
+                                                        </div>
+                                                    </motion.div>
                                                 ))}
                                                 </div>
-                                    </div>
+                                    </motion.div>
 
-                                    <button
-                                        onClick={() => router.push('/stats')}
-                                        className="group relative overflow-hidden rounded-xl font-bold py-3.5 px-10 transition-all duration-500 transform hover:scale-105 cursor-pointer bg-gradient-to-r from-ipl-purple to-ipl-gold text-white shadow-2xl shadow-purple-500/40 hover:shadow-purple-500/60"
+                                    <motion.div
+                                        className="text-center"
+                                        initial={{ opacity: 0, y: 20 }}
+                                        whileInView={{ opacity: 1, y: 0 }}
+                                        viewport={{ once: true }}
+                                        transition={{ duration: 0.6, delay: 0.4 }}
                                     >
-                                        <span className="relative z-10 flex items-center gap-2">
+                                        <motion.button
+                                        onClick={() => router.push('/stats')}
+                                            className="group relative overflow-hidden rounded-2xl font-bold py-4 px-12 text-lg transition-all duration-500 cursor-pointer bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white shadow-2xl shadow-purple-500/40 hover:shadow-purple-500/60"
+                                            whileHover={{ scale: 1.05, y: -2 }}
+                                            whileTap={{ scale: 0.95 }}
+                                    >
+                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                                            <span className="relative z-10 flex items-center gap-3">
                                             Explore Full Statistics
-                                            <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg className="w-6 h-6 transform group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                             </svg>
                                         </span>
-                                    </button>
+                                        </motion.button>
+                                    </motion.div>
                                 </div>
                             </div>
-                        </div>
+                        </motion.div>
                     )}
                 </div>
             </main>
