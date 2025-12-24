@@ -212,18 +212,8 @@ export default function AdminPlayers() {
       try {
         let dateOfBirthISO = '';
         
-        // Try to parse in the expected format for the current league first
-        if (currentLeague === 'wpl') {
+        // Always use Month DD, YYYY format for both IPL and WPL
           dateOfBirthISO = parseDateMonthDDYYYY(formData.dateOfBirth);
-        } else {
-          // For IPL, try DD/MM/YYYY format first
-          dateOfBirthISO = parseDateDDMMYYYY(formData.dateOfBirth);
-          
-          // If that fails, try Month DD, YYYY format as fallback
-          if (!dateOfBirthISO) {
-            dateOfBirthISO = parseDateMonthDDYYYY(formData.dateOfBirth);
-          }
-        }
         
         if (dateOfBirthISO) {
           // Debug: log the parsed date
@@ -403,9 +393,8 @@ export default function AdminPlayers() {
       : '';
     
     if (dobFormatted) {
-      const dateISO = player.league === 'wpl' 
-        ? parseDateMonthDDYYYY(dobFormatted)
-        : parseDateDDMMYYYY(dobFormatted);
+      // Always use Month DD, YYYY format for both IPL and WPL
+      const dateISO = parseDateMonthDDYYYY(dobFormatted);
       
       if (dateISO) {
         const calculatedAge = calculateAge(dateISO);
@@ -2427,7 +2416,7 @@ export default function AdminPlayers() {
                                       return (
                                         <>
                                           <span className="text-yellow-400">⚠</span>
-                                          <span className="text-yellow-300">Invalid date format. Please use {currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY or Month DD, YYYY'} format.</span>
+                                          <span className="text-yellow-300">Invalid date format. Please use Month DD, YYYY format.</span>
                                         </>
                                       );
                                     }
@@ -2442,7 +2431,7 @@ export default function AdminPlayers() {
                                   return (
                                     <>
                                       <span className="text-yellow-400">⚠</span>
-                                      <span className="text-yellow-300">Invalid date format. Use {currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY'} format (e.g., {currentLeague === 'wpl' ? 'December 25, 1994' : '25/12/1994'})</span>
+                                      <span className="text-yellow-300">Invalid date format. Use Month DD, YYYY format (e.g., December 25, 1994)</span>
                                     </>
                                   );
                             }
@@ -2454,7 +2443,7 @@ export default function AdminPlayers() {
                             <label className="block text-sm font-semibold text-gray-200 mb-2.5 flex items-center gap-2">
                               <Calendar className="w-4 h-4 text-pink-400" />
                               Date of Birth
-                              <span className="text-xs text-gray-400 font-normal">({currentLeague === 'wpl' ? 'Month DD, YYYY' : 'DD/MM/YYYY or Month DD, YYYY'})</span>
+                              <span className="text-xs text-gray-400 font-normal">(Month DD, YYYY)</span>
                         </label>
                             <div className="relative">
                         <input
@@ -2464,7 +2453,7 @@ export default function AdminPlayers() {
                             setFormData({...formData, dateOfBirth: e.target.value});
                           }}
                                 className="w-full pl-12 pr-4 py-3.5 bg-gray-800/60 border-2 border-white/10 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 transition-all hover:border-white/20 group-hover:bg-gray-800/70"
-                          placeholder={currentLeague === 'wpl' ? 'December 25, 1994 (optional)' : '25/12/1994 or December 25, 1994 (optional)'}
+                          placeholder="December 25, 1994 (optional)"
                         />
                               <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                             </div>
@@ -2479,18 +2468,8 @@ export default function AdminPlayers() {
                                   );
                             }
                             
-                            // Try to parse the date
-                            let parsedDate = '';
-                            if (currentLeague === 'wpl') {
-                              parsedDate = parseDateMonthDDYYYY(formData.dateOfBirth);
-                            } else {
-                              // For IPL, try DD/MM/YYYY format first
-                              parsedDate = parseDateDDMMYYYY(formData.dateOfBirth);
-                              // If that fails, try Month DD, YYYY format as fallback
-                              if (!parsedDate) {
-                                parsedDate = parseDateMonthDDYYYY(formData.dateOfBirth);
-                              }
-                            }
+                            // Try to parse the date - always use Month DD, YYYY format
+                            const parsedDate = parseDateMonthDDYYYY(formData.dateOfBirth);
                             
                             if (parsedDate) {
                               const calculatedAge = calculateAge(parsedDate);
