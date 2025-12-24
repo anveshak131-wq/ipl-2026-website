@@ -256,6 +256,21 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                           <Star className="w-4 h-4 text-yellow-900 fill-yellow-900" />
                         </motion.div>
                 )}
+
+                {/* Special Achievement Badge - Highest Run Scorer */}
+                {player.name.toLowerCase().includes('virat kohli') && (
+                  <motion.div 
+                    className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 shadow-lg border-2 border-amber-400/50 z-10"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                    whileHover={{ scale: 1.1 }}
+                  >
+                    <span className="text-[10px] font-bold text-white whitespace-nowrap">
+                      🏆 Highest Run Scorer
+                    </span>
+                  </motion.div>
+                )}
               </div>
                   </motion.div>
               
@@ -332,6 +347,22 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                 {player.jerseyNumber > 0 ? player.jerseyNumber : 'N/A'}
                       </motion.div>
                     </motion.div>
+
+                    {/* Special Achievement Badge - Highest Run Scorer */}
+                    {player.name.toLowerCase().includes('virat kohli') && (
+                      <motion.div 
+                        className="mt-3 w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500/20 to-orange-500/20 border-2 border-amber-400/50"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.4, delay: 0.4 }}
+                        whileHover={{ scale: 1.05 }}
+                      >
+                        <Award className="w-4 h-4 text-amber-400" />
+                        <span className="text-xs font-bold text-amber-300">
+                          🏆 Highest Run Scorer in IPL History
+                        </span>
+                      </motion.div>
+                    )}
               </div>
             </div>
           </div>
