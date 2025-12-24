@@ -83,6 +83,15 @@ export function calculateBatterPerformance(player: Player): OverallPerformance {
   // This gives significant importance to consistency and big scores
   const milestonesScore = Math.min(25, (weightedMilestonesPerMatch / 2) * 25);
   
+  // Separate scores for 50s and 100s to show individual contribution
+  // 50s: 0-1 per match = 0-12 points (consistency)
+  const fiftiesPerMatch = matches > 0 ? fifties / matches : 0;
+  const fiftiesScore = Math.min(12, (fiftiesPerMatch / 1) * 12);
+  
+  // 100s: 0-0.5 per match = 0-13 points (big scores, weighted more)
+  const hundredsPerMatch = matches > 0 ? hundreds / matches : 0;
+  const hundredsScore = Math.min(13, (hundredsPerMatch / 0.5) * 13);
+  
   // Runs per match: 0-50 = 0-10 points
   const rpmScore = Math.min(10, (runsPerMatch / 50) * 10);
   
@@ -106,7 +115,9 @@ export function calculateBatterPerformance(player: Player): OverallPerformance {
     breakdown: [
       { label: 'Batting Avg', value: battingAvg > 0 ? battingAvg.toFixed(2) : '-', weight: avgScore },
       { label: 'Strike Rate', value: strikeRate > 0 ? strikeRate.toFixed(1) : '-', weight: srScore },
-      { label: 'Milestones', value: `${fifties} 50s, ${hundreds} 100s`, weight: milestonesScore },
+      { label: '50s', value: fifties > 0 ? `${fifties} fifties` : '-', weight: fiftiesScore },
+      { label: '100s', value: hundreds > 0 ? `${hundreds} hundreds` : '-', weight: hundredsScore },
+      { label: 'Milestones Total', value: `${fifties} 50s, ${hundreds} 100s`, weight: milestonesScore - fiftiesScore - hundredsScore },
       { label: 'Runs/Match', value: runsPerMatch > 0 ? runsPerMatch.toFixed(1) : '-', weight: rpmScore },
       { label: 'Boundary Impact', value: boundaries > 0 ? `${boundaries} (${fours} 4s, ${sixes} 6s)` : '-', weight: boundaryScore },
       { label: 'Highest Score', value: highest > 0 ? highest.toString() : '-', weight: highestScore },
