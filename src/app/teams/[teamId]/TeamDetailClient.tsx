@@ -26,7 +26,7 @@ import TrophyShowcaseGallery from '@/components/teams/TrophyShowcaseGallery';
 import InteractiveStadiumTour from '@/components/teams/InteractiveStadiumTour';
 import PlayerComparisonTool from '@/components/teams/PlayerComparisonTool';
 import TeamFormationVisualizer from '@/components/teams/TeamFormationVisualizer';
-import { Calendar } from 'lucide-react';
+import { Calendar, Filter } from 'lucide-react';
 import { api } from '@/lib/data';
 import { 
   UsersIcon, 
@@ -564,7 +564,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                 {/* Premium Team Badge */}
                 <motion.div 
                   className="inline-flex items-center gap-4 px-8 py-4 rounded-2xl backdrop-blur-2xl border-2 shadow-2xl transition-all duration-500 group"
-                  style={{
+                     style={{
                     background: `linear-gradient(135deg, ${primaryColor.light}40, ${secondaryColor.light}40)`,
                     borderColor: primaryColor.medium,
                     boxShadow: `0 10px 40px ${primaryColor.glow}30`
@@ -705,7 +705,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                 {/* Enhanced Glow effect */}
                 <motion.div 
                   className="absolute inset-0 rounded-full blur-[150px] opacity-40"
-                  style={{ 
+                     style={{ 
                     background: `radial-gradient(circle, ${primaryColor.solid}60, ${secondaryColor.solid}40, transparent)`,
                   }}
                   animate={{
@@ -735,8 +735,8 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                   {/* Outer glow ring */}
                   <motion.div 
                     className="absolute -inset-8 rounded-full opacity-60 blur-3xl"
-                    style={{
-                      background: `conic-gradient(from 0deg, ${primaryColor.solid}, ${secondaryColor.solid}, ${primaryColor.solid})`
+                       style={{
+                         background: `conic-gradient(from 0deg, ${primaryColor.solid}, ${secondaryColor.solid}, ${primaryColor.solid})`
                     }}
                     animate={{
                       rotate: [0, 360],
@@ -751,7 +751,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                   {/* Main logo container */}
                   <motion.div 
                     className="relative w-[400px] h-[400px] md:w-[500px] md:h-[500px] rounded-[3rem] flex items-center justify-center backdrop-blur-2xl border-[3px] shadow-[0_0_80px_rgba(0,0,0,0.5)] overflow-visible"
-                    style={{
+                       style={{
                       background: `linear-gradient(135deg, ${primaryColor.light}50, ${secondaryColor.light}50, ${primaryColor.light}30)`,
                       borderColor: `${primaryColor.medium}80`,
                       boxShadow: `0 0 60px ${primaryColor.glow}60, 0 0 120px ${secondaryColor.glow || primaryColor.glow}40, inset 0 0 60px ${primaryColor.glow}20`
@@ -762,7 +762,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                     {/* Animated gradient overlay */}
                     <motion.div 
                       className="absolute inset-0 rounded-[3rem] opacity-30"
-                      style={{
+                         style={{
                         background: `conic-gradient(from 0deg, transparent, ${primaryColor.solid}30, transparent, ${secondaryColor.solid}30, transparent)`
                       }}
                       animate={{ rotate: 360 }}
@@ -1090,12 +1090,12 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
           </div>
         </AnimatedSection>
 
-        {/* Premium Tab Navigation */}
+        {/* Premium Tab Navigation - Complete Redesign */}
         <AnimatedSection direction="up" delay={0.3} className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20 mt-16">
-          <div className="flex flex-col items-center gap-8">
+          <div className="flex flex-col items-center gap-12">
             {/* Enhanced League Logo Badge */}
             <motion.div 
-              className="relative w-16 h-16 rounded-2xl backdrop-blur-2xl border-[3px] flex items-center justify-center shadow-2xl z-10" 
+              className="relative w-20 h-20 rounded-3xl backdrop-blur-2xl border-[3px] flex items-center justify-center shadow-2xl z-10 group" 
               style={{
                 background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
                 borderColor: primaryColor.medium,
@@ -1114,7 +1114,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
             {/* Premium Tab Container */}
             <motion.div 
               className="relative inline-flex gap-3 p-2 rounded-3xl backdrop-blur-2xl border-[3px] shadow-2xl"
-              style={{
+                 style={{
                 background: `linear-gradient(135deg, ${primaryColor.light}50, ${secondaryColor.light}50, ${primaryColor.light}30)`,
                 borderColor: `${primaryColor.medium}70`,
                 boxShadow: `0 20px 60px ${primaryColor.glow}30, inset 0 0 40px ${primaryColor.glow}10`
@@ -1248,63 +1248,126 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                   </motion.button>
                 </div>
               )}
-              {/* Squad Filters */}
-              <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 animate-fade-in">
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">Filter squad</span>
-                  <div className="w-12 h-px bg-white/10" />
+              {/* Premium Squad Filters - Complete Redesign */}
+              <motion.div 
+                className="mb-12 rounded-3xl backdrop-blur-2xl border-2 p-8 shadow-2xl"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                style={{
+                  background: `linear-gradient(135deg, ${primaryColor.light}40, ${secondaryColor.light}40, ${primaryColor.light}20)`,
+                  borderColor: `${primaryColor.medium}60`,
+                  boxShadow: `0 20px 60px ${primaryColor.glow}20, inset 0 0 40px ${primaryColor.glow}5`
+                }}
+              >
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                  <div className="flex items-center gap-4">
+                    <motion.div
+                      className="w-12 h-12 rounded-2xl flex items-center justify-center backdrop-blur-xl border-2"
+                      style={{
+                        background: `linear-gradient(135deg, ${primaryColor.light}50, ${secondaryColor.light}50)`,
+                        borderColor: primaryColor.medium,
+                      }}
+                      whileHover={{ rotate: 360, scale: 1.1 }}
+                      transition={{ duration: 0.6 }}
+                    >
+                      <Filter className="w-6 h-6" style={{ color: primaryColor.solid }} />
+                    </motion.div>
+                    <div>
+                      <h3 className="text-xl font-black mb-1" style={{ color: primaryColor.text }}>
+                        Filter Squad
+                      </h3>
+                      <p className="text-sm text-gray-400">Refine your search</p>
+                    </div>
                 </div>
 
-                <div className="flex flex-wrap gap-4">
+                  <div className="flex flex-wrap items-center gap-6">
                   {/* Nationality filter */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-400 uppercase tracking-wide">Nationality</span>
-                    <div className="inline-flex rounded-xl bg-white/5 p-1 border border-white/10">
+                    <div className="flex items-center gap-3">
+                      <GlobeIcon className="w-5 h-5" style={{ color: primaryColor.solid }} />
+                      <span className="text-sm font-bold uppercase tracking-wider" style={{ color: primaryColor.textOnLight }}>
+                        Nationality
+                      </span>
+                      <div className="inline-flex rounded-2xl backdrop-blur-xl p-1.5 border-2 gap-1.5"
+                           style={{
+                             background: `linear-gradient(135deg, ${primaryColor.light}30, ${secondaryColor.light}30)`,
+                             borderColor: `${primaryColor.medium}40`
+                           }}>
                       {[
                         { id: 'all', label: 'All' },
                         { id: 'indian', label: 'Indian' },
                         { id: 'overseas', label: 'Overseas' },
                       ].map((option) => (
-                        <button
+                          <motion.button
                           key={option.id}
                           onClick={() => setNationalityFilter(option.id as any)}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                            className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
                             nationalityFilter === option.id
-                              ? 'bg-white text-slate-900 shadow-md'
-                              : 'text-gray-300 hover:bg-white/10'
-                          }`}
+                                ? 'shadow-lg'
+                                : ''
+                            }`}
+                            style={nationalityFilter === option.id ? {
+                              background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
+                              color: '#FFFFFF',
+                              boxShadow: `0 8px 25px ${primaryColor.glow}40`
+                            } : {
+                              background: 'transparent',
+                              color: primaryColor.textOnLight,
+                            }}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                         >
                           {option.label}
-                        </button>
+                          </motion.button>
                       ))}
                     </div>
                   </div>
 
+                    <div className="h-8 w-px bg-gradient-to-b from-transparent via-white/20 to-transparent" />
+
                   {/* Batting style filter */}
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-400 uppercase tracking-wide">Batting</span>
-                    <div className="inline-flex rounded-xl bg-white/5 p-1 border border-white/10">
+                    <div className="flex items-center gap-3">
+                      <CricketBatIcon className="w-5 h-5" color={primaryColor.solid} />
+                      <span className="text-sm font-bold uppercase tracking-wider" style={{ color: primaryColor.textOnLight }}>
+                        Batting
+                      </span>
+                      <div className="inline-flex rounded-2xl backdrop-blur-xl p-1.5 border-2 gap-1.5"
+                           style={{
+                             background: `linear-gradient(135deg, ${primaryColor.light}30, ${secondaryColor.light}30)`,
+                             borderColor: `${primaryColor.medium}40`
+                           }}>
                       {[
                         { id: 'any', label: 'Any' },
-                        { id: 'right', label: 'Right-hand' },
-                        { id: 'left', label: 'Left-hand' },
+                          { id: 'right', label: 'Right' },
+                          { id: 'left', label: 'Left' },
                       ].map((option) => (
-                        <button
+                          <motion.button
                           key={option.id}
                           onClick={() => setBattingStyleFilter(option.id as any)}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-200 ${
+                            className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
                             battingStyleFilter === option.id
-                              ? 'bg-white text-slate-900 shadow-md'
-                              : 'text-gray-300 hover:bg-white/10'
-                          }`}
+                                ? 'shadow-lg'
+                                : ''
+                            }`}
+                            style={battingStyleFilter === option.id ? {
+                              background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
+                              color: '#FFFFFF',
+                              boxShadow: `0 8px 25px ${primaryColor.glow}40`
+                            } : {
+                              background: 'transparent',
+                              color: primaryColor.textOnLight,
+                            }}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                         >
                           {option.label}
-                        </button>
+                          </motion.button>
                       ))}
                     </div>
                   </div>
                 </div>
               </div>
+              </motion.div>
 
               {/* Premium Player Sections */}
               {[
@@ -1316,13 +1379,13 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                 section.players.length > 0 && (
                   <AnimatedSection key={sectionIndex} direction="up" delay={sectionIndex * 0.15} className="mb-16">
                     {/* Premium Section Header */}
-                    <motion.div 
+                      <motion.div
                       className="mb-10 flex items-center gap-6"
                       initial={{ opacity: 0, x: -30 }}
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
-                      transition={{ duration: 0.6 }}
-                    >
+                        transition={{ duration: 0.6 }}
+                      >
                       <motion.div
                         className="relative"
                         whileHover={{ rotate: 360, scale: 1.1 }}
@@ -1349,8 +1412,8 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                           whileHover={{ scale: 1.05 }}
                           transition={{ duration: 0.2 }}
                         >
-                          {section.title}
-                        </motion.h3>
+                      {section.title}
+                    </motion.h3>
                         <div className="h-1 w-24 rounded-full"
                              style={{
                                background: `linear-gradient(to right, ${primaryColor.solid}, ${secondaryColor.solid})`,
@@ -1755,7 +1818,7 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
         transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
       >
         <span className="drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
-          {player.jerseyNumber > 0 ? player.jerseyNumber : 'N/A'}
+        {player.jerseyNumber > 0 ? player.jerseyNumber : 'N/A'}
         </span>
       </motion.div>
 
@@ -1805,7 +1868,7 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.2 }}
           >
-            {player.name}
+          {player.name}
           </motion.h3>
           <motion.p 
             className="text-base font-bold uppercase tracking-widest mb-1" 
@@ -1815,7 +1878,7 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
               textShadow: '0 2px 8px rgba(0,0,0,0.5)'
             }}
           >
-            {player.role}
+        {player.role}
           </motion.p>
           {player.allrounderType && (
             <span className="inline-block px-3 py-1 rounded-lg text-xs font-bold mt-2"
@@ -1937,9 +2000,9 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
                 {stats.matches || 0}
               </p>
               <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: primaryColor.textOnLight }}>
-                Matches
-              </p>
-            </div>
+            Matches
+          </p>
+        </div>
           </div>
         </motion.div>
         <motion.div 
@@ -1958,9 +2021,9 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
                 {stats.runs || 0}
               </p>
               <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: primaryColor.textOnLight }}>
-                Runs
-              </p>
-            </div>
+            Runs
+          </p>
+        </div>
           </div>
         </motion.div>
         <motion.div 
@@ -1979,9 +2042,9 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
                 {stats.wickets || 0}
               </p>
               <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: primaryColor.textOnLight }}>
-                Wickets
-              </p>
-            </div>
+            Wickets
+          </p>
+        </div>
           </div>
         </motion.div>
       </div>
