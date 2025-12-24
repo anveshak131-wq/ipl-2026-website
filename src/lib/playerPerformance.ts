@@ -61,25 +61,35 @@ export function calculateBatterPerformance(player: Player): OverallPerformance {
   const boundaries = fours + sixes;
   const boundaryPercentage = runs > 0 ? (boundaries * 4 / runs) * 100 : 0; // Approximate boundary contribution
   const runsPerMatch = matches > 0 ? runs / matches : 0;
-  const consistencyScore = matches > 0 ? ((fifties + hundreds * 2) / matches) * 10 : 0; // Weighted consistency
+  
+  // Milestones calculation - give more weight to 50s and 100s
+  const totalMilestones = fifties + hundreds;
+  const milestonesPerMatch = matches > 0 ? totalMilestones / matches : 0;
+  // Weighted: 100s count as 2x, 50s count as 1x
+  const weightedMilestones = (fifties * 1) + (hundreds * 2);
+  const weightedMilestonesPerMatch = matches > 0 ? weightedMilestones / matches : 0;
   
   // Normalize and weight components (out of 100)
-  // Batting Average: 0-50 = 0-30 points, 50+ = 30 points
-  const avgScore = Math.min(30, (battingAvg / 50) * 30);
+  // Batting Average: 0-50 = 0-25 points, 50+ = 25 points
+  const avgScore = Math.min(25, (battingAvg / 50) * 25);
   
-  // Strike Rate: 100-150 = 0-25 points, 150+ = 25 points
-  const srScore = Math.min(25, ((strikeRate - 100) / 50) * 25);
+  // Strike Rate: 100-150 = 0-20 points, 150+ = 20 points
+  const srScore = Math.min(20, ((strikeRate - 100) / 50) * 20);
   
-  // Boundary Percentage: 0-50% = 0-20 points
-  const boundaryScore = Math.min(20, (boundaryPercentage / 50) * 20);
+  // Boundary Percentage: 0-50% = 0-15 points
+  const boundaryScore = Math.min(15, (boundaryPercentage / 50) * 15);
   
-  // Consistency: 0-2 per match = 0-15 points
-  const consistencyPoints = Math.min(15, (consistencyScore / 2) * 15);
+  // Milestones (50s and 100s): Increased weight - 0-2 per match = 0-25 points
+  // This gives significant importance to consistency and big scores
+  const milestonesScore = Math.min(25, (weightedMilestonesPerMatch / 2) * 25);
   
   // Runs per match: 0-50 = 0-10 points
   const rpmScore = Math.min(10, (runsPerMatch / 50) * 10);
   
-  const totalRating = avgScore + srScore + boundaryScore + consistencyPoints + rpmScore;
+  // Highest Score Bonus: 0-200 = 0-5 points
+  const highestScore = Math.min(5, (highest / 200) * 5);
+  
+  const totalRating = avgScore + srScore + boundaryScore + milestonesScore + rpmScore + highestScore;
   
   // Generate summary based on rating
   let summary = 'Emerging Talent';
@@ -96,10 +106,10 @@ export function calculateBatterPerformance(player: Player): OverallPerformance {
     breakdown: [
       { label: 'Batting Avg', value: battingAvg > 0 ? battingAvg.toFixed(2) : '-', weight: avgScore },
       { label: 'Strike Rate', value: strikeRate > 0 ? strikeRate.toFixed(1) : '-', weight: srScore },
+      { label: 'Milestones', value: `${fifties} 50s, ${hundreds} 100s`, weight: milestonesScore },
       { label: 'Runs/Match', value: runsPerMatch > 0 ? runsPerMatch.toFixed(1) : '-', weight: rpmScore },
-      { label: 'Consistency', value: `${fifties + hundreds} milestones`, weight: consistencyPoints },
       { label: 'Boundary Impact', value: boundaries > 0 ? `${boundaries} (${fours} 4s, ${sixes} 6s)` : '-', weight: boundaryScore },
-      { label: 'Highest Score', value: highest > 0 ? highest.toString() : '-', weight: highest > 0 ? Math.min(5, (highest / 200) * 5) : 0 },
+      { label: 'Highest Score', value: highest > 0 ? highest.toString() : '-', weight: highestScore },
     ],
     summary
   };
