@@ -639,22 +639,24 @@ export const onRequest = async (context) => {
         ...players[index], // Preserve existing properties
         id: updatedPlayer.id,
         ...(updatedPlayer.league && { league: updatedPlayer.league }), // Update league if provided
-        name: updatedPlayer.name,
-        role: updatedPlayer.role,
+        name: updatedPlayer.name || players[index].name,
+        role: updatedPlayer.role || players[index].role,
         // Preserve allrounderType if role is All-rounder, otherwise remove it
         ...(updatedPlayer.role === 'All-rounder' && updatedPlayer.allrounderType 
           ? { allrounderType: updatedPlayer.allrounderType }
           : updatedPlayer.role !== 'All-rounder' 
             ? { allrounderType: undefined }
             : {}),
-        teamId: updatedPlayer.teamId,
-        age: parseInt(updatedPlayer.age) || 0,
-        dateOfBirth: updatedPlayer.dateOfBirth || undefined,
-        nationality: updatedPlayer.nationality || '',
-        jerseyNumber: parseInt(updatedPlayer.jerseyNumber) || 0,
-        isCaptain: updatedPlayer.isCaptain || false,
-        bowlingStyle: updatedPlayer.bowlingStyle || 'N/A (Batsman)',
-        battingStyle: updatedPlayer.battingStyle || 'Right-handed bat',
+        teamId: updatedPlayer.teamId || players[index].teamId,
+        age: updatedPlayer.age !== undefined ? (parseInt(updatedPlayer.age) || 0) : players[index].age,
+        dateOfBirth: updatedPlayer.dateOfBirth !== undefined ? updatedPlayer.dateOfBirth : players[index].dateOfBirth,
+        nationality: updatedPlayer.nationality !== undefined ? updatedPlayer.nationality : players[index].nationality,
+        jerseyNumber: updatedPlayer.jerseyNumber !== undefined ? (parseInt(updatedPlayer.jerseyNumber) || 0) : players[index].jerseyNumber,
+        isCaptain: updatedPlayer.isCaptain !== undefined ? updatedPlayer.isCaptain : players[index].isCaptain,
+        bowlingStyle: updatedPlayer.bowlingStyle !== undefined ? updatedPlayer.bowlingStyle : players[index].bowlingStyle,
+        battingStyle: updatedPlayer.battingStyle !== undefined ? updatedPlayer.battingStyle : players[index].battingStyle,
+        // Preserve transferInfo if not provided
+        transferInfo: updatedPlayer.transferInfo !== undefined ? updatedPlayer.transferInfo : players[index].transferInfo,
         stats: {
           // Preserve existing stats first
           ...players[index].stats,

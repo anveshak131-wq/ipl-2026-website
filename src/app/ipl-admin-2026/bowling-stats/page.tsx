@@ -219,6 +219,7 @@ const BowlingStatsPage = () => {
       };
 
       const updatedPlayer = {
+        ...editingPlayer, // Preserve ALL existing player fields
         id: editingPlayer.id,
         name: editForm.name || editingPlayer.name,
         role: editForm.role || editingPlayer.role,
@@ -226,6 +227,14 @@ const BowlingStatsPage = () => {
         jerseyNumber: editForm.jerseyNumber || editingPlayer.jerseyNumber,
         teamId: editingPlayer.teamId,
         league: editingPlayer.league,
+        // Preserve all other fields that aren't being edited
+        dateOfBirth: editingPlayer.dateOfBirth,
+        nationality: editingPlayer.nationality,
+        battingStyle: editingPlayer.battingStyle,
+        bowlingStyle: editingPlayer.bowlingStyle,
+        isCaptain: editingPlayer.isCaptain,
+        allrounderType: editingPlayer.allrounderType,
+        transferInfo: editingPlayer.transferInfo,
         stats: {
           ...stats,
           // CRITICAL: Explicitly ensure numeric fields are numbers and are always set

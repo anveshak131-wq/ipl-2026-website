@@ -232,6 +232,7 @@ const BattingStatsPage = () => {
       };
 
       const updatedPlayer = {
+        ...editingPlayer, // Preserve ALL existing player fields
         id: editingPlayer.id,
         name: editForm.name || editingPlayer.name,
         role: editForm.role || editingPlayer.role,
@@ -239,6 +240,14 @@ const BattingStatsPage = () => {
         jerseyNumber: editForm.jerseyNumber || editingPlayer.jerseyNumber,
         teamId: editingPlayer.teamId,
         league: editingPlayer.league,
+        // Preserve all other fields that aren't being edited
+        dateOfBirth: editingPlayer.dateOfBirth,
+        nationality: editingPlayer.nationality,
+        battingStyle: editingPlayer.battingStyle,
+        bowlingStyle: editingPlayer.bowlingStyle,
+        isCaptain: editingPlayer.isCaptain,
+        allrounderType: editingPlayer.allrounderType,
+        transferInfo: editingPlayer.transferInfo,
         stats: {
           ...stats,
           // CRITICAL: Explicitly ensure average and strikeRate are numbers and are always set
