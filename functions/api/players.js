@@ -637,6 +637,12 @@ export const onRequest = async (context) => {
         ...(updatedPlayer.league && { league: updatedPlayer.league }), // Update league if provided
         name: updatedPlayer.name,
         role: updatedPlayer.role,
+        // Preserve allrounderType if role is All-rounder, otherwise remove it
+        ...(updatedPlayer.role === 'All-rounder' && updatedPlayer.allrounderType 
+          ? { allrounderType: updatedPlayer.allrounderType }
+          : updatedPlayer.role !== 'All-rounder' 
+            ? { allrounderType: undefined }
+            : {}),
         teamId: updatedPlayer.teamId,
         age: parseInt(updatedPlayer.age) || 0,
         dateOfBirth: updatedPlayer.dateOfBirth || undefined,

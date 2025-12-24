@@ -42,6 +42,11 @@ export default function CustomSelect({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const selectRef = useRef<HTMLDivElement>(null);
 
+  // Reset search query when value changes externally
+  useEffect(() => {
+    setSearchQuery('');
+  }, [value]);
+
   const selectedOption = options.find(opt => opt.value === value);
 
   // Filter options based on search query

@@ -2240,10 +2240,15 @@ export default function AdminPlayers() {
                               <span className="text-red-400">*</span>
                           </label>
                             <CustomSelect
+                            key={`allrounder-type-${editingPlayer?.id || 'new'}-${formData.allrounderType}`}
                             value={formData.allrounderType || ''}
                               onChange={(value) => {
-                                console.log('All-rounder type changed to:', value);
-                                setFormData({...formData, allrounderType: value as any});
+                                console.log('All-rounder type changed to:', value, 'Current formData:', formData);
+                                setFormData(prev => {
+                                  const updated = {...prev, allrounderType: value as any};
+                                  console.log('Updated formData:', updated);
+                                  return updated;
+                                });
                               }}
                               options={[
                                 { value: 'Batting All-rounder', label: 'Batting All-rounder' },
