@@ -529,14 +529,18 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                     </motion.h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       {[
+                        { label: 'Matches', value: player.stats.matches, isNumeric: true },
+                        { label: 'Innings', value: (player.stats as any).battingInnings || 0, isNumeric: true },
+                        { label: 'Not Outs', value: (player.stats as any).notOuts || 0, isNumeric: true },
+                  { label: 'Total Runs', value: player.stats.runs, isNumeric: true },
+                        { label: 'Balls Faced', value: (player.stats as any).ballsFaced || 0, isNumeric: true },
                         { label: 'Highest', value: player.stats.highest, isNumeric: true },
+                  { label: 'Batting Avg', value: player.stats.average, isNumeric: true, format: (v: number) => v.toFixed(2) },
+                  { label: 'Strike Rate', value: player.stats.strikeRate, isNumeric: true, format: (v: number) => v.toFixed(1) },
                         { label: 'Fours', value: player.stats.fours, isNumeric: true },
                         { label: 'Sixes', value: player.stats.sixes, isNumeric: true },
                         { label: 'Fifties', value: player.stats.fifties, isNumeric: true },
                         { label: 'Hundreds', value: player.stats.hundreds, isNumeric: true },
-                  { label: 'Total Runs', value: player.stats.runs, isNumeric: true },
-                        { label: 'Avg', value: player.stats.average, isNumeric: true, format: (v: number) => v.toFixed(2) },
-                        { label: 'SR', value: player.stats.strikeRate, isNumeric: true, format: (v: number) => v.toFixed(1) },
                 ].map((stat, index) => {
                   const displayValue = stat.isNumeric 
                     ? (stat.value > 0 ? (stat.format ? stat.format(stat.value) : stat.value.toString()) : '-')
@@ -589,10 +593,15 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                     </motion.h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[
+                  { label: 'Matches', value: player.stats.matches, isNumeric: true },
+                  { label: 'Bowling Innings', value: (player.stats as any).bowlingInnings || 0, isNumeric: true },
+                  { label: 'Balls', value: (player.stats as any).balls || 0, isNumeric: true },
+                  { label: 'Overs', value: (player.stats as any).balls ? ((player.stats as any).balls / 6).toFixed(1) : '0', isNumeric: false },
+                  { label: 'Maidens', value: (player.stats as any).maidens || 0, isNumeric: true },
+                  { label: 'Runs Conceded', value: (player.stats as any).runsConceded || 0, isNumeric: true },
                   { label: 'Wickets', value: player.stats.wickets, isNumeric: true },
-                        { label: 'Economy', value: player.stats.economy, isNumeric: true, format: (v: number) => v.toFixed(2) },
                   { 
-                          label: 'Avg', 
+                          label: 'Bowling Avg', 
                     value: (() => {
                       const bowlingAvg = player.stats.bowlingAverage ?? 
                         (player.stats.wickets > 0 
@@ -603,7 +612,21 @@ export default function PlayerModal({ player, isOpen, onClose, teamColors, teamD
                     isNumeric: true,
                     format: (v: number) => v.toFixed(2)
                   },
-                        { label: 'Best', value: player.stats.bestBowling, isNumeric: false },
+                  { label: 'Economy', value: player.stats.economy, isNumeric: true, format: (v: number) => v.toFixed(2) },
+                  { 
+                    label: 'Bowling SR', 
+                    value: (() => {
+                      const balls = (player.stats as any).balls || 0;
+                      const wickets = player.stats.wickets || 0;
+                      if (wickets > 0 && balls > 0) {
+                        return (balls / wickets).toFixed(1);
+                      }
+                      return '0';
+                    })(),
+                    isNumeric: false
+                  },
+                  { label: 'Best Bowling', value: player.stats.bestBowling, isNumeric: false },
+                  { label: '5 Wickets', value: (player.stats as any).fiveWickets || 0, isNumeric: true },
                 ].map((stat, index) => {
                   let displayValue: string;
                   if (stat.isNumeric) {
