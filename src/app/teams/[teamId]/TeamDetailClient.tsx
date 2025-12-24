@@ -1397,46 +1397,82 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
   return (
     <motion.div
       onClick={onClick}
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 30, scale: 0.95 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.05 }}
-      whileHover={{ scale: 1.05, y: -8 }}
-      className="group relative overflow-hidden rounded-2xl backdrop-blur-xl p-6 border cursor-pointer transition-all duration-500 shadow-xl hover:shadow-2xl"
+      transition={{ duration: 0.6, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ scale: 1.08, y: -12, rotateY: 5 }}
+      className="group relative overflow-hidden rounded-3xl backdrop-blur-2xl p-6 border-2 cursor-pointer transition-all duration-500 shadow-2xl hover:shadow-[0_20px_60px_rgba(0,0,0,0.4)]"
       style={{
-        background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
-        borderColor: isKeyPlayer ? '#facc15' : primaryColor.medium,
+        background: `linear-gradient(135deg, ${primaryColor.light}40, ${secondaryColor.light}40, ${primaryColor.light}20)`,
+        borderColor: isKeyPlayer ? 'rgba(250, 204, 21, 0.6)' : `${primaryColor.medium}60`,
         boxShadow: isKeyPlayer
-          ? `0 0 25px rgba(250, 204, 21, 0.6), 0 10px 30px ${primaryColor.glow}20`
-          : `0 10px 25px ${primaryColor.glow}20`,
+          ? `0 0 40px rgba(250, 204, 21, 0.5), 0 15px 40px ${primaryColor.glow}30, inset 0 0 60px ${primaryColor.glow}10`
+          : `0 15px 40px ${primaryColor.glow}25, inset 0 0 40px ${primaryColor.glow}5`,
+        transformStyle: 'preserve-3d',
+        perspective: '1000px'
       }}
     >
+      {/* Enhanced Glow Effect on Hover */}
+      <div 
+        className="absolute -inset-2 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-2xl -z-10"
+        style={{
+          background: `radial-gradient(circle, ${primaryColor.medium}60, ${secondaryColor.medium}40, transparent)`
+        }}
+      />
+      
       {/* Jersey Number with enhanced animation */}
-      <div
-        className="absolute top-4 right-4 w-14 h-14 rounded-xl flex items-center justify-center font-black text-xl shadow-lg transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 z-10 text-white"
+      <motion.div
+        className="absolute top-4 right-4 w-16 h-16 rounded-2xl flex items-center justify-center font-black text-2xl shadow-2xl transform z-10 text-white"
         style={{
           background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
-          boxShadow: `0 5px 15px ${primaryColor.glow}`,
+          boxShadow: `0 8px 25px ${primaryColor.glow}60, inset 0 2px 10px rgba(255,255,255,0.2)`,
         }}
+        whileHover={{ scale: 1.2, rotate: 15 }}
+        transition={{ duration: 0.3 }}
       >
         {player.jerseyNumber > 0 ? player.jerseyNumber : 'N/A'}
+      </motion.div>
+
+      {/* Enhanced Hover shimmer effect */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
       </div>
+      
+      {/* Animated Background Pattern */}
+      <div 
+        className="absolute inset-0 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-500"
+        style={{
+          backgroundImage: `radial-gradient(circle at 2px 2px, ${primaryColor.solid} 1px, transparent 0)`,
+          backgroundSize: '24px 24px'
+        }}
+      />
 
-      {/* Hover shimmer effect */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 animate-shimmer" />
-
-      {/* Player Name */}
-      <div className="flex items-center gap-2 mb-2 pr-16">
+      {/* Player Name with enhanced styling */}
+      <div className="flex items-center gap-3 mb-3 pr-20">
         {player.nationality && (
-          <FlagImage nationality={player.nationality} size="sm" />
+          <motion.div
+            whileHover={{ scale: 1.2, rotate: 10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <FlagImage nationality={player.nationality} size="md" />
+          </motion.div>
         )}
-        <h3 className="text-xl font-bold" style={{ color: primaryColor.textOnLight }}>
-          {player.name}
-        </h3>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-2xl font-black mb-1 truncate" style={{ 
+            color: primaryColor.textOnLight,
+            textShadow: `0 2px 10px ${primaryColor.glow}40`
+          }}>
+            {player.name}
+          </h3>
+          <p className="text-sm font-bold uppercase tracking-wider" style={{ 
+            color: `${primaryColor.textOnLight}90`,
+            letterSpacing: '0.1em'
+          }}>
+            {player.role}
+          </p>
+        </div>
       </div>
-      <p className="text-sm font-semibold mb-4" style={{ color: primaryColor.textOnLight }}>
-        {player.role}
-      </p>
 
       {/* Badges with Custom Icons */}
       <div className="flex flex-wrap gap-2 mb-3">
@@ -1474,38 +1510,82 @@ function PlayerCard({ player, primaryColor, secondaryColor, onClick, index, keyP
         </div>
       )}
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 pt-4 border-t" style={{ borderColor: primaryColor.medium }}>
-        <div className="text-center">
-          <p className="text-2xl font-black" style={{ color: primaryColor.text }}>
-            {stats.matches}
-          </p>
-          <p className="text-xs uppercase" style={{ color: primaryColor.textOnLight }}>
-            Matches
-          </p>
-        </div>
-        <div className="text-center">
-          <p className="text-2xl font-black" style={{ color: primaryColor.text }}>
-            {stats.runs}
-          </p>
-          <p className="text-xs uppercase" style={{ color: primaryColor.textOnLight }}>
-            Runs
-          </p>
-        </div>
-        <div className="text-center">
-          <p className="text-2xl font-black" style={{ color: primaryColor.text }}>
-            {stats.wickets}
-          </p>
-          <p className="text-xs uppercase" style={{ color: primaryColor.textOnLight }}>
-            Wickets
-          </p>
-        </div>
+      {/* Enhanced Stats with Icons */}
+      <div className="grid grid-cols-3 gap-4 pt-5 border-t-2" style={{ borderColor: `${primaryColor.medium}60` }}>
+        <motion.div 
+          className="text-center group/stat"
+          whileHover={{ scale: 1.1, y: -3 }}
+          transition={{ duration: 0.2 }}
+        >
+          <div className="relative">
+            <div className="absolute inset-0 rounded-xl opacity-0 group-hover/stat:opacity-100 transition-opacity duration-300 blur-lg"
+                 style={{ background: primaryColor.medium }} />
+            <div className="relative p-3 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 group-hover/stat:border-white/30 transition-all">
+              <p className="text-3xl font-black mb-1" style={{ 
+                color: primaryColor.text,
+                textShadow: `0 0 20px ${primaryColor.glow}40`
+              }}>
+                {stats.matches || 0}
+              </p>
+              <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: primaryColor.textOnLight }}>
+                Matches
+              </p>
+            </div>
+          </div>
+        </motion.div>
+        <motion.div 
+          className="text-center group/stat"
+          whileHover={{ scale: 1.1, y: -3 }}
+          transition={{ duration: 0.2 }}
+        >
+          <div className="relative">
+            <div className="absolute inset-0 rounded-xl opacity-0 group-hover/stat:opacity-100 transition-opacity duration-300 blur-lg"
+                 style={{ background: secondaryColor.medium }} />
+            <div className="relative p-3 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 group-hover/stat:border-white/30 transition-all">
+              <p className="text-3xl font-black mb-1" style={{ 
+                color: secondaryColor.text || primaryColor.text,
+                textShadow: `0 0 20px ${secondaryColor.glow || primaryColor.glow}40`
+              }}>
+                {stats.runs || 0}
+              </p>
+              <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: primaryColor.textOnLight }}>
+                Runs
+              </p>
+            </div>
+          </div>
+        </motion.div>
+        <motion.div 
+          className="text-center group/stat"
+          whileHover={{ scale: 1.1, y: -3 }}
+          transition={{ duration: 0.2 }}
+        >
+          <div className="relative">
+            <div className="absolute inset-0 rounded-xl opacity-0 group-hover/stat:opacity-100 transition-opacity duration-300 blur-lg"
+                 style={{ background: primaryColor.medium }} />
+            <div className="relative p-3 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10 group-hover/stat:border-white/30 transition-all">
+              <p className="text-3xl font-black mb-1" style={{ 
+                color: primaryColor.text,
+                textShadow: `0 0 20px ${primaryColor.glow}40`
+              }}>
+                {stats.wickets || 0}
+              </p>
+              <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: primaryColor.textOnLight }}>
+                Wickets
+              </p>
+            </div>
+          </div>
+        </motion.div>
       </div>
 
-      {/* Hover Arrow */}
+      {/* Enhanced Hover Arrow with glow */}
       <motion.div 
-        className="absolute bottom-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300"
-        whileHover={{ x: 5, scale: 1.1 }}
+        className="absolute bottom-4 right-4 w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-10"
+        style={{
+          background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
+          boxShadow: `0 0 20px ${primaryColor.glow}60`
+        }}
+        whileHover={{ x: 5, scale: 1.2, rotate: 15 }}
+        transition={{ duration: 0.2 }}
       >
         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
