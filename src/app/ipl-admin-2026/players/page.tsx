@@ -471,22 +471,12 @@ export default function AdminPlayers() {
       if (formData.dateOfBirth && formData.dateOfBirth.trim() !== '') {
         // For IPL, try DD/MM/YYYY format first, then Month DD, YYYY as fallback
         // For WPL, use Month DD, YYYY format
-        if (formData.league === 'wpl') {
+        // Always use Month DD, YYYY format for both IPL and WPL
           dateOfBirthISO = parseDateMonthDDYYYY(formData.dateOfBirth);
-        } else {
-          // For IPL, try DD/MM/YYYY format first
-          dateOfBirthISO = parseDateDDMMYYYY(formData.dateOfBirth);
-          // If that fails, try Month DD, YYYY format as fallback
-          if (!dateOfBirthISO) {
-            dateOfBirthISO = parseDateMonthDDYYYY(formData.dateOfBirth);
-          }
-        }
         
         // Validate the parsed date
         if (!dateOfBirthISO) {
-          const expectedFormat = formData.league === 'wpl' 
-            ? 'Month DD, YYYY (e.g., July 18, 1996)' 
-            : 'DD/MM/YYYY or Month DD, YYYY (e.g., 25/12/1994 or December 25, 1994)';
+          const expectedFormat = 'Month DD, YYYY (e.g., December 25, 1994)';
           alert(`Invalid date format. Please use ${expectedFormat}`);
           return;
         }
