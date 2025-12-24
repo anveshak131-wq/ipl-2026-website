@@ -477,6 +477,10 @@ export const onRequest = async (context) => {
         league: newPlayer.league || 'ipl', // Default to 'ipl' if not specified
         name: newPlayer.name,
         role: newPlayer.role,
+        // Set allrounderType only if role is All-rounder and value is provided
+        ...(newPlayer.role === 'All-rounder' && newPlayer.allrounderType 
+          ? { allrounderType: newPlayer.allrounderType }
+          : {}),
         teamId: newPlayer.teamId,
         age: parseInt(newPlayer.age) || 0,
         dateOfBirth: newPlayer.dateOfBirth || undefined,
