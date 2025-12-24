@@ -1,14 +1,13 @@
 'use client';
 
 import { useState, useEffect, useMemo, Suspense } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import EnhancedTeamCard from '@/components/teams/EnhancedTeamCard';
 import PlayerModal from '@/components/teams/PlayerModal';
 import TeamComparisonTool from '@/components/teams/TeamComparisonTool';
-import TeamQuickStatsPreview from '@/components/teams/TeamQuickStatsPreview';
 import { Team, Player, Match } from '@/types';
 import { api } from '@/lib/data';
 import { useLeague } from '@/contexts/LeagueContext';
@@ -20,6 +19,7 @@ import TeamCardSkeleton from '@/components/teams/TeamCardSkeleton';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import GradientText from '@/components/ui/GradientText';
+import { Search, Filter, Grid3x3, List, X, Star, Trophy, Users, Globe, Award, TrendingUp, Sparkles } from 'lucide-react';
 
 type SortOption = 'name' | 'titles' | 'players' | 'performance';
 type TitleFilter = 'all' | '0' | '1' | '2+';
@@ -31,15 +31,13 @@ function TeamsPageContent() {
     const pathname = usePathname();
     const { currentLeague, setCurrentLeague } = useLeague();
 
-    // Set league based on pathname, but preserve current league if already set
+    // Set league based on pathname
     useEffect(() => {
         if (pathname.startsWith('/wpl/teams') || pathname === '/wpl/teams') {
             setCurrentLeague('wpl');
         } else if (pathname === '/teams' && currentLeague === 'wpl') {
-            // If user is on WPL and navigates to /teams, redirect to /wpl/teams
             router.push('/wpl/teams');
         } else if (pathname === '/teams' && currentLeague !== 'wpl') {
-            // Only set to IPL if not already on WPL
             setCurrentLeague('ipl');
         }
     }, [pathname, setCurrentLeague, currentLeague, router]);
@@ -56,9 +54,9 @@ function TeamsPageContent() {
     const [homeGroundFilter, setHomeGroundFilter] = useState<string>('all');
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
     const [showComparison, setShowComparison] = useState(false);
-    const [hoveredTeam, setHoveredTeam] = useState<string | null>(null);
     const [favorites, setFavorites] = useState<string[]>([]);
     const [showFavoritesFirst, setShowFavoritesFirst] = useState(false);
+    const [showFilters, setShowFilters] = useState(false);
 
     // Debounce search
     useEffect(() => {
@@ -86,29 +84,13 @@ function TeamsPageContent() {
     useEffect(() => {
         const fetchTeams = async () => {
             setIsLoading(true);
-            console.log('Teams page: Fetching teams for league:', currentLeague);
-            console.log('Teams page: Current teams state:', teams.length);
             try {
                 const [teamsData, playersData, matchesData] = await Promise.all([
                     api.getTeams(currentLeague),
-                    api.getPlayers(undefined, currentLeague).catch((e) => {
-                        console.warn('Failed to fetch players:', e);
-                        return [];
-                    }),
-                    api.getMatches(currentLeague).catch((e) => {
-                        console.warn('Failed to fetch matches:', e);
-                        return [];
-                    })
+                    api.getPlayers(undefined, currentLeague).catch(() => []),
+                    api.getMatches(currentLeague).catch(() => [])
                 ]);
 
-                console.log(`Teams page: Loaded ${teamsData.length} teams, ${playersData.length} players, ${matchesData.length} matches for ${currentLeague}`);
-                console.log('Teams page: Teams data:', teamsData);
-
-                if (teamsData.length === 0) {
-                    console.warn('Teams page: No teams returned! Check API or fallback data.');
-                }
-
-                // Helper function to normalize team/player IDs for matching
                 const normalizeId = (id: string | number | undefined): string => {
                     if (!id) return '';
                     const str = String(id).trim();
@@ -118,7 +100,6 @@ function TeamsPageContent() {
                 
                 const teamsWithPlayers = teamsData
                     .filter(team => {
-                        // For WPL, filter out placeholder teams
                         if (currentLeague === 'wpl' && isPlaceholderTeam(team)) {
                             return false;
                         }
@@ -135,9 +116,7 @@ function TeamsPageContent() {
                             String(team.id).toUpperCase()
                         ];
                         
-                        // Get players from fetched data, matching by teamId with comprehensive variations
                         const fetchedPlayers = (playersData || []).filter(player => {
-                            // Check if player league matches
                             const leagueMatch = !player.league || !currentLeague || player.league === currentLeague;
                             if (!leagueMatch) return false;
                             
@@ -151,20 +130,11 @@ function TeamsPageContent() {
                                 String(player.teamId).toUpperCase()
                             ];
                             
-                            // Check if any variation matches
                             return teamIdVariations.some(tv => 
                                 playerTeamIdVariations.some(pv => pv === tv)
                             );
                         });
                         
-                        if (fetchedPlayers.length > 0) {
-                            console.log(`Teams page: Matched ${fetchedPlayers.length} players for team ${team.name} (ID: ${team.id})`);
-                        } else if (playersData && playersData.length > 0) {
-                            console.warn(`Teams page: No players matched for team ${team.name} (ID: ${team.id}). Sample player teamIds:`, 
-                                playersData.slice(0, 3).map(p => p.teamId));
-                        }
-                        
-                        // Always use fetched players if available, otherwise use team's original players
                         const finalPlayers = fetchedPlayers.length > 0 
                             ? fetchedPlayers 
                             : (team.players || []);
@@ -175,21 +145,14 @@ function TeamsPageContent() {
                         };
                     });
 
-                console.log('Teams page: Setting teams state with', teamsWithPlayers.length, 'teams');
                 setTeams(teamsWithPlayers);
                 setMatches(matchesData || []);
             } catch (error) {
-                console.error('Teams page: Error in fetchTeams:', error);
-                // Still try to display teams even if players fail
+                console.error('Error fetching teams:', error);
                 try {
                     const teamsData = await api.getTeams(currentLeague);
-                    console.log(`Teams page: Fallback - Loaded ${teamsData.length} teams for ${currentLeague}`);
-                    if (teamsData.length === 0) {
-                        console.error('Teams page: Even fallback returned 0 teams!');
-                    }
                     const filteredTeams = teamsData
                         .filter(team => {
-                            // For WPL, filter out placeholder teams
                             if (currentLeague === 'wpl' && isPlaceholderTeam(team)) {
                                 return false;
                             }
@@ -197,34 +160,20 @@ function TeamsPageContent() {
                         })
                         .map(team => ({ 
                             ...team, 
-                            // Preserve original players if they exist
                             players: team.players || [] 
                         }));
                     setTeams(filteredTeams);
                 } catch (err) {
-                    console.error('Teams page: Complete failure:', err);
-                    setTeams([]); // Set empty array so UI shows "no teams" message
+                    console.error('Complete failure:', err);
+                    setTeams([]);
                 }
             } finally {
                 setIsLoading(false);
             }
-        
-        return undefined;
-        return undefined;
-        return undefined;
-        return undefined;
-        return undefined;};
+        };
 
         fetchTeams();
-    }, [currentLeague]); // Re-fetch when league changes
-
-    // Debug: Log when teams state changes
-    useEffect(() => {
-        console.log('Teams page: Teams state updated. Count:', teams.length);
-        if (teams.length > 0) {
-            console.log('Teams page: First team:', teams[0]);
-        }
-    }, [teams]);
+    }, [currentLeague]);
 
     const toggleFavorite = (teamId: string) => {
         const newFavorites = favorites.includes(teamId)
@@ -252,7 +201,6 @@ function TeamsPageContent() {
         setShowFavoritesFirst(false);
     };
 
-    // Calculate team performance (win rate from recent matches)
     const calculateTeamPerformance = (team: Team): number => {
         const teamMatches = matches.filter(
             (m) => m.status === 'completed' && (m.team1.id === team.id || m.team2.id === team.id)
@@ -265,7 +213,6 @@ function TeamsPageContent() {
         return (wins / teamMatches.length) * 100;
     };
 
-    // Get all unique home grounds
     const allHomeGrounds = useMemo(() => {
         const grounds = new Set<string>();
         teams.forEach(team => {
@@ -274,35 +221,17 @@ function TeamsPageContent() {
         return Array.from(grounds).sort();
     }, [teams]);
 
-    // Custom team ordering function
     const getCustomTeamOrder = (team: Team): number => {
-        // Priority order: RCB, MI, CSK first, then others
         const shortName = team.shortName.toLowerCase();
-        
-        // RCB gets highest priority (0)
-        if (shortName === 'rcb') {
-            return 0;
-        }
-        
-        // MI gets second priority (1)
-        if (shortName === 'mi') {
-            return 1;
-        }
-        
-        // CSK gets third priority (2)
-        if (shortName === 'csk') {
-            return 2;
-        }
-        
-        // All other teams get normal priority (3)
+        if (shortName === 'rcb') return 0;
+        if (shortName === 'mi') return 1;
+        if (shortName === 'csk') return 2;
         return 3;
     };
 
-    // Filter and sort teams
     const filteredAndSortedTeams = useMemo(() => {
         let result = teams;
 
-        // Search filter
         if (debouncedSearch) {
             const normalized = debouncedSearch.trim().toLowerCase();
             result = result.filter((team) =>
@@ -311,7 +240,6 @@ function TeamsPageContent() {
             );
         }
 
-        // Title filter
         if (titleFilter !== 'all') {
             result = result.filter((team) => {
                 const trophyCount = team.trophies?.length || 0;
@@ -322,16 +250,13 @@ function TeamsPageContent() {
             });
         }
 
-        // Home ground filter
         if (homeGroundFilter !== 'all') {
             result = result.filter((team) => 
                 team.homeGrounds?.some(ground => ground === homeGroundFilter)
             );
         }
 
-        // Sort with custom ordering
         result = [...result].sort((a, b) => {
-            // First apply custom ordering
             const orderA = getCustomTeamOrder(a);
             const orderB = getCustomTeamOrder(b);
             
@@ -339,7 +264,6 @@ function TeamsPageContent() {
                 return orderA - orderB;
             }
             
-            // If same custom order, apply regular sort
             if (sortBy === 'titles') {
                 return (b.trophies?.length || 0) - (a.trophies?.length || 0);
             }
@@ -352,7 +276,6 @@ function TeamsPageContent() {
             return a.name.localeCompare(b.name);
         });
 
-        // Favorites first
         if (showFavoritesFirst) {
             result = [
                 ...result.filter(t => favorites.includes(t.id)),
@@ -361,7 +284,7 @@ function TeamsPageContent() {
         }
 
         return result;
-    }, [teams, debouncedSearch, sortBy, titleFilter, showFavoritesFirst, favorites]);
+    }, [teams, debouncedSearch, sortBy, titleFilter, homeGroundFilter, showFavoritesFirst, favorites, matches]);
 
     const totalTeams = teams.length;
     const totalPlayers = teams.reduce((sum, team) => sum + (team.players?.length || 0), 0);
@@ -377,254 +300,293 @@ function TeamsPageContent() {
     const hasActiveFilters = searchTerm || sortBy !== 'name' || titleFilter !== 'all' || homeGroundFilter !== 'all' || showFavoritesFirst;
 
     return (
-        <div className="min-h-screen">
+        <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black overflow-hidden">
             <Navbar />
-
-            <main className="relative py-16 min-h-screen">
                 <AuroraBackground />
 
-                <div className="absolute top-20 left-10 w-96 h-96 bg-ipl-blue-light/10 rounded-full blur-3xl -z-10 animate-float" />
-                <div className="absolute bottom-10 right-20 w-96 h-96 bg-ipl-gold/10 rounded-full blur-3xl -z-10 animate-float" style={{ animationDelay: '1s' }} />
+            <main className="relative">
+                {/* Premium Hero Section */}
+                <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
+                    {/* Animated Background Orbs */}
+                    <div className="absolute inset-0 overflow-hidden">
+                        <motion.div
+                            className="absolute w-[800px] h-[800px] rounded-full blur-[120px] opacity-40"
+                            style={{
+                                background: 'radial-gradient(circle, rgba(59, 130, 246, 0.4), rgba(139, 92, 246, 0.3), transparent)',
+                                top: '-20%',
+                                left: '-10%',
+                            }}
+                            animate={{
+                                scale: [1, 1.2, 1],
+                                opacity: [0.4, 0.6, 0.4],
+                            }}
+                            transition={{
+                                duration: 8,
+                                repeat: Infinity,
+                                ease: "easeInOut"
+                            }}
+                        />
+                        <motion.div
+                            className="absolute w-[600px] h-[600px] rounded-full blur-[100px] opacity-30"
+                            style={{
+                                background: 'radial-gradient(circle, rgba(168, 85, 247, 0.4), rgba(236, 72, 153, 0.3), transparent)',
+                                bottom: '-15%',
+                                right: '-10%',
+                            }}
+                            animate={{
+                                scale: [1, 1.3, 1],
+                                opacity: [0.3, 0.5, 0.3],
+                            }}
+                            transition={{
+                                duration: 10,
+                                repeat: Infinity,
+                                ease: "easeInOut",
+                                delay: 0.5
+                            }}
+                        />
+                    </div>
 
-                <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {/* Enhanced Hero Header */}
-                    <AnimatedSection direction="down" delay={0.1}>
+                    {/* Animated Grid Pattern */}
+                    <div 
+                        className="absolute inset-0 opacity-[0.03]"
+                        style={{
+                            backgroundImage: `
+                                linear-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+                                linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px)
+                            `,
+                            backgroundSize: '50px 50px'
+                        }}
+                    />
+
+                    <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full text-center py-20">
                         <motion.div 
-                            className="mb-12 relative"
-                            initial={{ opacity: 0, y: -30 }}
+                            initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6 }}
+                            transition={{ duration: 0.8 }}
+                            className="mb-8"
                         >
-                            {/* Background Glow Effect */}
-                            <div className="absolute -top-20 -left-20 w-96 h-96 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-full blur-3xl animate-pulse" />
-                            
-                            <div className="relative z-10">
-                            <motion.div 
-                                    className="inline-flex items-center space-x-2 mb-6 group"
+                            <motion.span
+                                className="inline-flex items-center gap-3 px-6 py-3 rounded-full backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 shadow-2xl"
                                 whileHover={{ scale: 1.05 }}
+                                style={{
+                                    boxShadow: '0 10px 40px rgba(59, 130, 246, 0.3)'
+                                }}
                             >
-                                    <span className="px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 border border-white/20 backdrop-blur-xl text-white flex items-center gap-2 hover:from-blue-500/30 hover:via-purple-500/30 hover:to-pink-500/30 transition-all duration-300 shadow-lg shadow-blue-500/20">
-                                        <Icon name="cricket" size={18} /> 
-                                        <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent font-extrabold">
-                                            IPL 2026 TEAMS
-                                        </span>
+                                <Sparkles className="w-5 h-5 text-blue-400" />
+                                <span className="text-sm font-black uppercase tracking-widest bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                                    {currentLeague === 'wpl' ? 'WPL 2026' : 'IPL 2026'} TEAMS
                                 </span>
+                            </motion.span>
                             </motion.div>
-                                
+
                             <motion.h1 
-                                    className="text-6xl md:text-7xl lg:text-8xl font-black text-white mb-6 tracking-tight leading-tight"
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.6, delay: 0.2 }}
+                            className="text-7xl md:text-8xl lg:text-9xl font-black mb-8 leading-[0.9] tracking-tight"
+                            initial={{ opacity: 0, y: 40 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                        >
+                            <span className="block text-white mb-4">Elite</span>
+                            <GradientText 
+                                gradient="from-blue-400 via-purple-400 to-pink-400" 
+                                animate 
+                                className="text-8xl md:text-9xl lg:text-[10rem]"
                             >
-                                    <span className="block mb-2">Meet the</span>
-                                    <GradientText gradient="from-blue-400 via-purple-400 to-pink-400" animate className="text-7xl md:text-8xl lg:text-9xl">
-                                        Champions
-                                    </GradientText>
+                                Franchises
+                            </GradientText>
                             </motion.h1>
-                                
+
                             <motion.p 
-                                    className="text-gray-300 text-xl md:text-2xl max-w-3xl leading-relaxed mb-8"
+                            className="text-2xl md:text-3xl text-gray-300 max-w-4xl mx-auto mb-12 leading-relaxed font-medium"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                transition={{ duration: 0.6, delay: 0.3 }}
+                            transition={{ duration: 0.8, delay: 0.4 }}
+                            style={{
+                                textShadow: '0 2px 20px rgba(0, 0, 0, 0.5)'
+                            }}
                             >
-                                    Explore all <span className="font-bold text-white">{totalTeams} elite franchises</span> competing for glory in the world's biggest T20 league. Discover squads, stats, and legendary moments.
+                            Discover the <span className="font-bold text-white">{totalTeams} powerhouse teams</span> competing for cricket supremacy. 
+                            Explore squads, track performances, and dive into championship legacies.
                             </motion.p>
-                                
-                                {/* Quick Action Buttons */}
-                                <motion.div 
-                                    className="flex flex-wrap items-center gap-4"
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.6, delay: 0.4 }}
+
+                        {/* Premium Quick Stats */}
+                        <motion.div
+                            className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto mb-16"
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 0.5 }}
+                        >
+                            {[
+                                { 
+                                    label: 'Teams', 
+                                    value: totalTeams, 
+                                    icon: Users, 
+                                    color: 'from-blue-500/30 to-blue-600/20',
+                                    borderColor: 'border-blue-500/40',
+                                    textColor: 'text-blue-300',
+                                    glow: 'rgba(59, 130, 246, 0.3)'
+                                },
+                                { 
+                                    label: 'Players', 
+                                    value: totalPlayers, 
+                                    icon: Users, 
+                                    color: 'from-purple-500/30 to-purple-600/20',
+                                    borderColor: 'border-purple-500/40',
+                                    textColor: 'text-purple-300',
+                                    glow: 'rgba(168, 85, 247, 0.3)'
+                                },
+                                { 
+                                    label: 'Overseas', 
+                                    value: totalOverseas, 
+                                    icon: Globe, 
+                                    color: 'from-amber-500/30 to-amber-600/20',
+                                    borderColor: 'border-amber-500/40',
+                                    textColor: 'text-amber-300',
+                                    glow: 'rgba(245, 158, 11, 0.3)'
+                                },
+                                { 
+                                    label: 'Captains', 
+                                    value: totalCaptains, 
+                                    icon: Award, 
+                                    color: 'from-emerald-500/30 to-emerald-600/20',
+                                    borderColor: 'border-emerald-500/40',
+                                    textColor: 'text-emerald-300',
+                                    glow: 'rgba(16, 185, 129, 0.3)'
+                                },
+                            ].map((stat, index) => (
+                                <motion.div
+                                    key={index}
+                                    className={`group relative overflow-hidden rounded-3xl backdrop-blur-2xl border-2 ${stat.borderColor} bg-gradient-to-br ${stat.color} p-8`}
+                                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    transition={{ duration: 0.6, delay: 0.6 + index * 0.1 }}
+                                    whileHover={{ scale: 1.1, y: -10 }}
+                                    style={{
+                                        boxShadow: `0 20px 60px ${stat.glow}`
+                                    }}
                                 >
-                                    <motion.button
-                                        onClick={() => setShowComparison(true)}
-                                        className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold hover:shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 flex items-center gap-2 group"
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                    >
-                                        <CustomEmoji type="target" size={20} />
-                                        Compare Teams
-                                        <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                        </svg>
-                                    </motion.button>
+                                    {/* Hover glow */}
+                                    <div 
+                                        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl"
+                                        style={{ background: stat.glow }}
+                                    />
                                     
-                                    <motion.button
-                                        onClick={() => router.push('/stats')}
-                                        className="px-6 py-3 rounded-xl bg-white/10 backdrop-blur-xl border border-white/20 text-white font-bold hover:bg-white/20 transition-all duration-300 flex items-center gap-2"
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                    >
-                                        <CustomEmoji type="chart" size={20} />
-                                        View Statistics
-                                    </motion.button>
-                                </motion.div>
-                            </div>
+                                    <div className="relative z-10">
+                                        <motion.div
+                                            className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${stat.color} border-2 ${stat.borderColor} flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300`}
+                                            style={{ boxShadow: `0 8px 30px ${stat.glow}` }}
+                                        >
+                                            <stat.icon className={`w-8 h-8 ${stat.textColor}`} />
                         </motion.div>
-                    </AnimatedSection>
-
-                    {/* Enhanced Quick Stats Cards */}
-                    <motion.div 
-                        className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6 mb-10"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.5 }}
-                    >
-                        <motion.div 
-                            className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-500/20 via-blue-600/15 to-blue-700/10 border border-blue-500/30 backdrop-blur-xl p-6 hover:border-blue-400/50 transition-all duration-500"
-                            whileHover={{ scale: 1.05, y: -5 }}
-                            style={{ boxShadow: '0 8px 32px rgba(59, 130, 246, 0.2)' }}
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                            <div className="relative z-10">
-                                <div className="flex items-center justify-between mb-3">
-                                    <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                        <Icon name="team" size={24} className="text-blue-300" />
-                        </div>
-                                    <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse" />
-                        </div>
-                                <p className="text-xs uppercase tracking-wider text-blue-300 font-bold mb-2">Teams</p>
-                                <p className="text-4xl font-black text-white mb-1">{totalTeams}</p>
-                                <p className="text-xs text-blue-200/70">Elite Franchises</p>
-                        </div>
-                        </motion.div>
-                        
-                        <motion.div 
-                            className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-500/20 via-purple-600/15 to-purple-700/10 border border-purple-500/30 backdrop-blur-xl p-6 hover:border-purple-400/50 transition-all duration-500"
-                            whileHover={{ scale: 1.05, y: -5 }}
-                            style={{ boxShadow: '0 8px 32px rgba(168, 85, 247, 0.2)' }}
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                            <div className="relative z-10">
-                                <div className="flex items-center justify-between mb-3">
-                                    <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                        <CustomEmoji type="people" size={24} />
-                        </div>
-                                    <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
-                    </div>
-                                <p className="text-xs uppercase tracking-wider text-purple-300 font-bold mb-2">Players</p>
-                                <p className="text-4xl font-black text-white mb-1">{totalPlayers}</p>
-                                <p className="text-xs text-purple-200/70">Total Squad Size</p>
-                            </div>
-                        </motion.div>
-                        
-                        <motion.div 
-                            className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-500/20 via-amber-600/15 to-amber-700/10 border border-amber-500/30 backdrop-blur-xl p-6 hover:border-amber-400/50 transition-all duration-500"
-                            whileHover={{ scale: 1.05, y: -5 }}
-                            style={{ boxShadow: '0 8px 32px rgba(245, 158, 11, 0.2)' }}
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-br from-amber-500/0 to-amber-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                            <div className="relative z-10">
-                                <div className="flex items-center justify-between mb-3">
-                                    <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                        <CustomEmoji type="globe" size={24} />
+                                        <p className={`text-5xl font-black mb-2 text-white`} style={{ textShadow: `0 4px 20px ${stat.glow}` }}>
+                                            {stat.value}
+                                        </p>
+                                        <p className={`text-sm font-bold uppercase tracking-widest ${stat.textColor}`}>
+                                            {stat.label}
+                                        </p>
                                     </div>
-                                    <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                        </div>
-                                <p className="text-xs uppercase tracking-wider text-amber-300 font-bold mb-2">Overseas</p>
-                                <p className="text-4xl font-black text-white mb-1">{totalOverseas}</p>
-                                <p className="text-xs text-amber-200/70">International Stars</p>
-                        </div>
+                                </motion.div>
+                            ))}
                         </motion.div>
-                        
-                        <motion.div 
-                            className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500/20 via-emerald-600/15 to-emerald-700/10 border border-emerald-500/30 backdrop-blur-xl p-6 hover:border-emerald-400/50 transition-all duration-500"
-                            whileHover={{ scale: 1.05, y: -5 }}
-                            style={{ boxShadow: '0 8px 32px rgba(16, 185, 129, 0.2)' }}
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 to-emerald-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                            <div className="relative z-10">
-                                <div className="flex items-center justify-between mb-3">
-                                    <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                        <CustomEmoji type="lightning" size={24} />
-                        </div>
-                                    <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                        </div>
-                                <p className="text-xs uppercase tracking-wider text-emerald-300 font-bold mb-2">Captains</p>
-                                <p className="text-4xl font-black text-white mb-1">{totalCaptains}</p>
-                                <p className="text-xs text-emerald-200/70">Team Leaders</p>
-                    </div>
-                        </motion.div>
-                    </motion.div>
 
-                    {/* Enhanced Sticky Filter Toolbar */}
-                    <motion.div 
-                        className="sticky top-16 md:top-20 z-40 -mx-4 px-4 sm:mx-0 sm:px-0 mb-10"
-                        initial={{ opacity: 0, y: -20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.6 }}
-                    >
-                        <div className="relative overflow-hidden rounded-2xl backdrop-blur-2xl bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border border-white/10 shadow-2xl">
-                            {/* Animated Background Gradient */}
+                        {/* CTA Buttons */}
+                        <motion.div
+                            className="flex flex-wrap items-center justify-center gap-4"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 0.9 }}
+                        >
+                            <motion.button
+                                onClick={() => setShowComparison(true)}
+                                className="group relative overflow-hidden px-8 py-4 rounded-2xl bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 text-white font-black text-lg shadow-2xl"
+                                whileHover={{ scale: 1.05, y: -2 }}
+                                whileTap={{ scale: 0.95 }}
+                                style={{
+                                    boxShadow: '0 20px 60px rgba(168, 85, 247, 0.5)'
+                                }}
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                                <span className="relative z-10 flex items-center gap-3">
+                                    <TrendingUp className="w-5 h-5" />
+                                    Compare Teams
+                                </span>
+                            </motion.button>
+                            
+                            <motion.button
+                                onClick={() => router.push('/stats')}
+                                className="px-8 py-4 rounded-2xl backdrop-blur-2xl border-2 border-white/20 bg-white/5 text-white font-black text-lg hover:bg-white/10 transition-all duration-300 flex items-center gap-3"
+                                whileHover={{ scale: 1.05, y: -2 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
+                                <Trophy className="w-5 h-5" />
+                                View Statistics
+                            </motion.button>
+                        </motion.div>
+                        </div>
+                </section>
+
+                {/* Premium Filter & Search Section */}
+                <section className="relative z-20 -mt-20 mb-16">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <motion.div
+                            className="relative rounded-3xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 shadow-2xl overflow-hidden"
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6 }}
+                            style={{
+                                boxShadow: '0 30px 80px rgba(0, 0, 0, 0.5)'
+                            }}
+                        >
+                            {/* Animated background */}
                             <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 opacity-0 hover:opacity-100 transition-opacity duration-500" />
                             
-                            <div className="relative z-10 p-6 flex flex-col gap-6">
-                                {/* Enhanced Search Bar */}
-                                <div className="relative group">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-xl blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-500" />
+                            <div className="relative z-10 p-6 md:p-8">
+                                {/* Premium Search Bar */}
+                                <div className="relative mb-6 group">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 rounded-2xl blur-2xl opacity-0 group-focus-within:opacity-50 transition-opacity duration-500" />
                             <div className="relative">
-                                        <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-gray-400 group-focus-within:text-blue-400 transition-colors">
-                                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                </span>
+                                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 group-focus-within:text-blue-400 transition-colors" />
                                 <input
                                     type="text"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     placeholder="Search teams by name or abbreviation..."
-                                            className="w-full pl-14 pr-12 py-4 rounded-xl bg-slate-800/60 border-2 border-white/15 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all text-lg"
+                                            className="w-full pl-16 pr-14 py-5 rounded-2xl bg-slate-800/60 border-2 border-white/15 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all text-lg font-medium"
                                 />
                                 {searchTerm && (
                                             <motion.button
                                         onClick={() => setSearchTerm('')}
-                                                className="absolute inset-y-0 right-4 flex items-center text-gray-400 hover:text-white transition-colors"
-                                                whileHover={{ scale: 1.1 }}
+                                                className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                                                whileHover={{ scale: 1.2, rotate: 90 }}
                                                 whileTap={{ scale: 0.9 }}
-                                    >
-                                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
+                                            >
+                                                <X className="w-6 h-6" />
                                             </motion.button>
-                                )}
+                                        )}
                                     </div>
                             </div>
 
-                                {/* Enhanced Filters and Sort Row */}
+                                {/* Filters Row */}
                                 <div className="flex flex-wrap items-center gap-4">
-                                {/* Title Filter Chips */}
+                                    {/* Title Filter */}
                                     <div className="flex items-center gap-3">
-                                        <span className="text-sm text-gray-300 font-bold uppercase tracking-wider flex items-center gap-2">
-                                            <CustomEmoji type="trophy" size={18} />
-                                            Titles:
-                                        </span>
+                                        <Trophy className="w-5 h-5 text-gray-400" />
+                                        <span className="text-sm font-bold uppercase tracking-wider text-gray-300">Titles:</span>
                                 <div className="flex items-center gap-2">
                                     {(['all', '0', '1', '2+'] as TitleFilter[]).map((filter) => (
                                                 <motion.button
                                             key={filter}
                                             onClick={() => setTitleFilter(filter)}
-                                                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 ${
+                                                    className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
                                                         titleFilter === filter
-                                                            ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-900 shadow-lg shadow-amber-500/50'
+                                                            ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-900 shadow-lg'
                                                             : 'bg-slate-800/60 text-gray-300 border-2 border-white/10 hover:border-amber-500/50 hover:bg-slate-700/60'
                                                     }`}
                                                     whileHover={{ scale: 1.05 }}
                                                     whileTap={{ scale: 0.95 }}
                                                 >
-                                                {filter === 'all' ? 'All' : filter === '2+' ? (
-                                                        <span className="flex items-center gap-1.5">
-                                                            2+ <CustomEmoji type="trophy" size={16} />
-                                                    </span>
-                                                ) : filter === '0' ? 'No titles' : (
-                                                        <span className="flex items-center gap-1.5">
-                                                            1 <CustomEmoji type="trophy" size={16} />
-                                                    </span>
-                                                )}
+                                                    {filter === 'all' ? 'All' : filter === '2+' ? '2+' : filter === '0' ? 'None' : '1'}
                                                 </motion.button>
-                                                ))}
+                                            ))}
                                         </div>
                                                 </div>
 
@@ -634,11 +596,11 @@ function TeamsPageContent() {
                                 {allHomeGrounds.length > 0 && (
                                     <>
                                             <div className="flex items-center gap-3">
-                                                <span className="text-sm text-gray-300 font-bold uppercase tracking-wider">Ground:</span>
+                                                <span className="text-sm font-bold uppercase tracking-wider text-gray-300">Ground:</span>
                                             <select
                                                 value={homeGroundFilter}
                                                 onChange={(e) => setHomeGroundFilter(e.target.value)}
-                                                    className="px-4 py-2 rounded-xl text-sm font-bold bg-slate-800/60 text-white border-2 border-white/10 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-blue-500/50 transition-all cursor-pointer"
+                                                    className="px-5 py-2.5 rounded-xl text-sm font-bold bg-slate-800/60 text-white border-2 border-white/10 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-blue-500/50 transition-all cursor-pointer"
                                             >
                                                 <option value="all">All Grounds</option>
                                                 {allHomeGrounds.map(ground => (
@@ -650,13 +612,13 @@ function TeamsPageContent() {
                                     </>
                                 )}
 
-                                {/* Sort Dropdown */}
+                                    {/* Sort */}
                                     <div className="flex items-center gap-3">
-                                        <span className="text-sm text-gray-300 font-bold uppercase tracking-wider">Sort:</span>
+                                        <span className="text-sm font-bold uppercase tracking-wider text-gray-300">Sort:</span>
                                     <select
                                         value={sortBy}
                                         onChange={(e) => setSortBy(e.target.value as SortOption)}
-                                            className="px-4 py-2 rounded-xl text-sm font-bold bg-slate-800/60 text-white border-2 border-white/10 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-blue-500/50 transition-all cursor-pointer"
+                                            className="px-5 py-2.5 rounded-xl text-sm font-bold bg-slate-800/60 text-white border-2 border-white/10 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 hover:border-blue-500/50 transition-all cursor-pointer"
                                     >
                                         <option value="name">Name (A-Z)</option>
                                         <option value="titles">Titles (Most first)</option>
@@ -669,11 +631,11 @@ function TeamsPageContent() {
 
                                 {/* View Toggle */}
                                     <div className="flex items-center gap-3">
-                                        <span className="text-sm text-gray-300 font-bold uppercase tracking-wider">View:</span>
+                                        <span className="text-sm font-bold uppercase tracking-wider text-gray-300">View:</span>
                                         <div className="flex rounded-xl border-2 border-white/10 overflow-hidden bg-slate-800/60">
                                             <motion.button
                                             onClick={() => setViewMode('grid')}
-                                                className={`px-4 py-2 text-sm font-bold transition-all ${
+                                                className={`px-5 py-2.5 text-sm font-bold transition-all flex items-center gap-2 ${
                                                 viewMode === 'grid'
                                                         ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
                                                         : 'text-gray-300 hover:bg-white/10'
@@ -681,11 +643,12 @@ function TeamsPageContent() {
                                                 whileHover={{ scale: 1.05 }}
                                                 whileTap={{ scale: 0.95 }}
                                         >
+                                                <Grid3x3 className="w-4 h-4" />
                                             Grid
                                             </motion.button>
                                             <motion.button
                                             onClick={() => setViewMode('list')}
-                                                className={`px-4 py-2 text-sm font-bold transition-all ${
+                                                className={`px-5 py-2.5 text-sm font-bold transition-all flex items-center gap-2 ${
                                                 viewMode === 'list'
                                                         ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
                                                         : 'text-gray-300 hover:bg-white/10'
@@ -693,28 +656,30 @@ function TeamsPageContent() {
                                                 whileHover={{ scale: 1.05 }}
                                                 whileTap={{ scale: 0.95 }}
                                         >
+                                                <List className="w-4 h-4" />
                                             List
                                             </motion.button>
                                     </div>
                                 </div>
 
-                                    <div className="h-8 w-px bg-gradient-to-b from-transparent via-white/20 to-transparent" />
-
                                 {/* Favorites Toggle */}
                                 {favorites.length > 0 && (
-                                        <motion.button
+                                        <>
+                                            <div className="h-8 w-px bg-gradient-to-b from-transparent via-white/20 to-transparent" />
+                                            <motion.button
                                         onClick={() => setShowFavoritesFirst(!showFavoritesFirst)}
-                                            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
-                                                showFavoritesFirst
-                                                    ? 'bg-gradient-to-r from-rose-500/30 to-pink-500/30 text-rose-300 border-2 border-rose-500/50 shadow-lg shadow-rose-500/20'
-                                                    : 'bg-slate-800/60 text-gray-300 border-2 border-white/10 hover:border-rose-500/50 hover:bg-slate-700/60'
-                                            }`}
-                                            whileHover={{ scale: 1.05 }}
-                                            whileTap={{ scale: 0.95 }}
-                                        >
-                                            <CustomEmoji type="star" size={18} /> 
-                                            <span>Favorites</span>
-                                        </motion.button>
+                                                className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
+                                                    showFavoritesFirst
+                                                        ? 'bg-gradient-to-r from-rose-500/30 to-pink-500/30 text-rose-300 border-2 border-rose-500/50 shadow-lg'
+                                                        : 'bg-slate-800/60 text-gray-300 border-2 border-white/10 hover:border-rose-500/50 hover:bg-slate-700/60'
+                                                }`}
+                                                whileHover={{ scale: 1.05 }}
+                                                whileTap={{ scale: 0.95 }}
+                                            >
+                                                <Star className={`w-4 h-4 ${showFavoritesFirst ? 'fill-rose-300' : ''}`} />
+                                                Favorites
+                                            </motion.button>
+                                        </>
                                         )}
 
                                 {/* Clear Filters */}
@@ -723,91 +688,90 @@ function TeamsPageContent() {
                                         <div className="flex-1" />
                                             <motion.button
                                             onClick={clearFilters}
-                                                className="px-4 py-2 rounded-xl text-sm font-bold bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-300 border-2 border-red-500/50 hover:from-red-500/30 hover:to-red-600/30 transition-all flex items-center gap-2"
+                                                className="px-5 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-300 border-2 border-red-500/50 hover:from-red-500/30 hover:to-red-600/30 transition-all flex items-center gap-2"
                                                 whileHover={{ scale: 1.05 }}
                                                 whileTap={{ scale: 0.95 }}
                                         >
-                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                                </svg>
+                                                <X className="w-4 h-4" />
                                             Clear all
                                             </motion.button>
                                     </>
                                 )}
                             </div>
 
-                                {/* Enhanced Results Count */}
-                                <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                                    <div className="flex items-center gap-2">
+                            {/* Results Count */}
+                                <div className="flex items-center justify-between pt-6 mt-6 border-t border-white/10">
+                                    <div className="flex items-center gap-3">
                                         <span className="text-sm text-gray-400">
-                                            Showing <span className="font-bold text-white text-base">{filteredAndSortedTeams.length}</span> of <span className="font-bold text-white text-base">{totalTeams}</span> teams
+                                            Showing <span className="font-black text-white text-lg">{filteredAndSortedTeams.length}</span> of <span className="font-black text-white text-lg">{totalTeams}</span> teams
                                 </span>
                                         {hasActiveFilters && (
-                                            <span className="px-2 py-1 rounded-lg text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                                            <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
                                                 Filtered
                                             </span>
                                         )}
                             </div>
                         </div>
                     </div>
-                        </div>
-                    </motion.div>
+                        </motion.div>
+                    </div>
+                </section>
 
-                    {/* Enhanced Teams Grid */}
+                {/* Premium Teams Grid */}
+                <section className="relative z-10 pb-24">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {isLoading ? (
-                        <motion.div 
-                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                        >
+                            <motion.div 
+                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                            >
                             {[...Array(6)].map((_, i) => (
                                 <TeamCardSkeleton key={i} delay={i * 100} />
                             ))}
-                        </motion.div>
-                    ) : filteredAndSortedTeams.length === 0 ? (
-                        <motion.div 
-                            className="text-center py-20"
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.5 }}
-                        >
-                            <motion.div 
-                                className="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-br from-slate-800/60 to-slate-900/60 border-2 border-white/10 mb-8"
-                                animate={{ rotate: [0, 10, -10, 0] }}
-                                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                            >
-                                <Icon name="team" size={64} className="text-gray-400" />
                             </motion.div>
-                            <h3 className="text-3xl font-black text-white mb-4 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-                                No teams found
-                            </h3>
-                            <p className="text-gray-400 text-lg max-w-md mx-auto mb-8">
+                    ) : filteredAndSortedTeams.length === 0 ? (
+                            <motion.div 
+                                className="text-center py-32"
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.5 }}
+                            >
+                                <motion.div 
+                                    className="inline-flex items-center justify-center w-40 h-40 rounded-full bg-gradient-to-br from-slate-800/60 to-slate-900/60 border-2 border-white/10 mb-8"
+                                    animate={{ rotate: [0, 10, -10, 0] }}
+                                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                                >
+                                    <Users className="w-20 h-20 text-gray-400" />
+                                </motion.div>
+                                <h3 className="text-4xl font-black text-white mb-4 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                                    No teams found
+                                </h3>
+                                <p className="text-gray-400 text-xl max-w-md mx-auto mb-10">
                                 {searchTerm ? `No teams match "${searchTerm}"` : 'No teams match your filters'}
                             </p>
-                            <motion.button
+                                <motion.button
                                 onClick={clearFilters}
-                                className="px-8 py-4 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-bold hover:shadow-2xl hover:shadow-purple-500/50 transition-all flex items-center gap-2 mx-auto"
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
+                                    className="px-10 py-5 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-black text-lg hover:shadow-2xl transition-all flex items-center gap-3 mx-auto"
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
                             >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
+                                    <X className="w-5 h-5" />
                                 Clear all filters
-                            </motion.button>
-                        </motion.div>
+                                </motion.button>
+                            </motion.div>
                     ) : (
                         <motion.div 
                             className={viewMode === 'grid' 
-                                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8"
-                                : "space-y-6"
+                                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                                    : "space-y-6"
                             }
                             initial="hidden"
                             animate="visible"
                             variants={{
                                 visible: {
                                     transition: {
-                                        staggerChildren: 0.08,
+                                            staggerChildren: 0.08,
                                     },
                                 },
                             }}
@@ -817,31 +781,29 @@ function TeamsPageContent() {
                                     <motion.div
                                         key={team.id}
                                         layout
-                                        initial={{ opacity: 0, y: 50, scale: 0.9, rotateY: -15 }}
-                                        animate={{ opacity: 1, y: 0, scale: 1, rotateY: 0 }}
-                                        exit={{ opacity: 0, scale: 0.8, rotateY: 15, y: -20 }}
+                                            initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 0.8, y: -20 }}
                                         transition={{
-                                            duration: 0.6,
+                                                duration: 0.6,
                                             delay: index * 0.05,
                                             ease: [0.22, 1, 0.36, 1],
                                         }}
                                         whileHover={{ 
-                                            y: -15, 
-                                            scale: 1.05,
-                                            rotateY: 5,
-                                            transition: { duration: 0.3, ease: "easeOut" }
+                                                y: -15, 
+                                                scale: 1.05,
+                                            transition: { duration: 0.3 }
                                         }}
-                                        style={{ perspective: 1000 }}
-                                        className="relative group"
-                                    >
-                                        {/* Enhanced Glow effect on hover */}
-                                        <div 
-                                            className="absolute -inset-1 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10"
-                                            style={{
-                                                background: `linear-gradient(135deg, ${team.colors.primary}40, ${team.colors.secondary}40)`
-                                            }}
-                                        />
-                                        
+                                            className="relative group"
+                                        >
+                                            {/* Enhanced Glow effect */}
+                                            <div 
+                                                className="absolute -inset-2 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-2xl -z-10"
+                                                style={{
+                                                    background: `linear-gradient(135deg, ${team.colors.primary}50, ${team.colors.secondary}50)`
+                                                }}
+                                            />
+                                            
                                         <EnhancedTeamCard
                                             team={team}
                                             onPlayerClick={handlePlayerClick}
@@ -853,65 +815,69 @@ function TeamsPageContent() {
                             </AnimatePresence>
                         </motion.div>
                     )}
+                    </div>
+                </section>
 
-                    {/* Enhanced Statistics Section */}
+                {/* Premium Statistics Section */}
                     {!isLoading && teams.length > 0 && (
-                        <motion.div 
-                            className="mt-24"
-                            initial={{ opacity: 0, y: 50 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.8 }}
-                        >
-                            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 backdrop-blur-2xl border-2 border-white/10 p-8 md:p-16 group hover:border-blue-500/50 transition-all duration-700 shadow-2xl">
-                                {/* Animated Background Effects */}
+                    <section className="relative z-10 py-24">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <motion.div
+                                className="relative overflow-hidden rounded-3xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 p-12 md:p-16 group"
+                                initial={{ opacity: 0, y: 50 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.8 }}
+                                style={{
+                                    boxShadow: '0 30px 80px rgba(0, 0, 0, 0.5)'
+                                }}
+                            >
+                                {/* Animated Background */}
                                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-                                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 animate-gradient" />
+                                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10" />
                                     <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
                                     <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
                                 </div>
 
                                 <div className="relative z-10">
                                     <motion.div 
-                                        className="text-center mb-12"
+                                        className="text-center mb-16"
                                         initial={{ opacity: 0, y: -20 }}
                                         whileInView={{ opacity: 1, y: 0 }}
                                         viewport={{ once: true }}
                                         transition={{ duration: 0.6 }}
                                     >
-                                        <motion.div 
-                                            className="inline-flex items-center space-x-2 mb-6"
+                                        <motion.span
+                                            className="inline-flex items-center gap-3 px-6 py-3 rounded-full backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 mb-8"
                                             whileHover={{ scale: 1.05 }}
                                         >
-                                            <span className="px-4 py-2 rounded-full text-sm font-bold bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 border border-white/20 backdrop-blur-xl text-white flex items-center gap-2 shadow-lg">
-                                                <Icon name="stats" size={20} /> 
-                                                <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent font-extrabold">
-                                                    LEAGUE INSIGHTS
+                                            <Trophy className="w-5 h-5 text-blue-400" />
+                                            <span className="text-sm font-black uppercase tracking-widest bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                                                CHAMPIONSHIP LEGACY
                                         </span>
-                                            </span>
-                                        </motion.div>
+                                        </motion.span>
                                         
-                                        <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 leading-tight">
-                                            Championship{' '}
+                                        <h2 className="text-5xl md:text-6xl lg:text-7xl font-black text-white mb-6 leading-tight">
+                                            Trophy{' '}
                                             <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                                                Breakdown
+                                                Champions
                                             </span>
                                     </h2>
                                         
-                                        <p className="text-gray-300 text-lg md:text-xl mb-12 max-w-3xl mx-auto leading-relaxed">
-                                            Historical performance metrics and championship legacy across all IPL franchises
-                                        </p>
+                                        <p className="text-gray-300 text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed">
+                                            Historical performance metrics and championship legacy across all franchises
+                                    </p>
                                     </motion.div>
 
-                                    {/* Enhanced Trophy Distribution */}
+                                    {/* Trophy Distribution */}
                                     <motion.div 
-                                        className="max-w-4xl mx-auto mb-12"
+                                        className="max-w-5xl mx-auto mb-12"
                                         initial={{ opacity: 0, scale: 0.9 }}
                                         whileInView={{ opacity: 1, scale: 1 }}
                                         viewport={{ once: true }}
                                         transition={{ duration: 0.6, delay: 0.2 }}
                                     >
-                                        <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
+                                        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
                                             {teams
                                                 .filter(t => t.trophies && t.trophies.length > 0)
                                                 .sort((a, b) => (b.trophies?.length || 0) - (a.trophies?.length || 0))
@@ -924,13 +890,13 @@ function TeamsPageContent() {
                                                         whileInView={{ opacity: 1, y: 0 }}
                                                         viewport={{ once: true }}
                                                         transition={{ duration: 0.5, delay: index * 0.1 }}
-                                                        whileHover={{ scale: 1.1, y: -5 }}
+                                                        whileHover={{ scale: 1.15, y: -10 }}
                                                     >
-                                                        <div className="mb-4 p-4 rounded-2xl bg-gradient-to-br from-white/5 to-white/0 border border-white/10 group-hover:border-amber-500/50 transition-all duration-300">
-                                                            <div className="text-lg font-black text-white mb-3" style={{ color: team.colors.primary }}>
+                                                        <div className="mb-6 p-6 rounded-3xl bg-gradient-to-br from-white/5 to-white/0 border-2 border-white/10 group-hover:border-amber-500/50 transition-all duration-300 backdrop-blur-xl">
+                                                            <div className="text-xl font-black text-white mb-4" style={{ color: team.colors.primary }}>
                                                                 {team.shortName}
                                                             </div>
-                                                            <div className="flex items-center justify-center gap-2 mb-2">
+                                                            <div className="flex items-center justify-center gap-2 mb-3">
                                                             {[...Array(team.trophies?.length || 0)].map((_, i) => (
                                                                     <motion.span
                                                                         key={i}
@@ -938,13 +904,13 @@ function TeamsPageContent() {
                                                                         whileInView={{ scale: 1, rotate: 0 }}
                                                                         viewport={{ once: true }}
                                                                         transition={{ duration: 0.5, delay: i * 0.1 }}
-                                                                        whileHover={{ scale: 1.3, rotate: 15 }}
+                                                                        whileHover={{ scale: 1.5, rotate: 20 }}
                                                                     >
-                                                                        <CustomEmoji type="trophy" size={32} />
+                                                                        <Trophy className="w-10 h-10 text-amber-400 fill-amber-400" />
                                                                     </motion.span>
                                                             ))}
                                                         </div>
-                                                            <div className="text-sm font-bold text-amber-300 mt-2">
+                                                            <div className="text-base font-bold text-amber-300">
                                                                 {team.trophies?.length} {team.trophies?.length === 1 ? 'Title' : 'Titles'}
                                                     </div>
                                                         </div>
@@ -962,24 +928,25 @@ function TeamsPageContent() {
                                     >
                                         <motion.button
                                         onClick={() => router.push('/stats')}
-                                            className="group relative overflow-hidden rounded-2xl font-bold py-4 px-12 text-lg transition-all duration-500 cursor-pointer bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white shadow-2xl shadow-purple-500/40 hover:shadow-purple-500/60"
+                                            className="group relative overflow-hidden rounded-2xl font-black py-5 px-12 text-lg transition-all duration-500 cursor-pointer bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white shadow-2xl"
                                             whileHover={{ scale: 1.05, y: -2 }}
                                             whileTap={{ scale: 0.95 }}
-                                    >
+                                            style={{
+                                                boxShadow: '0 20px 60px rgba(168, 85, 247, 0.5)'
+                                            }}
+                                        >
                                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
                                             <span className="relative z-10 flex items-center gap-3">
                                             Explore Full Statistics
-                                                <svg className="w-6 h-6 transform group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                            </svg>
+                                                <TrendingUp className="w-6 h-6 transform group-hover:translate-x-2 transition-transform" />
                                         </span>
                                         </motion.button>
                                     </motion.div>
                                 </div>
+                            </motion.div>
                             </div>
-                        </motion.div>
+                    </section>
                     )}
-                </div>
             </main>
 
             <Footer />
@@ -1005,10 +972,10 @@ function TeamsPageContent() {
 export default function TeamsPage() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen">
+            <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black">
                 <Navbar />
                 <div className="flex items-center justify-center h-96">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ipl-gold"></div>
+                    <LoadingSpinner />
                 </div>
                 <Footer />
             </div>
