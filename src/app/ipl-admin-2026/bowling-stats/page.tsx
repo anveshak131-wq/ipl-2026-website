@@ -106,10 +106,8 @@ const BowlingStatsPage = () => {
       
       if (type === 'player-updated' || type === 'player-created' || type === 'player-deleted') {
         console.log('Bowling stats: Data update detected, refreshing...');
-        // Small delay to ensure API has processed the update
-        setTimeout(async () => {
-          await refreshData();
-        }, 100);
+        // Immediate refresh
+        await refreshData();
       }
     };
 

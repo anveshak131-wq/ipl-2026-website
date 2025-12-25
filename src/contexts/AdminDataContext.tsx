@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { useLeague } from './LeagueContext';
 import { api } from '@/lib/data';
 
@@ -84,9 +84,9 @@ export const AdminDataProvider = ({ children }: AdminDataProviderProps) => {
     }
   };
 
-  const refreshData = async () => {
+  const refreshData = useCallback(async () => {
     await loadData();
-  };
+  }, [currentLeague]);
 
   const updatePlayer = async (playerId: string, updatedPlayer: Partial<Player>) => {
     try {
@@ -123,10 +123,8 @@ export const AdminDataProvider = ({ children }: AdminDataProviderProps) => {
       // Refresh data for any player-related updates
       if (type === 'player-updated' || type === 'player-created' || type === 'player-deleted') {
         console.log('AdminDataContext: Player update detected, refreshing data...');
-        // Small delay to ensure API has processed the update
-        setTimeout(async () => {
-          await loadData();
-        }, 100);
+        // Immediate refresh - API should be ready by now
+        await loadData();
       }
     };
 
@@ -135,7 +133,7 @@ export const AdminDataProvider = ({ children }: AdminDataProviderProps) => {
     return () => {
       window.removeEventListener('admin-data-updated', handleDataUpdate as EventListener);
     };
-  }, [currentLeague]);
+  }, [loadData]);
 
   const value: AdminDataContextType = {
     players,

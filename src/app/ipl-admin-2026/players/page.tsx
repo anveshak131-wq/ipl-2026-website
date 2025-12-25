@@ -328,7 +328,7 @@ export default function AdminPlayers() {
       
       if (type === 'player-updated' || type === 'player-created' || type === 'player-deleted') {
         console.log('Players page: Data update detected, refreshing...');
-        // Refresh data immediately
+        // Immediate refresh
         await fetchData();
       }
     };
@@ -718,13 +718,13 @@ export default function AdminPlayers() {
         
         const newPlayer = await response.json();
         
-        // Refresh data first, then dispatch event
-        await fetchData();
-        
-        // Dispatch real-time update event for new player
+        // Dispatch real-time update event first, then refresh
         window.dispatchEvent(new CustomEvent('admin-data-updated', {
           detail: { type: 'player-created', playerId: newPlayer.id }
         }));
+        
+        // Refresh data after dispatching event
+        await fetchData();
       }
       setShowForm(false);
       setEditingPlayer(null);
