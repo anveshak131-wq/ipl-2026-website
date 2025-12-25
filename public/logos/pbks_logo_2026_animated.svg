@@ -1,57 +1,45 @@
 <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="pbksGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="pbks-red" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#ED1D24;stop-opacity:1">
-        <animate attributeName="stop-color" values="#ED1D24;#FF4444;#ED1D24" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="stop-color" values="#ED1D24;#FD2D34;#ED1D24" dur="3s" repeatCount="indefinite"/>
       </stop>
-      <stop offset="100%" style="stop-color:#FF4444;stop-opacity:1">
-        <animate attributeName="stop-color" values="#FF4444;#ED1D24;#FF4444" dur="2s" repeatCount="indefinite"/>
+      <stop offset="100%" style="stop-color:#CC0D14;stop-opacity:1">
+        <animate attributeName="stop-color" values="#CC0D14;#ED1D24;#CC0D14" dur="3s" repeatCount="indefinite"/>
       </stop>
     </linearGradient>
-    <linearGradient id="pbksGold" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="pbks-yellow" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#FBDD0B;stop-opacity:1">
-        <animate attributeName="stop-color" values="#FBDD0B;#FFD700;#FBDD0B" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="stop-color" values="#FBDD0B;#FFED1B;#FBDD0B" dur="3s" repeatCount="indefinite"/>
       </stop>
-      <stop offset="100%" style="stop-color:#FFD700;stop-opacity:1">
-        <animate attributeName="stop-color" values="#FFD700;#FBDD0B;#FFD700" dur="2s" repeatCount="indefinite"/>
+      <stop offset="100%" style="stop-color:#DBCD0B;stop-opacity:1">
+        <animate attributeName="stop-color" values="#DBCD0B;#FBDD0B;#DBCD0B" dur="3s" repeatCount="indefinite"/>
       </stop>
     </linearGradient>
+    <filter id="pbks-glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur">
+        <animate attributeName="stdDeviation" values="3;5;3" dur="2.5s" repeatCount="indefinite"/>
+      </feGaussianBlur>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
   
-  <!-- Background shield with pulse -->
-  <path d="M 100 30 L 160 50 L 170 100 L 160 150 L 100 170 L 40 150 L 30 100 L 40 50 Z" 
-        fill="url(#pbksGradient)" 
-        stroke="url(#pbksGold)" 
-        stroke-width="4">
-    <animateTransform attributeName="transform" type="scale" values="1;1.02;1" dur="3s" repeatCount="indefinite"/>
-  </path>
-  
-  <!-- Inner shield with rotation -->
-  <path d="M 100 45 L 145 60 L 150 100 L 145 140 L 100 155 L 55 140 L 50 100 L 55 60 Z" 
-        fill="none" 
-        stroke="url(#pbksGold)" 
-        stroke-width="2" 
-        opacity="0.6">
-    <animateTransform attributeName="transform" type="rotate" values="0 100 100;2 100 100;0 100 100;-2 100 100;0 100 100" dur="4s" repeatCount="indefinite"/>
-  </path>
-  
-  <!-- Crown element with pulse -->
-  <path d="M 100 50 L 110 70 L 125 65 L 115 80 L 120 95 L 100 85 L 80 95 L 85 80 L 75 65 L 90 70 Z" 
-        fill="url(#pbksGold)">
-    <animateTransform attributeName="transform" type="scale" values="1;1.1;1" dur="1.5s" repeatCount="indefinite"/>
-  </path>
-  
-  <!-- Lion head with subtle movement -->
-  <path d="M 100 110 Q 75 105 70 130 Q 75 140 100 135 Q 125 140 130 130 Q 125 105 100 110 Z" 
-        fill="url(#pbksGold)" opacity="0.8">
-    <animateTransform attributeName="transform" type="translate" values="0,0;1,0;0,0" dur="3s" repeatCount="indefinite"/>
+  <!-- Shield -->
+  <path d="M 100 20 L 155 40 L 165 100 L 155 160 L 100 180 L 45 160 L 35 100 L 45 40 Z" 
+        fill="url(#pbks-red)" 
+        stroke="url(#pbks-yellow)" 
+        stroke-width="3" 
+        filter="url(#pbks-glow)">
+    <animateTransform attributeName="transform" type="scale" values="1;1.01;1" dur="4s" repeatCount="indefinite"/>
   </path>
   
   <!-- PBKS Text -->
-  <text x="100" y="165" font-family="Arial Black, sans-serif" font-size="22" font-weight="900" 
-        fill="url(#pbksGold)" text-anchor="middle">
-    <animate attributeName="opacity" values="1;0.8;1" dur="2s" repeatCount="indefinite"/>
+  <text x="100" y="110" font-family="Arial Black, sans-serif" font-size="24" font-weight="900" 
+        text-anchor="middle" fill="url(#pbks-yellow)" filter="url(#pbks-glow)">
+    <animateTransform attributeName="transform" type="scale" values="1;1.03;1" dur="3s" repeatCount="indefinite"/>
     PBKS
   </text>
 </svg>
-

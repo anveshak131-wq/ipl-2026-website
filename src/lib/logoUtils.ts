@@ -48,8 +48,8 @@ export function getAnimatedLogoPath(teamId: string, shortName?: string, league?:
   }
   
   const logoMap: { [key: string]: string } = {
-    // RCB uses the special premium animated 2026 logo
-    '1': 'rcb_logo_premium_2026_animated.svg',  // RCB - Special premium animated version
+    // RCB uses the special premium animated 2026 logo with enhanced animations
+    '1': 'rcb_logo_2026_premium_animated.svg',  // RCB - Special premium animated version
     '2': 'mi_logo_2026_animated.svg',            // MI
     '3': 'srh_logo_2026_animated.svg',           // SRH
     '4': 'gt_logo_2026_animated.svg',            // GT
@@ -63,7 +63,7 @@ export function getAnimatedLogoPath(teamId: string, shortName?: string, league?:
 
   // Handle both 'team1' and '1' formats
   const numericId = teamId.replace('team', '');
-  const logoFile = logoMap[numericId] || 'rcb_logo_premium_2026_animated.svg';
+  const logoFile = logoMap[numericId] || 'rcb_logo_2026_premium_animated.svg';
 
   // If the mapping is a Lottie JSON name, serve from /assets/lottie
   if (logoFile.endsWith('.json')) {
@@ -77,7 +77,7 @@ export function getAnimatedLogoPath(teamId: string, shortName?: string, league?:
 // Get regular logo path (fallback - uses animated versions)
 export function getLogoPath(teamId: string): string {
   const logoMap: { [key: string]: string } = {
-    '1': 'rcb_logo_premium_2026_animated.svg',  // RCB - Special premium animated version
+    '1': 'rcb_logo_2026_premium_animated.svg',  // RCB - Special premium animated version with enhanced effects
     '2': 'mi_logo_2026_animated.svg',          // MI
     '3': 'srh_logo_2026_animated.svg',         // SRH
     '4': 'gt_logo_2026_animated.svg',          // GT
@@ -90,7 +90,7 @@ export function getLogoPath(teamId: string): string {
   };
 
   const numericId = teamId.replace('team', '');
-  const logoFile = logoMap[numericId] || 'rcb_logo_premium_2026_animated.svg';
+  const logoFile = logoMap[numericId] || 'rcb_logo_2026_premium_animated.svg';
   return `/logos/${logoFile}`;
 }
 

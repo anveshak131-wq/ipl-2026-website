@@ -1,67 +1,53 @@
 <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="srhGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="srh-orange" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#FF822A;stop-opacity:1">
-        <animate attributeName="stop-color" values="#FF822A;#FFA500;#FF822A" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="stop-color" values="#FF822A;#FF9A4A;#FF822A" dur="3s" repeatCount="indefinite"/>
       </stop>
-      <stop offset="100%" style="stop-color:#FFA500;stop-opacity:1">
-        <animate attributeName="stop-color" values="#FFA500;#FF822A;#FFA500" dur="2s" repeatCount="indefinite"/>
+      <stop offset="100%" style="stop-color:#E66A1A;stop-opacity:1">
+        <animate attributeName="stop-color" values="#E66A1A;#FF822A;#E66A1A" dur="3s" repeatCount="indefinite"/>
       </stop>
     </linearGradient>
-    <radialGradient id="srhSun" cx="50%" cy="50%">
-      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1">
-        <animate attributeName="stop-color" values="#FFD700;#FFA500;#FFD700" dur="2s" repeatCount="indefinite"/>
-      </stop>
-      <stop offset="100%" style="stop-color:#FF822A;stop-opacity:1"/>
-    </radialGradient>
+    <linearGradient id="srh-black" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#000000;stop-opacity:1"/>
+      <stop offset="100%" style="stop-color:#1A1A1A;stop-opacity:1"/>
+    </linearGradient>
+    <filter id="srh-glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur">
+        <animate attributeName="stdDeviation" values="3;5;3" dur="2.5s" repeatCount="indefinite"/>
+      </feGaussianBlur>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
   
-  <!-- Background circle -->
-  <circle cx="100" cy="100" r="90" fill="url(#srhGradient)" stroke="#000" stroke-width="4">
-    <animate attributeName="r" values="90;92;90" dur="3s" repeatCount="indefinite"/>
+  <!-- Circle with sun rays -->
+  <circle cx="100" cy="100" r="80" fill="url(#srh-orange)" stroke="url(#srh-black)" stroke-width="3" filter="url(#srh-glow)">
+    <animateTransform attributeName="transform" type="scale" values="1;1.01;1" dur="4s" repeatCount="indefinite"/>
   </circle>
   
-  <!-- Sun rays with rotation -->
-  <g fill="url(#srhSun)" opacity="0.8">
-    <rect x="95" y="20" width="10" height="25" rx="5">
-      <animateTransform attributeName="transform" type="rotate" values="0 100 100;360 100 100" dur="10s" repeatCount="indefinite"/>
-    </rect>
-    <rect x="95" y="155" width="10" height="25" rx="5">
-      <animateTransform attributeName="transform" type="rotate" values="0 100 100;360 100 100" dur="10s" repeatCount="indefinite"/>
-    </rect>
-    <rect x="20" y="95" width="25" height="10" rx="5">
-      <animateTransform attributeName="transform" type="rotate" values="0 100 100;360 100 100" dur="10s" repeatCount="indefinite"/>
-    </rect>
-    <rect x="155" y="95" width="25" height="10" rx="5">
-      <animateTransform attributeName="transform" type="rotate" values="0 100 100;360 100 100" dur="10s" repeatCount="indefinite"/>
-    </rect>
-    <rect x="40" y="40" width="8" height="20" rx="4" transform="rotate(-45 44 50)">
-      <animateTransform attributeName="transform" type="rotate" values="-45 100 100;315 100 100" dur="10s" repeatCount="indefinite"/>
-    </rect>
-    <rect x="152" y="40" width="8" height="20" rx="4" transform="rotate(45 156 50)">
-      <animateTransform attributeName="transform" type="rotate" values="45 100 100;405 100 100" dur="10s" repeatCount="indefinite"/>
-    </rect>
-    <rect x="40" y="140" width="8" height="20" rx="4" transform="rotate(45 44 150)">
-      <animateTransform attributeName="transform" type="rotate" values="45 100 100;405 100 100" dur="10s" repeatCount="indefinite"/>
-    </rect>
-    <rect x="152" y="140" width="8" height="20" rx="4" transform="rotate(-45 156 150)">
-      <animateTransform attributeName="transform" type="rotate" values="-45 100 100;315 100 100" dur="10s" repeatCount="indefinite"/>
-    </rect>
+  <!-- Sun rays -->
+  <g stroke="url(#srh-orange)" stroke-width="3" opacity="0.7">
+    <line x1="100" y1="20" x2="100" y2="30">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/>
+    </line>
+    <line x1="100" y1="170" x2="100" y2="180">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite" begin="0.5s"/>
+    </line>
+    <line x1="20" y1="100" x2="30" y2="100">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite" begin="1s"/>
+    </line>
+    <line x1="170" y1="100" x2="180" y2="100">
+      <animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite" begin="1.5s"/>
+    </line>
   </g>
   
-  <!-- Central sun with pulse -->
-  <circle cx="100" cy="100" r="45" fill="url(#srhSun)">
-    <animate attributeName="r" values="45;48;45" dur="2s" repeatCount="indefinite"/>
-  </circle>
-  <circle cx="100" cy="100" r="35" fill="#FF822A">
-    <animate attributeName="r" values="35;37;35" dur="2s" repeatCount="indefinite"/>
-  </circle>
-  
   <!-- SRH Text -->
-  <text x="100" y="110" font-family="Arial Black, sans-serif" font-size="24" font-weight="900" 
-        fill="#000" text-anchor="middle">
-    <animate attributeName="opacity" values="1;0.8;1" dur="2s" repeatCount="indefinite"/>
+  <text x="100" y="110" font-family="Arial Black, sans-serif" font-size="28" font-weight="900" 
+        text-anchor="middle" fill="url(#srh-black)" filter="url(#srh-glow)">
+    <animateTransform attributeName="transform" type="scale" values="1;1.03;1" dur="3s" repeatCount="indefinite"/>
     SRH
   </text>
 </svg>
-

@@ -1,55 +1,45 @@
 <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="rrGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="rr-pink" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#EA1A85;stop-opacity:1">
-        <animate attributeName="stop-color" values="#EA1A85;#FF6BB5;#EA1A85" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="stop-color" values="#EA1A85;#FA2A95;#EA1A85" dur="3s" repeatCount="indefinite"/>
       </stop>
-      <stop offset="100%" style="stop-color:#FF6BB5;stop-opacity:1">
-        <animate attributeName="stop-color" values="#FF6BB5;#EA1A85;#FF6BB5" dur="3s" repeatCount="indefinite"/>
+      <stop offset="100%" style="stop-color:#CA0A75;stop-opacity:1">
+        <animate attributeName="stop-color" values="#CA0A75;#EA1A85;#CA0A75" dur="3s" repeatCount="indefinite"/>
       </stop>
     </linearGradient>
-    <linearGradient id="rrBlue" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="rr-blue" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#004B8D;stop-opacity:1">
-        <animate attributeName="stop-color" values="#004B8D;#0066CC;#004B8D" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="stop-color" values="#004B8D;#005B9D;#004B8D" dur="4s" repeatCount="indefinite"/>
       </stop>
-      <stop offset="100%" style="stop-color:#0066CC;stop-opacity:1">
-        <animate attributeName="stop-color" values="#0066CC;#004B8D;#0066CC" dur="2s" repeatCount="indefinite"/>
+      <stop offset="100%" style="stop-color:#003B6D;stop-opacity:1">
+        <animate attributeName="stop-color" values="#003B6D;#004B8D;#003B6D" dur="4s" repeatCount="indefinite"/>
       </stop>
     </linearGradient>
+    <filter id="rr-glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur">
+        <animate attributeName="stdDeviation" values="3;5;3" dur="2.5s" repeatCount="indefinite"/>
+      </feGaussianBlur>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
   
-  <!-- Background circle with pulse -->
-  <circle cx="100" cy="100" r="90" fill="url(#rrGradient)" stroke="url(#rrBlue)" stroke-width="4">
-    <animate attributeName="r" values="90;92;90" dur="3s" repeatCount="indefinite"/>
-  </circle>
-  
-  <!-- Inner circle with rotation -->
-  <circle cx="100" cy="100" r="75" fill="none" stroke="url(#rrBlue)" stroke-width="2" opacity="0.5">
-    <animateTransform attributeName="transform" type="rotate" values="0 100 100;360 100 100" dur="15s" repeatCount="indefinite"/>
-  </circle>
-  
-  <!-- Crown element with pulse -->
-  <path d="M 100 50 L 120 65 L 135 60 L 130 80 L 140 90 L 120 85 L 100 95 L 80 85 L 60 90 L 70 80 L 65 60 L 80 65 Z" 
-        fill="url(#rrBlue)">
-    <animateTransform attributeName="transform" type="scale" values="1;1.05;1" dur="2s" repeatCount="indefinite"/>
+  <!-- Shield -->
+  <path d="M 100 20 L 155 40 L 165 100 L 155 160 L 100 180 L 45 160 L 35 100 L 45 40 Z" 
+        fill="url(#rr-pink)" 
+        stroke="url(#rr-blue)" 
+        stroke-width="3" 
+        filter="url(#rr-glow)">
+    <animateTransform attributeName="transform" type="scale" values="1;1.01;1" dur="4s" repeatCount="indefinite"/>
   </path>
-  
-  <!-- Royal emblem with subtle movement -->
-  <path d="M 100 100 L 130 110 L 125 130 L 100 140 L 75 130 L 70 110 Z" 
-        fill="url(#rrBlue)">
-    <animateTransform attributeName="transform" type="translate" values="0,0;0,-1;0,0" dur="3s" repeatCount="indefinite"/>
-  </path>
-  
-  <!-- Center detail with pulse -->
-  <circle cx="100" cy="115" r="8" fill="#EA1A85">
-    <animate attributeName="r" values="8;10;8" dur="2s" repeatCount="indefinite"/>
-  </circle>
   
   <!-- RR Text -->
-  <text x="100" y="170" font-family="Arial Black, sans-serif" font-size="32" font-weight="900" 
-        fill="#FFFFFF" text-anchor="middle">
-    <animate attributeName="opacity" values="1;0.8;1" dur="2s" repeatCount="indefinite"/>
+  <text x="100" y="110" font-family="Arial Black, sans-serif" font-size="32" font-weight="900" 
+        text-anchor="middle" fill="#FFFFFF" filter="url(#rr-glow)">
+    <animateTransform attributeName="transform" type="scale" values="1;1.03;1" dur="3s" repeatCount="indefinite"/>
     RR
   </text>
 </svg>
-

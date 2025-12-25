@@ -1,57 +1,45 @@
 <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="lsgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="lsg-red" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#9C2A2C;stop-opacity:1">
-        <animate attributeName="stop-color" values="#9C2A2C;#C0392B;#9C2A2C" dur="3s" repeatCount="indefinite"/>
+        <animate attributeName="stop-color" values="#9C2A2C;#AC3A3C;#9C2A2C" dur="3s" repeatCount="indefinite"/>
       </stop>
-      <stop offset="100%" style="stop-color:#C0392B;stop-opacity:1">
-        <animate attributeName="stop-color" values="#C0392B;#9C2A2C;#C0392B" dur="3s" repeatCount="indefinite"/>
+      <stop offset="100%" style="stop-color:#7C1A1C;stop-opacity:1">
+        <animate attributeName="stop-color" values="#7C1A1C;#9C2A2C;#7C1A1C" dur="3s" repeatCount="indefinite"/>
       </stop>
     </linearGradient>
-    <linearGradient id="lsgGold" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="lsg-yellow" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#F7E17D;stop-opacity:1">
-        <animate attributeName="stop-color" values="#F7E17D;#FFD700;#F7E17D" dur="2s" repeatCount="indefinite"/>
+        <animate attributeName="stop-color" values="#F7E17D;#FFF78D;#F7E17D" dur="3s" repeatCount="indefinite"/>
       </stop>
-      <stop offset="100%" style="stop-color:#FFD700;stop-opacity:1">
-        <animate attributeName="stop-color" values="#FFD700;#F7E17D;#FFD700" dur="2s" repeatCount="indefinite"/>
+      <stop offset="100%" style="stop-color:#D7C15D;stop-opacity:1">
+        <animate attributeName="stop-color" values="#D7C15D;#F7E17D;#D7C15D" dur="3s" repeatCount="indefinite"/>
       </stop>
     </linearGradient>
+    <filter id="lsg-glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur">
+        <animate attributeName="stdDeviation" values="3;5;3" dur="2.5s" repeatCount="indefinite"/>
+      </feGaussianBlur>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
   </defs>
   
-  <!-- Background with pulse -->
-  <circle cx="100" cy="100" r="90" fill="url(#lsgGradient)" stroke="url(#lsgGold)" stroke-width="4">
-    <animate attributeName="r" values="90;92;90" dur="3s" repeatCount="indefinite"/>
-  </circle>
-  
-  <!-- Inner decorative ring with rotation -->
-  <circle cx="100" cy="100" r="75" fill="none" stroke="url(#lsgGold)" stroke-width="2" opacity="0.6">
-    <animateTransform attributeName="transform" type="rotate" values="0 100 100;-360 100 100" dur="20s" repeatCount="indefinite"/>
-  </circle>
-  
-  <!-- Super Giant silhouette with subtle movement -->
-  <path d="M 100 50 L 140 70 L 150 100 L 140 130 L 100 150 L 60 130 L 50 100 L 60 70 Z" 
-        fill="url(#lsgGold)">
-    <animateTransform attributeName="transform" type="scale" values="1;1.02;1" dur="3s" repeatCount="indefinite"/>
-  </path>
-  
-  <!-- Head detail with pulse -->
-  <circle cx="100" cy="75" r="15" fill="#9C2A2C">
-    <animate attributeName="r" values="15;16;15" dur="2s" repeatCount="indefinite"/>
-  </circle>
-  
-  <!-- Shoulder pads with alternating pulse -->
-  <path d="M 60 70 L 75 85 L 70 95 L 60 90 Z" fill="#9C2A2C">
-    <animate attributeName="opacity" values="1;0.7;1" dur="2s" repeatCount="indefinite"/>
-  </path>
-  <path d="M 140 70 L 125 85 L 130 95 L 140 90 Z" fill="#9C2A2C">
-    <animate attributeName="opacity" values="1;0.7;1" dur="2s" repeatCount="indefinite" begin="1s"/>
+  <!-- Shield -->
+  <path d="M 100 20 L 155 40 L 165 100 L 155 160 L 100 180 L 45 160 L 35 100 L 45 40 Z" 
+        fill="url(#lsg-red)" 
+        stroke="url(#lsg-yellow)" 
+        stroke-width="3" 
+        filter="url(#lsg-glow)">
+    <animateTransform attributeName="transform" type="scale" values="1;1.01;1" dur="4s" repeatCount="indefinite"/>
   </path>
   
   <!-- LSG Text -->
-  <text x="100" y="175" font-family="Arial Black, sans-serif" font-size="24" font-weight="900" 
-        fill="url(#lsgGold)" text-anchor="middle">
-    <animate attributeName="opacity" values="1;0.8;1" dur="2s" repeatCount="indefinite"/>
+  <text x="100" y="110" font-family="Arial Black, sans-serif" font-size="24" font-weight="900" 
+        text-anchor="middle" fill="url(#lsg-yellow)" filter="url(#lsg-glow)">
+    <animateTransform attributeName="transform" type="scale" values="1;1.03;1" dur="3s" repeatCount="indefinite"/>
     LSG
   </text>
 </svg>
-
