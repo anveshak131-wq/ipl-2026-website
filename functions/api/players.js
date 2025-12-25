@@ -844,8 +844,22 @@ export const onRequest = async (context) => {
       headers: { 'Content-Type': 'application/json', ...corsHeaders },
     });
   } catch (error) {
+    // Enhanced error logging for debugging
+    console.error('Players API Error:', error);
+    console.error('Error stack:', error.stack);
+    console.error('Error details:', {
+      message: error.message,
+      name: error.name,
+      method: request.method,
+      url: request.url
+    });
+    
     return new Response(
-      JSON.stringify({ error: 'Internal server error', message: error.message }),
+      JSON.stringify({ 
+        error: 'Internal server error', 
+        message: error.message,
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      }),
       {
         status: 500,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
