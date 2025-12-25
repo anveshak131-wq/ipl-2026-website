@@ -1015,50 +1015,80 @@ const BowlingStatsPage = () => {
                 {/* Player Info Section */}
                 <div className="p-6 bg-gradient-to-r from-gray-800/50 to-gray-900/50 border-b border-gray-700/50">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Player Name - Read-only with premium design */}
                     <div className="relative group">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-gray-300 mb-2">
-                        <User className="w-4 h-4 text-green-400" />
+                      <label className="flex items-center gap-2 text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
+                        <User className="w-3.5 h-3.5 text-green-400" />
                         Player Name
                       </label>
-                <input
-                  type="text"
-                  value={editForm.name}
-                  onChange={(e) => handleFormChange('name', e.target.value)}
-                        className="w-full pl-11 pr-4 py-3 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
-                        placeholder="Enter player name"
-                />
-                      <User className="absolute left-3 top-9 w-5 h-5 text-gray-400 pointer-events-none" />
-              </div>
+                      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-800/90 to-gray-900/90 border border-green-500/30 shadow-lg">
+                        <div className="flex items-center gap-3 px-4 py-3.5">
+                          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-green-500/20 to-teal-600/20 border border-green-500/30 flex items-center justify-center">
+                            <User className="w-5 h-5 text-green-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-white font-semibold text-base truncate">
+                              {editForm.name || editingPlayer?.name || 'N/A'}
+                            </div>
+                            <div className="text-xs text-gray-400 mt-0.5">Read-only</div>
+                          </div>
+                          <div className="flex-shrink-0">
+                            <div className="w-2 h-2 rounded-full bg-green-500/50 animate-pulse"></div>
+                          </div>
+                        </div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                      </div>
+                    </div>
+
+                    {/* Role - Read-only with badge design */}
                     <div className="relative group">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-gray-300 mb-2">
-                        <Activity className="w-4 h-4 text-emerald-400" />
+                      <label className="flex items-center gap-2 text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
+                        <Activity className="w-3.5 h-3.5 text-emerald-400" />
                         Role
                       </label>
-                <select
-                  value={editForm.role}
-                  onChange={(e) => handleFormChange('role', e.target.value)}
-                        className="w-full pl-11 pr-4 py-3 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all appearance-none cursor-pointer"
-                >
-                  <option value="Batsman">Batsman</option>
-                  <option value="Bowler">Bowler</option>
-                  <option value="All-rounder">All-rounder</option>
-                  <option value="Wicket-keeper">Wicket-keeper</option>
-                </select>
-                      <Activity className="absolute left-3 top-9 w-5 h-5 text-gray-400 pointer-events-none" />
-              </div>
+                      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-800/90 to-gray-900/90 border border-emerald-500/30 shadow-lg">
+                        <div className="flex items-center gap-3 px-4 py-3.5">
+                          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-600/20 border border-emerald-500/30 flex items-center justify-center">
+                            <Activity className="w-5 h-5 text-emerald-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="inline-flex items-center gap-2">
+                              <span className="px-3 py-1 rounded-lg bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border border-emerald-500/40 text-emerald-200 font-semibold text-sm">
+                                {editForm.role || editingPlayer?.role || 'N/A'}
+                              </span>
+                            </div>
+                            <div className="text-xs text-gray-400 mt-1.5">Read-only</div>
+                          </div>
+                        </div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                      </div>
+                    </div>
+
+                    {/* Jersey Number - Read-only with premium design */}
                     <div className="relative group">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-gray-300 mb-2">
-                        <Shirt className="w-4 h-4 text-teal-400" />
+                      <label className="flex items-center gap-2 text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
+                        <Shirt className="w-3.5 h-3.5 text-teal-400" />
                         Jersey Number
                       </label>
-                <input
-                  type="text"
-                  value={editForm.jerseyNumber}
-                  onChange={(e) => handleFormChange('jerseyNumber', e.target.value)}
-                        className="w-full pl-11 pr-4 py-3 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
-                        placeholder="#"
-                />
-                      <Hash className="absolute left-3 top-9 w-5 h-5 text-gray-400 pointer-events-none" />
+                      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-800/90 to-gray-900/90 border border-teal-500/30 shadow-lg">
+                        <div className="flex items-center gap-3 px-4 py-3.5">
+                          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-teal-500/20 to-cyan-600/20 border border-teal-500/30 flex items-center justify-center">
+                            <Hash className="w-5 h-5 text-teal-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-white font-bold text-lg">
+                                {editForm.jerseyNumber || editingPlayer?.jerseyNumber || 'N/A'}
+                              </span>
+                              {editForm.jerseyNumber && (
+                                <span className="text-xs text-gray-400">#{editForm.jerseyNumber}</span>
+                              )}
+                            </div>
+                            <div className="text-xs text-gray-400 mt-0.5">Read-only</div>
+                          </div>
+                        </div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                      </div>
                     </div>
                   </div>
               </div>

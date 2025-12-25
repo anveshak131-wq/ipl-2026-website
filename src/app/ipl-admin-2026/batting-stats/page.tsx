@@ -1013,56 +1013,80 @@ const BattingStatsPage = () => {
                 {/* Player Info Section */}
                 <div className="p-6 bg-gradient-to-r from-gray-800/50 to-gray-900/50 border-b border-gray-700/50">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Player Name - Read-only with premium design */}
                     <div className="relative group">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-gray-300 mb-2">
-                        <User className="w-4 h-4 text-blue-400" />
+                      <label className="flex items-center gap-2 text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
+                        <User className="w-3.5 h-3.5 text-blue-400" />
                         Player Name
                       </label>
-                <input
-                  type="text"
-                  id="edit-player-name"
-                  name="playerName"
-                  value={editForm.name}
-                  onChange={(e) => handleFormChange('name', e.target.value)}
-                        className="w-full pl-11 pr-4 py-3 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                        placeholder="Enter player name"
-                />
-                      <User className="absolute left-3 top-9 w-5 h-5 text-gray-400 pointer-events-none" />
-              </div>
+                      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-800/90 to-gray-900/90 border border-blue-500/30 shadow-lg">
+                        <div className="flex items-center gap-3 px-4 py-3.5">
+                          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-600/20 border border-blue-500/30 flex items-center justify-center">
+                            <User className="w-5 h-5 text-blue-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-white font-semibold text-base truncate">
+                              {editForm.name || editingPlayer?.name || 'N/A'}
+                            </div>
+                            <div className="text-xs text-gray-400 mt-0.5">Read-only</div>
+                          </div>
+                          <div className="flex-shrink-0">
+                            <div className="w-2 h-2 rounded-full bg-blue-500/50 animate-pulse"></div>
+                          </div>
+                        </div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                      </div>
+                    </div>
+
+                    {/* Role - Read-only with badge design */}
                     <div className="relative group">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-gray-300 mb-2">
-                        <Activity className="w-4 h-4 text-purple-400" />
+                      <label className="flex items-center gap-2 text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
+                        <Activity className="w-3.5 h-3.5 text-purple-400" />
                         Role
                       </label>
-                <select
-                  id="edit-player-role"
-                  name="playerRole"
-                  value={editForm.role}
-                  onChange={(e) => handleFormChange('role', e.target.value)}
-                        className="w-full pl-11 pr-4 py-3 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all appearance-none cursor-pointer"
-                >
-                  <option value="Batsman">Batsman</option>
-                  <option value="Bowler">Bowler</option>
-                  <option value="All-rounder">All-rounder</option>
-                  <option value="Wicket-keeper">Wicket-keeper</option>
-                </select>
-                      <Activity className="absolute left-3 top-9 w-5 h-5 text-gray-400 pointer-events-none" />
-              </div>
+                      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-800/90 to-gray-900/90 border border-purple-500/30 shadow-lg">
+                        <div className="flex items-center gap-3 px-4 py-3.5">
+                          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500/20 to-pink-600/20 border border-purple-500/30 flex items-center justify-center">
+                            <Activity className="w-5 h-5 text-purple-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="inline-flex items-center gap-2">
+                              <span className="px-3 py-1 rounded-lg bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/40 text-purple-200 font-semibold text-sm">
+                                {editForm.role || editingPlayer?.role || 'N/A'}
+                              </span>
+                            </div>
+                            <div className="text-xs text-gray-400 mt-1.5">Read-only</div>
+                          </div>
+                        </div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                      </div>
+                    </div>
+
+                    {/* Jersey Number - Read-only with premium design */}
                     <div className="relative group">
-                      <label className="flex items-center gap-2 text-sm font-semibold text-gray-300 mb-2">
-                        <Shirt className="w-4 h-4 text-pink-400" />
+                      <label className="flex items-center gap-2 text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
+                        <Shirt className="w-3.5 h-3.5 text-pink-400" />
                         Jersey Number
                       </label>
-                <input
-                  type="text"
-                  id="edit-player-jersey"
-                  name="playerJerseyNumber"
-                  value={editForm.jerseyNumber}
-                  onChange={(e) => handleFormChange('jerseyNumber', e.target.value)}
-                        className="w-full pl-11 pr-4 py-3 bg-gray-700/70 border border-gray-600/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                        placeholder="#"
-                />
-                      <Hash className="absolute left-3 top-9 w-5 h-5 text-gray-400 pointer-events-none" />
+                      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-gray-800/90 to-gray-900/90 border border-pink-500/30 shadow-lg">
+                        <div className="flex items-center gap-3 px-4 py-3.5">
+                          <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-pink-500/20 to-rose-600/20 border border-pink-500/30 flex items-center justify-center">
+                            <Hash className="w-5 h-5 text-pink-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-white font-bold text-lg">
+                                {editForm.jerseyNumber || editingPlayer?.jerseyNumber || 'N/A'}
+                              </span>
+                              {editForm.jerseyNumber && (
+                                <span className="text-xs text-gray-400">#{editForm.jerseyNumber}</span>
+                              )}
+                            </div>
+                            <div className="text-xs text-gray-400 mt-0.5">Read-only</div>
+                          </div>
+                        </div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-pink-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                      </div>
                     </div>
                   </div>
               </div>
