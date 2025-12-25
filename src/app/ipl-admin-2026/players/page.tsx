@@ -715,16 +715,13 @@ export default function AdminPlayers() {
         
         const newPlayer = await response.json();
         
-        // Dispatch real-time update event for new player
         // Refresh data first, then dispatch event
         await fetchData();
         
+        // Dispatch real-time update event for new player
         window.dispatchEvent(new CustomEvent('admin-data-updated', {
           detail: { type: 'player-created', playerId: newPlayer.id }
         }));
-      } else {
-        // Refresh players list if update failed
-        await fetchData();
       }
       setShowForm(false);
       setEditingPlayer(null);
