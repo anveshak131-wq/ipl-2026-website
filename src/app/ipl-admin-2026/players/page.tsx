@@ -592,10 +592,58 @@ export default function AdminPlayers() {
           matches: formData.stats.matches ? parseInt(formData.stats.matches) || 0 : 0,
           runs: formData.stats.runs ? parseInt(formData.stats.runs) || 0 : 0,
           wickets: formData.stats.wickets ? parseInt(formData.stats.wickets) || 0 : 0,
-          average: formData.stats.average && formData.stats.average.trim() !== '' ? parseFloat(formData.stats.average) : 0,
-          bowlingAverage: formData.stats.bowlingAverage && formData.stats.bowlingAverage.trim() !== '' ? parseFloat(formData.stats.bowlingAverage) : 0,
-          strikeRate: formData.stats.strikeRate && formData.stats.strikeRate.trim() !== '' ? parseFloat(formData.stats.strikeRate) : 0,
-          economy: formData.stats.economy && formData.stats.economy.trim() !== '' ? parseFloat(formData.stats.economy) : 0,
+          // Calculate average and strikeRate from base stats if not provided
+          average: (() => {
+            if (formData.stats.average && formData.stats.average.trim() !== '') {
+              return parseFloat(formData.stats.average) || 0;
+            }
+            // Calculate from runs, battingInnings, notOuts
+            const runs = formData.stats.runs ? parseInt(formData.stats.runs) || 0 : 0;
+            const battingInnings = formData.stats.battingInnings ? parseInt(formData.stats.battingInnings) || 0 : 0;
+            const notOuts = formData.stats.notOuts ? parseInt(formData.stats.notOuts) || 0 : 0;
+            const dismissals = battingInnings - notOuts;
+            if (dismissals > 0 && runs > 0) {
+              return runs / dismissals;
+            }
+            return 0;
+          })(),
+          strikeRate: (() => {
+            if (formData.stats.strikeRate && formData.stats.strikeRate.trim() !== '') {
+              return parseFloat(formData.stats.strikeRate) || 0;
+            }
+            // Calculate from runs and ballsFaced
+            const runs = formData.stats.runs ? parseInt(formData.stats.runs) || 0 : 0;
+            const ballsFaced = formData.stats.ballsFaced ? parseInt(formData.stats.ballsFaced) || 0 : 0;
+            if (ballsFaced > 0 && runs > 0) {
+              return (runs * 100) / ballsFaced;
+            }
+            return 0;
+          })(),
+          // Bowling stats - calculate if not provided
+          bowlingAverage: (() => {
+            if (formData.stats.bowlingAverage && formData.stats.bowlingAverage.trim() !== '') {
+              return parseFloat(formData.stats.bowlingAverage) || 0;
+            }
+            // Calculate from wickets and runsConceded
+            const wickets = formData.stats.wickets ? parseInt(formData.stats.wickets) || 0 : 0;
+            const runsConceded = formData.stats.runsConceded ? parseInt(formData.stats.runsConceded) || 0 : 0;
+            if (wickets > 0 && runsConceded >= 0) {
+              return runsConceded / wickets;
+            }
+            return 0;
+          })(),
+          economy: (() => {
+            if (formData.stats.economy && formData.stats.economy.trim() !== '') {
+              return parseFloat(formData.stats.economy) || 0;
+            }
+            // Calculate from balls and runsConceded
+            const balls = formData.stats.balls ? parseInt(formData.stats.balls) || 0 : 0;
+            const runsConceded = formData.stats.runsConceded ? parseInt(formData.stats.runsConceded) || 0 : 0;
+            if (balls > 0 && runsConceded >= 0) {
+              return (runsConceded * 6) / balls;
+            }
+            return 0;
+          })(),
           highest: formData.stats.highest ? parseInt(formData.stats.highest) || 0 : 0,
           fours: formData.stats.fours ? parseInt(formData.stats.fours) || 0 : 0,
           sixes: formData.stats.sixes ? parseInt(formData.stats.sixes) || 0 : 0,
@@ -726,7 +774,7 @@ export default function AdminPlayers() {
         }));
         
         // Then refresh this page's data
-        await fetchData();
+      await fetchData();
       }
       setShowForm(false);
       setEditingPlayer(null);

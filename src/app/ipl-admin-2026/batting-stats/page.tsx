@@ -259,13 +259,18 @@ const BattingStatsPage = () => {
         strikeRate: strikeRateNum
       };
 
+      // CRITICAL: Use editingPlayer values for read-only fields (name, role, jerseyNumber)
+      // These fields are now read-only in the UI, so we must use the original player data
       const updatedPlayer = {
-        ...editingPlayer, // Preserve ALL existing player fields
+        ...editingPlayer, // Preserve ALL existing player fields FIRST
         id: editingPlayer.id,
-        name: editForm.name || editingPlayer.name,
-        role: editForm.role || editingPlayer.role,
+        // Read-only fields - always use editingPlayer values (not from form)
+        name: editingPlayer.name,
+        role: editingPlayer.role,
+        jerseyNumber: editingPlayer.jerseyNumber,
+        // Age can be updated if provided in form (though not shown in batting stats form)
         age: editForm.age || editingPlayer.age,
-        jerseyNumber: editForm.jerseyNumber || editingPlayer.jerseyNumber,
+        // Preserve all team and league info
         teamId: editingPlayer.teamId,
         league: editingPlayer.league,
         // Preserve all other fields that aren't being edited
@@ -277,10 +282,16 @@ const BattingStatsPage = () => {
         allrounderType: editingPlayer.allrounderType,
         transferInfo: editingPlayer.transferInfo,
         stats: {
+          // CRITICAL: Preserve ALL existing stats first
+          ...editingPlayer.stats,
+          // Then override with updated batting stats
           ...stats,
           // CRITICAL: Explicitly ensure average and strikeRate are numbers and are always set
           average: typeof averageNum === 'number' ? averageNum : parseFloat(String(averageNum)) || 0,
-          strikeRate: typeof strikeRateNum === 'number' ? strikeRateNum : parseFloat(String(strikeRateNum)) || 0
+          strikeRate: typeof strikeRateNum === 'number' ? strikeRateNum : parseFloat(String(strikeRateNum)) || 0,
+          // Ensure string versions are also set
+          battingAverage: battingAverageStr,
+          battingStrikeRate: battingStrikeRateStr
         }
       };
 

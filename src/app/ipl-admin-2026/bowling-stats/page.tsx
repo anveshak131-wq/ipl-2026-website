@@ -246,13 +246,18 @@ const BowlingStatsPage = () => {
         fiveWickets: editForm.stats.fiveWickets === '' ? (editingPlayer.stats?.fiveWickets || 0) : (typeof editForm.stats.fiveWickets === 'number' ? editForm.stats.fiveWickets : parseInt(editForm.stats.fiveWickets) || 0)
       };
 
+      // CRITICAL: Use editingPlayer values for read-only fields (name, role, jerseyNumber)
+      // These fields are now read-only in the UI, so we must use the original player data
       const updatedPlayer = {
-        ...editingPlayer, // Preserve ALL existing player fields
+        ...editingPlayer, // Preserve ALL existing player fields FIRST
         id: editingPlayer.id,
-        name: editForm.name || editingPlayer.name,
-        role: editForm.role || editingPlayer.role,
+        // Read-only fields - always use editingPlayer values (not from form)
+        name: editingPlayer.name,
+        role: editingPlayer.role,
+        jerseyNumber: editingPlayer.jerseyNumber,
+        // Age can be updated if provided in form (though not shown in bowling stats form)
         age: editForm.age || editingPlayer.age,
-        jerseyNumber: editForm.jerseyNumber || editingPlayer.jerseyNumber,
+        // Preserve all team and league info
         teamId: editingPlayer.teamId,
         league: editingPlayer.league,
         // Preserve all other fields that aren't being edited
@@ -264,10 +269,14 @@ const BowlingStatsPage = () => {
         allrounderType: editingPlayer.allrounderType,
         transferInfo: editingPlayer.transferInfo,
         stats: {
+          // CRITICAL: Preserve ALL existing stats first
+          ...editingPlayer.stats,
+          // Then override with updated bowling stats (which has string versions)
           ...stats,
-          // CRITICAL: Explicitly ensure numeric fields are numbers and are always set
-          bowlingAverage: typeof bowlingAverageNum === 'number' ? bowlingAverageNum : parseFloat(String(bowlingAverageNum)) || 0,
-          economy: typeof economyNum === 'number' ? economyNum : parseFloat(String(economyNum)) || 0
+          // CRITICAL: Send numeric versions for API calculations
+          // The API will use these for calculations and preserve string versions for display
+          // Note: stats object above has string versions, but API needs numeric for calculations
+          // We'll let API handle the conversion - it will calculate numeric from string if needed
         }
       };
 

@@ -671,7 +671,7 @@ export const onRequest = async (context) => {
           // CRITICAL: Always set average and strikeRate explicitly
           average: finalAverage,
           strikeRate: finalStrikeRate,
-          economy: updatedPlayer.stats?.economy !== undefined ? (typeof updatedPlayer.stats.economy === 'string' ? (updatedPlayer.stats.economy || '') : (parseFloat(updatedPlayer.stats.economy) || 0)) : (existingPlayer.stats?.economy || 0),
+          // Economy will be calculated below in the economy calculation function
           highest: updatedPlayer.stats?.highest !== undefined ? (parseInt(updatedPlayer.stats.highest) || 0) : (existingPlayer.stats?.highest || 0),
           fours: updatedPlayer.stats?.fours !== undefined ? (parseInt(updatedPlayer.stats.fours) || 0) : (existingPlayer.stats?.fours || 0),
           sixes: updatedPlayer.stats?.sixes !== undefined ? (parseInt(updatedPlayer.stats.sixes) || 0) : (existingPlayer.stats?.sixes || 0),
@@ -690,8 +690,9 @@ export const onRequest = async (context) => {
           maidens: updatedPlayer.stats?.maidens !== undefined ? (parseInt(updatedPlayer.stats.maidens) || 0) : (existingPlayer.stats?.maidens || 0),
           runsConceded: updatedPlayer.stats?.runsConceded !== undefined ? (parseInt(updatedPlayer.stats.runsConceded) || 0) : (existingPlayer.stats?.runsConceded || 0),
           // Calculate bowling average - use provided value, or calculate from base stats, or use existing
+          // CRITICAL: Handle both numeric and string versions
           bowlingAverage: (() => {
-            // If explicitly provided, use it
+            // If explicitly provided as number, use it
             if (updatedPlayer.stats?.bowlingAverage !== undefined && updatedPlayer.stats?.bowlingAverage !== null && updatedPlayer.stats?.bowlingAverage !== '') {
               const provided = typeof updatedPlayer.stats.bowlingAverage === 'number' ? updatedPlayer.stats.bowlingAverage : parseFloat(updatedPlayer.stats.bowlingAverage);
               if (!isNaN(provided) && provided > 0) {
@@ -704,12 +705,20 @@ export const onRequest = async (context) => {
             if (wickets > 0 && runsConceded >= 0) {
               return runsConceded / wickets;
             }
-            // Fallback to existing value
-            return existingPlayer.stats?.bowlingAverage || 0;
+            // Fallback to existing value (handle both number and string)
+            const existingBowlingAvg = existingPlayer.stats?.bowlingAverage;
+            if (typeof existingBowlingAvg === 'number') {
+              return existingBowlingAvg;
+            } else if (typeof existingBowlingAvg === 'string' && existingBowlingAvg !== '' && existingBowlingAvg !== '-') {
+              const parsed = parseFloat(existingBowlingAvg);
+              return !isNaN(parsed) ? parsed : 0;
+            }
+            return 0;
           })(),
           // Calculate economy - use provided value, or calculate from base stats, or use existing
+          // CRITICAL: Handle both numeric and string versions
           economy: (() => {
-            // If explicitly provided, use it
+            // If explicitly provided as number, use it
             if (updatedPlayer.stats?.economy !== undefined && updatedPlayer.stats?.economy !== null && updatedPlayer.stats?.economy !== '') {
               const provided = typeof updatedPlayer.stats.economy === 'number' ? updatedPlayer.stats.economy : parseFloat(updatedPlayer.stats.economy);
               if (!isNaN(provided) && provided > 0) {
@@ -722,13 +731,37 @@ export const onRequest = async (context) => {
             if (balls > 0 && runsConceded >= 0) {
               return (runsConceded * 6) / balls;
             }
-            // Fallback to existing value
-            return existingPlayer.stats?.economy || 0;
+            // Fallback to existing value (handle both number and string)
+            const existingEconomy = existingPlayer.stats?.economy;
+            if (typeof existingEconomy === 'number') {
+              return existingEconomy;
+            } else if (typeof existingEconomy === 'string' && existingEconomy !== '' && existingEconomy !== '-') {
+              const parsed = parseFloat(existingEconomy);
+              return !isNaN(parsed) ? parsed : 0;
+            }
+            return 0;
           })(),
           bowlingStrikeRate: updatedPlayer.stats?.bowlingStrikeRate !== undefined ? (updatedPlayer.stats.bowlingStrikeRate || '') : (existingPlayer.stats?.bowlingStrikeRate || ''),
           fiveWickets: updatedPlayer.stats?.fiveWickets !== undefined ? (parseInt(updatedPlayer.stats.fiveWickets) || 0) : (existingPlayer.stats?.fiveWickets || 0),
         },
       };
+      
+      // CRITICAL: After calculating numeric versions, preserve string versions if they were provided
+      // The API stores numeric for calculations, but we also need to preserve string formats for display
+      // Check if string versions were provided and store them (overwrite numeric with string format if provided as string)
+      if (updatedPlayer.stats?.bowlingAverage !== undefined && typeof updatedPlayer.stats.bowlingAverage === 'string' && updatedPlayer.stats.bowlingAverage !== '' && updatedPlayer.stats.bowlingAverage !== '-') {
+        // Store the string version - the numeric version is already calculated above
+        // We'll keep the numeric for calculations, but the string format is what the admin sees
+        // Since we can't have duplicate keys, we'll use the numeric value but log the string format
+        // Actually, the API should store the numeric value for calculations, and the frontend can format it
+        // But if a specific string format was provided, we should preserve it
+        // For now, we'll store the numeric value (calculated above) and the frontend can format it
+        console.log('API: String bowlingAverage provided:', updatedPlayer.stats.bowlingAverage, 'Numeric stored:', players[index].stats.bowlingAverage);
+      }
+      
+      if (updatedPlayer.stats?.economy !== undefined && typeof updatedPlayer.stats.economy === 'string' && updatedPlayer.stats.economy !== '' && updatedPlayer.stats.economy !== '-') {
+        console.log('API: String economy provided:', updatedPlayer.stats.economy, 'Numeric stored:', players[index].stats.economy);
+      }
       
       // Ensure league property exists (default to existing or 'ipl')
       if (!players[index].league) {
