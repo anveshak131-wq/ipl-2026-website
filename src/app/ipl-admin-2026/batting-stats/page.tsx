@@ -103,12 +103,15 @@ const BattingStatsPage = () => {
   // Listen for real-time data updates
   useEffect(() => {
     const handleDataUpdate = async (event: CustomEvent) => {
-      const { type } = event.detail || {};
+      const { type, playerId } = event.detail || {};
       
       if (type === 'player-updated' || type === 'player-created' || type === 'player-deleted') {
-        console.log('Batting stats: Data update detected, refreshing...');
-        // Immediate refresh
-        await refreshData();
+        console.log('Batting stats: Data update detected for player:', playerId, 'type:', type, 'refreshing...');
+        // Small delay to ensure API has processed the update
+        setTimeout(async () => {
+          await refreshData();
+          console.log('Batting stats: Data refreshed after update');
+        }, 200);
       }
     };
 

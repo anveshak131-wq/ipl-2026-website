@@ -693,13 +693,14 @@ export default function AdminPlayers() {
         const updatedPlayer = await response.json();
         console.log('Player updated successfully:', updatedPlayer);
         
-        // Refresh data first, then dispatch event
-        await fetchData();
-        
-        // Dispatch real-time update event
+        // Dispatch real-time update event FIRST to notify other pages
+        console.log('Dispatching admin-data-updated event for player:', editingPlayer.id);
         window.dispatchEvent(new CustomEvent('admin-data-updated', {
           detail: { type: 'player-updated', playerId: editingPlayer.id }
         }));
+        
+        // Then refresh this page's data
+        await fetchData();
       } else {
         // Create new player
         const response = await fetch('/api/players', {
@@ -718,13 +719,14 @@ export default function AdminPlayers() {
         
         const newPlayer = await response.json();
         
-        // Dispatch real-time update event first, then refresh
+        // Dispatch real-time update event FIRST to notify other pages
+        console.log('Dispatching admin-data-updated event for new player:', newPlayer.id);
         window.dispatchEvent(new CustomEvent('admin-data-updated', {
           detail: { type: 'player-created', playerId: newPlayer.id }
         }));
         
-        // Refresh data after dispatching event
-      await fetchData();
+        // Then refresh this page's data
+        await fetchData();
       }
       setShowForm(false);
       setEditingPlayer(null);
@@ -769,12 +771,13 @@ export default function AdminPlayers() {
         throw new Error('Failed to delete player');
       }
 
-      // Dispatch real-time update event first, then refresh
+      // Dispatch real-time update event FIRST to notify other pages
+      console.log('Dispatching admin-data-updated event for deleted player:', deletedPlayerId);
       window.dispatchEvent(new CustomEvent('admin-data-updated', {
         detail: { type: 'player-deleted', playerId: deletedPlayerId }
       }));
       
-      // Refresh data after dispatching event
+      // Then refresh this page's data
       await fetchData();
       setShowDeleteModal(false);
       setDeleteTarget(null);
