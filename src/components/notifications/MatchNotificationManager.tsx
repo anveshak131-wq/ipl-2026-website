@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { initializeMatchNotifications, refreshMatchNotifications } from '@/services/matchNotificationScheduler';
 
 /**
@@ -12,11 +12,21 @@ import { initializeMatchNotifications, refreshMatchNotifications } from '@/servi
  * - Schedules notifications for all upcoming matches
  * - Checks and triggers notifications periodically
  * - Refreshes when matches are updated
+ * 
+ * References:
+ * - Browser Notifications API: https://developer.mozilla.org/en-US/docs/Web/API/Notifications_API
+ * - Service Workers for background notifications
  */
 export default function MatchNotificationManager() {
+  const initializedRef = useRef(false);
+
   useEffect(() => {
     // Only run on client side
     if (typeof window === 'undefined') return;
+    
+    // Prevent multiple initializations
+    if (initializedRef.current) return;
+    initializedRef.current = true;
 
     // Initialize notifications
     initializeMatchNotifications();
@@ -33,6 +43,12 @@ export default function MatchNotificationManager() {
     return () => {
       window.removeEventListener('match-updated', handleMatchUpdate);
       window.removeEventListener('match-created', handleMatchUpdate);
+      
+      // Clear interval if it exists
+      if ((window as any).__matchNotificationInterval) {
+        clearInterval((window as any).__matchNotificationInterval);
+        delete (window as any).__matchNotificationInterval;
+      }
     };
   }, []);
 

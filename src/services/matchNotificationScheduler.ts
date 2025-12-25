@@ -26,6 +26,9 @@ export interface ScheduledNotification {
 const STORAGE_KEY = 'scheduledMatchNotifications';
 const CHECK_INTERVAL = 60000; // Check every minute
 
+// Global interval ID to prevent multiple intervals
+let notificationCheckInterval: NodeJS.Timeout | null = null;
+
 /**
  * Request browser notification permission
  */
@@ -381,12 +384,10 @@ export async function initializeMatchNotifications(): Promise<void> {
     // Start checking for due notifications immediately
     checkAndTriggerNotifications();
     
-    // Set up interval to check every minute
-    const intervalId = setInterval(checkAndTriggerNotifications, CHECK_INTERVAL);
-    
-    // Store interval ID for cleanup (though in practice this runs for app lifetime)
-    if (typeof window !== 'undefined') {
-      (window as any).__matchNotificationInterval = intervalId;
+    // Set up interval to check every minute (only if not already set)
+    if (!notificationCheckInterval) {
+      notificationCheckInterval = setInterval(checkAndTriggerNotifications, CHECK_INTERVAL);
+      console.log('Started notification check interval');
     }
 
     console.log(`Initialized notifications for ${upcomingMatches.length} upcoming matches`);
