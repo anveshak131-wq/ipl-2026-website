@@ -12,6 +12,9 @@ import WicketCelebration from './WicketCelebration';
 import BoundaryHighlight from './BoundaryHighlight';
 import MilestoneCelebration from './MilestoneCelebration';
 import RichCommentary from './RichCommentary';
+import PartnershipInfo from './PartnershipInfo';
+import OverByOverAnalysis from './OverByOverAnalysis';
+import EnhancedPlayerStats from './EnhancedPlayerStats';
 import { useLiveScore, BallEvent } from '@/hooks/useLiveScore';
 import { Player } from '@/types';
 import { Users, RotateCcw, Save } from 'lucide-react';
@@ -375,27 +378,35 @@ export default function BallEntryPanel({
         />
       </div>
 
-      {/* Current Players */}
+      {/* Partnership Info */}
+      <PartnershipInfo state={state} league={league} />
+
+      {/* Current Players - Enhanced */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <PlayerStats
+        <EnhancedPlayerStats
           player={{
             name: state.currentBatter.name,
             runs: state.currentBatter.runs,
             balls: state.currentBatter.balls,
             isBatter: true,
           }}
+          ballHistory={state.ballHistory}
           league={league}
         />
-        <PlayerStats
+        <EnhancedPlayerStats
           player={{
             name: state.currentBowler.name,
             runs: state.currentBowler.runs,
             balls: state.currentBowler.balls,
             isBatter: false,
           }}
+          ballHistory={state.ballHistory}
           league={league}
         />
       </div>
+
+      {/* Over-by-Over Analysis */}
+      <OverByOverAnalysis state={state} league={league} />
 
       {/* Rich Commentary */}
       <RichCommentary
