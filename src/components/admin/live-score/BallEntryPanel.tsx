@@ -11,6 +11,7 @@ import MatchStateManager from './MatchStateManager';
 import WicketCelebration from './WicketCelebration';
 import BoundaryHighlight from './BoundaryHighlight';
 import MilestoneCelebration from './MilestoneCelebration';
+import RichCommentary from './RichCommentary';
 import { useLiveScore, BallEvent } from '@/hooks/useLiveScore';
 import { Player } from '@/types';
 import { Users, RotateCcw, Save } from 'lucide-react';
@@ -395,6 +396,16 @@ export default function BallEntryPanel({
           league={league}
         />
       </div>
+
+      {/* Rich Commentary */}
+      <RichCommentary
+        ballHistory={state.ballHistory}
+        currentOver={state.currentOver}
+        currentBatter={state.currentBatter}
+        currentBowler={state.currentBowler}
+        league={league}
+        maxVisible={10}
+      />
 
       {/* Ball Entry Buttons */}
       <div className="space-y-4">
