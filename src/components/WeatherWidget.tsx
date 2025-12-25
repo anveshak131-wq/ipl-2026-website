@@ -37,6 +37,29 @@ export default function WeatherWidget({ venue }: { venue: Venue }) {
 
   const fetchWeatherForVenue = async (venue: Venue) => {
     try {
+      // Check cache first (12-hour cache)
+      const cacheKey = `weather_widget_cache_${venue.id}`;
+      const lastUpdateKey = `weather_widget_last_update_${venue.id}`;
+      const cached = localStorage.getItem(cacheKey);
+      const lastUpdate = localStorage.getItem(lastUpdateKey);
+      const now = Date.now();
+      const TWELVE_HOURS = 12 * 60 * 60 * 1000; // 12 hours
+      
+      if (cached && lastUpdate && (now - parseInt(lastUpdate)) < TWELVE_HOURS) {
+        try {
+          const parsed = JSON.parse(cached);
+          setWeather(parsed.weather);
+          setLastUpdated(parsed.lastUpdated || '');
+          setNextUpdate(parsed.nextUpdate || '');
+          setIsCached(true);
+          setLoading(false);
+          console.log('Using cached weather data for widget');
+          return;
+        } catch (e) {
+          console.error('Error parsing cached weather:', e);
+        }
+      }
+      
       setLoading(true);
       setError(null);
       const response = await fetch(`/api/weather`);
@@ -55,6 +78,14 @@ export default function WeatherWidget({ venue }: { venue: Venue }) {
           setLastUpdated(data.lastUpdated || '');
           setNextUpdate(data.nextUpdate || '');
           setIsCached(data.cached || false);
+          
+          // Cache the result
+          localStorage.setItem(cacheKey, JSON.stringify({
+            weather: venueWeather.weather,
+            lastUpdated: data.lastUpdated || '',
+            nextUpdate: data.nextUpdate || ''
+          }));
+          localStorage.setItem(lastUpdateKey, now.toString());
         } else {
           setError('Weather data not available for this venue');
         }
