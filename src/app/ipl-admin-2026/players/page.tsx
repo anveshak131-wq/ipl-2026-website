@@ -295,6 +295,25 @@ export default function AdminPlayers() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentLeague]);
 
+  // Listen for real-time data updates
+  useEffect(() => {
+    const handleDataUpdate = async (event: CustomEvent) => {
+      const { type } = event.detail || {};
+      
+      if (type === 'player-updated' || type === 'player-created' || type === 'player-deleted') {
+        console.log('Players page: Data update detected, refreshing...');
+        // Refresh data immediately
+        await fetchData();
+      }
+    };
+
+    window.addEventListener('admin-data-updated', handleDataUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('admin-data-updated', handleDataUpdate as EventListener);
+    };
+  }, [currentLeague]); // Include currentLeague to ensure we refresh with correct league
+
   // Reset team filter if selected team is not in current league
   useEffect(() => {
     if (selectedTeam !== 'all' && teams.length > 0) {

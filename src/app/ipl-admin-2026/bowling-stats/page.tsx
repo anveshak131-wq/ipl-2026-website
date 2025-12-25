@@ -11,7 +11,7 @@ import { Search, Filter, Edit2, X, TrendingDown, Award, Target, Zap, ChevronDown
 const BowlingStatsPage = () => {
   const router = useRouter();
   const { currentLeague } = useLeague();
-  const { players, teams, loading, error, updatePlayer } = useAdminData();
+  const { players, teams, loading, error, updatePlayer, refreshData, lastUpdated } = useAdminData();
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [editingPlayer, setEditingPlayer] = useState(null);
@@ -98,6 +98,31 @@ const BowlingStatsPage = () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [showEditModal, handleCancelEdit]);
+
+  // Listen for real-time data updates
+  useEffect(() => {
+    const handleDataUpdate = async (event: CustomEvent) => {
+      const { type } = event.detail || {};
+      
+      if (type === 'player-updated' || type === 'player-created' || type === 'player-deleted') {
+        console.log('Bowling stats: Data update detected, refreshing...');
+        // Refresh data from context
+        await refreshData();
+      }
+    };
+
+    window.addEventListener('admin-data-updated', handleDataUpdate as EventListener);
+    
+    return () => {
+      window.removeEventListener('admin-data-updated', handleDataUpdate as EventListener);
+    };
+  }, [refreshData]);
+
+  // Also refresh when lastUpdated changes (from context)
+  useEffect(() => {
+    // This will trigger a re-render when context data is updated
+    console.log('Bowling stats: Data updated at', new Date(lastUpdated).toLocaleTimeString());
+  }, [lastUpdated]);
 
   const handleEditPlayer = (player) => {
     setEditingPlayer(player);

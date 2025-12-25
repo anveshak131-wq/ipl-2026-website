@@ -117,14 +117,20 @@ export const AdminDataProvider = ({ children }: AdminDataProviderProps) => {
 
   // Listen for custom events for real-time updates
   useEffect(() => {
-    const handleDataUpdate = () => {
-      loadData();
+    const handleDataUpdate = async (event: CustomEvent) => {
+      const { type } = event.detail || {};
+      
+      // Refresh data for any player-related updates
+      if (type === 'player-updated' || type === 'player-created' || type === 'player-deleted') {
+        console.log('AdminDataContext: Player update detected, refreshing data...');
+        await loadData();
+      }
     };
 
-    window.addEventListener('admin-data-updated', handleDataUpdate);
+    window.addEventListener('admin-data-updated', handleDataUpdate as EventListener);
     
     return () => {
-      window.removeEventListener('admin-data-updated', handleDataUpdate);
+      window.removeEventListener('admin-data-updated', handleDataUpdate as EventListener);
     };
   }, [currentLeague]);
 
