@@ -553,14 +553,41 @@ export default function AdminPlayers() {
       };
 
       if (editingPlayer) {
-        // Update existing player
+        // Update existing player - CRITICAL: Preserve ALL existing fields first, then override with form data
+        const updatePayload = {
+          ...editingPlayer, // Preserve ALL existing player fields first
+          ...playerData,    // Then override with form data
+          id: editingPlayer.id, // Ensure ID is always set
+          // Explicitly preserve fields that might not be in form
+          dateOfBirth: dateOfBirthISO || editingPlayer.dateOfBirth,
+          nationality: formData.nationality || editingPlayer.nationality,
+          battingStyle: formData.battingStyle || editingPlayer.battingStyle,
+          bowlingStyle: finalBowlingStyle || editingPlayer.bowlingStyle,
+          jerseyNumber: parseInt(formData.jerseyNumber) || editingPlayer.jerseyNumber || 0,
+          isCaptain: formData.isCaptain !== undefined ? formData.isCaptain : editingPlayer.isCaptain,
+          // Preserve transferInfo structure
+          transferInfo: {
+            ...editingPlayer.transferInfo, // Preserve existing transfer info
+            ...(formData.lastAuctionYear && { lastAuctionYear: Number(formData.lastAuctionYear) }),
+            ...(formData.acquiredVia && { acquiredVia: formData.acquiredVia }),
+            transferable: formData.transferable !== undefined ? !!formData.transferable : (editingPlayer.transferInfo?.transferable || false),
+            ...(formData.transferFee && { transferFee: parseFloat(String(formData.transferFee)) }),
+            ...(formData.transferNotes && { notes: formData.transferNotes }),
+          },
+          // Preserve stats structure - merge existing stats with new ones
+          stats: {
+            ...editingPlayer.stats, // Preserve ALL existing stats first
+            ...statsForPlayer,     // Then override with form stats
+          },
+        };
+        
         const response = await fetch('/api/players', {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ ...playerData, id: editingPlayer.id }),
+          body: JSON.stringify(updatePayload),
         });
 
         if (!response.ok) {

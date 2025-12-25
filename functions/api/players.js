@@ -658,8 +658,8 @@ export const onRequest = async (context) => {
         // Preserve transferInfo if not provided
         transferInfo: updatedPlayer.transferInfo !== undefined ? updatedPlayer.transferInfo : players[index].transferInfo,
         stats: {
-          // Preserve existing stats first
-          ...players[index].stats,
+          // CRITICAL: Preserve ALL existing stats first
+          ...existingPlayer.stats,
           // Standard stats - update if provided
           matches: updatedPlayer.stats?.matches !== undefined ? (parseInt(updatedPlayer.stats.matches) || 0) : (players[index].stats?.matches || 0),
           runs: runs,
