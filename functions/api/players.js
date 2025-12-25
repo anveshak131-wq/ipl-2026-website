@@ -559,8 +559,11 @@ export const onRequest = async (context) => {
         });
       }
 
+      // CRITICAL: Store existing player BEFORE any modifications
+      const existingPlayer = players[index];
+
       // Check for duplicate player when updating team or name
-      const playerLeague = updatedPlayer.league || players[index].league || 'ipl';
+      const playerLeague = updatedPlayer.league || existingPlayer.league || 'ipl';
       const duplicatePlayer = players.find(p => 
         p.id !== updatedPlayer.id && // Exclude the current player
         (p.league || 'ipl') === playerLeague &&
