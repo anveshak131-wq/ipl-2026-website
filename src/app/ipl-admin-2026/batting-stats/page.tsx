@@ -107,8 +107,10 @@ const BattingStatsPage = () => {
       
       if (type === 'player-updated' || type === 'player-created' || type === 'player-deleted') {
         console.log('Batting stats: Data update detected, refreshing...');
-        // Refresh data from context
-        await refreshData();
+        // Small delay to ensure API has processed the update
+        setTimeout(async () => {
+          await refreshData();
+        }, 100);
       }
     };
 

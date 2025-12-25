@@ -716,13 +716,16 @@ export default function AdminPlayers() {
         const newPlayer = await response.json();
         
         // Dispatch real-time update event for new player
+        // Refresh data first, then dispatch event
+        await fetchData();
+        
         window.dispatchEvent(new CustomEvent('admin-data-updated', {
           detail: { type: 'player-created', playerId: newPlayer.id }
         }));
+      } else {
+        // Refresh players list if update failed
+        await fetchData();
       }
-
-      // Refresh players list
-      await fetchData();
       setShowForm(false);
       setEditingPlayer(null);
     } catch (error) {
@@ -767,12 +770,12 @@ export default function AdminPlayers() {
       }
 
       // Dispatch real-time update event
+      // Refresh data first, then dispatch event
+      await fetchData();
+      
       window.dispatchEvent(new CustomEvent('admin-data-updated', {
         detail: { type: 'player-deleted', playerId: deletedPlayerId }
       }));
-
-      // Refresh players list
-      await fetchData();
       setShowDeleteModal(false);
       setDeleteTarget(null);
     } catch (error) {

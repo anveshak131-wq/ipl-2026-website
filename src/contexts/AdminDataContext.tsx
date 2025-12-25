@@ -123,7 +123,10 @@ export const AdminDataProvider = ({ children }: AdminDataProviderProps) => {
       // Refresh data for any player-related updates
       if (type === 'player-updated' || type === 'player-created' || type === 'player-deleted') {
         console.log('AdminDataContext: Player update detected, refreshing data...');
-        await loadData();
+        // Small delay to ensure API has processed the update
+        setTimeout(async () => {
+          await loadData();
+        }, 100);
       }
     };
 
