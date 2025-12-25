@@ -851,7 +851,7 @@ export default function AdminMatchdayAdvanced() {
       let sampleWeather: WeatherData[] = [];
       
       // Fetch real weather data for all venues (IPL + WPL)
-      const realWeatherData = await weatherService.fetchWeatherForAllVenues();
+      const realWeatherData = await weatherService.fetchWeatherForAllVenues(false);
       sampleWeather = realWeatherData.map(weather => ({
         ...weather,
         // Ensure compatibility with existing WeatherData interface
