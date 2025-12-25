@@ -251,9 +251,9 @@ class WeatherService {
     }
   }
 
-  async fetchWeatherForAllVenues(): Promise<VenueWeatherData[]> {
+  async fetchWeatherForAllVenues(forceUpdate: boolean = false): Promise<VenueWeatherData[]> {
     const venueIds = Object.keys(VENUE_COORDINATES);
-    const weatherPromises = venueIds.map(venueId => this.fetchWeatherForVenue(venueId));
+    const weatherPromises = venueIds.map(venueId => this.fetchWeatherForVenue(venueId, forceUpdate));
     
     try {
       const results = await Promise.allSettled(weatherPromises);

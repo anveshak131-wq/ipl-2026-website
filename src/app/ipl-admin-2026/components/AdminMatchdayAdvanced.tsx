@@ -136,19 +136,42 @@ export default function AdminMatchdayAdvanced() {
   }, []);
 
   useEffect(() => {
-    refreshWeatherData();
+    // Check if weather was already updated in the last 12 hours
+    const lastUpdateKey = 'weather_last_update';
+    const lastUpdate = localStorage.getItem(lastUpdateKey);
+    const now = Date.now();
+    const TWELVE_HOURS = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
+    
+    // Only refresh if it's been more than 12 hours since last update
+    if (!lastUpdate || (now - parseInt(lastUpdate)) >= TWELVE_HOURS) {
+      refreshWeatherData();
+    } else {
+      // Load cached weather data if available
+      const cachedWeatherKey = 'weather_cached_data';
+      const cached = localStorage.getItem(cachedWeatherKey);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          setWeatherData(parsed);
+          console.log('Using cached weather data. Next update in:', 
+            Math.round((TWELVE_HOURS - (now - parseInt(lastUpdate))) / (1000 * 60 * 60)), 'hours');
+        } catch (e) {
+          console.error('Error parsing cached weather:', e);
+        }
+      }
+    }
 
-    // Schedule weather updates at 6:00 AM and 6:00 PM IST
+    // Schedule weather updates at 6:00 AM and 6:00 PM IST (twice daily)
     const scheduleWeatherUpdates = () => {
-      const now = new Date();
+      const currentTime = new Date();
       
       // Calculate IST hour correctly
       const istOffset = 5.5 * 60 * 60 * 1000; // IST is UTC+5:30
-      const istTime = new Date(now.getTime() + istOffset);
+      const istTime = new Date(currentTime.getTime() + istOffset);
       const istHour = istTime.getHours(); // Get IST hour (0-23)
       
       // Calculate next update time in UTC
-      const nextUpdateUTC = new Date(now);
+      const nextUpdateUTC = new Date(currentTime);
       
       if (istHour < 6) {
         // Next update is 6:00 AM IST today
@@ -163,7 +186,7 @@ export default function AdminMatchdayAdvanced() {
       }
       
       // If calculated time is in the past, move to next slot
-      if (nextUpdateUTC <= now) {
+      if (nextUpdateUTC <= currentTime) {
         if (istHour < 18) {
           nextUpdateUTC.setUTCHours(12, 30, 0, 0); // Move to 6:00 PM IST
         } else {
@@ -172,7 +195,7 @@ export default function AdminMatchdayAdvanced() {
         }
       }
 
-      const timeUntilUpdate = nextUpdateUTC.getTime() - now.getTime();
+      const timeUntilUpdate = nextUpdateUTC.getTime() - currentTime.getTime();
       
       const istTimeString = new Date(nextUpdateUTC.getTime() + istOffset).toLocaleString('en-IN', {
         timeZone: 'Asia/Kolkata',
@@ -185,17 +208,29 @@ export default function AdminMatchdayAdvanced() {
       console.log(`Next weather update scheduled for: ${istTimeString} IST`);
       console.log(`Time until update: ${Math.round(timeUntilUpdate / (1000 * 60 * 60))} hours`);
       
-      setTimeout(() => {
-        refreshWeatherData();
+      const timeoutId = setTimeout(() => {
+        // Check again before updating (in case user manually updated)
+        const lastUpdateCheck = localStorage.getItem(lastUpdateKey);
+        const nowCheck = Date.now();
+        
+        // Only update if it's been more than 12 hours
+        if (!lastUpdateCheck || (nowCheck - parseInt(lastUpdateCheck)) >= TWELVE_HOURS) {
+          refreshWeatherData();
+        }
         // Schedule the next update
         scheduleWeatherUpdates();
       }, timeUntilUpdate);
+      
+      return timeoutId;
     };
 
-    scheduleWeatherUpdates();
+    const timeoutId = scheduleWeatherUpdates();
 
     return () => {
-      // Cleanup will be handled by setTimeout clearing
+      // Cleanup timeout
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
     };
   }, []);
 
@@ -288,10 +323,34 @@ export default function AdminMatchdayAdvanced() {
     }
   };
 
-  const refreshWeatherData = async () => {
+  const refreshWeatherData = async (forceUpdate: boolean = false) => {
+    // Check if weather was updated in the last 12 hours (unless forced)
+    const lastUpdateKey = 'weather_last_update';
+    const lastUpdate = localStorage.getItem(lastUpdateKey);
+    const now = Date.now();
+    const TWELVE_HOURS = 12 * 60 * 60 * 1000; // 12 hours in milliseconds
+    
+    if (!forceUpdate && lastUpdate && (now - parseInt(lastUpdate)) < TWELVE_HOURS) {
+      const hoursRemaining = Math.round((TWELVE_HOURS - (now - parseInt(lastUpdate))) / (1000 * 60 * 60));
+      addNotification(`Weather was updated ${12 - hoursRemaining} hours ago. Next update in ${hoursRemaining} hours.`, 'info');
+      
+      // Load cached data if available
+      const cachedWeatherKey = 'weather_cached_data';
+      const cached = localStorage.getItem(cachedWeatherKey);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          setWeatherData(parsed);
+        } catch (e) {
+          console.error('Error parsing cached weather:', e);
+        }
+      }
+      return;
+    }
+    
     setWeatherLoading(true);
     try {
-      const freshWeatherData = await weatherService.fetchWeatherForAllVenues();
+      const freshWeatherData = await weatherService.fetchWeatherForAllVenues(forceUpdate);
       const updatedWeatherData = freshWeatherData.map(weather => ({
         ...weather,
         outfieldCondition: 'Good',
@@ -302,7 +361,12 @@ export default function AdminMatchdayAdvanced() {
         fieldingConditions: 'Good'
       }));
       setWeatherData(updatedWeatherData);
-      addNotification('Weather data updated successfully');
+      
+      // Store update timestamp and cache data
+      localStorage.setItem(lastUpdateKey, now.toString());
+      localStorage.setItem('weather_cached_data', JSON.stringify(updatedWeatherData));
+      
+      addNotification('Weather data updated successfully. Next update in 12 hours.', 'success');
     } catch (error) {
       console.error('Error refreshing weather data:', error);
       addNotification('Failed to update weather data', 'error');
