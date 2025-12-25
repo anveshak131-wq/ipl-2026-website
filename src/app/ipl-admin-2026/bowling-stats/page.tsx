@@ -280,9 +280,13 @@ const BowlingStatsPage = () => {
 
       await updatePlayer(editingPlayer.id, updatedPlayer);
       
+      // Dispatch event first, then refresh
       window.dispatchEvent(new CustomEvent('admin-data-updated', {
         detail: { type: 'player-updated', playerId: editingPlayer.id }
       }));
+      
+      // Refresh data after dispatching event
+      await refreshData();
       
       setShowEditModal(false);
       setEditingPlayer(null);

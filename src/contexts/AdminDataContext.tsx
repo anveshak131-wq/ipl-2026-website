@@ -65,7 +65,7 @@ export const AdminDataProvider = ({ children }: AdminDataProviderProps) => {
   const [error, setError] = useState('');
   const [lastUpdated, setLastUpdated] = useState(Date.now());
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -82,11 +82,11 @@ export const AdminDataProvider = ({ children }: AdminDataProviderProps) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentLeague]);
 
   const refreshData = useCallback(async () => {
     await loadData();
-  }, [currentLeague]);
+  }, [loadData]);
 
   const updatePlayer = async (playerId: string, updatedPlayer: Partial<Player>) => {
     try {
