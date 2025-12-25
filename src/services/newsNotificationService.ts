@@ -90,8 +90,8 @@ export async function createNewsNotification(news: Content): Promise<void> {
 
     saveNotificationToLocalStorage(notification);
 
-    // Dispatch event for real-time updates
-    window.dispatchEvent(new CustomEvent('news-created', {
+    // Dispatch event for real-time updates on notifications page
+    window.dispatchEvent(new CustomEvent('news-notification-created', {
       detail: { newsId: news.id, news }
     }));
 

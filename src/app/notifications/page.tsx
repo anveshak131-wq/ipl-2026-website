@@ -125,16 +125,16 @@ export default function NotificationsPage() {
 
   // Listen for real-time news notifications
   useEffect(() => {
-    const handleNewsCreated = () => {
-      // Refresh notifications when news is created
+    const handleNewsNotificationCreated = () => {
+      // Refresh notifications when news notification is created
       const saved = loadNotificationsFromStorage();
       setNotifications(saved);
     };
 
-    window.addEventListener('news-created', handleNewsCreated);
+    window.addEventListener('news-notification-created', handleNewsNotificationCreated);
 
     return () => {
-      window.removeEventListener('news-created', handleNewsCreated);
+      window.removeEventListener('news-notification-created', handleNewsNotificationCreated);
     };
   }, []);
 
