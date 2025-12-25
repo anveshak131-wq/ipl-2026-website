@@ -406,7 +406,20 @@ export default function AdminPlayers() {
         sixes: '',
         fifties: '',
         hundreds: '',
-        bestBowling: ''
+        bestBowling: '',
+        // Batting-specific stats
+        battingInnings: '',
+        notOuts: '',
+        ballsFaced: '',
+        battingAverage: '',
+        battingStrikeRate: '',
+        // Bowling-specific stats
+        bowlingInnings: '',
+        balls: '',
+        maidens: '',
+        runsConceded: '',
+        bowlingStrikeRate: '',
+        fiveWickets: ''
       }
     });
     setShowForm(true);
