@@ -351,6 +351,14 @@ export default function ContentManager({
       } else {
         const newContent = await api.createContent(formData);
         setContent([...content, newContent]);
+        
+        // Create notification if it's news type
+        if (newContent.type === 'news' && newContent.isActive) {
+          // Dispatch event to create notification
+          window.dispatchEvent(new CustomEvent('news-created', {
+            detail: { news: newContent }
+          }));
+        }
       }
       setShowForm(false);
     } catch (error) {

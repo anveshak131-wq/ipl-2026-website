@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { initializeMatchNotifications, refreshMatchNotifications } from '@/services/matchNotificationScheduler';
+import { initializeNewsNotifications } from '@/services/newsNotificationService';
 
 /**
  * Match Notification Manager Component
@@ -28,8 +29,11 @@ export default function MatchNotificationManager() {
     if (initializedRef.current) return;
     initializedRef.current = true;
 
-    // Initialize notifications
+    // Initialize match notifications
     initializeMatchNotifications();
+    
+    // Initialize news notifications
+    initializeNewsNotifications();
 
     // Listen for match updates to refresh notifications
     const handleMatchUpdate = () => {

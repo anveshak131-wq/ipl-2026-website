@@ -123,6 +123,21 @@ export default function NotificationsPage() {
     loadNotifications();
   }, []);
 
+  // Listen for real-time news notifications
+  useEffect(() => {
+    const handleNewsCreated = () => {
+      // Refresh notifications when news is created
+      const saved = loadNotificationsFromStorage();
+      setNotifications(saved);
+    };
+
+    window.addEventListener('news-created', handleNewsCreated);
+
+    return () => {
+      window.removeEventListener('news-created', handleNewsCreated);
+    };
+  }, []);
+
   // Convert old API format to new format
   const convertApiNotifications = (apiNotifications: any[]): Notification[] => {
     return apiNotifications.map((n) => ({
