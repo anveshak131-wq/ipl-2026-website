@@ -130,6 +130,19 @@ export default function AdminPlayers() {
       fifties: string;
       hundreds: string;
       bestBowling: string;
+      // Batting-specific stats
+      battingInnings: string;
+      notOuts: string;
+      ballsFaced: string;
+      battingAverage: string;
+      battingStrikeRate: string;
+      // Bowling-specific stats
+      bowlingInnings: string;
+      balls: string;
+      maidens: string;
+      runsConceded: string;
+      bowlingStrikeRate: string;
+      fiveWickets: string;
     };
   }>({
     name: '',
@@ -164,7 +177,20 @@ export default function AdminPlayers() {
       sixes: '',
       fifties: '',
       hundreds: '',
-      bestBowling: ''
+      bestBowling: '',
+      // Batting-specific stats
+      battingInnings: '',
+      notOuts: '',
+      ballsFaced: '',
+      battingAverage: '',
+      battingStrikeRate: '',
+      // Bowling-specific stats
+      bowlingInnings: '',
+      balls: '',
+      maidens: '',
+      runsConceded: '',
+      bowlingStrikeRate: '',
+      fiveWickets: ''
     }
   });
 
@@ -462,7 +488,20 @@ export default function AdminPlayers() {
         sixes: player.stats.sixes > 0 ? player.stats.sixes.toString() : '',
         fifties: player.stats.fifties > 0 ? player.stats.fifties.toString() : '',
         hundreds: player.stats.hundreds > 0 ? player.stats.hundreds.toString() : '',
-        bestBowling: player.stats.bestBowling && player.stats.bestBowling !== '-' && player.stats.bestBowling.trim() !== '' ? player.stats.bestBowling : ''
+        bestBowling: player.stats.bestBowling && player.stats.bestBowling !== '-' && player.stats.bestBowling.trim() !== '' ? player.stats.bestBowling : '',
+        // Batting-specific stats
+        battingInnings: player.stats.battingInnings > 0 ? player.stats.battingInnings.toString() : '',
+        notOuts: player.stats.notOuts > 0 ? player.stats.notOuts.toString() : '',
+        ballsFaced: player.stats.ballsFaced > 0 ? player.stats.ballsFaced.toString() : '',
+        battingAverage: player.stats.battingAverage && player.stats.battingAverage !== '0' && player.stats.battingAverage !== '-' ? player.stats.battingAverage : '',
+        battingStrikeRate: player.stats.battingStrikeRate && player.stats.battingStrikeRate !== '0' && player.stats.battingStrikeRate !== '-' ? player.stats.battingStrikeRate : '',
+        // Bowling-specific stats
+        bowlingInnings: player.stats.bowlingInnings > 0 ? player.stats.bowlingInnings.toString() : '',
+        balls: player.stats.balls > 0 ? player.stats.balls.toString() : '',
+        maidens: player.stats.maidens > 0 ? player.stats.maidens.toString() : '',
+        runsConceded: player.stats.runsConceded > 0 ? player.stats.runsConceded.toString() : '',
+        bowlingStrikeRate: player.stats.bowlingStrikeRate && player.stats.bowlingStrikeRate !== '0' && player.stats.bowlingStrikeRate !== '-' ? player.stats.bowlingStrikeRate : '',
+        fiveWickets: player.stats.fiveWickets > 0 ? player.stats.fiveWickets.toString() : ''
       }
     });
     setShowForm(true);
@@ -525,6 +564,17 @@ export default function AdminPlayers() {
         fifties: 0,
         hundreds: 0,
         bestBowling: '-',
+        battingInnings: 0,
+        notOuts: 0,
+        ballsFaced: 0,
+        bowlingInnings: 0,
+        balls: 0,
+        maidens: 0,
+        runsConceded: 0,
+        bowlingStrikeRate: '',
+        fiveWickets: 0,
+        battingAverage: '',
+        battingStrikeRate: '',
       } : {
           matches: formData.stats.matches ? parseInt(formData.stats.matches) || 0 : 0,
           runs: formData.stats.runs ? parseInt(formData.stats.runs) || 0 : 0,
@@ -539,6 +589,19 @@ export default function AdminPlayers() {
           fifties: formData.stats.fifties ? parseInt(formData.stats.fifties) || 0 : 0,
           hundreds: formData.stats.hundreds ? parseInt(formData.stats.hundreds) || 0 : 0,
           bestBowling: formData.stats.bestBowling || '-',
+          // Batting-specific stats
+          battingInnings: formData.stats.battingInnings ? parseInt(formData.stats.battingInnings) || 0 : 0,
+          notOuts: formData.stats.notOuts ? parseInt(formData.stats.notOuts) || 0 : 0,
+          ballsFaced: formData.stats.ballsFaced ? parseInt(formData.stats.ballsFaced) || 0 : 0,
+          battingAverage: formData.stats.battingAverage && formData.stats.battingAverage.trim() !== '' ? formData.stats.battingAverage : '',
+          battingStrikeRate: formData.stats.battingStrikeRate && formData.stats.battingStrikeRate.trim() !== '' ? formData.stats.battingStrikeRate : '',
+          // Bowling-specific stats
+          bowlingInnings: formData.stats.bowlingInnings ? parseInt(formData.stats.bowlingInnings) || 0 : 0,
+          balls: formData.stats.balls ? parseInt(formData.stats.balls) || 0 : 0,
+          maidens: formData.stats.maidens ? parseInt(formData.stats.maidens) || 0 : 0,
+          runsConceded: formData.stats.runsConceded ? parseInt(formData.stats.runsConceded) || 0 : 0,
+          bowlingStrikeRate: formData.stats.bowlingStrikeRate && formData.stats.bowlingStrikeRate.trim() !== '' ? formData.stats.bowlingStrikeRate : '',
+          fiveWickets: formData.stats.fiveWickets ? parseInt(formData.stats.fiveWickets) || 0 : 0,
       };
 
       // Ensure allrounderType is properly set for All-rounders
