@@ -983,6 +983,12 @@ export default function AdminMatches() {
                 const allMatches = matches.map(m => m.id === editingId ? updatedMatch : m);
                 const matchesWithNumbers = recalculateMatchNumbers(allMatches);
                 setMatches(matchesWithNumbers);
+                
+                // Dispatch event to refresh match notifications
+                window.dispatchEvent(new CustomEvent('match-updated', {
+                  detail: { matchId: editingId }
+                }));
+                
                 showSuccess('Match updated successfully');
             } else {
                 const newMatch = await api.createMatch(matchData);
@@ -990,6 +996,12 @@ export default function AdminMatches() {
                 const allMatches = [...matches, newMatch];
                 const matchesWithNumbers = recalculateMatchNumbers(allMatches);
                 setMatches(matchesWithNumbers);
+                
+                // Dispatch event to refresh match notifications
+                window.dispatchEvent(new CustomEvent('match-created', {
+                  detail: { matchId: newMatch.id }
+                }));
+                
                 showSuccess('Match created successfully');
             }
 
@@ -2081,6 +2093,11 @@ export default function AdminMatches() {
                                     const allMatches = [...matches, newMatch];
                                     const matchesWithNumbers = recalculateMatchNumbers(allMatches);
                                     setMatches(matchesWithNumbers);
+                                    
+                                    // Dispatch event to refresh match notifications
+                                    window.dispatchEvent(new CustomEvent('match-created', {
+                                      detail: { matchId: newMatch.id }
+                                    }));
                                     
                                     showSuccess(`${playoffDetails.title} match created successfully`);
                                     resetForm();

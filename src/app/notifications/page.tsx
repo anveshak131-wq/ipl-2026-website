@@ -27,6 +27,32 @@ export default function NotificationsPage() {
     predictions: { enabled: true, sound: false, vibration: false },
   });
 
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
+
+  // Check notification permission status
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      setNotificationPermission(Notification.permission);
+    }
+  }, []);
+
+  // Request notification permission
+  const requestPermission = async () => {
+    if (!('Notification' in window)) {
+      alert('Your browser does not support notifications');
+      return;
+    }
+
+    const permission = await Notification.requestPermission();
+    setNotificationPermission(permission);
+    
+    if (permission === 'granted') {
+      // Initialize match notifications after permission granted
+      const { initializeMatchNotifications } = await import('@/services/matchNotificationScheduler');
+      await initializeMatchNotifications();
+    }
+  };
+
   // Load preferences from localStorage
   useEffect(() => {
     const savedPrefs = localStorage.getItem('notificationPreferences');
@@ -411,6 +437,30 @@ export default function NotificationsPage() {
             <AnimatedSection direction="up" delay={0.2}>
               <div className="mb-6 rounded-2xl border border-red-500/40 bg-red-500/10 text-red-100 px-4 py-3 text-sm">
                 {error}
+              </div>
+            </AnimatedSection>
+          )}
+
+          {notificationPermission !== 'granted' && (
+            <AnimatedSection direction="up" delay={0.2}>
+              <div className="mb-6 rounded-2xl border border-blue-400/40 bg-blue-500/10 text-blue-100 px-4 py-3">
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold mb-1">Enable Browser Notifications</p>
+                    <p className="text-sm text-blue-200">
+                      Get instant match reminders (1 day before, 30 min before, and at match start) directly in your browser.
+                    </p>
+                  </div>
+                  <motion.button
+                    onClick={requestPermission}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-4 py-2 rounded-xl bg-blue-500 hover:bg-blue-600 text-white font-semibold transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
+                  >
+                    <Bell className="w-4 h-4" />
+                    {notificationPermission === 'denied' ? 'Enable in Settings' : 'Enable Notifications'}
+                  </motion.button>
+                </div>
               </div>
             </AnimatedSection>
           )}

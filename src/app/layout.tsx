@@ -3,6 +3,7 @@ import "./globals.css";
 import TermsGuard from "@/components/TermsGuard";
 import { LeagueProvider } from "@/contexts/LeagueContext";
 import { AdminLayoutWrapper } from "@/components/admin/AdminLayoutWrapper";
+import MatchNotificationManager from "@/components/notifications/MatchNotificationManager";
 
 export const metadata: Metadata = {
   title: "SportsUP18 - Official Website",
@@ -33,6 +34,7 @@ export default function RootLayout({
       <body className="antialiased">
         <LeagueProvider>
           <AdminLayoutWrapper>
+            <MatchNotificationManager />
             {children}
           </AdminLayoutWrapper>
         </LeagueProvider>
