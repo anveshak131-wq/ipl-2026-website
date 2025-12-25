@@ -362,18 +362,38 @@ export function calculateAllRounderPerformance(player: Player): OverallPerforman
     summary = `${summary} (${player.allrounderType})`;
   }
   
+  // Build breakdown based on all-rounder type
+  const breakdown = [];
+  
+  // Always show batting stats (weighted by battingWeight)
+  breakdown.push(
+    { label: 'Batting Avg', value: battingAvg > 0 ? battingAvg.toFixed(2) : '-', weight: battingAvgScore * battingWeight },
+    { label: 'Batting SR', value: battingSR > 0 ? battingSR.toFixed(1) : '-', weight: battingSRScore * battingWeight }
+  );
+  
+  // Always show bowling stats (weighted by bowlingWeight)
+  breakdown.push(
+    { label: 'Bowling Avg', value: bowlingAvg > 0 ? bowlingAvg.toFixed(2) : '-', weight: bowlingAvgScore * bowlingWeight },
+    { label: 'Economy', value: economy > 0 ? economy.toFixed(2) : '-', weight: economyScore * bowlingWeight }
+  );
+  
+  // Show index and balance only for generic all-rounders
+  if (!player.allrounderType || player.allrounderType === '') {
+    breakdown.push(
+      { label: 'All-Rounder Index', value: allRounderIndex > 0 ? allRounderIndex.toFixed(2) : '-', weight: adjustedIndexScore },
+      { label: 'Balance Score', value: balanceBonus > 0 ? balanceBonus.toFixed(1) : '-', weight: balanceBonus }
+    );
+  }
+  
+  // Additional context stats (not weighted)
+  breakdown.push(
+    { label: 'Runs/Match', value: runsPerMatch > 0 ? runsPerMatch.toFixed(1) : '-', weight: 0 },
+    { label: 'Wickets/Match', value: wicketsPerMatch > 0 ? wicketsPerMatch.toFixed(2) : '-', weight: 0 }
+  );
+  
   return {
     rating: Math.min(Math.round(totalRating * 10) / 10, 100), // Cap at 100
-    breakdown: [
-      { label: 'Batting Avg', value: battingAvg > 0 ? battingAvg.toFixed(2) : '-', weight: battingAvgScore * battingWeight },
-      { label: 'Batting SR', value: battingSR > 0 ? battingSR.toFixed(1) : '-', weight: battingSRScore * battingWeight },
-      { label: 'Bowling Avg', value: bowlingAvg > 0 ? bowlingAvg.toFixed(2) : '-', weight: bowlingAvgScore * bowlingWeight },
-      { label: 'Economy', value: economy > 0 ? economy.toFixed(2) : '-', weight: economyScore * bowlingWeight },
-      { label: 'All-Rounder Index', value: allRounderIndex > 0 ? allRounderIndex.toFixed(2) : '-', weight: indexScore },
-      { label: 'Balance Score', value: balanceBonus > 0 ? balanceBonus.toFixed(1) : '-', weight: balanceBonus },
-      { label: 'Runs/Match', value: runsPerMatch > 0 ? runsPerMatch.toFixed(1) : '-', weight: 0 },
-      { label: 'Wickets/Match', value: wicketsPerMatch > 0 ? wicketsPerMatch.toFixed(2) : '-', weight: 0 },
-    ],
+    breakdown,
     summary
   };
 }
