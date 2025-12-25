@@ -693,6 +693,9 @@ export default function AdminPlayers() {
         const updatedPlayer = await response.json();
         console.log('Player updated successfully:', updatedPlayer);
         
+        // Refresh data first, then dispatch event
+        await fetchData();
+        
         // Dispatch real-time update event
         window.dispatchEvent(new CustomEvent('admin-data-updated', {
           detail: { type: 'player-updated', playerId: editingPlayer.id }
