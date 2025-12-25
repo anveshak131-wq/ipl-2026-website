@@ -287,7 +287,7 @@ export const metadata = {
 - [ ] Add robots.txt
 - [ ] Optimize page titles and descriptions
 - [ ] Add canonical URLs
-
+  
 ---
 
 ### 8. **Mobile Responsiveness**

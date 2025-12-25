@@ -1,13 +1,16 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import BallEntryButton from './BallEntryButton';
-import ScoreDisplay from './ScoreDisplay';
+import AnimatedScoreDisplay from './AnimatedScoreDisplay';
 import CurrentOverDisplay from './CurrentOverDisplay';
 import OverProgressBar from './OverProgressBar';
 import PlayerStats from './PlayerStats';
 import WicketModal from './WicketModal';
 import MatchStateManager from './MatchStateManager';
+import WicketCelebration from './WicketCelebration';
+import BoundaryHighlight from './BoundaryHighlight';
+import MilestoneCelebration from './MilestoneCelebration';
 import { useLiveScore, BallEvent } from '@/hooks/useLiveScore';
 import { Player } from '@/types';
 import { Users, RotateCcw, Save } from 'lucide-react';
@@ -47,6 +50,31 @@ export default function BallEntryPanel({
   const [showWicketModal, setShowWicketModal] = useState(false);
   const [showPlayerSelector, setShowPlayerSelector] = useState<'batter' | 'bowler' | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Animation states
+  const [showWicketCelebration, setShowWicketCelebration] = useState(false);
+  const [wicketData, setWicketData] = useState<{
+    batterName: string;
+    dismissalType: string;
+    bowlerName?: string;
+    fielderName?: string;
+  } | null>(null);
+  
+  const [showBoundary, setShowBoundary] = useState(false);
+  const [boundaryData, setBoundaryData] = useState<{
+    runs: 4 | 6;
+    batterName: string;
+  } | null>(null);
+  
+  const [showMilestone, setShowMilestone] = useState(false);
+  const [milestoneData, setMilestoneData] = useState<{
+    runs: number;
+    batterName: string;
+  } | null>(null);
+  
+  // Track previous state for animations
+  const previousStateRef = useRef<LiveScoreState | null>(null);
+  const lastBallRef = useRef<BallEvent | null>(null);
 
   const {
     state,
@@ -71,17 +99,101 @@ export default function BallEntryPanel({
     },
   });
 
+  // Initialize previous state ref
+  useEffect(() => {
+    if (!previousStateRef.current) {
+      previousStateRef.current = JSON.parse(JSON.stringify(state));
+    }
+  }, []);
+
+  // Detect events for celebrations
+  useEffect(() => {
+    if (!previousStateRef.current) {
+      previousStateRef.current = JSON.parse(JSON.stringify(state));
+      return;
+    }
+
+    const prev = previousStateRef.current;
+    const battingTeam = state.battingTeam === 'team1' ? state.team1 : state.team2;
+    const prevBattingTeam = prev.battingTeam === 'team1' ? prev.team1 : prev.team2;
+    const currentBatterRuns = state.currentBatter.runs;
+    const prevBatterRuns = prev.currentBatter.runs;
+
+    // Check for wicket
+    if (battingTeam.wickets > prevBattingTeam.wickets) {
+      const lastBall = lastBallRef.current;
+      if (lastBall && lastBall.type === 'W') {
+        setWicketData({
+          batterName: prev.currentBatter.name,
+          dismissalType: lastBall.dismissalType || 'out',
+          bowlerName: state.currentBowler.name,
+          fielderName: lastBall.fielderName,
+        });
+        setShowWicketCelebration(true);
+        setTimeout(() => {
+          setShowWicketCelebration(false);
+          setWicketData(null);
+        }, 3000);
+      }
+    }
+
+    // Check for boundary (4 or 6) - only if runs increased
+    if (lastBallRef.current && battingTeam.runs > prevBattingTeam.runs) {
+      const lastBall = lastBallRef.current;
+      if (lastBall.type === 4 || lastBall.type === 6) {
+        setBoundaryData({
+          runs: lastBall.type as 4 | 6,
+          batterName: state.currentBatter.name,
+        });
+        setShowBoundary(true);
+        setTimeout(() => {
+          setShowBoundary(false);
+          setBoundaryData(null);
+        }, 2000);
+      }
+    }
+
+    // Check for milestone (50, 100, 150) - only on exact milestone
+    if (currentBatterRuns === 50 && prevBatterRuns < 50) {
+      setMilestoneData({ runs: currentBatterRuns, batterName: state.currentBatter.name });
+      setShowMilestone(true);
+      setTimeout(() => {
+        setShowMilestone(false);
+        setMilestoneData(null);
+      }, 3000);
+    } else if (currentBatterRuns === 100 && prevBatterRuns < 100) {
+      setMilestoneData({ runs: currentBatterRuns, batterName: state.currentBatter.name });
+      setShowMilestone(true);
+      setTimeout(() => {
+        setShowMilestone(false);
+        setMilestoneData(null);
+      }, 4000);
+    } else if (currentBatterRuns === 150 && prevBatterRuns < 150) {
+      setMilestoneData({ runs: currentBatterRuns, batterName: state.currentBatter.name });
+      setShowMilestone(true);
+      setTimeout(() => {
+        setShowMilestone(false);
+        setMilestoneData(null);
+      }, 4000);
+    }
+
+    previousStateRef.current = JSON.parse(JSON.stringify(state));
+  }, [state]);
+
   const handleBallClick = useCallback((value: number | string) => {
     if (value === 'W') {
       setShowWicketModal(true);
       return;
     }
 
-    recordBall({
+    const ballEvent: BallEvent = {
       type: value as any,
       runs: typeof value === 'number' ? value : 0,
       timestamp: Date.now(),
-    });
+    };
+    
+    lastBallRef.current = ballEvent;
+    recordBall(ballEvent);
   }, [recordBall]);
 
   // Keyboard shortcuts
@@ -131,9 +243,23 @@ export default function BallEntryPanel({
   }, [canUndo, undo, showWicketModal, showPlayerSelector, handleBallClick]);
 
   const handleWicketConfirm = (dismissalType: string, fielderName?: string) => {
+    // Store wicket data for celebration
+    const batterName = state.currentBatter.name;
+    const bowlerName = state.currentBowler.name;
+    
+    // Update last ball ref with wicket info
+    lastBallRef.current = {
+      type: 'W',
+      runs: 0,
+      timestamp: Date.now(),
+      dismissalType,
+      fielderName,
+    };
+    
     recordWicket(dismissalType, fielderName);
     setShowWicketModal(false);
-    // Reset batter stats for new batter (will be set when admin selects new batter)
+    
+    // Celebration will be triggered by the useEffect that watches state changes
   };
 
   const handleSave = async () => {
@@ -218,21 +344,33 @@ export default function BallEntryPanel({
 
       {/* Score Display */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <ScoreDisplay
+        <AnimatedScoreDisplay
           teamName={state.team1.name}
           runs={state.team1.runs}
           wickets={state.team1.wickets}
           overs={ballsToOvers(state.team1.balls)}
           isBatting={state.battingTeam === 'team1'}
           league={league}
+          previousRuns={previousStateRef.current?.battingTeam === 'team1' 
+            ? previousStateRef.current.team1.runs 
+            : previousStateRef.current?.team1.runs || 0}
+          previousWickets={previousStateRef.current?.battingTeam === 'team1'
+            ? previousStateRef.current.team1.wickets
+            : previousStateRef.current?.team1.wickets || 0}
         />
-        <ScoreDisplay
+        <AnimatedScoreDisplay
           teamName={state.team2.name}
           runs={state.team2.runs}
           wickets={state.team2.wickets}
           overs={ballsToOvers(state.team2.balls)}
           isBatting={state.battingTeam === 'team2'}
           league={league}
+          previousRuns={previousStateRef.current?.battingTeam === 'team2'
+            ? previousStateRef.current.team2.runs
+            : previousStateRef.current?.team2.runs || 0}
+          previousWickets={previousStateRef.current?.battingTeam === 'team2'
+            ? previousStateRef.current.team2.wickets
+            : previousStateRef.current?.team2.wickets || 0}
         />
       </div>
 
@@ -390,6 +528,40 @@ export default function BallEntryPanel({
         players={players}
         league={league}
       />
+
+      {/* Celebration Animations */}
+      {wicketData && (
+        <WicketCelebration
+          isOpen={showWicketCelebration}
+          onClose={() => {
+            setShowWicketCelebration(false);
+            setWicketData(null);
+          }}
+          batterName={wicketData.batterName}
+          dismissalType={wicketData.dismissalType}
+          bowlerName={wicketData.bowlerName}
+          fielderName={wicketData.fielderName}
+          league={league}
+        />
+      )}
+
+      {boundaryData && (
+        <BoundaryHighlight
+          isVisible={showBoundary}
+          runs={boundaryData.runs}
+          batterName={boundaryData.batterName}
+          league={league}
+        />
+      )}
+
+      {milestoneData && (
+        <MilestoneCelebration
+          isVisible={showMilestone}
+          runs={milestoneData.runs}
+          batterName={milestoneData.batterName}
+          league={league}
+        />
+      )}
     </div>
   );
 }
