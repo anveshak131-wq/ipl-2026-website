@@ -293,42 +293,59 @@ export function calculateAllRounderPerformance(player: Player): OverallPerforman
   const allRounderIndex = bowlingAvg > 0 ? battingAvg / bowlingAvg : 0;
   
   // Normalize and weight components (out of 100)
-  // Batting contribution (40 points)
-  const battingAvgScore = Math.max(0, Math.min(20, (battingAvg / 50) * 20));
-  const battingSRScore = Math.max(0, Math.min(20, ((battingSR - 100) / 50) * 20));
+  // Batting contribution: Each metric can contribute up to 50 points (will be weighted later)
+  const battingAvgScore = Math.max(0, Math.min(50, (battingAvg / 50) * 50));
+  const battingSRScore = Math.max(0, Math.min(50, ((battingSR - 100) / 50) * 50));
   
-  // Bowling contribution (40 points)
+  // Bowling contribution: Each metric can contribute up to 50 points (will be weighted later)
   const bowlingAvgScore = bowlingAvg > 0 && bowlingAvg <= 25
-    ? Math.max(0, 20 - ((bowlingAvg - 15) / 10) * 10)
-    : bowlingAvg > 0 && bowlingAvg <= 15 ? 20 : 0;
+    ? Math.max(0, 50 - ((bowlingAvg - 15) / 10) * 30)
+    : bowlingAvg > 0 && bowlingAvg <= 15 ? 50 : 0;
   const economyScore = economy > 0 && economy <= 8
-    ? Math.max(0, 20 - ((economy - 6) / 2) * 10)
-    : economy > 0 && economy <= 6 ? 20 : 0;
+    ? Math.max(0, 50 - ((economy - 6) / 2) * 25)
+    : economy > 0 && economy <= 6 ? 50 : 0;
   
   // All-Rounder Index (20 points): >1.5 = excellent, 1.0-1.5 = good, <1.0 = needs improvement
+  // This will be adjusted based on all-rounder type
   const indexScore = allRounderIndex >= 1.5 ? 20 : allRounderIndex >= 1.0 ? 15 : allRounderIndex >= 0.5 ? 10 : 5;
   
   // Adjust weights based on all-rounder type
+  // CRITICAL: Role-specific weighting
   let battingWeight = 0.5;
   let bowlingWeight = 0.5;
   
   if (player.allrounderType === 'Batting All-rounder') {
-    battingWeight = 0.65;
-    bowlingWeight = 0.35;
+    // Batting All-rounder: Majorly batting (75%), minorly bowling (25%)
+    battingWeight = 0.75;
+    bowlingWeight = 0.25;
   } else if (player.allrounderType === 'Bowling All-rounder') {
-    battingWeight = 0.35;
-    bowlingWeight = 0.65;
+    // Bowling All-rounder: Majorly bowling (75%), minorly batting (25%)
+    battingWeight = 0.25;
+    bowlingWeight = 0.75;
   }
+  // Generic all-rounder: 50/50 split
   
-  // Calculate balanced contribution
+  // Calculate weighted contribution based on all-rounder type
   const battingContribution = (battingAvgScore + battingSRScore) * battingWeight;
   const bowlingContribution = (bowlingAvgScore + economyScore) * bowlingWeight;
   
-  // Balance bonus (how balanced they are)
-  const balanceDiff = Math.abs((battingAvgScore + battingSRScore) - (bowlingAvgScore + economyScore));
-  const balanceBonus = Math.max(0, 10 - (balanceDiff / 10)); // Max 10 points for perfect balance
+  // For specialized all-rounders, reduce balance bonus (they're not meant to be perfectly balanced)
+  // Generic all-rounders get full balance bonus
+  let balanceBonus = 0;
+  if (!player.allrounderType || player.allrounderType === '') {
+    // Only generic all-rounders get balance bonus
+    const balanceDiff = Math.abs((battingAvgScore + battingSRScore) - (bowlingAvgScore + economyScore));
+    balanceBonus = Math.max(0, 10 - (balanceDiff / 10)); // Max 10 points for perfect balance
+  }
   
-  const totalRating = Math.max(0, battingContribution + bowlingContribution + indexScore + balanceBonus);
+  // All-Rounder Index: Only significant for generic all-rounders, reduced for specialized ones
+  let adjustedIndexScore = indexScore;
+  if (player.allrounderType === 'Batting All-rounder' || player.allrounderType === 'Bowling All-rounder') {
+    // Specialized all-rounders get reduced index weight (5 points instead of 20)
+    adjustedIndexScore = allRounderIndex >= 1.5 ? 5 : allRounderIndex >= 1.0 ? 3 : allRounderIndex >= 0.5 ? 2 : 1;
+  }
+  
+  const totalRating = Math.max(0, battingContribution + bowlingContribution + adjustedIndexScore + balanceBonus);
   
   // Generate summary based on rating and type
   let summary = 'Emerging Talent';
