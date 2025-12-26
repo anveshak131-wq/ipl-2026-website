@@ -75,6 +75,7 @@ interface UseLiveScoreProps {
   initialMatchState?: MatchState;
   maxOvers?: number;
   onMatchStateChange?: (matchState: MatchState) => void;
+  isTestPage?: boolean; // For test pages, skip match state restrictions
 }
 
 // Helper functions
@@ -98,10 +99,24 @@ export function useLiveScore({
   initialMatchState,
   maxOvers = 20,
   onMatchStateChange,
+  isTestPage = false,
 }: UseLiveScoreProps) {
-  const [matchState, setMatchState] = useState<MatchState>(
-    initialMatchState || initializeMatchState()
-  );
+  // For test pages, initialize directly to innings-1 state
+  const getInitialMatchState = (): MatchState => {
+    if (isTestPage) {
+      return {
+        currentState: 'innings-1',
+        lockedStates: [],
+        innings1: {
+          battingTeam: 'team1',
+          completed: false,
+        },
+      };
+    }
+    return initialMatchState || initializeMatchState();
+  };
+
+  const [matchState, setMatchState] = useState<MatchState>(getInitialMatchState());
 
   const [state, setState] = useState<LiveScoreState>({
     innings: 1,
@@ -160,10 +175,13 @@ export function useLiveScore({
   }, [state.innings, state.team1.wickets, state.team2.wickets, state.team1.balls, state.team2.balls, matchState, maxOvers, onMatchStateChange, state.battingTeam, state.team1.runs, state.team2.runs]);
 
   const recordBall = useCallback((ball: BallEvent) => {
-    // Check if current state allows ball entry
-    if (matchState.currentState !== 'innings-1' && matchState.currentState !== 'innings-2') {
-      alert(`Cannot record balls in ${matchState.currentState} state. Please transition to an innings state first.`);
-      return;
+    // Skip match state check for test pages
+    if (!isTestPage) {
+      // Check if current state allows ball entry
+      if (matchState.currentState !== 'innings-1' && matchState.currentState !== 'innings-2') {
+        alert(`Cannot record balls in ${matchState.currentState} state. Please transition to an innings state first.`);
+        return;
+      }
     }
 
     setState((prev) => {

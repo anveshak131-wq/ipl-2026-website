@@ -59,6 +59,7 @@ interface BallEntryPanelProps {
     team2Wins: number;
     lastResult?: string;
   };
+  isTestPage?: boolean; // For test pages, skip match state restrictions
 }
 
 export default function BallEntryPanel({
@@ -80,6 +81,7 @@ export default function BallEntryPanel({
   weather,
   pitchReport,
   headToHead,
+  isTestPage = false,
 }: BallEntryPanelProps) {
   const [showWicketModal, setShowWicketModal] = useState(false);
   const [showPlayerSelector, setShowPlayerSelector] = useState<'batter' | 'bowler' | null>(null);
@@ -128,6 +130,7 @@ export default function BallEntryPanel({
     initialBowler,
     initialMatchState: initializeMatchState(),
     maxOvers: 20,
+    isTestPage,
     onMatchStateChange: (newMatchState) => {
       // This will be called when match state changes
       // You can save it to backend here if needed
@@ -356,8 +359,8 @@ export default function BallEntryPanel({
 
   const colors = leagueColors[league];
 
-  // Check if ball entry is allowed based on match state
-  const canRecordBalls = matchState.currentState === 'innings-1' || matchState.currentState === 'innings-2';
+  // Check if ball entry is allowed based on match state (always true for test pages)
+  const canRecordBalls = isTestPage || matchState.currentState === 'innings-1' || matchState.currentState === 'innings-2';
 
   // Detect mobile device
   const [isMobile, setIsMobile] = useState(false);
@@ -501,7 +504,7 @@ export default function BallEntryPanel({
 
       {/* Ball Entry Buttons */}
       <div className="space-y-4">
-        {!canRecordBalls && (
+        {!isTestPage && !canRecordBalls && (
           <div className="px-4 py-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
             <p className="text-sm text-yellow-400 font-semibold">
               ⚠️ Ball entry is disabled. Please transition to an innings state to record balls.

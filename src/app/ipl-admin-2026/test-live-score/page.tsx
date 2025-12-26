@@ -102,15 +102,16 @@ export default function TestLiveScorePage() {
                     borderColor: 'rgba(255, 255, 255, 0.1)',
                   }}
                 >
-            <BallEntryPanel
+                  <BallEntryPanel
               matchId="test-match"
               team1Name="Team A"
               team2Name="Team B"
               team1Id="team-a"
               team2Id="team-b"
-              onSave={handleSaveLiveScore}
+                    onSave={handleSaveLiveScore}
               players={[]}
-              league={currentLeague}
+                    league={currentLeague}
+              isTestPage={true}
               venue="Test Stadium"
               date={new Date().toISOString().split('T')[0]}
               time="19:30"
