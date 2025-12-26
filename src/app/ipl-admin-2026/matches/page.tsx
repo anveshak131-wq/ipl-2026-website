@@ -42,6 +42,8 @@ import {
 import { Match, Team } from '@/types';
 import { api } from '@/lib/data';
 import PointsSystemDisplay from '@/components/admin/matches/PointsSystemDisplay';
+import ModernMatchCard from '@/components/admin/matches/ModernMatchCard';
+import { Search } from 'lucide-react';
 
 const IconTable = ({ className }: { className?: string }) => (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -134,7 +136,8 @@ export default function AdminMatches() {
     const [teams, setTeams] = useState<Team[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [authLoading, setAuthLoading] = useState(true);
-    const [viewMode, setViewMode] = useState<'table' | 'timeline' | 'analytics'>('table');
+    const [viewMode, setViewMode] = useState<'grid' | 'table' | 'timeline' | 'analytics'>('grid');
+    const [searchQuery, setSearchQuery] = useState('');
     const [showForm, setShowForm] = useState(false);
     const [showFilters, setShowFilters] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -333,9 +336,26 @@ export default function AdminMatches() {
             if (filters.dateTo && match.date > filters.dateTo) return false;
             if (filters.team !== 'all' && match.team1.id !== filters.team && match.team2.id !== filters.team) return false;
             if (filters.venue !== 'all' && match.venue !== filters.venue) return false;
+            
+            // Search filter
+            if (searchQuery.trim()) {
+                const query = searchQuery.toLowerCase();
+                const team1Name = match.team1.shortName?.toLowerCase() || match.team1.name?.toLowerCase() || '';
+                const team2Name = match.team2.shortName?.toLowerCase() || match.team2.name?.toLowerCase() || '';
+                const venue = match.venue.toLowerCase();
+                const matchNumber = getMatchNumberDisplay(match, matches).toLowerCase();
+                
+                if (!team1Name.includes(query) && 
+                    !team2Name.includes(query) && 
+                    !venue.includes(query) && 
+                    !matchNumber.includes(query)) {
+                    return false;
+                }
+            }
+            
             return true;
         });
-    }, [matches, filters]);
+    }, [matches, filters, searchQuery]);
 
     const matchesByDate = useMemo(() => {
         const grouped: { [key: string]: Match[] } = {};
@@ -1165,11 +1185,25 @@ export default function AdminMatches() {
             <PageTransition className="flex-1 relative z-10">
                 <div className="p-8">
                     {/* Points Table */}
-                    {viewMode === 'table' && matches.length > 0 && (
+                    {(viewMode === 'grid' || viewMode === 'table') && matches.length > 0 && (
                         <div className="mb-8">
                             <PointsSystemDisplay matches={matches} league={currentLeague} />
                         </div>
                     )}
+
+                    {/* Mobile Search */}
+                    <div className="md:hidden mb-6">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Search matches..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="glass-effect pl-10 pr-4 py-2.5 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ipl-gold/50 w-full transition-all"
+                            />
+                        </div>
+                    </div>
 
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
                         <div>
@@ -2291,7 +2325,101 @@ export default function AdminMatches() {
                         </div>
                     )}
 
-                    {viewMode === 'table' ? (
+                    {viewMode === 'grid' ? (
+                        // Grid View (Card-based)
+                        <div className="space-y-6">
+                            {/* Bulk Operations Toolbar */}
+                            {selectedMatches.size > 0 && (
+                                <BulkOperationsToolbar
+                                    selectedCount={selectedMatches.size}
+                                    totalCount={filteredMatches.length}
+                                    onSelectAll={toggleSelectAll}
+                                    onDeselectAll={clearSelection}
+                                    onBulkEdit={() => setShowBulkEditModal(true)}
+                                    onBulkDelete={() => setShowBulkDeleteModal(true)}
+                                    onBulkExport={() => {
+                                        const format = prompt('Select export format:\n1. CSV\n2. JSON\n3. Excel\n4. iCal\n\nEnter 1-4:');
+                                        if (format === '1') {
+                                            handleBulkExport('csv');
+                                        } else if (format === '2') {
+                                            handleBulkExport('json');
+                                        } else if (format === '3') {
+                                            handleBulkExport('excel');
+                                        } else if (format === '4') {
+                                            handleBulkExport('ical');
+                                        }
+                                    }}
+                                    onBulkStatusUpdate={(status) => handleBulkStatusUpdate(status as 'upcoming' | 'live' | 'completed')}
+                                    statusOptions={[
+                                        { value: 'upcoming', label: 'Set to Scheduled' },
+                                        { value: 'live', label: 'Set to Live' },
+                                        { value: 'completed', label: 'Set to Completed' }
+                                    ]}
+                                    showSelectAll={true}
+                                />
+                            )}
+
+                            {/* Grid Layout */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                {filteredMatches.map((match, index) => (
+                                    <ModernMatchCard
+                                        key={match.id}
+                                        match={match}
+                                        index={index}
+                                        onEdit={handleEdit}
+                                        onDelete={handleDelete}
+                                        onExportCalendar={(m) => {
+                                            const [hours, minutes] = m.time.split(':');
+                                            const startDate = new Date(m.date);
+                                            startDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                                            const endDate = new Date(startDate);
+                                            endDate.setHours(endDate.getHours() + 3);
+                                            const event: CalendarEvent = {
+                                                title: `${m.team1.shortName} vs ${m.team2.shortName}`,
+                                                description: `${currentLeague.toUpperCase()} 2026 Match\\nVenue: ${m.venue}\\nStatus: ${m.status}`,
+                                                location: m.venue,
+                                                startDate,
+                                                endDate,
+                                            };
+                                            exportToICal([event], `match_${m.id}.ics`);
+                                            showSuccess('Match exported to iCal file');
+                                        }}
+                                        isSelected={selectedMatches.has(match.id)}
+                                        onSelect={toggleSelectMatch}
+                                        isSubmitting={isSubmitting}
+                                        onMarkCompleted={handleMarkAsCompleted}
+                                        onMarkCancelled={handleMarkAsCancelled}
+                                    />
+                                ))}
+                            </div>
+
+                            {filteredMatches.length === 0 && (
+                                <EmptyStateIllustration
+                                    type="matches"
+                                    title="No matches found"
+                                    description={
+                                        Object.values(filters).some(v => v !== 'all' && v !== '') || searchQuery.trim()
+                                            ? "Try adjusting your filters or search query to see more matches."
+                                            : "Get started by creating your first match."
+                                    }
+                                    action={
+                                        Object.values(filters).some(v => v !== 'all' && v !== '') || searchQuery.trim()
+                                            ? {
+                                                label: "Clear Filters",
+                                                onClick: () => {
+                                                    setFilters({ status: 'all', dateFrom: '', dateTo: '', team: 'all', venue: 'all' });
+                                                    setSearchQuery('');
+                                                }
+                                            }
+                                            : {
+                                                label: "Create Match",
+                                                onClick: () => setShowForm(true)
+                                            }
+                                    }
+                                />
+                            )}
+                        </div>
+                    ) : viewMode === 'table' ? (
                         // Table View
                         <div className="glass-effect rounded-xl overflow-hidden border border-white/10">
                             <BulkOperationsToolbar
