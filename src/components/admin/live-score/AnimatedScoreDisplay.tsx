@@ -153,7 +153,9 @@ export default function AnimatedScoreDisplay({
       {isBatting && (
         <div className="mt-3 pt-3 border-t border-white/10">
           <div className="text-xs text-gray-400">
-            Run Rate: <span className="text-white font-bold">{(runs / (overs || 0.1)).toFixed(2)}</span>
+            Run Rate: <span className="text-white font-bold">
+              {overs > 0 ? (runs / overs).toFixed(2) : '0.00'}
+            </span>
           </div>
         </div>
       )}

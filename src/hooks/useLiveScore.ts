@@ -315,11 +315,16 @@ export function useLiveScore({
       // Note: We'll handle this in a useEffect to avoid stale state
 
       // Update team stats
-      const currentBalls = oversToBalls(team.balls);
-      const newTeamBalls = isLegalDelivery ? currentBalls + 1 : currentBalls;
+      // team.balls is stored as integer (total number of balls), not as overs
+      const newTeamBalls = isLegalDelivery ? team.balls + 1 : team.balls;
       const newTeamOvers = ballsToOvers(newTeamBalls);
       const newTeamRuns = team.runs + teamRunDelta;
       const newTeamWickets = isWicket ? team.wickets + 1 : team.wickets;
+      
+      // Cap overs at maxOvers (20 for T20)
+      const maxBalls = maxOvers * 6;
+      const cappedBalls = Math.min(newTeamBalls, maxBalls);
+      const cappedOvers = ballsToOvers(cappedBalls);
 
       // Update batter stats
       const batterBallDelta = isLegalDelivery ? 1 : 0;
@@ -337,9 +342,9 @@ export function useLiveScore({
           ...team,
           runs: newTeamRuns,
           wickets: newTeamWickets,
-          balls: newTeamBalls,
+          balls: cappedBalls, // Store as integer (total balls)
         },
-        currentOver: newTeamOvers,
+        currentOver: cappedOvers, // Display as decimal (overs.balls)
         currentBatter: {
           ...prev.currentBatter,
           runs: newBatterRuns,
