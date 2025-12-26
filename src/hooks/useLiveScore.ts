@@ -194,6 +194,18 @@ export function useLiveScore({
       const battingKey = prev.battingTeam;
       const team = prev[battingKey];
       
+      // Check if innings is complete (20 overs or 10 wickets) - T20 format
+      const currentBalls = team.balls; // team.balls is stored as integer (total balls)
+      const maxBalls = maxOvers * 6; // 20 overs * 6 = 120 balls max
+      
+      // Prevent recording more balls if innings is complete
+      if (currentBalls >= maxBalls || team.wickets >= 10) {
+        if (!isTestPage) {
+          alert(`Innings complete! ${team.wickets >= 10 ? 'All 10 wickets fallen' : `${maxOvers} overs completed`}`);
+        }
+        return prev;
+      }
+      
       // Calculate runs based on ball type
       let teamRunDelta = 0;
       let batterRunDelta = 0;
