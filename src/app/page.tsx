@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useState, useMemo, useRef } from 'react';
+import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -32,7 +32,9 @@ import {
   Users,
   Flame,
   Star,
-  ChevronRight
+  ChevronRight,
+  Target,
+  Activity
 } from 'lucide-react';
 import CountdownTimer from '@/components/ui/CountdownTimer';
 import { formatMatchTime } from '@/lib/timeUtils';
@@ -45,6 +47,14 @@ export default function Home() {
   const [lastAcceptanceDate, setLastAcceptanceDate] = useState<string | null>(null);
   const [needsReAcceptance, setNeedsReAcceptance] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
+  
+  // Mouse tracking for parallax effects
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const springConfig = { damping: 50, stiffness: 100 };
+  const x = useSpring(mouseX, springConfig);
+  const y = useSpring(mouseY, springConfig);
   
   // IPL Data
   const [iplTeams, setIplTeams] = useState<Team[]>([]);
@@ -129,6 +139,22 @@ export default function Home() {
   const [iplLogoIndex, setIplLogoIndex] = useState(0);
   const [wplLogoIndex, setWplLogoIndex] = useState(0);
 
+  // Mouse tracking effect
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const { clientX, clientY } = e;
+      const { innerWidth, innerHeight } = window;
+      const xPos = (clientX / innerWidth - 0.5) * 100;
+      const yPos = (clientY / innerHeight - 0.5) * 100;
+      setMousePosition({ x: xPos, y: yPos });
+      mouseX.set(xPos);
+      mouseY.set(yPos);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [mouseX, mouseY]);
+
   useEffect(() => {
     setIsHydrated(true);
     
@@ -165,10 +191,8 @@ export default function Home() {
         const [iplTeamsData, iplMatchesData, iplPlayersData] = await Promise.all([
           api.getTeams('ipl'),
           api.getMatches('ipl'),
-          api.getPlayers(undefined, 'ipl').catch(() => []), // Fetch players for accurate counts
+          api.getPlayers(undefined, 'ipl').catch(() => []),
         ]);
-        
-        console.log('Home page: Fetched IPL players:', iplPlayersData?.length || 0);
         
         // Attach players to teams with improved matching
         const iplTeamsWithPlayers = iplTeamsData.map(team => {
@@ -193,18 +217,11 @@ export default function Home() {
               String(player.teamId).toUpperCase()
             ];
             
-            // Check if any variation matches
             return teamIdVariations.some(tv => 
               playerTeamIdVariations.some(pv => pv === tv)
             );
           });
           
-          if (teamPlayers.length > 0) {
-            console.log(`Home page: Matched ${teamPlayers.length} players for IPL team ${team.name} (ID: ${team.id})`);
-          } else if (iplPlayersData && iplPlayersData.length > 0) {
-            console.warn(`Home page: No players matched for IPL team ${team.name} (ID: ${team.id}). Sample player teamIds:`, 
-              iplPlayersData.slice(0, 3).map(p => p.teamId));
-          }
           return {
             ...team,
             players: teamPlayers.length > 0 ? teamPlayers : (team.players || [])
@@ -220,10 +237,8 @@ export default function Home() {
         const [wplTeamsData, wplMatchesData, wplPlayersData] = await Promise.all([
           api.getTeams('wpl'),
           api.getMatches('wpl'),
-          api.getPlayers(undefined, 'wpl').catch(() => []), // Fetch players for accurate counts
+          api.getPlayers(undefined, 'wpl').catch(() => []),
         ]);
-        
-        console.log('Home page: Fetched WPL players:', wplPlayersData?.length || 0);
         
         const wplTeamsWithPlayers = wplTeamsData
           .filter(team => !isPlaceholderTeam(team))
@@ -249,18 +264,11 @@ export default function Home() {
                 String(player.teamId).toUpperCase()
               ];
               
-              // Check if any variation matches
               return teamIdVariations.some(tv => 
                 playerTeamIdVariations.some(pv => pv === tv)
               );
             });
             
-            if (teamPlayers.length > 0) {
-              console.log(`Home page: Matched ${teamPlayers.length} players for WPL team ${team.name} (ID: ${team.id})`);
-            } else if (wplPlayersData && wplPlayersData.length > 0) {
-              console.warn(`Home page: No players matched for WPL team ${team.name} (ID: ${team.id}). Sample player teamIds:`, 
-                wplPlayersData.slice(0, 3).map(p => p.teamId));
-            }
             return {
               ...team,
               players: teamPlayers.length > 0 ? teamPlayers : (team.players || [])
@@ -282,15 +290,10 @@ export default function Home() {
         setWplLoading(false);
         setNewsLoading(false);
       }
-    
-    return undefined;
-    return undefined;
-    return undefined;
-    return undefined;
-    return undefined;};
+    };
 
     loadData();
-  }, []);
+  }, [setCurrentLeague]);
 
   // Auto-rotate team logos carousel
   useEffect(() => {
@@ -301,7 +304,6 @@ export default function Home() {
       }, 3000);
       return () => clearInterval(interval);
     }
-    return undefined;
   }, [iplTeams]);
 
   useEffect(() => {
@@ -312,7 +314,6 @@ export default function Home() {
       }, 3000);
       return () => clearInterval(interval);
     }
-    return undefined;
   }, [wplTeams]);
 
   const handleAcceptTerms = () => {
@@ -331,7 +332,7 @@ export default function Home() {
   const shouldShowModal = isHydrated && showTermsModal;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 overflow-x-hidden">
       <AuroraBackground />
       <Navbar />
 
@@ -347,137 +348,219 @@ export default function Home() {
       )}
 
       <main className="relative z-10">
-        {/* Modern Hero Section */}
-        <section className="relative min-h-[95vh] flex items-center justify-center overflow-hidden">
-          {/* Dynamic Background Effects */}
-          <div className="absolute inset-0">
-            {/* Animated Gradient Mesh */}
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-600/20 via-purple-600/10 to-transparent" />
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-pink-600/20 via-rose-600/10 to-transparent" />
-            
-            {/* Floating Orbs */}
+        {/* Enhanced Hero Section with Mouse Parallax */}
+        <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+          {/* Animated Grid Background */}
+          <div 
+            className="absolute inset-0 opacity-[0.03]"
+            style={{
+              backgroundImage: `
+                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+              `,
+              backgroundSize: '60px 60px',
+              transform: `translate(${mousePosition.x * 0.5}px, ${mousePosition.y * 0.5}px)`,
+            }}
+          />
+
+          {/* Dynamic Gradient Orbs with Mouse Parallax */}
             <motion.div
-              className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/30 rounded-full blur-3xl"
+            className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-blue-500/20 rounded-full blur-[120px]"
+            style={{
+              x: useSpring(mouseX, { damping: 50, stiffness: 100 }),
+              y: useSpring(mouseY, { damping: 50, stiffness: 100 }),
+            }}
               animate={{
-                scale: [1, 1.3, 1],
-                x: [0, 100, 0],
-                y: [0, 50, 0],
+              scale: [1, 1.2, 1],
+              opacity: [0.2, 0.4, 0.2],
               }}
               transition={{
-                duration: 15,
+              duration: 20,
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
             />
             <motion.div
-              className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/30 rounded-full blur-3xl"
+            className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-purple-500/20 rounded-full blur-[120px]"
+            style={{
+              x: useSpring(mouseX, { damping: 50, stiffness: 100 }),
+              y: useSpring(mouseY, { damping: 50, stiffness: 100 }),
+            }}
               animate={{
-                scale: [1, 1.4, 1],
-                x: [0, -80, 0],
-                y: [0, -60, 0],
+              scale: [1, 1.3, 1],
+              opacity: [0.2, 0.4, 0.2],
               }}
               transition={{
-                duration: 18,
+              duration: 25,
                 repeat: Infinity,
                 ease: "easeInOut",
                 delay: 2,
               }}
             />
             <motion.div
-              className="absolute top-1/2 left-1/2 w-80 h-80 bg-pink-500/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"
+            className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-pink-500/15 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2"
               animate={{
                 scale: [1, 1.5, 1],
-                opacity: [0.3, 0.6, 0.3],
+              opacity: [0.15, 0.3, 0.15],
+              rotate: [0, 180, 360],
               }}
               transition={{
-                duration: 12,
+              duration: 30,
                 repeat: Infinity,
-                ease: "easeInOut",
-                delay: 1,
+              ease: "linear",
+            }}
+          />
+
+          {/* Floating Particles */}
+          {[...Array(20)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-1 h-1 bg-white/30 rounded-full"
+              initial={{
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+                opacity: 0,
+              }}
+              animate={{
+                y: [null, -100],
+                opacity: [0, 1, 0],
+              }}
+              transition={{
+                duration: Math.random() * 3 + 2,
+                repeat: Infinity,
+                delay: Math.random() * 2,
+                ease: "linear",
               }}
             />
-          </div>
+          ))}
 
           {/* Content */}
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
             <div className="text-center space-y-8">
-              {/* Premium Badge */}
+              {/* Premium Badge with Glow Effect */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 backdrop-blur-xl border border-white/10 shadow-2xl"
+                initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.8, type: "spring" }}
+                className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-gradient-to-r from-blue-500/30 via-purple-500/30 to-pink-500/30 backdrop-blur-2xl border border-white/20 shadow-2xl shadow-purple-500/20"
               >
-                <div className="relative">
-                  <Zap className="w-5 h-5 text-yellow-400" />
                   <motion.div
-                    className="absolute inset-0 bg-yellow-400 rounded-full blur-lg opacity-50"
+                  className="relative"
+                  animate={{ rotate: [0, 360] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                >
+                  <Zap className="w-6 h-6 text-yellow-400" />
+                  <motion.div
+                    className="absolute inset-0 bg-yellow-400 rounded-full blur-xl opacity-50"
                     animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0.8, 0.5] }}
                     transition={{ duration: 2, repeat: Infinity }}
                   />
-                </div>
+                </motion.div>
                 <span className="text-sm font-bold text-white uppercase tracking-wider">
                   Premier Cricket Leagues 2026
                 </span>
+                <motion.div
+                  className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500/0 via-purple-500/50 to-pink-500/0"
+                  animate={{ x: ['-100%', '200%'] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                />
               </motion.div>
 
-              {/* Main Heading with Split Design */}
-              <div className="space-y-4">
+              {/* Main Heading with Staggered Animation */}
+              <div className="space-y-6">
                 <motion.h1
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 50 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
-                  className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-white leading-[0.9]"
+                  transition={{ duration: 1, delay: 0.2, type: "spring", stiffness: 100 }}
+                  className="text-7xl sm:text-8xl md:text-9xl lg:text-[12rem] font-black text-white leading-[0.85] tracking-tight"
                 >
-                  <span className="block">Cricket</span>
-                  <span className="block bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-gradient">
+                  <motion.span
+                    className="block"
+                    initial={{ opacity: 0, x: -50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.8, delay: 0.4 }}
+                  >
+                    Cricket
+                  </motion.span>
+                  <motion.span
+                    className="block bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.8, delay: 0.6 }}
+                  >
                     Reimagined
-                  </span>
+                  </motion.span>
                 </motion.h1>
                 
                 <motion.p
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.4 }}
-                  className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed font-light"
+                  transition={{ duration: 0.8, delay: 0.8 }}
+                  className="text-xl md:text-2xl lg:text-3xl text-gray-300 max-w-4xl mx-auto leading-relaxed font-light"
                 >
-                  Your ultimate destination for <span className="text-blue-400 font-semibold">IPL</span> and <span className="text-purple-400 font-semibold">WPL</span>. 
-                  Live scores, real-time stats, breaking news, and everything cricket.
+                  Your ultimate destination for{' '}
+                  <span className="text-blue-400 font-semibold relative">
+                    <span className="relative z-10">IPL</span>
+                    <motion.span
+                      className="absolute bottom-0 left-0 right-0 h-1 bg-blue-400/30"
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: 1 }}
+                      transition={{ duration: 0.8, delay: 1.2 }}
+                    />
+                  </span>
+                  {' '}and{' '}
+                  <span className="text-purple-400 font-semibold relative">
+                    <span className="relative z-10">WPL</span>
+                    <motion.span
+                      className="absolute bottom-0 left-0 right-0 h-1 bg-purple-400/30"
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: 1 }}
+                      transition={{ duration: 0.8, delay: 1.4 }}
+                    />
+                  </span>
+                  . Live scores, real-time stats, breaking news, and everything cricket.
                 </motion.p>
               </div>
 
-              {/* Live Match Badge - If there's a live match */}
+              {/* Live Match Badge */}
               {featuredLiveMatch && (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.6, delay: 0.6 }}
-                  className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-red-500/20 backdrop-blur-xl border border-red-500/30 shadow-xl"
+                  initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 1, type: "spring" }}
+                  className="inline-flex items-center gap-4 px-8 py-4 rounded-2xl bg-gradient-to-r from-red-500/30 via-orange-500/30 to-red-500/30 backdrop-blur-2xl border-2 border-red-500/40 shadow-2xl shadow-red-500/20"
                 >
                   <motion.div
-                    className="w-3 h-3 bg-red-500 rounded-full"
-                    animate={{ scale: [1, 1.3, 1], opacity: [1, 0.7, 1] }}
+                    className="w-4 h-4 bg-red-500 rounded-full"
+                    animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
                     transition={{ duration: 1.5, repeat: Infinity }}
                   />
-                  <span className="text-sm font-bold text-red-400 uppercase tracking-wider">
+                  <span className="text-sm font-bold text-red-300 uppercase tracking-wider">
                     Live Now
                   </span>
-                  <span className="text-white font-semibold">
+                  <span className="text-white font-bold text-lg">
                     {featuredLiveMatch.team1.shortName} vs {featuredLiveMatch.team2.shortName}
                   </span>
+                  <Link
+                    href="/live-score"
+                    className="ml-2 px-4 py-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-300 font-semibold transition-all hover:scale-105"
+                  >
+                    Watch →
+                  </Link>
                 </motion.div>
               )}
 
-              {/* CTA Buttons */}
+              {/* Enhanced CTA Buttons */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.6 }}
-                className="flex flex-wrap justify-center gap-4 pt-6"
+                transition={{ duration: 0.8, delay: 1.2 }}
+                className="flex flex-wrap justify-center gap-6 pt-8"
               >
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link
                   href="/live-score"
-                  className="group relative px-10 py-5 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white font-bold text-lg shadow-2xl shadow-blue-500/50 hover:shadow-blue-500/70 transition-all duration-300 transform hover:scale-105 overflow-hidden"
+                    className="group relative px-12 py-6 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white font-bold text-lg shadow-2xl shadow-blue-500/50 hover:shadow-blue-500/70 transition-all duration-300 overflow-hidden block"
                 >
                   <span className="relative z-10 flex items-center gap-3">
                     <Play className="w-6 h-6" />
@@ -489,109 +572,165 @@ export default function Home() {
                     whileHover={{ x: 0 }}
                     transition={{ duration: 0.3 }}
                   />
+                    <motion.div
+                      className="absolute inset-0 bg-white/20"
+                      initial={{ scale: 0, opacity: 0 }}
+                      whileHover={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.3 }}
+                    />
                 </Link>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link
                   href="/matches"
-                  className="group px-10 py-5 rounded-2xl bg-white/10 backdrop-blur-xl text-white font-bold text-lg border-2 border-white/20 hover:border-white/40 hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
+                    className="group px-12 py-6 rounded-2xl bg-white/10 backdrop-blur-2xl text-white font-bold text-lg border-2 border-white/20 hover:border-white/40 hover:bg-white/20 transition-all duration-300 flex items-center gap-3"
                 >
-                  <span className="flex items-center gap-3">
                     View Matches
-                    <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </span>
+                    <ChevronRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
                 </Link>
+                </motion.div>
               </motion.div>
 
-              {/* Quick Stats */}
+              {/* Enhanced Quick Stats with Hover Effects */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 40 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.8 }}
-                className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto pt-8"
+                transition={{ duration: 0.8, delay: 1.4 }}
+                className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto pt-12"
               >
                 {[
-                  { icon: Trophy, label: 'Teams', value: iplTeams.length + wplTeams.length, color: 'from-blue-500 to-cyan-500' },
-                  { icon: Calendar, label: 'Matches', value: iplMatches.length + wplMatches.length, color: 'from-purple-500 to-pink-500' },
-                  { icon: Radio, label: 'Live', value: totalLiveMatches, color: 'from-red-500 to-orange-500' },
-                  { icon: TrendingUp, label: 'Leagues', value: 2, color: 'from-green-500 to-emerald-500' },
+                  { icon: Trophy, label: 'Teams', value: iplTeams.length + wplTeams.length, color: 'from-blue-500 to-cyan-500', delay: 0 },
+                  { icon: Calendar, label: 'Matches', value: iplMatches.length + wplMatches.length, color: 'from-purple-500 to-pink-500', delay: 0.1 },
+                  { icon: Radio, label: 'Live', value: totalLiveMatches, color: 'from-red-500 to-orange-500', delay: 0.2 },
+                  { icon: TrendingUp, label: 'Leagues', value: 2, color: 'from-green-500 to-emerald-500', delay: 0.3 },
                 ].map((stat, idx) => (
                   <motion.div
                     key={stat.label}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.9 + idx * 0.1 }}
-                    className="relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-6 text-center group hover:bg-white/10 transition-all duration-300 cursor-pointer"
+                    initial={{ opacity: 0, y: 30, scale: 0.9 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.6, delay: 1.5 + stat.delay, type: "spring" }}
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    className="group relative overflow-hidden rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 p-8 text-center cursor-pointer hover:bg-white/10 transition-all duration-300"
                   >
-                    <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
-                    <stat.icon className="w-7 h-7 mx-auto mb-3 text-gray-400 group-hover:text-white transition-colors" />
-                    <p className="text-4xl font-black text-white mb-1">{stat.value}</p>
+                    <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-20 transition-opacity duration-300`} />
+                    <motion.div
+                      className="relative z-10"
+                      whileHover={{ rotate: [0, -10, 10, 0] }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <stat.icon className="w-8 h-8 mx-auto mb-4 text-gray-400 group-hover:text-white transition-colors" />
+                    </motion.div>
+                    <motion.p
+                      className="text-5xl font-black text-white mb-2"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ duration: 0.5, delay: 1.6 + stat.delay, type: "spring" }}
+                    >
+                      {stat.value}
+                    </motion.p>
                     <p className="text-xs text-gray-400 uppercase tracking-wider font-semibold">{stat.label}</p>
+                    <motion.div
+                      className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${stat.color}`}
+                      initial={{ scaleX: 0 }}
+                      whileHover={{ scaleX: 1 }}
+                      transition={{ duration: 0.3 }}
+                    />
                   </motion.div>
                 ))}
               </motion.div>
             </div>
           </div>
 
-          {/* Scroll Indicator */}
+          {/* Enhanced Scroll Indicator */}
           <motion.div
-            className="absolute bottom-8 left-1/2 -translate-x-1/2"
-            animate={{ y: [0, 10, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
+            className="absolute bottom-12 left-1/2 -translate-x-1/2 z-10"
+            animate={{ y: [0, 15, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           >
-            <div className="w-6 h-10 rounded-full border-2 border-white/30 flex items-start justify-center p-2 backdrop-blur-sm bg-white/5">
+            <div className="w-8 h-14 rounded-full border-2 border-white/30 flex items-start justify-center p-2 backdrop-blur-md bg-white/5 hover:bg-white/10 transition-colors cursor-pointer">
               <motion.div
-                className="w-1.5 h-1.5 rounded-full bg-white/70"
-                animate={{ y: [0, 12, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
+                className="w-2 h-2 rounded-full bg-white/70"
+                animate={{ y: [0, 20, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               />
             </div>
           </motion.div>
         </section>
 
-        {/* Featured Live Match Section */}
+        {/* Featured Live Match Section - Enhanced */}
         {featuredLiveMatch && (
-          <section className="relative py-12 -mt-20">
+          <section className="relative py-16 -mt-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <motion.div 
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-red-500/20 via-orange-500/20 to-red-500/20 backdrop-blur-xl border-2 border-red-500/30 p-8 shadow-2xl"
+                initial={{ opacity: 0, y: 50, scale: 0.95 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.8, type: "spring" }}
+                className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-red-500/30 via-orange-500/30 to-red-500/30 backdrop-blur-2xl border-2 border-red-500/40 p-10 shadow-2xl"
               >
-                <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                <motion.div
+                  className="absolute top-0 right-0 w-96 h-96 bg-red-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"
+                  animate={{
+                    scale: [1, 1.2, 1],
+                    opacity: [0.2, 0.4, 0.2],
+                  }}
+                  transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                />
                 <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center gap-4">
                       <motion.div
-                        className="w-3 h-3 bg-red-500 rounded-full"
-                        animate={{ scale: [1, 1.3, 1], opacity: [1, 0.7, 1] }}
+                        className="w-4 h-4 bg-red-500 rounded-full"
+                        animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
                         transition={{ duration: 1.5, repeat: Infinity }}
                       />
-                      <span className="text-sm font-bold text-red-400 uppercase tracking-wider">Live Match</span>
+                      <span className="text-lg font-bold text-red-300 uppercase tracking-wider">Live Match</span>
                     </div>
                     <Link
                       href="/live-score"
-                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/20 hover:bg-red-500/30 border border-red-500/30 text-red-400 font-semibold transition-all"
+                      className="group flex items-center gap-2 px-6 py-3 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 text-red-300 font-semibold transition-all hover:scale-105"
                     >
                       Watch Live
-                      <ArrowRight className="w-4 h-4" />
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </Link>
                   </div>
-                  <div className="grid md:grid-cols-3 gap-6 items-center">
-                    <div className="text-center md:text-left">
-                      <div className="text-2xl font-black text-white mb-2">{featuredLiveMatch.team1.shortName}</div>
-                      <div className="text-sm text-gray-400">{featuredLiveMatch.team1.name}</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-4xl font-black text-white mb-2">VS</div>
-                      <div className="text-sm text-gray-400">
+                  <div className="grid md:grid-cols-3 gap-8 items-center">
+                    <motion.div
+                      className="text-center md:text-left"
+                      initial={{ opacity: 0, x: -30 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.6, delay: 0.2 }}
+                    >
+                      <div className="text-3xl font-black text-white mb-2">{featuredLiveMatch.team1.shortName}</div>
+                      <div className="text-sm text-gray-300">{featuredLiveMatch.team1.name}</div>
+                    </motion.div>
+                    <motion.div
+                      className="text-center"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.6, delay: 0.3, type: "spring" }}
+                    >
+                      <div className="text-5xl font-black text-white mb-3">VS</div>
+                      <div className="text-sm text-gray-300">
                         {formatMatchTime(featuredLiveMatch.date, featuredLiveMatch.time)}
                       </div>
-                    </div>
-                    <div className="text-center md:text-right">
-                      <div className="text-2xl font-black text-white mb-2">{featuredLiveMatch.team2.shortName}</div>
-                      <div className="text-sm text-gray-400">{featuredLiveMatch.team2.name}</div>
-                    </div>
+                    </motion.div>
+                    <motion.div
+                      className="text-center md:text-right"
+                      initial={{ opacity: 0, x: 30 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.6, delay: 0.2 }}
+                    >
+                      <div className="text-3xl font-black text-white mb-2">{featuredLiveMatch.team2.shortName}</div>
+                      <div className="text-sm text-gray-300">{featuredLiveMatch.team2.name}</div>
+                    </motion.div>
                   </div>
                 </div>
               </motion.div>
@@ -599,108 +738,156 @@ export default function Home() {
           </section>
         )}
 
-        {/* League Selection Cards - Modern Design */}
-        <section className="relative py-20">
+        {/* League Selection Cards - Enhanced 3D Design */}
+        <section className="relative py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-12"
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8 }}
+              className="text-center mb-16"
             >
-              <h2 className="text-4xl md:text-5xl font-black text-white mb-4">
-                Choose Your <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">League</span>
+              <motion.div
+                className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-full bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 border border-white/10 backdrop-blur-sm"
+              >
+                <Target className="w-5 h-5 text-blue-400" />
+                <span className="text-sm font-bold text-white uppercase tracking-wider">Choose Your League</span>
+              </motion.div>
+              <h2 className="text-5xl md:text-7xl font-black text-white mb-6">
+                Experience <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Both Worlds</span>
               </h2>
-              <p className="text-gray-400 text-lg">Experience the best of both worlds</p>
+              <p className="text-gray-400 text-xl">The ultimate cricket experience awaits</p>
             </motion.div>
 
-            <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-              {/* IPL Card */}
+            <div className="grid md:grid-cols-2 gap-10 max-w-6xl mx-auto">
+              {/* IPL Card - Enhanced */}
               <motion.div 
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                whileHover={{ scale: 1.02, y: -8 }}
-                className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600/40 via-blue-500/30 to-cyan-500/40 backdrop-blur-xl border-2 border-blue-500/30 p-8 cursor-pointer shadow-2xl"
+                initial={{ opacity: 0, x: -100, rotateY: -15 }}
+                whileInView={{ opacity: 1, x: 0, rotateY: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.8, type: "spring" }}
+                whileHover={{ scale: 1.03, y: -12, rotateY: 5 }}
+                className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600/50 via-blue-500/40 to-cyan-500/50 backdrop-blur-2xl border-2 border-blue-500/40 p-10 cursor-pointer shadow-2xl shadow-blue-500/20"
                 onClick={() => router.push('/ipl')}
+                style={{ perspective: '1000px' }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-cyan-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="absolute -top-32 -right-32 w-64 h-64 bg-blue-500/30 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-br from-blue-600/30 to-cyan-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  animate={{
+                    backgroundPosition: ['0% 0%', '100% 100%'],
+                  }}
+                  transition={{
+                    duration: 5,
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                  }}
+                />
+                <motion.div
+                  className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/30 rounded-full blur-3xl"
+                  animate={{
+                    scale: [1, 1.3, 1],
+                    x: [0, 50, 0],
+                    y: [0, 50, 0],
+                  }}
+                  transition={{
+                    duration: 8,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                />
                 
                 <div className="relative z-10">
-                  <div className="flex items-start justify-between mb-6">
-                    <div className="flex items-center gap-4">
-                      {/* Team Logos Carousel */}
-                      <div className="relative p-5 rounded-2xl bg-blue-500/30 border border-blue-400/40 backdrop-blur-sm shadow-lg overflow-hidden">
+                  <div className="flex items-start justify-between mb-8">
+                    <div className="flex items-center gap-5">
+                      <motion.div
+                        className="relative p-6 rounded-3xl bg-blue-500/40 border-2 border-blue-400/50 backdrop-blur-xl shadow-xl overflow-hidden"
+                        whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
+                        transition={{ duration: 0.5 }}
+                      >
                         <AnimatePresence mode="wait">
                           {iplTeams.filter(t => !isPlaceholderTeam(t)).slice(0, 5).map((team, idx) => (
                             idx === iplLogoIndex && (
                               <motion.div
                                 key={team.id}
-                                initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
+                                initial={{ opacity: 0, scale: 0.5, rotate: -180 }}
                                 animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                                exit={{ opacity: 0, scale: 0.8, rotate: 10 }}
-                                transition={{ duration: 0.5 }}
+                                exit={{ opacity: 0, scale: 0.5, rotate: 180 }}
+                                transition={{ duration: 0.6, type: "spring" }}
                               >
                                 <Image
                                   src={getAnimatedLogoPath(team.id, team.shortName, 'ipl')}
                                   alt={team.shortName}
-                                  width={40}
-                                  height={40}
+                                  width={50}
+                                  height={50}
                                   className="object-contain"
                                 />
                               </motion.div>
                             )
                           ))}
                         </AnimatePresence>
-                      </div>
+                      </motion.div>
                       <div>
-                        <h3 className="text-3xl font-black text-white mb-1">Indian Premier League</h3>
-                        <p className="text-sm text-blue-300 font-bold">IPL 2026</p>
+                        <h3 className="text-4xl font-black text-white mb-2">Indian Premier League</h3>
+                        <p className="text-base text-blue-200 font-bold">IPL 2026</p>
                       </div>
                     </div>
-                    <ArrowRight className="w-7 h-7 text-blue-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-300" />
+                    <motion.div
+                      animate={{ x: [0, 10, 0] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      <ArrowRight className="w-8 h-8 text-blue-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-300" />
+                    </motion.div>
               </div>
 
-                  <p className="text-gray-200 mb-8 leading-relaxed text-lg">
+                  <p className="text-gray-100 mb-10 leading-relaxed text-lg">
                     The world's biggest T20 cricket league. Experience the thrill, passion, and glory of the men's premier tournament.
                   </p>
 
-                  <div className="grid grid-cols-3 gap-4 mb-6">
-                    <div className="text-center p-5 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
-                      <p className="text-4xl font-black text-white mb-2">{iplTeams.filter(t => !isPlaceholderTeam(t)).length}</p>
-                      <p className="text-xs text-gray-300 uppercase tracking-wide font-semibold">Teams</p>
-                    </div>
-                    <div className="text-center p-5 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
-                      <p className="text-4xl font-black text-white mb-2">{iplMatches.length}</p>
-                      <p className="text-xs text-gray-300 uppercase tracking-wide font-semibold">Matches</p>
-                    </div>
-                    <div className="text-center p-5 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
-                      <p className="text-4xl font-black text-white mb-2">{iplLiveMatches.length}</p>
-                      <p className="text-xs text-gray-300 uppercase tracking-wide font-semibold">Live</p>
-                    </div>
+                  <div className="grid grid-cols-3 gap-5 mb-8">
+                    {[
+                      { label: 'Teams', value: iplTeams.filter(t => !isPlaceholderTeam(t)).length },
+                      { label: 'Matches', value: iplMatches.length },
+                      { label: 'Live', value: iplLiveMatches.length },
+                    ].map((stat, idx) => (
+                      <motion.div
+                        key={stat.label}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: idx * 0.1 }}
+                        whileHover={{ scale: 1.1, y: -5 }}
+                        className="text-center p-6 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/20 transition-all"
+                      >
+                        <p className="text-5xl font-black text-white mb-2">{stat.value}</p>
+                        <p className="text-xs text-gray-300 uppercase tracking-wide font-semibold">{stat.label}</p>
+                      </motion.div>
+                    ))}
                   </div>
 
-                  {/* Last Match Result Preview */}
+                  {/* Last Match Result */}
                   {iplLastMatch && (
-                    <div className="mb-4 p-4 rounded-xl bg-white/5 border border-white/10">
-                      <p className="text-xs text-gray-400 mb-2 flex items-center gap-2">
-                        <Trophy className="w-3 h-3" />
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      viewport={{ once: true }}
+                      className="mb-6 p-5 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm"
+                    >
+                      <p className="text-xs text-gray-400 mb-3 flex items-center gap-2">
+                        <Trophy className="w-4 h-4" />
                         Last Result
                       </p>
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className={`text-sm font-semibold ${
+                        <div className="flex items-center gap-3">
+                          <span className={`text-base font-semibold ${
                             iplLastMatch.score && iplLastMatch.score.team1.runs > iplLastMatch.score.team2.runs 
                               ? 'text-yellow-400' 
                               : 'text-white'
                           }`}>
                             {iplLastMatch.team1.shortName}
                           </span>
-                          <span className="text-gray-400">vs</span>
-                          <span className={`text-sm font-semibold ${
+                          <span className="text-gray-500">vs</span>
+                          <span className={`text-base font-semibold ${
                             iplLastMatch.score && iplLastMatch.score.team2.runs > iplLastMatch.score.team1.runs 
                               ? 'text-yellow-400' 
                               : 'text-white'
@@ -709,44 +896,61 @@ export default function Home() {
                           </span>
                         </div>
                         {iplLastMatch.result && (
-                          <span className="text-xs text-yellow-400 font-bold">✓</span>
+                          <motion.span
+                            className="text-lg text-yellow-400 font-bold"
+                            animate={{ scale: [1, 1.2, 1] }}
+                            transition={{ duration: 1, repeat: Infinity }}
+                          >
+                            ✓
+                          </motion.span>
                         )}
                 </div>
-              </div>
+                    </motion.div>
                   )}
 
                   {iplNextMatch && (
-                    <div className="mb-6 p-4 rounded-xl bg-white/5 border border-white/10">
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      viewport={{ once: true }}
+                      className="mb-8 p-5 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm"
+                    >
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-xs text-gray-400 mb-1">Next Match</p>
-                          <p className="text-sm font-semibold text-white">
+                          <p className="text-xs text-gray-400 mb-2">Next Match</p>
+                          <p className="text-base font-semibold text-white">
                             {iplNextMatch.team1.shortName} vs {iplNextMatch.team2.shortName}
                           </p>
                         </div>
                         <CountdownTimer targetDate={iplNextMatch.date} matchTime={iplNextMatch.time} />
                       </div>
-                    </div>
+                    </motion.div>
                   )}
 
-                  {/* Interactive Hover Preview - Upcoming Matches */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-600/95 to-cyan-600/95 backdrop-blur-xl rounded-3xl p-8 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none group-hover:pointer-events-auto">
+                  {/* Hover Preview */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-600/95 to-cyan-600/95 backdrop-blur-2xl rounded-3xl p-10 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none group-hover:pointer-events-auto">
                     <div className="h-full flex flex-col">
-                      <h4 className="text-xl font-black text-white mb-4">Upcoming Matches</h4>
-                      <div className="flex-1 space-y-3 overflow-y-auto">
+                      <h4 className="text-2xl font-black text-white mb-6">Upcoming Matches</h4>
+                      <div className="flex-1 space-y-4 overflow-y-auto">
                         {iplUpcomingMatches.length > 0 ? (
-                          iplUpcomingMatches.map((match) => (
-                            <div key={match.id} className="p-3 rounded-lg bg-white/10 border border-white/20">
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="text-sm font-semibold text-white">
+                          iplUpcomingMatches.map((match, idx) => (
+                            <motion.div
+                              key={match.id}
+                              initial={{ opacity: 0, x: -20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ duration: 0.3, delay: idx * 0.1 }}
+                              className="p-4 rounded-xl bg-white/10 border border-white/20 backdrop-blur-sm"
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-base font-semibold text-white">
                                   {match.team1.shortName} vs {match.team2.shortName}
                                 </span>
                               </div>
-                              <div className="flex items-center gap-2 text-xs text-gray-300">
-                                <Clock className="w-3 h-3" />
+                              <div className="flex items-center gap-2 text-sm text-gray-300">
+                                <Clock className="w-4 h-4" />
                                 {match.time && match.date ? formatMatchTime(match.time, match.date) : 'TBD'}
             </div>
-          </div>
+                            </motion.div>
                           ))
                         ) : (
                           <p className="text-gray-400 text-sm">No upcoming matches</p>
@@ -755,31 +959,57 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 text-blue-300 font-bold text-lg relative z-10">
+                  <div className="flex items-center gap-3 text-blue-200 font-bold text-xl relative z-10 mt-8">
                     <span>Explore IPL</span>
-                    <ArrowRight className="w-5 h-5" />
+                    <ArrowRight className="w-6 h-6" />
                   </div>
                 </div>
               </motion.div>
 
-              {/* WPL Card */}
+              {/* WPL Card - Enhanced */}
               <motion.div
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                whileHover={{ scale: 1.02, y: -8 }}
-                className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-600/40 via-pink-500/30 to-rose-500/40 backdrop-blur-xl border-2 border-purple-500/30 p-8 cursor-pointer shadow-2xl"
+                initial={{ opacity: 0, x: 100, rotateY: 15 }}
+                whileInView={{ opacity: 1, x: 0, rotateY: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.8, type: "spring" }}
+                whileHover={{ scale: 1.03, y: -12, rotateY: -5 }}
+                className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-600/50 via-pink-500/40 to-rose-500/50 backdrop-blur-2xl border-2 border-purple-500/40 p-10 cursor-pointer shadow-2xl shadow-purple-500/20"
                 onClick={() => router.push('/wpl')}
+                style={{ perspective: '1000px' }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 to-pink-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="absolute -top-32 -left-32 w-64 h-64 bg-purple-500/30 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700" />
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-br from-purple-600/30 to-pink-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  animate={{
+                    backgroundPosition: ['0% 0%', '100% 100%'],
+                  }}
+                  transition={{
+                    duration: 5,
+                    repeat: Infinity,
+                    repeatType: "reverse",
+                  }}
+                />
+                <motion.div
+                  className="absolute -top-40 -left-40 w-80 h-80 bg-purple-500/30 rounded-full blur-3xl"
+                  animate={{
+                    scale: [1, 1.3, 1],
+                    x: [0, -50, 0],
+                    y: [0, 50, 0],
+                  }}
+                  transition={{
+                    duration: 8,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                />
                 
                 <div className="relative z-10">
-                  <div className="flex items-start justify-between mb-6">
-                    <div className="flex items-center gap-4">
-                      {/* Team Logos Carousel */}
-                      <div className="relative p-5 rounded-2xl bg-purple-500/30 border border-purple-400/40 backdrop-blur-sm shadow-lg overflow-hidden">
+                  <div className="flex items-start justify-between mb-8">
+                    <div className="flex items-center gap-5">
+                      <motion.div
+                        className="relative p-6 rounded-3xl bg-purple-500/40 border-2 border-purple-400/50 backdrop-blur-xl shadow-xl overflow-hidden"
+                        whileHover={{ rotate: [0, 10, -10, 0], scale: 1.1 }}
+                        transition={{ duration: 0.5 }}
+                      >
                         <AnimatePresence mode="wait">
                           {wplTeams.filter(t => !isPlaceholderTeam(t)).slice(0, 5).map((team, idx) => (
                             idx === wplLogoIndex && (
@@ -787,61 +1017,77 @@ export default function Home() {
                                 key={team.id}
                                 src={getAnimatedLogoPath(team.id, team.shortName, 'wpl')}
                                 alt={team.shortName}
-                                className="w-10 h-10 object-contain"
-                                initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
+                                className="w-12 h-12 object-contain"
+                                initial={{ opacity: 0, scale: 0.5, rotate: 180 }}
                                 animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                                exit={{ opacity: 0, scale: 0.8, rotate: 10 }}
-                                transition={{ duration: 0.5 }}
+                                exit={{ opacity: 0, scale: 0.5, rotate: -180 }}
+                                transition={{ duration: 0.6, type: "spring" }}
                               />
                             )
                           ))}
                         </AnimatePresence>
-                      </div>
+                      </motion.div>
                       <div>
-                        <h3 className="text-3xl font-black text-white mb-1">Women's Premier League</h3>
-                        <p className="text-sm text-purple-300 font-bold">WPL 2026</p>
+                        <h3 className="text-4xl font-black text-white mb-2">Women's Premier League</h3>
+                        <p className="text-base text-purple-200 font-bold">WPL 2026</p>
                       </div>
                     </div>
-                    <ArrowRight className="w-7 h-7 text-purple-400 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-300" />
+                    <motion.div
+                      animate={{ x: [0, -10, 0] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    >
+                      <ArrowRight className="w-8 h-8 text-purple-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-2 transition-all duration-300" />
+                    </motion.div>
             </div>
 
-                  <p className="text-gray-200 mb-8 leading-relaxed text-lg">
+                  <p className="text-gray-100 mb-10 leading-relaxed text-lg">
                     The pinnacle of women's T20 cricket. Power, passion, and excellence in every match.
                   </p>
 
-                  <div className="grid grid-cols-3 gap-4 mb-6">
-                    <div className="text-center p-5 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
-                      <p className="text-4xl font-black text-white mb-2">{wplTeams.filter(t => !isPlaceholderTeam(t)).length}</p>
-                      <p className="text-xs text-gray-300 uppercase tracking-wide font-semibold">Teams</p>
-                    </div>
-                    <div className="text-center p-5 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
-                      <p className="text-4xl font-black text-white mb-2">{wplMatches.length}</p>
-                      <p className="text-xs text-gray-300 uppercase tracking-wide font-semibold">Matches</p>
-                    </div>
-                    <div className="text-center p-5 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
-                      <p className="text-4xl font-black text-white mb-2">{wplLiveMatches.length}</p>
-                      <p className="text-xs text-gray-300 uppercase tracking-wide font-semibold">Live</p>
-                    </div>
+                  <div className="grid grid-cols-3 gap-5 mb-8">
+                    {[
+                      { label: 'Teams', value: wplTeams.filter(t => !isPlaceholderTeam(t)).length },
+                      { label: 'Matches', value: wplMatches.length },
+                      { label: 'Live', value: wplLiveMatches.length },
+                    ].map((stat, idx) => (
+                      <motion.div
+                        key={stat.label}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5, delay: idx * 0.1 }}
+                        whileHover={{ scale: 1.1, y: -5 }}
+                        className="text-center p-6 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white/20 transition-all"
+                      >
+                        <p className="text-5xl font-black text-white mb-2">{stat.value}</p>
+                        <p className="text-xs text-gray-300 uppercase tracking-wide font-semibold">{stat.label}</p>
+                      </motion.div>
+                    ))}
                   </div>
 
-                  {/* Last Match Result Preview */}
+                  {/* Last Match Result */}
                   {wplLastMatch && (
-                    <div className="mb-4 p-4 rounded-xl bg-white/5 border border-white/10">
-                      <p className="text-xs text-gray-400 mb-2 flex items-center gap-2">
-                        <Trophy className="w-3 h-3" />
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      viewport={{ once: true }}
+                      className="mb-6 p-5 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm"
+                    >
+                      <p className="text-xs text-gray-400 mb-3 flex items-center gap-2">
+                        <Trophy className="w-4 h-4" />
                         Last Result
                       </p>
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className={`text-sm font-semibold ${
+                        <div className="flex items-center gap-3">
+                          <span className={`text-base font-semibold ${
                             wplLastMatch.score && wplLastMatch.score.team1.runs > wplLastMatch.score.team2.runs 
                               ? 'text-yellow-400' 
                               : 'text-white'
                           }`}>
                             {wplLastMatch.team1.shortName}
                           </span>
-                          <span className="text-gray-400">vs</span>
-                          <span className={`text-sm font-semibold ${
+                          <span className="text-gray-500">vs</span>
+                          <span className={`text-base font-semibold ${
                             wplLastMatch.score && wplLastMatch.score.team2.runs > wplLastMatch.score.team1.runs 
                               ? 'text-yellow-400' 
                               : 'text-white'
@@ -850,44 +1096,61 @@ export default function Home() {
                           </span>
                         </div>
                         {wplLastMatch.result && (
-                          <span className="text-xs text-yellow-400 font-bold">✓</span>
+                          <motion.span
+                            className="text-lg text-yellow-400 font-bold"
+                            animate={{ scale: [1, 1.2, 1] }}
+                            transition={{ duration: 1, repeat: Infinity }}
+                          >
+                            ✓
+                          </motion.span>
                         )}
                       </div>
-                    </div>
+                    </motion.div>
                   )}
 
                   {wplNextMatch && (
-                    <div className="mb-6 p-4 rounded-xl bg-white/5 border border-white/10">
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      whileInView={{ opacity: 1 }}
+                      viewport={{ once: true }}
+                      className="mb-8 p-5 rounded-xl bg-white/5 border border-white/10 backdrop-blur-sm"
+                    >
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-xs text-gray-400 mb-1">Next Match</p>
-                          <p className="text-sm font-semibold text-white">
+                          <p className="text-xs text-gray-400 mb-2">Next Match</p>
+                          <p className="text-base font-semibold text-white">
                             {wplNextMatch.team1.shortName} vs {wplNextMatch.team2.shortName}
                           </p>
                         </div>
                         <CountdownTimer targetDate={wplNextMatch.date} matchTime={wplNextMatch.time} />
                       </div>
-                    </div>
+                    </motion.div>
                   )}
 
-                  {/* Interactive Hover Preview - Upcoming Matches */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-600/95 to-pink-600/95 backdrop-blur-xl rounded-3xl p-8 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none group-hover:pointer-events-auto">
+                  {/* Hover Preview */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-600/95 to-pink-600/95 backdrop-blur-2xl rounded-3xl p-10 opacity-0 group-hover:opacity-100 transition-all duration-500 pointer-events-none group-hover:pointer-events-auto">
                     <div className="h-full flex flex-col">
-                      <h4 className="text-xl font-black text-white mb-4">Upcoming Matches</h4>
-                      <div className="flex-1 space-y-3 overflow-y-auto">
+                      <h4 className="text-2xl font-black text-white mb-6">Upcoming Matches</h4>
+                      <div className="flex-1 space-y-4 overflow-y-auto">
                         {wplUpcomingMatches.length > 0 ? (
-                          wplUpcomingMatches.map((match) => (
-                            <div key={match.id} className="p-3 rounded-lg bg-white/10 border border-white/20">
-                              <div className="flex items-center justify-between mb-1">
-                                <span className="text-sm font-semibold text-white">
+                          wplUpcomingMatches.map((match, idx) => (
+                            <motion.div
+                              key={match.id}
+                              initial={{ opacity: 0, x: 20 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ duration: 0.3, delay: idx * 0.1 }}
+                              className="p-4 rounded-xl bg-white/10 border border-white/20 backdrop-blur-sm"
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-base font-semibold text-white">
                                   {match.team1.shortName} vs {match.team2.shortName}
                                 </span>
                               </div>
-                              <div className="flex items-center gap-2 text-xs text-gray-300">
-                                <Clock className="w-3 h-3" />
+                              <div className="flex items-center gap-2 text-sm text-gray-300">
+                                <Clock className="w-4 h-4" />
                                 {match.time && match.date ? formatMatchTime(match.time, match.date) : 'TBD'}
                 </div>
-              </div>
+                            </motion.div>
                           ))
             ) : (
                           <p className="text-gray-400 text-sm">No upcoming matches</p>
@@ -896,9 +1159,9 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 text-purple-300 font-bold text-lg relative z-10">
+                  <div className="flex items-center gap-3 text-purple-200 font-bold text-xl relative z-10 mt-8">
                     <span>Explore WPL</span>
-                    <ArrowRight className="w-5 h-5" />
+                    <ArrowRight className="w-6 h-6" />
                   </div>
                 </div>
               </motion.div>
@@ -906,55 +1169,69 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Featured Matches Section */}
-        <section className="relative py-20 overflow-hidden">
+        {/* Featured Matches Section - Enhanced */}
+        <section className="relative py-24 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-blue-950/10 via-transparent to-transparent" />
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="flex items-center justify-between mb-12"
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8 }}
+              className="flex items-center justify-between mb-16"
             >
               <div>
-                <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-blue-500/20 border border-blue-500/30 backdrop-blur-sm">
-                  <Calendar className="w-4 h-4 text-blue-400" />
+                <motion.div
+                  className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-full bg-blue-500/20 border border-blue-500/30 backdrop-blur-sm"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <Calendar className="w-5 h-5 text-blue-400" />
                   <span className="text-xs font-bold text-blue-300 uppercase tracking-wider">Upcoming Matches</span>
-          </div>
-                <h2 className="text-4xl md:text-6xl font-black text-white">
-                  Featured <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">Matches</span>
+                </motion.div>
+                <h2 className="text-5xl md:text-7xl font-black text-white">
+                  Featured <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent">Matches</span>
               </h2>
             </div>
               <Link
                 href="/matches"
-                className="group flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:text-white transition-all duration-300"
+                className="group flex items-center gap-2 px-8 py-4 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 hover:text-white transition-all duration-300 hover:scale-105"
               >
                 View All
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
               </Link>
             </motion.div>
 
-            {/* Combined Matches Grid */}
+            {/* Enhanced Matches Grid */}
             {iplLoading || wplLoading ? (
               <MatchesSkeleton />
             ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {[...iplMatches.slice(0, 3), ...wplMatches.slice(0, 3)]
                   .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
                   .slice(0, 6)
                   .map((match, idx) => (
                     <motion.div
                       key={match.id}
-                      initial={{ opacity: 0, y: 30 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.5, delay: idx * 0.1 }}
-                      className="group relative overflow-hidden rounded-2xl bg-white/5 backdrop-blur-xl border border-white/10 p-6 hover:bg-white/10 hover:border-white/20 transition-all duration-300 cursor-pointer"
+                      initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                      viewport={{ once: true, margin: "-50px" }}
+                      transition={{ duration: 0.6, delay: idx * 0.1, type: "spring" }}
+                      whileHover={{ scale: 1.05, y: -8 }}
+                      className="group relative overflow-hidden rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 p-8 hover:bg-white/10 hover:border-white/20 transition-all duration-300 cursor-pointer shadow-xl hover:shadow-2xl"
                       onClick={() => router.push(match.league === 'wpl' ? '/wpl/matches' : '/matches')}
                     >
-                      <div className="flex items-center justify-between mb-4">
-                        <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                      <motion.div
+                        className={`absolute top-0 left-0 w-full h-1 ${
+                          match.league === 'ipl' 
+                            ? 'bg-gradient-to-r from-blue-500 to-cyan-500'
+                            : 'bg-gradient-to-r from-purple-500 to-pink-500'
+                        }`}
+                        initial={{ scaleX: 0 }}
+                        whileHover={{ scaleX: 1 }}
+                        transition={{ duration: 0.3 }}
+                      />
+                      <div className="flex items-center justify-between mb-6">
+                        <span className={`text-xs font-bold px-4 py-2 rounded-full ${
                           match.league === 'ipl' 
                             ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
                             : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
@@ -962,27 +1239,36 @@ export default function Home() {
                           {match.league.toUpperCase()}
                         </span>
                         {match.status === 'live' && (
-                          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/20 border border-red-500/30">
                             <motion.div
-                              className="w-2 h-2 bg-red-500 rounded-full"
-                              animate={{ scale: [1, 1.3, 1], opacity: [1, 0.7, 1] }}
+                            className="flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/20 border border-red-500/30"
+                            animate={{ scale: [1, 1.1, 1] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                          >
+                            <motion.div
+                              className="w-2.5 h-2.5 bg-red-500 rounded-full"
+                              animate={{ scale: [1, 1.5, 1], opacity: [1, 0.5, 1] }}
                               transition={{ duration: 1.5, repeat: Infinity }}
                             />
                             <span className="text-xs font-bold text-red-400">LIVE</span>
-                          </div>
+                          </motion.div>
                         )}
                       </div>
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="text-2xl font-black text-white">{match.team1.shortName}</div>
-                        <div className="text-gray-400 text-sm">VS</div>
-                        <div className="text-2xl font-black text-white">{match.team2.shortName}</div>
+                      <div className="flex items-center justify-between mb-6">
+                        <div className="text-3xl font-black text-white">{match.team1.shortName}</div>
+                        <div className="text-gray-400 text-lg font-bold">VS</div>
+                        <div className="text-3xl font-black text-white">{match.team2.shortName}</div>
                       </div>
                       <div className="flex items-center justify-between text-sm text-gray-400">
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4" />
                           {match.time && match.date ? formatMatchTime(match.time, match.date) : 'TBD'}
                         </div>
-                        <ChevronRight className="w-5 h-5 text-gray-500 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                        <motion.div
+                          animate={{ x: [0, 5, 0] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        >
+                          <ChevronRight className="w-6 h-6 text-gray-500 group-hover:text-white group-hover:translate-x-2 transition-all" />
+                        </motion.div>
                       </div>
                     </motion.div>
                   ))}
@@ -991,25 +1277,28 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Teams Showcase Section */}
-        <section className="relative py-20 overflow-hidden">
+        {/* Teams Showcase Section - Enhanced */}
+        <section className="relative py-24 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-purple-950/10 via-transparent to-transparent" />
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-12"
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8 }}
+              className="text-center mb-16"
             >
-              <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-purple-500/20 border border-purple-500/30 backdrop-blur-sm">
-                <Users className="w-4 h-4 text-purple-400" />
+              <motion.div
+                className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-full bg-purple-500/20 border border-purple-500/30 backdrop-blur-sm"
+                whileHover={{ scale: 1.05 }}
+              >
+                <Users className="w-5 h-5 text-purple-400" />
                 <span className="text-xs font-bold text-purple-300 uppercase tracking-wider">Featured Teams</span>
-              </div>
-              <h2 className="text-4xl md:text-6xl font-black text-white mb-4">
-                Premier <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Teams</span>
+              </motion.div>
+              <h2 className="text-5xl md:text-7xl font-black text-white mb-6">
+                Premier <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">Teams</span>
               </h2>
-              <p className="text-gray-400 text-lg">Meet the champions of both leagues</p>
+              <p className="text-gray-400 text-xl">Meet the champions of both leagues</p>
             </motion.div>
 
             {/* IPL Teams */}
@@ -1019,18 +1308,18 @@ export default function Home() {
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className="mb-12"
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.8 }}
+                className="mb-16"
               >
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-2xl font-bold text-white">IPL Teams</h3>
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-3xl font-bold text-white">IPL Teams</h3>
                   <Link
                     href="/teams"
-                    className="text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-2"
+                    className="group text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-2 hover:gap-4 transition-all"
                   >
                     View All
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
                   </Link>
                 </div>
                 <ModernTeamsShowcase teams={iplTeams.filter(t => !isPlaceholderTeam(t)).slice(0, 5)} />
@@ -1044,17 +1333,17 @@ export default function Home() {
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.8 }}
               >
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-2xl font-bold text-white">WPL Teams</h3>
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-3xl font-bold text-white">WPL Teams</h3>
                   <Link
                     href="/wpl/teams"
-                    className="text-purple-400 hover:text-purple-300 font-semibold flex items-center gap-2"
+                    className="group text-purple-400 hover:text-purple-300 font-semibold flex items-center gap-2 hover:gap-4 transition-all"
                   >
                     View All
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
                   </Link>
                 </div>
                 <ModernTeamsShowcase teams={wplTeams.filter(t => !isPlaceholderTeam(t)).slice(0, 5)} />
@@ -1063,20 +1352,27 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Stats Section */}
-        <section className="relative py-20">
+        {/* Stats Section - Enhanced */}
+        <section className="relative py-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="text-center mb-12"
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8 }}
+              className="text-center mb-16"
             >
-              <h2 className="text-4xl md:text-6xl font-black text-white mb-4">
+              <motion.div
+                className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-full bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 border border-white/10 backdrop-blur-sm"
+                whileHover={{ scale: 1.05 }}
+              >
+                <Activity className="w-5 h-5 text-blue-400" />
+                <span className="text-xs font-bold text-white uppercase tracking-wider">League Statistics</span>
+              </motion.div>
+              <h2 className="text-5xl md:text-7xl font-black text-white mb-6">
                 League <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Statistics</span>
               </h2>
-              <p className="text-gray-400 text-lg">Comprehensive insights from both premier leagues</p>
+              <p className="text-gray-400 text-xl">Comprehensive insights from both premier leagues</p>
             </motion.div>
             <ModernStatsSection 
               totalMatches={iplMatches.length + wplMatches.length}
@@ -1086,34 +1382,37 @@ export default function Home() {
           </div>
         </section>
 
-        {/* News Section */}
+        {/* News Section - Enhanced */}
         {newsLoading ? (
           <NewsSkeleton />
         ) : news.length > 0 ? (
-          <section className="relative py-20">
+          <section className="relative py-24">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <motion.div 
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className="flex items-center justify-between mb-12"
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.8 }}
+                className="flex items-center justify-between mb-16"
               >
                 <div>
-                  <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-pink-500/20 border border-pink-500/30 backdrop-blur-sm">
-                    <Flame className="w-4 h-4 text-pink-400" />
+                  <motion.div
+                    className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-full bg-pink-500/20 border border-pink-500/30 backdrop-blur-sm"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    <Flame className="w-5 h-5 text-pink-400" />
                     <span className="text-xs font-bold text-pink-300 uppercase tracking-wider">Latest News</span>
-                  </div>
-                  <h2 className="text-4xl md:text-6xl font-black text-white">
-                    Breaking <span className="bg-gradient-to-r from-pink-400 to-rose-400 bg-clip-text text-transparent">News</span>
+                  </motion.div>
+                  <h2 className="text-5xl md:text-7xl font-black text-white">
+                    Breaking <span className="bg-gradient-to-r from-pink-400 via-rose-400 to-pink-400 bg-clip-text text-transparent">News</span>
                   </h2>
                 </div>
                 <Link
                   href="/news"
-                  className="group flex items-center gap-2 px-6 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white hover:text-pink-400 transition-all duration-300"
+                  className="group flex items-center gap-2 px-8 py-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-white hover:text-pink-400 transition-all duration-300 hover:scale-105"
                 >
                   View All
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
                 </Link>
               </motion.div>
               <ModernNewsSection articles={news.slice(0, 6)} />
@@ -1121,25 +1420,62 @@ export default function Home() {
           </section>
         ) : null}
 
-        {/* Final CTA Section */}
-        <section className="relative py-32 mt-12 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 via-purple-600/20 to-pink-600/20" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_70%)]" />
+        {/* Final CTA Section - Enhanced */}
+        <section className="relative py-40 mt-12 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-600/30 via-purple-600/30 to-pink-600/30" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.15),transparent_70%)]" />
           
-          <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          {/* Animated background elements */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+            className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.3, 1],
+              x: [0, 100, 0],
+              y: [0, 50, 0],
+            }}
+            transition={{
+              duration: 15,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          <motion.div
+            className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"
+            animate={{
+              scale: [1, 1.4, 1],
+              x: [0, -80, 0],
+              y: [0, -60, 0],
+            }}
+            transition={{
+              duration: 18,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 2,
+            }}
+          />
+          
+          <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="space-y-8"
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8, type: "spring" }}
+              className="space-y-10"
             >
-              <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 backdrop-blur-xl border border-white/20">
-                <Star className="w-5 h-5 text-yellow-400" />
+              <motion.div
+                className="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-white/10 backdrop-blur-xl border border-white/20"
+                whileHover={{ scale: 1.05 }}
+              >
+                <motion.div
+                  animate={{ rotate: [0, 360] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+                >
+                  <Star className="w-6 h-6 text-yellow-400" />
+                </motion.div>
                 <span className="text-sm font-bold text-white uppercase tracking-wider">Join The Action</span>
-              </div>
+              </motion.div>
               
-              <h2 className="text-5xl md:text-7xl font-black text-white leading-tight">
+              <h2 className="text-6xl md:text-8xl lg:text-9xl font-black text-white leading-tight">
                 Ready to Experience
                 <br />
                 <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
@@ -1147,17 +1483,18 @@ export default function Home() {
                 </span>
               </h2>
               
-              <p className="text-gray-300 text-xl md:text-2xl max-w-2xl mx-auto leading-relaxed">
+              <p className="text-gray-300 text-2xl md:text-3xl max-w-3xl mx-auto leading-relaxed">
                 Join millions of cricket fans following live scores, stats, and all the action from both premier leagues.
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+              <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link
                   href="/live-score"
-                  className="group relative px-10 py-5 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white font-bold text-lg shadow-2xl shadow-blue-500/50 hover:shadow-blue-500/70 transition-all duration-300 transform hover:scale-105 overflow-hidden"
+                    className="group relative px-12 py-6 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white font-bold text-xl shadow-2xl shadow-blue-500/50 hover:shadow-blue-500/70 transition-all duration-300 overflow-hidden block"
                 >
-                  <span className="relative z-10 flex items-center justify-center gap-3">
-                    <Play className="w-6 h-6" />
+                    <span className="relative z-10 flex items-center justify-center gap-4">
+                      <Play className="w-7 h-7" />
                     Watch Live Scores
                   </span>
                   <motion.div
@@ -1167,15 +1504,16 @@ export default function Home() {
                     transition={{ duration: 0.3 }}
                   />
                   </Link>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link
                   href="/matches"
-                  className="group px-10 py-5 rounded-2xl bg-white/10 backdrop-blur-xl text-white font-bold text-lg border-2 border-white/20 hover:border-white/40 hover:bg-white/20 transition-all duration-300 transform hover:scale-105"
+                    className="group px-12 py-6 rounded-2xl bg-white/10 backdrop-blur-xl text-white font-bold text-xl border-2 border-white/20 hover:border-white/40 hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-4"
                 >
-                  <span className="flex items-center justify-center gap-3">
                     View All Matches
-                    <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </span>
+                    <ChevronRight className="w-6 h-6 group-hover:translate-x-2 transition-transform" />
                   </Link>
+                </motion.div>
               </div>
             </motion.div>
           </div>
