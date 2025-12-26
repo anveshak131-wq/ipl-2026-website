@@ -127,7 +127,8 @@ export default function RichCommentary({
   const getEventColor = (eventType: CommentaryEntry['eventType'], event: BallEvent) => {
     switch (eventType) {
       case 'boundary':
-        return event.type === 6
+        const isSix = event.type === 6 || event.type === 'NB+6';
+        return isSix
           ? 'border-yellow-500/50 bg-yellow-500/10'
           : 'border-green-500/50 bg-green-500/10';
       case 'wicket':
@@ -137,6 +138,13 @@ export default function RichCommentary({
       case 'dot':
         return 'border-gray-500/30 bg-gray-500/5';
       case 'extras':
+        // Special colors for no ball and wide combinations
+        if (typeof event.type === 'string' && event.type.startsWith('NB')) {
+          return 'border-orange-600/50 bg-orange-600/10';
+        }
+        if (typeof event.type === 'string' && event.type.startsWith('WD')) {
+          return 'border-orange-500/50 bg-orange-500/10';
+        }
         return 'border-orange-500/50 bg-orange-500/10';
       default:
         return 'border-blue-500/30 bg-blue-500/5';
@@ -183,14 +191,53 @@ export default function RichCommentary({
     }
     
     switch (event.type) {
+      // Basic extras
       case 'WD':
         return 'Wide ball';
       case 'NB':
         return 'No-ball';
       case 'B':
-        return 'Bye';
+        return '1 Bye';
       case 'LB':
-        return 'Leg-bye';
+        return '1 Leg-bye';
+      // No ball + runs
+      case 'NB+1':
+        return 'No-ball + 1 run';
+      case 'NB+2':
+        return 'No-ball + 2 runs';
+      case 'NB+3':
+        return 'No-ball + 3 runs';
+      case 'NB+4':
+        return 'No-ball + 4 runs (FOUR!)';
+      case 'NB+6':
+        return 'No-ball + 6 runs (SIX!)';
+      // Wide + runs
+      case 'WD+1':
+        return 'Wide + 1 run';
+      case 'WD+2':
+        return 'Wide + 2 runs';
+      case 'WD+3':
+        return 'Wide + 3 runs';
+      case 'WD+4':
+        return 'Wide + 4 runs (FOUR!)';
+      // Multiple byes
+      case '1B':
+        return '1 Bye';
+      case '2B':
+        return '2 Byes';
+      case '3B':
+        return '3 Byes';
+      case '4B':
+        return '4 Byes (boundary)';
+      // Multiple leg byes
+      case '1LB':
+        return '1 Leg-bye';
+      case '2LB':
+        return '2 Leg-byes';
+      case '3LB':
+        return '3 Leg-byes';
+      case '4LB':
+        return '4 Leg-byes (boundary)';
       default:
         return 'Ball';
     }

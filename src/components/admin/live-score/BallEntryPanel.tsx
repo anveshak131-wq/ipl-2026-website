@@ -120,6 +120,7 @@ export default function BallEntryPanel({
     changeBatter,
     changeBowler,
     updateMatchState,
+    isFreeHit,
   } = useLiveScore({
     initialTeam1Name: team1Name,
     initialTeam2Name: team2Name,
@@ -174,9 +175,19 @@ export default function BallEntryPanel({
     // Check for boundary (4 or 6) - only if runs increased
     if (lastBallRef.current && battingTeam.runs > prevBattingTeam.runs) {
       const lastBall = lastBallRef.current;
+      let boundaryRuns: 4 | 6 | null = null;
+      
       if (lastBall.type === 4 || lastBall.type === 6) {
+        boundaryRuns = lastBall.type as 4 | 6;
+      } else if (lastBall.type === 'NB+4' || lastBall.type === 'WD+4' || lastBall.type === '4B' || lastBall.type === '4LB') {
+        boundaryRuns = 4;
+      } else if (lastBall.type === 'NB+6') {
+        boundaryRuns = 6;
+      }
+      
+      if (boundaryRuns) {
         setBoundaryData({
-          runs: lastBall.type as 4 | 6,
+          runs: boundaryRuns,
           batterName: state.currentBatter.name,
         });
         setShowBoundary(true);
@@ -497,19 +508,80 @@ export default function BallEntryPanel({
             </p>
           </div>
         )}
-        <div className={`grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 ${!canRecordBalls ? 'opacity-50 pointer-events-none' : ''}`}>
-          <BallEntryButton value={0} label={isMobile ? "0" : "Dot (0)"} color="green" onClick={() => handleBallClick(0)} />
-          <BallEntryButton value={1} label={isMobile ? "1" : "Single (1)"} color="green" onClick={() => handleBallClick(1)} />
-          <BallEntryButton value={2} label={isMobile ? "2" : "Double (2)"} color="green" onClick={() => handleBallClick(2)} />
-          <BallEntryButton value={4} label={isMobile ? "4" : "Four (4)"} color="green" onClick={() => handleBallClick(4)} />
-          <BallEntryButton value={6} label={isMobile ? "6" : "Six (6)"} color="green" onClick={() => handleBallClick(6)} />
+        {/* Free Hit Indicator */}
+        {isFreeHit && (
+          <div className="mb-4 p-3 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-2 border-yellow-500/50 rounded-xl">
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-2xl">🎯</span>
+              <span className="text-yellow-300 font-bold text-lg">FREE HIT</span>
+              <span className="text-yellow-300/80 text-sm">(Batter can only be dismissed by run out)</span>
+            </div>
+          </div>
+        )}
+
+        {/* Regular Runs */}
+        <div className="mb-4">
+          <h4 className="text-sm font-semibold text-gray-400 mb-2">Regular Runs</h4>
+          <div className={`grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 ${!canRecordBalls ? 'opacity-50 pointer-events-none' : ''}`}>
+            <BallEntryButton value={0} label={isMobile ? "0" : "Dot (0)"} color="green" onClick={() => handleBallClick(0)} />
+            <BallEntryButton value={1} label={isMobile ? "1" : "Single (1)"} color="green" onClick={() => handleBallClick(1)} />
+            <BallEntryButton value={2} label={isMobile ? "2" : "Double (2)"} color="green" onClick={() => handleBallClick(2)} />
+            <BallEntryButton value={4} label={isMobile ? "4" : "Four (4)"} color="green" onClick={() => handleBallClick(4)} />
+            <BallEntryButton value={6} label={isMobile ? "6" : "Six (6)"} color="green" onClick={() => handleBallClick(6)} />
+          </div>
         </div>
-        <div className={`grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 ${!canRecordBalls ? 'opacity-50 pointer-events-none' : ''}`}>
-          <BallEntryButton value="W" label={isMobile ? "W" : "Wicket (W)"} color="red" onClick={() => handleBallClick('W')} />
-          <BallEntryButton value="WD" label={isMobile ? "WD" : "Wide (D)"} color="orange" onClick={() => handleBallClick('WD')} />
-          <BallEntryButton value="NB" label={isMobile ? "NB" : "No-Ball (N)"} color="orange" onClick={() => handleBallClick('NB')} />
-          <BallEntryButton value="B" label={isMobile ? "B" : "Bye"} color="orange" onClick={() => handleBallClick('B')} />
-          <BallEntryButton value="LB" label={isMobile ? "LB" : "Leg-Bye"} color="orange" onClick={() => handleBallClick('LB')} />
+
+        {/* No Ball + Runs */}
+        <div className="mb-4">
+          <h4 className="text-sm font-semibold text-gray-400 mb-2">No Ball + Runs</h4>
+          <div className={`grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 ${!canRecordBalls ? 'opacity-50 pointer-events-none' : ''}`}>
+            <BallEntryButton value="NB" label={isMobile ? "NB" : "NB (0)"} color="orange" onClick={() => handleBallClick('NB')} />
+            <BallEntryButton value="NB+1" label={isMobile ? "NB+1" : "NB+1"} color="orange" onClick={() => handleBallClick('NB+1')} />
+            <BallEntryButton value="NB+2" label={isMobile ? "NB+2" : "NB+2"} color="orange" onClick={() => handleBallClick('NB+2')} />
+            <BallEntryButton value="NB+4" label={isMobile ? "NB+4" : "NB+4"} color="orange" onClick={() => handleBallClick('NB+4')} />
+            <BallEntryButton value="NB+6" label={isMobile ? "NB+6" : "NB+6"} color="orange" onClick={() => handleBallClick('NB+6')} />
+          </div>
+        </div>
+
+        {/* Wide + Runs */}
+        <div className="mb-4">
+          <h4 className="text-sm font-semibold text-gray-400 mb-2">Wide + Runs</h4>
+          <div className={`grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3 ${!canRecordBalls ? 'opacity-50 pointer-events-none' : ''}`}>
+            <BallEntryButton value="WD" label={isMobile ? "WD" : "WD (0)"} color="orange" onClick={() => handleBallClick('WD')} />
+            <BallEntryButton value="WD+1" label={isMobile ? "WD+1" : "WD+1"} color="orange" onClick={() => handleBallClick('WD+1')} />
+            <BallEntryButton value="WD+2" label={isMobile ? "WD+2" : "WD+2"} color="orange" onClick={() => handleBallClick('WD+2')} />
+            <BallEntryButton value="WD+4" label={isMobile ? "WD+4" : "WD+4"} color="orange" onClick={() => handleBallClick('WD+4')} />
+          </div>
+        </div>
+
+        {/* Byes */}
+        <div className="mb-4">
+          <h4 className="text-sm font-semibold text-gray-400 mb-2">Byes</h4>
+          <div className={`grid grid-cols-4 gap-2 sm:gap-3 ${!canRecordBalls ? 'opacity-50 pointer-events-none' : ''}`}>
+            <BallEntryButton value="1B" label={isMobile ? "1B" : "1 Bye"} color="orange" onClick={() => handleBallClick('1B')} />
+            <BallEntryButton value="2B" label={isMobile ? "2B" : "2 Byes"} color="orange" onClick={() => handleBallClick('2B')} />
+            <BallEntryButton value="3B" label={isMobile ? "3B" : "3 Byes"} color="orange" onClick={() => handleBallClick('3B')} />
+            <BallEntryButton value="4B" label={isMobile ? "4B" : "4 Byes"} color="orange" onClick={() => handleBallClick('4B')} />
+          </div>
+        </div>
+
+        {/* Leg Byes */}
+        <div className="mb-4">
+          <h4 className="text-sm font-semibold text-gray-400 mb-2">Leg Byes</h4>
+          <div className={`grid grid-cols-4 gap-2 sm:gap-3 ${!canRecordBalls ? 'opacity-50 pointer-events-none' : ''}`}>
+            <BallEntryButton value="1LB" label={isMobile ? "1LB" : "1 Leg Bye"} color="orange" onClick={() => handleBallClick('1LB')} />
+            <BallEntryButton value="2LB" label={isMobile ? "2LB" : "2 Leg Byes"} color="orange" onClick={() => handleBallClick('2LB')} />
+            <BallEntryButton value="3LB" label={isMobile ? "3LB" : "3 Leg Byes"} color="orange" onClick={() => handleBallClick('3LB')} />
+            <BallEntryButton value="4LB" label={isMobile ? "4LB" : "4 Leg Byes"} color="orange" onClick={() => handleBallClick('4LB')} />
+          </div>
+        </div>
+
+        {/* Wicket */}
+        <div className="mb-4">
+          <h4 className="text-sm font-semibold text-gray-400 mb-2">Wicket</h4>
+          <div className={`grid grid-cols-1 gap-2 sm:gap-3 ${!canRecordBalls ? 'opacity-50 pointer-events-none' : ''}`}>
+            <BallEntryButton value="W" label={isMobile ? "W" : "Wicket (W)"} color="red" onClick={() => handleBallClick('W')} />
+          </div>
         </div>
         {/* Keyboard Shortcuts Hint - Hidden on mobile */}
         {!isMobile && (

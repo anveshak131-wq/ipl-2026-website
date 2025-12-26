@@ -18,12 +18,16 @@ interface WicketModalProps {
 }
 
 const DISMISSAL_TYPES = [
-  { key: 'bowled', label: 'Bowled', needsFielder: false },
-  { key: 'caught', label: 'Caught', needsFielder: true },
-  { key: 'lbw', label: 'LBW', needsFielder: false },
-  { key: 'run_out', label: 'Run Out', needsFielder: true },
-  { key: 'stumped', label: 'Stumped', needsFielder: true },
-  { key: 'hit_wicket', label: 'Hit Wicket', needsFielder: false },
+  { key: 'bowled', label: 'Bowled', needsFielder: false, description: 'Ball hits the stumps' },
+  { key: 'caught', label: 'Caught', needsFielder: true, description: 'Fielder catches the ball' },
+  { key: 'lbw', label: 'LBW', needsFielder: false, description: 'Leg Before Wicket' },
+  { key: 'stumped', label: 'Stumped', needsFielder: true, description: 'Wicketkeeper removes bails' },
+  { key: 'run out', label: 'Run Out', needsFielder: true, description: 'Batter out of crease' },
+  { key: 'hit wicket', label: 'Hit Wicket', needsFielder: false, description: 'Batter dislodges bails' },
+  { key: 'obstructing field', label: 'Obstructing Field', needsFielder: false, description: 'Deliberate obstruction' },
+  { key: 'handled ball', label: 'Handled Ball', needsFielder: false, description: 'Batter uses hand illegally' },
+  { key: 'hit ball twice', label: 'Hit Ball Twice', needsFielder: false, description: 'Batter strikes ball twice' },
+  { key: 'timed out', label: 'Timed Out', needsFielder: false, description: 'Batter takes too long' },
 ];
 
 export default function WicketModal({
@@ -94,20 +98,24 @@ export default function WicketModal({
                 </button>
               </div>
               
-              <div className="grid grid-cols-2 gap-3 mb-6">
+              <div className="grid grid-cols-2 gap-3 mb-6 max-h-96 overflow-y-auto">
                 {DISMISSAL_TYPES.map((type) => (
                   <button
                     key={type.key}
                     onClick={() => setSelectedType(type.key)}
                     className={`
-                      px-4 py-3 rounded-xl font-bold transition-all text-sm
+                      px-4 py-3 rounded-xl font-bold transition-all text-sm text-left
                       ${selectedType === type.key
                         ? colors.selected
                         : colors.unselected
                       }
                     `}
+                    title={type.description}
                   >
-                    {type.label}
+                    <div className="font-bold">{type.label}</div>
+                    {type.description && (
+                      <div className="text-xs font-normal opacity-80 mt-1">{type.description}</div>
+                    )}
                   </button>
                 ))}
               </div>

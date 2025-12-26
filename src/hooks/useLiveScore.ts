@@ -6,11 +6,32 @@ import {
   transitionState
 } from '@/lib/matchStateMachine';
 
+export type BallEventType = 
+  | number // Regular runs: 0, 1, 2, 3, 4, 6
+  | 'W' // Wicket
+  | 'WD' | 'NB' | 'B' | 'LB' // Basic extras
+  | 'NB+1' | 'NB+2' | 'NB+3' | 'NB+4' | 'NB+6' // No ball + runs
+  | 'WD+1' | 'WD+2' | 'WD+3' | 'WD+4' // Wide + runs
+  | '1B' | '2B' | '3B' | '4B' // Multiple byes
+  | '1LB' | '2LB' | '3LB' | '4LB'; // Multiple leg byes
+
+export type DismissalType = 
+  | 'bowled' 
+  | 'caught' 
+  | 'lbw' 
+  | 'stumped' 
+  | 'run out' 
+  | 'hit wicket' 
+  | 'obstructing field' 
+  | 'handled ball' 
+  | 'hit ball twice' 
+  | 'timed out';
+
 export interface BallEvent {
-  type: number | 'W' | 'WD' | 'NB' | 'B' | 'LB';
+  type: BallEventType;
   runs: number;
   timestamp: number;
-  dismissalType?: string;
+  dismissalType?: DismissalType;
   fielderName?: string;
 }
 
@@ -105,6 +126,13 @@ export function useLiveScore({
   });
 
   const [undoStack, setUndoStack] = useState<LiveScoreState[]>([]);
+  
+  // Track free hit - check last ball in history
+  const isFreeHit = useMemo(() => {
+    if (state.ballHistory.length === 0) return false;
+    const lastBall = state.ballHistory[state.ballHistory.length - 1];
+    return lastBall.type === 'NB' || (typeof lastBall.type === 'string' && lastBall.type.startsWith('NB'));
+  }, [state.ballHistory]);
 
   // Auto-detect innings transitions
   useEffect(() => {
@@ -148,36 +176,125 @@ export function useLiveScore({
       const battingKey = prev.battingTeam;
       const team = prev[battingKey];
       
-      // Calculate runs
+      // Calculate runs based on ball type
       let teamRunDelta = 0;
       let batterRunDelta = 0;
       let bowlerRunDelta = 0;
 
+      // Regular runs (0, 1, 2, 3, 4, 6)
       if (typeof ball.type === 'number') {
         teamRunDelta = ball.type;
         batterRunDelta = ball.type;
         bowlerRunDelta = ball.type;
-      } else if (ball.type === 'WD') {
+      }
+      // No Ball + Runs
+      else if (ball.type === 'NB+1') {
+        teamRunDelta = 2; // 1 for no ball + 1 for run
+        batterRunDelta = 1;
+        bowlerRunDelta = 2;
+      } else if (ball.type === 'NB+2') {
+        teamRunDelta = 3;
+        batterRunDelta = 2;
+        bowlerRunDelta = 3;
+      } else if (ball.type === 'NB+3') {
+        teamRunDelta = 4;
+        batterRunDelta = 3;
+        bowlerRunDelta = 4;
+      } else if (ball.type === 'NB+4') {
+        teamRunDelta = 5;
+        batterRunDelta = 4;
+        bowlerRunDelta = 5;
+      } else if (ball.type === 'NB+6') {
+        teamRunDelta = 7;
+        batterRunDelta = 6;
+        bowlerRunDelta = 7;
+      }
+      // Wide + Runs
+      else if (ball.type === 'WD+1') {
+        teamRunDelta = 2; // 1 for wide + 1 for run
+        batterRunDelta = 1;
+        bowlerRunDelta = 2;
+      } else if (ball.type === 'WD+2') {
+        teamRunDelta = 3;
+        batterRunDelta = 2;
+        bowlerRunDelta = 3;
+      } else if (ball.type === 'WD+3') {
+        teamRunDelta = 4;
+        batterRunDelta = 3;
+        bowlerRunDelta = 4;
+      } else if (ball.type === 'WD+4') {
+        teamRunDelta = 5;
+        batterRunDelta = 4;
+        bowlerRunDelta = 5;
+      }
+      // Multiple Byes
+      else if (ball.type === '1B') {
         teamRunDelta = 1;
-        batterRunDelta = 0; // Wides don't count as batter runs
+        batterRunDelta = 0;
+        bowlerRunDelta = 0;
+      } else if (ball.type === '2B') {
+        teamRunDelta = 2;
+        batterRunDelta = 0;
+        bowlerRunDelta = 0;
+      } else if (ball.type === '3B') {
+        teamRunDelta = 3;
+        batterRunDelta = 0;
+        bowlerRunDelta = 0;
+      } else if (ball.type === '4B') {
+        teamRunDelta = 4;
+        batterRunDelta = 0;
+        bowlerRunDelta = 0;
+      }
+      // Multiple Leg Byes
+      else if (ball.type === '1LB') {
+        teamRunDelta = 1;
+        batterRunDelta = 0;
+        bowlerRunDelta = 0;
+      } else if (ball.type === '2LB') {
+        teamRunDelta = 2;
+        batterRunDelta = 0;
+        bowlerRunDelta = 0;
+      } else if (ball.type === '3LB') {
+        teamRunDelta = 3;
+        batterRunDelta = 0;
+        bowlerRunDelta = 0;
+      } else if (ball.type === '4LB') {
+        teamRunDelta = 4;
+        batterRunDelta = 0;
+        bowlerRunDelta = 0;
+      }
+      // Basic extras
+      else if (ball.type === 'WD') {
+        teamRunDelta = 1;
+        batterRunDelta = 0;
         bowlerRunDelta = 1;
       } else if (ball.type === 'NB') {
         teamRunDelta = 1;
-        batterRunDelta = 0; // No-balls don't count as batter runs (unless runs scored)
+        batterRunDelta = 0;
         bowlerRunDelta = 1;
-      } else if (ball.type === 'B' || ball.type === 'LB') {
+      } else if (ball.type === 'B') {
         teamRunDelta = 1;
-        batterRunDelta = 0; // Byes/leg-byes don't count against bowler or batter
-        bowlerRunDelta = 0; // Byes/leg-byes don't count against bowler
-      } else if (ball.type === 'W') {
+        batterRunDelta = 0;
+        bowlerRunDelta = 0;
+      } else if (ball.type === 'LB') {
+        teamRunDelta = 1;
+        batterRunDelta = 0;
+        bowlerRunDelta = 0;
+      }
+      // Wicket
+      else if (ball.type === 'W') {
         teamRunDelta = 0;
         batterRunDelta = 0;
         bowlerRunDelta = 0;
       }
 
-      // Determine if legal delivery
-      const isLegalDelivery = !['WD', 'NB'].includes(ball.type as string);
+      // Determine if legal delivery (illegal deliveries don't count as balls)
+      const illegalDeliveries = ['WD', 'NB', 'NB+1', 'NB+2', 'NB+3', 'NB+4', 'NB+6', 'WD+1', 'WD+2', 'WD+3', 'WD+4'];
+      const isLegalDelivery = !illegalDeliveries.includes(ball.type as string);
       const isWicket = ball.type === 'W';
+      
+      // Set free hit flag if no ball was bowled
+      // Note: We'll handle this in a useEffect to avoid stale state
 
       // Update team stats
       const currentBalls = oversToBalls(team.balls);
@@ -300,6 +417,7 @@ export function useLiveScore({
     changeBowler,
     switchInnings,
     updateMatchState,
+    isFreeHit,
   };
 }
 
