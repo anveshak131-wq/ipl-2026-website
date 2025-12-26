@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useState, useRef } from 'react';
+import { motion, AnimatePresence, useMotionValue, useSpring } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import AuroraBackground from '@/components/ui/AuroraBackground';
@@ -12,12 +13,12 @@ import ModernMatchesGrid from '@/components/home/ModernMatchesGrid';
 import ModernNewsSection from '@/components/home/ModernNewsSection';
 import ModernStatsSection from '@/components/home/ModernStatsSection';
 import ModernFeatureShowcase from '@/components/home/ModernFeatureShowcase';
-import ParallaxSection from '@/components/effects/ParallaxSection';
 import ConfettiAnimation from '@/components/effects/ConfettiAnimation';
 import FloatingBadge from '@/components/effects/FloatingBadge';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import GradientText from '@/components/ui/GradientText';
 import BackToTop from '@/components/ui/BackToTop';
+import QuickStatsWidget from '@/components/home/QuickStatsWidget';
 import { TeamsSkeleton, MatchesSkeleton, NewsSkeleton } from '@/components/home/HomePageSkeletons';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/data';
@@ -25,10 +26,26 @@ import { useLeague } from '@/contexts/LeagueContext';
 import { isPlaceholderTeam } from '@/lib/playoffUtils';
 import type { Team, Match, News } from '@/types';
 import { useMemo } from 'react';
-import { Sparkles, ArrowRight, Play, Calendar, TrendingUp, Users, Zap, Trophy, Star } from 'lucide-react';
+import { 
+  Trophy, 
+  ArrowRight, 
+  Play, 
+  Calendar, 
+  TrendingUp, 
+  Users, 
+  Zap,
+  Clock,
+  Star,
+  Target,
+  Activity,
+  Radio,
+  Sparkles
+} from 'lucide-react';
 import WPLFloatingParticles from '@/components/animations/WPLFloatingParticles';
 import { WPLColors } from '@/lib/wplColors';
 import CountdownTimer from '@/components/ui/CountdownTimer';
+import { formatMatchTime } from '@/lib/timeUtils';
+import { getAnimatedLogoPath } from '@/lib/logoUtils';
 
 export default function WPLHomePage() {
   const router = useRouter();
@@ -43,6 +60,12 @@ export default function WPLHomePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
   const [hasLiveMatch, setHasLiveMatch] = useState(false);
+  
+  // Mouse tracking for parallax effects
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const springConfig = { damping: 50, stiffness: 100 };
   
   // Set league to WPL when page loads
   useEffect(() => {
@@ -59,6 +82,31 @@ export default function WPLHomePage() {
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     return upcoming[0] || null;
   }, [matches]);
+  
+  const featuredLiveMatch = useMemo(() => {
+    return matches.find(m => m.status === 'live') || null;
+  }, [matches]);
+  
+  // Calculate total players from teams
+  const totalPlayers = useMemo(() => {
+    return teams.reduce((sum, team) => sum + (team.players?.length || 0), 0);
+  }, [teams]);
+
+  // Mouse tracking effect
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const { clientX, clientY } = e;
+      const { innerWidth, innerHeight } = window;
+      const xPos = (clientX / innerWidth - 0.5) * 100;
+      const yPos = (clientY / innerHeight - 0.5) * 100;
+      setMousePosition({ x: xPos, y: yPos });
+      mouseX.set(xPos);
+      mouseY.set(yPos);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [mouseX, mouseY]);
 
   useEffect(() => {
     setIsHydrated(true);
@@ -221,78 +269,100 @@ export default function WPLHomePage() {
       )}
 
       <main className="relative z-10">
-        {/* Premium Hero Section */}
+        {/* Enhanced Hero Section with Mouse Parallax */}
         <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-          {/* Animated Background */}
-          <div className="absolute inset-0">
-            <div 
-              className="absolute inset-0"
-              style={{
-                background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[40]}, ${WPLColors.pinkRGBA[30]}, ${WPLColors.roseRGBA[40]})`,
-              }}
-            />
-            <div 
-              className="absolute inset-0"
-              style={{
-                background: `linear-gradient(to top, ${WPLColors.gradientMid}4D, transparent, ${WPLColors.gradientEnd}4D)`,
-              }}
-            />
+          {/* Animated Grid Background */}
+          <div 
+            className="absolute inset-0 opacity-[0.03]"
+            style={{
+              backgroundImage: `
+                linear-gradient(rgba(147,51,234,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(147,51,234,0.1) 1px, transparent 1px)
+              `,
+              backgroundSize: '60px 60px',
+              transform: `translate(${mousePosition.x * 0.5}px, ${mousePosition.y * 0.5}px)`,
+            }}
+          />
+
+          {/* Dynamic Gradient Orbs with Mouse Parallax */}
+          <motion.div
+            className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full blur-[120px]"
+            style={{
+              x: useSpring(mouseX, springConfig),
+              y: useSpring(mouseY, springConfig),
+              background: `radial-gradient(circle, ${WPLColors.purpleRGBA[50]}, transparent)`,
+            }}
+            animate={{
+              scale: [1, 1.2, 1],
+              opacity: [0.2, 0.4, 0.2],
+            }}
+            transition={{
+              duration: 20,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+          <motion.div
+            className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full blur-[120px]"
+            style={{
+              x: useSpring(mouseX, springConfig),
+              y: useSpring(mouseY, springConfig),
+              background: `radial-gradient(circle, ${WPLColors.pinkRGBA[50]}, transparent)`,
+            }}
+            animate={{
+              scale: [1, 1.3, 1],
+              opacity: [0.2, 0.4, 0.2],
+            }}
+            transition={{
+              duration: 25,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 2,
+            }}
+          />
+          <motion.div
+            className="absolute top-1/2 left-1/2 w-[400px] h-[400px] rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2"
+            style={{
+              background: `radial-gradient(circle, ${WPLColors.roseRGBA[50]}, transparent)`,
+            }}
+            animate={{
+              scale: [1, 1.5, 1],
+              opacity: [0.15, 0.3, 0.15],
+              rotate: [0, 180, 360],
+            }}
+            transition={{
+              duration: 30,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          />
+
+          {/* Floating Particles */}
+          {[...Array(15)].map((_, i) => (
             <motion.div
-              className="absolute top-1/4 left-1/4 w-[600px] h-[600px] rounded-full blur-3xl"
+              key={i}
+              className="absolute w-1 h-1 rounded-full"
+              style={{
+                backgroundColor: [WPLColors.purple, WPLColors.pink, WPLColors.rose][i % 3],
+                opacity: 0.3,
+              }}
+              initial={{
+                x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1920),
+                y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1080),
+                opacity: 0,
+              }}
               animate={{
-                scale: [1, 1.4, 1],
-                opacity: [0.3, 0.6, 0.3],
-                x: [0, 100, 0],
-                y: [0, 50, 0],
+                y: [null, -100],
+                opacity: [0, 1, 0],
               }}
               transition={{
-                duration: 12,
+                duration: Math.random() * 3 + 2,
                 repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              style={{
-                background: `radial-gradient(circle, ${WPLColors.purpleRGBA[50]}, transparent)`,
+                delay: Math.random() * 2,
+                ease: "linear",
               }}
             />
-            <motion.div
-              className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] rounded-full blur-3xl"
-              animate={{
-                scale: [1, 1.5, 1],
-                opacity: [0.3, 0.7, 0.3],
-                x: [0, -80, 0],
-                y: [0, -40, 0],
-              }}
-              transition={{
-                duration: 15,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 1,
-              }}
-              style={{
-                background: `radial-gradient(circle, ${WPLColors.pinkRGBA[50]}, transparent)`,
-              }}
-            />
-            <div 
-              className="absolute inset-0"
-              style={{
-                background: `radial-gradient(circle at 50% 50%, ${WPLColors.purpleRGBA[20]}, transparent 70%)`,
-              }}
-            />
-            
-            {/* Grid Pattern */}
-            <div className="absolute inset-0 opacity-10">
-              <div 
-                className="absolute inset-0"
-                style={{
-                  backgroundImage: `
-                    linear-gradient(rgba(147,51,234,0.1) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(147,51,234,0.1) 1px, transparent 1px)
-                  `,
-                  backgroundSize: '60px 60px',
-                }}
-              />
-            </div>
-          </div>
+          ))}
           
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
