@@ -1,7 +1,12 @@
+'use client';
+
 import Link from 'next/link';
 import SportsUP18LogoWithText from '../branding/SportsUP18LogoWithText';
+import { useLeague } from '@/contexts/LeagueContext';
 
 export default function Footer() {
+  const { currentLeague } = useLeague();
+  const isIPL = currentLeague === 'ipl';
   return (
     <footer className="glass-effect border-t border-white/10 mt-20">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
@@ -62,6 +67,13 @@ export default function Footer() {
                   Terms of Service
                 </Link>
               </li>
+              {isIPL && (
+                <li>
+                  <Link href="/rules" className="text-gray-300 hover:text-white text-sm transition-colors">
+                    IPL Rules & Regulations
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
         </div>
