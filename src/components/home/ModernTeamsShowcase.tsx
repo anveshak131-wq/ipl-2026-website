@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import AnimatedCard from '@/components/ui/AnimatedCard';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
-import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { isPlaceholderTeam } from '@/lib/playoffUtils';
 import type { Team } from '@/types';
 
@@ -101,36 +100,32 @@ export default function ModernTeamsShowcase({ teams, isLoading = false }: Modern
                   />
                 )}
                 
-                {/* Actual Logo */}
+                {/* Actual Logo - Modern Animated */}
                 <div className="relative z-10 w-full h-full flex items-center justify-center">
                   {(() => {
                     const animatedPath = getAnimatedLogoPath(team.id, team.shortName, team.league);
-                    if (animatedPath.endsWith('rcb_logo_premium.svg')) {
-                      return (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <RCBLionLogo className="w-full h-full" />
-                    </div>
-                      );
-                    }
+                    const fallbackPath = getLogoPath(team.id);
+                    
+                    // Skip JSON files (Lottie animations)
                     if (animatedPath.endsWith('.json')) {
-                      // Handle RCB Lottie animation if needed
-                      return null; // Add RCBLottie component if needed
+                      return null;
                     }
+                    
                     return (
-                    <motion.img
+                      <motion.img
                         src={animatedPath}
-                      alt={`${team.shortName} logo`}
-                      className="w-full h-full object-contain drop-shadow-2xl"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = getLogoPath(team.id);
-                      }}
-                      whileHover={{ 
-                        scale: 1.15,
-                        rotate: [0, -5, 5, -5, 0],
-                        filter: "brightness(1.2)"
-                      }}
-                      transition={{ duration: 0.5 }}
-                    />
+                        alt={`${team.shortName} logo`}
+                        className="w-full h-full object-contain drop-shadow-2xl"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = fallbackPath;
+                        }}
+                        whileHover={{ 
+                          scale: 1.15,
+                          rotate: [0, -5, 5, -5, 0],
+                          filter: "brightness(1.2)"
+                        }}
+                        transition={{ duration: 0.5 }}
+                      />
                     );
                   })()}
                 </div>

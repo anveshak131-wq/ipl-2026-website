@@ -668,52 +668,37 @@ export default function AdminTeams() {
                                                                                 height={32}
                                                                                 className="object-contain"
                                                                                 onError={(e) => {
-                                                                                    // If logo fails to load, try animated logo
+                                                                                    // If logo fails to load, try modern animated logo
                                                                                     const anim = getAnimatedLogoPath(team.id, team.shortName, team.league);
-                                                                                    if (anim && !anim.endsWith('.json') && !anim.endsWith('rcb_logo_premium.svg')) {
+                                                                                    const fallback = getLogoPath(team.id);
+                                                                                    if (anim && !anim.endsWith('.json')) {
                                                                                         (e.target as HTMLImageElement).src = anim;
+                                                                                    } else {
+                                                                                        (e.target as HTMLImageElement).src = fallback;
                                                                                     }
                                                                                 }}
                                                                             />
                                                                         );
                                                                     }
                                                                     
-                                                                    // Try to get animated logo
+                                                                    // Try to get modern animated logo
                                                                     const anim = getAnimatedLogoPath(team.id, team.shortName, team.league);
-                                                                    if (anim.endsWith('.json')) {
-                                                                        return (
-                                                                            <div className="w-8 h-8">
-                                                                                <RCBLottie className="w-8 h-8" />
-                                                                            </div>
-                                                                        );
-                                                                    }
-
-                                                                    if (anim.endsWith('rcb_logo_premium.svg')) {
-                                                                        return (
-                                                                            <div className="w-8 h-8 flex items-center justify-center">
-                                                                                <RCBLionLogo className="w-full h-full" />
-                                                                            </div>
-                                                                        );
-                                                                    }
-
-                                                                    // If we have an animated logo path, use it
-                                                                    if (anim && anim !== '/logos/rcb_logo_animated.svg') {
-                                                                        return (
-                                                                            <img 
-                                                                                src={anim} 
-                                                                                alt={team.name} 
-                                                                                className="w-8 h-8 object-contain"
-                                                                                onError={(e) => {
-                                                                                    // Final fallback: show short name
-                                                                                    (e.target as HTMLImageElement).style.display = 'none';
-                                                                                    const parent = (e.target as HTMLImageElement).parentElement;
-                                                                                    if (parent) {
-                                                                                        parent.textContent = team.shortName.substring(0, 2);
-                                                                                    }
-                                                                                }}
-                                                                            />
-                                                                        );
-                                                                    }
+                                                                    const fallback = getLogoPath(team.id);
+                                                                    
+                                                                    // Use modern logo with enhanced styling
+                                                                    return (
+                                                                        <Image 
+                                                                            src={anim} 
+                                                                            alt={team.name} 
+                                                                            width={32}
+                                                                            height={32}
+                                                                            className="object-contain transition-transform duration-300 hover:scale-110"
+                                                                            onError={(e) => {
+                                                                                // Fallback to regular logo path
+                                                                                (e.target as HTMLImageElement).src = fallback;
+                                                                            }}
+                                                                        />
+                                                                    );
 
                                                                     // Fallback to short name
                                                                     return <span className="text-xs font-bold">{team.shortName.substring(0, 2)}</span>;

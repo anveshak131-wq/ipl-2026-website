@@ -1,0 +1,45 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="wpl-dc-blue-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0078D4;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#005A9E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#003D7A;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="wpl-dc-pink-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF69B4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF1493;stop-opacity:1" />
+    </linearGradient>
+    <filter id="wpl-dc-glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      @keyframes shield {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.85; }
+      }
+      .shield { animation: shield 2s ease-in-out infinite; }
+      .logo-pulse { animation: pulse 2.5s ease-in-out infinite; }
+    </style>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="90" fill="url(#wpl-dc-blue-grad)" class="logo-pulse" filter="url(#wpl-dc-glow)"/>
+  
+  <!-- Shield with Pink Accent -->
+  <g class="shield">
+    <path d="M 100 40 L 140 60 L 140 120 L 100 160 L 60 120 L 60 60 Z" fill="url(#wpl-dc-pink-grad)" opacity="0.9"/>
+    <path d="M 100 50 L 130 65 L 130 115 L 100 150 L 70 115 L 70 65 Z" fill="url(#wpl-dc-blue-grad)" opacity="0.7"/>
+  </g>
+  
+  <!-- DC Text -->
+  <text x="100" y="130" font-family="Arial Black, sans-serif" font-size="32" font-weight="900" fill="#FF69B4" text-anchor="middle" opacity="0.95">DC</text>
+</svg>
+

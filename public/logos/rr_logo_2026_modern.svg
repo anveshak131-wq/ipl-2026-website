@@ -1,0 +1,47 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="rr-pink-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF69B4;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FF1493;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#DC143C;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="rr-blue-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1E90FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0066CC;stop-opacity:1" />
+    </linearGradient>
+    <filter id="rr-glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      @keyframes crown {
+        0%, 100% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(-5px) scale(1.05); }
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.85; }
+      }
+      .crown { animation: crown 2.5s ease-in-out infinite; }
+      .logo-pulse { animation: pulse 2.5s ease-in-out infinite; }
+    </style>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="90" fill="url(#rr-pink-grad)" class="logo-pulse" filter="url(#rr-glow)"/>
+  
+  <!-- Crown -->
+  <g class="crown">
+    <path d="M 70 100 L 85 70 L 100 85 L 115 70 L 130 100 L 100 120 Z" fill="url(#rr-blue-grad)" opacity="0.9"/>
+    <circle cx="85" cy="75" r="4" fill="#FFD700"/>
+    <circle cx="100" cy="80" r="4" fill="#FFD700"/>
+    <circle cx="115" cy="75" r="4" fill="#FFD700"/>
+  </g>
+  
+  <!-- RR Text -->
+  <text x="100" y="150" font-family="Arial Black, sans-serif" font-size="28" font-weight="900" fill="#1E90FF" text-anchor="middle" opacity="0.95">RR</text>
+</svg>
+

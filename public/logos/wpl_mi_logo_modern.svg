@@ -1,0 +1,45 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="wpl-mi-blue-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#004BA0;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#0066CC;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#003D7A;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="wpl-mi-pink-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF69B4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF1493;stop-opacity:1" />
+    </linearGradient>
+    <filter id="wpl-mi-glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.85; }
+      }
+      .chakra { animation: spin 8s linear infinite; transform-origin: 100px 100px; }
+      .logo-pulse { animation: pulse 2s ease-in-out infinite; }
+    </style>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="90" fill="url(#wpl-mi-blue-grad)" class="logo-pulse" filter="url(#wpl-mi-glow)"/>
+  
+  <!-- Chakra with Pink Accent -->
+  <g class="chakra">
+    <circle cx="100" cy="100" r="60" fill="none" stroke="url(#wpl-mi-pink-grad)" stroke-width="4" opacity="0.9"/>
+    <circle cx="100" cy="100" r="20" fill="url(#wpl-mi-pink-grad)" opacity="0.9"/>
+  </g>
+  
+  <!-- MI-W Text -->
+  <text x="100" y="140" font-family="Arial Black, sans-serif" font-size="28" font-weight="900" fill="#FF69B4" text-anchor="middle" opacity="0.95">MI</text>
+</svg>
+

@@ -35,11 +35,11 @@ export function getAnimatedLogoPath(teamId: string, shortName?: string, league?:
   
   if (isWPL && shortName) {
     const wplLogoMap: { [key: string]: string } = {
-      'MI-W': 'wpl_mi_logo_animated.svg',
-      'RCB-W': 'wpl_rcb_logo_animated.svg',
-      'DC-W': 'wpl_dc_logo_animated.svg',
-      'GG': 'wpl_gg_logo_animated.svg',
-      'UPW': 'wpl_upw_logo_animated.svg',
+      'MI-W': 'wpl_mi_logo_modern.svg',
+      'RCB-W': 'wpl_rcb_logo_modern.svg',
+      'DC-W': 'wpl_dc_logo_modern.svg',
+      'GG': 'wpl_gg_logo_modern.svg',
+      'UPW': 'wpl_upw_logo_modern.svg',
     };
     
     if (wplLogoMap[shortName]) {
@@ -48,17 +48,17 @@ export function getAnimatedLogoPath(teamId: string, shortName?: string, league?:
   }
   
   const logoMap: { [key: string]: string } = {
-    // RCB uses the special premium animated 2026 logo with enhanced animations
-    '1': 'rcb_logo_2026_premium_animated.svg',  // RCB - Special premium animated version
-    '2': 'mi_logo_2026_animated.svg',            // MI
-    '3': 'srh_logo_2026_animated.svg',           // SRH
-    '4': 'gt_logo_2026_animated.svg',            // GT
-    '5': 'pbks_logo_2026_animated.svg',          // PBKS
-    '6': 'dc_logo_2026_animated.svg',            // DC
-    '7': 'lsg_logo_2026_animated.svg',           // LSG
-    '8': 'rr_logo_2026_animated.svg',            // RR
-    '9': 'kkr_logo_2026_animated.svg',           // KKR
-    '10': 'csk_logo_2026_animated.svg'            // CSK
+    // Modern 2026 logos with enhanced animations and copyright-free designs
+    '1': 'rcb_logo_2026_modern.svg',  // RCB - Modern animated version
+    '2': 'mi_logo_2026_modern.svg',    // MI - Modern animated version
+    '3': 'srh_logo_2026_modern.svg',  // SRH - Modern animated version
+    '4': 'gt_logo_2026_modern.svg',   // GT - Modern animated version
+    '5': 'pbks_logo_2026_modern.svg', // PBKS - Modern animated version
+    '6': 'dc_logo_2026_modern.svg',   // DC - Modern animated version
+    '7': 'lsg_logo_2026_modern.svg',  // LSG - Modern animated version
+    '8': 'rr_logo_2026_modern.svg',   // RR - Modern animated version
+    '9': 'kkr_logo_2026_modern.svg',  // KKR - Modern animated version
+    '10': 'csk_logo_2026_modern.svg'  // CSK - Modern animated version
   };
 
   // Handle both 'team1' and '1' formats
@@ -74,23 +74,23 @@ export function getAnimatedLogoPath(teamId: string, shortName?: string, league?:
 }
 
 
-// Get regular logo path (fallback - uses animated versions)
+// Get regular logo path (fallback - uses modern animated versions)
 export function getLogoPath(teamId: string): string {
   const logoMap: { [key: string]: string } = {
-    '1': 'rcb_logo_2026_premium_animated.svg',  // RCB - Special premium animated version with enhanced effects
-    '2': 'mi_logo_2026_animated.svg',          // MI
-    '3': 'srh_logo_2026_animated.svg',         // SRH
-    '4': 'gt_logo_2026_animated.svg',          // GT
-    '5': 'pbks_logo_2026_animated.svg',        // PBKS
-    '6': 'dc_logo_2026_animated.svg',          // DC
-    '7': 'lsg_logo_2026_animated.svg',         // LSG
-    '8': 'rr_logo_2026_animated.svg',          // RR
-    '9': 'kkr_logo_2026_animated.svg',         // KKR
-    '10': 'csk_logo_2026_animated.svg',         // CSK
+    '1': 'rcb_logo_2026_modern.svg',  // RCB - Modern animated version
+    '2': 'mi_logo_2026_modern.svg',    // MI - Modern animated version
+    '3': 'srh_logo_2026_modern.svg',  // SRH - Modern animated version
+    '4': 'gt_logo_2026_modern.svg',   // GT - Modern animated version
+    '5': 'pbks_logo_2026_modern.svg',  // PBKS - Modern animated version
+    '6': 'dc_logo_2026_modern.svg',   // DC - Modern animated version
+    '7': 'lsg_logo_2026_modern.svg',  // LSG - Modern animated version
+    '8': 'rr_logo_2026_modern.svg',  // RR - Modern animated version
+    '9': 'kkr_logo_2026_modern.svg',  // KKR - Modern animated version
+    '10': 'csk_logo_2026_modern.svg', // CSK - Modern animated version
   };
 
   const numericId = teamId.replace('team', '');
-  const logoFile = logoMap[numericId] || 'rcb_logo_2026_premium_animated.svg';
+  const logoFile = logoMap[numericId] || 'rcb_logo_2026_modern.svg';
   return `/logos/${logoFile}`;
 }
 

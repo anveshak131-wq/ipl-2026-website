@@ -1,0 +1,46 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="pbks-red-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ED1C24;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#DC143C;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B22222;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="pbks-silver-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#C0C0C0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#808080;stop-opacity:1" />
+    </linearGradient>
+    <filter id="pbks-glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      @keyframes king {
+        0%, 100% { transform: scale(1) rotate(0deg); }
+        50% { transform: scale(1.08) rotate(2deg); }
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.85; }
+      }
+      .king { animation: king 3s ease-in-out infinite; }
+      .logo-pulse { animation: pulse 2.5s ease-in-out infinite; }
+    </style>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="90" fill="url(#pbks-red-grad)" class="logo-pulse" filter="url(#pbks-glow)"/>
+  
+  <!-- King Symbol -->
+  <g class="king">
+    <path d="M 100 50 L 120 80 L 140 70 L 130 100 L 140 130 L 100 150 L 60 130 L 70 100 L 60 70 L 80 80 Z" fill="url(#pbks-silver-grad)" opacity="0.9"/>
+    <circle cx="100" cy="100" r="15" fill="url(#pbks-red-grad)"/>
+    <text x="100" y="107" font-family="Arial Black, sans-serif" font-size="16" font-weight="900" fill="#FFF" text-anchor="middle">K</text>
+  </g>
+  
+  <!-- PBKS Text -->
+  <text x="100" y="170" font-family="Arial Black, sans-serif" font-size="20" font-weight="900" fill="#C0C0C0" text-anchor="middle" opacity="0.95">PBKS</text>
+</svg>
+

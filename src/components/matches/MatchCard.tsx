@@ -102,21 +102,14 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
     const animatedPath = getAnimatedLogoPath(team.id, teamShortName, teamLeague);
     const fallbackPath = getLogoPath(team.id);
 
-    if (animatedPath.endsWith('.json')) {
-      return <RCBLottie className="w-10 h-10" />;
-    }
-
-    if (animatedPath.endsWith('rcb_logo_premium.svg')) {
-      return <RCBLionLogo className="w-12 h-12" />;
-    }
-
+    // Use modern logo component for better animations
     return (
       <Image
         src={animatedPath}
         alt={`${team.shortName} logo`}
         width={40}
         height={40}
-        className="object-contain"
+        className="object-contain transition-transform duration-300 hover:scale-110"
         onError={(e) => {
           (e.target as HTMLImageElement).src = fallbackPath;
         }}

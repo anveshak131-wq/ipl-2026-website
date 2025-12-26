@@ -1,0 +1,46 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="mi-blue-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#004BA0;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#0066CC;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#003D7A;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="mi-gold-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFA500;stop-opacity:1" />
+    </linearGradient>
+    <filter id="mi-glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+      }
+      .chakra { animation: spin 8s linear infinite; transform-origin: 100px 100px; }
+      .logo-pulse { animation: pulse 2s ease-in-out infinite; }
+    </style>
+  </defs>
+  
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="90" fill="url(#mi-blue-grad)" class="logo-pulse" filter="url(#mi-glow)"/>
+  
+  <!-- Chakra Symbol -->
+  <g class="chakra">
+    <circle cx="100" cy="100" r="60" fill="none" stroke="url(#mi-gold-grad)" stroke-width="4" opacity="0.9"/>
+    <path d="M 100 40 L 100 160 M 40 100 L 160 100" stroke="url(#mi-gold-grad)" stroke-width="3" opacity="0.8"/>
+    <circle cx="100" cy="100" r="20" fill="url(#mi-gold-grad)" opacity="0.9"/>
+  </g>
+  
+  <!-- MI Text -->
+  <text x="100" y="140" font-family="Arial Black, sans-serif" font-size="32" font-weight="900" fill="#FFD700" text-anchor="middle" opacity="0.95">MI</text>
+</svg>
+
