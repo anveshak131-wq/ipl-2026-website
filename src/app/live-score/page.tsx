@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import Script from 'next/script';
+import Link from 'next/link';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import Emoji, { EmojiName } from '@/components/emoji/Emoji';
@@ -12,6 +13,7 @@ import type { Match } from '@/types';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import GradientText from '@/components/ui/GradientText';
 import GlassCard from '@/components/ui/GlassCard';
+import { HelpCircle, BookOpen } from 'lucide-react';
 
 interface LiveScoreData {
   matchId: string;
@@ -644,6 +646,21 @@ export default function LiveScorePage() {
                                 </motion.div>
                               </motion.div>
                             </motion.div>
+
+                            {/* Rules Help Link */}
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2 text-sm text-gray-400">
+                                <HelpCircle className="w-4 h-4" />
+                                <span>Need help understanding the rules?</span>
+                              </div>
+                              <Link
+                                href="/rules"
+                                className="flex items-center gap-1 text-ipl-gold hover:text-ipl-gold/80 text-sm font-semibold transition-colors"
+                              >
+                                <BookOpen className="w-4 h-4" />
+                                View Rules
+                              </Link>
+                            </div>
 
                             {/* Current Players */}
                             <div className="bg-slate-700/30 rounded-lg p-6 border border-white/5">

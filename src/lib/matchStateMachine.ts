@@ -7,8 +7,11 @@ export type MatchStateType =
   | 'pre-match'
   | 'toss'
   | 'innings-1'
+  | 'strategic-timeout-1'
   | 'break'
   | 'innings-2'
+  | 'strategic-timeout-2'
+  | 'super-over'
   | 'complete';
 
 export interface MatchState {
@@ -30,6 +33,19 @@ export interface MatchState {
     completed: boolean;
     completedAt?: number;
   };
+  superOver?: {
+    overNumber: number; // Track multiple Super Overs
+    team1: { runs: number; wickets: number };
+    team2: { runs: number; wickets: number };
+    battingTeam: 'team1' | 'team2';
+    completed: boolean;
+    winner?: 'team1' | 'team2';
+  };
+  strategicTimeout?: {
+    team1: { used: number; remaining: number };
+    team2: { used: number; remaining: number };
+    currentTimeout?: { team: 'team1' | 'team2'; startTime: number; duration: number };
+  };
   completedAt?: number;
   lockedStates: MatchStateType[]; // States that cannot be edited
 }
@@ -47,9 +63,12 @@ export interface MatchStateTransition {
 const VALID_TRANSITIONS: Record<MatchStateType, MatchStateType[]> = {
   'pre-match': ['toss'],
   'toss': ['innings-1'],
-  'innings-1': ['break'],
+  'innings-1': ['strategic-timeout-1', 'break'],
+  'strategic-timeout-1': ['innings-1'],
   'break': ['innings-2'],
-  'innings-2': ['complete'],
+  'innings-2': ['strategic-timeout-2', 'super-over', 'complete'],
+  'strategic-timeout-2': ['innings-2'],
+  'super-over': ['super-over', 'complete'], // Can have multiple super overs
   'complete': [], // Terminal state
 };
 
@@ -98,6 +117,16 @@ export function canTransition(
       to: targetState,
       allowed: false,
       reason: 'Innings 1 must be completed before starting innings 2',
+    };
+  }
+
+  // Super Over can only be triggered from innings-2 if scores are tied
+  if (targetState === 'super-over' && currentState !== 'innings-2') {
+    return {
+      from: currentState,
+      to: targetState,
+      allowed: false,
+      reason: 'Super Over can only be triggered after innings 2',
     };
   }
 
@@ -174,8 +203,33 @@ export function transitionState(
       }
       break;
 
+    case 'strategic-timeout-1':
+    case 'strategic-timeout-2':
+      // Strategic timeout doesn't change match state, just pauses
+      // The timeout state is temporary and returns to the innings state
+      break;
+
+    case 'super-over':
+      if (!matchState.superOver) {
+        newState.superOver = {
+          overNumber: 1,
+          team1: { runs: 0, wickets: 0 },
+          team2: { runs: 0, wickets: 0 },
+          battingTeam: matchState.toss?.decision === 'bat' ? matchState.toss.winner : 
+                        matchState.toss?.winner === 'team1' ? 'team2' : 'team1',
+          completed: false,
+        };
+      }
+      break;
+
     case 'complete':
-      if (matchState.innings2) {
+      if (matchState.superOver && !matchState.superOver.completed) {
+        // Complete super over first
+        newState.superOver = {
+          ...matchState.superOver,
+          completed: true,
+        };
+      } else if (matchState.innings2) {
         newState.innings2 = {
           ...matchState.innings2,
           completed: true,
@@ -245,6 +299,24 @@ export function getStateDisplay(state: MatchStateType): {
       description: 'Second innings in progress',
       color: 'green',
       icon: '🏏',
+    },
+    'strategic-timeout-1': {
+      label: 'Strategic Timeout (1st Innings)',
+      description: 'Strategic timeout in first innings',
+      color: 'blue',
+      icon: '⏸️',
+    },
+    'strategic-timeout-2': {
+      label: 'Strategic Timeout (2nd Innings)',
+      description: 'Strategic timeout in second innings',
+      color: 'blue',
+      icon: '⏸️',
+    },
+    'super-over': {
+      label: 'Super Over',
+      description: 'Super Over in progress',
+      color: 'purple',
+      icon: '⚡',
     },
     'complete': {
       label: 'Match Complete',

@@ -24,6 +24,7 @@ interface MatchContextPanelProps {
     team2Wins: number;
     lastMeeting?: string;
   };
+  currentOver?: number;
   league?: 'ipl' | 'wpl';
 }
 
@@ -35,6 +36,7 @@ export default function MatchContextPanel({
   weather,
   pitchReport,
   headToHead,
+  currentOver = 0,
   league = 'ipl',
 }: MatchContextPanelProps) {
   const leagueColors = {
@@ -170,6 +172,31 @@ export default function MatchContextPanel({
           </div>
         </div>
       )}
+
+      {/* Fielding Restrictions */}
+      <div>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-sm font-semibold text-white">Fielding Restrictions</span>
+        </div>
+        <div className="text-sm text-gray-300 space-y-1">
+          {currentOver <= 6 ? (
+            <div className="bg-yellow-500/20 border border-yellow-500/30 rounded p-2">
+              <div className="font-bold text-yellow-300">Powerplay (Overs 1-6)</div>
+              <div>Max 2 fielders outside 30-yard circle</div>
+            </div>
+          ) : currentOver <= 15 ? (
+            <div className="bg-blue-500/20 border border-blue-500/30 rounded p-2">
+              <div className="font-bold text-blue-300">Middle Overs (7-15)</div>
+              <div>Max 4 fielders outside 30-yard circle</div>
+            </div>
+          ) : (
+            <div className="bg-red-500/20 border border-red-500/30 rounded p-2">
+              <div className="font-bold text-red-300">Death Overs (16-20)</div>
+              <div>Max 5 fielders outside 30-yard circle</div>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Default message if no data */}
       {!toss && !weather && !pitchReport && !headToHead && (

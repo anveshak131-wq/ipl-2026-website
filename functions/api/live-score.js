@@ -20,6 +20,23 @@ export const onRequest = async (context) => {
             commentary: [],
             status: 'Not Started',
             lastUpdated: new Date().toISOString(),
+            // New fields for IPL rules
+            strategicTimeout: {
+              team1: { used: 0, remaining: 2 },
+              team2: { used: 0, remaining: 2 },
+              currentTimeout: null,
+            },
+            drsReviews: {
+              team1: { used: 0, remaining: 2, successful: 0 },
+              team2: { used: 0, remaining: 2, successful: 0 },
+            },
+            impactPlayer: {
+              team1: null,
+              team2: null,
+            },
+            superOver: null,
+            ballChanged: false,
+            isEveningMatch: false,
           }),
           { status: 200, headers: { 'Content-Type': 'application/json' } }
         );
@@ -94,6 +111,23 @@ export const onRequest = async (context) => {
             commentary: [],
             status: 'Live',
             lastUpdated: new Date().toISOString(),
+            // New fields for IPL rules
+            strategicTimeout: {
+              team1: { used: 0, remaining: 2 },
+              team2: { used: 0, remaining: 2 },
+              currentTimeout: null,
+            },
+            drsReviews: {
+              team1: { used: 0, remaining: 2, successful: 0 },
+              team2: { used: 0, remaining: 2, successful: 0 },
+            },
+            impactPlayer: {
+              team1: null,
+              team2: null,
+            },
+            superOver: null,
+            ballChanged: false,
+            isEveningMatch: false,
           })
       );
 

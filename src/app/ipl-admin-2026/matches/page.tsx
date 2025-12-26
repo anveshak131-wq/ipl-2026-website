@@ -41,6 +41,7 @@ import {
 } from '@/lib/admin/exportUtils';
 import { Match, Team } from '@/types';
 import { api } from '@/lib/data';
+import PointsSystemDisplay from '@/components/admin/matches/PointsSystemDisplay';
 
 const IconTable = ({ className }: { className?: string }) => (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -1163,6 +1164,12 @@ export default function AdminMatches() {
 
             <PageTransition className="flex-1 relative z-10">
                 <div className="p-8">
+                    {/* Points Table */}
+                    {viewMode === 'table' && matches.length > 0 && (
+                        <div className="mb-8">
+                            <PointsSystemDisplay matches={matches} league={currentLeague} />
+                        </div>
+                    )}
 
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-8">
                         <div>

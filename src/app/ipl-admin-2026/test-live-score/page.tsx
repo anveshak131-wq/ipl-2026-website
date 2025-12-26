@@ -10,6 +10,7 @@ import { LoadingSpinner } from '@/components/admin/animations';
 import { TestTube } from 'lucide-react';
 import { useLeague } from '@/contexts/LeagueContext';
 import { WPLColors } from '@/lib/wplColors';
+import { Player } from '@/types';
 
 export default function TestLiveScorePage() {
   const router = useRouter();
@@ -17,6 +18,50 @@ export default function TestLiveScorePage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
+  // Dummy players for testing Impact Player feature
+  const dummyPlayers: Player[] = [
+    // Team A players (playing 11)
+    { id: 'p1', name: 'Batter 1', teamId: 'team-a', role: 'Batsman', league: currentLeague },
+    { id: 'p2', name: 'Batter 2', teamId: 'team-a', role: 'Batsman', league: currentLeague },
+    { id: 'p3', name: 'All-rounder 1', teamId: 'team-a', role: 'All-rounder', league: currentLeague },
+    { id: 'p4', name: 'Bowler 1', teamId: 'team-a', role: 'Bowler', league: currentLeague },
+    { id: 'p5', name: 'Bowler 2', teamId: 'team-a', role: 'Bowler', league: currentLeague },
+    { id: 'p6', name: 'WK 1', teamId: 'team-a', role: 'Wicket-keeper', league: currentLeague },
+    { id: 'p7', name: 'Batter 3', teamId: 'team-a', role: 'Batsman', league: currentLeague },
+    { id: 'p8', name: 'Bowler 3', teamId: 'team-a', role: 'Bowler', league: currentLeague },
+    { id: 'p9', name: 'All-rounder 2', teamId: 'team-a', role: 'All-rounder', league: currentLeague },
+    { id: 'p10', name: 'Bowler 4', teamId: 'team-a', role: 'Bowler', league: currentLeague },
+    { id: 'p11', name: 'Batter 4', teamId: 'team-a', role: 'Batsman', league: currentLeague },
+    // Team A Impact Player options (not in playing 11)
+    { id: 'p12', name: 'Impact Batter', teamId: 'team-a', role: 'Batsman', league: currentLeague },
+    { id: 'p13', name: 'Impact Bowler', teamId: 'team-a', role: 'Bowler', league: currentLeague },
+    // Team B players (playing 11)
+    { id: 'p14', name: 'Batter 5', teamId: 'team-b', role: 'Batsman', league: currentLeague },
+    { id: 'p15', name: 'Batter 6', teamId: 'team-b', role: 'Batsman', league: currentLeague },
+    { id: 'p16', name: 'All-rounder 3', teamId: 'team-b', role: 'All-rounder', league: currentLeague },
+    { id: 'p17', name: 'Bowler 5', teamId: 'team-b', role: 'Bowler', league: currentLeague },
+    { id: 'p18', name: 'Bowler 6', teamId: 'team-b', role: 'Bowler', league: currentLeague },
+    { id: 'p19', name: 'WK 2', teamId: 'team-b', role: 'Wicket-keeper', league: currentLeague },
+    { id: 'p20', name: 'Batter 7', teamId: 'team-b', role: 'Batsman', league: currentLeague },
+    { id: 'p21', name: 'Bowler 7', teamId: 'team-b', role: 'Bowler', league: currentLeague },
+    { id: 'p22', name: 'All-rounder 4', teamId: 'team-b', role: 'All-rounder', league: currentLeague },
+    { id: 'p23', name: 'Bowler 8', teamId: 'team-b', role: 'Bowler', league: currentLeague },
+    { id: 'p24', name: 'Batter 8', teamId: 'team-b', role: 'Batsman', league: currentLeague },
+    // Team B Impact Player options (not in playing 11)
+    { id: 'p25', name: 'Impact All-rounder', teamId: 'team-b', role: 'All-rounder', league: currentLeague },
+    { id: 'p26', name: 'Impact Spinner', teamId: 'team-b', role: 'Bowler', league: currentLeague },
+  ];
+
+  // Dummy playing 11
+  const dummyPlaying11 = {
+    team1: ['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8', 'p9', 'p10', 'p11'],
+    team2: ['p14', 'p15', 'p16', 'p17', 'p18', 'p19', 'p20', 'p21', 'p22', 'p23', 'p24'],
+  };
+
+  // Initial batter and bowler for testing
+  const initialBatter = { id: 'p1', name: 'Batter 1' };
+  const initialBowler = { id: 'p17', name: 'Bowler 5' };
 
   // Check authentication
   useEffect(() => {
@@ -103,36 +148,40 @@ export default function TestLiveScorePage() {
                   }}
                 >
                   <BallEntryPanel
-              matchId="test-match"
-              team1Name="Team A"
-              team2Name="Team B"
-              team1Id="team-a"
-              team2Id="team-b"
+                    matchId="test-match"
+                    team1Name="Team A"
+                    team2Name="Team B"
+                    team1Id="team-a"
+                    team2Id="team-b"
                     onSave={handleSaveLiveScore}
-              players={[]}
+                    players={dummyPlayers}
                     league={currentLeague}
-              isTestPage={true}
-              venue="Test Stadium"
-              date={new Date().toISOString().split('T')[0]}
-              time="19:30"
-              toss={{
-                winner: 'team1',
-                decision: 'bat',
-              }}
-              weather={{
-                temperature: 28,
-                condition: 'partly-cloudy',
-                humidity: 65,
-                windSpeed: 12,
-              }}
-              pitchReport="Hard and dry surface with even bounce. Good for stroke play. Expected to assist both batters and bowlers equally."
-              headToHead={{
-                totalMatches: 15,
-                team1Wins: 8,
-                team2Wins: 7,
-                lastMeeting: 'Team A won by 5 wickets',
-              }}
-            />
+                    initialBatter={initialBatter}
+                    initialBowler={initialBowler}
+                    playing11={dummyPlaying11}
+                    isTestPage={true}
+                    venue="Test Stadium"
+                    date={new Date().toISOString().split('T')[0]}
+                    time="19:30"
+                    isEveningMatch={true} // Evening match for two-ball rule testing
+                    toss={{
+                      winner: 'team1',
+                      decision: 'bat',
+                    }}
+                    weather={{
+                      temperature: 28,
+                      condition: 'partly-cloudy',
+                      humidity: 65,
+                      windSpeed: 12,
+                    }}
+                    pitchReport="Hard and dry surface with even bounce. Good for stroke play. Expected to assist both batters and bowlers equally."
+                    headToHead={{
+                      matches: 15,
+                      team1Wins: 8,
+                      team2Wins: 7,
+                      lastResult: 'Team A won by 5 wickets',
+                    }}
+                  />
             </div>
         </div>
       </main>

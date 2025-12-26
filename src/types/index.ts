@@ -79,6 +79,27 @@ export interface Match {
   team2: Team;
   status: 'upcoming' | 'live' | 'completed' | 'cancelled';
   result?: string;
+  resultType?: 'win' | 'loss' | 'tie' | 'no-result' | 'abandoned';
+  points?: {
+    team1: number;
+    team2: number;
+  };
+  netRunRate?: {
+    team1: number;
+    team2: number;
+  };
+  impactPlayer?: {
+    team1?: {
+      original: string;
+      impact: string;
+      substitutedAt: number;
+    };
+    team2?: {
+      original: string;
+      impact: string;
+      substitutedAt: number;
+    };
+  };
   matchNumber?: string; // Auto-generated based on date and time ordering (e.g., "IPL-001", "WPL-001")
   playoffType?: PlayoffType; // Type of playoff match (null for regular matches)
   playing11?: {

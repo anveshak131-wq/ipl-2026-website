@@ -82,6 +82,9 @@ export default function AdminLiveScorePage() {
       const token = localStorage.getItem('adminToken');
       
       // Convert state to API format
+      // Extract extended state fields if they exist
+      const extendedState = state as any;
+      
       const scoreUpdate = {
         team1: {
           name: selectedMatch.team1.shortName || selectedMatch.team1.name,
@@ -114,6 +117,14 @@ export default function AdminLiveScorePage() {
         status: 'Live',
         innings: state.innings,
         battingTeam: state.battingTeam,
+        // Include new IPL rules fields
+        strategicTimeout: extendedState.strategicTimeout,
+        drsReviews: extendedState.drsReviews,
+        impactPlayer: extendedState.impactPlayer,
+        superOver: extendedState.superOver,
+        ballChanged: extendedState.ballChanged,
+        isEveningMatch: extendedState.isEveningMatch,
+        matchState: state.matchState,
       };
 
       const response = await fetch('/api/live-score', {

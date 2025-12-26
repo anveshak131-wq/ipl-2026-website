@@ -17,10 +17,16 @@ import OverByOverAnalysis from './OverByOverAnalysis';
 import EnhancedPlayerStats from './EnhancedPlayerStats';
 import MatchContextPanel from './MatchContextPanel';
 import QuickActionsBar from './QuickActionsBar';
+import PowerplayIndicator from './PowerplayIndicator';
+import StrategicTimeout from './StrategicTimeout';
+import DRSReview from './DRSReview';
+import SuperOverPanel from './SuperOverPanel';
+import ImpactPlayerSelector from './ImpactPlayerSelector';
+import TwoBallRuleIndicator from './TwoBallRuleIndicator';
 import { useLiveScore, BallEvent } from '@/hooks/useLiveScore';
 import { Player } from '@/types';
 import { Users, RotateCcw, Save } from 'lucide-react';
-import { initializeMatchState } from '@/lib/matchStateMachine';
+import { initializeMatchState, transitionState } from '@/lib/matchStateMachine';
 import { LiveScoreState } from '@/hooks/useLiveScore';
 
 interface BallEntryPanelProps {
@@ -82,6 +88,7 @@ export default function BallEntryPanel({
   pitchReport,
   headToHead,
   isTestPage = false,
+  isEveningMatch: propIsEveningMatch,
 }: BallEntryPanelProps) {
   const [showWicketModal, setShowWicketModal] = useState(false);
   const [showPlayerSelector, setShowPlayerSelector] = useState<'batter' | 'bowler' | null>(null);
@@ -111,6 +118,49 @@ export default function BallEntryPanel({
   // Track previous state for animations
   const previousStateRef = useRef<LiveScoreState | null>(null);
   const lastBallRef = useRef<BallEvent | null>(null);
+
+  // Strategic Timeout state
+  const [timeoutState, setTimeoutState] = useState({
+    team1: { used: 0, remaining: 2 },
+    team2: { used: 0, remaining: 2 },
+    currentTimeout: null as { team: 'team1' | 'team2'; startTime: number } | null,
+  });
+
+  // DRS Review state
+  const [drsState, setDrsState] = useState({
+    team1: { used: 0, remaining: 2, successful: 0 },
+    team2: { used: 0, remaining: 2, successful: 0 },
+  });
+
+  // Super Over state
+  const [superOverState, setSuperOverState] = useState<{
+    overNumber: number;
+    team1: { runs: number; wickets: number };
+    team2: { runs: number; wickets: number };
+    battingTeam: 'team1' | 'team2';
+    completed: boolean;
+    winner?: 'team1' | 'team2';
+  } | null>(null);
+
+  // Impact Player state
+  const [impactPlayerState, setImpactPlayerState] = useState<{
+    team1?: { original: string; impact: string; substitutedAt: number };
+    team2?: { original: string; impact: string; substitutedAt: number };
+  }>({});
+
+  // Two-Ball Rule state
+  const [ballChanged, setBallChanged] = useState(false);
+  const [isEveningMatch, setIsEveningMatch] = useState(false);
+  
+  // Determine if evening match (after 5 PM IST typically)
+  useEffect(() => {
+    if (propIsEveningMatch !== undefined) {
+      setIsEveningMatch(propIsEveningMatch);
+    } else if (time) {
+      const [hours] = time.split(':').map(Number);
+      setIsEveningMatch(hours >= 17); // 5 PM or later
+    }
+  }, [propIsEveningMatch, time]);
 
   const {
     state,
@@ -313,7 +363,18 @@ export default function BallEntryPanel({
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await onSave(state);
+      // Include all new state in the save
+      const extendedState = {
+        ...state,
+        // Add new fields for persistence
+        strategicTimeout: timeoutState,
+        drsReviews: drsState,
+        impactPlayer: impactPlayerState,
+        superOver: superOverState,
+        ballChanged,
+        isEveningMatch,
+      };
+      await onSave(extendedState as LiveScoreState);
     } catch (error) {
       console.error('Failed to save:', error);
       alert('Failed to save score. Please try again.');
@@ -457,10 +518,190 @@ export default function BallEntryPanel({
               team2Wins: 12,
               lastMeeting: '2025-04-15',
             }}
+            currentOver={state.currentOver}
             league={league}
           />
+          </div>
         </div>
-      </div>
+
+      {/* Powerplay Indicator */}
+      <PowerplayIndicator currentOver={state.currentOver} league={league} />
+
+      {/* Two-Ball Rule Indicator */}
+      <TwoBallRuleIndicator
+        isEveningMatch={isEveningMatch}
+        currentInnings={state.innings}
+        currentOver={state.currentOver}
+        ballChanged={ballChanged}
+        onBallChange={() => {
+          setBallChanged(true);
+          // In real implementation, this would notify umpires/backend
+        }}
+        league={league}
+      />
+
+      {/* Strategic Timeouts */}
+      {matchState.currentState === 'innings-1' || matchState.currentState === 'innings-2' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <StrategicTimeout
+            team="team1"
+            teamName={team1Name}
+            used={timeoutState.team1.used}
+            remaining={timeoutState.team1.remaining}
+            isActive={timeoutState.currentTimeout?.team === 'team1' || false}
+            onTimeout={() => {
+              setTimeoutState(prev => ({
+                ...prev,
+                team1: { ...prev.team1, used: prev.team1.used + 1, remaining: prev.team1.remaining - 1 },
+                currentTimeout: { team: 'team1', startTime: Date.now() },
+              }));
+            }}
+            onTimeoutEnd={() => {
+              setTimeoutState(prev => ({
+                ...prev,
+                currentTimeout: null,
+              }));
+            }}
+          />
+          <StrategicTimeout
+            team="team2"
+            teamName={team2Name}
+            used={timeoutState.team2.used}
+            remaining={timeoutState.team2.remaining}
+            isActive={timeoutState.currentTimeout?.team === 'team2' || false}
+            onTimeout={() => {
+              setTimeoutState(prev => ({
+                ...prev,
+                team2: { ...prev.team2, used: prev.team2.used + 1, remaining: prev.team2.remaining - 1 },
+                currentTimeout: { team: 'team2', startTime: Date.now() },
+              }));
+            }}
+            onTimeoutEnd={() => {
+              setTimeoutState(prev => ({
+                ...prev,
+                currentTimeout: null,
+              }));
+            }}
+          />
+        </div>
+      ) : null}
+
+      {/* DRS Reviews */}
+      {matchState.currentState === 'innings-1' || matchState.currentState === 'innings-2' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <DRSReview
+            team="team1"
+            teamName={team1Name}
+            used={drsState.team1.used}
+            remaining={drsState.team1.remaining}
+            successful={drsState.team1.successful}
+            onReview={(type) => {
+              setDrsState(prev => ({
+                ...prev,
+                team1: { ...prev.team1, used: prev.team1.used + 1, remaining: prev.team1.remaining - 1 },
+              }));
+            }}
+            onResult={(successful) => {
+              if (successful) {
+                setDrsState(prev => ({
+                  ...prev,
+                  team1: { ...prev.team1, successful: prev.team1.successful + 1 },
+                }));
+              }
+            }}
+          />
+          <DRSReview
+            team="team2"
+            teamName={team2Name}
+            used={drsState.team2.used}
+            remaining={drsState.team2.remaining}
+            successful={drsState.team2.successful}
+            onReview={(type) => {
+              setDrsState(prev => ({
+                ...prev,
+                team2: { ...prev.team2, used: prev.team2.used + 1, remaining: prev.team2.remaining - 1 },
+              }));
+            }}
+            onResult={(successful) => {
+              if (successful) {
+                setDrsState(prev => ({
+                  ...prev,
+                  team2: { ...prev.team2, successful: prev.team2.successful + 1 },
+                }));
+              }
+            }}
+          />
+        </div>
+      ) : null}
+
+      {/* Super Over Trigger - Show when innings 2 is complete and scores are tied */}
+      {matchState.currentState === 'complete' && 
+       matchState.innings1?.completed && 
+       matchState.innings2?.completed &&
+       !superOverState &&
+       state.team1.runs === state.team2.runs && (
+        <div className="bg-gradient-to-r from-purple-600/30 to-pink-600/30 border-2 border-purple-500/50 rounded-xl p-6 mb-6">
+          <div className="text-center">
+            <h3 className="text-white font-bold text-xl mb-2">⚡ Match Tied!</h3>
+            <p className="text-gray-300 mb-4">
+              {team1Name}: {state.team1.runs}/{state.team1.wickets} | {team2Name}: {state.team2.runs}/{state.team2.wickets}
+            </p>
+            <button
+              onClick={() => {
+                const newSuperOverState = {
+                  overNumber: 1,
+                  team1: { runs: 0, wickets: 0 },
+                  team2: { runs: 0, wickets: 0 },
+                  battingTeam: matchState.toss?.decision === 'bat' ? matchState.toss.winner : 
+                                matchState.toss?.winner === 'team1' ? 'team2' : 'team1',
+                  completed: false,
+                };
+                setSuperOverState(newSuperOverState);
+                updateMatchState(transitionState(matchState, 'super-over'));
+              }}
+              className="bg-purple-500 hover:bg-purple-600 text-white font-bold px-6 py-3 rounded-lg transition-all hover:scale-105"
+            >
+              Start Super Over
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Super Over Panel */}
+      {matchState.currentState === 'super-over' && superOverState && (
+        <SuperOverPanel
+          team1Name={team1Name}
+          team2Name={team2Name}
+          superOver={superOverState}
+          onBallRecord={(ball) => {
+            // Handle super over ball recording
+            if (superOverState.battingTeam === 'team1') {
+              setSuperOverState(prev => prev ? {
+                ...prev,
+                team1: { ...prev.team1, runs: prev.team1.runs + ball.runs },
+              } : null);
+            } else {
+              setSuperOverState(prev => prev ? {
+                ...prev,
+                team2: { ...prev.team2, runs: prev.team2.runs + ball.runs },
+              } : null);
+            }
+          }}
+          onComplete={(winner) => {
+            setSuperOverState(prev => prev ? { ...prev, completed: true, winner } : null);
+            updateMatchState(transitionState(matchState, 'complete'));
+          }}
+          onNextSuperOver={() => {
+            setSuperOverState(prev => prev ? {
+              ...prev,
+              overNumber: prev.overNumber + 1,
+              team1: { runs: 0, wickets: 0 },
+              team2: { runs: 0, wickets: 0 },
+              completed: false,
+            } : null);
+          }}
+        />
+      )}
 
       {/* Partnership Info */}
       <PartnershipInfo state={state} league={league} />
