@@ -674,6 +674,7 @@ export default function BallEntryPanel({
         onConfirm={handleWicketConfirm}
         players={players}
         league={league}
+        isTestPage={isTestPage}
       />
 
       {/* Celebration Animations */}
