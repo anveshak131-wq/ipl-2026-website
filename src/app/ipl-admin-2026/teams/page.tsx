@@ -12,6 +12,10 @@ import { wplTeams } from '@/data/wpl-teams';
 import { getAnimatedLogoPath } from '@/lib/logoUtils';
 import RCBLottie from '@/components/ui/RCBLottie';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
+import ModernTeamCard from '@/components/admin/teams/ModernTeamCard';
+import { motion } from 'framer-motion';
+import { Grid3x3, List, Users, Trophy, MapPin } from 'lucide-react';
+import { StaggeredList } from '@/components/admin/animations';
 
 type SortField = 'name' | 'shortName';
 type SortDirection = 'asc' | 'desc';
@@ -74,6 +78,7 @@ export default function AdminTeams() {
     const [sortField, setSortField] = useState<SortField>('name');
     const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
     const [selectedTeams, setSelectedTeams] = useState<Set<string>>(new Set());
+    const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
     const [formData, setFormData] = useState({
         name: '',
         shortName: '',
@@ -512,8 +517,82 @@ export default function AdminTeams() {
                         </div>
                     </div>
 
+                    {/* Statistics Cards */}
+                    <StaggeredList className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6" staggerDelay={0.1}>
+                        <motion.div
+                            className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-slate-500/50 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]"
+                            whileHover={{ scale: 1.02 }}
+                        >
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center shadow-lg">
+                                    <Users className="w-6 h-6 text-white" />
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-3xl font-bold text-white">{teams.length}</p>
+                                    <p className="text-xs text-gray-400">Total Teams</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm text-gray-300 font-medium">All teams</span>
+                            </div>
+                        </motion.div>
+                        <motion.div
+                            className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-blue-500/50 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]"
+                            whileHover={{ scale: 1.02 }}
+                        >
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
+                                    <Users className="w-6 h-6 text-white" />
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-3xl font-bold text-white">{teams.filter(t => t.league === 'ipl').length}</p>
+                                    <p className="text-xs text-gray-400">IPL Teams</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm text-gray-300 font-medium">IPL</span>
+                            </div>
+                        </motion.div>
+                        <motion.div
+                            className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-purple-500/50 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]"
+                            whileHover={{ scale: 1.02 }}
+                        >
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg">
+                                    <Users className="w-6 h-6 text-white" />
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-3xl font-bold text-white">{teams.filter(t => t.league === 'wpl').length}</p>
+                                    <p className="text-xs text-gray-400">WPL Teams</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm text-gray-300 font-medium">WPL</span>
+                            </div>
+                        </motion.div>
+                        <motion.div
+                            className="bg-gradient-to-br from-slate-800/40 to-slate-900/40 backdrop-blur-xl rounded-2xl p-6 border border-slate-700/50 hover:border-yellow-500/50 transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]"
+                            whileHover={{ scale: 1.02 }}
+                        >
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center shadow-lg">
+                                    <Trophy className="w-6 h-6 text-white" />
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-3xl font-bold text-white">
+                                        {teams.reduce((acc, team) => acc + (team.trophies?.length || 0), 0)}
+                                    </p>
+                                    <p className="text-xs text-gray-400">Total Trophies</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm text-gray-300 font-medium">Championships</span>
+                            </div>
+                        </motion.div>
+                    </StaggeredList>
+
                     {selectedTeams.size > 0 && (
-                        <div className="admin-glass mb-8 p-5 rounded-xl border border-blue-500/20 bg-blue-500/5 flex items-center justify-between">
+                        <div className="glass-effect mb-8 p-5 rounded-xl border border-blue-500/20 bg-blue-500/5 flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
                                     <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -525,26 +604,77 @@ export default function AdminTeams() {
                             <button
                                 onClick={handleBulkDelete}
                                 disabled={isSubmitting}
-                                className="admin-btn-ghost text-red-400 hover:text-red-300 hover:bg-red-500/10 disabled:opacity-50"
+                                className="glass-effect px-4 py-2 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 disabled:opacity-50 transition-all"
                             >
                                 Delete Selected
                             </button>
                         </div>
                     )}
 
-                    <div className="admin-card overflow-hidden">
-                        <div className="p-6 border-b border-white/8">
-                            <div className="relative">
-                                <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                                <input
-                                    type="text"
-                                    placeholder="Search teams by name..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="admin-input w-full pl-12 pr-4 py-3"
-                                />
-                            </div>
+                    {/* Search Bar */}
+                    <div className="glass-effect mb-6 rounded-xl p-6 border border-white/10">
+                        <div className="relative">
+                            <MagnifyingGlassIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Search teams by name or code..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-12 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-ipl-gold/50 focus:ring-2 focus:ring-ipl-gold/20 transition-all"
+                            />
                         </div>
+                    </div>
+
+                    {viewMode === 'grid' ? (
+                        // Grid View
+                        <div className="space-y-6">
+                            {isLoading ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                    {[...Array(8)].map((_, i) => (
+                                        <div key={i} className="animate-pulse bg-slate-800/40 rounded-2xl h-96" />
+                                    ))}
+                                </div>
+                            ) : filteredAndSortedTeams.length === 0 ? (
+                                <div className="glass-effect rounded-xl p-16 text-center border border-white/10">
+                                    <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 mb-6">
+                                        <Users className="w-10 h-10 text-purple-400" />
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-white mb-3">
+                                        {searchQuery ? 'No teams found' : 'No teams yet'}
+                                    </h3>
+                                    <p className="text-gray-400 text-lg mb-8 max-w-md mx-auto">
+                                        {searchQuery ? 'Try adjusting your search terms' : 'Get started by adding your first team to the platform'}
+                                    </p>
+                                    {!searchQuery && (
+                                        <button
+                                            onClick={handleAddTeam}
+                                            className="ipl-button flex items-center gap-2 mx-auto"
+                                        >
+                                            <PlusIcon className="w-5 h-5" />
+                                            Add Your First Team
+                                        </button>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                    {filteredAndSortedTeams.map((team, index) => (
+                                        <ModernTeamCard
+                                            key={team.id}
+                                            team={team}
+                                            index={index}
+                                            onEdit={handleEditTeam}
+                                            onDelete={handleDeleteTeam}
+                                            isSelected={selectedTeams.has(team.id)}
+                                            onSelect={toggleSelectTeam}
+                                            isSubmitting={isSubmitting}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        // Table View
+                        <div className="admin-card overflow-hidden">
 
                         {isLoading ? (
                             <div className="p-12">
@@ -923,7 +1053,8 @@ export default function AdminTeams() {
                                 </div>
                             </>
                         )}
-                    </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
