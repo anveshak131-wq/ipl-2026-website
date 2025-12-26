@@ -15,6 +15,8 @@ import RichCommentary from './RichCommentary';
 import PartnershipInfo from './PartnershipInfo';
 import OverByOverAnalysis from './OverByOverAnalysis';
 import EnhancedPlayerStats from './EnhancedPlayerStats';
+import MatchContextPanel from './MatchContextPanel';
+import QuickActionsBar from './QuickActionsBar';
 import { useLiveScore, BallEvent } from '@/hooks/useLiveScore';
 import { Player } from '@/types';
 import { Users, RotateCcw, Save } from 'lucide-react';
@@ -36,6 +38,27 @@ interface BallEntryPanelProps {
     team1: string[];
     team2: string[];
   };
+  // Match context props
+  venue?: string;
+  date?: string;
+  time?: string;
+  toss?: {
+    winner: 'team1' | 'team2';
+    decision: 'bat' | 'bowl';
+  };
+  weather?: {
+    temperature: number;
+    condition: string;
+    humidity: number;
+    windSpeed: number;
+  };
+  pitchReport?: string;
+  headToHead?: {
+    matches: number;
+    team1Wins: number;
+    team2Wins: number;
+    lastResult?: string;
+  };
 }
 
 export default function BallEntryPanel({
@@ -49,7 +72,14 @@ export default function BallEntryPanel({
   league = 'ipl',
   initialBatter,
   initialBowler,
-  playing11
+  playing11,
+  venue,
+  date,
+  time,
+  toss,
+  weather,
+  pitchReport,
+  headToHead,
 }: BallEntryPanelProps) {
   const [showWicketModal, setShowWicketModal] = useState(false);
   const [showPlayerSelector, setShowPlayerSelector] = useState<'batter' | 'bowler' | null>(null);
@@ -318,64 +348,104 @@ export default function BallEntryPanel({
   // Check if ball entry is allowed based on match state
   const canRecordBalls = matchState.currentState === 'innings-1' || matchState.currentState === 'innings-2';
 
+  // Detect mobile device
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
-    <div className="space-y-6">
-      {/* Match State Manager */}
-      <MatchStateManager
-        matchState={matchState}
-        onStateChange={updateMatchState}
-        league={league}
-        team1Name={team1Name}
-        team2Name={team2Name}
-        currentInnings={state.innings}
-        team1Wickets={state.team1.wickets}
-        team2Wickets={state.team2.wickets}
-        team1Overs={state.team1.balls / 6}
-        team2Overs={state.team2.balls / 6}
-        maxOvers={20}
-      />
+    <div className="space-y-4 md:space-y-6 pb-20 md:pb-0">
+      {/* Top Section: Match Context + State Manager */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2 space-y-4">
+          {/* Match State Manager */}
+          <MatchStateManager
+            matchState={matchState}
+            onStateChange={updateMatchState}
+            league={league}
+            team1Name={team1Name}
+            team2Name={team2Name}
+            currentInnings={state.innings}
+            team1Wickets={state.team1.wickets}
+            team2Wickets={state.team2.wickets}
+            team1Overs={state.team1.balls / 6}
+            team2Overs={state.team2.balls / 6}
+            maxOvers={20}
+          />
+          
+          {/* Match Info */}
+          <div className="space-y-4">
+            <CurrentOverDisplay
+              over={state.currentOver}
+              innings={state.innings}
+              battingTeam={battingTeam.name}
+              league={league}
+            />
+            <OverProgressBar currentOver={state.currentOver} league={league} />
+          </div>
 
-      {/* Match Info */}
-      <div className="space-y-4">
-        <CurrentOverDisplay
-          over={state.currentOver}
-          innings={state.innings}
-          battingTeam={battingTeam.name}
-          league={league}
-        />
-        <OverProgressBar currentOver={state.currentOver} league={league} />
-      </div>
+          {/* Score Display */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <AnimatedScoreDisplay
+              teamName={state.team1.name}
+              runs={state.team1.runs}
+              wickets={state.team1.wickets}
+              overs={ballsToOvers(state.team1.balls)}
+              isBatting={state.battingTeam === 'team1'}
+              league={league}
+              previousRuns={previousStateRef.current?.battingTeam === 'team1' 
+                ? previousStateRef.current.team1.runs 
+                : previousStateRef.current?.team1.runs || 0}
+              previousWickets={previousStateRef.current?.battingTeam === 'team1'
+                ? previousStateRef.current.team1.wickets
+                : previousStateRef.current?.team1.wickets || 0}
+            />
+            <AnimatedScoreDisplay
+              teamName={state.team2.name}
+              runs={state.team2.runs}
+              wickets={state.team2.wickets}
+              overs={ballsToOvers(state.team2.balls)}
+              isBatting={state.battingTeam === 'team2'}
+              league={league}
+              previousRuns={previousStateRef.current?.battingTeam === 'team2'
+                ? previousStateRef.current.team2.runs
+                : previousStateRef.current?.team2.runs || 0}
+              previousWickets={previousStateRef.current?.battingTeam === 'team2'
+                ? previousStateRef.current.team2.wickets
+                : previousStateRef.current?.team2.wickets || 0}
+            />
+          </div>
+        </div>
 
-      {/* Score Display */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <AnimatedScoreDisplay
-          teamName={state.team1.name}
-          runs={state.team1.runs}
-          wickets={state.team1.wickets}
-          overs={ballsToOvers(state.team1.balls)}
-          isBatting={state.battingTeam === 'team1'}
-          league={league}
-          previousRuns={previousStateRef.current?.battingTeam === 'team1' 
-            ? previousStateRef.current.team1.runs 
-            : previousStateRef.current?.team1.runs || 0}
-          previousWickets={previousStateRef.current?.battingTeam === 'team1'
-            ? previousStateRef.current.team1.wickets
-            : previousStateRef.current?.team1.wickets || 0}
-        />
-        <AnimatedScoreDisplay
-          teamName={state.team2.name}
-          runs={state.team2.runs}
-          wickets={state.team2.wickets}
-          overs={ballsToOvers(state.team2.balls)}
-          isBatting={state.battingTeam === 'team2'}
-          league={league}
-          previousRuns={previousStateRef.current?.battingTeam === 'team2'
-            ? previousStateRef.current.team2.runs
-            : previousStateRef.current?.team2.runs || 0}
-          previousWickets={previousStateRef.current?.battingTeam === 'team2'
-            ? previousStateRef.current.team2.wickets
-            : previousStateRef.current?.team2.wickets || 0}
-        />
+        {/* Right Column: Match Context Panel */}
+        <div className="lg:col-span-1">
+          <MatchContextPanel
+            team1Name={team1Name}
+            team2Name={team2Name}
+            venue="Test Venue"
+            toss={matchState.toss}
+            weather={{
+              temperature: 28,
+              condition: 'partly-cloudy',
+              humidity: 65,
+              windSpeed: 12,
+            }}
+            pitchReport="Hard and dry surface with even bounce. Good for stroke play. Expected to assist spinners in the second innings."
+            headToHead={{
+              totalMatches: 24,
+              team1Wins: 12,
+              team2Wins: 12,
+              lastMeeting: '2025-04-15',
+            }}
+            league={league}
+          />
+        </div>
       </div>
 
       {/* Partnership Info */}
@@ -427,65 +497,45 @@ export default function BallEntryPanel({
             </p>
           </div>
         )}
-        <div className={`grid grid-cols-5 gap-3 ${!canRecordBalls ? 'opacity-50 pointer-events-none' : ''}`}>
-          <BallEntryButton value={0} label="Dot (0)" color="green" onClick={() => handleBallClick(0)} />
-          <BallEntryButton value={1} label="Single (1)" color="green" onClick={() => handleBallClick(1)} />
-          <BallEntryButton value={2} label="Double (2)" color="green" onClick={() => handleBallClick(2)} />
-          <BallEntryButton value={4} label="Four (4)" color="green" onClick={() => handleBallClick(4)} />
-          <BallEntryButton value={6} label="Six (6)" color="green" onClick={() => handleBallClick(6)} />
+        <div className={`grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 ${!canRecordBalls ? 'opacity-50 pointer-events-none' : ''}`}>
+          <BallEntryButton value={0} label={isMobile ? "0" : "Dot (0)"} color="green" onClick={() => handleBallClick(0)} />
+          <BallEntryButton value={1} label={isMobile ? "1" : "Single (1)"} color="green" onClick={() => handleBallClick(1)} />
+          <BallEntryButton value={2} label={isMobile ? "2" : "Double (2)"} color="green" onClick={() => handleBallClick(2)} />
+          <BallEntryButton value={4} label={isMobile ? "4" : "Four (4)"} color="green" onClick={() => handleBallClick(4)} />
+          <BallEntryButton value={6} label={isMobile ? "6" : "Six (6)"} color="green" onClick={() => handleBallClick(6)} />
         </div>
-        <div className={`grid grid-cols-5 gap-3 ${!canRecordBalls ? 'opacity-50 pointer-events-none' : ''}`}>
-          <BallEntryButton value="W" label="Wicket (W)" color="red" onClick={() => handleBallClick('W')} />
-          <BallEntryButton value="WD" label="Wide (D)" color="orange" onClick={() => handleBallClick('WD')} />
-          <BallEntryButton value="NB" label="No-Ball (N)" color="orange" onClick={() => handleBallClick('NB')} />
-          <BallEntryButton value="B" label="Bye" color="orange" onClick={() => handleBallClick('B')} />
-          <BallEntryButton value="LB" label="Leg-Bye" color="orange" onClick={() => handleBallClick('LB')} />
+        <div className={`grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 ${!canRecordBalls ? 'opacity-50 pointer-events-none' : ''}`}>
+          <BallEntryButton value="W" label={isMobile ? "W" : "Wicket (W)"} color="red" onClick={() => handleBallClick('W')} />
+          <BallEntryButton value="WD" label={isMobile ? "WD" : "Wide (D)"} color="orange" onClick={() => handleBallClick('WD')} />
+          <BallEntryButton value="NB" label={isMobile ? "NB" : "No-Ball (N)"} color="orange" onClick={() => handleBallClick('NB')} />
+          <BallEntryButton value="B" label={isMobile ? "B" : "Bye"} color="orange" onClick={() => handleBallClick('B')} />
+          <BallEntryButton value="LB" label={isMobile ? "LB" : "Leg-Bye"} color="orange" onClick={() => handleBallClick('LB')} />
         </div>
-        {/* Keyboard Shortcuts Hint */}
-        <div className="text-center">
-          <p className="text-xs text-gray-400">
-            💡 Keyboard Shortcuts: Press <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300">0-6</kbd> for runs, 
-            <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300 mx-1">W</kbd> for wicket, 
-            <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300 mx-1">N</kbd> for no-ball, 
-            <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300 mx-1">D</kbd> for wide, 
-            <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300 mx-1">U</kbd> for undo
-          </p>
-        </div>
+        {/* Keyboard Shortcuts Hint - Hidden on mobile */}
+        {!isMobile && (
+          <div className="text-center">
+            <p className="text-xs text-gray-400">
+              💡 Keyboard Shortcuts: Press <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300">0-6</kbd> for runs, 
+              <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300 mx-1">W</kbd> for wicket, 
+              <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300 mx-1">N</kbd> for no-ball, 
+              <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300 mx-1">D</kbd> for wide, 
+              <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300 mx-1">U</kbd> for undo
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* Quick Actions */}
-      <div className="flex flex-wrap gap-3">
-        <button
-          onClick={() => setShowPlayerSelector('batter')}
-          className={`flex-1 px-4 py-3 ${colors.secondary} rounded-xl text-white font-bold flex items-center justify-center gap-2 transition-colors`}
-        >
-          <Users className="w-5 h-5" />
-          Change Batter
-        </button>
-        <button
-          onClick={() => setShowPlayerSelector('bowler')}
-          className={`flex-1 px-4 py-3 ${colors.secondary} rounded-xl text-white font-bold flex items-center justify-center gap-2 transition-colors`}
-        >
-          <Users className="w-5 h-5" />
-          Change Bowler
-        </button>
-        <button
-          onClick={undo}
-          disabled={!canUndo}
-          className="px-4 py-3 bg-gray-600 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-white font-bold flex items-center justify-center gap-2 transition-colors"
-        >
-          <RotateCcw className="w-5 h-5" />
-          Undo
-        </button>
-        <button
-          onClick={handleSave}
-          disabled={isSaving}
-          className={`px-6 py-3 bg-gradient-to-r ${colors.save} disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-white font-bold flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transition-all`}
-        >
-          <Save className="w-5 h-5" />
-          {isSaving ? 'Saving...' : 'Save'}
-        </button>
-      </div>
+      {/* Quick Actions Bar */}
+      <QuickActionsBar
+        onChangeBatter={() => setShowPlayerSelector('batter')}
+        onChangeBowler={() => setShowPlayerSelector('bowler')}
+        onUndo={undo}
+        onSave={handleSave}
+        canUndo={canUndo}
+        isSaving={isSaving}
+        isMobile={isMobile}
+        league={league}
+      />
 
       {/* Player Selector Modal */}
       {showPlayerSelector && (

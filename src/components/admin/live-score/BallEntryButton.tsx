@@ -28,9 +28,9 @@ export default function BallEntryButton({
   };
 
   const sizeClasses = {
-    sm: 'w-16 h-16 text-xl',
-    md: 'w-20 h-20 text-2xl',
-    lg: 'w-24 h-24 text-3xl',
+    sm: 'w-14 h-14 text-lg p-2',
+    md: 'w-18 h-18 text-xl p-3',
+    lg: 'w-20 h-20 md:w-24 md:h-24 text-2xl md:text-3xl p-3 md:p-4',
   };
 
   return (
@@ -44,11 +44,13 @@ export default function BallEntryButton({
         ${sizeClasses[size]}
         rounded-xl
         text-white font-black
-        shadow-lg hover:shadow-xl
+        shadow-lg hover:shadow-xl active:scale-95
         transition-all duration-200
         disabled:opacity-50 disabled:cursor-not-allowed
         flex flex-col items-center justify-center
         border-2 border-white/20
+        touch-manipulation
+        min-h-[60px] min-w-[60px]
       `}
     >
       <span className="leading-none">{value}</span>

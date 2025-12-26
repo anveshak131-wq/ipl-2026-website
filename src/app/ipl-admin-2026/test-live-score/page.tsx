@@ -102,15 +102,35 @@ export default function TestLiveScorePage() {
                     borderColor: 'rgba(255, 255, 255, 0.1)',
                   }}
                 >
-                  <BallEntryPanel
+            <BallEntryPanel
               matchId="test-match"
               team1Name="Team A"
               team2Name="Team B"
               team1Id="team-a"
               team2Id="team-b"
-                    onSave={handleSaveLiveScore}
+              onSave={handleSaveLiveScore}
               players={[]}
-                    league={currentLeague}
+              league={currentLeague}
+              venue="Test Stadium"
+              date={new Date().toISOString().split('T')[0]}
+              time="19:30"
+              toss={{
+                winner: 'team1',
+                decision: 'bat',
+              }}
+              weather={{
+                temperature: 28,
+                condition: 'partly-cloudy',
+                humidity: 65,
+                windSpeed: 12,
+              }}
+              pitchReport="Hard and dry surface with even bounce. Good for stroke play. Expected to assist both batters and bowlers equally."
+              headToHead={{
+                totalMatches: 15,
+                team1Wins: 8,
+                team2Wins: 7,
+                lastMeeting: 'Team A won by 5 wickets',
+              }}
             />
             </div>
         </div>
