@@ -333,8 +333,7 @@ export function useLiveScore({
       const newTeamRuns = team.runs + teamRunDelta;
       const newTeamWickets = isWicket ? team.wickets + 1 : team.wickets;
       
-      // Cap overs at maxOvers (20 for T20)
-      const maxBalls = maxOvers * 6;
+      // Cap overs at maxOvers (20 for T20) - maxBalls already calculated above
       const cappedBalls = Math.min(newTeamBalls, maxBalls);
       const cappedOvers = ballsToOvers(cappedBalls);
 
