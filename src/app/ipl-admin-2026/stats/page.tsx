@@ -758,9 +758,11 @@ export default function AdminStatsPage() {
               <span className="text-gray-600">/</span>
               <span className="text-gray-300">Stats Hub</span>
             </div>
-            <h1 className="text-3xl font-bold text-white mb-1">Stats & Records Hub</h1>
+            <h1 className="text-4xl font-black text-white mb-2 bg-gradient-to-r from-white via-ipl-gold to-white bg-clip-text text-transparent">
+              Stats & Records Hub
+            </h1>
             <p className="text-sm text-gray-300 max-w-xl">
-              Control what fans see on the public <span className="font-semibold">/stats</span> page.
+              Control what fans see on the public <span className="font-semibold text-ipl-gold">/stats</span> page.
               Review auto-computed leaderboards, then publish a snapshot when you are ready.
             </p>
             {publishedStats?.lastUpdated && (
@@ -881,17 +883,48 @@ export default function AdminStatsPage() {
           </div>
         </div>
 
+        {/* Quick Stats Summary */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="glass-effect rounded-xl p-4 border border-blue-500/30">
+            <div className="text-xs text-gray-400 mb-1">Total Players</div>
+            <div className="text-2xl font-black text-blue-400">{players.length}</div>
+          </div>
+          <div className="glass-effect rounded-xl p-4 border border-purple-500/30">
+            <div className="text-xs text-gray-400 mb-1">Total Teams</div>
+            <div className="text-2xl font-black text-purple-400">{teams.length}</div>
+          </div>
+          <div className="glass-effect rounded-xl p-4 border border-orange-500/30">
+            <div className="text-xs text-gray-400 mb-1">Top Run Scorer</div>
+            <div className="text-lg font-bold text-orange-400 truncate">
+              {topRunScorers[0]?.name || 'N/A'}
+            </div>
+            <div className="text-xs text-gray-500">{topRunScorers[0]?.stats.runs || 0} runs</div>
+          </div>
+          <div className="glass-effect rounded-xl p-4 border border-emerald-500/30">
+            <div className="text-xs text-gray-400 mb-1">Top Wicket Taker</div>
+            <div className="text-lg font-bold text-emerald-400 truncate">
+              {topWicketTakers[0]?.name || 'N/A'}
+            </div>
+            <div className="text-xs text-gray-500">{topWicketTakers[0]?.stats.wickets || 0} wickets</div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-[1.5fr,1fr] gap-6">
           <section className="space-y-4">
-            <div className="glass-effect rounded-xl p-6">
-              <div className="flex items-center justify-between mb-3 gap-3">
-                <h2 className="text-lg font-semibold text-white">Auto-computed season leaders</h2>
+            <div className="glass-effect rounded-xl p-6 border border-white/20">
+              <div className="flex items-center justify-between mb-4 gap-3">
+                <div>
+                  <h2 className="text-xl font-bold text-white mb-1">Auto-computed Season Leaders</h2>
+                  <p className="text-xs text-gray-400">
+                    Review and edit leaderboards before publishing
+                  </p>
+                </div>
                 <button
                   type="button"
                   onClick={rebuildLeaderboardsFromStats}
-                  className="text-[11px] px-3 py-1 rounded-full border border-white/20 text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-ipl-gold to-ipl-purple text-sm font-semibold text-white hover:shadow-lg hover:shadow-ipl-gold/30 transition-all"
                 >
-                  Rebuild from latest stats
+                  Rebuild
                 </button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
