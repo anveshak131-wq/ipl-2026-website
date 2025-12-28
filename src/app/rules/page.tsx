@@ -480,7 +480,7 @@ export default function IPLRulesPage() {
             <h3 className="text-2xl font-bold text-white mb-6 text-center">Complete Documentation</h3>
             <div className="grid md:grid-cols-3 gap-6">
               <Link
-                href="/docs/IPL_2025_RULES_AND_REGULATIONS.md"
+                href="/rules/ipl-2025"
                 className="group bg-gradient-to-br from-blue-600/20 to-cyan-600/20 rounded-xl p-6 border border-blue-500/30 hover:border-blue-400 transition-all hover:scale-105"
               >
                 <FileText className="w-8 h-8 text-blue-400 mb-3" />
@@ -494,7 +494,7 @@ export default function IPLRulesPage() {
               </Link>
 
               <Link
-                href="/docs/IPL_2026_RULES_AND_REGULATIONS.md"
+                href="/rules/ipl-2026"
                 className="group bg-gradient-to-br from-purple-600/20 to-pink-600/20 rounded-xl p-6 border border-purple-500/30 hover:border-purple-400 transition-all hover:scale-105"
               >
                 <FileText className="w-8 h-8 text-purple-400 mb-3" />
@@ -508,7 +508,7 @@ export default function IPLRulesPage() {
               </Link>
 
               <Link
-                href="/docs/IPL_COMPLETE_RULES_REFERENCE.md"
+                href="/rules/quick-reference"
                 className="group bg-gradient-to-br from-amber-600/20 to-orange-600/20 rounded-xl p-6 border border-amber-500/30 hover:border-amber-400 transition-all hover:scale-105"
               >
                 <BookOpen className="w-8 h-8 text-amber-400 mb-3" />
