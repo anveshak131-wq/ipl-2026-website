@@ -285,13 +285,25 @@ export const onRequest = async (context) => {
       const predictionUserId = String(prediction.userId || '').trim();
       const currentUserId = String(user.id || '').trim();
       
+      console.log(`[UPDATE PREDICTION] Checking ownership: prediction.userId="${predictionUserId}" (type: ${typeof prediction.userId}), user.id="${currentUserId}" (type: ${typeof user.id})`);
+      
+      if (!predictionUserId || !currentUserId) {
+        console.error(`[UPDATE PREDICTION] Missing user ID: prediction.userId="${predictionUserId}", user.id="${currentUserId}"`);
+        return new Response(
+          JSON.stringify({ error: 'Invalid user identification' }),
+          { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
+      
       if (predictionUserId !== currentUserId) {
-        console.log(`Update prediction: User ${currentUserId} (type: ${typeof user.id}) attempted to update prediction ${id} owned by ${predictionUserId} (type: ${typeof prediction.userId})`);
+        console.log(`[UPDATE PREDICTION] Ownership mismatch: User ${currentUserId} attempted to update prediction ${id} owned by ${predictionUserId}`);
         return new Response(
           JSON.stringify({ error: 'You can only update your own predictions' }),
           { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
+      
+      console.log(`[UPDATE PREDICTION] Ownership verified: User ${currentUserId} owns prediction ${id}`);
 
       // Validate match is still upcoming
       const matchesData = await env.SPORTS_KV.get('matches');
