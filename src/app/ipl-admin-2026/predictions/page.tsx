@@ -11,111 +11,72 @@ export default function AdminPredictionsPage() {
   const [predictions, setPredictions] = useState<any[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [polls, setPolls] = useState<Poll[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
   const [stats, setStats] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-  const [initialLoad, setInitialLoad] = useState(true);
 
   useEffect(() => {
-    let cancelled = false;
-    let timeoutId: NodeJS.Timeout;
-
     const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
         
-        // Set a timeout to ensure we always finish loading
-        timeoutId = setTimeout(() => {
-          if (!cancelled) {
-            console.warn('Predictions page: Loading timeout, showing content anyway');
-            setLoading(false);
-          }
-        }, 5000);
-        
-        // Fetch matches - this should always work
+        // Fetch matches
         try {
           const allMatches = await api.getMatches(currentLeague);
-          if (!cancelled) {
-            setMatches(Array.isArray(allMatches) ? allMatches : []);
-          }
+          setMatches(Array.isArray(allMatches) ? allMatches : []);
         } catch (matchError) {
           console.error('Error fetching matches:', matchError);
-          if (!cancelled) {
-            setMatches([]);
-          }
+          setMatches([]);
         }
         
         // Fetch predictions based on filter
         if (selectedMatchId) {
           try {
             const matchPredictions = await api.getPredictions({ matchId: selectedMatchId });
-            if (!cancelled) {
-              setPredictions(Array.isArray(matchPredictions) ? matchPredictions : []);
-            }
+            setPredictions(Array.isArray(matchPredictions) ? matchPredictions : []);
           } catch (predError) {
             console.error('Error fetching predictions:', predError);
-            if (!cancelled) {
-              setPredictions([]);
-            }
+            setPredictions([]);
           }
           
           try {
             const pollData = await api.getPolls(selectedMatchId);
-            if (!cancelled) {
-              if (pollData) {
-                setPolls([pollData]);
-              } else {
-                setPolls([]);
-              }
+            if (pollData) {
+              setPolls([pollData]);
+            } else {
+              setPolls([]);
             }
           } catch (pollError) {
             console.error('Error fetching poll:', pollError);
-            if (!cancelled) {
-              setPolls([]);
-            }
+            setPolls([]);
           }
         } else {
           try {
             const allPredictions = await api.getPredictions({ league: currentLeague });
-            if (!cancelled) {
-              setPredictions(Array.isArray(allPredictions) ? allPredictions : []);
-            }
+            setPredictions(Array.isArray(allPredictions) ? allPredictions : []);
           } catch (predError) {
             console.error('Error fetching all predictions:', predError);
-            if (!cancelled) {
-              setPredictions([]);
-            }
+            setPredictions([]);
           }
         }
       } catch (error: any) {
         console.error('Error in fetchData:', error);
-        if (!cancelled) {
-          setError(error.message || 'Failed to load data');
-        }
+        setError(error.message || 'Failed to load data');
       } finally {
-        if (!cancelled) {
-          clearTimeout(timeoutId);
-          setLoading(false);
-          setInitialLoad(false);
-        }
+        setLoading(false);
       }
     };
 
     fetchData();
-
-    return () => {
-      cancelled = true;
-      if (timeoutId) clearTimeout(timeoutId);
-    };
   }, [currentLeague, selectedMatchId]);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
         const leaderboard = await api.getLeaderboard();
-        if (leaderboard.length > 0) {
+        if (leaderboard && leaderboard.length > 0) {
           setStats({
             totalPredictions: predictions.length,
             totalUsers: new Set(predictions.map((p) => p.userId)).size,
@@ -137,24 +98,6 @@ export default function AdminPredictionsPage() {
     const matchDateTime = new Date(`${m.date}T${m.time}`);
     return matchDateTime > new Date();
   });
-
-  // Show loading only on very first load
-  if (initialLoad && loading) {
-    return (
-      <div className="p-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
-            <Target className="w-8 h-8 text-ipl-gold" />
-            Predictions Management
-          </h1>
-          <p className="text-gray-400">View and manage user predictions and polls</p>
-        </div>
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-ipl-gold"></div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="p-6">
@@ -179,6 +122,13 @@ export default function AdminPredictionsPage() {
         </div>
       )}
 
+      {loading && (
+        <div className="mb-6 flex items-center gap-2 text-gray-400">
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-ipl-gold"></div>
+          <span>Loading data...</span>
+        </div>
+      )}
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-4">
@@ -195,7 +145,7 @@ export default function AdminPredictionsPage() {
             <div>
               <p className="text-sm text-gray-400">Active Users</p>
               <p className="text-2xl font-bold text-white mt-1">
-                {new Set(predictions.map((p) => p.userId)).size}
+                {predictions.length > 0 ? new Set(predictions.map((p) => p.userId)).size : 0}
               </p>
             </div>
             <Users className="w-8 h-8 text-blue-400" />
@@ -249,6 +199,7 @@ export default function AdminPredictionsPage() {
         {predictions.length === 0 ? (
           <div className="text-center py-8 text-gray-400">
             <p>No predictions found</p>
+            <p className="text-sm mt-2">Predictions will appear here once users start making predictions</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -299,8 +250,8 @@ export default function AdminPredictionsPage() {
                         </div>
                       )}
                       <div className="text-xs text-gray-500 mt-2">
-                        User ID: {prediction.userId.slice(0, 8)}... | Created:{' '}
-                        {new Date(prediction.createdAt).toLocaleDateString()}
+                        User ID: {prediction.userId?.slice(0, 8) || 'unknown'}... | Created:{' '}
+                        {prediction.createdAt ? new Date(prediction.createdAt).toLocaleDateString() : 'N/A'}
                       </div>
                     </div>
                     {prediction.accuracy && (
@@ -388,4 +339,3 @@ export default function AdminPredictionsPage() {
     </div>
   );
 }
-
