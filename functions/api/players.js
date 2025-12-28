@@ -304,14 +304,18 @@ export const onRequest = async (context) => {
         }
         
         const shouldBeWPL = wplTeamIds.includes(normalizedTeamId);
+        // Also check if player is in known WPL corrections list
+        const isKnownWPLPlayer = wplPlayerCorrections[player.name] !== undefined;
         
         // If player is on WPL team but marked as IPL, correct it (but only if not an IPL teamId)
-        if (shouldBeWPL && !isIPLTeam && playerLeague !== 'wpl') {
-          console.log(`[FIX] Player "${player.name}": league '${playerLeague}' -> 'wpl' (teamId: ${normalizedTeamId})`);
+        // Also fix if player is in known WPL players list
+        if ((shouldBeWPL || isKnownWPLPlayer) && !isIPLTeam && playerLeague !== 'wpl') {
+          const correctTeamId = isKnownWPLPlayer ? wplPlayerCorrections[player.name] : normalizedTeamId;
+          console.log(`[FIX] Player "${player.name}": league '${playerLeague}' -> 'wpl' (teamId: ${normalizedTeamId} -> ${correctTeamId})`);
           needsUpdate = true;
           return {
             ...player,
-            teamId: normalizedTeamId,
+            teamId: correctTeamId,
             league: 'wpl'
           };
         }
