@@ -135,9 +135,10 @@ const topRunScorers = players
 - **Primary Sort**: Total runs (descending)
 - **Secondary Metrics**: Strike rate, average, matches
 - **Minimum Qualification**: 
-  - **IPL**: Minimum 3 matches played (out of 14 total per team)
+  - **IPL (One Season)**: Minimum 5 matches played (out of 14 total per team)
+  - **IPL (Overall/Career)**: Minimum 14 matches played (across all seasons)
   - **WPL**: Minimum 4 matches played
-  - *Rationale: Prevents misleading stats from small sample sizes. Players with 1-2 good matches might have high runs but not be truly consistent performers. Note: IPL teams play 14 matches total per season, so requiring all 14 would be too restrictive.*
+  - *Rationale: Prevents misleading stats from small sample sizes. Players with 1-2 good matches might have high runs but not be truly consistent performers. For one season, 5 matches (35% of season) is meaningful. For overall/career stats, 14 matches ensures substantial participation across multiple seasons.*
 - **Leader Highlighting**: Top player gets special styling (gold/purple gradient)
 
 ### Current Implementation
@@ -182,9 +183,10 @@ const topWicketTakers = players
 - **Primary Sort**: Total wickets (descending)
 - **Secondary Metrics**: Economy rate, bowling average, best bowling
 - **Minimum Qualification**: 
-  - **IPL**: Minimum 3 matches played + at least 1 wicket (out of 14 total per team)
+  - **IPL (One Season)**: Minimum 5 matches played + at least 1 wicket (out of 14 total per team)
+  - **IPL (Overall/Career)**: Minimum 14 matches played + at least 1 wicket (across all seasons)
   - **WPL**: Minimum 4 matches played + at least 1 wicket
-  - *Rationale: Ensures bowlers have meaningful participation. Prevents players who bowled in 1-2 matches from topping charts. Note: IPL teams play 14 matches total per season, so requiring all 14 would be too restrictive.*
+  - *Rationale: Ensures bowlers have meaningful participation. Prevents players who bowled in 1-2 matches from topping charts. For one season, 5 matches ensures meaningful participation. For overall/career stats, 14 matches ensures substantial participation across multiple seasons.*
 - **Leader Highlighting**: Top player gets special styling (emerald/teal gradient)
 
 ### Current Implementation
@@ -216,11 +218,12 @@ function getBowlingFormLabel(player: Player): 'Hot' | 'Consistent' | 'Cooling' {
 
 #### Criteria
 - **Minimum Qualification**: 
-  - **IPL**: Minimum 3 matches + 300 runs in the tournament (out of 14 total per team)
+  - **IPL (One Season)**: Minimum 5 matches + 300 runs in the tournament (out of 14 total per team)
+  - **IPL (Overall/Career)**: Minimum 14 matches + 300 runs (across all seasons)
   - **WPL**: Minimum 4 matches + 200 runs in the tournament
 - **Sort**: Strike rate (descending)
 - **Purpose**: Identify the most aggressive/effective batsmen
-- **Rationale**: 300 runs (IPL) / 200 runs (WPL) ensures meaningful contribution. Minimum matches prevent players with 1-2 explosive innings from dominating. Note: IPL teams play 14 matches total per season, so requiring all 14 would be too restrictive.
+- **Rationale**: 300 runs (IPL) / 200 runs (WPL) ensures meaningful contribution. Minimum matches prevent players with 1-2 explosive innings from dominating. For one season, 5 matches ensures meaningful participation. For overall/career stats, 14 matches ensures substantial participation across multiple seasons.
 
 ```typescript
 const bestStrikeRates = players
@@ -233,11 +236,12 @@ const bestStrikeRates = players
 
 #### Criteria
 - **Minimum Qualification**: 
-  - **IPL**: Minimum 3 matches + 20 wickets + 18 overs bowled (out of 14 total per team)
+  - **IPL (One Season)**: Minimum 5 matches + 20 wickets + 30 overs bowled (out of 14 total per team)
+  - **IPL (Overall/Career)**: Minimum 14 matches + 20 wickets + 30 overs bowled (across all seasons)
   - **WPL**: Minimum 4 matches + 15 wickets + 20 overs bowled
 - **Sort**: Economy rate (ascending - lower is better)
 - **Purpose**: Identify the most economical bowlers
-- **Rationale**: Multiple criteria ensure meaningful sample size. A bowler with 2-3 good overs might have great economy but not be representative. Note: IPL teams play 14 matches total per season, so requiring all 14 would be too restrictive.
+- **Rationale**: Multiple criteria ensure meaningful sample size. A bowler with 2-3 good overs might have great economy but not be representative. For one season, 5 matches ensures meaningful participation. For overall/career stats, 14 matches ensures substantial participation across multiple seasons.
 
 ```typescript
 const bestEconomyRates = players
@@ -508,12 +512,12 @@ Live Score Entry → Player Stats Update → Leaderboard Recalculation → UI Re
 
 ### Qualification Criteria Summary
 
-| Statistic | IPL Requirements | WPL Requirements |
-|-----------|------------------|------------------|
-| **Orange Cap** | 3 matches (out of 14 total) | 4 matches |
-| **Purple Cap** | 3 matches + 1 wicket (out of 14 total) | 4 matches + 1 wicket |
-| **Best Strike Rate** | 3 matches + 300 runs (out of 14 total) | 4 matches + 200 runs |
-| **Best Economy** | 3 matches + 20 wickets + 18 overs (out of 14 total) | 4 matches + 15 wickets + 20 overs |
+| Statistic | IPL (One Season) | IPL (Overall/Career) | WPL |
+|-----------|------------------|---------------------|-----|
+| **Orange Cap** | 5 matches | 14 matches (all seasons) | 4 matches |
+| **Purple Cap** | 5 matches + 1 wicket | 14 matches + 1 wicket (all seasons) | 4 matches + 1 wicket |
+| **Best Strike Rate** | 5 matches + 300 runs | 14 matches + 300 runs (all seasons) | 4 matches + 200 runs |
+| **Best Economy** | 5 matches + 20 wickets + 30 overs | 14 matches + 20 wickets + 30 overs (all seasons) | 4 matches + 15 wickets + 20 overs |
 
 ### Implementation
 
