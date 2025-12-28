@@ -269,7 +269,8 @@ export const onRequest = async (context) => {
         'Pooja Vastrakar': '12', // RCB-W
         'Renuka Singh': '12', // RCB-W
         'Devika Vaidya': '14', // Gujarat Giants
-        'Ashleigh Gardner': '14' // Gujarat Giants
+        'Ashleigh Gardner': '14', // Gujarat Giants
+        'Georgia Voll': '11' // MI-W (WPL player, not IPL)
       };
       
       // Aggressive migration: Fix league property based on teamId and known player corrections
