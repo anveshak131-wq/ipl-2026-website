@@ -356,7 +356,7 @@ export const onRequest = async (context) => {
       });
       
       // DEDUPLICATION: Remove duplicate WPL players (same name, case-insensitive)
-      // Keep the first occurrence and remove subsequent duplicates
+      // Keep the player with the correct team assignment (from wplPlayerCorrections if applicable)
       const seenWPLPlayers = new Map();
       const deduplicatedPlayers = [];
       let duplicatesRemoved = 0;
@@ -364,19 +364,58 @@ export const onRequest = async (context) => {
       for (const player of players) {
         const playerLeague = player.league || 'ipl';
         const playerNameLower = player.name?.toLowerCase().trim() || '';
+        const normalizedTeamId = normalizeTeamId(player.teamId);
         
         // For WPL players, check for duplicates by name (case-insensitive)
-        if (playerLeague === 'wpl' || wplTeamIds.includes(normalizeTeamId(player.teamId))) {
+        if (playerLeague === 'wpl' || wplTeamIds.includes(normalizedTeamId)) {
           if (seenWPLPlayers.has(playerNameLower)) {
-            // Duplicate found - log and skip
+            // Duplicate found - decide which one to keep
             const existingPlayer = seenWPLPlayers.get(playerNameLower);
-            console.log(`[DUPLICATE] Removing duplicate WPL player: "${player.name}" (ID: ${player.id}, teamId: ${player.teamId}). Keeping existing: ID ${existingPlayer.id}, teamId: ${existingPlayer.teamId}`);
-            duplicatesRemoved++;
-            needsUpdate = true;
-            continue;
+            const existingTeamId = normalizeTeamId(existingPlayer.teamId);
+            
+            // Check if either player has a known correction
+            const correctTeamId = wplPlayerCorrections[player.name];
+            const existingCorrectTeamId = wplPlayerCorrections[existingPlayer.name];
+            
+            // Priority: Keep the one with the correct teamId from corrections
+            let keepExisting = true;
+            if (correctTeamId && normalizedTeamId === correctTeamId) {
+              // Current player has correct teamId
+              keepExisting = false;
+            } else if (existingCorrectTeamId && existingTeamId === existingCorrectTeamId) {
+              // Existing player has correct teamId
+              keepExisting = true;
+            } else if (correctTeamId && normalizedTeamId !== correctTeamId) {
+              // Current player should have correct teamId but doesn't - keep existing
+              keepExisting = true;
+            } else if (existingCorrectTeamId && existingTeamId !== existingCorrectTeamId) {
+              // Existing player should have correct teamId but doesn't - keep current
+              keepExisting = false;
+            }
+            
+            if (keepExisting) {
+              // Keep existing, remove current
+              console.log(`[DUPLICATE] Removing duplicate WPL player: "${player.name}" (ID: ${player.id}, teamId: ${player.teamId}). Keeping existing: ID ${existingPlayer.id}, teamId: ${existingPlayer.teamId}`);
+              duplicatesRemoved++;
+              needsUpdate = true;
+              continue;
+            } else {
+              // Replace existing with current (which has correct teamId)
+              console.log(`[DUPLICATE] Replacing WPL player: "${player.name}" (ID: ${existingPlayer.id}, teamId: ${existingPlayer.teamId}) with correct version (ID: ${player.id}, teamId: ${player.teamId})`);
+              // Remove the existing one from deduplicatedPlayers
+              const existingIndex = deduplicatedPlayers.findIndex(p => p.id === existingPlayer.id);
+              if (existingIndex !== -1) {
+                deduplicatedPlayers.splice(existingIndex, 1);
+              }
+              duplicatesRemoved++;
+              needsUpdate = true;
+              // Update the map to point to current player
+              seenWPLPlayers.set(playerNameLower, player);
+            }
+          } else {
+            // First occurrence - mark as seen
+            seenWPLPlayers.set(playerNameLower, player);
           }
-          // Mark as seen
-          seenWPLPlayers.set(playerNameLower, player);
         }
         
         deduplicatedPlayers.push(player);
