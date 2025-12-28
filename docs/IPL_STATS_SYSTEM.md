@@ -134,7 +134,10 @@ const topRunScorers = players
 ### Display Criteria
 - **Primary Sort**: Total runs (descending)
 - **Secondary Metrics**: Strike rate, average, matches
-- **Minimum Qualification**: No minimum (all players eligible)
+- **Minimum Qualification**: 
+  - **IPL**: Minimum 5 matches played
+  - **WPL**: Minimum 4 matches played
+  - *Rationale: Prevents misleading stats from small sample sizes. Players with 2-3 good matches might have high runs but not be truly consistent performers.*
 - **Leader Highlighting**: Top player gets special styling (gold/purple gradient)
 
 ### Current Implementation
@@ -178,7 +181,10 @@ const topWicketTakers = players
 ### Display Criteria
 - **Primary Sort**: Total wickets (descending)
 - **Secondary Metrics**: Economy rate, bowling average, best bowling
-- **Minimum Qualification**: Must have at least 1 wicket
+- **Minimum Qualification**: 
+  - **IPL**: Minimum 5 matches played + at least 1 wicket
+  - **WPL**: Minimum 4 matches played + at least 1 wicket
+  - *Rationale: Ensures bowlers have meaningful participation. Prevents players who bowled in 1-2 matches from topping charts.*
 - **Leader Highlighting**: Top player gets special styling (emerald/teal gradient)
 
 ### Current Implementation
@@ -209,13 +215,16 @@ function getBowlingFormLabel(player: Player): 'Hot' | 'Consistent' | 'Cooling' {
 ### Best Strike Rates
 
 #### Criteria
-- **Minimum Qualification**: 300 runs in the tournament
+- **Minimum Qualification**: 
+  - **IPL**: Minimum 5 matches + 300 runs in the tournament
+  - **WPL**: Minimum 4 matches + 200 runs in the tournament
 - **Sort**: Strike rate (descending)
 - **Purpose**: Identify the most aggressive/effective batsmen
+- **Rationale**: 300 runs (IPL) / 200 runs (WPL) ensures meaningful contribution. Minimum matches prevent players with 1-2 explosive innings from dominating.
 
 ```typescript
 const bestStrikeRates = players
-  .filter((p) => p.stats.runs >= 300)
+  .filter((p) => p.stats.matches >= 5 && p.stats.runs >= 300)
   .sort((a, b) => b.stats.strikeRate - a.stats.strikeRate)
   .slice(0, 50);
 ```
@@ -223,13 +232,21 @@ const bestStrikeRates = players
 ### Best Economy Rates
 
 #### Criteria
-- **Minimum Qualification**: 20 wickets in the tournament
+- **Minimum Qualification**: 
+  - **IPL**: Minimum 5 matches + 20 wickets + 30 overs bowled
+  - **WPL**: Minimum 4 matches + 15 wickets + 20 overs bowled
 - **Sort**: Economy rate (ascending - lower is better)
 - **Purpose**: Identify the most economical bowlers
+- **Rationale**: Multiple criteria ensure meaningful sample size. A bowler with 2-3 good overs might have great economy but not be representative.
 
 ```typescript
 const bestEconomyRates = players
-  .filter((p) => p.stats.wickets >= 20 && p.stats.economy > 0)
+  .filter((p) => {
+    const matches = p.stats.matches >= 5; // IPL: 5, WPL: 4
+    const wickets = p.stats.wickets >= 20; // IPL: 20, WPL: 15
+    const overs = (p.stats.balls || 0) / 6 >= 30; // IPL: 30, WPL: 20
+    return matches && wickets && overs && p.stats.economy > 0;
+  })
   .sort((a, b) => a.stats.economy - b.stats.economy)
   .slice(0, 5);
 ```
@@ -475,6 +492,39 @@ Live Score Entry → Player Stats Update → Leaderboard Recalculation → UI Re
 
 ---
 
+## 13. Qualification Requirements
+
+### Why Minimum Qualifications Matter
+
+**Problem**: Small sample sizes can lead to misleading statistics
+- A player who scores 50 runs in 1 match has a strike rate of 200, but it's not representative
+- A bowler who bowls 2 overs and takes 1 wicket might have a great economy rate, but it's not meaningful
+- Players with 2-3 good matches early in the season might top charts but not be truly best
+
+**Solution**: Minimum match and performance thresholds
+- Ensures statistics are based on meaningful participation
+- Prevents anomalies from small sample sizes
+- Industry-standard approach used in professional cricket
+
+### Qualification Criteria Summary
+
+| Statistic | IPL Requirements | WPL Requirements |
+|-----------|------------------|------------------|
+| **Orange Cap** | 5 matches | 4 matches |
+| **Purple Cap** | 5 matches + 1 wicket | 4 matches + 1 wicket |
+| **Best Strike Rate** | 5 matches + 300 runs | 4 matches + 200 runs |
+| **Best Economy** | 5 matches + 20 wickets + 30 overs | 4 matches + 15 wickets + 20 overs |
+
+### Implementation
+
+The qualification system is implemented in `src/lib/statsQualifications.ts` and automatically applied to all leaderboards. Qualifications are:
+- **League-aware**: Different thresholds for IPL vs WPL
+- **Configurable**: Easy to adjust based on tournament structure
+- **Transparent**: Qualification requirements are displayed to users
+- **Automatic**: Applied automatically when computing leaderboards
+
+---
+
 ## Summary
 
 The IPL statistics system tracks comprehensive batting and bowling metrics, automatically calculates leaderboards for Orange Cap and Purple Cap races, and provides admin tools for publishing curated statistics to fans. The system supports both real-time updates during matches and manual curation for official publications.
@@ -487,4 +537,7 @@ The IPL statistics system tracks comprehensive batting and bowling metrics, auto
 - ✅ Admin publishing system
 - ✅ Real-time updates from live scores
 - ✅ Form indicators and contextual insights
+- ✅ **Minimum match qualifications** (prevents misleading stats from small sample sizes)
+- ✅ **League-aware thresholds** (IPL vs WPL)
+- ✅ **Transparent qualification display** (users see requirements)
 
