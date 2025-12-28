@@ -75,7 +75,8 @@ export default function Navbar() {
     { href: getLeagueAwareHref('/news'), label: 'News', emoji: 'fire' },
     // New Pages
     { href: '/matchday', label: 'Match Day', emoji: 'venue' },
-    { href: '/stories', label: 'Fan Stories', emoji: 'people' },
+    // Fan Stories temporarily hidden from end-user navigation
+    // { href: '/stories', label: 'Fan Stories', emoji: 'people' },
     // Analytics & Insights (only for IPL, not WPL)
     ...(currentLeague !== 'wpl' ? [{ href: '/stats', label: 'Stats', emoji: 'chart' as NavEmojiName }] : []),
     // Predictions temporarily removed - will be added back when improved
