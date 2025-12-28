@@ -239,12 +239,28 @@ export const onRequest = async (context) => {
 
       if (!user) {
         return new Response(
-          JSON.stringify({ error: 'Unauthorized' }),
+          JSON.stringify({ error: 'Unauthorized. Please log in to update predictions.' }),
           { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
 
-      const body = await request.json();
+      if (user.isBlocked) {
+        return new Response(
+          JSON.stringify({ error: 'Your account is blocked' }),
+          { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
+
+      let body;
+      try {
+        body = await request.json();
+      } catch (e) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid request body' }),
+          { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        );
+      }
+
       const { id, predictedWinner, playerPredictions } = body;
 
       if (!id) {
@@ -265,10 +281,11 @@ export const onRequest = async (context) => {
 
       const prediction = JSON.parse(predData);
 
-      // Check ownership
+      // Check ownership - allow if userId matches
       if (prediction.userId !== user.id) {
+        console.log(`Update prediction: User ${user.id} attempted to update prediction ${id} owned by ${prediction.userId}`);
         return new Response(
-          JSON.stringify({ error: 'Forbidden' }),
+          JSON.stringify({ error: 'You can only update your own predictions' }),
           { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
@@ -286,9 +303,17 @@ export const onRequest = async (context) => {
         }
       }
 
-      // Update prediction
-      prediction.predictedWinner = predictedWinner ?? prediction.predictedWinner;
-      prediction.playerPredictions = playerPredictions ?? prediction.playerPredictions;
+      // Update prediction - merge playerPredictions if provided
+      if (predictedWinner !== undefined) {
+        prediction.predictedWinner = predictedWinner;
+      }
+      if (playerPredictions !== undefined) {
+        // Merge player predictions instead of replacing entirely
+        prediction.playerPredictions = {
+          ...(prediction.playerPredictions || {}),
+          ...playerPredictions,
+        };
+      }
       prediction.updatedAt = new Date().toISOString();
 
       await env.SPORTS_KV.put(`prediction:${id}`, JSON.stringify(prediction), {

@@ -65,7 +65,18 @@ export default function PredictionForm({ match, existingPrediction, onSuccess }:
       };
 
       if (existingPrediction) {
-        await api.updatePrediction(existingPrediction.id, predictionData);
+        // For updates, send all current values (not just changed ones)
+        // This ensures the API receives complete data
+        const updateData = {
+          predictedWinner,
+          playerPredictions: {
+            ...(topScorer && { topScorer }),
+            ...(mostWickets && { mostWickets }),
+            ...(playerOfMatch && { playerOfMatch }),
+          },
+        };
+        
+        await api.updatePrediction(existingPrediction.id, updateData);
       } else {
         await api.createPrediction(predictionData);
       }
