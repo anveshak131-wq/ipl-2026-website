@@ -79,8 +79,8 @@ export default function Navbar() {
     // { href: '/stories', label: 'Fan Stories', emoji: 'people' },
     // Analytics & Insights (only for IPL, not WPL)
     ...(currentLeague !== 'wpl' ? [{ href: '/stats', label: 'Stats', emoji: 'chart' as NavEmojiName }] : []),
-    // Predictions temporarily removed - will be added back when improved
-    // { href: '/predictions', label: 'Predictions', emoji: 'target' },
+    // Predictions & Engagement
+    { href: '/predictions', label: 'Predictions', emoji: 'target' },
   ];
 
   const secondaryNavItems: NavItem[] = [
@@ -92,16 +92,14 @@ export default function Navbar() {
 
   const getNavBadgeLabel = (href: string): string | null => {
     if (href === '/stats') return 'Numbers';
-    // Predictions temporarily removed
-    // if (href === '/predictions') return 'AI Picks';
+    if (href === '/predictions') return 'Predict';
     return null;
   };
 
   const getNavTooltip = (href: string): string | null => {
     if (href === '/stats') return 'Leaderboards, records, and team comparisons';
-    // Predictions temporarily removed
-    // if (href === '/predictions')
-    //   return 'AI-powered match win chances & toss insights';
+    if (href === '/predictions')
+      return 'Predict match outcomes, player performances, and compete on leaderboards';
     return null;
   };
 

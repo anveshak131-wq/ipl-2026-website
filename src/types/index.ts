@@ -218,3 +218,58 @@ export interface KeyPlayers {
   deathSpecialistIds?: string[];
   allRoundXFactorIds?: string[];
 }
+
+export interface Prediction {
+  id: string;
+  userId: string;
+  matchId: string;
+  league: League;
+  predictedWinner: 'team1' | 'team2';
+  playerPredictions?: {
+    topScorer?: string; // Player ID
+    mostWickets?: string; // Player ID
+    playerOfMatch?: string; // Player ID
+  };
+  createdAt: string;
+  updatedAt: string;
+  accuracy?: {
+    matchWinner: boolean;
+    topScorer: boolean;
+    mostWickets: boolean;
+    playerOfMatch: boolean;
+    points: number; // Total points earned (0-30)
+    calculatedAt?: string;
+  };
+}
+
+export interface Poll {
+  id: string;
+  matchId: string;
+  league: League;
+  question: string;
+  options: Array<{
+    id: string;
+    text: string;
+    votes: number;
+  }>;
+  createdAt: string;
+  createdBy?: string; // User ID or 'admin'
+  isActive: boolean;
+}
+
+export interface PredictionStats {
+  userId: string;
+  totalPredictions: number;
+  completedPredictions: number;
+  accuracy: {
+    matchWinner: number; // Percentage
+    topScorer: number;
+    mostWickets: number;
+    playerOfMatch: number;
+    overall: number; // Overall accuracy percentage
+  };
+  totalPoints: number;
+  averagePoints: number;
+  rank?: number; // Global rank
+  wins: number; // Perfect predictions (30 points)
+}

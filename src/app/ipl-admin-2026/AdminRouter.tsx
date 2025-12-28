@@ -26,6 +26,7 @@ import AdminCoaches from './coaches/page';
 import AdminDemo from './demo/page';
 import AdminMatchday from './components/AdminMatchday';
 import AdminStories from './components/AdminStories';
+import AdminPredictions from './predictions/page';
 
 export default function AdminRouter() {
   const router = useRouter();
@@ -207,6 +208,8 @@ export default function AdminRouter() {
       return <AdminMatchday />;
     } else if (pathname === '/ipl-admin-2026/stories') {
       return <AdminStories />;
+    } else if (pathname === '/ipl-admin-2026/predictions') {
+      return <AdminPredictions />;
     }
     return <AdminDashboard />;
   };

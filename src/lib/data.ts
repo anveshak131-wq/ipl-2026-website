@@ -870,5 +870,183 @@ export const api = {
       console.error('Error deleting player:', error);
       throw error;
     }
+  },
+
+  // Predictions API
+  createPrediction: async (prediction: {
+    matchId: string;
+    predictedWinner: 'team1' | 'team2';
+    playerPredictions?: {
+      topScorer?: string;
+      mostWickets?: string;
+      playerOfMatch?: string;
+    };
+    league: 'ipl' | 'wpl';
+  }): Promise<any> => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      const response = await fetch('/api/predictions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(prediction)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || 'Failed to create prediction');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating prediction:', error);
+      throw error;
+    }
+  },
+
+  getPredictions: async (filters?: {
+    matchId?: string;
+    userId?: string;
+    league?: 'ipl' | 'wpl';
+  }): Promise<any[]> => {
+    try {
+      const params = new URLSearchParams();
+      if (filters?.matchId) params.append('matchId', filters.matchId);
+      if (filters?.userId) params.append('userId', filters.userId);
+      if (filters?.league) params.append('league', filters.league);
+
+      const url = `/api/predictions${params.toString() ? `?${params.toString()}` : ''}`;
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch predictions');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching predictions:', error);
+      return [];
+    }
+  },
+
+  updatePrediction: async (id: string, updates: {
+    predictedWinner?: 'team1' | 'team2';
+    playerPredictions?: {
+      topScorer?: string;
+      mostWickets?: string;
+      playerOfMatch?: string;
+    };
+  }): Promise<any> => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      const response = await fetch('/api/predictions', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ id, ...updates })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || 'Failed to update prediction');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating prediction:', error);
+      throw error;
+    }
+  },
+
+  getLeaderboard: async (matchId?: string): Promise<any[]> => {
+    try {
+      const url = `/api/predictions/leaderboard${matchId ? `?matchId=${matchId}` : ''}`;
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch leaderboard');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching leaderboard:', error);
+      return [];
+    }
+  },
+
+  getPredictionStats: async (userId: string): Promise<any> => {
+    try {
+      const response = await fetch(`/api/predictions/stats?userId=${userId}`);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch prediction stats');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching prediction stats:', error);
+      return null;
+    }
+  },
+
+  voteOnPoll: async (matchId: string, pollId: string, optionId: string): Promise<any> => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      const response = await fetch('/api/predictions/polls', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          action: 'vote',
+          matchId,
+          pollId,
+          optionId
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || 'Failed to vote on poll');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error voting on poll:', error);
+      throw error;
+    }
+  },
+
+  getPolls: async (matchId: string): Promise<any | null> => {
+    try {
+      const response = await fetch(`/api/predictions/polls?matchId=${matchId}`);
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch polls');
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching polls:', error);
+      return null;
+    }
   }
 };

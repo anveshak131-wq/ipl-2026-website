@@ -1,55 +1,297 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import AuroraBackground from '@/components/ui/AuroraBackground';
-import CustomEmoji from '@/components/emoji/CustomEmoji';
+import MatchSelector from '@/components/predictions/MatchSelector';
+import PredictionForm from '@/components/predictions/PredictionForm';
+import PollCard from '@/components/predictions/PollCard';
+import Leaderboard from '@/components/predictions/Leaderboard';
+import PredictionHistory from '@/components/predictions/PredictionHistory';
+import AccuracyStats from '@/components/predictions/AccuracyStats';
+import { api } from '@/lib/data';
+import { useLeague } from '@/contexts/LeagueContext';
+import type { Match, Poll } from '@/types';
+import { Target, Trophy, BarChart3, History, TrendingUp } from 'lucide-react';
 
 export default function PredictionsPage() {
-  const router = useRouter();
+  const { currentLeague } = useLeague();
+  const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
+  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+  const [existingPrediction, setExistingPrediction] = useState<any | null>(null);
+  const [poll, setPoll] = useState<Poll | null>(null);
+  const [activeTab, setActiveTab] = useState<'predict' | 'leaderboard' | 'history' | 'stats'>('predict');
+  const [user, setUser] = useState<any | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    // Redirect to home page - predictions page is temporarily unavailable
-    router.replace('/');
-  }, [router]);
+    // Get current user
+    if (typeof window !== 'undefined') {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        try {
+          setUser(JSON.parse(userStr));
+        } catch (e) {
+          console.error('Error parsing user:', e);
+        }
+      }
+    }
+  }, []);
 
-  // Show a brief message before redirect
+  useEffect(() => {
+    const fetchMatchData = async () => {
+      if (!selectedMatchId) {
+        setSelectedMatch(null);
+        setExistingPrediction(null);
+        setPoll(null);
+        return;
+      }
+
+      try {
+        // Fetch match details
+        const matches = await api.getMatches(currentLeague);
+        const match = matches.find((m: Match) => m.id === selectedMatchId);
+        setSelectedMatch(match || null);
+
+        // Fetch existing prediction if user is logged in
+        if (user?.id) {
+          const predictions = await api.getPredictions({
+            matchId: selectedMatchId,
+            userId: user.id,
+          });
+          setExistingPrediction(predictions.length > 0 ? predictions[0] : null);
+        } else {
+          setExistingPrediction(null);
+        }
+
+        // Fetch poll
+        const pollData = await api.getPolls(selectedMatchId);
+        setPoll(pollData);
+      } catch (error) {
+        console.error('Error fetching match data:', error);
+      }
+    };
+
+    fetchMatchData();
+  }, [selectedMatchId, currentLeague, user, refreshKey]);
+
+  const handlePredictionSuccess = () => {
+    setRefreshKey((k) => k + 1);
+    setActiveTab('history');
+  };
+
+  const handlePollVote = () => {
+    setRefreshKey((k) => k + 1);
+  };
+
+  const tabs = [
+    { id: 'predict', label: 'Make Prediction', icon: Target },
+    { id: 'leaderboard', label: 'Leaderboard', icon: Trophy },
+    { id: 'history', label: 'My History', icon: History },
+    { id: 'stats', label: 'My Stats', icon: TrendingUp },
+  ];
+
   return (
     <div className="min-h-screen">
       <Navbar />
       <main className="relative py-16 min-h-screen overflow-hidden section-match-bg">
         <AuroraBackground />
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="flex flex-col items-center justify-center min-h-[60vh] text-center"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-8"
           >
-            <motion.div
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ duration: 2, repeat: Infinity, repeatDelay: 2 }}
-              className="mb-6"
-            >
-              <CustomEmoji type="target" size={80} animate={true} />
-            </motion.div>
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-              Predictions Coming Soon
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 flex items-center justify-center gap-3">
+              <Target className="w-10 h-10 text-ipl-gold" />
+              Match Predictions
             </h1>
-            <p className="text-gray-300 text-lg mb-6 max-w-md">
-              We're working on improving the predictions feature. It will be back soon with better AI-powered insights!
+            <p className="text-gray-300 text-lg max-w-2xl mx-auto">
+              Predict match outcomes, player performances, and compete on the leaderboard!
             </p>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => router.push('/')}
-              className="px-6 py-3 bg-gradient-to-r from-ipl-gold to-ipl-purple rounded-lg text-white font-semibold hover:from-ipl-gold/90 hover:to-ipl-purple/90 transition-all duration-200 shadow-lg shadow-ipl-gold/20"
-            >
-              Go to Home
-            </motion.button>
           </motion.div>
+
+          {/* Tabs */}
+          <div className="flex flex-wrap gap-2 mb-6 justify-center">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <motion.button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
+                    isActive
+                      ? 'bg-gradient-to-r from-ipl-gold to-ipl-purple text-white shadow-lg shadow-ipl-gold/20'
+                      : 'bg-gray-800/50 text-gray-300 hover:bg-gray-700/50'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span>{tab.label}</span>
+                </motion.button>
+              );
+            })}
+          </div>
+
+          {/* Content */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Main Content */}
+            <div className="lg:col-span-2 space-y-6">
+              {activeTab === 'predict' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gray-900/80 backdrop-blur-sm border border-gray-700 rounded-xl p-6"
+                >
+                  <MatchSelector
+                    selectedMatchId={selectedMatchId}
+                    onSelectMatch={setSelectedMatchId}
+                  />
+                  {selectedMatch && (
+                    <div className="mt-6 pt-6 border-t border-gray-700">
+                      <PredictionForm
+                        match={selectedMatch}
+                        existingPrediction={existingPrediction}
+                        onSuccess={handlePredictionSuccess}
+                      />
+                    </div>
+                  )}
+                  {poll && (
+                    <div className="mt-6 pt-6 border-t border-gray-700">
+                      <PollCard poll={poll} matchId={selectedMatchId!} onVote={handlePollVote} />
+                    </div>
+                  )}
+                </motion.div>
+              )}
+
+              {activeTab === 'leaderboard' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gray-900/80 backdrop-blur-sm border border-gray-700 rounded-xl p-6"
+                >
+                  <Leaderboard matchId={selectedMatchId || undefined} currentUserId={user?.id} />
+                </motion.div>
+              )}
+
+              {activeTab === 'history' && user?.id && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gray-900/80 backdrop-blur-sm border border-gray-700 rounded-xl p-6"
+                >
+                  <PredictionHistory userId={user.id} />
+                </motion.div>
+              )}
+
+              {activeTab === 'history' && !user && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gray-900/80 backdrop-blur-sm border border-gray-700 rounded-xl p-6 text-center py-12"
+                >
+                  <p className="text-gray-400 mb-4">Please log in to view your prediction history</p>
+                  <a
+                    href="/account"
+                    className="inline-block px-6 py-3 bg-gradient-to-r from-ipl-gold to-ipl-purple rounded-lg text-white font-semibold hover:from-ipl-gold/90 hover:to-ipl-purple/90 transition-all"
+                  >
+                    Go to Account
+                  </a>
+                </motion.div>
+              )}
+
+              {activeTab === 'stats' && user?.id && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gray-900/80 backdrop-blur-sm border border-gray-700 rounded-xl p-6"
+                >
+                  <AccuracyStats userId={user.id} />
+                </motion.div>
+              )}
+
+              {activeTab === 'stats' && !user && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-gray-900/80 backdrop-blur-sm border border-gray-700 rounded-xl p-6 text-center py-12"
+                >
+                  <p className="text-gray-400 mb-4">Please log in to view your prediction statistics</p>
+                  <a
+                    href="/account"
+                    className="inline-block px-6 py-3 bg-gradient-to-r from-ipl-gold to-ipl-purple rounded-lg text-white font-semibold hover:from-ipl-gold/90 hover:to-ipl-purple/90 transition-all"
+                  >
+                    Go to Account
+                  </a>
+                </motion.div>
+              )}
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-6">
+              {/* Quick Stats */}
+              {user?.id && (
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="bg-gray-900/80 backdrop-blur-sm border border-gray-700 rounded-xl p-6"
+                >
+                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5 text-ipl-gold" />
+                    Quick Stats
+                  </h3>
+                  <AccuracyStats userId={user.id} />
+                </motion.div>
+              )}
+
+              {/* Info Card */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="bg-gradient-to-br from-ipl-gold/20 to-ipl-purple/20 border border-ipl-gold/50 rounded-xl p-6"
+              >
+                <h3 className="text-lg font-semibold text-white mb-3">How it works</h3>
+                <ul className="space-y-2 text-sm text-gray-300">
+                  <li className="flex items-start gap-2">
+                    <span className="text-ipl-gold">•</span>
+                    <span>Predict match winners and player performances</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-ipl-gold">•</span>
+                    <span>Earn points for accurate predictions</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-ipl-gold">•</span>
+                    <span>Compete on the global leaderboard</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-ipl-gold">•</span>
+                    <span>Track your prediction accuracy over time</span>
+                  </li>
+                </ul>
+                <div className="mt-4 pt-4 border-t border-ipl-gold/30">
+                  <div className="text-xs text-gray-400">
+                    <strong className="text-ipl-gold">Scoring:</strong>
+                    <br />
+                    Match Winner: 10 pts
+                    <br />
+                    Top Scorer: 5 pts
+                    <br />
+                    Most Wickets: 5 pts
+                    <br />
+                    Player of Match: 10 pts
+                    <br />
+                    <strong>Total: 30 pts per match</strong>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
         </div>
       </main>
       <Footer />

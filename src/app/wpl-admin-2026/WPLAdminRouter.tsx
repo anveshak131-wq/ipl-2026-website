@@ -170,6 +170,20 @@ export default function WPLAdminRouter() {
         </div>
       );
     }
+    
+    if (pathname.includes('/predictions')) {
+      return (
+        <div>
+          <WPLAdminSidebar currentPage="predictions" />
+          <div className="ml-64">
+            <GlobalSearch />
+            <div className="p-6">
+              {/* Predictions admin page will be rendered by Next.js routing */}
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     // Default dashboard
     return (
