@@ -420,6 +420,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
           </svg>
         ),
         group: 'Content',
+        shortcut: 'S',
       }] : []),
     ],
     Tools: [
