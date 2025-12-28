@@ -270,38 +270,50 @@ export const onRequest = async (context) => {
         'Renuka Singh': '12', // RCB-W
         'Devika Vaidya': '14', // Gujarat Giants
         'Ashleigh Gardner': '14', // Gujarat Giants
-        'Georgia Voll': '11' // MI-W (WPL player, not IPL)
+        'Georgia Voll': '12' // RCB-W (WPL player, not IPL)
       };
       
-      // Aggressive migration: Fix league property based on teamId and known player corrections
-      let needsUpdate = false;
-      players = players.map(player => {
-        let normalizedTeamId = normalizeTeamId(player.teamId);
-        const playerLeague = player.league || 'ipl';
-        const isIPLTeam = iplTeamIds.includes(normalizedTeamId);
-        const isWPLTeam = wplTeamIds.includes(normalizedTeamId);
-        const isWPLPlayer = playerLeague === 'wpl' || isWPLTeam;
-        
-        // CRITICAL: Protect IPL players - never convert IPL teamIds to WPL
-        if (isIPLTeam && playerLeague === 'wpl') {
-          console.log(`[FIX] Player "${player.name}": Incorrectly marked as WPL, correcting to IPL (teamId: ${normalizedTeamId})`);
-          needsUpdate = true;
-          return {
-            ...player,
-            teamId: normalizedTeamId,
-            league: 'ipl'
-          };
-        }
-        
-        // Check if this player has a known correction (ONLY apply to WPL players)
-        if (isWPLPlayer && wplPlayerCorrections[player.name]) {
-          const correctTeamId = wplPlayerCorrections[player.name];
-          if (normalizedTeamId !== correctTeamId) {
-            console.log(`[CORRECT] Player "${player.name}": teamId '${normalizedTeamId}' -> '${correctTeamId}' (known WPL player)`);
-            needsUpdate = true;
-            normalizedTeamId = correctTeamId;
+        // Aggressive migration: Fix league property based on teamId and known player corrections
+        let needsUpdate = false;
+        players = players.map(player => {
+          let normalizedTeamId = normalizeTeamId(player.teamId);
+          const playerLeague = player.league || 'ipl';
+          const isIPLTeam = iplTeamIds.includes(normalizedTeamId);
+          const isWPLTeam = wplTeamIds.includes(normalizedTeamId);
+          const isWPLPlayer = playerLeague === 'wpl' || isWPLTeam;
+          
+          // PRIORITY: Check if this player has a known WPL correction FIRST
+          // This must happen before other checks to ensure correct team assignment
+          if (wplPlayerCorrections[player.name]) {
+            const correctTeamId = wplPlayerCorrections[player.name];
+            if (normalizedTeamId !== correctTeamId) {
+              console.log(`[CORRECT] Player "${player.name}": teamId '${normalizedTeamId}' -> '${correctTeamId}' (known WPL player)`);
+              needsUpdate = true;
+              normalizedTeamId = correctTeamId;
+              // Update isWPLTeam and isWPLPlayer based on corrected teamId
+              const correctedIsWPLTeam = wplTeamIds.includes(normalizedTeamId);
+              const correctedIsWPLPlayer = correctedIsWPLTeam;
+              
+              // Return corrected player immediately
+              return {
+                ...player,
+                teamId: normalizedTeamId,
+                league: 'wpl'
+              };
+            }
           }
-        }
+          
+          // CRITICAL: Protect IPL players - never convert IPL teamIds to WPL
+          // But skip this check if player is in WPL corrections (already handled above)
+          if (isIPLTeam && playerLeague === 'wpl' && !wplPlayerCorrections[player.name]) {
+            console.log(`[FIX] Player "${player.name}": Incorrectly marked as WPL, correcting to IPL (teamId: ${normalizedTeamId})`);
+            needsUpdate = true;
+            return {
+              ...player,
+              teamId: normalizedTeamId,
+              league: 'ipl'
+            };
+          }
         
         const shouldBeWPL = wplTeamIds.includes(normalizedTeamId);
         // Also check if player is in known WPL corrections list
