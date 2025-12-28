@@ -11,6 +11,13 @@ import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+// Helper to generate ID from heading text
+const generateId = (text: string): string => {
+  return text.toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+};
+
 export default function IPL2026RulesPage() {
   const router = useRouter();
   const [content, setContent] = useState<string>('');
@@ -35,6 +42,17 @@ export default function IPL2026RulesPage() {
     };
 
     fetchContent();
+
+    // Handle hash navigation on mount
+    if (window.location.hash) {
+      setTimeout(() => {
+        const hash = window.location.hash.substring(1);
+        const element = document.getElementById(hash);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 500);
+    }
   }, []);
 
   return (
@@ -111,15 +129,36 @@ export default function IPL2026RulesPage() {
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   components={{
-                    h1: ({ children }) => (
-                      <h1 className="text-3xl font-black text-white mb-6 mt-8 first:mt-0">{children}</h1>
-                    ),
-                    h2: ({ children }) => (
-                      <h2 className="text-2xl font-bold text-white mb-4 mt-8">{children}</h2>
-                    ),
-                    h3: ({ children }) => (
-                      <h3 className="text-xl font-semibold text-white mb-3 mt-6">{children}</h3>
-                    ),
+                    h1: ({ children }) => {
+                      const text = typeof children === 'string' ? children : 
+                        (Array.isArray(children) ? children.map(c => typeof c === 'string' ? c : '').join('') : '');
+                      const id = generateId(text);
+                      return (
+                        <h1 id={id} className="text-3xl font-black text-white mb-6 mt-8 first:mt-0 scroll-mt-20">
+                          {children}
+                        </h1>
+                      );
+                    },
+                    h2: ({ children }) => {
+                      const text = typeof children === 'string' ? children : 
+                        (Array.isArray(children) ? children.map(c => typeof c === 'string' ? c : '').join('') : '');
+                      const id = generateId(text);
+                      return (
+                        <h2 id={id} className="text-2xl font-bold text-white mb-4 mt-8 scroll-mt-20">
+                          {children}
+                        </h2>
+                      );
+                    },
+                    h3: ({ children }) => {
+                      const text = typeof children === 'string' ? children : 
+                        (Array.isArray(children) ? children.map(c => typeof c === 'string' ? c : '').join('') : '');
+                      const id = generateId(text);
+                      return (
+                        <h3 id={id} className="text-xl font-semibold text-white mb-3 mt-6 scroll-mt-20">
+                          {children}
+                        </h3>
+                      );
+                    },
                     p: ({ children }) => (
                       <p className="text-gray-300 mb-4 leading-relaxed">{children}</p>
                     ),
@@ -138,9 +177,29 @@ export default function IPL2026RulesPage() {
                     code: ({ children }) => (
                       <code className="bg-black/40 px-2 py-1 rounded text-purple-400 font-mono text-sm">{children}</code>
                     ),
-                    a: ({ href, children }) => (
-                      <a href={href} className="text-purple-400 hover:text-purple-300 underline">{children}</a>
-                    ),
+                    a: ({ href, children }) => {
+                      const isAnchor = href?.startsWith('#');
+                      const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+                        if (isAnchor) {
+                          e.preventDefault();
+                          const targetId = href?.substring(1);
+                          const element = document.getElementById(targetId);
+                          if (element) {
+                            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            window.history.pushState(null, '', `#${targetId}`);
+                          }
+                        }
+                      };
+                      return (
+                        <a 
+                          href={href} 
+                          onClick={handleClick}
+                          className={`${isAnchor ? 'cursor-pointer' : ''} text-purple-400 hover:text-purple-300 underline`}
+                        >
+                          {children}
+                        </a>
+                      );
+                    },
                   }}
                 >
                   {content}
