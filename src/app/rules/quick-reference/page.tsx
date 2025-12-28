@@ -193,6 +193,7 @@ export default function QuickReferencePage() {
                     ),
                     a: ({ href, children }) => {
                       const isAnchor = href?.startsWith('#');
+                      const isInternalPage = href?.startsWith('/rules/');
                       const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
                         if (isAnchor) {
                           e.preventDefault();
@@ -202,6 +203,9 @@ export default function QuickReferencePage() {
                             element.scrollIntoView({ behavior: 'smooth', block: 'start' });
                             window.history.pushState(null, '', `#${targetId}`);
                           }
+                        } else if (isInternalPage) {
+                          // Let Next.js handle internal page navigation
+                          return;
                         }
                       };
                       return (

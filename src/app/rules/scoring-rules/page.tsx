@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import AuroraBackground from '@/components/ui/AuroraBackground';
-import { ArrowLeft, BookOpen, Calculator } from 'lucide-react';
+import { ArrowLeft, Calculator, Zap } from 'lucide-react';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -122,8 +122,8 @@ export default function ScoringRulesPage() {
                   IPL Cricket Scoring Rules
                 </h1>
                 <p className="text-gray-400 flex items-center gap-2">
-                  <BookOpen className="w-4 h-4" />
-                  Detailed scoring system for IPL cricket matches
+                  <Zap className="w-4 h-4" />
+                  Detailed scoring system and rules
                 </p>
               </div>
             </div>
@@ -193,6 +193,7 @@ export default function ScoringRulesPage() {
                     ),
                     a: ({ href, children }) => {
                       const isAnchor = href?.startsWith('#');
+                      const isInternalPage = href?.startsWith('/rules/');
                       const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
                         if (isAnchor) {
                           e.preventDefault();
@@ -202,6 +203,9 @@ export default function ScoringRulesPage() {
                             element.scrollIntoView({ behavior: 'smooth', block: 'start' });
                             window.history.pushState(null, '', `#${targetId}`);
                           }
+                        } else if (isInternalPage) {
+                          // Let Next.js handle internal page navigation
+                          return;
                         }
                       };
                       return (
@@ -245,4 +249,3 @@ export default function ScoringRulesPage() {
     </div>
   );
 }
-
