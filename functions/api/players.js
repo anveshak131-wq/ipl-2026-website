@@ -355,6 +355,38 @@ export const onRequest = async (context) => {
         return player;
       });
       
+      // DEDUPLICATION: Remove duplicate WPL players (same name, case-insensitive)
+      // Keep the first occurrence and remove subsequent duplicates
+      const seenWPLPlayers = new Map();
+      const deduplicatedPlayers = [];
+      let duplicatesRemoved = 0;
+      
+      for (const player of players) {
+        const playerLeague = player.league || 'ipl';
+        const playerNameLower = player.name?.toLowerCase().trim() || '';
+        
+        // For WPL players, check for duplicates by name (case-insensitive)
+        if (playerLeague === 'wpl' || wplTeamIds.includes(normalizeTeamId(player.teamId))) {
+          if (seenWPLPlayers.has(playerNameLower)) {
+            // Duplicate found - log and skip
+            const existingPlayer = seenWPLPlayers.get(playerNameLower);
+            console.log(`[DUPLICATE] Removing duplicate WPL player: "${player.name}" (ID: ${player.id}, teamId: ${player.teamId}). Keeping existing: ID ${existingPlayer.id}, teamId: ${existingPlayer.teamId}`);
+            duplicatesRemoved++;
+            needsUpdate = true;
+            continue;
+          }
+          // Mark as seen
+          seenWPLPlayers.set(playerNameLower, player);
+        }
+        
+        deduplicatedPlayers.push(player);
+      }
+      
+      if (duplicatesRemoved > 0) {
+        console.log(`[DEDUPLICATION] Removed ${duplicatesRemoved} duplicate WPL player(s)`);
+        players = deduplicatedPlayers;
+      }
+      
       // Update KV storage if any corrections were made
       if (needsUpdate) {
         console.log(`[UPDATE] Writing corrected players to KV (${players.length} total)`);
