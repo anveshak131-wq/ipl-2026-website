@@ -7,17 +7,15 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import Icon from '@/components/ui/Icon';
 import { api } from '@/lib/data';
 import { useLeague } from '@/contexts/LeagueContext';
 import type { Player, Team } from '@/types';
-import AnimatedSection from '@/components/ui/AnimatedSection';
-import GradientText from '@/components/ui/GradientText';
-import GlassCard from '@/components/ui/GlassCard';
-import ModernStatsCard from '@/components/stats/ModernStatsCard';
-import StatsVisualization from '@/components/stats/StatsVisualization';
-import QuickStatsGrid from '@/components/stats/QuickStatsGrid';
 import { getQualificationCriteria, qualifiesForStat, getQualificationDescription } from '@/lib/statsQualifications';
+import StatsHeroSection from '@/components/stats/StatsHeroSection';
+import StatsTabs from '@/components/stats/StatsTabs';
+import LeaderboardSection from '@/components/stats/LeaderboardSection';
+import QuickStatsGrid from '@/components/stats/QuickStatsGrid';
+import { Trophy, Award, TrendingUp, Target, Users, Sparkles, Filter } from 'lucide-react';
 
 interface TeamAggregate {
   team: Team | null;
@@ -45,7 +43,7 @@ interface PublishedStats {
   lastUpdated?: string;
 }
 
-type StatsTabKey = 'overview' | 'batting' | 'bowling' | 'teams' | 'toss';
+type StatsTabKey = 'overview' | 'batting' | 'bowling' | 'teams';
 
 function sortByRunsDesc(players: Player[]): Player[] {
   return [...players].sort((a, b) => b.stats.runs - a.stats.runs);
@@ -63,75 +61,6 @@ function sortByEconomyAsc(players: Player[]): Player[] {
   return [...players].sort((a, b) => a.stats.economy - b.stats.economy);
 }
 
-function getBattingFormLabel(p: Player): 'Hot' | 'Consistent' | 'Cooling' {
-  const matches = p.stats.matches || 0;
-  const runs = p.stats.runs || 0;
-  const strikeRate = p.stats.strikeRate || 0;
-  const runsPerMatch = matches > 0 ? runs / matches : 0;
-
-  if (runsPerMatch >= 45 && strikeRate >= 140) return 'Hot';
-  if (runsPerMatch >= 30 && strikeRate >= 125) return 'Consistent';
-  return 'Cooling';
-}
-
-function getBattingContextLine(p: Player): string {
-  const matches = p.stats.matches || 0;
-  const runs = p.stats.runs || 0;
-  const strikeRate = p.stats.strikeRate || 0;
-  const boundaries = (p.stats.fours || 0) + (p.stats.sixes || 0);
-
-  if (matches > 0 && runs > 0) {
-    const runsPerMatch = runs / matches;
-    const projected = Math.round(((runsPerMatch * 14) / 50)) * 50;
-    if (projected > 0) {
-      return `On track to cross around ${projected} runs if this pace continues.`;
-    }
-  }
-
-  if (strikeRate > 0 && boundaries > 0 && runs > 0) {
-    const ballsFaced = (runs * 100) / strikeRate;
-    const ballsPerBoundary = ballsFaced / boundaries;
-    if (ballsPerBoundary > 0) {
-      return `Strikes a four or six roughly every ${ballsPerBoundary.toFixed(0)} balls.`;
-    }
-  }
-
-  return '';
-}
-
-function getBowlingFormLabel(p: Player): 'Hot' | 'Consistent' | 'Cooling' {
-  const matches = p.stats.matches || 0;
-  const wickets = p.stats.wickets || 0;
-  const economy = p.stats.economy || 0;
-  const wicketsPerMatch = matches > 0 ? wickets / matches : 0;
-
-  if (wicketsPerMatch >= 2 || (economy > 0 && economy <= 7)) return 'Hot';
-  if (wicketsPerMatch >= 1.2 || (economy > 0 && economy <= 8.5)) return 'Consistent';
-  return 'Cooling';
-}
-
-function getBowlingContextLine(p: Player): string {
-  const economy = p.stats.economy || 0;
-  const bowlingAverage = p.stats.bowlingAverage || 0;
-
-  if (economy > 0 && bowlingAverage > 0) {
-    const oversPerWicket = bowlingAverage / economy;
-    const ballsPerWicket = oversPerWicket * 6;
-    if (ballsPerWicket > 0) {
-      return `Strikes once every about ${ballsPerWicket.toFixed(0)} balls on average.`;
-    }
-  }
-
-  const matches = p.stats.matches || 0;
-  const wickets = p.stats.wickets || 0;
-  if (matches > 0 && wickets > 0) {
-    const wicketsPerMatch = wickets / matches;
-    return `Takes around ${wicketsPerMatch.toFixed(1)} wickets per match.`;
-  }
-
-  return '';
-}
-
 export default function StatsPage() {
   const { currentLeague, setCurrentLeague } = useLeague();
   const router = useRouter();
@@ -143,24 +72,13 @@ export default function StatsPage() {
     }
   }, [setCurrentLeague]);
   
-  // All hooks must be called before any conditional returns
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [publishedStats, setPublishedStats] = useState<PublishedStats | null>(null);
-  const [selectedTeam1Id, setSelectedTeam1Id] = useState<string>('');
-  const [selectedTeam2Id, setSelectedTeam2Id] = useState<string>('');
   const [expandedPlayerId, setExpandedPlayerId] = useState<string | null>(null);
-  const [statsConfig, setStatsConfig] = useState({
-    showTopRunScorers: true,
-    showTopWicketTakers: true,
-    showBestStrikeRates: true,
-    showBestEconomyRates: true,
-    showInsights: true,
-  });
-  const [activeStatsTab, setActiveStatsTab] = useState<StatsTabKey>('overview');
-  const [leadersRange, setLeadersRange] = useState<'season' | 'recent'>('season');
+  const [activeTab, setActiveTab] = useState<StatsTabKey>('overview');
   const [leadersLimit, setLeadersLimit] = useState<10 | 50>(10);
   
   // Redirect WPL users away from stats page
@@ -171,7 +89,6 @@ export default function StatsPage() {
   }, [currentLeague, router]);
 
   useEffect(() => {
-    // Only fetch data if not WPL
     if (currentLeague === 'wpl') return;
     
     const fetchData = async () => {
@@ -186,41 +103,9 @@ export default function StatsPage() {
         setPlayers(playersData || []);
         setTeams(teamsData || []);
 
-        let team1Id = '';
-        let team2Id = '';
-
-        if (teamsData && teamsData.length >= 2) {
-          team1Id = teamsData[0].id;
-          team2Id = teamsData[1].id;
-        } else if (teamsData && teamsData.length === 1) {
-          team1Id = teamsData[0].id;
+        if (settingsData && (settingsData as any).publishedStats) {
+          setPublishedStats((settingsData as any).publishedStats);
         }
-
-        if (settingsData) {
-          if ((settingsData as any).publishedStats) {
-            const published = (settingsData as any).publishedStats as PublishedStats;
-            setPublishedStats(published);
-            if (published.defaultTeams) {
-              if (published.defaultTeams.team1Id) {
-                team1Id = published.defaultTeams.team1Id;
-              }
-              if (published.defaultTeams.team2Id) {
-                team2Id = published.defaultTeams.team2Id;
-              }
-            }
-          }
-
-          if ((settingsData as any).statsConfig) {
-            const cfg = (settingsData as any).statsConfig as Partial<typeof statsConfig>;
-            setStatsConfig((prev) => ({
-              ...prev,
-              ...cfg,
-            }));
-          }
-        }
-
-        if (team1Id) setSelectedTeam1Id(team1Id);
-        if (team2Id) setSelectedTeam2Id(team2Id);
       } catch (err) {
         console.error('Failed to load stats data:', err);
         setError('Failed to load stats. Please try again later.');
@@ -230,7 +115,7 @@ export default function StatsPage() {
     };
 
     fetchData();
-  }, [currentLeague]); // Re-fetch when league changes
+  }, [currentLeague]);
 
   const computedTopRunScorers = useMemo(() => {
     const criteria = getQualificationCriteria('orangeCap', currentLeague);
@@ -289,199 +174,24 @@ export default function StatsPage() {
     const base = publishedStats?.leaders?.bestEconomyRates?.length
       ? publishedStats.leaders.bestEconomyRates
       : computedBestEconomyRates;
-
-    const eligible = base.filter(
-      (p) => p.stats.wickets >= 20 && p.stats.economy > 0
-    );
-
-    return sortByEconomyAsc(eligible).slice(0, 5);
+    return sortByEconomyAsc(base);
   }, [publishedStats?.leaders?.bestEconomyRates, computedBestEconomyRates]);
 
-  const computeTeamAggregate = (teamId: string): TeamAggregate => {
-    const team = teams.find((t) => t.id === teamId) || null;
-    const teamPlayers = players.filter((p) => p.teamId === teamId);
-
-    if (teamPlayers.length === 0) {
-      return {
-        team,
-        totalRuns: 0,
-        totalWickets: 0,
-        totalMatches: 0,
-        avgRunsPerMatch: 0,
-        avgStrikeRate: 0,
-      };
-    }
-
-    const totalRuns = teamPlayers.reduce((sum, p) => sum + p.stats.runs, 0);
-    const totalWickets = teamPlayers.reduce((sum, p) => sum + p.stats.wickets, 0);
-    const totalMatches = teamPlayers.reduce((sum, p) => sum + p.stats.matches, 0);
-    const avgStrikeRate =
-      teamPlayers.reduce((sum, p) => sum + p.stats.strikeRate, 0) /
-      teamPlayers.length;
-
-    const avgRunsPerMatch = totalMatches > 0 ? totalRuns / totalMatches : 0;
-
-    return {
-      team,
-      totalRuns,
-      totalWickets,
-      totalMatches,
-      avgRunsPerMatch,
-      avgStrikeRate,
-    };
-  };
-
-  const leagueBattingSummary = useMemo(() => {
-    if (!players.length) {
-      return {
-        totalRuns: 0,
-        totalMatches: 0,
-        avgRunsPerMatch: 0,
-        avgStrikeRate: 0,
-      };
-    }
-
-    const totalRuns = players.reduce((sum, p) => sum + p.stats.runs, 0);
-    const totalMatches = players.reduce((sum, p) => sum + p.stats.matches, 0);
-    const avgRunsPerMatch = totalMatches > 0 ? totalRuns / totalMatches : 0;
-    const avgStrikeRate =
-      players.reduce((sum, p) => sum + p.stats.strikeRate, 0) / players.length;
-
-    return {
-      totalRuns,
-      totalMatches,
-      avgRunsPerMatch,
-      avgStrikeRate,
-    };
+  // Calculate totals for hero section
+  const totalRuns = useMemo(() => {
+    return players.reduce((sum, p) => sum + p.stats.runs, 0);
   }, [players]);
 
-  const findPublishedTeamAggregate = (teamId: string): TeamAggregate | null => {
-    if (!publishedStats?.teamAggregates || !publishedStats.teamAggregates.length) {
-      return null;
-    }
-    const found = publishedStats.teamAggregates.find(
-      (agg) => agg.team && agg.team.id === teamId
-    );
-    return found || null;
-  };
-
-  const selectedTeam1Agg = useMemo(
-    () => {
-      if (!selectedTeam1Id) return null;
-      const publishedAgg = findPublishedTeamAggregate(selectedTeam1Id);
-      if (publishedAgg) return publishedAgg;
-      return computeTeamAggregate(selectedTeam1Id);
-    },
-    [selectedTeam1Id, publishedStats, players, teams]
-  );
-
-  const selectedTeam2Agg = useMemo(
-    () => {
-      if (!selectedTeam2Id) return null;
-      const publishedAgg = findPublishedTeamAggregate(selectedTeam2Id);
-      if (publishedAgg) return publishedAgg;
-      return computeTeamAggregate(selectedTeam2Id);
-    },
-    [selectedTeam2Id, publishedStats, players, teams]
-  );
-
-  const insights = useMemo(() => {
-    const points: string[] = [];
-
-    if (topRunScorers.length > 1) {
-      const leader = topRunScorers[0];
-      const runnerUp = topRunScorers[1];
-      const diff = leader.stats.runs - runnerUp.stats.runs;
-      const percent = runnerUp.stats.runs
-        ? (diff / runnerUp.stats.runs) * 100
-        : 0;
-      points.push(
-        `${leader.name} leads the run charts with ${leader.stats.runs} runs, about ${percent.toFixed(
-          1
-        )}% more than the next best (${runnerUp.name}).`
-      );
-    }
-
-    if (selectedTeam1Agg && leagueBattingSummary.avgStrikeRate > 0) {
-      const teamName = selectedTeam1Agg.team?.shortName || 'Team 1';
-      const diffStrike =
-        ((selectedTeam1Agg.avgStrikeRate - leagueBattingSummary.avgStrikeRate) /
-          leagueBattingSummary.avgStrikeRate) * 100;
-      const fasterOrSlower = diffStrike >= 0 ? 'faster' : 'slower';
-      points.push(
-        `${teamName} bat ${Math.abs(diffStrike).toFixed(
-          1
-        )}% ${fasterOrSlower} than the league average strike rate.`
-      );
-    }
-
-    if (selectedTeam1Agg && selectedTeam2Agg) {
-      const t1 = selectedTeam1Agg;
-      const t2 = selectedTeam2Agg;
-      const betterBatting =
-        t1.avgRunsPerMatch > t2.avgRunsPerMatch ? t1.team : t2.team;
-      const betterBowling =
-        t1.totalWickets > t2.totalWickets ? t1.team : t2.team;
-
-      if (betterBatting) {
-        points.push(
-          `${betterBatting.shortName} have a stronger batting unit on paper when you look at average runs per match from their full squad.`
-        );
-      }
-
-      if (betterBowling) {
-        points.push(
-          `${betterBowling.shortName} bowlers collectively have taken more wickets than their rivals in this comparison.`
-        );
-      }
-    }
-
-    return points;
-  }, [
-    topRunScorers,
-    selectedTeam1Agg,
-    selectedTeam2Agg,
-    leagueBattingSummary.avgStrikeRate,
-  ]);
-
-  const displayInsights = useMemo(() => {
-    if (publishedStats?.insights && publishedStats.insights.length) {
-      return publishedStats.insights;
-    }
-    return insights;
-  }, [publishedStats, insights]);
-
-  const handleStatsTabClick = (tab: StatsTabKey, targetId: string) => {
-    setActiveStatsTab(tab);
-    if (typeof window === 'undefined') return;
-    const el = document.getElementById(targetId);
-    if (!el) return;
-
-    const rect = el.getBoundingClientRect();
-    const offset = 96; // offset for sticky main navbar
-    const targetTop = rect.top + window.scrollY - offset;
-    window.scrollTo({ top: targetTop, behavior: 'smooth' });
-  };
-
-  // Don't render stats page for WPL - must be after all hooks
-  if (currentLeague === 'wpl') {
-    return (
-      <div className="min-h-screen">
-        <Navbar />
-        <div className="flex items-center justify-center h-96">
-          <LoadingSpinner size="lg" />
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+  const totalWickets = useMemo(() => {
+    return players.reduce((sum, p) => sum + p.stats.wickets, 0);
+  }, [players]);
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-ipl-dark">
         <Navbar />
-        <main className="flex-1 flex items-center justify-center bg-ipl-dark">
-          <LoadingSpinner size="lg" />
+        <main className="flex-1 flex items-center justify-center">
+          <LoadingSpinner />
         </main>
         <Footer />
       </div>
@@ -490,15 +200,17 @@ export default function StatsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-ipl-dark">
         <Navbar />
-        <main className="flex-1 flex items-center justify-center bg-ipl-dark px-4">
-          <div className="max-w-md w-full rounded-2xl bg-white/5 border border-red-500/40 p-6 text-center">
-            <p className="text-red-300 font-semibold mb-2">{error}</p>
-            <p className="text-gray-300 text-sm">
-              This page uses aggregated data from players and teams. Please refresh
-              the page or try again later.
-            </p>
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-400 text-lg mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-6 py-3 rounded-lg bg-gradient-to-r from-ipl-gold to-ipl-purple text-white font-semibold"
+            >
+              Retry
+            </button>
           </div>
         </main>
         <Footer />
@@ -510,544 +222,270 @@ export default function StatsPage() {
     <div className="min-h-screen flex flex-col bg-ipl-dark">
       <Navbar />
 
-      <main className="relative flex-1 py-12 overflow-hidden section-match-bg">
+      <main className="relative flex-1 overflow-hidden">
         <AuroraBackground />
         
-        {/* Enhanced floating orbs */}
+        {/* Animated background orbs */}
         <motion.div 
-          className="absolute top-20 right-10 w-96 h-96 rounded-full blur-3xl"
+          className="fixed top-20 right-10 w-96 h-96 rounded-full blur-3xl pointer-events-none"
           style={{ 
-            background: 'radial-gradient(circle, rgba(99, 102, 241, 0.25), rgba(139, 92, 246, 0.15), transparent)',
+            background: 'radial-gradient(circle, rgba(251, 191, 36, 0.15), rgba(139, 92, 246, 0.1), transparent)',
           }}
           animate={{
-            y: [0, -25, 0],
-            x: [0, 15, 0],
+            y: [0, -30, 0],
+            x: [0, 20, 0],
             scale: [1, 1.1, 1],
           }}
           transition={{
-            duration: 9,
+            duration: 8,
             repeat: Infinity,
             ease: "easeInOut"
           }}
         />
         <motion.div 
-          className="absolute bottom-20 left-10 w-80 h-80 rounded-full blur-3xl"
+          className="fixed bottom-20 left-10 w-80 h-80 rounded-full blur-3xl pointer-events-none"
           style={{ 
-            background: 'radial-gradient(circle, rgba(236, 72, 153, 0.2), rgba(245, 158, 11, 0.12), transparent)',
+            background: 'radial-gradient(circle, rgba(236, 72, 153, 0.15), rgba(99, 102, 241, 0.1), transparent)',
           }}
           animate={{
-            y: [0, 25, 0],
-            x: [0, -15, 0],
-            scale: [1, 1.12, 1],
+            y: [0, 30, 0],
+            x: [0, -20, 0],
+            scale: [1, 1.15, 1],
           }}
           transition={{
-            duration: 11,
+            duration: 10,
             repeat: Infinity,
             ease: "easeInOut",
-            delay: 1.5
+            delay: 1
           }}
         />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-          {/* Hero / Header */}
-          <AnimatedSection direction="down" delay={0.1}>
-            <section id="stats-overview" className="space-y-4">
-              <motion.div 
-                className="inline-flex items-center space-x-2 mb-2"
-                whileHover={{ scale: 1.05 }}
-              >
-                <span className="px-3 py-1 rounded-full text-xs font-bold glass-effect text-amber-300 flex items-center gap-2">
-                  <Icon name="stats" size={16} />
-                  STATS & RECORDS HUB
-                </span>
-              </motion.div>
-              <motion.h1 
-                className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                style={{
-                  background: 'linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #cbd5e1 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
-                Season Leaders &
-                <span className="block mt-1">
-                  <GradientText gradient="from-indigo-400 via-purple-400 to-pink-400" animate>
-                    Deep IPL Insights
-                  </GradientText>
-                </span>
-              </motion.h1>
-              <motion.p 
-                className="text-slate-200 text-base md:text-lg max-w-2xl"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-              >
-                Explore Orange Cap and Purple Cap races, plus the best strike
-                rates and bowling economies across the league.
-              </motion.p>
-            </section>
-          </AnimatedSection>
-          {publishedStats?.lastUpdated && (
-            <p className="text-xs text-gray-400">
-              Snapshot published by admin on{' '}
-              {new Date(publishedStats.lastUpdated).toLocaleString('en-US', {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-              .
-            </p>
-          )}
+        <div className="relative z-10">
+          {/* Hero Section */}
+          <StatsHeroSection
+            totalPlayers={players.length}
+            totalTeams={teams.length}
+            totalRuns={totalRuns}
+            totalWickets={totalWickets}
+          />
 
-          {/* Quick Stats Grid - Modern Design */}
-          <QuickStatsGrid players={players} teams={teams} />
+          {/* Main Content */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+            {/* Tabs Navigation */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="mb-8"
+            >
+              <StatsTabs activeTab={activeTab} onTabChange={setActiveTab} />
+            </motion.div>
 
-          {/* Contextual sub-navigation */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 -mt-4">
-            <div className="inline-flex items-center gap-1 bg-black/40 border border-white/10 rounded-full px-2 py-1 overflow-x-auto no-scrollbar">
-              {[
-                { key: 'overview' as StatsTabKey, label: 'Overview', targetId: 'stats-overview' },
-                { key: 'batting' as StatsTabKey, label: 'Batting', targetId: 'stats-batting' },
-                { key: 'bowling' as StatsTabKey, label: 'Bowling', targetId: 'stats-bowling' },
-                { key: 'teams' as StatsTabKey, label: 'Teams', targetId: 'stats-teams' },
-                { key: 'toss' as StatsTabKey, label: 'Toss & Luck', targetId: 'stats-toss' },
-              ].map((tab) => (
+            {/* View Controls */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="flex flex-wrap items-center justify-between gap-4 mb-8"
+            >
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10">
+                <Filter className="w-4 h-4 text-gray-400" />
+                <span className="text-sm text-gray-400 mr-2">Show:</span>
                 <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => handleStatsTabClick(tab.key, tab.targetId)}
-                  className={`px-3 py-1.5 rounded-full text-[11px] font-semibold flex items-center gap-1 whitespace-nowrap transition-colors
-                    ${
-                      activeStatsTab === tab.key
-                        ? 'bg-gradient-to-r from-ipl-blue-dark to-ipl-purple text-white shadow-sm shadow-ipl-purple/40 border border-ipl-gold/40'
-                        : 'bg-transparent text-gray-300 border border-transparent hover:border-white/20 hover:bg-white/5'
-                    }`}
+                  onClick={() => setLeadersLimit(10)}
+                  className={`px-4 py-1.5 rounded-lg font-semibold text-sm transition-all ${
+                    leadersLimit === 10
+                      ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white shadow-lg'
+                      : 'text-gray-300 hover:text-white hover:bg-white/10'
+                  }`}
                 >
-                  {tab.label}
+                  Top 10
                 </button>
-              ))}
-            </div>
-            <p className="text-[11px] text-gray-400 md:text-right">
-              Quickly jump between season overview, batting and bowling leaders, team comparison,
-              and toss & luck insights.
-            </p>
-          </div>
-
-          {/* Season Leaders */}
-          {(statsConfig.showTopRunScorers || statsConfig.showTopWicketTakers) && (
-            <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="lg:col-span-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-1 text-[11px] text-gray-300">
-                <div className="inline-flex items-center gap-1 bg-black/40 border border-white/10 rounded-full px-1 py-0.5">
-                  <span className="px-2 py-0.5 rounded-full uppercase tracking-wide text-[10px] text-gray-400">
-                    Range
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setLeadersRange('season')}
-                    className={`px-3 py-0.5 rounded-full font-semibold transition-colors ${
-                      leadersRange === 'season'
-                        ? 'bg-gradient-to-r from-ipl-blue-dark to-ipl-purple text-white shadow-sm shadow-ipl-purple/40'
-                        : 'text-gray-300 hover:text-white hover:bg-white/10'
-                    }`}
-                  >
-                    All season
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setLeadersRange('recent')}
-                    className={`px-3 py-0.5 rounded-full font-semibold transition-colors ${
-                      leadersRange === 'recent'
-                        ? 'bg-gradient-to-r from-ipl-blue-dark to-ipl-purple text-white shadow-sm shadow-ipl-purple/40'
-                        : 'text-gray-300 hover:text-white hover:bg-white/10'
-                    }`}
-                  >
-                    Last 5 matches
-                  </button>
-                </div>
-                <div className="inline-flex items-center gap-1 bg-black/40 border border-white/10 rounded-full px-1 py-0.5">
-                  <span className="px-2 py-0.5 rounded-full uppercase tracking-wide text-[10px] text-gray-400">
-                    Showing
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setLeadersLimit(10)}
-                    className={`px-3 py-0.5 rounded-full font-semibold transition-colors ${
-                      leadersLimit === 10
-                        ? 'bg-gradient-to-r from-ipl-gold to-ipl-purple text-black shadow-sm shadow-ipl-gold/40'
-                        : 'text-gray-300 hover:text-white hover:bg-white/10'
-                    }`}
-                  >
-                    Top 10
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setLeadersLimit(50)}
-                    className={`px-3 py-0.5 rounded-full font-semibold transition-colors ${
-                      leadersLimit === 50
-                        ? 'bg-gradient-to-r from-ipl-gold to-ipl-purple text-black shadow-sm shadow-ipl-gold/40'
-                        : 'text-gray-300 hover:text-white hover:bg-white/10'
-                    }`}
-                  >
-                    Top 50
-                  </button>
-                </div>
-              </div>
-              {/* Batting leaders */}
-              {statsConfig.showTopRunScorers && (
-                <div
-                  id="stats-batting"
-                  className="rounded-3xl bg-white/5 border border-white/10 p-6 backdrop-blur-md shadow-xl"
+                <button
+                  onClick={() => setLeadersLimit(50)}
+                  className={`px-4 py-1.5 rounded-lg font-semibold text-sm transition-all ${
+                    leadersLimit === 50
+                      ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white shadow-lg'
+                      : 'text-gray-300 hover:text-white hover:bg-white/10'
+                  }`}
                 >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-ipl-gold to-ipl-purple flex items-center justify-center">
-                        <Icon name="trophy" size={20} />
-                      </div>
-                      <div>
-                        <h2 className="text-xl font-bold text-white">Orange Cap Race</h2>
-                        <p className="text-xs text-gray-400">
-                          Top run scorers in the tournament
-                        </p>
-                        <p className="text-[10px] text-gray-500 mt-1 italic">
-                          Qualification: {getQualificationDescription('orangeCap', currentLeague)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  Top 50
+                </button>
+              </div>
 
-                  {/* Modern Stats Cards */}
-                  <div className="space-y-3">
-                    {topRunScorers.slice(0, leadersLimit).map((p, index) => {
-                      const team = teams.find((t) => t.id === p.teamId);
-                      return (
-                        <ModernStatsCard
-                          key={p.id}
-                          player={p}
-                          rank={index + 1}
-                          isLeader={index === 0}
-                          type="batting"
-                          teamName={team?.shortName}
-                          onExpand={() => setExpandedPlayerId((prev) => (prev === p.id ? null : p.id))}
-                          isExpanded={expandedPlayerId === p.id}
-                        />
-                      );
-                    })}
-                  </div>
+              {publishedStats?.lastUpdated && (
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10">
+                  <Sparkles className="w-4 h-4 text-yellow-400" />
+                  <span className="text-xs text-gray-400">
+                    Updated {new Date(publishedStats.lastUpdated).toLocaleDateString()}
+                  </span>
+                </div>
+              )}
+            </motion.div>
 
-                  {/* Visualization Chart */}
-                  <div className="mt-8 p-6 rounded-2xl bg-black/30 border border-white/10">
-                    <h3 className="text-sm font-semibold text-gray-400 mb-4 uppercase tracking-wider">
-                      Visual Comparison
-                    </h3>
-                    <StatsVisualization 
-                      players={topRunScorers.slice(0, leadersLimit)} 
+            {/* Tab Content */}
+            <AnimatePresence mode="wait">
+              {activeTab === 'overview' && (
+                <motion.div
+                  key="overview"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.4 }}
+                  className="space-y-8"
+                >
+                  {/* Quick Stats */}
+                  <QuickStatsGrid players={players} teams={teams} />
+
+                  {/* Top Performers Grid */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {topRunScorers.length > 0 && (
+                      <LeaderboardSection
+                        title="Orange Cap Race"
+                        icon={Trophy}
+                        players={topRunScorers}
+                        teams={teams}
+                        type="batting"
+                        qualificationText={getQualificationDescription('orangeCap', currentLeague)}
+                        color="from-orange-500/20 to-yellow-500/20"
+                        expandedPlayerId={expandedPlayerId}
+                        onPlayerExpand={setExpandedPlayerId}
+                        leadersLimit={leadersLimit}
+                      />
+                    )}
+
+                    {topWicketTakers.length > 0 && (
+                      <LeaderboardSection
+                        title="Purple Cap Race"
+                        icon={Award}
+                        players={topWicketTakers}
+                        teams={teams}
+                        type="bowling"
+                        qualificationText={getQualificationDescription('purpleCap', currentLeague)}
+                        color="from-purple-500/20 to-pink-500/20"
+                        expandedPlayerId={expandedPlayerId}
+                        onPlayerExpand={setExpandedPlayerId}
+                        leadersLimit={leadersLimit}
+                      />
+                    )}
+                  </div>
+                </motion.div>
+              )}
+
+              {activeTab === 'batting' && (
+                <motion.div
+                  key="batting"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.4 }}
+                  className="space-y-8"
+                >
+                  {/* Orange Cap */}
+                  {topRunScorers.length > 0 && (
+                    <LeaderboardSection
+                      title="Orange Cap - Top Run Scorers"
+                      icon={Trophy}
+                      players={topRunScorers}
+                      teams={teams}
                       type="batting"
-                      maxItems={leadersLimit}
+                      qualificationText={getQualificationDescription('orangeCap', currentLeague)}
+                      color="from-orange-500/20 to-yellow-500/20"
+                      expandedPlayerId={expandedPlayerId}
+                      onPlayerExpand={setExpandedPlayerId}
+                      leadersLimit={leadersLimit}
                     />
-                  </div>
-                </div>
+                  )}
+
+                  {/* Best Strike Rates */}
+                  {bestStrikeRates.length > 0 && (
+                    <LeaderboardSection
+                      title="Best Strike Rates"
+                      icon={TrendingUp}
+                      players={bestStrikeRates}
+                      teams={teams}
+                      type="batting"
+                      qualificationText={getQualificationDescription('bestStrikeRate', currentLeague)}
+                      color="from-blue-500/20 to-cyan-500/20"
+                      expandedPlayerId={expandedPlayerId}
+                      onPlayerExpand={setExpandedPlayerId}
+                      leadersLimit={leadersLimit}
+                    />
+                  )}
+                </motion.div>
               )}
 
-              {/* Bowling leaders */}
-              {statsConfig.showTopWicketTakers && (
-                <div
-                  id="stats-bowling"
-                  className="rounded-3xl bg-white/5 border border-white/10 p-6 backdrop-blur-md shadow-xl"
+              {activeTab === 'bowling' && (
+                <motion.div
+                  key="bowling"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.4 }}
+                  className="space-y-8"
                 >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-                    <Icon name="cricket" size={20} />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-white">Purple Cap Race</h2>
-                    <p className="text-xs text-gray-400">
-                      Leading wicket takers and economy masters
-                    </p>
-                    <p className="text-[10px] text-gray-500 mt-1 italic">
-                      Qualification: {getQualificationDescription('purpleCap', currentLeague)}
-                    </p>
-                    <p className="text-[10px] text-gray-500 mt-1 italic">
-                      Qualification: {getQualificationDescription('purpleCap', currentLeague)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Modern Stats Cards */}
-              <div className="space-y-3">
-                {topWicketTakers.slice(0, leadersLimit).map((p, index) => {
-                  const team = teams.find((t) => t.id === p.teamId);
-                  return (
-                    <ModernStatsCard
-                      key={p.id}
-                      player={p}
-                      rank={index + 1}
-                      isLeader={index === 0}
+                  {/* Purple Cap */}
+                  {topWicketTakers.length > 0 && (
+                    <LeaderboardSection
+                      title="Purple Cap - Top Wicket Takers"
+                      icon={Award}
+                      players={topWicketTakers}
+                      teams={teams}
                       type="bowling"
-                      teamName={team?.shortName}
-                      onExpand={() => setExpandedPlayerId((prev) => (prev === p.id ? null : p.id))}
-                      isExpanded={expandedPlayerId === p.id}
+                      qualificationText={getQualificationDescription('purpleCap', currentLeague)}
+                      color="from-purple-500/20 to-pink-500/20"
+                      expandedPlayerId={expandedPlayerId}
+                      onPlayerExpand={setExpandedPlayerId}
+                      leadersLimit={leadersLimit}
                     />
-                  );
-                })}
-                  </div>
+                  )}
 
-              {/* Visualization Chart */}
-              <div className="mt-8 p-6 rounded-2xl bg-black/30 border border-white/10">
-                <h3 className="text-sm font-semibold text-gray-400 mb-4 uppercase tracking-wider">
-                  Visual Comparison
-                </h3>
-                <StatsVisualization 
-                  players={topWicketTakers.slice(0, leadersLimit)} 
-                  type="bowling"
-                  maxItems={leadersLimit}
-                />
-              </div>
-                </div>
+                  {/* Best Economy */}
+                  {bestEconomyRates.length > 0 && (
+                    <LeaderboardSection
+                      title="Best Economy Rates"
+                      icon={Target}
+                      players={bestEconomyRates}
+                      teams={teams}
+                      type="bowling"
+                      qualificationText={getQualificationDescription('bestEconomy', currentLeague)}
+                      color="from-emerald-500/20 to-teal-500/20"
+                      expandedPlayerId={expandedPlayerId}
+                      onPlayerExpand={setExpandedPlayerId}
+                      leadersLimit={leadersLimit}
+                    />
+                  )}
+                </motion.div>
               )}
-            </section>
-          )}
 
-          {/* Teams anchor (placeholder) */}
-          <section
-            id="stats-teams"
-            className="rounded-3xl bg-white/5 border border-white/10 p-6 md:p-8 backdrop-blur-md text-xs text-gray-300"
-          >
-            <h2 className="text-sm md:text-base font-bold text-white mb-2">Teams spotlight</h2>
-            <p>
-              Team comparison cards on this page already use aggregated squad statistics. A richer
-              dedicated teams analytics view will appear here in a future update.
-            </p>
-          </section>
-
-          {/* Toss & Luck anchor (placeholder) */}
-          <section
-            id="stats-toss"
-            className="rounded-3xl bg-white/5 border border-white/10 p-6 md:p-8 backdrop-blur-md text-xs text-gray-300"
-          >
-            <h2 className="text-sm md:text-base font-bold text-white mb-2">Toss &amp; luck insights</h2>
-            <p>
-              Toss &amp; luck analytics from admin-selected datasets will surface here once
-              published. For now, visit the AI Predictions page to see how toss trends are already
-              influencing win probabilities.
-            </p>
-          </section>
-
-          {/* Strike rate & economy tables */}
-          {(statsConfig.showBestStrikeRates || statsConfig.showBestEconomyRates) && (
-            <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {statsConfig.showBestStrikeRates && (
-                <div className="rounded-3xl bg-white/5 border border-white/10 p-6 backdrop-blur-md">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h2 className="text-lg font-bold text-white">Best Strike Rates</h2>
-                      <p className="text-xs text-gray-400">
-                        {getQualificationDescription('bestStrikeRate', currentLeague)}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    {bestStrikeRates.map((p, index) => (
-                      <div
-                        key={p.id}
-                        onClick={() =>
-                          setExpandedPlayerId((prev) => (prev === p.id ? null : p.id))
-                        }
-                        className="rounded-2xl bg-black/20 border border-white/10 px-4 py-3 cursor-pointer hover:border-ipl-gold/50 transition-all duration-200"
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <span className="text-xs text-gray-400 w-6 text-center">
-                              {index + 1}.
-                            </span>
-                            <div>
-                              <div className="text-sm font-semibold text-white">
-                                {p.name}
-                              </div>
-                              <div className="text-[11px] text-gray-400">
-                                {p.stats.runs} runs • {p.stats.matches} matches
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-sm font-bold text-ipl-gold">
-                              SR {p.stats.strikeRate.toFixed(1)}
-                            </div>
-                          </div>
-                        </div>
-                        {expandedPlayerId === p.id && (
-                          <div className="mt-2 pt-2 border-t border-white/10 text-[11px] text-gray-300 flex flex-wrap gap-x-4 gap-y-1">
-                            <span>Highest: {p.stats.highest}</span>
-                            <span>4s: {p.stats.fours}</span>
-                            <span>6s: {p.stats.sixes}</span>
-                            <span>50s: {p.stats.fifties}</span>
-                            <span>100s: {p.stats.hundreds}</span>
-                          </div>
-                        )}
+              {activeTab === 'teams' && (
+                <motion.div
+                  key="teams"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.4 }}
+                  className="space-y-8"
+                >
+                  <div className="rounded-3xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl border border-white/20 p-8">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 shadow-lg">
+                        <Users className="w-8 h-8 text-white" />
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {statsConfig.showBestEconomyRates && (
-                <div className="rounded-3xl bg-white/5 border border-white/10 p-6 backdrop-blur-md">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h2 className="text-lg font-bold text-white">Best Economy (Qualifiers)</h2>
-                      <p className="text-xs text-gray-400">
-                        {getQualificationDescription('bestEconomy', currentLeague)}
-                      </p>
+                      <h2 className="text-3xl font-black text-white">Team Statistics</h2>
                     </div>
+                    <p className="text-gray-400">
+                      Team comparison and aggregate statistics coming soon.
+                    </p>
                   </div>
-                  <div className="space-y-2">
-                    {bestEconomyRates.map((p, index) => {
-                      const bowlingAverage =
-                        p.stats.bowlingAverage !== undefined
-                          ? p.stats.bowlingAverage.toFixed(1)
-                          : '-';
-
-                      return (
-                        <div
-                          key={p.id}
-                          onClick={() =>
-                            setExpandedPlayerId((prev) => (prev === p.id ? null : p.id))
-                          }
-                          className="rounded-2xl bg-black/20 border border-white/10 px-4 py-3 cursor-pointer hover:border-emerald-400/50 transition-all duration-200"
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <span className="text-xs text-gray-400 w-6 text-center">
-                                {index + 1}.
-                              </span>
-                              <div>
-                                <div className="text-sm font-semibold text-white">
-                                  {p.name}
-                                </div>
-                                <div className="text-[11px] text-gray-400">
-                                  {p.stats.wickets} wickets • {p.stats.matches} matches
-                                </div>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <div className="text-sm font-bold text-emerald-300">
-                                Eco {p.stats.economy.toFixed(2)}
-                              </div>
-                            </div>
-                          </div>
-                          {expandedPlayerId === p.id && (
-                            <div className="mt-2 pt-2 border-t border-white/10 text-[11px] text-gray-300 flex flex-wrap gap-x-4 gap-y-1">
-                              <span>Bowling avg: {bowlingAverage}</span>
-                              <span>Best: {p.stats.bestBowling}</span>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                </motion.div>
               )}
-            </section>
-          )}
-
-          {/* AI-style insights */}
-          {statsConfig.showInsights && (
-            <section className="rounded-3xl bg-white/5 border border-white/10 p-6 md:p-8 backdrop-blur-md">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-ipl-blue-light to-ipl-purple flex items-center justify-center">
-                  <Icon name="news" size={18} />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-white">Insights from the numbers</h2>
-                  <p className="text-xs text-gray-400">
-                    Light-weight AI-style summaries generated from current squad
-                    statistics.
-                  </p>
-                </div>
-              </div>
-
-              {displayInsights.length ? (
-                <ul className="space-y-2 list-disc list-inside text-sm text-gray-200">
-                  {displayInsights.map((line, idx) => (
-                    <li key={idx}>{line}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-gray-400 text-sm">
-                  Not enough data yet to generate meaningful insights. Once more
-                  players and stats are available, this section will light up with
-                  stories.
-                </p>
-              )}
-            </section>
-          )}
+            </AnimatePresence>
+          </div>
         </div>
       </main>
 
       <Footer />
-    </div>
-  );
-}
-
-function TeamComparisonCard({
-  aggregate,
-  label,
-}: {
-  aggregate: TeamAggregate | null;
-  label: string;
-}) {
-  if (!aggregate || !aggregate.team) {
-    return (
-      <div className="rounded-2xl bg-black/30 border border-white/10 p-5 flex items-center justify-center text-sm text-gray-400">
-        Select {label} to see squad statistics.
-      </div>
-    );
-  }
-
-  const { team, totalRuns, totalWickets, totalMatches, avgRunsPerMatch, avgStrikeRate } =
-    aggregate;
-
-  return (
-    <div className="rounded-2xl bg-black/40 border border-white/10 p-5 space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="text-xs uppercase tracking-wide text-gray-400">
-            {label}
-          </div>
-          <div className="text-xl font-bold text-white flex items-center gap-2">
-            <span>{team.shortName}</span>
-          </div>
-          <div className="text-[11px] text-gray-400">{team.name}</div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3 text-sm">
-        <div className="rounded-xl bg-white/5 border border-white/10 p-3">
-          <div className="text-[11px] text-gray-400 mb-1">Squad runs</div>
-          <div className="text-lg font-bold text-ipl-gold">{totalRuns}</div>
-          <div className="text-[11px] text-gray-400">across {totalMatches} matches</div>
-        </div>
-        <div className="rounded-xl bg-white/5 border border-white/10 p-3">
-          <div className="text-[11px] text-gray-400 mb-1">Squad wickets</div>
-          <div className="text-lg font-bold text-emerald-300">{totalWickets}</div>
-          <div className="text-[11px] text-gray-400">all bowlers combined</div>
-        </div>
-        <div className="rounded-xl bg-white/5 border border-white/10 p-3">
-          <div className="text-[11px] text-gray-400 mb-1">Avg runs / match</div>
-          <div className="text-lg font-bold text-white">{avgRunsPerMatch.toFixed(1)}</div>
-        </div>
-        <div className="rounded-xl bg-white/5 border border-white/10 p-3">
-          <div className="text-[11px] text-gray-400 mb-1">Avg strike rate</div>
-          <div className="text-lg font-bold text-white">{avgStrikeRate.toFixed(1)}</div>
-        </div>
-      </div>
     </div>
   );
 }
