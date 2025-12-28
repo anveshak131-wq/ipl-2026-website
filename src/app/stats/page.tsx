@@ -17,6 +17,7 @@ import GlassCard from '@/components/ui/GlassCard';
 import ModernStatsCard from '@/components/stats/ModernStatsCard';
 import StatsVisualization from '@/components/stats/StatsVisualization';
 import QuickStatsGrid from '@/components/stats/QuickStatsGrid';
+import { getQualificationCriteria, qualifiesForStat, getQualificationDescription } from '@/lib/statsQualifications';
 
 interface TeamAggregate {
   team: Team | null;
@@ -232,31 +233,36 @@ export default function StatsPage() {
   }, [currentLeague]); // Re-fetch when league changes
 
   const computedTopRunScorers = useMemo(() => {
+    const criteria = getQualificationCriteria('orangeCap', currentLeague);
     return [...players]
+      .filter((p) => qualifiesForStat(p, criteria, currentLeague))
       .sort((a, b) => b.stats.runs - a.stats.runs)
       .slice(0, 50);
-  }, [players]);
+  }, [players, currentLeague]);
 
   const computedTopWicketTakers = useMemo(() => {
+    const criteria = getQualificationCriteria('purpleCap', currentLeague);
     return [...players]
-      .filter((p) => p.stats.wickets > 0)
+      .filter((p) => qualifiesForStat(p, criteria, currentLeague))
       .sort((a, b) => b.stats.wickets - a.stats.wickets)
       .slice(0, 50);
-  }, [players]);
+  }, [players, currentLeague]);
 
   const computedBestStrikeRates = useMemo(() => {
+    const criteria = getQualificationCriteria('bestStrikeRate', currentLeague);
     return [...players]
-      .filter((p) => p.stats.runs >= 300)
+      .filter((p) => qualifiesForStat(p, criteria, currentLeague))
       .sort((a, b) => b.stats.strikeRate - a.stats.strikeRate)
       .slice(0, 50);
-  }, [players]);
+  }, [players, currentLeague]);
 
   const computedBestEconomyRates = useMemo(() => {
+    const criteria = getQualificationCriteria('bestEconomy', currentLeague);
     return [...players]
-      .filter((p) => p.stats.wickets >= 20 && p.stats.economy > 0)
+      .filter((p) => qualifiesForStat(p, criteria, currentLeague) && p.stats.economy > 0)
       .sort((a, b) => a.stats.economy - b.stats.economy)
       .slice(0, 50);
-  }, [players]);
+  }, [players, currentLeague]);
 
   const topRunScorers = useMemo(() => {
     const base = publishedStats?.leaders?.topRunScorers?.length
@@ -761,6 +767,9 @@ export default function StatsPage() {
                     <p className="text-xs text-gray-400">
                       Leading wicket takers and economy masters
                     </p>
+                    <p className="text-[10px] text-gray-500 mt-1 italic">
+                      Qualification: {getQualificationDescription('purpleCap', currentLeague)}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -782,7 +791,7 @@ export default function StatsPage() {
                     />
                   );
                 })}
-              </div>
+                  </div>
 
               {/* Visualization Chart */}
               <div className="mt-8 p-6 rounded-2xl bg-black/30 border border-white/10">
@@ -888,7 +897,7 @@ export default function StatsPage() {
                     <div>
                       <h2 className="text-lg font-bold text-white">Best Economy (Qualifiers)</h2>
                       <p className="text-xs text-gray-400">
-                        Minimum 20 wickets in the tournament
+                        {getQualificationDescription('bestEconomy', currentLeague)}
                       </p>
                     </div>
                   </div>

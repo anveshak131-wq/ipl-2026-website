@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { api } from '@/lib/data';
 import type { Player, Team } from '@/types';
+import { getQualificationCriteria, qualifiesForStat, getQualificationDescription } from '@/lib/statsQualifications';
 
 interface TeamAggregate {
   team: Team | null;
@@ -313,31 +314,36 @@ export default function AdminStatsPage() {
   }, [router]);
 
   const suggestedTopRunScorers = useMemo(() => {
+    const criteria = getQualificationCriteria('orangeCap', currentLeague);
     return [...players]
+      .filter((p) => qualifiesForStat(p, criteria, currentLeague))
       .sort((a, b) => b.stats.runs - a.stats.runs)
       .slice(0, 5);
-  }, [players]);
+  }, [players, currentLeague]);
 
   const suggestedTopWicketTakers = useMemo(() => {
+    const criteria = getQualificationCriteria('purpleCap', currentLeague);
     return [...players]
-      .filter((p) => p.stats.wickets > 0)
+      .filter((p) => qualifiesForStat(p, criteria, currentLeague))
       .sort((a, b) => b.stats.wickets - a.stats.wickets)
       .slice(0, 5);
-  }, [players]);
+  }, [players, currentLeague]);
 
   const suggestedBestStrikeRates = useMemo(() => {
+    const criteria = getQualificationCriteria('bestStrikeRate', currentLeague);
     return [...players]
-      .filter((p) => p.stats.runs >= 300)
+      .filter((p) => qualifiesForStat(p, criteria, currentLeague))
       .sort((a, b) => b.stats.strikeRate - a.stats.strikeRate)
       .slice(0, 5);
-  }, [players]);
+  }, [players, currentLeague]);
 
   const suggestedBestEconomyRates = useMemo(() => {
+    const criteria = getQualificationCriteria('bestEconomy', currentLeague);
     return [...players]
-      .filter((p) => p.stats.wickets >= 20 && p.stats.economy > 0)
+      .filter((p) => qualifiesForStat(p, criteria, currentLeague) && p.stats.economy > 0)
       .sort((a, b) => a.stats.economy - b.stats.economy)
       .slice(0, 5);
-  }, [players]);
+  }, [players, currentLeague]);
 
   useEffect(() => {
     if (!players.length || hasInitializedLeaders) {
@@ -1352,6 +1358,7 @@ interface LeaderboardEditorProps {
   allPlayers: Player[];
   formatValue: (player: Player) => string;
   suggestedEntries?: Player[];
+  qualificationText?: string;
 }
 
 function LeaderboardEditor({
@@ -1363,6 +1370,7 @@ function LeaderboardEditor({
   allPlayers,
   formatValue,
   suggestedEntries,
+  qualificationText,
 }: LeaderboardEditorProps) {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [selectedPlayerId, setSelectedPlayerId] = useState('');
@@ -1435,13 +1443,20 @@ function LeaderboardEditor({
 
   return (
     <div className="space-y-2">
-      <h3
-        className={`font-semibold ${
-          titleClassName ? titleClassName : 'text-white'
-        }`}
-      >
-        {title}
-      </h3>
+      <div className="flex items-start justify-between gap-2 mb-1">
+        <h3
+          className={`font-semibold ${
+            titleClassName ? titleClassName : 'text-white'
+          }`}
+        >
+          {title}
+        </h3>
+      </div>
+      {qualificationText && (
+        <p className="text-[10px] text-gray-500 mb-1 italic">
+          Qualification: {qualificationText}
+        </p>
+      )}
       {suggestedEntries && suggestedEntries.length > 0 && (
         <p className="text-[10px] text-gray-400">
           {matchesSuggestions
