@@ -368,9 +368,17 @@ export default function AdminStatsPage() {
     updateBestStrikeRates(
       initialBestStrike.length ? initialBestStrike : suggestedBestStrikeRates
     );
-    updateBestEconomyRates(
-      initialBestEconomy.length ? initialBestEconomy : suggestedBestEconomyRates
-    );
+    // Ensure bestEconomyRates has 5 players (fill from suggested if needed)
+    let finalBestEconomy = initialBestEconomy.length ? initialBestEconomy : suggestedBestEconomyRates;
+    if (finalBestEconomy.length < 5 && suggestedBestEconomyRates.length >= 5) {
+      // Fill up to 5 players from suggested list
+      const existingIds = new Set(finalBestEconomy.map(p => p.id));
+      const additional = suggestedBestEconomyRates
+        .filter(p => !existingIds.has(p.id))
+        .slice(0, 5 - finalBestEconomy.length);
+      finalBestEconomy = [...finalBestEconomy, ...additional].slice(0, 5);
+    }
+    updateBestEconomyRates(finalBestEconomy);
 
     setHasInitializedLeaders(true);
   }, [
