@@ -432,8 +432,7 @@ Max: 500 users
 
 ### Long Term (2-3 months)
 10. **Premium subscriptions** with monetization
-11. **Fantasy cricket** integration
-12. **AI commentary** and analytics
+11. **AI commentary** and analytics
 
 ---
 

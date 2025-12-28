@@ -77,11 +77,6 @@
 - **You.com:** AI-powered cricket research
 - **Bing Chat:** Current cricket news and updates
 
-### **For Fantasy Cricket**
-- **Dream11:** Fantasy cricket platform
-- **MyTeam11:** Fantasy cricket league
-- **FanCode:** Fantasy sports platform
-
 ---
 
 ## 💡 **Tips for Users**
@@ -255,13 +250,6 @@
 ✅ Check player injuries
 ✅ Review head-to-head records
 
-### **For Fantasy Cricket**
-✅ Research player form
-✅ Check recent performances
-✅ Consider venue factors
-✅ Monitor injury updates
-✅ Balance team composition
-
 ### **For Live Watching**
 ✅ Join live chat for discussions
 ✅ Follow commentary updates
@@ -309,7 +297,6 @@
 - Player comparison tool
 - Team statistics dashboard
 - Match prediction engine
-- Fantasy cricket integration
 - Advanced analytics
 
 ---

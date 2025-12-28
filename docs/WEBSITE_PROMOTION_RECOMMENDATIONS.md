@@ -27,7 +27,6 @@
 
 ### 4. **Community Building**
 - **Forums/Discussions**: Enable user comments, match discussions
-- **Fantasy League Integration**: If applicable, promote fantasy cricket features
 - **User-Generated Content**: Contests for best predictions, fan art
 - **Live Chat**: During matches for real-time engagement
 
@@ -112,7 +111,7 @@
 - Paid advertising campaigns
 - Major partnerships
 - PR outreach
-- Advanced features (fantasy league, etc.)
+- Advanced features
 
 ## Content Calendar Ideas
 

@@ -362,7 +362,6 @@ curl -H "Authorization: Bearer YOUR_TOKEN" https://yourdomain.com/api/admin/user
 
 ### Phase 4: Advanced Features
 - Prediction engine
-- Fantasy leagues
 - Live polls
 
 ### Phase 5: Monetization

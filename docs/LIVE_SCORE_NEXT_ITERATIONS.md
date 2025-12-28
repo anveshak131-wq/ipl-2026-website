@@ -455,15 +455,7 @@ Use AI to:
 - Virtual meet-and-greet with players
 ```
 
-### 3. Fantasy Cricket Integration
-```
-- Live fantasy points tracking
-- Captain selection during match
-- Power plays and trades
-- Leaderboards and prizes
-```
-
-### 4. AI-Powered Predictions
+### 3. AI-Powered Predictions
 ```
 - Match winner prediction (ML model)
 - Next ball prediction
@@ -471,11 +463,10 @@ Use AI to:
 - Injury risk assessment
 ```
 
-### 5. Community Features
+### 4. Community Features
 ```
 - User-generated content (fan edits)
 - Meme competitions
-- Fantasy cricket leagues
 - Team/club management
 ```
 

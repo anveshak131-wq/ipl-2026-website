@@ -430,7 +430,6 @@ interface LeagueContextType {
 
 ### **2. Social Features**
 - **League-Specific Discussions**: Separate chat/feed for each league
-- **Fantasy Teams**: Create teams for both leagues
 - **Predictions**: Separate prediction pools
 
 ### **3. Content Features**

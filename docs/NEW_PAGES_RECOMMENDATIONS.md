@@ -12,34 +12,7 @@ Based on research from modern cricket websites, AI-powered features, and industr
 
 ## 🎯 END-USER PAGES RECOMMENDATIONS
 
-### 1. **Fantasy League / Dream Team** (`/fantasy`)
-**Priority: High** | **Complexity: Medium**
-
-**Features:**
-- Create and manage fantasy teams
-- Select players within budget constraints
-- Points system based on real match performance
-- Leaderboards and rankings
-- Private leagues (friends, family)
-- Transfer windows and substitutions
-- Real-time points updates during matches
-
-**Why:**
-- Major engagement driver (ESPN Fantasy, Dream11 model)
-- Increases time spent on platform
-- Creates community and competition
-- Revenue opportunity (optional premium features)
-
-**UI/UX:**
-- Drag-and-drop team builder
-- Player cards with stats and prices
-- Budget indicator with visual feedback
-- Points breakdown per player
-- Match-by-match performance tracking
-
----
-
-### 2. **Match Predictions & Polls** (`/predictions`)
+### 1. **Match Predictions & Polls** (`/predictions`)
 **Priority: High** | **Complexity: Low** (Already exists, enhance it)
 
 **Enhancements:**
@@ -59,7 +32,7 @@ Based on research from modern cricket websites, AI-powered features, and industr
 
 ---
 
-### 3. **Player Comparison Tool** (`/compare`)
+### 2. **Player Comparison Tool** (`/compare`)
 **Priority: Medium** | **Complexity: Low**
 
 **Features:**
@@ -72,7 +45,6 @@ Based on research from modern cricket websites, AI-powered features, and industr
 - Share comparison results
 
 **Why:**
-- Useful for fantasy team selection
 - Fan debates and discussions
 - Educational tool for understanding stats
 - Easy to implement with existing data
@@ -85,7 +57,7 @@ Based on research from modern cricket websites, AI-powered features, and industr
 
 ---
 
-### 4. **Venue/Stadium Guide** (`/venues`)
+### 3. **Venue/Stadium Guide** (`/venues`)
 **Priority: Medium** | **Complexity: Medium**
 
 **Features:**
@@ -106,7 +78,7 @@ Based on research from modern cricket websites, AI-powered features, and industr
 
 ---
 
-### 5. **Highlights & Videos** (`/highlights`)
+### 4. **Highlights & Videos** (`/highlights`)
 **Priority: High** | **Complexity: Medium**
 
 **Features:**
@@ -127,7 +99,7 @@ Based on research from modern cricket websites, AI-powered features, and industr
 
 ---
 
-### 6. **Fan Zone / Community** (`/community`)
+### 5. **Fan Zone / Community** (`/community`)
 **Priority: Medium** | **Complexity: High**
 
 **Features:**
@@ -148,7 +120,7 @@ Based on research from modern cricket websites, AI-powered features, and industr
 
 ---
 
-### 7. **Schedule & Calendar** (`/schedule`)
+### 6. **Schedule & Calendar** (`/schedule`)
 **Priority: Medium** | **Complexity: Low**
 
 **Features:**
@@ -168,7 +140,7 @@ Based on research from modern cricket websites, AI-powered features, and industr
 
 ---
 
-### 8. **Player Profiles Enhanced** (`/players/[id]`)
+### 7. **Player Profiles Enhanced** (`/players/[id]`)
 **Priority: Medium** | **Complexity: Medium** (Enhance existing)
 
 **Enhancements:**
@@ -184,7 +156,7 @@ Based on research from modern cricket websites, AI-powered features, and industr
 
 ---
 
-### 9. **Match Center** (`/match/[id]`)
+### 8. **Match Center** (`/match/[id]`)
 **Priority: High** | **Complexity: Medium**
 
 **Features:**
@@ -207,7 +179,7 @@ Based on research from modern cricket websites, AI-powered features, and industr
 
 ---
 
-### 10. **Tournament Standings** (`/standings`)
+### 9. **Tournament Standings** (`/standings`)
 **Priority: Medium** | **Complexity: Low**
 
 **Features:**
@@ -228,7 +200,7 @@ Based on research from modern cricket websites, AI-powered features, and industr
 
 ---
 
-### 11. **Records & Milestones** (`/records`)
+### 10. **Records & Milestones** (`/records`)
 **Priority: Low** | **Complexity: Medium**
 
 **Features:**
@@ -248,7 +220,7 @@ Based on research from modern cricket websites, AI-powered features, and industr
 
 ---
 
-### 12. **Notifications Center** (`/notifications`)
+### 11. **Notifications Center** (`/notifications`)
 **Priority: Medium** | **Complexity: Low** (Already exists, enhance)
 
 **Enhancements:**
@@ -556,7 +528,7 @@ Based on research from modern cricket websites, AI-powered features, and industr
 ## 📊 PRIORITY MATRIX
 
 ### High Priority (Implement First):
-1. **End-User**: Fantasy League, Match Center, Highlights
+1. **End-User**: Match Center, Highlights
 2. **Admin**: Analytics Dashboard, User Management Enhanced
 
 ### Medium Priority (Next Phase):
@@ -584,7 +556,6 @@ Based on research from modern cricket websites, AI-powered features, and industr
 - Analytics Dashboard (Admin)
 
 ### Phase 3 (Complex Features):
-- Fantasy League
 - Highlights & Videos
 - Fan Zone / Community
 - Email Campaign Manager (Admin)

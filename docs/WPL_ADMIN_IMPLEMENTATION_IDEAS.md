@@ -612,7 +612,6 @@ Create shared components that accept league prop:
 ### **5. User Engagement**
 - Fan polls
 - Predictions
-- Fantasy league integration
 - Social features
 
 ---

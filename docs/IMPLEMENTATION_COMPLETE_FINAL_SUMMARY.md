@@ -517,7 +517,6 @@ node scripts/create-admin.js admin@ipl2026.com IPLAdmin@2025 "Admin User"
 
 ### Phase 4: Advanced Features
 - Prediction engine
-- Fantasy leagues
 - Live polls & voting
 - Player ratings
 
