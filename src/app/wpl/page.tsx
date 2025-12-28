@@ -997,6 +997,104 @@ export default function WPLHomePage() {
           </section>
         ) : null}
 
+        {/* Predictions Panel Section */}
+        <section className="relative py-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8 }}
+              className="relative overflow-hidden rounded-3xl backdrop-blur-2xl border-2 p-10 shadow-2xl"
+              style={{
+                background: `linear-gradient(135deg, ${WPLColors.pinkRGBA[20]}, ${WPLColors.roseRGBA[20]}, ${WPLColors.pinkRGBA[20]})`,
+                borderColor: WPLColors.pinkRGBA[40],
+              }}
+            >
+              <motion.div
+                className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"
+                style={{
+                  background: WPLColors.pinkRGBA[20],
+                }}
+                animate={{
+                  scale: [1, 1.2, 1],
+                  opacity: [0.2, 0.4, 0.2],
+                }}
+                transition={{
+                  duration: 4,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+              <div className="relative z-10 grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                  <motion.div
+                    className="inline-flex items-center gap-2 mb-6 px-6 py-3 rounded-full backdrop-blur-sm"
+                    style={{
+                      background: WPLColors.pinkRGBA[30],
+                      border: `1px solid ${WPLColors.pinkRGBA[40]}`,
+                    }}
+                  >
+                    <Target className="w-5 h-5" style={{ color: WPLColors.pink }} />
+                    <span className="text-sm font-bold uppercase tracking-wider" style={{ color: WPLColors.textPrimary }}>Match Predictions</span>
+                  </motion.div>
+                  <h2 className="text-4xl md:text-5xl font-black mb-4" style={{ color: WPLColors.textPrimary }}>
+                    Predict & <GradientText gradient="from-pink-400 to-rose-400" animate>Win</GradientText>
+                  </h2>
+                  <p className="text-lg mb-6 leading-relaxed" style={{ color: WPLColors.textSecondary }}>
+                    Test your cricket knowledge! Predict match outcomes, player performances, and compete on the leaderboard. Show off your expertise and climb the rankings.
+                  </p>
+                  <Link
+                    href="/predictions"
+                    className="group inline-flex items-center gap-3 px-8 py-4 rounded-xl text-white font-bold text-lg shadow-2xl transition-all hover:scale-105"
+                    style={{
+                      background: `linear-gradient(135deg, ${WPLColors.pink}, ${WPLColors.rose})`,
+                      boxShadow: `0 10px 40px ${WPLColors.pinkRGBA[50]}, 0 0 60px ${WPLColors.roseRGBA[30]}`,
+                    }}
+                  >
+                    <Target className="w-6 h-6" />
+                    <span>Start Predicting</span>
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+                  </Link>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { label: 'Match Winner', icon: Trophy, color: 'from-pink-500 to-rose-500' },
+                    { label: 'Top Scorer', icon: Star, color: 'from-rose-500 to-purple-500' },
+                    { label: 'Most Wickets', icon: Activity, color: 'from-purple-500 to-pink-500' },
+                    { label: 'Player of Match', icon: Target, color: 'from-pink-500 to-rose-500' },
+                  ].map((feature, idx) => (
+                    <motion.div
+                      key={feature.label}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: idx * 0.1 }}
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      className="p-6 rounded-2xl backdrop-blur-xl border transition-all"
+                      style={{
+                        background: WPLColors.purpleRGBA[5],
+                        borderColor: WPLColors.purpleRGBA[30],
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = WPLColors.purpleRGBA[10];
+                        e.currentTarget.style.borderColor = WPLColors.purpleRGBA[50];
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = WPLColors.purpleRGBA[5];
+                        e.currentTarget.style.borderColor = WPLColors.purpleRGBA[30];
+                      }}
+                    >
+                      <feature.icon className={`w-8 h-8 mb-3 bg-gradient-to-r ${feature.color} bg-clip-text text-transparent`} />
+                      <p className="text-sm font-semibold" style={{ color: WPLColors.textPrimary }}>{feature.label}</p>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
         {/* Feature Showcase */}
         {!isLoading && (
           <section className="relative py-24">

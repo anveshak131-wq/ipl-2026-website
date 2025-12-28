@@ -79,8 +79,6 @@ export default function Navbar() {
     // { href: '/stories', label: 'Fan Stories', emoji: 'people' },
     // Analytics & Insights (only for IPL, not WPL)
     ...(currentLeague !== 'wpl' ? [{ href: '/stats', label: 'Stats', emoji: 'chart' as NavEmojiName }] : []),
-    // Predictions & Engagement
-    { href: '/predictions', label: 'Predictions', emoji: 'target' },
   ];
 
   const secondaryNavItems: NavItem[] = [
@@ -92,14 +90,11 @@ export default function Navbar() {
 
   const getNavBadgeLabel = (href: string): string | null => {
     if (href === '/stats') return 'Numbers';
-    if (href === '/predictions') return 'Predict';
     return null;
   };
 
   const getNavTooltip = (href: string): string | null => {
     if (href === '/stats') return 'Leaderboards, records, and team comparisons';
-    if (href === '/predictions')
-      return 'Predict match outcomes, player performances, and compete on leaderboards';
     return null;
   };
 
