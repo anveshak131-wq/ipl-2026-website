@@ -5,6 +5,8 @@ import { api } from '@/lib/data';
 import { useLeague } from '@/contexts/LeagueContext';
 import type { Match, Poll } from '@/types';
 import { Target, Trophy, BarChart3, Users, MessageSquare } from 'lucide-react';
+import AdminSidebar from '@/components/admin/AdminSidebar';
+import GlobalSearch from '@/components/admin/GlobalSearch';
 
 export default function AdminPredictionsPage() {
   const { currentLeague } = useLeague();
@@ -100,14 +102,18 @@ export default function AdminPredictionsPage() {
   });
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
-          <Target className="w-8 h-8 text-ipl-gold" />
-          Predictions Management
-        </h1>
-        <p className="text-gray-400">View and manage user predictions and polls</p>
-      </div>
+    <div className="flex min-h-screen bg-ipl-dark">
+      <AdminSidebar currentPage="/ipl-admin-2026/predictions" />
+      <div className="flex-1 ml-64">
+        <GlobalSearch />
+        <div className="p-6">
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
+              <Target className="w-8 h-8 text-ipl-gold" />
+              Predictions Management
+            </h1>
+            <p className="text-gray-400">View and manage user predictions and polls</p>
+          </div>
 
       {error && (
         <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300">
@@ -334,6 +340,7 @@ export default function AdminPredictionsPage() {
           >
             View Leaderboard
           </a>
+        </div>
         </div>
       </div>
     </div>
