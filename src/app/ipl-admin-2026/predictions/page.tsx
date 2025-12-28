@@ -15,6 +15,7 @@ export default function AdminPredictionsPage() {
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
   const [stats, setStats] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [initialLoad, setInitialLoad] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -102,31 +103,13 @@ export default function AdminPredictionsPage() {
       }
     };
 
-    // Only fetch on mount and when filters change
-    if (initialLoad || selectedMatchId !== null) {
-      fetchData();
-    } else {
-      // If not initial load and no match selected, just load matches
-      const loadMatches = async () => {
-        try {
-          const allMatches = await api.getMatches(currentLeague);
-          setMatches(Array.isArray(allMatches) ? allMatches : []);
-        } catch (matchError) {
-          console.error('Error fetching matches:', matchError);
-          setMatches([]);
-        } finally {
-          setLoading(false);
-          setInitialLoad(false);
-        }
-      };
-      loadMatches();
-    }
+    fetchData();
 
     return () => {
       cancelled = true;
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [currentLeague, selectedMatchId, initialLoad]);
+  }, [currentLeague, selectedMatchId]);
 
   useEffect(() => {
     const fetchStats = async () => {
