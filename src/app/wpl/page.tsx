@@ -41,6 +41,7 @@ import {
   Radio,
   Sparkles
 } from 'lucide-react';
+import GradientText from '@/components/ui/GradientText';
 import WPLFloatingParticles from '@/components/animations/WPLFloatingParticles';
 import { WPLColors } from '@/lib/wplColors';
 import CountdownTimer from '@/components/ui/CountdownTimer';
