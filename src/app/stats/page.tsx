@@ -14,6 +14,9 @@ import type { Player, Team } from '@/types';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import GradientText from '@/components/ui/GradientText';
 import GlassCard from '@/components/ui/GlassCard';
+import ModernStatsCard from '@/components/stats/ModernStatsCard';
+import StatsVisualization from '@/components/stats/StatsVisualization';
+import QuickStatsGrid from '@/components/stats/QuickStatsGrid';
 
 interface TeamAggregate {
   team: Team | null;
@@ -596,37 +599,8 @@ export default function StatsPage() {
             </p>
           )}
 
-          {/* Quick Stats - Similar to WPL stats page */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-            <motion.div 
-              className="rounded-xl px-6 py-4 cursor-pointer glass-effect"
-              whileHover={{ scale: 1.05 }}
-            >
-              <p className="text-xs uppercase tracking-wide font-semibold mb-1 text-gray-400">Players</p>
-              <p className="text-3xl font-black text-white">{players.length}</p>
-            </motion.div>
-            <motion.div 
-              className="rounded-xl px-6 py-4 cursor-pointer glass-effect"
-              whileHover={{ scale: 1.05 }}
-            >
-              <p className="text-xs uppercase tracking-wide font-semibold mb-1 text-gray-400">Teams</p>
-              <p className="text-3xl font-black text-white">{teams.length}</p>
-            </motion.div>
-            <motion.div 
-              className="rounded-xl px-6 py-4 cursor-pointer glass-effect"
-              whileHover={{ scale: 1.05 }}
-            >
-              <p className="text-xs uppercase tracking-wide font-semibold mb-1 text-gray-400">Total Runs</p>
-              <p className="text-3xl font-black text-white">{players.reduce((sum, p) => sum + p.stats.runs, 0).toLocaleString()}</p>
-            </motion.div>
-            <motion.div 
-              className="rounded-xl px-6 py-4 cursor-pointer glass-effect"
-              whileHover={{ scale: 1.05 }}
-            >
-              <p className="text-xs uppercase tracking-wide font-semibold mb-1 text-gray-400">Total Wickets</p>
-              <p className="text-3xl font-black text-white">{players.reduce((sum, p) => sum + p.stats.wickets, 0)}</p>
-            </motion.div>
-          </div>
+          {/* Quick Stats Grid - Modern Design */}
+          <QuickStatsGrid players={players} teams={teams} />
 
           {/* Contextual sub-navigation */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 -mt-4">
@@ -738,94 +712,35 @@ export default function StatsPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
+                  {/* Modern Stats Cards */}
+                  <div className="space-y-3">
                     {topRunScorers.slice(0, leadersLimit).map((p, index) => {
-                      const isLeader = index === 0;
                       const team = teams.find((t) => t.id === p.teamId);
-                      const formLabel = getBattingFormLabel(p);
-                      const contextLine = getBattingContextLine(p);
-                      const formBaseClasses =
-                        'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border';
-                      const formClasses =
-                        formLabel === 'Hot'
-                          ? `${formBaseClasses} bg-red-500/15 text-red-300 border-red-400/60`
-                          : formLabel === 'Consistent'
-                          ? `${formBaseClasses} bg-emerald-500/15 text-emerald-300 border-emerald-400/60`
-                          : `${formBaseClasses} bg-slate-500/20 text-slate-200 border-slate-400/50`;
                       return (
-                        <div
+                        <ModernStatsCard
                           key={p.id}
-                          onClick={() =>
-                            setExpandedPlayerId((prev) => (prev === p.id ? null : p.id))
-                          }
-                          className={`rounded-2xl border px-4 py-3 transition-all duration-200 cursor-pointer ${
-                            isLeader
-                              ? 'bg-gradient-to-r from-ipl-gold/20 via-ipl-purple/20 to-black/40 border-ipl-gold/60 shadow-lg shadow-ipl-gold/20'
-                              : 'bg-black/20 border-white/10 hover:border-ipl-gold/50'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div
-                                className={`rounded-full flex items-center justify-center text-xs font-bold text-white ${
-                                  isLeader
-                                    ? 'w-10 h-10 bg-gradient-to-br from-ipl-gold to-ipl-purple'
-                                    : 'w-8 h-8 bg-gradient-to-br from-ipl-gold/80 to-ipl-purple/80'
-                                }`}
-                              >
-                                #{index + 1}
-                              </div>
-                              <div>
-                                <div
-                                  className={`font-semibold text-white ${
-                                    isLeader ? 'text-base' : 'text-sm'
-                                  }`}
-                                >
-                                  {p.name}
-                                </div>
-                                <div className="text-[11px] text-gray-400">
-                                  {p.role} • {team?.shortName || 'Unknown'} • {p.stats.matches}{' '}
-                                  matches
-                                </div>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <div
-                                className={`font-bold text-ipl-gold ${
-                                  isLeader ? 'text-lg' : 'text-base'
-                                }`}
-                              >
-                                {p.stats.runs} runs
-                              </div>
-                              <div className="text-[11px] text-gray-400">
-                                SR {p.stats.strikeRate.toFixed(1)} • Avg{' '}
-                                {p.stats.average.toFixed(1)}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="mt-1 flex items-center justify-between gap-2">
-                            <span className={formClasses}>
-                              <span className="opacity-70">Form:</span>
-                              <span>{formLabel}</span>
-                            </span>
-                          </div>
-                          {contextLine && (
-                            <div className="mt-1 text-[11px] text-gray-300">
-                              {contextLine}
-                            </div>
-                          )}
-                          {expandedPlayerId === p.id && (
-                            <div className="mt-2 pt-2 border-t border-white/10 text-[11px] text-gray-300 flex flex-wrap gap-x-4 gap-y-1">
-                              <span>Highest: {p.stats.highest}</span>
-                              <span>4s: {p.stats.fours}</span>
-                              <span>6s: {p.stats.sixes}</span>
-                              <span>50s: {p.stats.fifties}</span>
-                              <span>100s: {p.stats.hundreds}</span>
-                            </div>
-                          )}
-                        </div>
+                          player={p}
+                          rank={index + 1}
+                          isLeader={index === 0}
+                          type="batting"
+                          teamName={team?.shortName}
+                          onExpand={() => setExpandedPlayerId((prev) => (prev === p.id ? null : p.id))}
+                          isExpanded={expandedPlayerId === p.id}
+                        />
                       );
                     })}
+                  </div>
+
+                  {/* Visualization Chart */}
+                  <div className="mt-8 p-6 rounded-2xl bg-black/30 border border-white/10">
+                    <h3 className="text-sm font-semibold text-gray-400 mb-4 uppercase tracking-wider">
+                      Visual Comparison
+                    </h3>
+                    <StatsVisualization 
+                      players={topRunScorers.slice(0, leadersLimit)} 
+                      type="batting"
+                      maxItems={leadersLimit}
+                    />
                   </div>
                 </div>
               )}
@@ -850,85 +765,36 @@ export default function StatsPage() {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              {/* Modern Stats Cards */}
+              <div className="space-y-3">
                 {topWicketTakers.slice(0, leadersLimit).map((p, index) => {
-                  const isLeader = index === 0;
-                  const bowlingAverage =
-                    p.stats.bowlingAverage !== undefined
-                      ? p.stats.bowlingAverage.toFixed(1)
-                      : '-';
                   const team = teams.find((t) => t.id === p.teamId);
-                  const formLabel = getBowlingFormLabel(p);
-                  const contextLine = getBowlingContextLine(p);
-                  const formBaseClasses =
-                    'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border';
-                  const formClasses =
-                    formLabel === 'Hot'
-                      ? `${formBaseClasses} bg-emerald-500/20 text-emerald-200 border-emerald-400/70`
-                      : formLabel === 'Consistent'
-                      ? `${formBaseClasses} bg-sky-500/20 text-sky-200 border-sky-400/70`
-                      : `${formBaseClasses} bg-slate-500/20 text-slate-200 border-slate-400/50`;
-
                   return (
-                    <div
+                    <ModernStatsCard
                       key={p.id}
-                      onClick={() =>
-                        setExpandedPlayerId((prev) => (prev === p.id ? null : p.id))
-                      }
-                      className={`rounded-2xl border px-4 py-3 transition-all duration-200 cursor-pointer ${
-                        isLeader
-                          ? 'bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-black/40 border-emerald-400/70 shadow-lg shadow-emerald-400/20'
-                          : 'bg-black/20 border-white/10 hover:border-emerald-400/50'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`rounded-full flex items-center justify-center text-xs font-bold text-white ${
-                              isLeader
-                                ? 'w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500'
-                                : 'w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-500'
-                            }`}
-                          >
-                            #{index + 1}
-                          </div>
-                          <div>
-                            <div
-                              className={`font-semibold text-white ${
-                                isLeader ? 'text-base' : 'text-sm'
-                              }`}
-                            >
-                              {p.name}
-                            </div>
-                            <div className="text-[11px] text-gray-400">
-                              {p.role} • {team?.shortName || 'Unknown'} • {p.stats.matches}{' '}
-                              matches
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div
-                            className={`font-bold text-emerald-300 ${
-                              isLeader ? 'text-lg' : 'text-base'
-                            }`}
-                          >
-                            {p.stats.wickets} wickets
-                          </div>
-                          <div className="text-[11px] text-gray-400">
-                            Eco {p.stats.economy.toFixed(2)} • Best {p.stats.bestBowling}
-                          </div>
-                        </div>
-                      </div>
-                      {expandedPlayerId === p.id && (
-                        <div className="mt-2 pt-2 border-t border-white/10 text-[11px] text-gray-300 flex flex-wrap gap-x-4 gap-y-1">
-                          <span>Bowling avg: {bowlingAverage}</span>
-                          <span>Matches: {p.stats.matches}</span>
-                        </div>
-                      )}
-                    </div>
+                      player={p}
+                      rank={index + 1}
+                      isLeader={index === 0}
+                      type="bowling"
+                      teamName={team?.shortName}
+                      onExpand={() => setExpandedPlayerId((prev) => (prev === p.id ? null : p.id))}
+                      isExpanded={expandedPlayerId === p.id}
+                    />
                   );
                 })}
-                  </div>
+              </div>
+
+              {/* Visualization Chart */}
+              <div className="mt-8 p-6 rounded-2xl bg-black/30 border border-white/10">
+                <h3 className="text-sm font-semibold text-gray-400 mb-4 uppercase tracking-wider">
+                  Visual Comparison
+                </h3>
+                <StatsVisualization 
+                  players={topWicketTakers.slice(0, leadersLimit)} 
+                  type="bowling"
+                  maxItems={leadersLimit}
+                />
+              </div>
                 </div>
               )}
             </section>
