@@ -193,23 +193,37 @@ export default function PredictionsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   className="bg-gray-900/80 backdrop-blur-sm border border-gray-700 rounded-xl p-6"
                 >
-                  <MatchSelector
-                    selectedMatchId={selectedMatchId}
-                    onSelectMatch={setSelectedMatchId}
-                  />
-                  {selectedMatch && (
-                    <div className="mt-6 pt-6 border-t border-gray-700">
-                      <PredictionForm
-                        match={selectedMatch}
-                        existingPrediction={existingPrediction}
-                        onSuccess={handlePredictionSuccess}
+                  {!user?.id ? (
+                    <div className="text-center py-12">
+                      <p className="text-gray-400 mb-4">Please log in to make predictions</p>
+                      <a
+                        href="/account"
+                        className="inline-block px-6 py-3 bg-gradient-to-r from-ipl-gold to-ipl-purple rounded-lg text-white font-semibold hover:from-ipl-gold/90 hover:to-ipl-purple/90 transition-all"
+                      >
+                        Go to Account
+                      </a>
+                    </div>
+                  ) : (
+                    <>
+                      <MatchSelector
+                        selectedMatchId={selectedMatchId}
+                        onSelectMatch={setSelectedMatchId}
                       />
-                    </div>
-                  )}
-                  {poll && selectedMatchId && (
-                    <div className="mt-6 pt-6 border-t border-gray-700">
-                      <PollCard poll={poll} matchId={selectedMatchId} onVote={handlePollVote} />
-                    </div>
+                      {selectedMatch && (
+                        <div className="mt-6 pt-6 border-t border-gray-700">
+                          <PredictionForm
+                            match={selectedMatch}
+                            existingPrediction={existingPrediction}
+                            onSuccess={handlePredictionSuccess}
+                          />
+                        </div>
+                      )}
+                      {poll && selectedMatchId && (
+                        <div className="mt-6 pt-6 border-t border-gray-700">
+                          <PollCard poll={poll} matchId={selectedMatchId} onVote={handlePollVote} />
+                        </div>
+                      )}
+                    </>
                   )}
                 </motion.div>
               )}
