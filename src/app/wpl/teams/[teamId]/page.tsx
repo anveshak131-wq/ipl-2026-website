@@ -1,9 +1,6 @@
 import TeamDetailClient from '@/app/teams/[teamId]/TeamDetailClient';
 import { api } from '@/lib/data';
 
-// Allow dynamic routes for WPL teams (not just pre-generated static routes)
-export const dynamicParams = true;
-
 // Generate static params for WPL teams
 // With static export, all routes must be pre-generated at build time
 export async function generateStaticParams() {

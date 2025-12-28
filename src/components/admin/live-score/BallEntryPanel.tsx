@@ -439,41 +439,41 @@ export default function BallEntryPanel({
       {/* Top Section: Match Context + State Manager */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 space-y-4">
-          {/* Match State Manager */}
-          <MatchStateManager
-            matchState={matchState}
-            onStateChange={updateMatchState}
-            league={league}
-            team1Name={team1Name}
-            team2Name={team2Name}
-            currentInnings={state.innings}
-            team1Wickets={state.team1.wickets}
-            team2Wickets={state.team2.wickets}
-            team1Overs={state.team1.balls / 6}
-            team2Overs={state.team2.balls / 6}
-            maxOvers={20}
-          />
-          
-          {/* Match Info */}
-          <div className="space-y-4">
-            <CurrentOverDisplay
-              over={state.currentOver}
-              innings={state.innings}
-              battingTeam={battingTeam.name}
-              league={league}
-            />
-            <OverProgressBar currentOver={state.currentOver} league={league} />
-          </div>
+      {/* Match State Manager */}
+      <MatchStateManager
+        matchState={matchState}
+        onStateChange={updateMatchState}
+        league={league}
+        team1Name={team1Name}
+        team2Name={team2Name}
+        currentInnings={state.innings}
+        team1Wickets={state.team1.wickets}
+        team2Wickets={state.team2.wickets}
+        team1Overs={state.team1.balls / 6}
+        team2Overs={state.team2.balls / 6}
+        maxOvers={20}
+      />
 
-          {/* Score Display */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Match Info */}
+      <div className="space-y-4">
+        <CurrentOverDisplay
+          over={state.currentOver}
+          innings={state.innings}
+          battingTeam={battingTeam.name}
+          league={league}
+        />
+        <OverProgressBar currentOver={state.currentOver} league={league} />
+      </div>
+
+      {/* Score Display */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <AnimatedScoreDisplay
-              teamName={state.team1.name}
-              runs={state.team1.runs}
-              wickets={state.team1.wickets}
-              overs={ballsToOvers(state.team1.balls)}
-              isBatting={state.battingTeam === 'team1'}
-              league={league}
+          teamName={state.team1.name}
+          runs={state.team1.runs}
+          wickets={state.team1.wickets}
+          overs={ballsToOvers(state.team1.balls)}
+          isBatting={state.battingTeam === 'team1'}
+          league={league}
               previousRuns={previousStateRef.current?.battingTeam === 'team1' 
                 ? previousStateRef.current.team1.runs 
                 : previousStateRef.current?.team1.runs || 0}
@@ -482,12 +482,12 @@ export default function BallEntryPanel({
                 : previousStateRef.current?.team1.wickets || 0}
             />
             <AnimatedScoreDisplay
-              teamName={state.team2.name}
-              runs={state.team2.runs}
-              wickets={state.team2.wickets}
-              overs={ballsToOvers(state.team2.balls)}
-              isBatting={state.battingTeam === 'team2'}
-              league={league}
+          teamName={state.team2.name}
+          runs={state.team2.runs}
+          wickets={state.team2.wickets}
+          overs={ballsToOvers(state.team2.balls)}
+          isBatting={state.battingTeam === 'team2'}
+          league={league}
               previousRuns={previousStateRef.current?.battingTeam === 'team2'
                 ? previousStateRef.current.team2.runs
                 : previousStateRef.current?.team2.runs || 0}
@@ -829,15 +829,15 @@ export default function BallEntryPanel({
         </div>
         {/* Keyboard Shortcuts Hint - Hidden on mobile */}
         {!isMobile && (
-          <div className="text-center">
-            <p className="text-xs text-gray-400">
-              💡 Keyboard Shortcuts: Press <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300">0-6</kbd> for runs, 
-              <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300 mx-1">W</kbd> for wicket, 
-              <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300 mx-1">N</kbd> for no-ball, 
-              <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300 mx-1">D</kbd> for wide, 
-              <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300 mx-1">U</kbd> for undo
-            </p>
-          </div>
+        <div className="text-center">
+          <p className="text-xs text-gray-400">
+            💡 Keyboard Shortcuts: Press <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300">0-6</kbd> for runs, 
+            <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300 mx-1">W</kbd> for wicket, 
+            <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300 mx-1">N</kbd> for no-ball, 
+            <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300 mx-1">D</kbd> for wide, 
+            <kbd className="px-2 py-1 bg-gray-700 rounded text-gray-300 mx-1">U</kbd> for undo
+          </p>
+        </div>
         )}
       </div>
 
