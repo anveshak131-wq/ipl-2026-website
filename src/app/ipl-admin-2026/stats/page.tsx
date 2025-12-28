@@ -972,6 +972,7 @@ export default function AdminStatsPage() {
                   allPlayers={players}
                   suggestedEntries={suggestedTopRunScorers}
                   formatValue={(player) => `${player.stats.runs}`}
+                  qualificationText={getQualificationDescription('orangeCap', currentLeague, false)}
                 />
                 <LeaderboardEditor
                   title="Purple Cap (Wickets)"
@@ -982,6 +983,7 @@ export default function AdminStatsPage() {
                   allPlayers={players}
                   suggestedEntries={suggestedTopWicketTakers}
                   formatValue={(player) => `${player.stats.wickets}`}
+                  qualificationText={getQualificationDescription('purpleCap', currentLeague, false)}
                 />
                 <LeaderboardEditor
                   title="Best Strike Rates"
@@ -994,6 +996,7 @@ export default function AdminStatsPage() {
                   formatValue={(player) =>
                     `SR ${player.stats.strikeRate.toFixed(1)}`
                   }
+                  qualificationText={getQualificationDescription('bestStrikeRate', currentLeague, false)}
                 />
                 <LeaderboardEditor
                   title="Best Economy"
@@ -1006,6 +1009,7 @@ export default function AdminStatsPage() {
                   formatValue={(player) =>
                     `Eco ${player.stats.economy.toFixed(2)}`
                   }
+                  qualificationText={getQualificationDescription('bestEconomy', currentLeague, false)}
                 />
               </div>
             </div>
