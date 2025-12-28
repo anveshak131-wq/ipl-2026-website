@@ -359,15 +359,36 @@ export default function AdminStatsPage() {
     const initialBestStrike = mapPublishedPlayers(publishedLeaders?.bestStrikeRates);
     const initialBestEconomy = mapPublishedPlayers(publishedLeaders?.bestEconomyRates);
 
-    updateTopRunScorers(
-      initialTopRuns.length ? initialTopRuns : suggestedTopRunScorers
-    );
-    updateTopWicketTakers(
-      initialTopWickets.length ? initialTopWickets : suggestedTopWicketTakers
-    );
-    updateBestStrikeRates(
-      initialBestStrike.length ? initialBestStrike : suggestedBestStrikeRates
-    );
+    // Ensure all leaderboards have at least 5 players (fill from suggested if needed)
+    let finalTopRuns = initialTopRuns.length ? initialTopRuns : suggestedTopRunScorers;
+    if (finalTopRuns.length < 5 && suggestedTopRunScorers.length >= 5) {
+      const existingIds = new Set(finalTopRuns.map(p => p.id));
+      const additional = suggestedTopRunScorers
+        .filter(p => !existingIds.has(p.id))
+        .slice(0, 5 - finalTopRuns.length);
+      finalTopRuns = [...finalTopRuns, ...additional].slice(0, 5);
+    }
+    updateTopRunScorers(finalTopRuns);
+
+    let finalTopWickets = initialTopWickets.length ? initialTopWickets : suggestedTopWicketTakers;
+    if (finalTopWickets.length < 5 && suggestedTopWicketTakers.length >= 5) {
+      const existingIds = new Set(finalTopWickets.map(p => p.id));
+      const additional = suggestedTopWicketTakers
+        .filter(p => !existingIds.has(p.id))
+        .slice(0, 5 - finalTopWickets.length);
+      finalTopWickets = [...finalTopWickets, ...additional].slice(0, 5);
+    }
+    updateTopWicketTakers(finalTopWickets);
+
+    let finalBestStrike = initialBestStrike.length ? initialBestStrike : suggestedBestStrikeRates;
+    if (finalBestStrike.length < 5 && suggestedBestStrikeRates.length >= 5) {
+      const existingIds = new Set(finalBestStrike.map(p => p.id));
+      const additional = suggestedBestStrikeRates
+        .filter(p => !existingIds.has(p.id))
+        .slice(0, 5 - finalBestStrike.length);
+      finalBestStrike = [...finalBestStrike, ...additional].slice(0, 5);
+    }
+    updateBestStrikeRates(finalBestStrike);
     // Ensure bestEconomyRates has 5 players (fill from suggested if needed)
     let finalBestEconomy = initialBestEconomy.length ? initialBestEconomy : suggestedBestEconomyRates;
     if (finalBestEconomy.length < 5 && suggestedBestEconomyRates.length >= 5) {
