@@ -714,6 +714,9 @@ export default function StatsPage() {
                         <p className="text-xs text-gray-400">
                           Top run scorers in the tournament
                         </p>
+                        <p className="text-[10px] text-gray-500 mt-1 italic">
+                          Qualification: {getQualificationDescription('orangeCap', currentLeague)}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -766,6 +769,9 @@ export default function StatsPage() {
                     <h2 className="text-xl font-bold text-white">Purple Cap Race</h2>
                     <p className="text-xs text-gray-400">
                       Leading wicket takers and economy masters
+                    </p>
+                    <p className="text-[10px] text-gray-500 mt-1 italic">
+                      Qualification: {getQualificationDescription('purpleCap', currentLeague)}
                     </p>
                     <p className="text-[10px] text-gray-500 mt-1 italic">
                       Qualification: {getQualificationDescription('purpleCap', currentLeague)}
@@ -843,7 +849,7 @@ export default function StatsPage() {
                     <div>
                       <h2 className="text-lg font-bold text-white">Best Strike Rates</h2>
                       <p className="text-xs text-gray-400">
-                        Minimum 300 runs in the tournament
+                        {getQualificationDescription('bestStrikeRate', currentLeague)}
                       </p>
                     </div>
                   </div>
