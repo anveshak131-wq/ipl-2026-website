@@ -272,17 +272,17 @@ export default function StatsPage() {
           {/* Main Content */}
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
             {/* Tabs Navigation */}
-            <motion.div
+              <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
               className="mb-8"
             >
               <StatsTabs activeTab={activeTab} onTabChange={setActiveTab} />
             </motion.div>
 
             {/* View Controls */}
-            <motion.div
+            <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.3 }}
@@ -292,26 +292,26 @@ export default function StatsPage() {
                 <Filter className="w-4 h-4 text-gray-400" />
                 <span className="text-sm text-gray-400 mr-2">Show:</span>
                 <button
-                  onClick={() => setLeadersLimit(10)}
+                    onClick={() => setLeadersLimit(10)}
                   className={`px-4 py-1.5 rounded-lg font-semibold text-sm transition-all ${
-                    leadersLimit === 10
+                      leadersLimit === 10
                       ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white shadow-lg'
-                      : 'text-gray-300 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  Top 10
-                </button>
-                <button
-                  onClick={() => setLeadersLimit(50)}
+                        : 'text-gray-300 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    Top 10
+                  </button>
+                  <button
+                    onClick={() => setLeadersLimit(50)}
                   className={`px-4 py-1.5 rounded-lg font-semibold text-sm transition-all ${
-                    leadersLimit === 50
+                      leadersLimit === 50
                       ? 'bg-gradient-to-r from-orange-500 to-yellow-500 text-white shadow-lg'
-                      : 'text-gray-300 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  Top 50
-                </button>
-              </div>
+                        : 'text-gray-300 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    Top 50
+                  </button>
+                </div>
 
               {publishedStats?.lastUpdated && (
                 <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 backdrop-blur-xl border border-white/10">
@@ -319,7 +319,7 @@ export default function StatsPage() {
                   <span className="text-xs text-gray-400">
                     Updated {new Date(publishedStats.lastUpdated).toLocaleDateString()}
                   </span>
-                </div>
+              </div>
               )}
             </motion.div>
 
@@ -481,7 +481,7 @@ export default function StatsPage() {
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
+              </div>
         </div>
       </main>
 

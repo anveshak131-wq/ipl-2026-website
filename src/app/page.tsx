@@ -576,8 +576,8 @@ export default function Home() {
                       className="absolute inset-0 bg-white/20"
                       initial={{ scale: 0, opacity: 0 }}
                       whileHover={{ scale: 1, opacity: 1 }}
-                      transition={{ duration: 0.3 }}
-                    />
+                    transition={{ duration: 0.3 }}
+                  />
                 </Link>
                 </motion.div>
                 <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>

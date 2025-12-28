@@ -7,9 +7,9 @@
 
 ## 📋 Quick Navigation
 
-- [IPL 2025 Rules](./IPL_2025_RULES_AND_REGULATIONS.md) - Complete 2025 season rules
-- [IPL 2026 Rules](./IPL_2026_RULES_AND_REGULATIONS.md) - Complete 2026 season rules
-- [IPL Cricket Scoring Rules](./IPL_CRICKET_SCORING_RULES.md) - Detailed scoring system
+- [IPL 2025 Rules](/rules/ipl-2025) - Complete 2025 season rules
+- [IPL 2026 Rules](/rules/ipl-2026) - Complete 2026 season rules
+- [IPL Cricket Scoring Rules](/rules/scoring-rules) - Detailed scoring system
 
 ---
 
