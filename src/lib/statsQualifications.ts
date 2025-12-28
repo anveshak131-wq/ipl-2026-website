@@ -6,9 +6,9 @@
  * 
  * Research findings:
  * - Small sample sizes (few matches) can lead to misleading statistics
- * - Players with 2-3 good matches might top charts but not be truly best
- * - Industry standard: Minimum 5-7 matches (35-50% of season) for meaningful stats
- * - IPL teams play 14 matches in regular season
+ * - Players with 1-2 good matches might top charts but not be truly best
+ * - Industry standard: Minimum 3-5 matches (20-35% of season) for meaningful stats
+ * - IPL teams play 14 matches in regular season (not requiring all 14 - too restrictive)
  * - WPL teams play fewer matches, so thresholds are adjusted
  */
 
@@ -30,32 +30,32 @@ export interface QualificationCriteria {
  */
 export const STATS_QUALIFICATIONS = {
   // Orange Cap - Top Run Scorers
-  // Standard: No official minimum, but we use 5 matches for meaningful stats
+  // Standard: No official minimum, but we use 3 matches for meaningful stats (not 14 - full season)
   orangeCap: {
-    minMatches: 5,
+    minMatches: 3,
     minRuns: 0, // No minimum runs, just matches
   } as QualificationCriteria,
 
   // Purple Cap - Top Wicket Takers
-  // Standard: No official minimum, but we use 5 matches for meaningful stats
+  // Standard: No official minimum, but we use 3 matches for meaningful stats (not 14 - full season)
   purpleCap: {
-    minMatches: 5,
+    minMatches: 3,
     minWickets: 1, // Must have at least 1 wicket
   } as QualificationCriteria,
 
   // Best Strike Rates
   // Standard: Minimum 300 runs (IPL standard) + minimum matches
   bestStrikeRate: {
-    minMatches: 5,
+    minMatches: 3,
     minRuns: 300, // IPL standard: 300 runs minimum
   } as QualificationCriteria,
 
   // Best Economy Rates
   // Standard: Minimum 20 wickets (IPL standard) + minimum matches
   bestEconomy: {
-    minMatches: 5,
+    minMatches: 3,
     minWickets: 20, // IPL standard: 20 wickets minimum
-    minOvers: 30, // Approximately 5 matches worth of bowling (6 overs per match)
+    minOvers: 18, // Approximately 3 matches worth of bowling (6 overs per match)
   } as QualificationCriteria,
 
   // For WPL (fewer matches, adjusted thresholds)
