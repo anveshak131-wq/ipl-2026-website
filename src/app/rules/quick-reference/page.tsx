@@ -11,6 +11,23 @@ import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+// Helper to extract text from React children
+const extractText = (children: React.ReactNode): string => {
+  if (typeof children === 'string') {
+    return children;
+  }
+  if (typeof children === 'number') {
+    return String(children);
+  }
+  if (Array.isArray(children)) {
+    return children.map(extractText).join('');
+  }
+  if (children && typeof children === 'object' && 'props' in children) {
+    return extractText((children as any).props.children);
+  }
+  return '';
+};
+
 // Helper to generate ID from heading text
 const generateId = (text: string): string => {
   return text.toLowerCase()
@@ -130,8 +147,7 @@ export default function QuickReferencePage() {
                   remarkPlugins={[remarkGfm]}
                   components={{
                     h1: ({ children }) => {
-                      const text = typeof children === 'string' ? children : 
-                        (Array.isArray(children) ? children.map(c => typeof c === 'string' ? c : '').join('') : '');
+                      const text = extractText(children);
                       const id = generateId(text);
                       return (
                         <h1 id={id} className="text-3xl font-black text-white mb-6 mt-8 first:mt-0 scroll-mt-20">
@@ -140,8 +156,7 @@ export default function QuickReferencePage() {
                       );
                     },
                     h2: ({ children }) => {
-                      const text = typeof children === 'string' ? children : 
-                        (Array.isArray(children) ? children.map(c => typeof c === 'string' ? c : '').join('') : '');
+                      const text = extractText(children);
                       const id = generateId(text);
                       return (
                         <h2 id={id} className="text-2xl font-bold text-white mb-4 mt-8 scroll-mt-20">
@@ -150,8 +165,7 @@ export default function QuickReferencePage() {
                       );
                     },
                     h3: ({ children }) => {
-                      const text = typeof children === 'string' ? children : 
-                        (Array.isArray(children) ? children.map(c => typeof c === 'string' ? c : '').join('') : '');
+                      const text = extractText(children);
                       const id = generateId(text);
                       return (
                         <h3 id={id} className="text-xl font-semibold text-white mb-3 mt-6 scroll-mt-20">
