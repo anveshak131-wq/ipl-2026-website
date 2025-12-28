@@ -304,8 +304,13 @@ export const onRequest = async (context) => {
       }
       
       // Compare normalized IDs (case-insensitive, trimmed)
-      if (predictionUserId !== currentUserId) {
-        console.log(`[UPDATE PREDICTION] Ownership mismatch: User ${currentUserId} attempted to update prediction ${id} owned by ${predictionUserId}`);
+      // Also try comparing without normalization as fallback
+      const directMatch = String(prediction.userId || '').trim() === String(user.id || '').trim();
+      const normalizedMatch = predictionUserId === currentUserId;
+      
+      if (!directMatch && !normalizedMatch) {
+        console.log(`[UPDATE PREDICTION] Ownership mismatch: User ${currentUserId} (email: ${user.email}) attempted to update prediction ${id} owned by ${predictionUserId} (userName: ${prediction.userName})`);
+        console.log(`[UPDATE PREDICTION] Direct match: ${directMatch}, Normalized match: ${normalizedMatch}`);
         return new Response(
           JSON.stringify({ error: 'You can only update your own predictions' }),
           { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
