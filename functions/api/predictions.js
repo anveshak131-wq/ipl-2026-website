@@ -308,13 +308,26 @@ export const onRequest = async (context) => {
       const directMatch = String(prediction.userId || '').trim() === String(user.id || '').trim();
       const normalizedMatch = predictionUserId === currentUserId;
       
-      if (!directMatch && !normalizedMatch) {
-        console.log(`[UPDATE PREDICTION] Ownership mismatch: User ${currentUserId} (email: ${user.email}) attempted to update prediction ${id} owned by ${predictionUserId} (userName: ${prediction.userName})`);
-        console.log(`[UPDATE PREDICTION] Direct match: ${directMatch}, Normalized match: ${normalizedMatch}`);
+      // Additional fallback: if userIds don't match but we have userName/email match, allow it
+      // This handles cases where userId might have been stored differently
+      const emailMatch = prediction.userName && user.email && 
+        prediction.userName.toLowerCase() === user.email.toLowerCase();
+      const nameMatch = prediction.userName && user.name && 
+        prediction.userName.toLowerCase() === user.name.toLowerCase();
+      
+      if (!directMatch && !normalizedMatch && !emailMatch && !nameMatch) {
+        console.log(`[UPDATE PREDICTION] Ownership mismatch: User ${currentUserId} (email: ${user.email}, name: ${user.name}) attempted to update prediction ${id} owned by ${predictionUserId} (userName: ${prediction.userName})`);
+        console.log(`[UPDATE PREDICTION] Direct match: ${directMatch}, Normalized match: ${normalizedMatch}, Email match: ${emailMatch}, Name match: ${nameMatch}`);
         return new Response(
           JSON.stringify({ error: 'You can only update your own predictions' }),
           { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
+      }
+      
+      // If we got here via email/name match, update the prediction with correct userId
+      if ((emailMatch || nameMatch) && !directMatch && !normalizedMatch) {
+        console.log(`[UPDATE PREDICTION] Ownership verified via email/name match. Updating prediction userId from ${prediction.userId} to ${user.id}`);
+        prediction.userId = String(user.id).trim();
       }
       
       console.log(`[UPDATE PREDICTION] Ownership verified: User ${currentUserId} owns prediction ${id}`);
