@@ -26,7 +26,12 @@ async function getUserFromToken(token, env) {
   if (!userData) return null;
 
   const user = JSON.parse(userData);
-  return { ...user, email };
+  // Ensure user.id is always a string and not undefined
+  if (!user.id) {
+    console.error(`[getUserFromToken] User data missing id field for email: ${email}`);
+    return null;
+  }
+  return { ...user, email, id: String(user.id).trim() };
 }
 
 // Helper to check if match is upcoming
