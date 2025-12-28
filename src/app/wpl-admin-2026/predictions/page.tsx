@@ -212,8 +212,14 @@ export default function WPLAdminPredictionsPage() {
                         </div>
                       )}
                       <div className="text-xs text-gray-500 mt-2">
-                        User ID: {prediction.userId.slice(0, 8)}... | Created:{' '}
-                        {new Date(prediction.createdAt).toLocaleDateString()}
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-gray-400">User:</span>
+                          <span className="text-white">{prediction.userName || 'Anonymous'}</span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-gray-500">ID: {prediction.userId?.slice(0, 8) || 'unknown'}... | Created:{' '}
+                          {prediction.createdAt ? new Date(prediction.createdAt).toLocaleDateString() : 'N/A'}</span>
+                        </div>
                       </div>
                     </div>
                     {prediction.accuracy && (

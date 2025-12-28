@@ -190,6 +190,7 @@ export const onRequest = async (context) => {
       const prediction = {
         id: predictionId,
         userId: user.id,
+        userName: user.name || user.email || 'Anonymous',
         matchId,
         league,
         predictedWinner,

@@ -280,10 +280,16 @@ export default function AdminPredictionsPage() {
                               )}
                             </div>
                           )}
-                          <div className="text-xs text-gray-500 mt-2">
-                            User ID: {prediction.userId?.slice(0, 8) || 'unknown'}... | Created:{' '}
-                            {prediction.createdAt ? new Date(prediction.createdAt).toLocaleDateString() : 'N/A'}
-                          </div>
+                      <div className="text-xs text-gray-500 mt-2">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-gray-400">User:</span>
+                          <span className="text-white">{prediction.userName || 'Anonymous'}</span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-gray-500">ID: {prediction.userId?.slice(0, 8) || 'unknown'}... | Created:{' '}
+                          {prediction.createdAt ? new Date(prediction.createdAt).toLocaleDateString() : 'N/A'}</span>
+                        </div>
+                      </div>
                         </div>
                         {prediction.accuracy && (
                           <div className="ml-4 px-3 py-1 bg-ipl-gold/20 text-ipl-gold rounded-lg text-sm font-semibold">
