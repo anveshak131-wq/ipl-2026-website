@@ -17,74 +17,86 @@ export default function AdminPredictionsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let isMounted = true;
-    const timeoutId = setTimeout(() => {
-      if (isMounted && loading) {
-        console.warn('Predictions page loading timeout');
-        setLoading(false);
-        setError('Loading took too long. Please refresh the page.');
-      }
-    }, 10000); // 10 second timeout
+    let cancelled = false;
+    let timeoutId: NodeJS.Timeout;
 
     const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
         
-        const allMatches = await api.getMatches(currentLeague);
-        if (!isMounted) return;
-        setMatches(allMatches || []);
+        // Set a timeout to ensure we always finish loading
+        timeoutId = setTimeout(() => {
+          if (!cancelled) {
+            console.warn('Predictions page: Loading timeout, showing content anyway');
+            setLoading(false);
+          }
+        }, 5000);
         
+        // Fetch matches - this should always work
+        try {
+          const allMatches = await api.getMatches(currentLeague);
+          if (!cancelled) {
+            setMatches(Array.isArray(allMatches) ? allMatches : []);
+          }
+        } catch (matchError) {
+          console.error('Error fetching matches:', matchError);
+          if (!cancelled) {
+            setMatches([]);
+          }
+        }
+        
+        // Fetch predictions based on filter
         if (selectedMatchId) {
           try {
             const matchPredictions = await api.getPredictions({ matchId: selectedMatchId });
-            if (!isMounted) return;
-            setPredictions(matchPredictions || []);
-          } catch (predError: any) {
+            if (!cancelled) {
+              setPredictions(Array.isArray(matchPredictions) ? matchPredictions : []);
+            }
+          } catch (predError) {
             console.error('Error fetching predictions:', predError);
-            if (isMounted) {
+            if (!cancelled) {
               setPredictions([]);
-              setError(predError.message || 'Failed to load predictions');
             }
           }
           
           try {
             const pollData = await api.getPolls(selectedMatchId);
-            if (!isMounted) return;
-            if (pollData) {
-              setPolls([pollData]);
-            } else {
-              setPolls([]);
+            if (!cancelled) {
+              if (pollData) {
+                setPolls([pollData]);
+              } else {
+                setPolls([]);
+              }
             }
           } catch (pollError) {
             console.error('Error fetching poll:', pollError);
-            if (isMounted) setPolls([]);
+            if (!cancelled) {
+              setPolls([]);
+            }
           }
         } else {
           try {
             const allPredictions = await api.getPredictions({ league: currentLeague });
-            if (!isMounted) return;
-            setPredictions(allPredictions || []);
-          } catch (predError: any) {
+            if (!cancelled) {
+              setPredictions(Array.isArray(allPredictions) ? allPredictions : []);
+            }
+          } catch (predError) {
             console.error('Error fetching all predictions:', predError);
-            if (isMounted) {
+            if (!cancelled) {
               setPredictions([]);
-              setError(predError.message || 'Failed to load predictions');
             }
           }
         }
       } catch (error: any) {
-        console.error('Error fetching data:', error);
-        if (isMounted) {
-          setMatches([]);
-          setPredictions([]);
-          setPolls([]);
+        console.error('Error in fetchData:', error);
+        if (!cancelled) {
           setError(error.message || 'Failed to load data');
         }
       } finally {
-        if (isMounted) {
-          setLoading(false);
+        if (!cancelled) {
           clearTimeout(timeoutId);
+          setLoading(false);
         }
       }
     };
@@ -92,7 +104,7 @@ export default function AdminPredictionsPage() {
     fetchData();
 
     return () => {
-      isMounted = false;
+      cancelled = true;
       clearTimeout(timeoutId);
     };
   }, [currentLeague, selectedMatchId]);
@@ -124,9 +136,17 @@ export default function AdminPredictionsPage() {
     return matchDateTime > new Date();
   });
 
-  if (loading) {
+  // Show loading only on initial load
+  if (loading && matches.length === 0 && predictions.length === 0 && !error) {
     return (
-      <div className="p-6 min-h-screen">
+      <div className="p-6">
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
+            <Target className="w-8 h-8 text-ipl-gold" />
+            Predictions Management
+          </h1>
+          <p className="text-gray-400">View and manage user predictions and polls</p>
+        </div>
         <div className="flex items-center justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-ipl-gold"></div>
         </div>
