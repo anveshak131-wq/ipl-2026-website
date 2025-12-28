@@ -171,10 +171,23 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
         if (teamsResponse.ok) {
           const allTeams = await teamsResponse.json();
           // Try to find team by shortName first (RCB, MI, etc.), then by ID
-          let team = allTeams.find((t: Team) => 
-            t.shortName?.toLowerCase() === shortNameLower || 
-            t.shortName?.toUpperCase() === shortNameUpper
-          );
+          let team = allTeams.find((t: Team) => {
+            if (!t.shortName) return false;
+            const tShortNameLower = t.shortName.toLowerCase();
+            // Exact match
+            if (tShortNameLower === shortNameLower || t.shortName.toUpperCase() === shortNameUpper) {
+              return true;
+            }
+            // Partial match for WPL teams (e.g., "dc" matches "dc-w")
+            if (tShortNameLower.includes(shortNameLower) || shortNameLower.includes(tShortNameLower.replace('-w', ''))) {
+              return true;
+            }
+            // Match without -W suffix (e.g., "dc" matches "dc-w")
+            if (tShortNameLower.replace('-w', '') === shortNameLower || shortNameLower === tShortNameLower.replace('-w', '')) {
+              return true;
+            }
+            return false;
+          });
           
           // Fallback to ID matching if shortName not found (for backward compatibility)
           if (!team) {
