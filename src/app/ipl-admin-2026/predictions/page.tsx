@@ -97,17 +97,36 @@ export default function AdminPredictionsPage() {
         if (!cancelled) {
           clearTimeout(timeoutId);
           setLoading(false);
+          setInitialLoad(false);
         }
       }
     };
 
-    fetchData();
+    // Only fetch on mount and when filters change
+    if (initialLoad || selectedMatchId !== null) {
+      fetchData();
+    } else {
+      // If not initial load and no match selected, just load matches
+      const loadMatches = async () => {
+        try {
+          const allMatches = await api.getMatches(currentLeague);
+          setMatches(Array.isArray(allMatches) ? allMatches : []);
+        } catch (matchError) {
+          console.error('Error fetching matches:', matchError);
+          setMatches([]);
+        } finally {
+          setLoading(false);
+          setInitialLoad(false);
+        }
+      };
+      loadMatches();
+    }
 
     return () => {
       cancelled = true;
-      clearTimeout(timeoutId);
+      if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [currentLeague, selectedMatchId]);
+  }, [currentLeague, selectedMatchId, initialLoad]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -136,8 +155,8 @@ export default function AdminPredictionsPage() {
     return matchDateTime > new Date();
   });
 
-  // Show loading only on initial load
-  if (loading && matches.length === 0 && predictions.length === 0 && !error) {
+  // Show loading only on very first load
+  if (initialLoad && loading) {
     return (
       <div className="p-6">
         <div className="mb-6">
