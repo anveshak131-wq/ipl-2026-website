@@ -282,19 +282,23 @@ export const onRequest = async (context) => {
       const prediction = JSON.parse(predData);
 
       // Check ownership - normalize IDs to strings for comparison
-      const predictionUserId = String(prediction.userId || '').trim();
-      const currentUserId = String(user.id || '').trim();
+      // Handle both string and number IDs, and trim whitespace
+      const predictionUserId = String(prediction.userId || '').trim().toLowerCase();
+      const currentUserId = String(user.id || '').trim().toLowerCase();
       
-      console.log(`[UPDATE PREDICTION] Checking ownership: prediction.userId="${predictionUserId}" (type: ${typeof prediction.userId}), user.id="${currentUserId}" (type: ${typeof user.id})`);
+      console.log(`[UPDATE PREDICTION] Checking ownership: prediction.userId="${predictionUserId}" (original: "${prediction.userId}", type: ${typeof prediction.userId}), user.id="${currentUserId}" (original: "${user.id}", type: ${typeof user.id})`);
+      console.log(`[UPDATE PREDICTION] User object:`, JSON.stringify({ id: user.id, email: user.email, name: user.name }));
+      console.log(`[UPDATE PREDICTION] Prediction object:`, JSON.stringify({ id: prediction.id, userId: prediction.userId, userName: prediction.userName }));
       
       if (!predictionUserId || !currentUserId) {
         console.error(`[UPDATE PREDICTION] Missing user ID: prediction.userId="${predictionUserId}", user.id="${currentUserId}"`);
         return new Response(
-          JSON.stringify({ error: 'Invalid user identification' }),
+          JSON.stringify({ error: 'Invalid user identification. Please try logging in again.' }),
           { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
         );
       }
       
+      // Compare normalized IDs (case-insensitive, trimmed)
       if (predictionUserId !== currentUserId) {
         console.log(`[UPDATE PREDICTION] Ownership mismatch: User ${currentUserId} attempted to update prediction ${id} owned by ${predictionUserId}`);
         return new Response(
