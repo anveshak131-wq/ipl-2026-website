@@ -25,18 +25,28 @@ export default function PredictionsPage() {
   const [activeTab, setActiveTab] = useState<'predict' | 'leaderboard' | 'history' | 'stats'>('predict');
   const [user, setUser] = useState<any | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [pageLoading, setPageLoading] = useState(true);
 
   useEffect(() => {
     // Get current user
     if (typeof window !== 'undefined') {
-      const userStr = localStorage.getItem('user');
-      if (userStr) {
-        try {
-          setUser(JSON.parse(userStr));
-        } catch (e) {
-          console.error('Error parsing user:', e);
+      try {
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+          try {
+            setUser(JSON.parse(userStr));
+          } catch (e) {
+            console.error('Error parsing user:', e);
+          }
         }
+      } catch (e) {
+        console.error('Error accessing localStorage:', e);
+      } finally {
+        setPageLoading(false);
       }
+    } else {
+      setPageLoading(false);
     }
   }, []);
 
@@ -46,10 +56,12 @@ export default function PredictionsPage() {
         setSelectedMatch(null);
         setExistingPrediction(null);
         setPoll(null);
+        setError(null);
         return;
       }
 
       try {
+        setError(null);
         // Fetch match details
         const matches = await api.getMatches(currentLeague);
         const match = matches.find((m: Match) => m.id === selectedMatchId);
@@ -57,20 +69,31 @@ export default function PredictionsPage() {
 
         // Fetch existing prediction if user is logged in
         if (user?.id) {
-          const predictions = await api.getPredictions({
-            matchId: selectedMatchId,
-            userId: user.id,
-          });
-          setExistingPrediction(predictions.length > 0 ? predictions[0] : null);
+          try {
+            const predictions = await api.getPredictions({
+              matchId: selectedMatchId,
+              userId: user.id,
+            });
+            setExistingPrediction(predictions.length > 0 ? predictions[0] : null);
+          } catch (predError) {
+            console.error('Error fetching predictions:', predError);
+            // Don't set error for predictions, just continue
+          }
         } else {
           setExistingPrediction(null);
         }
 
         // Fetch poll
-        const pollData = await api.getPolls(selectedMatchId);
-        setPoll(pollData);
-      } catch (error) {
+        try {
+          const pollData = await api.getPolls(selectedMatchId);
+          setPoll(pollData);
+        } catch (pollError) {
+          console.error('Error fetching poll:', pollError);
+          // Don't set error for polls, just continue
+        }
+      } catch (error: any) {
         console.error('Error fetching match data:', error);
+        setError(error.message || 'Failed to load match data');
       }
     };
 
@@ -92,6 +115,21 @@ export default function PredictionsPage() {
     { id: 'history', label: 'My History', icon: History },
     { id: 'stats', label: 'My Stats', icon: TrendingUp },
   ];
+
+  if (pageLoading) {
+    return (
+      <div className="min-h-screen">
+        <Navbar />
+        <main className="relative py-16 min-h-screen overflow-hidden section-match-bg">
+          <AuroraBackground />
+          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-center min-h-[60vh]">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-ipl-gold"></div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -138,6 +176,13 @@ export default function PredictionsPage() {
             })}
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300">
+              {error}
+            </div>
+          )}
+
           {/* Content */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Main Content */}
@@ -161,9 +206,9 @@ export default function PredictionsPage() {
                       />
                     </div>
                   )}
-                  {poll && (
+                  {poll && selectedMatchId && (
                     <div className="mt-6 pt-6 border-t border-gray-700">
-                      <PollCard poll={poll} matchId={selectedMatchId!} onVote={handlePollVote} />
+                      <PollCard poll={poll} matchId={selectedMatchId} onVote={handlePollVote} />
                     </div>
                   )}
                 </motion.div>
@@ -175,7 +220,10 @@ export default function PredictionsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   className="bg-gray-900/80 backdrop-blur-sm border border-gray-700 rounded-xl p-6"
                 >
-                  <Leaderboard matchId={selectedMatchId || undefined} currentUserId={user?.id} />
+                  <Leaderboard 
+                    matchId={selectedMatchId || undefined} 
+                    currentUserId={user?.id} 
+                  />
                 </motion.div>
               )}
 
