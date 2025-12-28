@@ -10,10 +10,26 @@ import Footer from '@/components/layout/Footer';
 import Emoji, { EmojiName } from '@/components/emoji/Emoji';
 import EmojiPicker from '@/components/emoji/EmojiPicker';
 import type { Match } from '@/types';
-import AnimatedSection from '@/components/ui/AnimatedSection';
-import GradientText from '@/components/ui/GradientText';
-import GlassCard from '@/components/ui/GlassCard';
-import { HelpCircle, BookOpen } from 'lucide-react';
+import { useLeague } from '@/contexts/LeagueContext';
+import { WPLColors, getWPLGradient, getWPLGlassmorphism } from '@/lib/wplColors';
+import AuroraBackground from '@/components/ui/AuroraBackground';
+import ModernTeamLogo from '@/components/ui/ModernTeamLogo';
+import { 
+  HelpCircle, 
+  BookOpen, 
+  Radio, 
+  TrendingUp, 
+  Clock, 
+  MapPin,
+  Users,
+  MessageCircle,
+  Send,
+  LogOut,
+  Trash2,
+  Sparkles,
+  Trophy,
+  Zap
+} from 'lucide-react';
 
 interface LiveScoreData {
   matchId: string;
@@ -53,18 +69,13 @@ const getPasswordStrength = (password: string) => {
   }
 
   let score = 0;
-
   if (password.length >= 12) score += 1;
   if (/[A-Z]/.test(password)) score += 1;
   if (/[0-9]/.test(password)) score += 1;
   if (/[^A-Za-z0-9]/.test(password)) score += 1;
 
-  if (score <= 1) {
-    return { label: 'Weak', score };
-  }
-  if (score === 2 || score === 3) {
-    return { label: 'Medium', score };
-  }
+  if (score <= 1) return { label: 'Weak', score };
+  if (score === 2 || score === 3) return { label: 'Medium', score };
   return { label: 'Strong', score };
 };
 
@@ -79,7 +90,6 @@ const EMOJI_CODE_MAP: Record<string, EmojiName> = {
 
 const renderMessageTextWithEmojis = (text: string) => {
   if (!text) return null;
-
   const parts: Array<string | { key: string; emoji: EmojiName }> = [];
   const regex = /:(fire|clap|rocket|heart|wow|thumbs_up):/g;
   let lastIndex = 0;
@@ -89,7 +99,6 @@ const renderMessageTextWithEmojis = (text: string) => {
     if (match.index > lastIndex) {
       parts.push(text.slice(lastIndex, match.index));
     }
-
     const code = match[1];
     const emojiName = EMOJI_CODE_MAP[code];
     if (emojiName) {
@@ -97,7 +106,6 @@ const renderMessageTextWithEmojis = (text: string) => {
     } else {
       parts.push(match[0]);
     }
-
     lastIndex = match.index + match[0].length;
   }
 
@@ -120,6 +128,7 @@ const renderMessageTextWithEmojis = (text: string) => {
 
 export default function LiveScorePage() {
   const router = useRouter();
+  const { currentLeague, isWPL } = useLeague();
   const [user, setUser] = useState<User | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
   const [activeMatches, setActiveMatches] = useState<Match[]>([]);
@@ -138,10 +147,33 @@ export default function LiveScorePage() {
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileReady, setTurnstileReady] = useState(false);
 
-  // Track user activity for admin engagement page
+  // League-aware styling
+  const leagueColors = isWPL ? {
+    primary: WPLColors.purple,
+    secondary: WPLColors.pink,
+    accent: WPLColors.violet,
+    gradient: getWPLGradient('to-br'),
+    glass: getWPLGlassmorphism('purple', 20),
+    textPrimary: WPLColors.textPrimary,
+    textSecondary: WPLColors.textSecondary,
+  } : {
+    primary: '#1E40AF',
+    secondary: '#3B82F6',
+    accent: '#F59E0B',
+    gradient: 'linear-gradient(135deg, #1E3A8A, #3B82F6, #F59E0B)',
+    glass: {
+      background: 'rgba(30, 64, 175, 0.2)',
+      backdropFilter: 'blur(20px) saturate(180%)',
+      WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+      border: '1px solid rgba(59, 130, 246, 0.3)',
+      boxShadow: '0 8px 32px 0 rgba(59, 130, 246, 0.2)',
+    },
+    textPrimary: '#FFFFFF',
+    textSecondary: '#E2E8F0',
+  };
+
   const trackUserActivity = useCallback(async () => {
     if (!user) return;
-    
     try {
       const token = localStorage.getItem('auth_token');
       await fetch('/api/admin/users/activity', {
@@ -157,11 +189,9 @@ export default function LiveScorePage() {
     }
   }, [user]);
 
-  // Load user from localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     const storedToken = localStorage.getItem('auth_token');
-
     if (storedUser && storedToken) {
       try {
         setUser(JSON.parse(storedUser));
@@ -174,124 +204,73 @@ export default function LiveScorePage() {
     setIsLoading(false);
   }, []);
 
-  // Initialize Cloudflare Turnstile widget when signup modal is open
   useEffect(() => {
-    if (!turnstileReady || !showAuthModal || authMode !== 'signup') {
-      return;
-    }
-
+    if (!turnstileReady || !showAuthModal || authMode !== 'signup') return;
     if (typeof window === 'undefined') return;
-
     const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
-    if (!siteKey) {
-      return;
-    }
-
+    if (!siteKey) return;
     const anyWindow = window as any;
-    if (!anyWindow.turnstile) {
-      return;
-    }
-
+    if (!anyWindow.turnstile) return;
     const container = document.getElementById('turnstile-container');
-    if (!container) {
-      return;
-    }
-    // Clear any previous widget
+    if (!container) return;
     container.innerHTML = '';
-
     anyWindow.turnstile.render('#turnstile-container', {
       sitekey: siteKey,
-      callback: (token: string) => {
-        setTurnstileToken(token);
-      },
-      'error-callback': () => {
-        setTurnstileToken(null);
-      },
+      callback: (token: string) => setTurnstileToken(token),
+      'error-callback': () => setTurnstileToken(null),
     } as any);
   }, [turnstileReady, showAuthModal, authMode]);
 
-  // Fetch matches and live scores, and determine which matches should show live panels
   useEffect(() => {
     let isCancelled = false;
-
     const getMatchDateTime = (match: Match) => {
-      // Combine date and time; assume IST (UTC+5:30) for IPL fixtures
-      // Example date: '2026-03-23', time: '19:30'
       try {
         return new Date(`${match.date}T${match.time}:00+05:30`);
       } catch {
         return new Date(match.date);
       }
     };
-
     const isInLiveWindow = (match: Match) => {
       const start = getMatchDateTime(match);
       const now = new Date();
-
-      // Start showing 60 minutes before scheduled time
       const preWindow = new Date(start.getTime() - 60 * 60 * 1000);
-      // Keep visible for 4 hours after start to cover the match
       const postWindow = new Date(start.getTime() + 4 * 60 * 60 * 1000);
-
-      // Always show if backend marks it as live
       if (match.status === 'live') return true;
-
       return now >= preWindow && now <= postWindow;
     };
-
     const fetchMatchesAndScores = async () => {
       try {
         const matchesRes = await fetch('/api/matches');
-        if (!matchesRes.ok) {
-          throw new Error('Failed to load fixtures');
-        }
+        if (!matchesRes.ok) throw new Error('Failed to load fixtures');
         const allMatches: Match[] = await matchesRes.json();
         if (isCancelled) return;
-
         setMatches(allMatches);
-
-        // Filter matches that should be visible on live score page
         const eligible = allMatches.filter((m) => isInLiveWindow(m));
         setActiveMatches(eligible);
-
         if (eligible.length === 0) {
           setIsLiveLoading(false);
           return;
         }
-
-        // Fetch live score for each eligible match by its ID
         const scoreEntries: [string, LiveScoreData][] = [];
-
         await Promise.all(
           eligible.map(async (match) => {
             try {
               const res = await fetch(`/api/live-score?matchId=${encodeURIComponent(match.id)}`);
               if (!res.ok) return;
               const score: LiveScoreData = await res.json();
-
-              // Override team names from fixtures so they always match schedule
               const mergedScore: LiveScoreData = {
                 ...score,
                 matchId: match.id,
-                team1: {
-                  ...score.team1,
-                  name: match.team1.shortName || match.team1.name,
-                },
-                team2: {
-                  ...score.team2,
-                  name: match.team2.shortName || match.team2.name,
-                },
+                team1: { ...score.team1, name: match.team1.shortName || match.team1.name },
+                team2: { ...score.team2, name: match.team2.shortName || match.team2.name },
               };
-
               scoreEntries.push([match.id, mergedScore]);
             } catch (err) {
               console.error('Error fetching live score for match', match.id, err);
             }
           })
         );
-
         if (isCancelled) return;
-
         setLiveScoresByMatch((prev) => {
           const next: Record<string, LiveScoreData> = { ...prev };
           for (const [id, score] of scoreEntries) {
@@ -307,21 +286,16 @@ export default function LiveScorePage() {
         }
       }
     };
-
     fetchMatchesAndScores();
-    const interval = setInterval(fetchMatchesAndScores, 5000); // keep in sync with admin updates
-
+    const interval = setInterval(fetchMatchesAndScores, 5000);
     return () => {
       isCancelled = true;
       clearInterval(interval);
-    
-    return undefined;};
+    };
   }, []);
 
-  // Fetch messages (only if user is logged in)
   useEffect(() => {
     if (!user) return;
-
     const fetchMessages = async () => {
       try {
         const response = await fetch(`/api/messages?matchId=current&limit=50`);
@@ -333,35 +307,21 @@ export default function LiveScorePage() {
         console.error('Error fetching messages:', error);
       }
     };
-
     fetchMessages();
-    const interval = setInterval(fetchMessages, 3000); // Update every 3 seconds
+    const interval = setInterval(fetchMessages, 3000);
     return () => clearInterval(interval);
   }, [user]);
 
-  // Track user activity periodically when logged in
   useEffect(() => {
     if (!user) return;
-
-    // Track activity immediately on login
     trackUserActivity();
-
-    // Then track every 30 seconds while on the page
-    const interval = setInterval(() => {
-      trackUserActivity();
-    }, 30000);
-
+    const interval = setInterval(() => trackUserActivity(), 30000);
     return () => clearInterval(interval);
   }, [user, trackUserActivity]);
 
-  // Send message
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!newMessage.trim() || !user) {
-      return;
-    }
-
+    if (!newMessage.trim() || !user) return;
     setIsSendingMessage(true);
     try {
       const token = localStorage.getItem('auth_token');
@@ -371,17 +331,11 @@ export default function LiveScorePage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          matchId: 'current',
-          text: newMessage,
-        }),
+        body: JSON.stringify({ matchId: 'current', text: newMessage }),
       });
-
       if (response.ok) {
         setNewMessage('');
-        // Track activity when message is sent
         await trackUserActivity();
-        // Scroll to bottom after message is sent
         setTimeout(() => {
           messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
         }, 100);
@@ -396,10 +350,8 @@ export default function LiveScorePage() {
     }
   };
 
-  // Handle auth
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (authMode === 'signup') {
       if (!authFormData.password || authFormData.password.length < 12) {
         alert('Password must be at least 12 characters long.');
@@ -410,9 +362,7 @@ export default function LiveScorePage() {
         return;
       }
     }
-
     try {
-      // Always POST to /api/auth; the server infers signup vs signin from body fields
       const response = await fetch('/api/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -422,7 +372,6 @@ export default function LiveScorePage() {
             : { ...authFormData, turnstileToken },
         ),
       });
-
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem('user', JSON.stringify(data.user));
@@ -449,18 +398,15 @@ export default function LiveScorePage() {
 
   const handleDeleteAccount = async () => {
     if (!user) return;
-
     const confirmed = window.confirm(
       'This will delete your account and anonymize your chat messages. This cannot be undone. Do you want to continue?'
     );
     if (!confirmed) return;
-
     const token = localStorage.getItem('auth_token');
     if (!token) {
       alert('You are not logged in.');
       return;
     }
-
     try {
       const response = await fetch('/api/account?action=delete', {
         method: 'DELETE',
@@ -469,7 +415,6 @@ export default function LiveScorePage() {
           Authorization: `Bearer ${token}`,
         },
       });
-
       if (response.ok) {
         localStorage.removeItem('user');
         localStorage.removeItem('auth_token');
@@ -488,73 +433,127 @@ export default function LiveScorePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-ipl-gold"></div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: isWPL ? getWPLGradient('to-b') : 'linear-gradient(to bottom, #0F172A, #1E3A8A)' }}>
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-16 h-16 rounded-full border-4 border-t-transparent"
+          style={{ borderColor: isWPL ? WPLColors.purple : '#3B82F6' }}
+        />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 flex flex-col">
+    <div className="min-h-screen flex flex-col" style={{ background: isWPL ? getWPLGradient('to-b') : 'linear-gradient(to bottom, #0F172A, #1E3A8A, #0F172A)' }}>
       <Script
         src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
         strategy="afterInteractive"
         onLoad={() => setTurnstileReady(true)}
       />
       <Navbar />
+      <AuroraBackground />
 
-      <main className="flex-grow container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Live Score Section */}
-          <div className="lg:col-span-2">
-            <GlassCard className="p-8">
-              <AnimatedSection direction="down" delay={0.1}>
-                <motion.h1 
-                  className="text-3xl font-bold text-white mb-8"
+      <main className="flex-grow relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Hero Section */}
+        <motion.div
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6 }}
-                >
-                  <GradientText gradient="from-red-400 via-orange-400 to-yellow-400" animate>
+          className="mb-8"
+        >
+          <div className="flex items-center gap-4 mb-4">
+            <motion.div
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="p-3 rounded-2xl"
+              style={{
+                background: isWPL ? WPLColors.purpleRGBA[20] : 'rgba(59, 130, 246, 0.2)',
+                border: `1px solid ${isWPL ? WPLColors.purple : '#3B82F6'}`,
+              }}
+            >
+              <Radio className="w-6 h-6" style={{ color: isWPL ? WPLColors.purple : '#3B82F6' }} />
+            </motion.div>
+            <div>
+              <h1 className="text-4xl md:text-5xl font-black text-white mb-2">
                     Live Score
-                  </GradientText>
-                </motion.h1>
-              </AnimatedSection>
+              </h1>
+              <p className="text-gray-300 flex items-center gap-2">
+                <Sparkles className="w-4 h-4" />
+                Real-time match updates
+              </p>
+            </div>
+          </div>
+        </motion.div>
 
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Live Score Section */}
+          <div className="lg:col-span-2 space-y-6">
               {isLiveLoading ? (
-                <div className="space-y-8 animate-pulse">
-                  {/* Loading skeleton */}
+              <div className="space-y-4">
+                {[1, 2].map((i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: i * 0.2 }}
+                    className="rounded-3xl p-8"
+                    style={leagueColors.glass}
+                  >
+                    <div className="animate-pulse space-y-4">
+                      <div className="h-8 bg-white/10 rounded-lg w-3/4"></div>
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-slate-700/30 rounded-lg p-6 h-32"></div>
-                    <div className="bg-slate-700/30 rounded-lg p-6 h-32"></div>
+                        <div className="h-32 bg-white/10 rounded-xl"></div>
+                        <div className="h-32 bg-white/10 rounded-xl"></div>
                   </div>
-                  <div className="bg-slate-700/30 rounded-lg p-6 h-24"></div>
-                  <div className="bg-slate-700/30 rounded-lg p-6 h-40"></div>
+                    </div>
+                  </motion.div>
+                ))}
                 </div>
               ) : activeMatches.length > 0 ? (
-                <div className="space-y-10">
-                  {activeMatches.map((match) => {
+              <AnimatePresence>
+                {activeMatches.map((match, index) => {
                     const liveScore = liveScoresByMatch[match.id];
+                  const isLive = liveScore?.status !== 'Completed';
 
                     return (
-                      <div
+                    <motion.div
                         key={match.id}
-                        className="space-y-6 border border-white/5 rounded-2xl p-6 bg-slate-900/40"
-                      >
-                        {/* Match header from fixtures */}
-                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                          <div>
-                            <p className="text-sm text-gray-400">
-                              {match.venue}
-                            </p>
-                            <h2 className="text-xl font-bold text-white">
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="rounded-3xl p-6 md:p-8 relative overflow-hidden"
+                      style={leagueColors.glass}
+                    >
+                      {/* Animated background gradient */}
+                      <motion.div
+                        className="absolute inset-0 opacity-20"
+                        animate={{
+                          background: isWPL 
+                            ? `radial-gradient(circle at ${50 + Math.sin(Date.now() / 2000) * 20}% ${50 + Math.cos(Date.now() / 2000) * 20}%, ${WPLColors.purple}, transparent)`
+                            : `radial-gradient(circle at ${50 + Math.sin(Date.now() / 2000) * 20}% ${50 + Math.cos(Date.now() / 2000) * 20}%, #3B82F6, transparent)`,
+                        }}
+                        transition={{ duration: 3, repeat: Infinity }}
+                      />
+
+                      {/* Match Header */}
+                      <div className="relative z-10 mb-6">
+                        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <MapPin className="w-4 h-4 text-gray-400" />
+                              <span className="text-sm text-gray-400">{match.venue}</span>
+                            </div>
+                            <h2 className="text-2xl md:text-3xl font-black text-white mb-2">
                               {match.team1.shortName} vs {match.team2.shortName}
                             </h2>
-                            <p className="text-sm text-gray-400">
-                              {match.date} · {match.time}
-                            </p>
+                            <div className="flex items-center gap-3 text-sm text-gray-400">
+                              <Clock className="w-4 h-4" />
+                              <span>{match.date} · {match.time}</span>
+                            </div>
                             {liveScore && (
-                              <div className="mt-1 space-y-1">
+                              <div className="mt-3 space-y-1">
                                 {typeof liveScore.innings === 'number' && (
                                   <p className="text-xs text-gray-400">
                                     {liveScore.innings === 1 ? '1st innings' : '2nd innings'} –{' '}
@@ -570,146 +569,195 @@ export default function LiveScorePage() {
                               </div>
                             )}
                           </div>
-                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/40">
-                            {liveScore?.status === 'Completed' ? 'Match Result' : 'Live Score'}
-                          </span>
+                          <motion.div
+                            animate={isLive ? { scale: [1, 1.05, 1] } : {}}
+                            transition={{ duration: 2, repeat: isLive ? Infinity : 0 }}
+                            className="px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2"
+                            style={{
+                              background: isLive 
+                                ? (isWPL ? WPLColors.pinkRGBA[20] : 'rgba(239, 68, 68, 0.2)')
+                                : (isWPL ? WPLColors.violetRGBA[20] : 'rgba(34, 197, 94, 0.2)'),
+                              border: `1px solid ${isLive 
+                                ? (isWPL ? WPLColors.pink : '#EF4444')
+                                : (isWPL ? WPLColors.violet : '#22C55E')}`,
+                              color: isLive 
+                                ? (isWPL ? WPLColors.pink : '#EF4444')
+                                : (isWPL ? WPLColors.violet : '#22C55E'),
+                            }}
+                          >
+                            {isLive ? (
+                              <>
+                                <motion.div
+                                  animate={{ opacity: [1, 0.5, 1] }}
+                                  transition={{ duration: 1.5, repeat: Infinity }}
+                                  className="w-2 h-2 rounded-full"
+                                  style={{ background: isWPL ? WPLColors.pink : '#EF4444' }}
+                                />
+                                LIVE
+                              </>
+                            ) : (
+                              <>
+                                <Trophy className="w-3 h-3" />
+                                COMPLETED
+                              </>
+                            )}
+                          </motion.div>
                         </div>
 
-                        {liveScore ? (
-                          <div className="space-y-6">
-                            {/* Result banner when match is completed */}
-                            {liveScore.status === 'Completed' && liveScore.resultText && (
-                              <div className="bg-emerald-900/30 border border-emerald-500/50 rounded-lg p-3">
-                                <p className="text-xs font-semibold text-emerald-300 uppercase tracking-wide mb-1">Result</p>
-                                <p className="text-sm text-emerald-100 font-medium">{liveScore.resultText}</p>
-                              </div>
-                            )}
+                        {/* Result Banner */}
+                        {liveScore?.status === 'Completed' && liveScore.resultText && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="rounded-xl p-4 mb-4"
+                            style={{
+                              background: isWPL ? WPLColors.violetRGBA[20] : 'rgba(34, 197, 94, 0.2)',
+                              border: `1px solid ${isWPL ? WPLColors.violet : '#22C55E'}`,
+                            }}
+                          >
+                            <p className="text-xs font-bold uppercase tracking-wide mb-1" style={{ color: isWPL ? WPLColors.violet : '#22C55E' }}>
+                              Result
+                            </p>
+                            <p className="text-sm font-semibold text-white">{liveScore.resultText}</p>
+                          </motion.div>
+                        )}
+                      </div>
 
+                      {liveScore ? (
+                        <div className="relative z-10 space-y-6">
                             {/* Score Cards */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {[
+                              { team: liveScore.team1, matchTeam: match.team1, isBatting: liveScore.battingTeam === 'team1' },
+                              { team: liveScore.team2, matchTeam: match.team2, isBatting: liveScore.battingTeam === 'team2' },
+                            ].map(({ team, matchTeam, isBatting }, idx) => (
                             <motion.div 
-                              className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                              initial="hidden"
-                              animate="visible"
-                              variants={{
-                                visible: {
-                                  transition: {
-                                    staggerChildren: 0.1,
-                                  },
-                                },
-                              }}
-                            >
-                              {/* Team 1 */}
-                              <motion.div
-                                variants={{
-                                  hidden: { opacity: 0, x: -50 },
-                                  visible: { opacity: 1, x: 0 },
+                                key={idx}
+                                initial={{ opacity: 0, x: idx === 0 ? -20 : 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.2 + idx * 0.1 }}
+                                whileHover={{ scale: 1.02, y: -4 }}
+                                className="rounded-2xl p-6 relative overflow-hidden"
+                                style={{
+                                  background: isBatting
+                                    ? (isWPL ? `linear-gradient(135deg, ${WPLColors.purpleRGBA[30]}, ${WPLColors.pinkRGBA[20]})` : 'linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(37, 99, 235, 0.2))')
+                                    : (isWPL ? WPLColors.purpleRGBA[10] : 'rgba(30, 64, 175, 0.1)'),
+                                  border: `2px solid ${isBatting 
+                                    ? (isWPL ? WPLColors.purple : '#3B82F6')
+                                    : (isWPL ? WPLColors.purpleRGBA[30] : 'rgba(59, 130, 246, 0.3)')}`,
                                 }}
-                                whileHover={{ scale: 1.02, y: -5 }}
-                                className="bg-gradient-to-br from-red-900/20 to-red-600/20 border border-red-500/30 rounded-lg p-6"
                               >
-                                <h3 className="text-xl font-bold text-white mb-4">{liveScore.team1.name}</h3>
+                                {isBatting && (
+                              <motion.div
+                                    className="absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-bold"
+                                    style={{
+                                      background: isWPL ? WPLColors.pinkRGBA[30] : 'rgba(239, 68, 68, 0.3)',
+                                      color: isWPL ? WPLColors.pink : '#EF4444',
+                                    }}
+                                    animate={{ opacity: [1, 0.7, 1] }}
+                                    transition={{ duration: 2, repeat: Infinity }}
+                                  >
+                                    BATTING
+                                  </motion.div>
+                                )}
+                                <div className="flex items-center gap-3 mb-4">
+                                  <ModernTeamLogo
+                                    teamId={matchTeam.id}
+                                    shortName={matchTeam.shortName || matchTeam.name}
+                                    league={currentLeague}
+                                    size={48}
+                                  />
+                                  <h3 className="text-xl font-bold text-white">{team.name}</h3>
+                                </div>
                                 <motion.div 
-                                  className="space-y-2"
-                                  key={`${liveScore.team1.runs}-${liveScore.team1.wickets}`}
+                                  key={`${team.runs}-${team.wickets}`}
                                   initial={{ scale: 1.2 }}
                                   animate={{ scale: 1 }}
                                   transition={{ duration: 0.3 }}
-                                >
-                                  <div className="text-4xl font-bold text-ipl-gold">
-                                    {liveScore.team1.runs}/{liveScore.team1.wickets}
-                                  </div>
-                                  <div className="text-gray-300">Overs: {liveScore.team1.overs}</div>
-                                </motion.div>
-                              </motion.div>
-
-                              {/* Team 2 */}
-                              <motion.div
-                                variants={{
-                                  hidden: { opacity: 0, x: 50 },
-                                  visible: { opacity: 1, x: 0 },
-                                }}
-                                whileHover={{ scale: 1.02, y: -5 }}
-                                className="bg-gradient-to-br from-yellow-900/20 to-yellow-600/20 border border-yellow-500/30 rounded-lg p-6"
-                              >
-                                <h3 className="text-xl font-bold text-white mb-4">{liveScore.team2.name}</h3>
-                                <motion.div 
                                   className="space-y-2"
-                                  key={`${liveScore.team2.runs}-${liveScore.team2.wickets}`}
-                                  initial={{ scale: 1.2 }}
-                                  animate={{ scale: 1 }}
-                                  transition={{ duration: 0.3 }}
                                 >
-                                  <div className="text-4xl font-bold text-ipl-gold">
-                                    {liveScore.team2.runs}/{liveScore.team2.wickets}
+                                  <div className="text-5xl font-black" style={{ color: isWPL ? WPLColors.purple : '#F59E0B' }}>
+                                    {team.runs}<span className="text-3xl">/{team.wickets}</span>
                                   </div>
-                                  <div className="text-gray-300">Overs: {liveScore.team2.overs}</div>
+                                  <div className="flex items-center gap-4 text-gray-300">
+                                    <span className="flex items-center gap-1">
+                                      <Zap className="w-4 h-4" />
+                                      {team.overs} overs
+                                    </span>
+                                  </div>
                                 </motion.div>
                               </motion.div>
-                            </motion.div>
+                            ))}
+                          </div>
 
-                            {/* Rules Help Link */}
-                            <div className="flex items-center justify-between mb-2">
-                              <div className="flex items-center gap-2 text-sm text-gray-400">
-                                <HelpCircle className="w-4 h-4" />
-                                <span>Need help understanding the rules?</span>
-                              </div>
-                              <Link
-                                href="/rules"
-                                className="flex items-center gap-1 text-ipl-gold hover:text-ipl-gold/80 text-sm font-semibold transition-colors"
-                              >
-                                <BookOpen className="w-4 h-4" />
-                                View Rules
-                              </Link>
-                            </div>
-
-                            {/* Current Players */}
-                            <div className="bg-slate-700/30 rounded-lg p-6 border border-white/5">
-                              <h3 className="text-lg font-bold text-white mb-4">Current Match</h3>
+                          {/* Current Players */}
+                              <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 }}
+                            className="rounded-2xl p-6"
+                            style={{
+                              background: isWPL ? WPLColors.purpleRGBA[10] : 'rgba(30, 64, 175, 0.1)',
+                              border: `1px solid ${isWPL ? WPLColors.purpleRGBA[30] : 'rgba(59, 130, 246, 0.3)'}`,
+                            }}
+                          >
+                            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                              <Users className="w-5 h-5" style={{ color: isWPL ? WPLColors.purple : '#3B82F6' }} />
+                              Current Players
+                            </h3>
                               <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                  <p className="text-gray-400 text-sm">Batter</p>
+                                <p className="text-xs text-gray-400 mb-1">Batter</p>
                                   <p className="text-white font-semibold">{liveScore.currentBatter.name || '-'}</p>
-                                  <p className="text-ipl-gold text-sm">
+                                <p className="text-sm mt-1" style={{ color: isWPL ? WPLColors.purple : '#F59E0B' }}>
                                     {liveScore.currentBatter.runs} ({liveScore.currentBatter.balls})
                                   </p>
                                 </div>
                                 <div>
-                                  <p className="text-gray-400 text-sm">Bowler</p>
+                                <p className="text-xs text-gray-400 mb-1">Bowler</p>
                                   <p className="text-white font-semibold">{liveScore.currentBowler.name || '-'}</p>
-                                  <p className="text-ipl-gold text-sm">
+                                <p className="text-sm mt-1" style={{ color: isWPL ? WPLColors.purple : '#F59E0B' }}>
                                     {liveScore.currentBowler.runs} ({liveScore.currentBowler.balls})
                                   </p>
                                 </div>
                               </div>
-                            </div>
+                          </motion.div>
 
                             {/* Commentary */}
-                            <div className="bg-slate-700/30 rounded-lg p-6 border border-white/5">
-                              <h3 className="text-lg font-bold text-white mb-4">Commentary</h3>
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.5 }}
+                            className="rounded-2xl p-6"
+                            style={{
+                              background: isWPL ? WPLColors.purpleRGBA[10] : 'rgba(30, 64, 175, 0.1)',
+                              border: `1px solid ${isWPL ? WPLColors.purpleRGBA[30] : 'rgba(59, 130, 246, 0.3)'}`,
+                            }}
+                          >
+                            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                              <MessageCircle className="w-5 h-5" style={{ color: isWPL ? WPLColors.purple : '#3B82F6' }} />
+                              Commentary
+                            </h3>
                               {liveScore.commentary && liveScore.commentary.length > 0 ? (
                                 <div className="space-y-2 max-h-64 overflow-y-auto">
-                                  {(expandedCommentary[match.id]
-                                    ? liveScore.commentary
-                                    : liveScore.commentary.slice(0, 8)
-                                  ).map((comment, idx) => (
-                                    <div
+                                {(expandedCommentary[match.id] ? liveScore.commentary : liveScore.commentary.slice(0, 8)).map((comment, idx) => (
+                                  <motion.div
                                       key={idx}
-                                      className="text-gray-300 text-sm border-l-2 border-ipl-gold pl-3 py-1"
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: idx * 0.05 }}
+                                    className="text-gray-300 text-sm pl-4 py-2 border-l-2 rounded-r"
+                                    style={{ borderColor: isWPL ? WPLColors.purple : '#F59E0B' }}
                                     >
                                       {comment}
-                                    </div>
+                                  </motion.div>
                                   ))}
-
                                   {liveScore.commentary.length > 8 && (
                                     <button
                                       type="button"
-                                      onClick={() =>
-                                        setExpandedCommentary((prev) => ({
-                                          ...prev,
-                                          [match.id]: !prev[match.id],
-                                        }))
-                                      }
-                                      className="mt-2 text-xs font-semibold text-ipl-gold hover:text-ipl-gold/80"
+                                    onClick={() => setExpandedCommentary((prev) => ({ ...prev, [match.id]: !prev[match.id] }))}
+                                    className="mt-2 text-xs font-semibold hover:underline"
+                                    style={{ color: isWPL ? WPLColors.purple : '#F59E0B' }}
                                     >
                                       {expandedCommentary[match.id] ? 'Show less' : 'Show more'}
                                     </button>
@@ -718,58 +766,90 @@ export default function LiveScorePage() {
                               ) : (
                                 <p className="text-gray-400">No commentary yet</p>
                               )}
+                          </motion.div>
+
+                          {/* Rules Help */}
+                          <div className="flex items-center justify-between p-4 rounded-xl" style={{
+                            background: isWPL ? WPLColors.purpleRGBA[10] : 'rgba(30, 64, 175, 0.1)',
+                          }}>
+                            <div className="flex items-center gap-2 text-sm text-gray-400">
+                              <HelpCircle className="w-4 h-4" />
+                              <span>Need help understanding the rules?</span>
+                            </div>
+                            <Link
+                              href="/rules"
+                              className="flex items-center gap-1 text-sm font-semibold transition-colors hover:opacity-80"
+                              style={{ color: isWPL ? WPLColors.purple : '#F59E0B' }}
+                            >
+                              <BookOpen className="w-4 h-4" />
+                              View Rules
+                            </Link>
                             </div>
                           </div>
                         ) : (
                           <p className="text-gray-400 text-sm">Live score data is not available yet for this match.</p>
                         )}
-                      </div>
+                    </motion.div>
                     );
                   })}
-                </div>
+              </AnimatePresence>
               ) : (
                 <motion.div 
-                  className="text-center py-16"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5 }}
+                className="text-center py-16 rounded-3xl"
+                style={leagueColors.glass}
                 >
                   <motion.div 
-                    className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-slate-700/30 border border-white/10 mb-6"
                     animate={{ rotate: [0, 10, -10, 0] }}
                     transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                  className="inline-flex items-center justify-center w-20 h-20 rounded-full mb-6"
+                  style={{
+                    background: isWPL ? WPLColors.purpleRGBA[20] : 'rgba(59, 130, 246, 0.2)',
+                    border: `1px solid ${isWPL ? WPLColors.purple : '#3B82F6'}`,
+                  }}
                   >
-                    <svg className="w-10 h-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                  <Trophy className="w-10 h-10 text-gray-400" />
                   </motion.div>
                   <h3 className="text-xl font-bold text-white mb-2">No Live Match</h3>
                   <p className="text-gray-400 mb-6 max-w-md mx-auto">
                     There are currently no live matches. Check back soon or view upcoming matches in the schedule.
                   </p>
-                  <motion.a
+                <Link
                     href="/matches"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-ipl-gold hover:bg-ipl-gold/90 text-slate-900 font-bold rounded-lg transition-colors"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all hover:scale-105"
+                  style={{
+                    background: isWPL ? WPLColors.purple : '#F59E0B',
+                    color: '#FFFFFF',
+                  }}
                   >
                     View Schedule
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </motion.a>
+                  <TrendingUp className="w-4 h-4" />
+                </Link>
                 </motion.div>
               )}
-            </GlassCard>
           </div>
 
           {/* Chat Section */}
           <div className="lg:col-span-1">
-            <div className="bg-slate-800/50 rounded-2xl border border-white/10 p-6 h-[600px] flex flex-col">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              className="rounded-3xl p-6 h-[600px] flex flex-col"
+              style={leagueColors.glass}
+            >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">Live Chat</h2>
+                <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                  <MessageCircle className="w-5 h-5" style={{ color: isWPL ? WPLColors.purple : '#3B82F6' }} />
+                  Live Chat
+                </h2>
                 {user && (
-                  <span className="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">
+                  <span className="text-xs px-3 py-1 rounded-full font-semibold" style={{
+                    background: isWPL ? WPLColors.pinkRGBA[20] : 'rgba(34, 197, 94, 0.2)',
+                    color: isWPL ? WPLColors.pink : '#22C55E',
+                    border: `1px solid ${isWPL ? WPLColors.pink : '#22C55E'}`,
+                  }}>
                     {user.name}
                   </span>
                 )}
@@ -777,13 +857,21 @@ export default function LiveScorePage() {
 
               {user ? (
                 <div className="flex flex-col flex-grow">
-                  {/* Messages */}
-                  <div className="flex-grow overflow-y-auto mb-4 space-y-3 bg-slate-900/30 rounded-lg p-3">
+                  <div className="flex-grow overflow-y-auto mb-4 space-y-3 rounded-xl p-3" style={{
+                    background: isWPL ? WPLColors.purpleRGBA[10] : 'rgba(30, 64, 175, 0.1)',
+                  }}>
                     {messages.length > 0 ? (
                       messages.map((msg) => (
-                        <div key={msg.id} className="text-sm">
+                        <motion.div
+                          key={msg.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="text-sm"
+                        >
                           <div className="flex items-baseline gap-2">
-                            <span className="font-semibold text-ipl-gold">{msg.userName}</span>
+                            <span className="font-semibold" style={{ color: isWPL ? WPLColors.purple : '#F59E0B' }}>
+                              {msg.userName}
+                            </span>
                             <span className="text-xs text-gray-500">
                               {new Date(msg.timestamp).toLocaleTimeString()}
                             </span>
@@ -791,7 +879,7 @@ export default function LiveScorePage() {
                           <p className="text-gray-300 mt-1 break-words">
                             {renderMessageTextWithEmojis(msg.text)}
                           </p>
-                        </div>
+                        </motion.div>
                       ))
                     ) : (
                       <div className="flex items-center justify-center h-full">
@@ -801,12 +889,9 @@ export default function LiveScorePage() {
                     <div ref={messagesEndRef} />
                   </div>
 
-                  {/* Message Input */}
                   <form onSubmit={handleSendMessage} className="space-y-2">
                     <EmojiPicker
-                      onSelect={(code) =>
-                        setNewMessage((prev) => (prev ? `${prev} ${code}`.trim() : code))
-                      }
+                      onSelect={(code) => setNewMessage((prev) => (prev ? `${prev} ${code}`.trim() : code))}
                     />
                     <input
                       type="text"
@@ -814,41 +899,73 @@ export default function LiveScorePage() {
                       onChange={(e) => setNewMessage(e.target.value)}
                       placeholder="Type your comment..."
                       maxLength={500}
-                      className="w-full px-3 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 text-sm focus:outline-none focus:border-ipl-gold"
+                      className="w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 text-sm focus:outline-none transition-all"
+                      style={{
+                        background: isWPL ? WPLColors.purpleRGBA[10] : 'rgba(30, 64, 175, 0.2)',
+                        border: `1px solid ${isWPL ? WPLColors.purpleRGBA[30] : 'rgba(59, 130, 246, 0.3)'}`,
+                      }}
                     />
                     <button
                       type="submit"
                       disabled={isSendingMessage || !newMessage.trim()}
-                      className="w-full px-3 py-2 bg-ipl-gold hover:bg-ipl-gold/90 text-black font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                      className="w-full px-4 py-3 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm flex items-center justify-center gap-2"
+                      style={{
+                        background: isWPL ? WPLColors.purple : '#F59E0B',
+                        color: '#FFFFFF',
+                      }}
                     >
-                      {isSendingMessage ? 'Sending...' : 'Send'}
+                      {isSendingMessage ? 'Sending...' : (
+                        <>
+                          <Send className="w-4 h-4" />
+                          Send
+                        </>
+                      )}
                     </button>
+                    <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
                       onClick={handleSignOut}
-                      className="w-full px-3 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg transition-colors text-sm"
-                    >
+                        className="px-3 py-2 rounded-lg transition-colors text-sm flex items-center justify-center gap-1"
+                        style={{
+                          background: isWPL ? WPLColors.roseRGBA[20] : 'rgba(239, 68, 68, 0.2)',
+                          color: isWPL ? WPLColors.rose : '#EF4444',
+                          border: `1px solid ${isWPL ? WPLColors.rose : '#EF4444'}`,
+                        }}
+                      >
+                        <LogOut className="w-3 h-3" />
                       Sign Out
                     </button>
                     <button
                       type="button"
                       onClick={handleDeleteAccount}
-                      className="w-full px-3 py-2 bg-red-900/40 hover:bg-red-900/60 text-red-300 rounded-lg transition-colors text-xs"
-                    >
-                      Delete my account
+                        className="px-3 py-2 rounded-lg transition-colors text-xs flex items-center justify-center gap-1"
+                        style={{
+                          background: isWPL ? WPLColors.roseRGBA[10] : 'rgba(127, 29, 29, 0.2)',
+                          color: isWPL ? WPLColors.rose : '#DC2626',
+                          border: `1px solid ${isWPL ? WPLColors.roseRGBA[30] : 'rgba(220, 38, 38, 0.3)'}`,
+                        }}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        Delete
                     </button>
+                    </div>
                   </form>
                 </div>
               ) : (
                 <div className="flex-grow flex flex-col items-center justify-center">
                   <div className="text-center">
                     <p className="text-gray-400 mb-4">Sign in to join the conversation!</p>
+                    <div className="space-y-2">
                     <button
                       onClick={() => {
                         setShowAuthModal(true);
                         setAuthMode('signin');
                       }}
-                      className="mb-2 w-full px-4 py-2 bg-ipl-gold hover:bg-ipl-gold/90 text-black font-semibold rounded-lg transition-colors"
+                        className="w-full px-4 py-3 rounded-xl font-semibold transition-all hover:scale-105"
+                        style={{
+                          background: isWPL ? WPLColors.purple : '#F59E0B',
+                          color: '#FFFFFF',
+                        }}
                     >
                       Sign In
                     </button>
@@ -857,57 +974,44 @@ export default function LiveScorePage() {
                         setShowAuthModal(true);
                         setAuthMode('signup');
                       }}
-                      className="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg transition-colors"
+                        className="w-full px-4 py-3 rounded-xl font-semibold transition-all hover:scale-105"
+                        style={{
+                          background: isWPL ? WPLColors.purpleRGBA[20] : 'rgba(30, 64, 175, 0.2)',
+                          color: isWPL ? WPLColors.purple : '#3B82F6',
+                          border: `1px solid ${isWPL ? WPLColors.purple : '#3B82F6'}`,
+                        }}
                     >
                       Create Account
                     </button>
+                    </div>
                   </div>
                 </div>
               )}
+            </motion.div>
             </div>
-          </div>
-        </div>
-        <div className="mt-10">
-          <section className="bg-slate-800/40 rounded-2xl border border-white/10 p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold text-ipl-gold uppercase tracking-wide">More live cricket</p>
-              <h2 className="text-lg font-bold text-white mt-1">See other live matches worldwide</h2>
-              <p className="text-xs text-gray-400 mt-1 max-w-md">
-                Browse scores from international and domestic games beyond IPL, powered by CricketData.
-              </p>
-            </div>
-            <a
-              href="/world-cricket"
-              className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-gradient-to-r from-ipl-blue-light to-ipl-purple text-sm font-semibold text-white shadow-lg shadow-ipl-purple/30 hover:shadow-ipl-purple/50 hover:opacity-95 transition-all"
-            >
-              Open global live scores
-              <svg
-                className="w-4 h-4 ml-2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M13 7l5 5m0 0l-5 5m5-5H6"
-                />
-              </svg>
-            </a>
-          </section>
         </div>
       </main>
 
       {/* Auth Modal */}
+      <AnimatePresence>
       {showAuthModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          >
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowAuthModal(false)} />
-          <div className="relative z-10 w-full max-w-md mx-4 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-white/10 p-8">
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative z-10 w-full max-w-md rounded-3xl shadow-2xl p-8"
+              style={leagueColors.glass}
+            >
             <h2 className="text-2xl font-bold text-white mb-6">
               {authMode === 'signin' ? 'Sign In' : 'Create Account'}
             </h2>
-
             <form onSubmit={handleAuth} className="space-y-4">
               {authMode === 'signup' && (
                 <input
@@ -916,7 +1020,11 @@ export default function LiveScorePage() {
                   value={authFormData.name}
                   onChange={(e) => setAuthFormData({ ...authFormData, name: e.target.value })}
                   required
-                  className="w-full px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                    className="w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 focus:outline-none transition-all"
+                    style={{
+                      background: isWPL ? WPLColors.purpleRGBA[10] : 'rgba(30, 64, 175, 0.2)',
+                      border: `1px solid ${isWPL ? WPLColors.purpleRGBA[30] : 'rgba(59, 130, 246, 0.3)'}`,
+                    }}
                 />
               )}
               <input
@@ -925,7 +1033,11 @@ export default function LiveScorePage() {
                 value={authFormData.email}
                 onChange={(e) => setAuthFormData({ ...authFormData, email: e.target.value })}
                 required
-                className="w-full px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
+                  className="w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 focus:outline-none transition-all"
+                  style={{
+                    background: isWPL ? WPLColors.purpleRGBA[10] : 'rgba(30, 64, 175, 0.2)',
+                    border: `1px solid ${isWPL ? WPLColors.purpleRGBA[30] : 'rgba(59, 130, 246, 0.3)'}`,
+                  }}
               />
               <input
                 type="password"
@@ -934,35 +1046,25 @@ export default function LiveScorePage() {
                 onChange={(e) => setAuthFormData({ ...authFormData, password: e.target.value })}
                 required
                 minLength={12}
-                className="w-full px-4 py-2 bg-slate-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-ipl-gold"
-              />
-
+                  className="w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 focus:outline-none transition-all"
+                  style={{
+                    background: isWPL ? WPLColors.purpleRGBA[10] : 'rgba(30, 64, 175, 0.2)',
+                    border: `1px solid ${isWPL ? WPLColors.purpleRGBA[30] : 'rgba(59, 130, 246, 0.3)'}`,
+                  }}
+                />
               {authMode === 'signup' && authFormData.password && (
-                <div className="space-y-1 text-xs mt-1">
+                  <div className="space-y-1 text-xs">
                   <div className="flex items-center justify-between text-gray-400">
                     <span>Password strength</span>
-                    <span
-                      className={
-                        passwordStrength.label === 'Weak'
-                          ? 'text-red-400'
-                          : passwordStrength.label === 'Medium'
-                          ? 'text-yellow-400'
-                          : 'text-emerald-400'
-                      }
-                    >
+                      <span className={passwordStrength.label === 'Weak' ? 'text-red-400' : passwordStrength.label === 'Medium' ? 'text-yellow-400' : 'text-emerald-400'}>
                       {passwordStrength.label}
                     </span>
                   </div>
-                  <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                    <div
-                      className={
-                        'h-full transition-all ' +
-                        (passwordStrength.label === 'Weak'
-                          ? 'bg-red-500'
-                          : passwordStrength.label === 'Medium'
-                          ? 'bg-yellow-500'
-                          : 'bg-emerald-500')
-                      }
+                    <div className="h-1.5 rounded-full overflow-hidden" style={{ background: isWPL ? WPLColors.purpleRGBA[10] : 'rgba(30, 64, 175, 0.2)' }}>
+                      <div
+                        className={`h-full transition-all ${
+                          passwordStrength.label === 'Weak' ? 'bg-red-500' : passwordStrength.label === 'Medium' ? 'bg-yellow-500' : 'bg-emerald-500'
+                        }`}
                       style={{ width: `${(passwordStrength.score / 4) * 100}%` }}
                     />
                   </div>
@@ -971,7 +1073,6 @@ export default function LiveScorePage() {
                   </p>
                 </div>
               )}
-
               {authMode === 'signup' && (
                 <div className="mt-3 space-y-1">
                   <div id="turnstile-container" className="flex justify-center" />
@@ -980,24 +1081,26 @@ export default function LiveScorePage() {
                   </p>
                 </div>
               )}
-
               <button
                 type="submit"
-                className="w-full px-4 py-2 bg-ipl-gold hover:bg-ipl-gold/90 text-black font-semibold rounded-lg transition-colors"
+                  className="w-full px-4 py-3 rounded-xl font-semibold transition-all hover:scale-105"
+                  style={{
+                    background: isWPL ? WPLColors.purple : '#F59E0B',
+                    color: '#FFFFFF',
+                  }}
               >
                 {authMode === 'signin' ? 'Sign In' : 'Create Account'}
               </button>
             </form>
-
             <div className="mt-6 text-center">
               <button
                 onClick={() => setAuthMode(authMode === 'signin' ? 'signup' : 'signin')}
-                className="text-ipl-gold hover:text-ipl-gold/80 text-sm"
+                  className="text-sm transition-colors hover:opacity-80"
+                  style={{ color: isWPL ? WPLColors.purple : '#F59E0B' }}
               >
                 {authMode === 'signin' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
               </button>
             </div>
-
             <button
               onClick={() => setShowAuthModal(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-gray-300"
@@ -1006,9 +1109,10 @@ export default function LiveScorePage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-          </div>
-        </div>
+            </motion.div>
+          </motion.div>
       )}
+      </AnimatePresence>
 
       <Footer />
     </div>
