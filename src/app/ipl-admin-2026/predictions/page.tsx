@@ -14,35 +14,87 @@ export default function AdminPredictionsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
   const [stats, setStats] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+    const timeoutId = setTimeout(() => {
+      if (isMounted && loading) {
+        console.warn('Predictions page loading timeout');
+        setLoading(false);
+        setError('Loading took too long. Please refresh the page.');
+      }
+    }, 10000); // 10 second timeout
+
     const fetchData = async () => {
       try {
+        setLoading(true);
+        setError(null);
+        
         const allMatches = await api.getMatches(currentLeague);
-        setMatches(allMatches);
+        if (!isMounted) return;
+        setMatches(allMatches || []);
         
         if (selectedMatchId) {
-          const matchPredictions = await api.getPredictions({ matchId: selectedMatchId });
-          setPredictions(matchPredictions);
+          try {
+            const matchPredictions = await api.getPredictions({ matchId: selectedMatchId });
+            if (!isMounted) return;
+            setPredictions(matchPredictions || []);
+          } catch (predError: any) {
+            console.error('Error fetching predictions:', predError);
+            if (isMounted) {
+              setPredictions([]);
+              setError(predError.message || 'Failed to load predictions');
+            }
+          }
           
-          const pollData = await api.getPolls(selectedMatchId);
-          if (pollData) {
-            setPolls([pollData]);
-          } else {
-            setPolls([]);
+          try {
+            const pollData = await api.getPolls(selectedMatchId);
+            if (!isMounted) return;
+            if (pollData) {
+              setPolls([pollData]);
+            } else {
+              setPolls([]);
+            }
+          } catch (pollError) {
+            console.error('Error fetching poll:', pollError);
+            if (isMounted) setPolls([]);
           }
         } else {
-          const allPredictions = await api.getPredictions({ league: currentLeague });
-          setPredictions(allPredictions);
+          try {
+            const allPredictions = await api.getPredictions({ league: currentLeague });
+            if (!isMounted) return;
+            setPredictions(allPredictions || []);
+          } catch (predError: any) {
+            console.error('Error fetching all predictions:', predError);
+            if (isMounted) {
+              setPredictions([]);
+              setError(predError.message || 'Failed to load predictions');
+            }
+          }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error fetching data:', error);
+        if (isMounted) {
+          setMatches([]);
+          setPredictions([]);
+          setPolls([]);
+          setError(error.message || 'Failed to load data');
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+          clearTimeout(timeoutId);
+        }
       }
     };
 
     fetchData();
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
   }, [currentLeague, selectedMatchId]);
 
   useEffect(() => {
@@ -74,7 +126,7 @@ export default function AdminPredictionsPage() {
 
   if (loading) {
     return (
-      <div className="p-6">
+      <div className="p-6 min-h-screen">
         <div className="flex items-center justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-ipl-gold"></div>
         </div>
@@ -91,6 +143,19 @@ export default function AdminPredictionsPage() {
         </h1>
         <p className="text-gray-400">View and manage user predictions and polls</p>
       </div>
+
+      {error && (
+        <div className="mb-6 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300">
+          <p className="font-semibold">Error:</p>
+          <p>{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+          >
+            Reload Page
+          </button>
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
