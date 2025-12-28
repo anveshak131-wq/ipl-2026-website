@@ -189,7 +189,7 @@ export const onRequest = async (context) => {
       
       const prediction = {
         id: predictionId,
-        userId: user.id,
+        userId: String(user.id || '').trim(), // Ensure userId is always a string
         userName: user.name || user.email || 'Anonymous',
         matchId,
         league,
@@ -281,9 +281,12 @@ export const onRequest = async (context) => {
 
       const prediction = JSON.parse(predData);
 
-      // Check ownership - allow if userId matches
-      if (prediction.userId !== user.id) {
-        console.log(`Update prediction: User ${user.id} attempted to update prediction ${id} owned by ${prediction.userId}`);
+      // Check ownership - normalize IDs to strings for comparison
+      const predictionUserId = String(prediction.userId || '').trim();
+      const currentUserId = String(user.id || '').trim();
+      
+      if (predictionUserId !== currentUserId) {
+        console.log(`Update prediction: User ${currentUserId} (type: ${typeof user.id}) attempted to update prediction ${id} owned by ${predictionUserId} (type: ${typeof prediction.userId})`);
         return new Response(
           JSON.stringify({ error: 'You can only update your own predictions' }),
           { status: 403, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
