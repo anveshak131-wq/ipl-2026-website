@@ -147,9 +147,9 @@ export default function TeamFormationVisualizer({
                   }}
                   title={`${player.name} - ${player.role}`}
                 >
-                  <div className="text-center leading-tight px-1">
-                    <div className="font-bold truncate" style={{ fontSize: '9px' }}>
-                      {player.name.split(' ').map((n, i) => i === 0 ? n.charAt(0) + '.' : n).join(' ')}
+                  <div className="text-center leading-none">
+                    <div className="font-black" style={{ fontSize: '11px', letterSpacing: '-0.5px' }}>
+                      {player.name.split(' ').map(n => n.charAt(0)).join('').slice(0, 2)}
                     </div>
                   </div>
                 </div>
