@@ -5,7 +5,7 @@ import { api } from '@/lib/data';
 import type { Player, Team } from '@/types';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import IPLPlayersPanel from '@/components/teams/IPLPlayersPanel';
+import ModernPlayersPanel from '@/components/players/ModernPlayersPanel';
 
 export default function TeamPlayersPage() {
   const [players, setPlayers] = useState<Player[]>([]);
@@ -46,7 +46,7 @@ export default function TeamPlayersPage() {
           </p>
         </div>
 
-        <IPLPlayersPanel initialPlayers={players} teams={teams} />
+        <ModernPlayersPanel initialPlayers={players} teams={teams} />
       </main>
 
       <Footer />

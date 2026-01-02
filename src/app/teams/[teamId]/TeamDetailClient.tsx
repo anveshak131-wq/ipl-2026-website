@@ -39,6 +39,7 @@ import {
   CricketBatIcon,
   TrophyIcon
 } from '@/components/ui/CustomIcons';
+import TeamPlayersTab from '@/components/teams/TeamPlayersTab';
 import Image from 'next/image';
 import { Team, Player, CoachingStaff, KeyPlayers, Match, Trophy } from '@/types';
 import { PlayerCardProps, KeyPlayersSectionProps, StatsTabProps, AboutTabProps } from '@/types/components';
@@ -133,7 +134,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [teamData, setTeamData] = useState<Team | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'squad' | 'stats' | 'about'>('squad');
+  const [activeTab, setActiveTab] = useState<'squad' | 'players' | 'stats' | 'about'>('squad');
   const [scrollY, setScrollY] = useState(0);
   const [nationalityFilter, setNationalityFilter] = useState<'all' | 'indian' | 'overseas'>('all');
   const [battingStyleFilter, setBattingStyleFilter] = useState<'any' | 'right' | 'left'>('any');
@@ -764,6 +765,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
             <div className="flex gap-1">
               {[
                 { id: 'squad', label: 'Squad' },
+                { id: 'players', label: 'Players' },
                 { id: 'stats', label: 'Stats' },
                 { id: 'about', label: 'About' }
               ].map((tab) => (
@@ -986,6 +988,30 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                   </AnimatedSection>
                 )
               ))}
+              </motion.div>
+            )}
+
+            {activeTab === 'players' && teamData && (
+              <motion.div
+                key="players"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="space-y-8"
+              >
+                <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl"
+                     style={{
+                       background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
+                       borderColor: primaryColor.medium,
+                       boxShadow: `0 10px 30px ${primaryColor.glow}15`,
+                     }}>
+                  <TeamPlayersTab 
+                    teamId={teamData.id} 
+                    teamName={teamData.name}
+                    initialPlayers={teamData.players}
+                  />
+                </div>
               </motion.div>
             )}
 

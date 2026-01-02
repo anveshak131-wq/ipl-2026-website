@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, ChevronDown, BarChart2, Trophy, Zap, Flame, ArrowRight } from 'lucide-react';
+import { Search, Filter, ChevronDown, BarChart2, Trophy, Zap, Flame, ArrowRight, X, BarChart3, Users, ScatterChart, Table2, SlidersHorizontal } from 'lucide-react';
 import Image from 'next/image';
 import { teamColors, roleColors, fadeIn, staggerContainer, cardStyle, buttonStyle, inputStyle } from '@/styles/theme';
 import PlayerCardModal from './PlayerCardModal';
+import { useInView } from 'react-intersection-observer';
 
 interface Player {
   id: string;
@@ -41,17 +42,62 @@ interface ModernPlayersPanelProps {
   teams: Team[];
 }
 
+// Define view types
+type ViewType = 'grid' | 'table' | 'stats';
+
+// Define comparison type
+interface ComparisonPlayer extends Player {
+  isSelected: boolean;
+}
+
 export default function ModernPlayersPanel({ initialPlayers = [], teams }: ModernPlayersPanelProps) {
+  // State for players and filtering
   const [players, setPlayers] = useState<Player[]>(initialPlayers);
-  const [filteredPlayers, setFilteredPlayers] = useState<Player[]>(initialPlayers);
+  const [filteredPlayers, setFilteredPlayers] = useState<Player[]>([]);
+  const [displayedPlayers, setDisplayedPlayers] = useState<Player[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTeam, setSelectedTeam] = useState('all');
   const [selectedRole, setSelectedRole] = useState('all');
-  const [sortBy, setSortBy] = useState<'name' | 'runs' | 'wickets' | 'matches'>('name');
+  const [sortBy, setSortBy] = useState<'name' | 'runs' | 'wickets' | 'matches' | 'battingAverage' | 'bowlingAverage' | 'strikeRate' | 'economy'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [isLoading, setIsLoading] = useState(!initialPlayers.length);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [selectedPlayerIndex, setSelectedPlayerIndex] = useState<number>(-1);
+  const [viewType, setViewType] = useState<ViewType>('grid');
+  const [showComparison, setShowComparison] = useState(false);
+  const [comparisonPlayers, setComparisonPlayers] = useState<ComparisonPlayer[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [statsView, setStatsView] = useState<'batting' | 'bowling' | 'fielding'>('batting');
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Infinite scroll ref
+  const { ref: loadMoreRef, inView } = useInView({
+    threshold: 0.1,
+    triggerOnce: false,
+  });
+  
+  // Load more players when scrolled to bottom
+  useEffect(() => {
+    if (inView && hasMore && !isLoading) {
+      loadMorePlayers();
+    }
+  }, [inView, hasMore]);
+  
+  const loadMorePlayers = () => {
+    const nextPage = page + 1;
+    const startIndex = (nextPage - 1) * 20;
+    const endIndex = startIndex + 20;
+    
+    if (startIndex >= filteredPlayers.length) {
+      setHasMore(false);
+      return;
+    }
+    
+    const newPlayers = filteredPlayers.slice(0, endIndex);
+    setDisplayedPlayers(newPlayers);
+    setPage(nextPage);
+  };
 
   // Fetch players if not provided
   useEffect(() => {
