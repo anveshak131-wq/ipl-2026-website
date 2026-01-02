@@ -64,10 +64,10 @@ export default function WPLPlayerCard({ player, onClick, index = 0 }: WPLPlayerC
       <div
         className="relative overflow-hidden rounded-3xl backdrop-blur-xl p-6 border transition-all duration-300 hover:border-pink-500/50"
         style={{
-          background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[15]}, ${WPLColors.pinkRGBA[15]})`,
+          background: `linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 27, 75, 0.85))`,
           borderColor: WPLColors.purpleRGBA[30],
           transform: `rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(20px)`,
-          boxShadow: `0 20px 60px rgba(0,0,0,0.3), 0 0 40px ${WPLColors.purpleRGBA[20]}`,
+          boxShadow: `0 20px 60px rgba(0,0,0,0.5), 0 0 40px ${WPLColors.purpleRGBA[20]}`,
         }}
       >
         {/* Animated border glow on hover */}

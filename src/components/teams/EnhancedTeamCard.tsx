@@ -56,8 +56,9 @@ export default function EnhancedTeamCard({ team, onPlayerClick, isFavorite = fal
       whileHover={{ y: -8, scale: 1.02 }}
       transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
       style={{
-        background: `linear-gradient(135deg, ${team.colors.primary}15, ${team.colors.secondary}25)`,
-        boxShadow: `0 0 0 1px ${team.colors.primary}20`
+        background: `linear-gradient(135deg, rgba(15, 23, 42, 0.75), rgba(30, 27, 75, 0.75))`,
+        boxShadow: `0 0 0 1px ${team.colors.primary}20`,
+        borderColor: `${team.colors.primary}40`
       }}
     >
       {/* Gradient Background Overlay */}
