@@ -62,20 +62,20 @@ export default function WPLPlayerCard({ player, onClick, index = 0 }: WPLPlayerC
       }}
     >
       <div
-        className="relative overflow-hidden rounded-3xl backdrop-blur-xl p-6 border transition-all duration-300 hover:border-pink-500/50"
+        className="relative overflow-hidden rounded-3xl backdrop-blur-xl p-6 border transition-all duration-300 hover:border-purple-500/30"
         style={{
-          background: `linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 27, 75, 0.95))`,
-          borderColor: WPLColors.purpleRGBA[30],
+          background: `linear-gradient(135deg, rgb(15, 23, 42), rgb(30, 27, 75))`,
+          borderColor: 'rgba(139, 92, 246, 0.3)',
           transform: `rotateX(${tiltX}deg) rotateY(${tiltY}deg) translateZ(20px)`,
-          boxShadow: `0 20px 60px rgba(0,0,0,0.5), 0 0 40px ${WPLColors.purpleRGBA[20]}`,
+          boxShadow: `0 20px 60px rgba(0,0,0,0.7), 0 0 40px rgba(139, 92, 246, 0.15)`,
         }}
       >
         {/* Animated border glow on hover */}
-        <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none">
+        <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-30 transition-opacity duration-500 pointer-events-none">
           <div 
             className="absolute inset-0 rounded-3xl blur-sm"
             style={{
-              background: `linear-gradient(135deg, ${WPLColors.purple}, ${WPLColors.pink}, ${WPLColors.rose})`,
+              background: `linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(168, 85, 247, 0.3))`,
               padding: '2px',
             }}
           />
@@ -88,8 +88,8 @@ export default function WPLPlayerCard({ player, onClick, index = 0 }: WPLPlayerC
               key={i}
               className="absolute w-2 h-2 rounded-full"
               style={{
-                background: WPLColors.pink,
-                opacity: 0.15,
+                background: 'rgba(139, 92, 246, 0.4)',
+                opacity: 0.1,
               }}
               initial={{
                 x: Math.random() * 100 + '%',
@@ -98,7 +98,7 @@ export default function WPLPlayerCard({ player, onClick, index = 0 }: WPLPlayerC
               animate={{
                 y: [null, Math.random() * 100 + '%'],
                 x: [null, Math.random() * 100 + '%'],
-                opacity: [0.15, 0.3, 0.15],
+                opacity: [0.1, 0.2, 0.1],
               }}
               transition={{
                 duration: 3 + Math.random() * 2,
@@ -115,8 +115,8 @@ export default function WPLPlayerCard({ player, onClick, index = 0 }: WPLPlayerC
           <div
             className="absolute top-3 right-3 w-14 h-14 rounded-2xl flex items-center justify-center font-black text-xl transform group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 text-white shadow-lg"
             style={{
-              background: `linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(20, 184, 166, 0.7))`,
-              boxShadow: `0 4px 20px ${WPLColors.purpleRGBA[50]}`,
+              background: `linear-gradient(135deg, rgba(139, 92, 246, 0.7), rgba(88, 28, 135, 0.8))`,
+              boxShadow: `0 4px 20px rgba(139, 92, 246, 0.3)`,
             }}
           >
             {player.jerseyNumber > 0 ? player.jerseyNumber : 'N/A'}
@@ -125,16 +125,16 @@ export default function WPLPlayerCard({ player, onClick, index = 0 }: WPLPlayerC
           {/* Player Avatar Circle with Gradient */}
           <div className="mb-4 w-24 h-24 mx-auto rounded-full flex items-center justify-center text-3xl font-black transform group-hover:scale-110 transition-transform duration-300 relative"
                style={{
-                 background: `linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(20, 184, 166, 0.6))`,
-                 boxShadow: `0 10px 40px ${WPLColors.purpleRGBA[40]}`,
+                 background: `linear-gradient(135deg, rgba(139, 92, 246, 0.6), rgba(88, 28, 135, 0.7))`,
+                 boxShadow: `0 10px 40px rgba(139, 92, 246, 0.3)`,
                  color: '#FFFFFF'
                }}>
             <span>{getInitials(player.name)}</span>
             {/* Glow effect */}
             <div 
-              className="absolute inset-0 rounded-full blur-xl opacity-30 group-hover:opacity-50 transition-opacity"
+              className="absolute inset-0 rounded-full blur-xl opacity-20 group-hover:opacity-30 transition-opacity"
               style={{
-                background: `radial-gradient(circle, rgba(20, 184, 166, 0.4), transparent)`,
+                background: `radial-gradient(circle, rgba(139, 92, 246, 0.3), transparent)`,
               }}
             />
           </div>
@@ -232,7 +232,7 @@ export default function WPLPlayerCard({ player, onClick, index = 0 }: WPLPlayerC
         <div
           className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
           style={{
-            background: `linear-gradient(135deg, transparent, ${WPLColors.pinkRGBA[10]}, transparent)`,
+            background: `linear-gradient(135deg, transparent, rgba(139, 92, 246, 0.05), transparent)`,
             transform: 'skewX(-20deg) translateX(-100%)',
             animation: 'shimmer 1.5s infinite',
           }}
