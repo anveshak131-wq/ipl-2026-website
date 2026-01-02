@@ -1,93 +1,90 @@
 <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-  <!-- RCB Premium Logo - Roaring Lion King -->
+  <!-- RCB Premium Logo - Elegant Lion King -->
   <defs>
-    <linearGradient id="rcb-premium-red" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#DC0000;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#C8102E;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#8B0000;stop-opacity:1" />
+    <linearGradient id="rcb-red" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#E74C3C;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#C0392B;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#A93226;stop-opacity:1" />
     </linearGradient>
-    <linearGradient id="rcb-premium-gold" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#FFC700;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#FFAA00;stop-opacity:1" />
+    <linearGradient id="rcb-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F4D03F;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#F39C12;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E67E22;stop-opacity:1" />
     </linearGradient>
-    <radialGradient id="rcb-glow" cx="50%" cy="50%">
-      <stop offset="0%" style="stop-color:#FF0000;stop-opacity:0.6" />
-      <stop offset="100%" style="stop-color:#C8102E;stop-opacity:0" />
+    <radialGradient id="rcb-shine" cx="50%" cy="50%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#FFFFFF;stop-opacity:0" />
     </radialGradient>
   </defs>
   
-  <!-- Glow Effect -->
-  <circle cx="100" cy="100" r="95" fill="url(#rcb-glow)" opacity="0.4"/>
+  <!-- Main Shield -->
+  <path d="M100 15 L175 45 L175 115 Q175 155 100 185 Q25 155 25 115 L25 45 Z" 
+        fill="url(#rcb-red)" stroke="url(#rcb-gold)" stroke-width="4"/>
   
-  <!-- Shield Background -->
-  <path d="M100 10 L180 45 L180 115 Q180 160 100 190 Q20 160 20 115 L20 45 Z" 
-        fill="url(#rcb-premium-red)" stroke="url(#rcb-premium-gold)" stroke-width="4"/>
+  <!-- Inner Highlight -->
+  <path d="M100 25 L160 50 L160 110 Q160 145 100 170 Q40 145 40 110 L40 50 Z" 
+        fill="url(#rcb-shine)" opacity="0.3"/>
   
-  <!-- Inner Shield Detail -->
-  <path d="M100 25 L165 52 L165 110 Q165 145 100 170 Q35 145 35 110 L35 52 Z" 
-        fill="none" stroke="url(#rcb-premium-gold)" stroke-width="2" opacity="0.6"/>
-  
-  <!-- Lion Face -->
-  <g transform="translate(100, 75)">
-    <!-- Mane (Golden Crown) -->
-    <path d="M-35,-25 Q-40,-35 -35,-40 L-30,-35 Q-25,-40 -20,-35 L-15,-40 Q-10,-35 -5,-35 L0,-40 Q5,-35 5,-35 L15,-40 Q20,-35 20,-35 L30,-35 Q35,-40 35,-25" 
-          fill="url(#rcb-premium-gold)" stroke="#8B4513" stroke-width="1.5"/>
-    <path d="M-38,-25 L-30,-15 M-28,-30 L-22,-18 M-18,-35 L-12,-20 M-8,-35 L-3,-22 M3,-35 L8,-22 M12,-35 L18,-20 M22,-30 L28,-18 M30,-25 L38,-15" 
-          stroke="#8B4513" stroke-width="2" fill="none" opacity="0.7"/>
+  <!-- Stylized Lion Head -->
+  <g transform="translate(100, 80)">
+    <!-- Mane - Elegant Crown Shape -->
+    <g fill="url(#rcb-gold)">
+      <circle cx="-25" cy="-15" r="8" opacity="0.9"/>
+      <circle cx="-15" cy="-22" r="9" opacity="0.95"/>
+      <circle cx="0" cy="-25" r="10"/>
+      <circle cx="15" cy="-22" r="9" opacity="0.95"/>
+      <circle cx="25" cy="-15" r="8" opacity="0.9"/>
+      <ellipse cx="-20" cy="-5" rx="7" ry="10" opacity="0.85"/>
+      <ellipse cx="20" cy="-5" rx="7" ry="10" opacity="0.85"/>
+    </g>
     
-    <!-- Face -->
-    <ellipse cx="0" cy="-5" rx="28" ry="24" fill="#D2691E"/>
+    <!-- Face Circle -->
+    <circle cx="0" cy="0" r="30" fill="#D4A574"/>
+    <circle cx="0" cy="0" r="28" fill="#CD9B5B"/>
     
-    <!-- Eyes -->
-    <ellipse cx="-10" cy="-10" rx="5" ry="7" fill="#FFFFFF"/>
-    <ellipse cx="10" cy="-10" rx="5" ry="7" fill="#FFFFFF"/>
-    <circle cx="-10" cy="-9" r="3" fill="#000000"/>
-    <circle cx="10" cy="-9" r="3" fill="#000000"/>
-    <circle cx="-9" cy="-10" r="1.5" fill="#FFFFFF"/>
-    <circle cx="11" cy="-10" r="1.5" fill="#FFFFFF"/>
-    
-    <!-- Fierce Eyebrows -->
-    <path d="M-16,-15 Q-10,-18 -5,-15" stroke="#8B4513" stroke-width="2" fill="none" stroke-linecap="round"/>
-    <path d="M5,-15 Q10,-18 16,-15" stroke="#8B4513" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <!-- Eyes - Confident Look -->
+    <ellipse cx="-9" cy="-5" rx="4" ry="5" fill="#2C3E50"/>
+    <ellipse cx="9" cy="-5" rx="4" ry="5" fill="#2C3E50"/>
+    <circle cx="-8" cy="-6" r="1.5" fill="#FFFFFF"/>
+    <circle cx="10" cy="-6" r="1.5" fill="#FFFFFF"/>
     
     <!-- Nose -->
-    <path d="M-4,0 L0,-3 L4,0 L0,3 Z" fill="#8B4513"/>
+    <ellipse cx="0" cy="5" rx="4" ry="3" fill="#8B6F47"/>
     
-    <!-- Roaring Mouth (OPEN) -->
-    <ellipse cx="0" cy="8" rx="12" ry="10" fill="#8B0000"/>
-    <ellipse cx="0" cy="6" rx="10" ry="8" fill="#FF4444"/>
+    <!-- Confident Smile -->
+    <path d="M-10,12 Q0,18 10,12" stroke="#2C3E50" stroke-width="2" 
+          fill="none" stroke-linecap="round" opacity="0.8"/>
     
-    <!-- Fierce Teeth -->
-    <path d="M-8,5 L-6,9 L-4,5 M-2,5 L0,9 L2,5 M4,5 L6,9 L8,5" 
-          stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round"/>
-    
-    <!-- Whiskers -->
-    <line x1="-28" y1="-5" x2="-35" y2="-8" stroke="#8B4513" stroke-width="1.5" opacity="0.8"/>
-    <line x1="-28" y1="0" x2="-36" y2="0" stroke="#8B4513" stroke-width="1.5" opacity="0.8"/>
-    <line x1="-28" y1="5" x2="-35" y2="8" stroke="#8B4513" stroke-width="1.5" opacity="0.8"/>
-    <line x1="28" y1="-5" x2="35" y2="-8" stroke="#8B4513" stroke-width="1.5" opacity="0.8"/>
-    <line x1="28" y1="0" x2="36" y2="0" stroke="#8B4513" stroke-width="1.5" opacity="0.8"/>
-    <line x1="28" y1="5" x2="35" y2="8" stroke="#8B4513" stroke-width="1.5" opacity="0.8"/>
+    <!-- Whisker Dots -->
+    <circle cx="-20" cy="5" r="1.5" fill="#8B6F47" opacity="0.6"/>
+    <circle cx="-22" cy="0" r="1.5" fill="#8B6F47" opacity="0.6"/>
+    <circle cx="20" cy="5" r="1.5" fill="#8B6F47" opacity="0.6"/>
+    <circle cx="22" cy="0" r="1.5" fill="#8B6F47" opacity="0.6"/>
   </g>
   
-  <!-- RCB Text -->
-  <text x="100" y="145" font-family="Arial Black, sans-serif" font-size="32" 
-        font-weight="900" fill="url(#rcb-premium-gold)" text-anchor="middle" 
-        stroke="#8B0000" stroke-width="1">RCB</text>
+  <!-- RCB Text with Bold Style -->
+  <text x="100" y="145" font-family="Arial Black, sans-serif" font-size="40" 
+        font-weight="900" fill="url(#rcb-gold)" text-anchor="middle" 
+        stroke="#8B0000" stroke-width="1.5">RCB</text>
   
-  <!-- Bangalore Text -->
-  <text x="100" y="165" font-family="Arial, sans-serif" font-size="12" 
-        font-weight="bold" fill="#FFD700" text-anchor="middle" opacity="0.9">BANGALORE</text>
+  <!-- Subtitle -->
+  <text x="100" y="168" font-family="Arial, sans-serif" font-size="11" 
+        font-weight="bold" fill="#F4D03F" text-anchor="middle" opacity="0.95">ROYAL CHALLENGERS</text>
   
-  <!-- Crown on Top -->
-  <path d="M85,20 L90,15 L95,20 L100,10 L105,20 L110,15 L115,20 L110,25 L90,25 Z" 
-        fill="url(#rcb-premium-gold)" stroke="#8B4513" stroke-width="1"/>
-  <circle cx="90" cy="15" r="2" fill="#FF0000"/>
-  <circle cx="100" cy="10" r="2.5" fill="#FF0000"/>
-  <circle cx="110" cy="15" r="2" fill="#FF0000"/>
+  <!-- Crown on Shield Top -->
+  <g transform="translate(100, 22)">
+    <path d="M-15,0 L-10,-8 L-5,0 L0,-10 L5,0 L10,-8 L15,0 L12,5 L-12,5 Z" 
+          fill="url(#rcb-gold)" stroke="#8B0000" stroke-width="1"/>
+    <circle cx="-10" cy="-8" r="2" fill="#E74C3C"/>
+    <circle cx="0" cy="-10" r="2.5" fill="#E74C3C"/>
+    <circle cx="10" cy="-8" r="2" fill="#E74C3C"/>
+  </g>
   
-  <!-- Decorative Stars -->
-  <polygon points="25,60 27,67 34,67 28,72 30,79 25,74 20,79 22,72 16,67 23,67" fill="url(#rcb-premium-gold)" opacity="0.8"/>
-  <polygon points="175,60 177,67 184,67 178,72 180,79 175,74 170,79 172,72 166,67 173,67" fill="url(#rcb-premium-gold)" opacity="0.8"/>
+  <!-- Decorative Golden Accents -->
+  <circle cx="35" cy="70" r="3" fill="url(#rcb-gold)" opacity="0.8"/>
+  <circle cx="165" cy="70" r="3" fill="url(#rcb-gold)" opacity="0.8"/>
+  <path d="M30,100 L35,105 L30,110" stroke="url(#rcb-gold)" stroke-width="2" 
+        fill="none" opacity="0.7" stroke-linecap="round"/>
+  <path d="M170,100 L165,105 L170,110" stroke="url(#rcb-gold)" stroke-width="2" 
+        fill="none" opacity="0.7" stroke-linecap="round"/>
 </svg>
