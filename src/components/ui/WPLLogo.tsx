@@ -27,7 +27,7 @@ export default function WPLLogo({ size = 32, className = '' }: WPLLogoProps) {
         <motion.path
           d="M50 5 L85 20 L85 60 Q85 75 50 95 Q15 75 15 60 L15 20 Z"
           fill="url(#wplGradient)"
-          stroke="#E91E63"
+          stroke="#14B8A6"
           strokeWidth="2"
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -61,7 +61,7 @@ export default function WPLLogo({ size = 32, className = '' }: WPLLogoProps) {
         />
         <motion.path
           d="M46 60 Q50 56 54 60"
-          stroke="#E91E63"
+          stroke="#14B8A6"
           strokeWidth="1.5"
           fill="none"
           initial={{ pathLength: 0 }}
@@ -72,9 +72,9 @@ export default function WPLLogo({ size = 32, className = '' }: WPLLogoProps) {
         {/* Gradient Definition */}
         <defs>
           <linearGradient id="wplGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#9C27B0" />
-            <stop offset="50%" stopColor="#E91E63" />
-            <stop offset="100%" stopColor="#9C27B0" />
+            <stop offset="0%" stopColor="#8B5CF6" />
+            <stop offset="50%" stopColor="#14B8A6" />
+            <stop offset="100%" stopColor="#06B6D4" />
           </linearGradient>
         </defs>
       </svg>

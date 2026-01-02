@@ -15,8 +15,8 @@ interface Particle {
 
 export default function WPLFloatingParticles() {
   const particles = useMemo(() => {
-    // WPL colors: Purple, Pink, Rose, Violet, Fuchsia
-    const colors = ['#9333EA', '#EC4899', '#F43F5E', '#A855F7', '#D946EF'];
+    // WPL colors: Purple, Teal, Cyan, Violet, Emerald
+    const colors = ['#8B5CF6', '#14B8A6', '#06B6D4', '#A855F7', '#10B981'];
     return Array.from({ length: 40 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,

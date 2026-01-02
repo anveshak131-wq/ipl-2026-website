@@ -6,17 +6,17 @@
 
 export const WPLColors = {
   // Primary Colors
-  purple: '#9333EA',
-  pink: '#EC4899',
-  rose: '#F43F5E',
+  purple: '#8B5CF6',
+  pink: '#14B8A6',
+  rose: '#06B6D4',
   violet: '#A855F7',
-  fuchsia: '#D946EF',
+  fuchsia: '#10B981',
 
   // Background Colors
   base: '#0F172A',        // Slate 950
   gradientStart: '#1E1B4B', // Indigo 950
-  gradientMid: '#581C87',   // Purple 900
-  gradientEnd: '#831843',   // Rose 900
+  gradientMid: '#1E3A8A',   // Blue 900
+  gradientEnd: '#134E4A',   // Teal 900
 
   // Text Colors
   textPrimary: '#FFFFFF',   // White
@@ -26,28 +26,28 @@ export const WPLColors = {
 
   // RGBA variants for transparency
   purpleRGBA: {
-    10: 'rgba(147, 51, 234, 0.1)',
-    15: 'rgba(147, 51, 234, 0.15)',
-    20: 'rgba(147, 51, 234, 0.2)',
-    30: 'rgba(147, 51, 234, 0.3)',
-    40: 'rgba(147, 51, 234, 0.4)',
-    50: 'rgba(147, 51, 234, 0.5)',
+    10: 'rgba(139, 92, 246, 0.1)',
+    15: 'rgba(139, 92, 246, 0.15)',
+    20: 'rgba(139, 92, 246, 0.2)',
+    30: 'rgba(139, 92, 246, 0.3)',
+    40: 'rgba(139, 92, 246, 0.4)',
+    50: 'rgba(139, 92, 246, 0.5)',
   },
   pinkRGBA: {
-    10: 'rgba(236, 72, 153, 0.1)',
-    15: 'rgba(236, 72, 153, 0.15)',
-    20: 'rgba(236, 72, 153, 0.2)',
-    30: 'rgba(236, 72, 153, 0.3)',
-    40: 'rgba(236, 72, 153, 0.4)',
-    50: 'rgba(236, 72, 153, 0.5)',
+    10: 'rgba(20, 184, 166, 0.1)',
+    15: 'rgba(20, 184, 166, 0.15)',
+    20: 'rgba(20, 184, 166, 0.2)',
+    30: 'rgba(20, 184, 166, 0.3)',
+    40: 'rgba(20, 184, 166, 0.4)',
+    50: 'rgba(20, 184, 166, 0.5)',
   },
   roseRGBA: {
-    10: 'rgba(244, 63, 94, 0.1)',
-    15: 'rgba(244, 63, 94, 0.15)',
-    20: 'rgba(244, 63, 94, 0.2)',
-    30: 'rgba(244, 63, 94, 0.3)',
-    40: 'rgba(244, 63, 94, 0.4)',
-    50: 'rgba(244, 63, 94, 0.5)',
+    10: 'rgba(6, 182, 212, 0.1)',
+    15: 'rgba(6, 182, 212, 0.15)',
+    20: 'rgba(6, 182, 212, 0.2)',
+    30: 'rgba(6, 182, 212, 0.3)',
+    40: 'rgba(6, 182, 212, 0.4)',
+    50: 'rgba(6, 182, 212, 0.5)',
   },
   violetRGBA: {
     10: 'rgba(168, 85, 247, 0.1)',
