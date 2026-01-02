@@ -1,64 +1,87 @@
-<svg width="400" height="400" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- SRH Premium Logo - Rising Sun & Eagle -->
   <defs>
-    <radialGradient id="srh-sun-grad" cx="50%" cy="50%">
-      <stop offset="0%" stop-color="#FFD700" />
-      <stop offset="40%" stop-color="#FF822A" />
-      <stop offset="100%" stop-color="#FF6B00" />
-    </radialGradient>
-    <linearGradient id="srh-orange-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FF822A" />
-      <stop offset="100%" stop-color="#FF6B00" />
+    <linearGradient id="srh-orange" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B00;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FF5722;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E64A19;stop-opacity:1" />
     </linearGradient>
-    <filter id="srh-glow">
-      <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
+    <linearGradient id="srh-black" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1A1A1A;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#000000;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="srh-sun" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF8C00;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="srh-glow" cx="50%" cy="40%">
+      <stop offset="0%" style="stop-color:#FF6B00;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#FF5722;stop-opacity:0" />
+    </radialGradient>
   </defs>
   
-  <!-- Black Background -->
-  <rect width="400" height="400" fill="#000000"/>
+  <!-- Glow Effect -->
+  <circle cx="100" cy="80" r="90" fill="url(#srh-glow)" opacity="0.5"/>
   
-  <!-- Sun with Rays -->
-  <g transform="translate(200, 200)">
-    <!-- Rays -->
-    <g opacity="0.85">
-      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(0)"/>
-      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(15)"/>
-      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(30)"/>
-      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(45)"/>
-      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(60)"/>
-      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(75)"/>
-      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(90)"/>
-      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(105)"/>
-      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(120)"/>
-      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(135)"/>
-      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(150)"/>
-      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(165)"/>
-      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(180)"/>
-      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(195)"/>
-      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(210)"/>
-      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(225)"/>
-      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(240)"/>
-      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(255)"/>
-      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(270)"/>
-      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(285)"/>
-      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(300)"/>
-      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(315)"/>
-      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(330)"/>
-      <rect x="-2" y="-170" width="4" height="35" fill="url(#srh-orange-grad)" transform="rotate(345)"/>
-    </g>
-    
-    <!-- Main Sun Circle -->
-    <circle cx="0" cy="0" r="110" fill="url(#srh-sun-grad)" filter="url(#srh-glow)"/>
-    
-    <!-- Inner Circle -->
-    <circle cx="0" cy="0" r="90" fill="#000000"/>
-    
-    <!-- SRH Text -->
-    <text x="0" y="15" font-family="Arial Black, sans-serif" font-size="48" font-weight="900" 
-          fill="url(#srh-orange-grad)" text-anchor="middle" letter-spacing="4">SRH</text>
+  <!-- Shield Background -->
+  <path d="M100 10 L180 45 L180 115 Q180 160 100 190 Q20 160 20 115 L20 45 Z" 
+        fill="url(#srh-orange)" stroke="url(#srh-black)" stroke-width="4"/>
+  
+  <!-- Rising Sun -->
+  <circle cx="100" cy="65" r="32" fill="url(#srh-sun)"/>
+  <circle cx="100" cy="65" r="25" fill="#FFD700" opacity="0.8"/>
+  
+  <!-- Sun Rays -->
+  <g stroke="#FFD700" stroke-width="3" stroke-linecap="round">
+    <line x1="100" y1="28" x2="100" y2="18"/>
+    <line x1="100" y1="102" x2="100" y2="112"/>
+    <line x1="63" y1="65" x2="53" y2="65"/>
+    <line x1="137" y1="65" x2="147" y2="65"/>
+    <line x1="75" y1="40" x2="68" y2="33"/>
+    <line x1="125" y1="90" x2="132" y2="97"/>
+    <line x1="125" y1="40" x2="132" y2="33"/>
+    <line x1="75" y1="90" x2="68" y2="97"/>
   </g>
+  
+  <!-- Eagle/Hawk Silhouette -->
+  <g transform="translate(100, 115)" fill="url(#srh-black)">
+    <!-- Body -->
+    <ellipse cx="0" cy="0" rx="18" ry="22"/>
+    
+    <!-- Wings Spread -->
+    <path d="M-18,-5 Q-35,-8 -45,-3 Q-40,0 -35,2 Q-25,0 -18,5" fill="#1A1A1A"/>
+    <path d="M18,-5 Q35,-8 45,-3 Q40,0 35,2 Q25,0 18,5" fill="#1A1A1A"/>
+    
+    <!-- Wing Details -->
+    <path d="M-20,-3 L-30,-2 M-22,0 L-32,2 M-20,3 L-28,5" stroke="#FF6B00" stroke-width="1.5"/>
+    <path d="M20,-3 L30,-2 M22,0 L32,2 M20,3 L28,5" stroke="#FF6B00" stroke-width="1.5"/>
+    
+    <!-- Head -->
+    <circle cx="0" cy="-15" r="10" fill="#1A1A1A"/>
+    <circle cx="-3" cy="-17" r="2" fill="#FFD700"/>
+    <circle cx="3" cy="-17" r="2" fill="#FFD700"/>
+    
+    <!-- Beak -->
+    <path d="M0,-10 L5,-8 L0,-6 Z" fill="#FFA500"/>
+    
+    <!-- Tail Feathers -->
+    <path d="M-8,15 L-12,25 M0,18 L0,28 M8,15 L12,25" 
+          stroke="#1A1A1A" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+  
+  <!-- SRH Text -->
+  <text x="100" y="165" font-family="Arial Black, sans-serif" font-size="32" 
+        font-weight="900" fill="url(#srh-black)" text-anchor="middle" 
+        stroke="#FFD700" stroke-width="0.5">SRH</text>
+  
+  <!-- Hyderabad Text -->
+  <text x="100" y="182" font-family="Arial, sans-serif" font-size="11" 
+        font-weight="bold" fill="#1A1A1A" text-anchor="middle" opacity="0.9">HYDERABAD</text>
+  
+  <!-- Decorative Elements -->
+  <circle cx="30" cy="60" r="3" fill="#FFD700" opacity="0.8"/>
+  <circle cx="170" cy="60" r="3" fill="#FFD700" opacity="0.8"/>
+  <circle cx="25" cy="90" r="2.5" fill="#FFA500" opacity="0.7"/>
+  <circle cx="175" cy="90" r="2.5" fill="#FFA500" opacity="0.7"/>
 </svg>
