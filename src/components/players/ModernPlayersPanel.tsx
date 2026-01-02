@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, ChevronDown, BarChart2, Trophy, Zap, Flame, ArrowRight, X, BarChart3, Users, ScatterChart, Table2, SlidersHorizontal } from 'lucide-react';
+import { Search, Filter, ChevronDown, BarChart2, Trophy, Zap, Flame, ArrowRight, X, BarChart3, Users, ScatterChart, Table2, SlidersHorizontal, Download, FileText, FileDown, FileJson } from 'lucide-react';
 import Image from 'next/image';
 import { teamColors, roleColors, fadeIn, staggerContainer, cardStyle, buttonStyle, inputStyle } from '@/styles/theme';
 import PlayerCardModal from './PlayerCardModal';
 import { useInView } from 'react-intersection-observer';
+import { exportToCSV, exportToPDF, exportToJSON } from '@/utils/exportUtils';
 
 interface Player {
   id: string;
@@ -70,6 +71,7 @@ export default function ModernPlayersPanel({ initialPlayers = [], teams }: Moder
   const [hasMore, setHasMore] = useState(true);
   const [statsView, setStatsView] = useState<'batting' | 'bowling' | 'fielding'>('batting');
   const [showFilters, setShowFilters] = useState(false);
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
   
   // Infinite scroll ref
   const { ref: loadMoreRef, inView } = useInView({
