@@ -10,7 +10,7 @@ export const mockTeams: Team[] = [
     league: 'ipl',
     name: 'Royal Challengers Bengaluru',
     shortName: 'RCB',
-    logo: '/logos/rcb_logo_2026_premium_animated.svg',
+    logo: '/logos/rcb_logo_premium.svg',
     description: 'One of the most popular IPL teams known for their aggressive batting',
     colors: { primary: '#EC1C24', secondary: '#000000' },
     players: [],

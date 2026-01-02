@@ -11,7 +11,7 @@ const mockTeams = [
     league: 'ipl',
     name: 'Royal Challengers Bengaluru',
     shortName: 'RCB',
-    logo: '/logos/rcb_logo_new.svg',
+    logo: '/logos/rcb_logo_premium.svg',
     colors: { primary: '#EC1C24', secondary: '#000000' }
   },
   {

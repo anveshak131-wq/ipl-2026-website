@@ -74,7 +74,7 @@ export function getAnimatedLogoPath(teamId: string, shortName?: string, league?:
   
   const logoMap: { [key: string]: string } = {
     // Modern 2026 logos with enhanced animations and copyright-free designs
-    '1': 'rcb_logo_2026_modern.svg',  // RCB - Modern animated version
+    '1': 'rcb_logo_premium.svg',  // RCB - Canonical logo used across app
     '2': 'mi_logo_2026_modern.svg',    // MI - Modern animated version
     '3': 'srh_logo_2026_modern.svg',  // SRH - Modern animated version
     '4': 'gt_logo_2026_modern.svg',   // GT - Modern animated version
@@ -87,7 +87,7 @@ export function getAnimatedLogoPath(teamId: string, shortName?: string, league?:
   };
 
   // Handle both 'team1' and '1' formats (numericId already defined above)
-  const logoFile = logoMap[numericId] || 'rcb_logo_2026_modern.svg';
+  const logoFile = logoMap[numericId] || 'rcb_logo_premium.svg';
 
   // If the mapping is a Lottie JSON name, serve from /assets/lottie
   if (logoFile.endsWith('.json')) {
@@ -101,7 +101,7 @@ export function getAnimatedLogoPath(teamId: string, shortName?: string, league?:
 // Get regular logo path (fallback - uses modern animated versions)
 export function getLogoPath(teamId: string): string {
   const logoMap: { [key: string]: string } = {
-    '1': 'rcb_logo_2026_modern.svg',  // RCB - Modern animated version
+    '1': 'rcb_logo_premium.svg',  // RCB - Canonical logo used across app
     '2': 'mi_logo_2026_modern.svg',    // MI - Modern animated version
     '3': 'srh_logo_2026_modern.svg',  // SRH - Modern animated version
     '4': 'gt_logo_2026_modern.svg',   // GT - Modern animated version
@@ -114,7 +114,7 @@ export function getLogoPath(teamId: string): string {
   };
 
   const numericId = teamId.replace('team', '');
-  const logoFile = logoMap[numericId] || 'rcb_logo_2026_modern.svg';
+  const logoFile = logoMap[numericId] || 'rcb_logo_premium.svg';
   return `/logos/${logoFile}`;
 }
 

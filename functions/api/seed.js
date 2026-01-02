@@ -26,7 +26,7 @@ export const onRequest = async (context) => {
         id: '1',
         name: 'Royal Challengers Bengaluru',
         shortName: 'RCB',
-        logo: '/logos/rcb_logo_new.svg',
+        logo: '/logos/rcb_logo_premium.svg',
         description: 'One of the most popular IPL teams known for their aggressive batting',
         colors: { primary: '#EC1C24', secondary: '#000000' }
       },
