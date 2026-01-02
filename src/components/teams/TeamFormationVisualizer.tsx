@@ -19,6 +19,7 @@ export default function TeamFormationVisualizer({
   secondaryColor,
 }: TeamFormationVisualizerProps) {
   const [formationType, setFormationType] = useState<FormationType>('balanced');
+  const [impactPlayer, setImpactPlayer] = useState<string | null>(null);
 
   const formation = useMemo(() => {
     const batsmen = players.filter((p) => p.role === 'Batsman');
@@ -146,7 +147,11 @@ export default function TeamFormationVisualizer({
                   }}
                   title={`${player.name} - ${player.role}`}
                 >
-                  #{player.jerseyNumber}
+                  <div className="text-center leading-tight px-1">
+                    <div className="font-bold truncate" style={{ fontSize: '9px' }}>
+                      {player.name.split(' ').map((n, i) => i === 0 ? n.charAt(0) + '.' : n).join(' ')}
+                    </div>
+                  </div>
                 </div>
                 {/* Player Info Tooltip */}
                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
@@ -160,8 +165,89 @@ export default function TeamFormationVisualizer({
           })}
         </div>
 
-        {/* Formation Stats */}
+        {/* Playing 11 List */}
         <div className="mt-8 pt-6 border-t border-white/10">
+          <h4 className="text-md font-bold text-white mb-4 flex items-center gap-2">
+            <Users className="w-4 h-4" style={{ color: primaryColor }} />
+            Playing 11
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+            {formation.map((player, index) => (
+              <div
+                key={player.id}
+                className="flex items-center gap-3 p-3 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all"
+              >
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-xs border-2 border-white/30"
+                  style={{
+                    backgroundColor: getRoleColor(player.role),
+                    boxShadow: `0 0 15px ${getRoleColor(player.role)}40`,
+                  }}
+                >
+                  {index + 1}
+                </div>
+                <div className="flex-1">
+                  <div className="font-bold text-white text-sm">{player.name}</div>
+                  <div className="text-xs text-gray-400">{player.role}</div>
+                </div>
+                {player.isCaptain && (
+                  <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded font-bold border border-yellow-500/30">
+                    C
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Impact Player Selection */}
+          <div className="mt-6 pt-6 border-t border-white/10">
+            <h4 className="text-md font-bold text-white mb-4 flex items-center gap-2">
+              <Shuffle className="w-4 h-4" style={{ color: secondaryColor }} />
+              Impact Player
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {players
+                .filter((p) => !formation.find((fp) => fp.id === p.id))
+                .slice(0, 6)
+                .map((player) => (
+                  <motion.button
+                    key={player.id}
+                    onClick={() => setImpactPlayer(player.id === impactPlayer ? null : player.id)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all text-left ${
+                      impactPlayer === player.id
+                        ? 'border-blue-500 bg-blue-500/20'
+                        : 'border-white/10 bg-white/5 hover:border-white/30'
+                    }`}
+                  >
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs border border-white/30"
+                      style={{
+                        backgroundColor: getRoleColor(player.role),
+                      }}
+                    >
+                      {player.name.charAt(0)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-bold text-white text-xs truncate">{player.name}</div>
+                      <div className="text-xs text-gray-400">{player.role}</div>
+                    </div>
+                  </motion.button>
+                ))}
+            </div>
+            {impactPlayer && (
+              <div className="mt-4 p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
+                <div className="text-xs text-blue-400 font-bold">
+                  Selected Impact Player: {players.find((p) => p.id === impactPlayer)?.name}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Formation Stats */}
+        <div className="mt-6 pt-6 border-t border-white/10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { label: 'Batsmen', count: formation.filter((p) => p.role === 'Batsman').length, color: '#10B981' },
