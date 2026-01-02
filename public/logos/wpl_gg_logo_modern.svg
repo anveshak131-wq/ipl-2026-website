@@ -1,50 +1,42 @@
-<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gujarat Giants WPL - Orange & Gold Lioness -->
   <defs>
-    <linearGradient id="wpl-gg-purple-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#9333EA;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#7C3AED;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#6D28D9;stop-opacity:1" />
+    <linearGradient id="gg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F97316;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#EA580C;stop-opacity:1" />
     </linearGradient>
-    <linearGradient id="wpl-gg-pink-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#EC4899;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#DB2777;stop-opacity:1" />
+    <linearGradient id="gg-gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFA500;stop-opacity:1" />
     </linearGradient>
-    <filter id="wpl-gg-glow">
-      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <style>
-      @keyframes roar {
-        0%, 100% { transform: scale(1) rotate(0deg); }
-        25% { transform: scale(1.1) rotate(-2deg); }
-        75% { transform: scale(1.1) rotate(2deg); }
-      }
-      @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.85; }
-      }
-      .lioness { animation: roar 3s ease-in-out infinite; }
-      .logo-pulse { animation: pulse 2.5s ease-in-out infinite; }
-    </style>
   </defs>
   
-  <!-- Background Circle -->
-  <circle cx="100" cy="100" r="90" fill="url(#wpl-gg-purple-grad)" class="logo-pulse" filter="url(#wpl-gg-glow)"/>
+  <!-- Shield Background -->
+  <path d="M100 10 L170 40 L170 110 Q170 150 100 190 Q30 150 30 110 L30 40 Z" 
+        fill="url(#gg-grad)" stroke="url(#gg-gold)" stroke-width="3"/>
   
-  <!-- Lioness Head -->
-  <g class="lioness">
-    <circle cx="100" cy="85" r="35" fill="url(#wpl-gg-pink-grad)" opacity="0.9"/>
-    <circle cx="90" cy="80" r="6" fill="#FFF"/>
-    <circle cx="110" cy="80" r="6" fill="#FFF"/>
-    <path d="M 85 95 Q 100 105 115 95" stroke="#FFF" stroke-width="3" fill="none"/>
-    <!-- Mane -->
-    <path d="M 65 85 Q 70 70 75 85 Q 80 70 85 85 Q 90 70 95 85 Q 100 70 105 85 Q 110 70 115 85 Q 120 70 125 85 Q 130 70 135 85" stroke="url(#wpl-gg-pink-grad)" stroke-width="4" fill="none" opacity="0.8"/>
-  </g>
+  <!-- GG Letters -->
+  <text x="100" y="95" font-family="Arial Black, sans-serif" font-size="56" 
+        font-weight="bold" fill="url(#gg-gold)" text-anchor="middle" 
+        dominant-baseline="middle">GG</text>
   
-  <!-- GG Text -->
-  <text x="100" y="140" font-family="Arial Black, sans-serif" font-size="28" font-weight="900" fill="url(#wpl-gg-pink-grad)" text-anchor="middle" opacity="0.98" style="letter-spacing: 2px;">GG</text>
+  <!-- Subtitle -->
+  <text x="100" y="135" font-family="Arial, sans-serif" font-size="14" 
+        font-weight="bold" fill="#FFD700" text-anchor="middle">WOMEN</text>
+  
+  <!-- Lioness Crown -->
+  <path d="M70 45 L85 50 L100 40 L115 50 L130 45" 
+        stroke="#FFD700" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <circle cx="75" cy="47" r="4" fill="#FFD700"/>
+  <circle cx="100" cy="42" r="4" fill="#FFD700"/>
+  <circle cx="125" cy="47" r="4" fill="#FFD700"/>
+  
+  <!-- Paw Prints -->
+  <circle cx="65" cy="160" r="3" fill="#FFD700"/>
+  <circle cx="75" cy="160" r="3" fill="#FFD700"/>
+  <circle cx="70" cy="167" r="4" fill="#FFD700"/>
+  
+  <circle cx="125" cy="160" r="3" fill="#FFD700"/>
+  <circle cx="135" cy="160" r="3" fill="#FFD700"/>
+  <circle cx="130" cy="167" r="4" fill="#FFD700"/>
 </svg>
-

@@ -1,45 +1,35 @@
-<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Delhi Capitals WPL - Blue & Red -->
   <defs>
-    <linearGradient id="wpl-dc-blue-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#0078D4;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#005A9E;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#003D7A;stop-opacity:1" />
+    <linearGradient id="dc-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#004BA0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0066CC;stop-opacity:1" />
     </linearGradient>
-    <linearGradient id="wpl-dc-pink-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#FF69B4;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#FF1493;stop-opacity:1" />
+    <linearGradient id="dc-red" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#DC2626;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B91C1C;stop-opacity:1" />
     </linearGradient>
-    <filter id="wpl-dc-glow">
-      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <style>
-      @keyframes shield {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-      }
-      @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.85; }
-      }
-      .shield { animation: shield 2s ease-in-out infinite; }
-      .logo-pulse { animation: pulse 2.5s ease-in-out infinite; }
-    </style>
   </defs>
   
-  <!-- Background Circle -->
-  <circle cx="100" cy="100" r="90" fill="url(#wpl-dc-blue-grad)" class="logo-pulse" filter="url(#wpl-dc-glow)"/>
+  <!-- Shield Background -->
+  <path d="M100 10 L170 40 L170 110 Q170 150 100 190 Q30 150 30 110 L30 40 Z" 
+        fill="url(#dc-grad)" stroke="url(#dc-red)" stroke-width="3"/>
   
-  <!-- Shield with Pink Accent -->
-  <g class="shield">
-    <path d="M 100 40 L 140 60 L 140 120 L 100 160 L 60 120 L 60 60 Z" fill="url(#wpl-dc-pink-grad)" opacity="0.9"/>
-    <path d="M 100 50 L 130 65 L 130 115 L 100 150 L 70 115 L 70 65 Z" fill="url(#wpl-dc-blue-grad)" opacity="0.7"/>
-  </g>
+  <!-- DC Letters -->
+  <text x="100" y="95" font-family="Arial Black, sans-serif" font-size="56" 
+        font-weight="bold" fill="#FFFFFF" text-anchor="middle" 
+        dominant-baseline="middle">DC</text>
   
-  <!-- DC Text -->
-  <text x="100" y="140" font-family="Arial Black, sans-serif" font-size="28" font-weight="900" fill="url(#wpl-dc-pink-grad)" text-anchor="middle" opacity="0.98" style="letter-spacing: 2px;">DC</text>
+  <!-- Subtitle -->
+  <text x="100" y="135" font-family="Arial, sans-serif" font-size="14" 
+        font-weight="bold" fill="#DC2626" text-anchor="middle">WOMEN</text>
+  
+  <!-- Capitol Dome -->
+  <circle cx="100" cy="50" r="12" fill="none" stroke="#DC2626" stroke-width="2.5"/>
+  <rect x="88" y="48" width="24" height="4" fill="#DC2626"/>
+  
+  <!-- Three Stars (representing three tigers) -->
+  <polygon points="60,160 62,166 68,166 63,170 65,176 60,172 55,176 57,170 52,166 58,166" fill="#DC2626"/>
+  <polygon points="100,160 102,166 108,166 103,170 105,176 100,172 95,176 97,170 92,166 98,166" fill="#DC2626"/>
+  <polygon points="140,160 142,166 148,166 143,170 145,176 140,172 135,176 137,170 132,166 138,166" fill="#DC2626"/>
 </svg>
-

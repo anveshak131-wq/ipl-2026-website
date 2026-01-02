@@ -1,115 +1,38 @@
-<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- UP Warriorz WPL - Green & Orange Warrior Shield -->
   <defs>
-    <linearGradient id="wpl-upw-orange-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1">
-        <animate attributeName="stop-color" values="#FF6B35;#FF8C42;#FF6B35" dur="4s" repeatCount="indefinite"/>
-      </stop>
-      <stop offset="50%" style="stop-color:#FF8C42;stop-opacity:1">
-        <animate attributeName="stop-color" values="#FF8C42;#FFA500;#FF8C42" dur="4s" repeatCount="indefinite"/>
-      </stop>
-      <stop offset="100%" style="stop-color:#E55A2B;stop-opacity:1">
-        <animate attributeName="stop-color" values="#E55A2B;#FF6B35;#E55A2B" dur="4s" repeatCount="indefinite"/>
-      </stop>
+    <linearGradient id="upw-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#059669;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#047857;stop-opacity:1" />
     </linearGradient>
-    <linearGradient id="wpl-upw-pink-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#FF69B4;stop-opacity:1">
-        <animate attributeName="stop-color" values="#FF69B4;#FF1493;#FF69B4" dur="3s" repeatCount="indefinite"/>
-      </stop>
-      <stop offset="100%" style="stop-color:#FF1493;stop-opacity:1">
-        <animate attributeName="stop-color" values="#FF1493;#FF69B4;#FF1493" dur="3s" repeatCount="indefinite"/>
-      </stop>
+    <linearGradient id="upw-orange" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F97316;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#EA580C;stop-opacity:1" />
     </linearGradient>
-    <filter id="wpl-upw-glow">
-      <feGaussianBlur stdDeviation="4" result="coloredBlur">
-        <animate attributeName="stdDeviation" values="4;6;4" dur="3s" repeatCount="indefinite"/>
-      </feGaussianBlur>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <filter id="wpl-upw-inner-glow">
-      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-    <style>
-      @keyframes warrior {
-        0%, 100% { transform: scale(1) translateY(0); }
-        50% { transform: scale(1.05) translateY(-3px); }
-      }
-      @keyframes pulse {
-        0%, 100% { opacity: 1; transform: scale(1); }
-        50% { opacity: 0.9; transform: scale(1.02); }
-      }
-      @keyframes glow {
-        0%, 100% { opacity: 0.6; }
-        50% { opacity: 1; }
-      }
-      .warrior { animation: warrior 3.5s ease-in-out infinite; transform-origin: 100px 90px; }
-      .logo-pulse { animation: pulse 3s ease-in-out infinite; }
-      .glow-effect { animation: glow 2s ease-in-out infinite; }
-    </style>
   </defs>
   
-  <!-- Outer Glow -->
-  <circle cx="100" cy="100" r="92" fill="url(#wpl-upw-orange-grad)" opacity="0.3" class="glow-effect" filter="url(#wpl-upw-glow)"/>
+  <!-- Shield Background -->
+  <path d="M100 10 L170 40 L170 110 Q170 150 100 190 Q30 150 30 110 L30 40 Z" 
+        fill="url(#upw-grad)" stroke="url(#upw-orange)" stroke-width="3"/>
   
-  <!-- Main Background Circle -->
-  <circle cx="100" cy="100" r="88" fill="url(#wpl-upw-orange-grad)" class="logo-pulse" filter="url(#wpl-upw-glow)"/>
+  <!-- UPW Letters -->
+  <text x="100" y="85" font-family="Arial Black, sans-serif" font-size="44" 
+        font-weight="bold" fill="url(#upw-orange)" text-anchor="middle" 
+        dominant-baseline="middle">UPW</text>
   
-  <!-- Inner Border -->
-  <circle cx="100" cy="100" r="82" fill="none" stroke="url(#wpl-upw-pink-grad)" stroke-width="2" opacity="0.4"/>
+  <!-- Subtitle -->
+  <text x="100" y="120" font-family="Arial, sans-serif" font-size="14" 
+        font-weight="bold" fill="#F97316" text-anchor="middle">WOMEN</text>
   
-  <!-- Shield Base -->
-  <path d="M 100 30 L 145 55 L 145 120 L 100 170 L 55 120 L 55 55 Z" fill="url(#wpl-upw-pink-grad)" opacity="0.95" filter="url(#wpl-upw-inner-glow)"/>
+  <!-- Sword -->
+  <rect x="97" y="135" width="6" height="35" fill="#F97316"/>
+  <path d="M92 135 L100 125 L108 135 Z" fill="#F97316"/>
+  <rect x="93" y="170" width="14" height="3" fill="#F97316"/>
+  <circle cx="100" cy="175" r="4" fill="#F97316"/>
   
-  <!-- Inner Shield -->
-  <path d="M 100 40 L 135 60 L 135 110 L 100 160 L 65 110 L 65 60 Z" fill="url(#wpl-upw-orange-grad)" opacity="0.85"/>
-  
-  <!-- Warrior Symbol -->
-  <g class="warrior">
-    <!-- Sarus Crane Head -->
-    <ellipse cx="100" cy="75" rx="28" ry="18" fill="url(#wpl-upw-pink-grad)" opacity="0.95"/>
-    <circle cx="95" cy="72" r="4" fill="#FFF"/>
-    <circle cx="105" cy="72" r="4" fill="#FFF"/>
-    <path d="M 100 78 Q 100 82 100 85" stroke="#FFF" stroke-width="2" fill="none"/>
-    
-    <!-- Wings -->
-    <path d="M 72 85 Q 85 70 100 85" stroke="url(#wpl-upw-pink-grad)" stroke-width="4" fill="none" opacity="0.9"/>
-    <path d="M 128 85 Q 115 70 100 85" stroke="url(#wpl-upw-pink-grad)" stroke-width="4" fill="none" opacity="0.9"/>
-    
-    <!-- Sword -->
-    <g>
-      <line x1="100" y1="95" x2="100" y2="125" stroke="url(#wpl-upw-pink-grad)" stroke-width="6" opacity="0.95" stroke-linecap="round"/>
-      <path d="M 95 95 L 100 90 L 105 95" fill="url(#wpl-upw-pink-grad)" opacity="0.95"/>
-      <circle cx="100" cy="120" r="4" fill="url(#wpl-upw-orange-grad)"/>
-    </g>
-    
-    <!-- Sun Rays (extending from wings) -->
-    <line x1="60" y1="85" x2="70" y2="85" stroke="url(#wpl-upw-pink-grad)" stroke-width="3" opacity="0.7"/>
-    <line x1="65" y1="75" x2="72" y2="80" stroke="url(#wpl-upw-pink-grad)" stroke-width="3" opacity="0.7"/>
-    <line x1="65" y1="95" x2="72" y2="90" stroke="url(#wpl-upw-pink-grad)" stroke-width="3" opacity="0.7"/>
-    <line x1="130" y1="85" x2="140" y2="85" stroke="url(#wpl-upw-pink-grad)" stroke-width="3" opacity="0.7"/>
-    <line x1="135" y1="75" x2="128" y2="80" stroke="url(#wpl-upw-pink-grad)" stroke-width="3" opacity="0.7"/>
-    <line x1="135" y1="95" x2="128" y2="90" stroke="url(#wpl-upw-pink-grad)" stroke-width="3" opacity="0.7"/>
-  </g>
-  
-  <!-- UPW Text -->
-  <text x="100" y="140" font-family="Arial Black, sans-serif" font-size="28" font-weight="900" fill="url(#wpl-upw-pink-grad)" text-anchor="middle" opacity="0.98" filter="url(#wpl-upw-inner-glow)" style="letter-spacing: 2px;">UPW</text>
-  
-  <!-- Decorative Elements -->
-  <g opacity="0.6">
-    <circle cx="100" cy="25" r="3" fill="url(#wpl-upw-pink-grad)">
-      <animate attributeName="opacity" values="0.4;0.9;0.4" dur="2s" repeatCount="indefinite"/>
-    </circle>
-    <circle cx="60" cy="60" r="2.5" fill="url(#wpl-upw-pink-grad)">
-      <animate attributeName="opacity" values="0.4;0.9;0.4" dur="2.5s" repeatCount="indefinite"/>
-    </circle>
-    <circle cx="140" cy="60" r="2.5" fill="url(#wpl-upw-pink-grad)">
-      <animate attributeName="opacity" values="0.4;0.9;0.4" dur="2.2s" repeatCount="indefinite"/>
-    </circle>
-  </g>
+  <!-- Wings -->
+  <path d="M85 50 Q80 55 75 52 Q70 50 68 48" 
+        stroke="#F97316" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M115 50 Q120 55 125 52 Q130 50 132 48" 
+        stroke="#F97316" stroke-width="2.5" fill="none" stroke-linecap="round"/>
 </svg>
