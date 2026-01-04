@@ -434,7 +434,12 @@ const BowlingStatsPage = () => {
 
   // Calculate summary stats
   const summaryStats = useMemo(() => {
-    const activeBowlers = players.filter(p => (p.league || 'ipl') === 'ipl' && (p.stats?.bowlingInnings > 0 || p.stats?.wickets > 0));
+    // Filter players based on team selection first
+    const playersForStats = selectedTeam === 'all' 
+      ? players.filter(p => (p.league || 'ipl') === 'ipl')
+      : players.filter(p => (p.league || 'ipl') === 'ipl' && p.teamId === selectedTeam);
+    
+    const activeBowlers = playersForStats.filter(p => p.stats?.bowlingInnings > 0 || p.stats?.wickets > 0);
     const totalWickets = activeBowlers.reduce((sum, p) => sum + (p.stats?.wickets || 0), 0);
     const totalFiveWickets = activeBowlers.reduce((sum, p) => sum + (p.stats?.fiveWickets || 0), 0);
     const totalMaidens = activeBowlers.reduce((sum, p) => sum + (p.stats?.maidens || 0), 0);
@@ -452,7 +457,7 @@ const BowlingStatsPage = () => {
       bestEconomy: bestEconomy.toFixed(2),
       avgWickets: parseFloat(avgWickets)
     };
-  }, [players]);
+  }, [players, selectedTeam]);
 
   const SortIcon = ({ field }: { field: string }) => {
     if (sortField !== field) return <SortAsc className="w-4 h-4 text-gray-500 opacity-0 group-hover:opacity-100" />;
