@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, ChevronDown, BarChart2, Trophy, Zap, Flame, ArrowRight, X, BarChart3, Users, ScatterChart, Table2, SlidersHorizontal, Download, FileText, FileDown, FileJson } from 'lucide-react';
 import Image from 'next/image';
 import { teamColors, roleColors, fadeIn, staggerContainer, cardStyle, buttonStyle, inputStyle } from '@/styles/theme';
-import PlayerCardModal from './PlayerCardModal';
+import PlayerCardModal from '../teams/PlayerCardModal';
 import { useInView } from 'react-intersection-observer';
 import { exportToCSV, exportToPDF, exportToJSON } from '@/utils/exportUtils';
 
