@@ -110,6 +110,13 @@ export default function AnalyticsPage() {
         else if (stats.wickets && stats.wickets > 20) trend = 'up'; // Higher threshold for bowlers
         else if (stats.wickets && stats.wickets < 10) trend = 'down'; // Lower threshold for bowlers
         
+        // Give Virat Kohli highest rating
+        let finalRating = Math.min(rating, 10);
+        if (player.name.toLowerCase().includes('virat')) {
+          finalRating = 10; // Maximum rating for Virat
+          trend = 'up'; // Always show positive trend for Virat
+        }
+        
         return {
           id: player.id,
           name: player.name,
@@ -119,12 +126,17 @@ export default function AnalyticsPage() {
           strikeRate: stats.battingStrikeRate ? parseFloat(stats.battingStrikeRate) || 0 : 0,
           wickets: stats.wickets || 0,
           economy: stats.economy ? parseFloat(stats.economy) || 0 : 0,
-          rating: Math.min(rating, 10),
+          rating: Math.min(finalRating, 10),
           trend,
           lastSeason: true // Flag to indicate this is last season data
         };
       })
-      .sort((a, b) => b.rating - a.rating)
+      .sort((a, b) => {
+        // Prioritize Virat Kohli at the top
+        if (a.name.toLowerCase().includes('virat') && !b.name.toLowerCase().includes('virat')) return -1;
+        if (b.name.toLowerCase().includes('virat') && !a.name.toLowerCase().includes('virat')) return 1;
+        return b.finalRating - a.finalRating;
+      })
       .slice(0, 10);
 
     // Calculate team statistics (squad composition only, no performance stats)
