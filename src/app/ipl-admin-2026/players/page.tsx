@@ -1609,7 +1609,7 @@ export default function AdminPlayers() {
           </div>
 
           {/* Enhanced Search and Filter Section */}
-          <div className="mb-8 relative z-10">
+          <div className="mb-8 relative z-50">
             <div className="relative bg-gradient-to-br from-slate-800/80 via-gray-800/60 to-slate-900/80 rounded-2xl p-6 border border-white/10 backdrop-blur-xl shadow-2xl overflow-visible">
               {/* Subtle glow effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
@@ -1637,7 +1637,7 @@ export default function AdminPlayers() {
                     
                     {/* Search Suggestions Dropdown */}
                     {showSuggestions && searchSuggestions.length > 0 && (
-                      <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-white/10 rounded-lg shadow-xl z-50">
+                      <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-white/10 rounded-lg shadow-xl z-[9999]">
                         {searchSuggestions.map((suggestion, index) => (
                           <button
                             key={index}
