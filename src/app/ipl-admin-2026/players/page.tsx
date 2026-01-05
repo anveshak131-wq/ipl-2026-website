@@ -4553,8 +4553,8 @@ export default function AdminPlayers() {
             </div>
           </div>
         </div>
+        )}
       </ModernDialog>
-      </div>
 
       {/* Context Menu */}
       {contextMenu.visible && contextMenu.player && (
