@@ -399,7 +399,7 @@ export default function AdminPlayers() {
         </div>
       </div>
     );
-  }, []);
+  };
 
   const [formData, setFormData] = useState<{
     name: string;
