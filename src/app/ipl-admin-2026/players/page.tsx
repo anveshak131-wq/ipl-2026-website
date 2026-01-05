@@ -141,8 +141,8 @@ export default function AdminPlayers() {
   const [showExportModal, setShowExportModal] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   
-  // Virtual scrolling state
-  const [virtualScrollEnabled, setVirtualScrollEnabled] = useState(true);
+  // Virtual scrolling state - temporarily disabled for stability
+  const [virtualScrollEnabled, setVirtualScrollEnabled] = useState(false);
   const VIRTUAL_SCROLL_THRESHOLD = 50; // Enable virtual scrolling for 50+ players
 
   // Performance helper functions
@@ -226,110 +226,28 @@ export default function AdminPlayers() {
     });
   };
 
-  // Virtualized Player Card Component
+  // Virtualized Player Card Component - simplified for stability
   const VirtualizedPlayerCard = useCallback(({ columnIndex, rowIndex, style, data }: any) => {
     const { players, teams, handleContextMenu, handleViewPlayerDetails } = data;
-    const playerIndex = rowIndex * 4 + columnIndex; // 4 columns per row
+    const playerIndex = rowIndex * 4 + columnIndex;
     const player = players[playerIndex];
     
-    if (!player) return null;
+    if (!player) return <div style={style}></div>;
     
     const team = teams.find(t => String(t.id) === String(player.teamId));
     
-    // Determine role colors with special handling for All-rounder types
-    let roleColors: string;
-    let roleBadgeColors: string;
-    let roleLabel: string;
-    let roleIcon: React.ReactNode = null;
-    
-    if (player.role === 'All-rounder') {
-      if (player.allrounderType === 'Batting All-rounder') {
-        roleColors = 'from-emerald-600/30 via-green-500/25 to-emerald-500/30 border-emerald-300/50';
-        roleBadgeColors = 'bg-gradient-to-r from-emerald-500/40 to-green-500/40 text-emerald-100 border-2 border-emerald-300/60 shadow-xl shadow-emerald-500/30';
-        roleLabel = 'Batting All-rounder';
-        roleIcon = (
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-          </svg>
-        );
-      } else if (player.allrounderType === 'Bowling All-rounder') {
-        roleColors = 'from-cyan-600/30 via-blue-500/25 to-cyan-500/30 border-cyan-300/50';
-        roleBadgeColors = 'bg-gradient-to-r from-cyan-500/40 to-blue-500/40 text-cyan-100 border-2 border-cyan-300/60 shadow-xl shadow-cyan-500/30';
-        roleLabel = 'Bowling All-rounder';
-        roleIcon = (
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clipRule="evenodd" />
-          </svg>
-        );
-      } else {
-        roleColors = 'from-purple-500/20 to-pink-600/20 border-purple-500/30';
-        roleBadgeColors = 'bg-purple-500/20 text-purple-400 border-purple-500/30';
-        roleLabel = 'All-rounder';
-        roleIcon = <Award className="w-4 h-4" />;
-      }
-    } else if (player.role === 'Batsman') {
-      roleColors = 'from-amber-600/30 via-yellow-500/25 to-orange-500/30 border-amber-300/50';
-      roleBadgeColors = 'bg-gradient-to-r from-amber-500/40 to-yellow-500/40 text-amber-100 border-2 border-amber-300/60 shadow-xl shadow-amber-500/30';
-      roleLabel = 'Batsman';
-      roleIcon = (
-        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
-        </svg>
-      );
-    } else if (player.role === 'Bowler') {
-      roleColors = 'from-blue-600/30 via-indigo-500/25 to-blue-500/30 border-blue-300/50';
-      roleBadgeColors = 'bg-gradient-to-r from-blue-500/40 to-indigo-500/40 text-blue-100 border-2 border-blue-300/60 shadow-xl shadow-blue-500/30';
-      roleLabel = 'Bowler';
-      roleIcon = (
-        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
-        </svg>
-      );
-    } else if (player.role === 'Wicket-keeper') {
-      roleColors = 'from-green-600/30 via-teal-500/25 to-emerald-500/30 border-green-300/50';
-      roleBadgeColors = 'bg-gradient-to-r from-green-500/40 to-teal-500/40 text-green-100 border-2 border-green-300/60 shadow-xl shadow-green-500/30';
-      roleLabel = 'Wicket-keeper';
-      roleIcon = (
-        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
-        </svg>
-      );
-    } else {
-      roleColors = 'from-gray-600/30 via-slate-500/25 to-gray-500/30 border-gray-300/50';
-      roleBadgeColors = 'bg-gray-500/20 text-gray-400 border-gray-500/30';
-      roleLabel = player.role || 'Unknown';
-      roleIcon = <User className="w-4 h-4" />;
-    }
-
     return (
       <div style={style} className="p-3">
         <div 
-          className={`group relative bg-gradient-to-br ${roleColors} rounded-2xl p-6 border backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-[1.03] cursor-pointer overflow-hidden`}
+          className="group relative bg-gradient-to-br from-blue-600/30 via-indigo-600/20 to-blue-700/30 rounded-2xl p-6 border border-blue-500/40 backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-[1.03] cursor-pointer overflow-hidden"
           onContextMenu={(e) => handleContextMenu(e, player)}
         >
-          {/* Animated background pattern */}
-          <div className="absolute inset-0 opacity-10 overflow-hidden">
-            <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.1)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px]"></div>
-          </div>
-
-          {/* Player Header */}
           <div className="relative z-10">
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
                 <h3 className="text-white font-bold text-lg mb-1 group-hover:text-blue-300 transition-colors">
                   {player.name}
                 </h3>
-                <div className="flex items-center gap-2 mb-2">
-                  <div className={`px-2 py-1 rounded-full text-xs font-semibold ${roleBadgeColors} flex items-center gap-1`}>
-                    {roleIcon}
-                    {roleLabel}
-                  </div>
-                  {player.isCaptain && (
-                    <div className="px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-300 text-xs font-semibold border border-yellow-500/30">
-                      🏆 C
-                    </div>
-                  )}
-                </div>
               </div>
               <div className="flex flex-col items-end">
                 <div className="text-white font-bold text-xl mb-1">
@@ -341,30 +259,23 @@ export default function AdminPlayers() {
               </div>
             </div>
 
-            {/* Team Info */}
             <div className="flex items-center gap-2 mb-4">
               {team?.logoUrl ? (
                 <img 
                   src={team.logoUrl} 
                   alt={team.name} 
                   className="w-6 h-6 rounded object-contain bg-white/10 p-0.5"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    const fallback = target.nextElementSibling as HTMLElement;
-                    if (fallback) fallback.style.display = 'flex';
-                  }}
                 />
-              ) : null}
-              <div className="hidden w-6 h-6 rounded bg-white/10 items-center justify-center">
-                <Shield className="w-3 h-3 text-gray-400" />
-              </div>
+              ) : (
+                <div className="w-6 h-6 rounded bg-white/10 flex items-center justify-center">
+                  <Shield className="w-3 h-3 text-gray-400" />
+                </div>
+              )}
               <span className="text-white text-sm font-medium">
                 {team?.name || 'No Team'}
               </span>
             </div>
 
-            {/* Player Stats */}
             <div className="grid grid-cols-3 gap-2 mb-4">
               <div className="text-center">
                 <div className="text-white font-bold text-lg">
@@ -386,58 +297,34 @@ export default function AdminPlayers() {
               </div>
             </div>
 
-            {/* Performance Graph */}
-            <div className="mb-4">
-              <div className="flex items-center gap-2 mb-2">
-                <BarChart3 className="w-4 h-4 text-gray-400" />
-                <span className="text-xs text-gray-300">Performance</span>
-              </div>
-              <div className="flex gap-1 h-8">
-                {generatePerformanceBars(player).map((height, index) => (
-                  <div
-                    key={index}
-                    className="flex-1 rounded-t transition-all duration-300 hover:opacity-80"
-                    style={{
-                      height: `${height}%`,
-                      backgroundColor: getPerformanceColor(player),
-                      opacity: 0.8 + (height / 100) * 0.2
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Action Buttons */}
             <div className="flex gap-2">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   handleViewPlayerDetails(player);
                 }}
-                className="flex-1 p-2.5 bg-green-500/20 hover:bg-green-500/40 text-green-300 hover:text-green-100 rounded-xl transition-all duration-300 border border-green-500/30 hover:border-green-400/60 hover:scale-105 shadow-lg hover:shadow-green-500/20 group"
+                className="flex-1 p-2.5 bg-green-500/20 hover:bg-green-500/40 text-green-300 hover:text-green-100 rounded-xl transition-all duration-300 border border-green-500/30 hover:border-green-400/60 hover:scale-105 shadow-lg hover:shadow-green-500/20"
                 title="View Details"
               >
-                <Eye className="w-4 h-4 group-hover:scale-110 transition-transform duration-300 mx-auto" />
+                <Eye className="w-4 h-4 mx-auto" />
               </button>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  // Edit functionality
                 }}
-                className="flex-1 p-2.5 bg-blue-500/20 hover:bg-blue-500/40 text-blue-300 hover:text-blue-100 rounded-xl transition-all duration-300 border border-blue-500/30 hover:border-blue-400/60 hover:scale-105 shadow-lg hover:shadow-blue-500/20 group"
+                className="flex-1 p-2.5 bg-blue-500/20 hover:bg-blue-500/40 text-blue-300 hover:text-blue-100 rounded-xl transition-all duration-300 border border-blue-500/30 hover:border-blue-400/60 hover:scale-105 shadow-lg hover:shadow-blue-500/20"
                 title="Edit Player"
               >
-                <Edit2 className="w-4 h-4 group-hover:scale-110 transition-transform duration-300 mx-auto" />
+                <Edit2 className="w-4 h-4 mx-auto" />
               </button>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  // Copy functionality
                 }}
-                className="flex-1 p-2.5 bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 hover:text-purple-100 rounded-xl transition-all duration-300 border border-purple-500/30 hover:border-purple-400/60 hover:scale-105 shadow-lg hover:shadow-purple-500/20 group"
+                className="flex-1 p-2.5 bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 hover:text-purple-100 rounded-xl transition-all duration-300 border border-purple-500/30 hover:border-purple-400/60 hover:scale-105 shadow-lg hover:shadow-purple-500/20"
                 title="Copy Player Data"
               >
-                <Copy className="w-4 h-4 group-hover:scale-110 transition-transform duration-300 mx-auto" />
+                <Copy className="w-4 h-4 mx-auto" />
               </button>
             </div>
           </div>
