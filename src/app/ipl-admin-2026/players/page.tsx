@@ -298,7 +298,7 @@ export default function AdminPlayers() {
   };
 
   // Virtualized Player Card Component - simplified for stability
-  const VirtualizedPlayerCard = useCallback(({ columnIndex, rowIndex, style, data }: any) => {
+  const VirtualizedPlayerCard = ({ columnIndex, rowIndex, style, data }: any) => {
     const { players, teams, handleContextMenu, handleViewPlayerDetails } = data;
     const playerIndex = rowIndex * 4 + columnIndex;
     const player = players[playerIndex];
