@@ -21,10 +21,7 @@ import {
   Search,
   Users,
   Shield,
-  Heart,
-  Radar,
-  Gauge,
-  Target as TargetIcon
+  Heart
 } from 'lucide-react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { useLeague } from '@/contexts/LeagueContext';
@@ -468,185 +465,7 @@ export default function AnalyticsPage() {
     </div>
   );
 
-  const ResearchInsights = () => (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-xl font-semibold text-white">Advanced Cricket Analytics</h3>
-          <p className="text-gray-400 text-sm">Research-based insights for IPL 2026</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Player Performance Metrics */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6"
-        >
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-blue-500/20">
-              <TargetIcon className="w-5 h-5 text-blue-400" />
-            </div>
-            <h4 className="text-lg font-semibold text-white">Key Performance Indicators</h4>
-          </div>
-          
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-              <div>
-                <div className="text-sm font-medium text-white">Strike Rate Analysis</div>
-                <div className="text-xs text-gray-400">Boundary % + Dot Ball %</div>
-              </div>
-              <Radar className="w-5 h-5 text-purple-400" />
-            </div>
-            
-            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-              <div>
-                <div className="text-sm font-medium text-white">Economy Rate Impact</div>
-                <div className="text-xs text-gray-400">Run control + Pressure building</div>
-              </div>
-              <Gauge className="w-5 h-5 text-green-400" />
-            </div>
-            
-            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-              <div>
-                <div className="text-sm font-medium text-white">Impact Player Index</div>
-                <div className="text-xs text-gray-400">Match-winning contributions</div>
-              </div>
-              <Zap className="w-5 h-5 text-yellow-400" />
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Team Strategy Insights */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6"
-        >
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-lg bg-purple-500/20">
-              <BarChart3 className="w-5 h-5 text-purple-400" />
-            </div>
-            <h4 className="text-lg font-semibold text-white">Team Strategy Metrics</h4>
-          </div>
-          
-          <div className="space-y-3">
-            <div className="p-3 bg-white/5 rounded-lg">
-              <div className="text-sm font-medium text-white mb-2">Power Play Optimization</div>
-              <div className="w-full bg-gray-700 rounded-full h-2">
-                <div className="bg-blue-400 h-2 rounded-full" style={{width: '75%'}}></div>
-              </div>
-              <div className="text-xs text-gray-400 mt-1">First 6 overs scoring rate</div>
-            </div>
-            
-            <div className="p-3 bg-white/5 rounded-lg">
-              <div className="text-sm font-medium text-white mb-2">Death Over Efficiency</div>
-              <div className="w-full bg-gray-700 rounded-full h-2">
-                <div className="bg-red-400 h-2 rounded-full" style={{width: '68%'}}></div>
-              </div>
-              <div className="text-xs text-gray-400 mt-1">Final 4 overs economy</div>
-            </div>
-            
-            <div className="p-3 bg-white/5 rounded-lg">
-              <div className="text-sm font-medium text-white mb-2">All-Rounder Balance</div>
-              <div className="w-full bg-gray-700 rounded-full h-2">
-                <div className="bg-green-400 h-2 rounded-full" style={{width: '82%'}}></div>
-              </div>
-              <div className="text-xs text-gray-400 mt-1">Batting + Bowling contribution</div>
-            </div>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Research-Based Insights */}
-      <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-        <h4 className="text-lg font-semibold text-white mb-4">Research-Based Analytics Framework</h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
-            <h5 className="text-sm font-medium text-blue-400 mb-2">Batting Analytics</h5>
-            <ul className="space-y-1 text-xs text-gray-300">
-              <li>• Strike Rate vs Average balance</li>
-              <li>• Boundary percentage analysis</li>
-              <li>• Power play impact scoring</li>
-              <li>• Finisher contribution rate</li>
-            </ul>
-          </div>
-          
-          <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20">
-            <h5 className="text-sm font-medium text-green-400 mb-2">Bowling Analytics</h5>
-            <ul className="space-y-1 text-xs text-gray-300">
-              <li>• Economy rate consistency</li>
-              <li>• Dot ball percentage</li>
-              <li>• Wicket-taking ability</li>
-              <li>• Death over specialists</li>
-            </ul>
-          </div>
-          
-          <div className="p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
-            <h5 className="text-sm font-medium text-purple-400 mb-2">Team Dynamics</h5>
-            <ul className="space-y-1 text-xs text-gray-300">
-              <li>• Squad balance optimization</li>
-              <li>• Match-up strategies</li>
-              <li>• Home advantage impact</li>
-              <li>• Captaincy influence</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-    const RecentActivity = () => (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-xl font-semibold text-white">Pre-Season Updates</h3>
-          <p className="text-gray-400 text-sm">Latest team and player developments</p>
-        </div>
-        <div className="flex items-center gap-2 text-gray-400 text-sm">
-          <Clock className="w-4 h-4" />
-          Pre-Season Period
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        {analyticsData.recentActivity.map((activity, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 rounded-xl p-4"
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex items-start gap-3">
-                <div className={`w-2 h-2 rounded-full mt-2 ${
-                  activity.impact === 'high' ? 'bg-red-400' : 'bg-yellow-400'
-                }`}></div>
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-white font-medium">{activity.player}</span>
-                    <span className="text-gray-400 text-sm">{activity.action}</span>
-                  </div>
-                  <div className="text-gray-500 text-sm">{activity.match}</div>
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-gray-400 text-xs">{activity.time}</div>
-                <div className={`text-xs mt-1 ${
-                  activity.impact === 'high' ? 'text-red-400' : 'text-yellow-400'
-                }`}>
-                  {activity.impact === 'high' ? 'High Priority' : 'Medium Priority'}
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  );
-
+      
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/10 to-slate-900">
       <AdminSidebar />
@@ -686,9 +505,7 @@ export default function AnalyticsPage() {
               {[
                 { id: 'overview', label: 'Overview', icon: BarChart3 },
                 { id: 'performers', label: 'Player Rankings', icon: Trophy },
-                { id: 'teams', label: 'Pre-Season Team Analysis', icon: Users },
-                { id: 'research', label: 'Advanced Analytics', icon: BarChart3 },
-                { id: 'activity', label: 'Pre-Season Updates', icon: Activity }
+                { id: 'teams', label: 'Pre-Season Team Analysis', icon: Users }
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -717,8 +534,6 @@ export default function AnalyticsPage() {
                 {activeTab === 'overview' && <PlayerOverview />}
                 {activeTab === 'performers' && <TopPerformers />}
                 {activeTab === 'teams' && <TeamAnalytics />}
-                {activeTab === 'research' && <ResearchInsights />}
-                {activeTab === 'activity' && <RecentActivity />}
               </>
             )}
           </div>
