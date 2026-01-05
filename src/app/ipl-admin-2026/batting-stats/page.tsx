@@ -466,6 +466,25 @@ const BattingStatsPage = () => {
     });
     
     const activeBatsmen = playersForStats.filter(p => p.stats?.battingInnings > 0 || p.stats?.runs > 0);
+    
+    // If search query is active, show individual player stats instead of aggregated
+    if (searchQuery.trim() !== '') {
+      if (activeBatsmen.length === 0) {
+        return { activeBatsmen: 0, totalRuns: 0, totalHundreds: 0, totalFifties: 0, highestScore: 0, avgRuns: 0 };
+      }
+      // For search results, show individual stats (not aggregated)
+      // If multiple players match, show stats for each individually in the table, but summary shows first match
+      const player = activeBatsmen[0];
+      const runs = player.stats?.runs || 0;
+      const hundreds = player.stats?.hundreds || 0;
+      const fifties = player.stats?.fifties || 0;
+      const highest = player.stats?.highest || 0;
+      const avgRuns = runs; // For individual player, avg is just their runs
+
+      return { activeBatsmen: activeBatsmen.length, totalRuns: runs, totalHundreds: hundreds, totalFifties: fifties, highestScore: highest, avgRuns };
+    }
+    
+    // Normal aggregated stats for team filter only (no search)
     const totalRuns = activeBatsmen.reduce((sum, p) => sum + (p.stats?.runs || 0), 0);
     const totalHundreds = activeBatsmen.reduce((sum, p) => sum + (p.stats?.hundreds || 0), 0);
     const totalFifties = activeBatsmen.reduce((sum, p) => sum + (p.stats?.fifties || 0), 0);

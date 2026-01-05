@@ -445,6 +445,32 @@ const BowlingStatsPage = () => {
     });
     
     const activeBowlers = playersForStats.filter(p => p.stats?.bowlingInnings > 0 || p.stats?.wickets > 0);
+    
+    // If search query is active, show individual player stats instead of aggregated
+    if (searchQuery.trim() !== '') {
+      if (activeBowlers.length === 0) {
+        return { activeBowlers: 0, totalWickets: 0, totalFiveWickets: 0, totalMaidens: 0, bestEconomy: '0.00', avgWickets: 0 };
+      }
+      // For search results, show individual stats (not aggregated)
+      // If multiple players match, show stats for each individually in the table, but summary shows first match
+      const player = activeBowlers[0];
+      const wickets = player.stats?.wickets || 0;
+      const fiveWickets = player.stats?.fiveWickets || 0;
+      const maidens = player.stats?.maidens || 0;
+      const economy = parseFloat(player.stats?.economy) || 0;
+      const avgWickets = wickets; // For individual player, avg is just their wickets
+
+      return { 
+        activeBowlers: activeBowlers.length, 
+        totalWickets: wickets, 
+        totalFiveWickets: fiveWickets, 
+        totalMaidens: maidens, 
+        bestEconomy: economy.toFixed(2),
+        avgWickets: avgWickets
+      };
+    }
+    
+    // Normal aggregated stats for team filter only (no search)
     const totalWickets = activeBowlers.reduce((sum, p) => sum + (p.stats?.wickets || 0), 0);
     const totalFiveWickets = activeBowlers.reduce((sum, p) => sum + (p.stats?.fiveWickets || 0), 0);
     const totalMaidens = activeBowlers.reduce((sum, p) => sum + (p.stats?.maidens || 0), 0);
