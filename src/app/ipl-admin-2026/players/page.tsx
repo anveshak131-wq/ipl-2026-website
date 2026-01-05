@@ -134,6 +134,8 @@ export default function AdminPlayers() {
   const [savedSearches, setSavedSearches] = useState<{ name: string; query: string; filters: any }[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
+  const [showPlayerDetailsModal, setShowPlayerDetailsModal] = useState(false);
+  const [selectedPlayerForDetails, setSelectedPlayerForDetails] = useState<Player | null>(null);
 
   // Performance helper functions
   const getPerformanceColor = (player: Player): string => {
@@ -478,6 +480,17 @@ export default function AdminPlayers() {
       typeof value === 'string' ? value !== '' : 
       typeof value === 'object' ? (value.min !== '' || value.max !== '') : false
     );
+  };
+
+  // Player details modal handlers
+  const handleViewPlayerDetails = (player: Player) => {
+    setSelectedPlayerForDetails(player);
+    setShowPlayerDetailsModal(true);
+  };
+
+  const handleClosePlayerDetails = () => {
+    setShowPlayerDetailsModal(false);
+    setSelectedPlayerForDetails(null);
   };
 
   // Close suggestions when clicking outside
@@ -2443,8 +2456,7 @@ export default function AdminPlayers() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              // View player details - could open a modal or navigate
-                              console.log('View player details:', player);
+                              handleViewPlayerDetails(player);
                             }}
                             className="flex-1 p-2.5 bg-green-500/20 hover:bg-green-500/40 text-green-300 hover:text-green-100 rounded-xl transition-all duration-300 border border-green-500/30 hover:border-green-400/60 hover:scale-105 shadow-lg hover:shadow-green-500/20 group"
                             title="View Details"
@@ -3996,6 +4008,208 @@ export default function AdminPlayers() {
             )}
           </div>
         </div>
+      </ModernDialog>
+
+      {/* Player Details Modal */}
+      <ModernDialog
+        isOpen={showPlayerDetailsModal}
+        onClose={handleClosePlayerDetails}
+        title="Player Details"
+        description="Complete player information and statistics"
+        variant="info"
+        size="lg"
+        icon={
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
+            <Eye className="w-6 h-6 text-white" />
+          </div>
+        }
+      >
+        {selectedPlayerForDetails && (
+          <div className="space-y-6">
+            {/* Player Header */}
+            <div className="flex items-center gap-4 p-4 bg-gray-800/50 rounded-xl border border-white/10">
+              {/* Player Avatar */}
+              <div className="w-20 h-20 rounded-full overflow-hidden border-3 border-white/20 shadow-xl"
+                   style={{ borderColor: teams.find(t => String(t.id) === String(selectedPlayerForDetails.teamId))?.colors?.primary || '#3B82F6' }}>
+                {selectedPlayerForDetails.photoUrl ? (
+                  <img 
+                    src={selectedPlayerForDetails.photoUrl} 
+                    alt={selectedPlayerForDetails.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                ) : null}
+                <div className={`w-full h-full flex items-center justify-center text-white font-bold text-2xl ${selectedPlayerForDetails.photoUrl ? 'hidden' : ''}`}
+                     style={{ background: `linear-gradient(135deg, ${teams.find(t => String(t.id) === String(selectedPlayerForDetails.teamId))?.colors?.primary || '#3B82F6'}, ${teams.find(t => String(t.id) === String(selectedPlayerForDetails.teamId))?.colors?.secondary || '#8B5CF6'})` }}>
+                  {selectedPlayerForDetails.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                </div>
+              </div>
+              
+              {/* Player Info */}
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold text-white mb-2">{selectedPlayerForDetails.name}</h3>
+                <div className="flex items-center gap-4 text-sm text-gray-300">
+                  <span className="flex items-center gap-2">
+                    {selectedPlayerForDetails.nationality && (
+                      <FlagImage nationality={selectedPlayerForDetails.nationality} size="sm" />
+                    )}
+                    {selectedPlayerForDetails.nationality}
+                  </span>
+                  <span>•</span>
+                  <span>Age: {selectedPlayerForDetails.age}</span>
+                  <span>•</span>
+                  <span>Jersey #{selectedPlayerForDetails.jerseyNumber}</span>
+                  {selectedPlayerForDetails.isCaptain && (
+                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
+                      <CustomEmoji type="star" size={12} /> Captain
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Team Information */}
+            {(() => {
+              const team = teams.find(t => String(t.id) === String(selectedPlayerForDetails.teamId));
+              return team ? (
+                <div className="p-4 bg-gray-800/50 rounded-xl border border-white/10">
+                  <h4 className="text-lg font-semibold text-white mb-3">Team Information</h4>
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-12 h-12 rounded-xl text-white font-bold flex items-center justify-center shadow-lg"
+                      style={{ backgroundColor: team.colors.primary }}
+                    >
+                      {team.shortName}
+                    </div>
+                    <div>
+                      <p className="text-white font-medium">{team.name}</p>
+                      <p className="text-gray-400 text-sm">{team.league === 'wpl' ? 'WPL' : 'IPL'}</p>
+                    </div>
+                  </div>
+                </div>
+              ) : null;
+            })()}
+
+            {/* Player Details */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4 bg-gray-800/50 rounded-xl border border-white/10">
+                <h4 className="text-lg font-semibold text-white mb-3">Player Details</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Role:</span>
+                    <span className="text-white font-medium">{selectedPlayerForDetails.role}</span>
+                  </div>
+                  {selectedPlayerForDetails.allrounderType && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">Type:</span>
+                      <span className="text-white font-medium">{selectedPlayerForDetails.allrounderType}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Batting Style:</span>
+                    <span className="text-white font-medium">{selectedPlayerForDetails.battingStyle}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Bowling Style:</span>
+                    <span className="text-white font-medium">{selectedPlayerForDetails.bowlingStyle}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 bg-gray-800/50 rounded-xl border border-white/10">
+                <h4 className="text-lg font-semibold text-white mb-3">Performance</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Performance Grade:</span>
+                    <span className={`font-bold text-lg ${getPerformanceTextColor(selectedPlayerForDetails)}`}>
+                      {getPerformanceIndicator(selectedPlayerForDetails)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Performance:</span>
+                    <span className={`text-white font-medium ${getPerformanceTextColor(selectedPlayerForDetails)}`}>
+                      {getPerformanceLabel(selectedPlayerForDetails)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Statistics */}
+            <div className="p-4 bg-gray-800/50 rounded-xl border border-white/10">
+              <h4 className="text-lg font-semibold text-white mb-4">Statistics</h4>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-ipl-gold">{selectedPlayerForDetails.stats?.runs || 0}</p>
+                  <p className="text-xs text-gray-400">Runs</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-blue-400">{selectedPlayerForDetails.stats?.wickets || 0}</p>
+                  <p className="text-xs text-gray-400">Wickets</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-purple-400">
+                    {selectedPlayerForDetails.stats?.average && selectedPlayerForDetails.stats.average > 0 
+                      ? selectedPlayerForDetails.stats.average.toFixed(2) 
+                      : '-'}
+                  </p>
+                  <p className="text-xs text-gray-400">Average</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-green-400">
+                    {selectedPlayerForDetails.stats?.strikeRate && selectedPlayerForDetails.stats.strikeRate > 0 
+                      ? selectedPlayerForDetails.stats.strikeRate.toFixed(1) 
+                      : '-'}
+                  </p>
+                  <p className="text-xs text-gray-400">Strike Rate</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-orange-400">{selectedPlayerForDetails.stats?.highest || 0}</p>
+                  <p className="text-xs text-gray-400">Highest Score</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-pink-400">{selectedPlayerForDetails.stats?.fifties || 0}</p>
+                  <p className="text-xs text-gray-400">Fifties</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-red-400">{selectedPlayerForDetails.stats?.hundreds || 0}</p>
+                  <p className="text-xs text-gray-400">Hundreds</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-cyan-400">{selectedPlayerForDetails.stats?.economy || 0}</p>
+                  <p className="text-xs text-gray-400">Economy</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Performance Graph */}
+            <div className="p-4 bg-gray-800/50 rounded-xl border border-white/10">
+              <h4 className="text-lg font-semibold text-white mb-3">Recent Form</h4>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-gray-400">Performance Trend</span>
+                <span className={`text-sm font-bold ${getPerformanceTextColor(selectedPlayerForDetails)}`}>
+                  {getPerformanceLabel(selectedPlayerForDetails)}
+                </span>
+              </div>
+              <div className="flex gap-1 h-12">
+                {generatePerformanceBars(selectedPlayerForDetails).map((height, index) => (
+                  <div
+                    key={index}
+                    className="flex-1 rounded-t transition-all duration-300 hover:opacity-80"
+                    style={{
+                      height: `${height}%`,
+                      background: `linear-gradient(to top, ${teams.find(t => String(t.id) === String(selectedPlayerForDetails.teamId))?.colors?.primary || '#3B82F6'}, ${teams.find(t => String(t.id) === String(selectedPlayerForDetails.teamId))?.colors?.secondary || '#8B5CF6'})`,
+                      opacity: height > 0 ? 1 : 0.3
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </ModernDialog>
     </div>
   );
