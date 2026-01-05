@@ -391,8 +391,8 @@ export default function AnalyticsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-xl font-semibold text-white">Squad Composition Analysis</h3>
-          <p className="text-gray-400 text-sm">Team-wise player distribution and squad strength</p>
+          <h3 className="text-xl font-semibold text-white">Pre-Season Team Analysis</h3>
+          <p className="text-gray-400 text-sm">Last season performance and squad strength</p>
         </div>
         <button
           onClick={handleRefreshData}
@@ -686,7 +686,7 @@ export default function AnalyticsPage() {
               {[
                 { id: 'overview', label: 'Overview', icon: BarChart3 },
                 { id: 'performers', label: 'Player Rankings', icon: Trophy },
-                { id: 'teams', label: 'Squad Analysis', icon: Users },
+                { id: 'teams', label: 'Pre-Season Team Analysis', icon: Users },
                 { id: 'research', label: 'Advanced Analytics', icon: BarChart3 },
                 { id: 'activity', label: 'Pre-Season Updates', icon: Activity }
               ].map((tab) => (
