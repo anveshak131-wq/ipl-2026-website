@@ -83,6 +83,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
     if (href.includes('ml-lab')) return 'ml-lab';
     if (href.includes('content')) return 'content';
     if (href.includes('stats')) return 'stats';
+    if (href.includes('analytics')) return 'analytics';
     if (href.includes('live-score')) return 'live-score';
     if (href.includes('playing-11')) return 'playing-11';
     if (href.includes('test-live-score')) return 'test-live-score';
@@ -160,6 +161,11 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
       stats: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h10M4 14h6m-2 4h12" />
+        </svg>
+      ),
+      analytics: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>
       ),
       'live-score': (
@@ -501,6 +507,17 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
       },
     ],
     Settings: [
+      {
+        href: '/ipl-admin-2026/analytics',
+        label: 'Analytics',
+        icon: (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+        ),
+        group: 'Settings',
+        shortcut: 'A',
+      },
       {
         href: '/ipl-admin-2026/support',
         label: 'Support',
