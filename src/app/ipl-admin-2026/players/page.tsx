@@ -15,7 +15,7 @@ import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import FlagImage from '@/components/ui/FlagImage';
 import CustomSelect from '@/components/ui/CustomSelect';
-import { Search, Filter, Edit2, X, Users, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Plus, Trash2, Download, Upload, Shield, Activity, Hash, Grid3x3, List, Eye, Star, Copy, History } from 'lucide-react';
+import { Search, Filter, Edit2, X, Users, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Plus, Trash2, Download, Upload, Shield, Activity, Hash, Grid3x3, List, Eye, Star, Copy, History, FileSpreadsheet, FileText, Database } from 'lucide-react';
 import '@/styles/flags.css';
 
 // Cricket-playing countries (exclude Pakistan – not part of IPL/WPL)
@@ -137,6 +137,8 @@ export default function AdminPlayers() {
   const [showPlayerDetailsModal, setShowPlayerDetailsModal] = useState(false);
   const [selectedPlayerForDetails, setSelectedPlayerForDetails] = useState<Player | null>(null);
   const [contextMenu, setContextMenu] = useState<{ visible: boolean; x: number; y: number; player: Player | null }>({ visible: false, x: 0, y: 0, player: null });
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Performance helper functions
   const getPerformanceColor = (player: Player): string => {
@@ -572,6 +574,167 @@ export default function AdminPlayers() {
     console.log('View player history:', player.name);
     // For now, you could show a simple alert or implement a history modal
     alert(`Player history for ${player.name}\n\nThis feature would show:\n- Recent matches\n- Performance trends\n- Injury history\n- Transfer history\n- Achievements and milestones`);
+  };
+
+  // Export functionality
+  const exportToJSON = (playersToExport: Player[]) => {
+    const exportData = playersToExport.map(player => {
+      const team = teams.find(t => String(t.id) === String(player.teamId));
+      return {
+        id: player.id,
+        name: player.name,
+        role: player.role,
+        allrounderType: player.allrounderType,
+        teamId: player.teamId,
+        teamName: team?.name || 'Unknown',
+        teamShortName: team?.shortName || 'Unknown',
+        age: player.age,
+        nationality: player.nationality,
+        jerseyNumber: player.jerseyNumber,
+        isCaptain: player.isCaptain,
+        battingStyle: player.battingStyle,
+        bowlingStyle: player.bowlingStyle,
+        league: player.league,
+        photoUrl: player.photoUrl,
+        stats: {
+          matches: player.stats?.matches || 0,
+          runs: player.stats?.runs || 0,
+          wickets: player.stats?.wickets || 0,
+          average: player.stats?.average || 0,
+          bowlingAverage: player.stats?.bowlingAverage || 0,
+          strikeRate: player.stats?.strikeRate || 0,
+          economy: player.stats?.economy || 0,
+          highest: player.stats?.highest || 0,
+          fours: player.stats?.fours || 0,
+          sixes: player.stats?.sixes || 0,
+          fifties: player.stats?.fifties || 0,
+          hundreds: player.stats?.hundreds || 0,
+          bestBowling: player.stats?.bestBowling || '',
+          maidens: player.stats?.maidens || 0,
+          fiveWickets: (player.stats as any)?.fiveWickets || 0
+        },
+        performance: {
+          grade: getPerformanceIndicator(player),
+          label: getPerformanceLabel(player),
+          color: getPerformanceColor(player)
+        }
+      };
+    });
+
+    return JSON.stringify(exportData, null, 2);
+  };
+
+  const exportToCSV = (playersToExport: Player[]) => {
+    const headers = [
+      'ID', 'Name', 'Role', 'Type', 'Team', 'Age', 'Nationality', 'Jersey', 'Captain',
+      'Batting Style', 'Bowling Style', 'League', 'Matches', 'Runs', 'Wickets', 'Average',
+      'Strike Rate', 'Economy', 'Highest', 'Fours', 'Sixes', 'Fifties', 'Hundreds',
+      'Best Bowling', 'Maidens', '5-Wickets', 'Performance Grade'
+    ];
+
+    const csvData = playersToExport.map(player => {
+      const team = teams.find(t => String(t.id) === String(player.teamId));
+      return [
+        player.id,
+        player.name,
+        player.role,
+        player.allrounderType || '',
+        team?.name || 'Unknown',
+        player.age,
+        player.nationality,
+        player.jerseyNumber,
+        player.isCaptain ? 'Yes' : 'No',
+        player.battingStyle,
+        player.bowlingStyle,
+        player.league,
+        player.stats?.matches || 0,
+        player.stats?.runs || 0,
+        player.stats?.wickets || 0,
+        player.stats?.average || 0,
+        player.stats?.strikeRate || 0,
+        player.stats?.economy || 0,
+        player.stats?.highest || 0,
+        player.stats?.fours || 0,
+        player.stats?.sixes || 0,
+        player.stats?.fifties || 0,
+        player.stats?.hundreds || 0,
+        player.stats?.bestBowling || '',
+        player.stats?.maidens || 0,
+        (player.stats as any)?.fiveWickets || 0,
+        getPerformanceIndicator(player)
+      ];
+    });
+
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    return csvContent;
+  };
+
+  const exportToExcel = async (playersToExport: Player[]) => {
+    // For Excel export, we'll create a CSV and suggest opening in Excel
+    // In a real implementation, you might use libraries like xlsx or exceljs
+    return exportToCSV(playersToExport);
+  };
+
+  const downloadFile = (content: string, filename: string, mimeType: string) => {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExport = async (format: 'json' | 'csv' | 'excel') => {
+    setIsExporting(true);
+    
+    try {
+      const playersToExport = players.filter(player => 
+        (player.league || 'ipl') === currentLeague
+      );
+
+      let content: string;
+      let filename: string;
+      let mimeType: string;
+
+      switch (format) {
+        case 'json':
+          content = exportToJSON(playersToExport);
+          filename = `players_${currentLeague}_${new Date().toISOString().split('T')[0]}.json`;
+          mimeType = 'application/json';
+          break;
+        case 'csv':
+          content = exportToCSV(playersToExport);
+          filename = `players_${currentLeague}_${new Date().toISOString().split('T')[0]}.csv`;
+          mimeType = 'text/csv';
+          break;
+        case 'excel':
+          content = await exportToExcel(playersToExport);
+          filename = `players_${currentLeague}_${new Date().toISOString().split('T')[0]}.csv`;
+          mimeType = 'text/csv';
+          break;
+        default:
+          throw new Error('Unsupported format');
+      }
+
+      downloadFile(content, filename, mimeType);
+      
+      // Show success message
+      console.log(`Successfully exported ${playersToExport.length} players to ${format.toUpperCase()}`);
+      
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Export failed. Please try again.');
+    } finally {
+      setIsExporting(false);
+      setShowExportModal(false);
+    }
   };
 
   // Close suggestions when clicking outside
@@ -1542,6 +1705,17 @@ export default function AdminPlayers() {
                 {/* Action Buttons Group */}
                 <div className="flex items-center gap-3 flex-wrap">
                 <LeagueSwitch size="md" showLabel={false} />
+                  
+                  {/* Export Button - Only for admin and super_admin */}
+                  {(userRole === 'admin' || userRole === 'super_admin') && (
+                    <button
+                      onClick={() => setShowExportModal(true)}
+                      className="p-2.5 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg hover:shadow-green-500/25 transition-all duration-300 hover:scale-105 border border-green-500/30"
+                      title="Export Players"
+                    >
+                      <Download className="w-5 h-5" />
+                    </button>
+                  )}
                   
                   {/* View Toggle - Enhanced */}
                   <div className="flex items-center gap-1 bg-gray-900/80 backdrop-blur-sm rounded-xl p-1.5 border border-white/10 shadow-lg">
@@ -4292,9 +4466,93 @@ export default function AdminPlayers() {
                   />
                 ))}
               </div>
+          </div>
+
+          {/* Format Selection */}
+          <div>
+            <h4 className="text-lg font-semibold text-white mb-4">Choose Export Format</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* JSON Format */}
+              <button
+                onClick={() => handleExport('json')}
+                disabled={isExporting}
+                className="p-4 bg-gray-800/50 hover:bg-gray-700/50 border border-white/10 rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed group"
+              >
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
+                    <Database className="w-6 h-6 text-blue-400" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-white font-medium">JSON</p>
+                    <p className="text-xs text-gray-400">Structured data format</p>
+                  </div>
+                </div>
+              </button>
+
+              {/* CSV Format */}
+              <button
+                onClick={() => handleExport('csv')}
+                disabled={isExporting}
+                className="p-4 bg-gray-800/50 hover:bg-gray-700/50 border border-white/10 rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed group"
+              >
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-12 h-12 rounded-lg bg-green-500/20 flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
+                    <FileText className="w-6 h-6 text-green-400" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-white font-medium">CSV</p>
+                    <p className="text-xs text-gray-400">Excel compatible</p>
+                  </div>
+                </div>
+              </button>
+
+              {/* Excel Format */}
+              <button
+                onClick={() => handleExport('excel')}
+                disabled={isExporting}
+                className="p-4 bg-gray-800/50 hover:bg-gray-700/50 border border-white/10 rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed group"
+              >
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
+                    <FileSpreadsheet className="w-6 h-6 text-purple-400" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-white font-medium">Excel</p>
+                    <p className="text-xs text-gray-400">CSV for Excel</p>
+                  </div>
+                </div>
+              </button>
             </div>
           </div>
-        )}
+
+          {/* Export Status */}
+          {isExporting && (
+            <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-blue-300">Exporting players...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Export Tips */}
+          <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+            <div className="flex items-start gap-3">
+              <div className="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-amber-400 text-xs font-bold">!</span>
+              </div>
+              <div className="text-sm text-amber-300">
+                <p className="font-medium mb-1">Export Tips:</p>
+                <ul className="text-xs space-y-1 text-amber-200">
+                  <li>• JSON is best for data backup and API integration</li>
+                  <li>• CSV works directly with Excel and Google Sheets</li>
+                  <li>• Files are named with date and league for easy organization</li>
+                  <li>• All player statistics are included in the export</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
       </ModernDialog>
 
       {/* Context Menu */}
