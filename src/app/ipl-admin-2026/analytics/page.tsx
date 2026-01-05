@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { 
   User, 
@@ -25,70 +25,168 @@ import {
 } from 'lucide-react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { useLeague } from '@/contexts/LeagueContext';
-
-// Mock player analytics data
-const mockPlayerAnalytics = {
-  overview: {
-    totalPlayers: 284,
-    activePlayers: 156,
-    averageRating: 7.8,
-    topPerformers: 42,
-    emergingTalent: 18
-  },
-  performanceMetrics: [
-    { name: 'Virat Kohli', team: 'RCB', runs: 582, average: 52.9, strikeRate: 138.4, rating: 9.2, trend: 'up' },
-    { name: 'Rohit Sharma', team: 'MI', runs: 445, average: 41.2, strikeRate: 129.8, rating: 8.7, trend: 'up' },
-    { name: 'KL Rahul', team: 'LSG', runs: 412, average: 37.4, strikeRate: 134.2, rating: 8.3, trend: 'down' },
-    { name: 'Jasprit Bumrah', team: 'MI', wickets: 23, economy: 7.2, average: 18.4, rating: 9.0, trend: 'up' },
-    { name: 'Rashid Khan', team: 'GT', wickets: 19, economy: 6.8, average: 20.1, rating: 8.8, trend: 'stable' }
-  ],
-  teamStats: [
-    { team: 'Mumbai Indians', players: 24, avgRating: 8.2, totalRuns: 2456, totalWickets: 56 },
-    { team: 'Chennai Super Kings', players: 24, avgRating: 7.9, totalRuns: 2389, totalWickets: 52 },
-    { team: 'Royal Challengers Bangalore', players: 24, avgRating: 7.7, totalRuns: 2234, totalWickets: 48 },
-    { team: 'Gujarat Titans', players: 24, avgRating: 8.1, totalRuns: 2298, totalWickets: 54 }
-  ],
-  playerCategories: {
-    batsmen: 142,
-    bowlers: 98,
-    allRounders: 32,
-    wicketKeepers: 12
-  },
-  recentActivity: [
-    { player: 'Virat Kohli', action: 'Scored 89 runs', match: 'RCB vs MI', time: '2 hours ago', impact: 'high' },
-    { player: 'Jasprit Bumrah', action: 'Took 3 wickets', match: 'MI vs CSK', time: '4 hours ago', impact: 'high' },
-    { player: 'Rohit Sharma', action: 'Scored 45 runs', match: 'MI vs RCB', time: '6 hours ago', impact: 'medium' },
-    { player: 'KL Rahul', action: 'Scored 32 runs', match: 'LSG vs GT', time: '8 hours ago', impact: 'medium' }
-  ]
-};
+import { useAdminData } from '@/contexts/AdminDataContext';
 
 export default function AnalyticsPage() {
   const { currentLeague } = useLeague();
+  const { players, teams, loading, error, refreshData } = useAdminData();
   const [selectedTimeRange, setSelectedTimeRange] = useState('season');
   const [isLoading, setIsLoading] = useState(false);
-  const [analyticsData, setAnalyticsData] = useState(mockPlayerAnalytics);
   const [activeTab, setActiveTab] = useState('overview');
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    fetchPlayerAnalytics();
-  }, [currentLeague, selectedTimeRange]);
+  // Calculate analytics data from real player data
+  const analyticsData = useMemo(() => {
+    if (!players.length || !teams.length) {
+      return {
+        overview: {
+          totalPlayers: 0,
+          activePlayers: 0,
+          averageRating: 0,
+          topPerformers: 0,
+          emergingTalent: 0
+        },
+        performanceMetrics: [],
+        teamStats: [],
+        playerCategories: {
+          batsmen: 0,
+          bowlers: 0,
+          allRounders: 0,
+          wicketKeepers: 0
+        },
+        recentActivity: []
+      };
+    }
 
-  const fetchPlayerAnalytics = async () => {
+    // Calculate player categories
+    const playerCategories = players.reduce((acc, player) => {
+      const role = player.role?.toLowerCase() || '';
+      if (role.includes('batsman') || role.includes('batting')) {
+        acc.batsmen++;
+      } else if (role.includes('bowler') || role.includes('bowling')) {
+        acc.bowlers++;
+      } else if (role.includes('all-rounder') || role.includes('all rounder')) {
+        acc.allRounders++;
+      } else if (role.includes('wicket keeper') || role.includes('keeper')) {
+        acc.wicketKeepers++;
+      }
+      return acc;
+    }, { batsmen: 0, bowlers: 0, allRounders: 0, wicketKeepers: 0 });
+
+    // Calculate active players (players with stats)
+    const activePlayers = players.filter(player => 
+      player.stats && Object.keys(player.stats).length > 0
+    ).length;
+
+    // Calculate performance metrics for top performers
+    const performanceMetrics = players
+      .filter(player => player.stats && (player.stats.runs || player.stats.wickets))
+      .map(player => {
+        const stats = player.stats!;
+        const team = teams.find(t => t.id === player.teamId);
+        
+        // Calculate a simple rating based on performance
+        let rating = 5.0; // Base rating
+        if (stats.runs) {
+          rating += Math.min(stats.runs / 100, 3); // Up to 3 points for runs
+        }
+        if (stats.wickets) {
+          rating += Math.min(stats.wickets / 5, 2); // Up to 2 points for wickets
+        }
+        if (stats.battingAverage) {
+          const avg = parseFloat(stats.battingAverage);
+          if (!isNaN(avg)) {
+            rating += Math.min(avg / 20, 2); // Up to 2 points for average
+          }
+        }
+        if (stats.economy) {
+          const econ = parseFloat(stats.economy);
+          if (!isNaN(econ) && econ < 8) {
+            rating += Math.min((8 - econ) / 2, 1); // Up to 1 point for good economy
+          }
+        }
+        
+        // Determine trend based on recent performance (simplified)
+        let trend = 'stable';
+        if (stats.runs && stats.runs > 300) trend = 'up';
+        else if (stats.runs && stats.runs < 100) trend = 'down';
+        
+        return {
+          id: player.id,
+          name: player.name,
+          team: team?.name || 'Unknown',
+          runs: stats.runs || 0,
+          average: stats.battingAverage ? parseFloat(stats.battingAverage) || 0 : 0,
+          strikeRate: stats.battingStrikeRate ? parseFloat(stats.battingStrikeRate) || 0 : 0,
+          wickets: stats.wickets || 0,
+          economy: stats.economy ? parseFloat(stats.economy) || 0 : 0,
+          rating: Math.min(rating, 10),
+          trend
+        };
+      })
+      .sort((a, b) => b.rating - a.rating)
+      .slice(0, 10);
+
+    // Calculate team statistics
+    const teamStats = teams.map(team => {
+      const teamPlayers = players.filter(p => p.teamId === team.id);
+      const totalRuns = teamPlayers.reduce((sum, p) => sum + (p.stats?.runs || 0), 0);
+      const totalWickets = teamPlayers.reduce((sum, p) => sum + (p.stats?.wickets || 0), 0);
+      const avgRating = teamPlayers.length > 0 
+        ? teamPlayers.reduce((sum, p) => {
+            const rating = performanceMetrics.find(pm => pm.id === p.id)?.rating || 5;
+            return sum + rating;
+          }, 0) / teamPlayers.length
+        : 0;
+
+      return {
+        team: team.name,
+        players: teamPlayers.length,
+        avgRating,
+        totalRuns,
+        totalWickets
+      };
+    });
+
+    // Calculate overview metrics
+    const topPerformers = performanceMetrics.filter(p => p.rating >= 8.5).length;
+    const averageRating = performanceMetrics.length > 0 
+      ? performanceMetrics.reduce((sum, p) => sum + p.rating, 0) / performanceMetrics.length 
+      : 0;
+
+    // Generate recent activity (mock for now, but could be based on recent updates)
+    const recentActivity = performanceMetrics.slice(0, 5).map(player => ({
+      player: player.name,
+      action: player.runs > 0 ? `Scored ${player.runs} runs` : `Took ${player.wickets} wickets`,
+      match: `${player.team} vs Opponent`,
+      time: 'Recently',
+      impact: player.rating >= 9 ? 'high' : 'medium'
+    }));
+
+    return {
+      overview: {
+        totalPlayers: players.length,
+        activePlayers,
+        averageRating,
+        topPerformers,
+        emergingTalent: players.filter(p => p.age && parseInt(p.age) <= 25).length
+      },
+      performanceMetrics,
+      teamStats,
+      playerCategories,
+      recentActivity
+    };
+  }, [players, teams]);
+
+  const handleRefreshData = async () => {
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setAnalyticsData(mockPlayerAnalytics);
+      await refreshData();
     } catch (error) {
-      console.error('Failed to fetch player analytics:', error);
+      console.error('Failed to refresh data:', error);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const refreshData = () => {
-    fetchPlayerAnalytics();
   };
 
   const MetricCard = ({ title, value, change, icon: Icon, color, subtitle }: any) => (
@@ -135,7 +233,7 @@ export default function AnalyticsPage() {
           change={12.5}
           icon={Activity}
           color="bg-green-500/20"
-          subtitle="this season"
+          subtitle="with statistics"
         />
         <MetricCard
           title="Average Rating"
@@ -159,7 +257,7 @@ export default function AnalyticsPage() {
           change={22.1}
           icon={Target}
           color="bg-orange-500/20"
-          subtitle="new discoveries"
+          subtitle="age 25 or under"
         />
       </div>
 
@@ -269,7 +367,7 @@ export default function AnalyticsPage() {
       <div className="flex items-center justify-between">
         <h3 className="text-xl font-semibold text-white">Team Analytics</h3>
         <button
-          onClick={refreshData}
+          onClick={handleRefreshData}
           className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-400 hover:bg-blue-500/30 transition-colors"
         >
           <RefreshCw className="w-4 h-4" />
@@ -307,7 +405,7 @@ export default function AnalyticsPage() {
                 <div className="text-xs text-gray-400">Total Wickets</div>
               </div>
               <div className="text-center p-3 bg-orange-500/10 rounded-lg">
-                <div className="text-xl font-bold text-orange-400">{(team.totalRuns / team.players).toFixed(0)}</div>
+                <div className="text-xl font-bold text-orange-400">{team.players > 0 ? (team.totalRuns / team.players).toFixed(0) : 0}</div>
                 <div className="text-xs text-gray-400">Avg Runs/Player</div>
               </div>
             </div>
@@ -389,7 +487,7 @@ export default function AnalyticsPage() {
                   />
                 </div>
                 <button
-                  onClick={refreshData}
+                  onClick={handleRefreshData}
                   className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-400 hover:bg-blue-500/30 transition-colors"
                 >
                   <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -424,7 +522,7 @@ export default function AnalyticsPage() {
 
           {/* Content */}
           <div className="space-y-6">
-            {isLoading ? (
+            {loading || isLoading ? (
               <div className="flex items-center justify-center py-12">
                 <RefreshCw className="w-8 h-8 text-blue-400 animate-spin" />
               </div>
