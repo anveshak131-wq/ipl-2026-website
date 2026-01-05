@@ -21,7 +21,10 @@ import {
   Search,
   Users,
   Shield,
-  Heart
+  Heart,
+  Radar,
+  Gauge,
+  Target as TargetIcon
 } from 'lucide-react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { useLeague } from '@/contexts/LeagueContext';
@@ -128,25 +131,31 @@ export default function AnalyticsPage() {
       .sort((a, b) => b.rating - a.rating)
       .slice(0, 10);
 
-    // Calculate team statistics based on last season data
+    // Calculate team statistics (squad composition only, no performance stats)
     const teamStats = teams.map(team => {
       const teamPlayers = players.filter(p => p.teamId === team.id);
-      const totalRuns = teamPlayers.reduce((sum, p) => sum + (p.stats?.runs || 0), 0);
-      const totalWickets = teamPlayers.reduce((sum, p) => sum + (p.stats?.wickets || 0), 0);
-      const avgRating = teamPlayers.length > 0 
-        ? teamPlayers.reduce((sum, p) => {
-            const rating = performanceMetrics.find(pm => pm.id === p.id)?.rating || 5;
-            return sum + rating;
-          }, 0) / teamPlayers.length
-        : 0;
+      const playerCategories = teamPlayers.reduce((acc, player) => {
+        const role = player.role?.toLowerCase() || '';
+        if (role.includes('batsman') || role.includes('batting')) {
+          acc.batsmen++;
+        } else if (role.includes('bowler') || role.includes('bowling')) {
+          acc.bowlers++;
+        } else if (role.includes('all-rounder') || role.includes('all rounder')) {
+          acc.allRounders++;
+        } else if (role.includes('wicket keeper') || role.includes('keeper')) {
+          acc.wicketKeepers++;
+        }
+        return acc;
+      }, { batsmen: 0, bowlers: 0, allRounders: 0, wicketKeepers: 0 });
 
       return {
         team: team.name,
         players: teamPlayers.length,
-        avgRating,
-        totalRuns,
-        totalWickets,
-        lastSeason: true // Flag to indicate this is last season data
+        playerCategories,
+        avgAge: teamPlayers.length > 0 
+          ? teamPlayers.reduce((sum, p) => sum + (parseInt(p.age) || 0), 0) / teamPlayers.length 
+          : 0,
+        squadStrength: teamPlayers.length >= 20 ? 'Strong' : teamPlayers.length >= 15 ? 'Balanced' : 'Limited'
       };
     });
 
@@ -382,8 +391,8 @@ export default function AnalyticsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-xl font-semibold text-white">Pre-Season Team Analysis</h3>
-          <p className="text-gray-400 text-sm">Last season performance and squad strength</p>
+          <h3 className="text-xl font-semibold text-white">Squad Composition Analysis</h3>
+          <p className="text-gray-400 text-sm">Team-wise player distribution and squad strength</p>
         </div>
         <button
           onClick={handleRefreshData}
@@ -405,33 +414,52 @@ export default function AnalyticsPage() {
           >
             <div className="flex items-center justify-between mb-4">
               <h4 className="text-lg font-semibold text-white">{team.team}</h4>
-              <div className="flex items-center gap-2">
-                <Star className="w-4 h-4 text-yellow-400" />
-                <span className="text-yellow-400 font-medium">{team.avgRating.toFixed(1)}</span>
+              <div className={`px-2 py-1 rounded-lg text-xs font-medium ${
+                team.squadStrength === 'Strong' ? 'bg-green-500/20 text-green-400' :
+                team.squadStrength === 'Balanced' ? 'bg-yellow-500/20 text-yellow-400' :
+                'bg-red-500/20 text-red-400'
+              }`}>
+                {team.squadStrength} Squad
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 mb-4">
               <div className="text-center p-3 bg-blue-500/10 rounded-lg">
                 <div className="text-xl font-bold text-blue-400">{team.players}</div>
-                <div className="text-xs text-gray-400">Squad Size</div>
-              </div>
-              <div className="text-center p-3 bg-green-500/10 rounded-lg">
-                <div className="text-xl font-bold text-green-400">{team.totalRuns}</div>
-                <div className="text-xs text-gray-400">Last Season Runs</div>
+                <div className="text-xs text-gray-400">Total Players</div>
               </div>
               <div className="text-center p-3 bg-purple-500/10 rounded-lg">
-                <div className="text-xl font-bold text-purple-400">{team.totalWickets}</div>
-                <div className="text-xs text-gray-400">Last Season Wickets</div>
-              </div>
-              <div className="text-center p-3 bg-orange-500/10 rounded-lg">
-                <div className="text-xl font-bold text-orange-400">{team.players > 0 ? (team.totalRuns / team.players).toFixed(0) : 0}</div>
-                <div className="text-xs text-gray-400">Avg Runs/Player</div>
+                <div className="text-xl font-bold text-purple-400">{team.avgAge.toFixed(1)}</div>
+                <div className="text-xs text-gray-400">Average Age</div>
               </div>
             </div>
+            
+            {/* Player Categories Breakdown */}
+            <div className="space-y-2">
+              <h5 className="text-sm font-medium text-gray-300 mb-2">Squad Breakdown</h5>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="flex items-center justify-between p-2 bg-blue-500/10 rounded">
+                  <span className="text-xs text-blue-300">Batsmen</span>
+                  <span className="text-sm font-medium text-blue-400">{team.playerCategories.batsmen}</span>
+                </div>
+                <div className="flex items-center justify-between p-2 bg-green-500/10 rounded">
+                  <span className="text-xs text-green-300">Bowlers</span>
+                  <span className="text-sm font-medium text-green-400">{team.playerCategories.bowlers}</span>
+                </div>
+                <div className="flex items-center justify-between p-2 bg-purple-500/10 rounded">
+                  <span className="text-xs text-purple-300">All-Rounders</span>
+                  <span className="text-sm font-medium text-purple-400">{team.playerCategories.allRounders}</span>
+                </div>
+                <div className="flex items-center justify-between p-2 bg-orange-500/10 rounded">
+                  <span className="text-xs text-orange-300">Wicket Keepers</span>
+                  <span className="text-sm font-medium text-orange-400">{team.playerCategories.wicketKeepers}</span>
+                </div>
+              </div>
+            </div>
+            
             <div className="mt-3 pt-3 border-t border-white/10">
               <div className="flex items-center gap-2 text-xs text-gray-400">
-                <Calendar className="w-3 h-3" />
-                <span>Based on last season performance</span>
+                <Shield className="w-3 h-3" />
+                <span>Squad composition for IPL 2026</span>
               </div>
             </div>
           </motion.div>
@@ -440,7 +468,136 @@ export default function AnalyticsPage() {
     </div>
   );
 
-  const RecentActivity = () => (
+  const ResearchInsights = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-xl font-semibold text-white">Advanced Cricket Analytics</h3>
+          <p className="text-gray-400 text-sm">Research-based insights for IPL 2026</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Player Performance Metrics */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 rounded-lg bg-blue-500/20">
+              <TargetIcon className="w-5 h-5 text-blue-400" />
+            </div>
+            <h4 className="text-lg font-semibold text-white">Key Performance Indicators</h4>
+          </div>
+          
+          <div className="space-y-3">
+            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+              <div>
+                <div className="text-sm font-medium text-white">Strike Rate Analysis</div>
+                <div className="text-xs text-gray-400">Boundary % + Dot Ball %</div>
+              </div>
+              <Radar className="w-5 h-5 text-purple-400" />
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+              <div>
+                <div className="text-sm font-medium text-white">Economy Rate Impact</div>
+                <div className="text-xs text-gray-400">Run control + Pressure building</div>
+              </div>
+              <Gauge className="w-5 h-5 text-green-400" />
+            </div>
+            
+            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+              <div>
+                <div className="text-sm font-medium text-white">Impact Player Index</div>
+                <div className="text-xs text-gray-400">Match-winning contributions</div>
+              </div>
+              <Zap className="w-5 h-5 text-yellow-400" />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Team Strategy Insights */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 rounded-lg bg-purple-500/20">
+              <BarChart3 className="w-5 h-5 text-purple-400" />
+            </div>
+            <h4 className="text-lg font-semibold text-white">Team Strategy Metrics</h4>
+          </div>
+          
+          <div className="space-y-3">
+            <div className="p-3 bg-white/5 rounded-lg">
+              <div className="text-sm font-medium text-white mb-2">Power Play Optimization</div>
+              <div className="w-full bg-gray-700 rounded-full h-2">
+                <div className="bg-blue-400 h-2 rounded-full" style={{width: '75%'}}></div>
+              </div>
+              <div className="text-xs text-gray-400 mt-1">First 6 overs scoring rate</div>
+            </div>
+            
+            <div className="p-3 bg-white/5 rounded-lg">
+              <div className="text-sm font-medium text-white mb-2">Death Over Efficiency</div>
+              <div className="w-full bg-gray-700 rounded-full h-2">
+                <div className="bg-red-400 h-2 rounded-full" style={{width: '68%'}}></div>
+              </div>
+              <div className="text-xs text-gray-400 mt-1">Final 4 overs economy</div>
+            </div>
+            
+            <div className="p-3 bg-white/5 rounded-lg">
+              <div className="text-sm font-medium text-white mb-2">All-Rounder Balance</div>
+              <div className="w-full bg-gray-700 rounded-full h-2">
+                <div className="bg-green-400 h-2 rounded-full" style={{width: '82%'}}></div>
+              </div>
+              <div className="text-xs text-gray-400 mt-1">Batting + Bowling contribution</div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Research-Based Insights */}
+      <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+        <h4 className="text-lg font-semibold text-white mb-4">Research-Based Analytics Framework</h4>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
+            <h5 className="text-sm font-medium text-blue-400 mb-2">Batting Analytics</h5>
+            <ul className="space-y-1 text-xs text-gray-300">
+              <li>• Strike Rate vs Average balance</li>
+              <li>• Boundary percentage analysis</li>
+              <li>• Power play impact scoring</li>
+              <li>• Finisher contribution rate</li>
+            </ul>
+          </div>
+          
+          <div className="p-4 bg-green-500/10 rounded-lg border border-green-500/20">
+            <h5 className="text-sm font-medium text-green-400 mb-2">Bowling Analytics</h5>
+            <ul className="space-y-1 text-xs text-gray-300">
+              <li>• Economy rate consistency</li>
+              <li>• Dot ball percentage</li>
+              <li>• Wicket-taking ability</li>
+              <li>• Death over specialists</li>
+            </ul>
+          </div>
+          
+          <div className="p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
+            <h5 className="text-sm font-medium text-purple-400 mb-2">Team Dynamics</h5>
+            <ul className="space-y-1 text-xs text-gray-300">
+              <li>• Squad balance optimization</li>
+              <li>• Match-up strategies</li>
+              <li>• Home advantage impact</li>
+              <li>• Captaincy influence</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+    const RecentActivity = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -529,7 +686,8 @@ export default function AnalyticsPage() {
               {[
                 { id: 'overview', label: 'Overview', icon: BarChart3 },
                 { id: 'performers', label: 'Player Rankings', icon: Trophy },
-                { id: 'teams', label: 'Team Analysis', icon: Users },
+                { id: 'teams', label: 'Squad Analysis', icon: Users },
+                { id: 'research', label: 'Advanced Analytics', icon: BarChart3 },
                 { id: 'activity', label: 'Pre-Season Updates', icon: Activity }
               ].map((tab) => (
                 <button
@@ -559,6 +717,7 @@ export default function AnalyticsPage() {
                 {activeTab === 'overview' && <PlayerOverview />}
                 {activeTab === 'performers' && <TopPerformers />}
                 {activeTab === 'teams' && <TeamAnalytics />}
+                {activeTab === 'research' && <ResearchInsights />}
                 {activeTab === 'activity' && <RecentActivity />}
               </>
             )}
