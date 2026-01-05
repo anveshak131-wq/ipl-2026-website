@@ -455,10 +455,15 @@ const BattingStatsPage = () => {
 
   // Calculate summary stats
   const summaryStats = useMemo(() => {
-    // Filter players based on team selection first
-    const playersForStats = selectedTeam === 'all' 
-      ? players.filter(p => (p.league || 'ipl') === 'ipl')
-      : players.filter(p => (p.league || 'ipl') === 'ipl' && p.teamId === selectedTeam);
+    // Filter players based on team selection and search query first
+    const playersForStats = players.filter(player => {
+      // Only show IPL players
+      const isIPL = (player.league || 'ipl') === 'ipl';
+      const matchesSearch = player.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           player.teamId?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesTeam = selectedTeam === 'all' || player.teamId === selectedTeam;
+      return isIPL && matchesSearch && matchesTeam;
+    });
     
     const activeBatsmen = playersForStats.filter(p => p.stats?.battingInnings > 0 || p.stats?.runs > 0);
     const totalRuns = activeBatsmen.reduce((sum, p) => sum + (p.stats?.runs || 0), 0);
@@ -468,7 +473,7 @@ const BattingStatsPage = () => {
     const avgRuns = activeBatsmen.length > 0 ? Math.round(totalRuns / activeBatsmen.length) : 0;
 
     return { activeBatsmen: activeBatsmen.length, totalRuns, totalHundreds, totalFifties, highestScore, avgRuns };
-  }, [players, selectedTeam]);
+  }, [players, selectedTeam, searchQuery]);
 
   const SortIcon = ({ field }: { field: string }) => {
     if (sortField !== field) return <SortAsc className="w-4 h-4 text-gray-500 opacity-0 group-hover:opacity-100" />;
