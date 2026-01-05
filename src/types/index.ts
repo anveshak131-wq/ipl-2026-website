@@ -37,6 +37,7 @@ export interface Player {
   isCaptain: boolean;
   bowlingStyle: string;
   battingStyle: string;
+  photoUrl?: string; // Optional player photo URL
   stats: {
     matches: number;
     runs: number;

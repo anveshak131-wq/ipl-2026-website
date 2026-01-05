@@ -133,6 +133,87 @@ export default function AdminPlayers() {
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const [savedSearches, setSavedSearches] = useState<{ name: string; query: string; filters: any }[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Performance helper functions
+  const getPerformanceColor = (player: Player): string => {
+    const runs = player.stats?.runs || 0;
+    const wickets = player.stats?.wickets || 0;
+    const average = parseFloat(player.stats?.average) || 0;
+    
+    if (player.role === 'Batsman' || player.role === 'Wicket-keeper') {
+      if (runs > 500) return '#10B981'; // Green - Excellent
+      if (runs > 300) return '#3B82F6'; // Blue - Good
+      if (runs > 100) return '#F59E0B'; // Yellow - Average
+      return '#EF4444'; // Red - Poor
+    } else if (player.role === 'Bowler') {
+      if (wickets > 20) return '#10B981';
+      if (wickets > 10) return '#3B82F6';
+      if (wickets > 5) return '#F59E0B';
+      return '#EF4444';
+    } else { // All-rounder
+      const performance = (runs / 10) + (wickets * 5);
+      if (performance > 100) return '#10B981';
+      if (performance > 50) return '#3B82F6';
+      if (performance > 25) return '#F59E0B';
+      return '#EF4444';
+    }
+  };
+
+  const getPerformanceIndicator = (player: Player): string => {
+    const runs = player.stats?.runs || 0;
+    const wickets = player.stats?.wickets || 0;
+    
+    if (player.role === 'Batsman' || player.role === 'Wicket-keeper') {
+      if (runs > 500) return 'A';
+      if (runs > 300) return 'B';
+      if (runs > 100) return 'C';
+      return 'D';
+    } else if (player.role === 'Bowler') {
+      if (wickets > 20) return 'A';
+      if (wickets > 10) return 'B';
+      if (wickets > 5) return 'C';
+      return 'D';
+    } else { // All-rounder
+      const performance = (runs / 10) + (wickets * 5);
+      if (performance > 100) return 'A';
+      if (performance > 50) return 'B';
+      if (performance > 25) return 'C';
+      return 'D';
+    }
+  };
+
+  const getPerformanceLabel = (player: Player): string => {
+    const indicator = getPerformanceIndicator(player);
+    switch (indicator) {
+      case 'A': return 'Excellent';
+      case 'B': return 'Good';
+      case 'C': return 'Average';
+      case 'D': return 'Poor';
+      default: return 'Unknown';
+    }
+  };
+
+  const getPerformanceTextColor = (player: Player): string => {
+    const indicator = getPerformanceIndicator(player);
+    switch (indicator) {
+      case 'A': return 'text-green-400';
+      case 'B': return 'text-blue-400';
+      case 'C': return 'text-yellow-400';
+      case 'D': return 'text-red-400';
+      default: return 'text-gray-400';
+    }
+  };
+
+  const generatePerformanceBars = (player: Player): number[] => {
+    // Generate 5 bars representing recent performance (simulated data)
+    const basePerformance = getPerformanceIndicator(player);
+    const baseValue = basePerformance === 'A' ? 80 : basePerformance === 'B' ? 60 : basePerformance === 'C' ? 40 : 20;
+    
+    return Array.from({ length: 5 }, (_, i) => {
+      const variation = Math.random() * 40 - 20; // -20 to +20 variation
+      return Math.max(10, Math.min(100, baseValue + variation));
+    });
+  };
   const [formData, setFormData] = useState<{
     name: string;
     role: 'Batsman' | 'Bowler' | 'All-rounder' | 'Wicket-keeper';
@@ -2210,102 +2291,162 @@ export default function AdminPlayers() {
                       
                       {/* Content */}
                       <div className="relative z-10">
-                        {/* Player Header */}
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-3 flex-1 min-w-0">
-                            {player.nationality && (
-                              <FlagImage nationality={player.nationality} size="sm" />
-                            )}
-                            <div className="flex-1 min-w-0">
-                              <h3 className="text-white font-bold text-lg truncate">{player.name}</h3>
-                              <p className="text-gray-400 text-sm truncate">{player.nationality}</p>
+                        {/* Player Header with Avatar */}
+                        <div className="flex items-start gap-4 mb-4">
+                          {/* Player Avatar */}
+                          <div className="relative group">
+                            <div className="w-16 h-16 rounded-full overflow-hidden border-3 border-white/20 shadow-xl group-hover:scale-110 transition-transform duration-300"
+                                 style={{ borderColor: team?.colors?.primary || '#3B82F6' }}>
+                              {player.photoUrl ? (
+                                <img 
+                                  src={player.photoUrl} 
+                                  alt={player.name}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                  }}
+                                />
+                              ) : null}
+                              <div className={`w-full h-full flex items-center justify-center text-white font-bold text-xl ${player.photoUrl ? 'hidden' : ''}`}
+                                   style={{ background: `linear-gradient(135deg, ${team?.colors?.primary || '#3B82F6'}, ${team?.colors?.secondary || '#8B5CF6'})` }}>
+                                {player.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                              </div>
+                            </div>
+                            {/* Performance Indicator */}
+                            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white shadow-lg flex items-center justify-center"
+                                 style={{ 
+                                   backgroundColor: getPerformanceColor(player),
+                                   borderColor: team?.colors?.primary || '#3B82F6'
+                                 }}>
+                              <span className="text-white text-xs font-bold">{getPerformanceIndicator(player)}</span>
                             </div>
                           </div>
-                          {player.isCaptain && (
-                            <div className="flex-shrink-0">
-                              <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" title="Captain" />
+
+                          {/* Player Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <h3 className="text-white font-bold text-lg truncate group-hover:text-blue-300 transition-colors">{player.name}</h3>
+                                <div className="flex items-center gap-2 text-sm">
+                                  {player.nationality && (
+                                    <FlagImage nationality={player.nationality} size="sm" />
+                                  )}
+                                  <span className="text-gray-400">{player.nationality}</span>
+                                  {player.isCaptain && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
+                                      <CustomEmoji type="star" size={12} /> C
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
                             </div>
-                          )}
+                          </div>
                         </div>
 
-                        {/* Team Badge */}
+                        {/* Team Badge with Enhanced Styling */}
                         {team && (
-                          <div className="flex items-center gap-2 mb-4">
+                          <div className="flex items-center gap-3 mb-4 p-2.5 rounded-lg border border-white/10"
+                               style={{ background: `linear-gradient(135deg, ${team.colors.primary}20, ${team.colors.secondary}10)` }}>
                             <div
-                              className="w-8 h-8 rounded-lg text-white font-bold text-xs flex items-center justify-center shadow-lg"
+                              className="w-10 h-10 rounded-xl text-white font-bold text-sm flex items-center justify-center shadow-lg border-2 border-white/20"
                               style={{ backgroundColor: team.colors.primary }}
                             >
                               {team.shortName}
                             </div>
-                            <span className="text-gray-300 text-sm font-medium truncate">{team.name}</span>
+                            <div className="flex-1">
+                              <p className="text-white font-medium text-sm">{team.name}</p>
+                              <p className="text-gray-400 text-xs">Jersey #{player.jerseyNumber || 'N/A'}</p>
+                            </div>
                           </div>
                         )}
 
-                        {/* Role Badge - Enhanced with all role types */}
+                        {/* Role Badge with Enhanced Styling */}
                         <div className="mb-4">
-                          <span className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border-2 transition-all duration-300 hover:scale-110 ${roleBadgeColors}`}>
-                            {/* Icon based on role type */}
+                          <span className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border-2 transition-all duration-300 hover:scale-105 shadow-lg ${roleBadgeColors}`}>
                             {roleIcon}
                             <span className="font-extrabold">{roleLabel}</span>
                           </span>
                         </div>
 
+                        {/* Performance Graph */}
+                        <div className="mb-4 p-3 rounded-lg border border-white/10 bg-white/5">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs text-gray-400 font-medium">Recent Form</span>
+                            <span className={`text-xs font-bold ${getPerformanceTextColor(player)}`}>
+                              {getPerformanceLabel(player)}
+                            </span>
+                          </div>
+                          <div className="flex gap-1 h-8">
+                            {generatePerformanceBars(player).map((height, index) => (
+                              <div
+                                key={index}
+                                className="flex-1 rounded-t transition-all duration-300 hover:opacity-80"
+                                style={{
+                                  height: `${height}%`,
+                                  background: `linear-gradient(to top, ${team?.colors?.primary || '#3B82F6'}, ${team?.colors?.secondary || '#8B5CF6'})`,
+                                  opacity: height > 0 ? 1 : 0.3
+                                }}
+                              />
+                            ))}
+                          </div>
+                        </div>
+
                         {/* Stats Preview */}
                         {currentLeague !== 'wpl' && (
                           <div className="grid grid-cols-2 gap-3 mb-4 pt-4 border-t border-white/10">
-                            <div>
-                              <p className="text-xs text-gray-400 mb-1">Runs</p>
-                              <p className="text-ipl-gold font-bold text-lg">{player.stats.runs || 0}</p>
+                            <div className="group">
+                              <p className="text-xs text-gray-400 mb-1 group-hover:text-blue-400 transition-colors">Runs</p>
+                              <p className="text-ipl-gold font-bold text-lg group-hover:scale-110 transition-transform">{player.stats.runs || 0}</p>
                             </div>
-                            <div>
-                              <p className="text-xs text-gray-400 mb-1">Wickets</p>
-                              <p className="text-blue-400 font-bold text-lg">{player.stats.wickets || 0}</p>
+                            <div className="group">
+                              <p className="text-xs text-gray-400 mb-1 group-hover:text-blue-400 transition-colors">Wickets</p>
+                              <p className="text-blue-400 font-bold text-lg group-hover:scale-110 transition-transform">{player.stats.wickets || 0}</p>
                             </div>
-                            <div>
-                              <p className="text-xs text-gray-400 mb-1">Avg</p>
-                              <p className="text-purple-400 font-semibold">{player.stats.average && player.stats.average > 0 ? player.stats.average.toFixed(2) : '-'}</p>
+                            <div className="group">
+                              <p className="text-xs text-gray-400 mb-1 group-hover:text-blue-400 transition-colors">Avg</p>
+                              <p className="text-purple-400 font-semibold group-hover:scale-110 transition-transform">{player.stats.average && player.stats.average > 0 ? player.stats.average.toFixed(2) : '-'}</p>
                             </div>
-                            <div>
-                              <p className="text-xs text-gray-400 mb-1">SR</p>
-                              <p className="text-gray-300 font-semibold">{player.stats.strikeRate && player.stats.strikeRate > 0 ? player.stats.strikeRate.toFixed(1) : '-'}</p>
+                            <div className="group">
+                              <p className="text-xs text-gray-400 mb-1 group-hover:text-blue-400 transition-colors">SR</p>
+                              <p className="text-gray-300 font-semibold group-hover:scale-110 transition-transform">{player.stats.strikeRate && player.stats.strikeRate > 0 ? player.stats.strikeRate.toFixed(1) : '-'}</p>
                             </div>
                           </div>
                         )}
 
-                        {/* Player Info */}
-                        <div className="flex items-center justify-between text-sm pt-4 border-t border-white/10">
-                          <div className="flex items-center gap-2 text-gray-400">
-                            {player.jerseyNumber > 0 && (
-                              <span className="inline-flex items-center justify-center w-6 h-6 bg-ipl-gold/20 text-ipl-gold rounded-full font-bold text-xs">
-                                #{player.jerseyNumber}
-                              </span>
-                            )}
-                            {player.age > 0 && (
-                              <span>{player.age}y</span>
-                            )}
-                          </div>
-                          <div className="flex gap-2">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleEditPlayer(player);
-                              }}
-                              className="p-2.5 bg-blue-500/20 hover:bg-blue-500/40 text-blue-300 hover:text-blue-100 rounded-xl transition-all duration-300 border border-blue-500/30 hover:border-blue-400/60 hover:scale-110 shadow-lg hover:shadow-blue-500/20 group/btn"
-                              title="Edit"
-                            >
-                              <Edit2 className="w-4 h-4 group-hover/btn:rotate-12 transition-transform duration-300" />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeletePlayer(player.id, player.name);
-                              }}
-                              className="p-2.5 bg-red-500/20 hover:bg-red-500/40 text-red-300 hover:text-red-100 rounded-xl transition-all duration-300 border border-red-500/30 hover:border-red-400/60 hover:scale-110 shadow-lg hover:shadow-red-500/20 group/btn"
-                              title="Delete"
-                            >
-                              <Trash2 className="w-4 h-4 group-hover/btn:rotate-12 transition-transform duration-300" />
-                            </button>
-                          </div>
+                        {/* Quick Action Buttons */}
+                        <div className="flex gap-2 pt-4 border-t border-white/10">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditPlayer(player);
+                            }}
+                            className="flex-1 p-2.5 bg-blue-500/20 hover:bg-blue-500/40 text-blue-300 hover:text-blue-100 rounded-xl transition-all duration-300 border border-blue-500/30 hover:border-blue-400/60 hover:scale-105 shadow-lg hover:shadow-blue-500/20 group"
+                            title="Edit Player"
+                          >
+                            <Edit2 className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300 mx-auto" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeletePlayer(player.id, player.name);
+                            }}
+                            className="flex-1 p-2.5 bg-red-500/20 hover:bg-red-500/40 text-red-300 hover:text-red-100 rounded-xl transition-all duration-300 border border-red-500/30 hover:border-red-400/60 hover:scale-105 shadow-lg hover:shadow-red-500/20 group"
+                            title="Delete Player"
+                          >
+                            <Trash2 className="w-4 h-4 group-hover:rotate-12 transition-transform duration-300 mx-auto" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // View player details - could open a modal or navigate
+                              console.log('View player details:', player);
+                            }}
+                            className="flex-1 p-2.5 bg-green-500/20 hover:bg-green-500/40 text-green-300 hover:text-green-100 rounded-xl transition-all duration-300 border border-green-500/30 hover:border-green-400/60 hover:scale-105 shadow-lg hover:shadow-green-500/20 group"
+                            title="View Details"
+                          >
+                            <Eye className="w-4 h-4 group-hover:scale-110 transition-transform duration-300 mx-auto" />
+                          </button>
                         </div>
                       </div>
                     </div>
