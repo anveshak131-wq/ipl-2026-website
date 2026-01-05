@@ -436,22 +436,19 @@ export default function AdminPlayers() {
       highest: string;
       fours: string;
       sixes: string;
-      fifties: string;
-      hundreds: string;
-      bestBowling: string;
-      // Batting-specific stats
+      balls: string;
       battingInnings: string;
       notOuts: string;
-      ballsFaced: string;
       battingAverage: string;
       battingStrikeRate: string;
-      // Bowling-specific stats
       bowlingInnings: string;
       balls: string;
       maidens: string;
       runsConceded: string;
+      bowlingAverage: string;
       bowlingStrikeRate: string;
       fiveWickets: string;
+      bestBowling: string;
     };
   }>({
     name: '',
