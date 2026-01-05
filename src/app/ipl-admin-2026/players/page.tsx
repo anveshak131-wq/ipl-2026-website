@@ -63,6 +63,31 @@ const BATTING_STYLES = [
 // Current season for which transfer rules apply (used to enforce auction locks)
 const CURRENT_SEASON = 2027;
 
+// Levenshtein distance for fuzzy matching
+function levenshteinDistance(str1: string, str2: string): number {
+  const matrix = [];
+  for (let i = 0; i <= str2.length; i++) {
+    matrix[i] = [i];
+  }
+  for (let j = 0; j <= str1.length; j++) {
+    matrix[0][j] = j;
+  }
+  for (let i = 1; i <= str2.length; i++) {
+    for (let j = 1; j <= str1.length; j++) {
+      if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j] + 1
+        );
+      }
+    }
+  }
+  return matrix[str2.length][str1.length];
+}
+
 // Mark this page as dynamic to prevent pre-rendering
 // Note: Removed for static export compatibility
 
@@ -95,6 +120,19 @@ export default function AdminPlayers() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedRole, setSelectedRole] = useState<string>('all');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [advancedFilters, setAdvancedFilters] = useState({
+    ageRange: { min: '', max: '' },
+    runsRange: { min: '', max: '' },
+    wicketsRange: { min: '', max: '' },
+    battingStyle: '',
+    bowlingStyle: '',
+    isCaptain: '',
+    teamId: ''
+  });
+  const [searchSuggestions, setSearchSuggestions] = useState<string[]>([]);
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [savedSearches, setSavedSearches] = useState<{ name: string; query: string; filters: any }[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [formData, setFormData] = useState<{
     name: string;
     role: 'Batsman' | 'Bowler' | 'All-rounder' | 'Wicket-keeper';
@@ -296,6 +334,81 @@ export default function AdminPlayers() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.dateOfBirth, currentLeague]);
+
+  // Search functionality handlers
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    
+    // Generate suggestions
+    if (value.length > 1) {
+      const suggestions = players
+        .filter(player => 
+          player.name.toLowerCase().includes(value.toLowerCase()) ||
+          player.nationality.toLowerCase().includes(value.toLowerCase())
+        )
+        .slice(0, 5)
+        .map(player => player.name);
+      setSearchSuggestions(suggestions);
+      setShowSuggestions(true);
+    } else {
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleSearchSubmit = (value: string) => {
+    // Add to search history
+    if (value && !searchHistory.includes(value)) {
+      setSearchHistory(prev => [value, ...prev.slice(0, 9)]);
+    }
+    setShowSuggestions(false);
+  };
+
+  const saveSearch = () => {
+    const searchName = prompt('Enter a name for this search:');
+    if (searchName && searchQuery) {
+      setSavedSearches(prev => [...prev, {
+        name: searchName,
+        query: searchQuery,
+        filters: advancedFilters
+      }]);
+    }
+  };
+
+  const loadSavedSearch = (savedSearch: { name: string; query: string; filters: any }) => {
+    setSearchQuery(savedSearch.query);
+    setAdvancedFilters(savedSearch.filters);
+  };
+
+  const clearAdvancedFilters = () => {
+    setAdvancedFilters({
+      ageRange: { min: '', max: '' },
+      runsRange: { min: '', max: '' },
+      wicketsRange: { min: '', max: '' },
+      battingStyle: '',
+      bowlingStyle: '',
+      isCaptain: '',
+      teamId: ''
+    });
+  };
+
+  const hasActiveFilters = () => {
+    return Object.values(advancedFilters).some(value => 
+      typeof value === 'string' ? value !== '' : 
+      typeof value === 'object' ? (value.min !== '' || value.max !== '') : false
+    );
+  };
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showSuggestions) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showSuggestions]);
 
   const fetchData = async () => {
     try {
@@ -1141,11 +1254,38 @@ export default function AdminPlayers() {
     wicketkeepers: filteredPlayers.filter(p => p.role === 'Wicket-keeper').length,
   };
 
-  // Apply search filter
-  let searchFilteredPlayers = filteredPlayers.filter(player =>
-    player.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    player.nationality.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Apply search filter with advanced features
+  let searchFilteredPlayers = filteredPlayers.filter(player => {
+    // Basic search with fuzzy matching
+    const searchLower = searchQuery.toLowerCase();
+    const nameMatch = player.name.toLowerCase().includes(searchLower);
+    const nationalityMatch = player.nationality.toLowerCase().includes(searchLower);
+    const teamMatch = player.teamId?.toLowerCase().includes(searchLower);
+    
+    // Phonetic search (simple approximation)
+    const phoneticMatch = searchQuery.length > 2 && (
+      player.name.toLowerCase().replace(/[^a-z]/g, '').includes(searchLower.replace(/[^a-z]/g, '')) ||
+      levenshteinDistance(player.name.toLowerCase(), searchLower) <= 2
+    );
+    
+    const basicMatch = nameMatch || nationalityMatch || teamMatch || phoneticMatch;
+    
+    if (!basicMatch) return false;
+    
+    // Apply advanced filters
+    if (advancedFilters.ageRange.min && (!player.age || player.age < parseInt(advancedFilters.ageRange.min))) return false;
+    if (advancedFilters.ageRange.max && (!player.age || player.age > parseInt(advancedFilters.ageRange.max))) return false;
+    if (advancedFilters.runsRange.min && (!player.stats?.runs || parseInt(player.stats.runs) < parseInt(advancedFilters.runsRange.min))) return false;
+    if (advancedFilters.runsRange.max && (!player.stats?.runs || parseInt(player.stats.runs) > parseInt(advancedFilters.runsRange.max))) return false;
+    if (advancedFilters.wicketsRange.min && (!player.stats?.wickets || parseInt(player.stats.wickets) < parseInt(advancedFilters.wicketsRange.min))) return false;
+    if (advancedFilters.wicketsRange.max && (!player.stats?.wickets || parseInt(player.stats.wickets) > parseInt(advancedFilters.wicketsRange.max))) return false;
+    if (advancedFilters.battingStyle && player.battingStyle !== advancedFilters.battingStyle) return false;
+    if (advancedFilters.bowlingStyle && player.bowlingStyle !== advancedFilters.bowlingStyle) return false;
+    if (advancedFilters.isCaptain !== '' && player.isCaptain !== (advancedFilters.isCaptain === 'true')) return false;
+    if (advancedFilters.teamId && player.teamId !== advancedFilters.teamId) return false;
+    
+    return true;
+  });
   
   // Apply role filter
   if (selectedRole !== 'all') {
@@ -1475,28 +1615,79 @@ export default function AdminPlayers() {
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-purple-500/5 to-pink-500/5 rounded-2xl opacity-0 hover:opacity-100 transition-opacity duration-500"></div>
               
               <div className="relative z-10 flex gap-4 flex-col md:flex-row items-stretch">
-                {/* Enhanced Search Bar */}
+                {/* Enhanced Search Bar with Advanced Features */}
                 <div className="relative flex-1 group">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
                     <Search className={`w-5 h-5 transition-colors duration-300 ${searchQuery ? 'text-blue-400' : 'text-gray-400 group-hover:text-gray-300'}`} />
                   </div>
-                <input
-                  type="text"
-                  placeholder="Search by player name, nationality..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-12 pr-4 py-4 bg-gray-900/70 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 hover:border-white/20 shadow-lg"
-                  />
-                  {searchQuery && (
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search by player name, nationality..."
+                      value={searchQuery}
+                      onChange={(e) => handleSearchChange(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleSearchSubmit(searchQuery);
+                        }
+                      }}
+                      onFocus={() => searchQuery && setShowSuggestions(true)}
+                      className="w-full pl-12 pr-4 py-4 bg-gray-900/70 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all duration-300 hover:border-white/20 shadow-lg"
+                    />
+                    
+                    {/* Search Suggestions Dropdown */}
+                    {showSuggestions && searchSuggestions.length > 0 && (
+                      <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 border border-white/10 rounded-lg shadow-xl z-50">
+                        {searchSuggestions.map((suggestion, index) => (
+                          <button
+                            key={index}
+                            onClick={() => {
+                              setSearchQuery(suggestion);
+                              handleSearchSubmit(suggestion);
+                              setShowSuggestions(false);
+                            }}
+                            className="w-full px-4 py-3 text-left text-white hover:bg-gray-700 transition-colors first:rounded-t-lg last:rounded-b-lg"
+                          >
+                            <Search className="w-4 h-4 inline mr-2 text-gray-400" />
+                            {suggestion}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Search Actions */}
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery('')}
+                        className="p-1.5 rounded-lg bg-gray-700/50 hover:bg-gray-700 text-gray-400 hover:text-white transition-all"
+                        title="Clear search"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
                     <button
-                      onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg bg-gray-700/50 hover:bg-gray-700 text-gray-400 hover:text-white transition-all"
+                      onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                      className={`p-1.5 rounded-lg transition-all ${
+                        hasActiveFilters() 
+                          ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' 
+                          : 'bg-gray-700/50 text-gray-400 hover:text-white'
+                      }`}
+                      title="Advanced filters"
                     >
-                      <X className="w-4 h-4" />
+                      <Filter className="w-4 h-4" />
                     </button>
-                  )}
-                </div>
-
+                    <button
+                      onClick={saveSearch}
+                      disabled={!searchQuery}
+                      className="p-1.5 rounded-lg bg-gray-700/50 hover:bg-gray-700 text-gray-400 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Save search"
+                    >
+                      <Star className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>  
                 {/* Role Filter - Enhanced */}
               <div className="relative md:min-w-[200px] z-[100]" data-filter-dropdown>
                 <button
@@ -1699,6 +1890,207 @@ export default function AdminPlayers() {
                 </div>
               </div>
             </div>
+
+            {/* Advanced Filters Panel */}
+            {showAdvancedFilters && (
+              <div className="mt-4 bg-gray-800/60 border border-white/10 rounded-xl p-6 backdrop-blur-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <Filter className="w-5 h-5 text-blue-400" />
+                    Advanced Filters
+                  </h3>
+                  <div className="flex gap-2">
+                    {hasActiveFilters() && (
+                      <button
+                        onClick={clearAdvancedFilters}
+                        className="text-sm px-3 py-1.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white transition-all"
+                      >
+                        Clear All
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setShowAdvancedFilters(false)}
+                      className="text-gray-400 hover:text-white transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Age Range */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Age Range</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        placeholder="Min"
+                        value={advancedFilters.ageRange.min}
+                        onChange={(e) => setAdvancedFilters(prev => ({
+                          ...prev,
+                          ageRange: { ...prev.ageRange, min: e.target.value }
+                        }))}
+                        className="w-full px-3 py-2 bg-gray-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                      />
+                      <input
+                        type="number"
+                        placeholder="Max"
+                        value={advancedFilters.ageRange.max}
+                        onChange={(e) => setAdvancedFilters(prev => ({
+                          ...prev,
+                          ageRange: { ...prev.ageRange, max: e.target.value }
+                        }))}
+                        className="w-full px-3 py-2 bg-gray-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Runs Range */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Runs Range</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        placeholder="Min"
+                        value={advancedFilters.runsRange.min}
+                        onChange={(e) => setAdvancedFilters(prev => ({
+                          ...prev,
+                          runsRange: { ...prev.runsRange, min: e.target.value }
+                        }))}
+                        className="w-full px-3 py-2 bg-gray-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                      />
+                      <input
+                        type="number"
+                        placeholder="Max"
+                        value={advancedFilters.runsRange.max}
+                        onChange={(e) => setAdvancedFilters(prev => ({
+                          ...prev,
+                          runsRange: { ...prev.runsRange, max: e.target.value }
+                        }))}
+                        className="w-full px-3 py-2 bg-gray-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Wickets Range */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Wickets Range</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        placeholder="Min"
+                        value={advancedFilters.wicketsRange.min}
+                        onChange={(e) => setAdvancedFilters(prev => ({
+                          ...prev,
+                          wicketsRange: { ...prev.wicketsRange, min: e.target.value }
+                        }))}
+                        className="w-full px-3 py-2 bg-gray-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                      />
+                      <input
+                        type="number"
+                        placeholder="Max"
+                        value={advancedFilters.wicketsRange.max}
+                        onChange={(e) => setAdvancedFilters(prev => ({
+                          ...prev,
+                          wicketsRange: { ...prev.wicketsRange, max: e.target.value }
+                        }))}
+                        className="w-full px-3 py-2 bg-gray-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Batting Style */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Batting Style</label>
+                    <select
+                      value={advancedFilters.battingStyle}
+                      onChange={(e) => setAdvancedFilters(prev => ({ ...prev, battingStyle: e.target.value }))}
+                      className="w-full px-3 py-2 bg-gray-700 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    >
+                      <option value="">All Styles</option>
+                      {BATTING_STYLES.map(style => (
+                        <option key={style} value={style}>{style}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Bowling Style */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Bowling Style</label>
+                    <select
+                      value={advancedFilters.bowlingStyle}
+                      onChange={(e) => setAdvancedFilters(prev => ({ ...prev, bowlingStyle: e.target.value }))}
+                      className="w-full px-3 py-2 bg-gray-700 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    >
+                      <option value="">All Styles</option>
+                      {BOWLING_STYLES.map(style => (
+                        <option key={style} value={style}>{style}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Captain Status */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Captain Status</label>
+                    <select
+                      value={advancedFilters.isCaptain}
+                      onChange={(e) => setAdvancedFilters(prev => ({ ...prev, isCaptain: e.target.value }))}
+                      className="w-full px-3 py-2 bg-gray-700 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    >
+                      <option value="">All Players</option>
+                      <option value="true">Captain</option>
+                      <option value="false">Not Captain</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Search History & Saved Searches */}
+            {(searchHistory.length > 0 || savedSearches.length > 0) && (
+              <div className="mt-4 flex gap-4 flex-wrap">
+                {/* Search History */}
+                {searchHistory.length > 0 && (
+                  <div className="flex-1 min-w-[300px]">
+                    <h4 className="text-sm font-medium text-gray-400 mb-2">Recent Searches</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {searchHistory.slice(0, 5).map((term, index) => (
+                        <button
+                          key={index}
+                          onClick={() => {
+                            setSearchQuery(term);
+                            handleSearchSubmit(term);
+                          }}
+                          className="text-xs px-3 py-1.5 rounded-lg bg-gray-700/50 hover:bg-gray-700 text-gray-300 hover:text-white transition-all border border-white/10"
+                        >
+                          <Search className="w-3 h-3 inline mr-1" />
+                          {term}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Saved Searches */}
+                {savedSearches.length > 0 && (
+                  <div className="flex-1 min-w-[300px]">
+                    <h4 className="text-sm font-medium text-gray-400 mb-2">Saved Searches</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {savedSearches.map((saved, index) => (
+                        <button
+                          key={index}
+                          onClick={() => loadSavedSearch(saved)}
+                          className="text-xs px-3 py-1.5 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 hover:text-blue-100 transition-all border border-blue-500/30"
+                        >
+                          <Star className="w-3 h-3 inline mr-1" />
+                          {saved.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Players Display - Grid or List View */}
