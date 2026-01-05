@@ -3,92 +3,92 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  BarChart3, 
+  User, 
   TrendingUp, 
-  Users, 
+  Target, 
+  Award, 
   Activity, 
-  Database, 
   Zap, 
   Clock, 
-  Server,
-  GitBranch,
-  Package,
-  AlertCircle,
-  CheckCircle,
+  BarChart3,
+  Trophy,
+  Star,
   ArrowUpRight,
   ArrowDownRight,
   RefreshCw,
-  Settings,
-  Download,
   Filter,
   Calendar,
-  Target
+  Search,
+  Users,
+  Shield,
+  Heart
 } from 'lucide-react';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import { useLeague } from '@/contexts/LeagueContext';
 
-// Mock data for demonstration
-const mockAnalyticsData = {
-  pipeline: {
-    status: 'active',
-    throughput: 15420,
-    latency: 85,
-    errorRate: 0.02,
-    uptime: 99.95
+// Mock player analytics data
+const mockPlayerAnalytics = {
+  overview: {
+    totalPlayers: 284,
+    activePlayers: 156,
+    averageRating: 7.8,
+    topPerformers: 42,
+    emergingTalent: 18
   },
-  kafka: {
-    topics: 12,
-    messagesPerSecond: 847,
-    consumerGroups: 5,
-    storageUsed: '2.4 TB'
+  performanceMetrics: [
+    { name: 'Virat Kohli', team: 'RCB', runs: 582, average: 52.9, strikeRate: 138.4, rating: 9.2, trend: 'up' },
+    { name: 'Rohit Sharma', team: 'MI', runs: 445, average: 41.2, strikeRate: 129.8, rating: 8.7, trend: 'up' },
+    { name: 'KL Rahul', team: 'LSG', runs: 412, average: 37.4, strikeRate: 134.2, rating: 8.3, trend: 'down' },
+    { name: 'Jasprit Bumrah', team: 'MI', wickets: 23, economy: 7.2, average: 18.4, rating: 9.0, trend: 'up' },
+    { name: 'Rashid Khan', team: 'GT', wickets: 19, economy: 6.8, average: 20.1, rating: 8.8, trend: 'stable' }
+  ],
+  teamStats: [
+    { team: 'Mumbai Indians', players: 24, avgRating: 8.2, totalRuns: 2456, totalWickets: 56 },
+    { team: 'Chennai Super Kings', players: 24, avgRating: 7.9, totalRuns: 2389, totalWickets: 52 },
+    { team: 'Royal Challengers Bangalore', players: 24, avgRating: 7.7, totalRuns: 2234, totalWickets: 48 },
+    { team: 'Gujarat Titans', players: 24, avgRating: 8.1, totalRuns: 2298, totalWickets: 54 }
+  ],
+  playerCategories: {
+    batsmen: 142,
+    bowlers: 98,
+    allRounders: 32,
+    wicketKeepers: 12
   },
-  redis: {
-    connections: 342,
-    hitRate: 94.7,
-    memoryUsed: '1.8 GB',
-    operationsPerSecond: 12500
-  },
-  elasticsearch: {
-    indices: 8,
-    documents: 1250000,
-    queryTime: 12,
-    indexingRate: 450
-  },
-  realTimeMetrics: [
-    { timestamp: '10:00:00', matches: 45, users: 12500, events: 84720 },
-    { timestamp: '10:05:00', matches: 48, users: 13200, events: 89340 },
-    { timestamp: '10:10:00', matches: 52, users: 14100, events: 95680 },
-    { timestamp: '10:15:00', matches: 47, users: 12800, events: 86520 },
-    { timestamp: '10:20:00', matches: 51, users: 13900, events: 94200 }
+  recentActivity: [
+    { player: 'Virat Kohli', action: 'Scored 89 runs', match: 'RCB vs MI', time: '2 hours ago', impact: 'high' },
+    { player: 'Jasprit Bumrah', action: 'Took 3 wickets', match: 'MI vs CSK', time: '4 hours ago', impact: 'high' },
+    { player: 'Rohit Sharma', action: 'Scored 45 runs', match: 'MI vs RCB', time: '6 hours ago', impact: 'medium' },
+    { player: 'KL Rahul', action: 'Scored 32 runs', match: 'LSG vs GT', time: '8 hours ago', impact: 'medium' }
   ]
 };
 
 export default function AnalyticsPage() {
   const { currentLeague } = useLeague();
-  const [selectedTimeRange, setSelectedTimeRange] = useState('1h');
+  const [selectedTimeRange, setSelectedTimeRange] = useState('season');
   const [isLoading, setIsLoading] = useState(false);
-  const [analyticsData, setAnalyticsData] = useState(mockAnalyticsData);
+  const [analyticsData, setAnalyticsData] = useState(mockPlayerAnalytics);
   const [activeTab, setActiveTab] = useState('overview');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    fetchAnalyticsData();
+    fetchPlayerAnalytics();
   }, [currentLeague, selectedTimeRange]);
 
-  const fetchAnalyticsData = async () => {
+  const fetchPlayerAnalytics = async () => {
     setIsLoading(true);
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      setAnalyticsData(mockAnalyticsData);
+      setAnalyticsData(mockPlayerAnalytics);
     } catch (error) {
-      console.error('Failed to fetch analytics data:', error);
+      console.error('Failed to fetch player analytics:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const refreshData = () => {
-    fetchAnalyticsData();
+    fetchPlayerAnalytics();
   };
 
   const MetricCard = ({ title, value, change, icon: Icon, color, subtitle }: any) => (
@@ -107,14 +107,10 @@ export default function AnalyticsPage() {
           </div>
           <div className="text-2xl font-bold text-white mb-1">{value}</div>
           <div className="flex items-center gap-2">
-            {change && (
-              <div className={`flex items-center gap-1 text-sm ${
-                change > 0 ? 'text-green-400' : 'text-red-400'
-              }`}>
-                {change > 0 ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-                {Math.abs(change)}%
-              </div>
-            )}
+            {change && <div className={`flex items-center gap-1 text-sm ${change > 0 ? 'text-green-400' : 'text-red-400'}`}>
+              {change > 0 ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+              {Math.abs(change)}%
+            </div>}
             <span className="text-gray-400 text-xs">{subtitle}</span>
           </div>
         </div>
@@ -122,173 +118,143 @@ export default function AnalyticsPage() {
     </motion.div>
   );
 
-  const PipelineStatus = () => (
+  const PlayerOverview = () => (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-xl font-semibold text-white">Pipeline Status</h3>
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-          <span className="text-green-400 text-sm">Active</span>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <MetricCard
-          title="Throughput"
-          value={`${analyticsData.pipeline.throughput.toLocaleString()}`}
+          title="Total Players"
+          value={analyticsData.overview.totalPlayers}
+          change={8.2}
+          icon={Users}
+          color="bg-blue-500/20"
+          subtitle="registered players"
+        />
+        <MetricCard
+          title="Active Players"
+          value={analyticsData.overview.activePlayers}
           change={12.5}
           icon={Activity}
-          color="bg-blue-500/20"
-          subtitle="events/min"
-        />
-        <MetricCard
-          title="Latency"
-          value={`${analyticsData.pipeline.latency}ms`}
-          change={-8.3}
-          icon={Clock}
           color="bg-green-500/20"
-          subtitle="avg response"
+          subtitle="this season"
         />
         <MetricCard
-          title="Error Rate"
-          value={`${(analyticsData.pipeline.errorRate * 100).toFixed(2)}%`}
-          change={-15.2}
-          icon={AlertCircle}
+          title="Average Rating"
+          value={analyticsData.overview.averageRating.toFixed(1)}
+          change={3.8}
+          icon={Star}
           color="bg-yellow-500/20"
-          subtitle="last hour"
+          subtitle="performance score"
         />
         <MetricCard
-          title="Uptime"
-          value={`${analyticsData.pipeline.uptime}%`}
-          change={0.1}
-          icon={CheckCircle}
-          color="bg-emerald-500/20"
-          subtitle="last 30 days"
+          title="Top Performers"
+          value={analyticsData.overview.topPerformers}
+          change={15.3}
+          icon={Trophy}
+          color="bg-purple-500/20"
+          subtitle="rating 8.5+"
+        />
+        <MetricCard
+          title="Emerging Talent"
+          value={analyticsData.overview.emergingTalent}
+          change={22.1}
+          icon={Target}
+          color="bg-orange-500/20"
+          subtitle="new discoveries"
         />
       </div>
-    </div>
-  );
 
-  const SystemComponents = () => (
-    <div className="space-y-6">
-      <h3 className="text-xl font-semibold text-white">System Components</h3>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Kafka */}
-        <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border border-orange-500/20 rounded-2xl p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-orange-500/20 rounded-lg">
-              <GitBranch className="w-5 h-5 text-orange-400" />
-            </div>
-            <h4 className="text-lg font-semibold text-white">Apache Kafka</h4>
+      {/* Player Categories */}
+      <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+        <h3 className="text-xl font-semibold text-white mb-4">Player Categories</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="text-center p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
+            <div className="text-2xl font-bold text-blue-400">{analyticsData.playerCategories.batsmen}</div>
+            <div className="text-sm text-gray-400 mt-1">Batsmen</div>
           </div>
-          <div className="space-y-3">
-            <div className="flex justify-between">
-              <span className="text-gray-400">Topics</span>
-              <span className="text-white font-medium">{analyticsData.kafka.topics}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Messages/sec</span>
-              <span className="text-white font-medium">{analyticsData.kafka.messagesPerSecond}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Consumer Groups</span>
-              <span className="text-white font-medium">{analyticsData.kafka.consumerGroups}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Storage Used</span>
-              <span className="text-white font-medium">{analyticsData.kafka.storageUsed}</span>
-            </div>
+          <div className="text-center p-4 bg-green-500/10 rounded-lg border border-green-500/20">
+            <div className="text-2xl font-bold text-green-400">{analyticsData.playerCategories.bowlers}</div>
+            <div className="text-sm text-gray-400 mt-1">Bowlers</div>
           </div>
-        </div>
-
-        {/* Redis */}
-        <div className="bg-gradient-to-br from-red-500/10 to-red-600/5 border border-red-500/20 rounded-2xl p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-red-500/20 rounded-lg">
-              <Database className="w-5 h-5 text-red-400" />
-            </div>
-            <h4 className="text-lg font-semibold text-white">Redis Cache</h4>
+          <div className="text-center p-4 bg-purple-500/10 rounded-lg border border-purple-500/20">
+            <div className="text-2xl font-bold text-purple-400">{analyticsData.playerCategories.allRounders}</div>
+            <div className="text-sm text-gray-400 mt-1">All-Rounders</div>
           </div>
-          <div className="space-y-3">
-            <div className="flex justify-between">
-              <span className="text-gray-400">Connections</span>
-              <span className="text-white font-medium">{analyticsData.redis.connections}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Hit Rate</span>
-              <span className="text-white font-medium">{analyticsData.redis.hitRate}%</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Memory Used</span>
-              <span className="text-white font-medium">{analyticsData.redis.memoryUsed}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Ops/sec</span>
-              <span className="text-white font-medium">{analyticsData.redis.operationsPerSecond.toLocaleString()}</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Elasticsearch */}
-        <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20 rounded-2xl p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-green-500/20 rounded-lg">
-              <Package className="w-5 h-5 text-green-400" />
-            </div>
-            <h4 className="text-lg font-semibold text-white">Elasticsearch</h4>
-          </div>
-          <div className="space-y-3">
-            <div className="flex justify-between">
-              <span className="text-gray-400">Indices</span>
-              <span className="text-white font-medium">{analyticsData.elasticsearch.indices}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Documents</span>
-              <span className="text-white font-medium">{(analyticsData.elasticsearch.documents / 1000000).toFixed(1)}M</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Query Time</span>
-              <span className="text-white font-medium">{analyticsData.elasticsearch.queryTime}ms</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-400">Indexing Rate</span>
-              <span className="text-white font-medium">{analyticsData.elasticsearch.indexingRate}/sec</span>
-            </div>
+          <div className="text-center p-4 bg-orange-500/10 rounded-lg border border-orange-500/20">
+            <div className="text-2xl font-bold text-orange-400">{analyticsData.playerCategories.wicketKeepers}</div>
+            <div className="text-sm text-gray-400 mt-1">Wicket Keepers</div>
           </div>
         </div>
       </div>
     </div>
   );
 
-  const RealTimeMetrics = () => (
+  const TopPerformers = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-semibold text-white">Real-time Metrics</h3>
+        <h3 className="text-xl font-semibold text-white">Top Performers</h3>
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-          <span className="text-green-400 text-sm">Live</span>
+          <select 
+            value={selectedTimeRange}
+            onChange={(e) => setSelectedTimeRange(e.target.value)}
+            className="bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
+          >
+            <option value="season">This Season</option>
+            <option value="month">This Month</option>
+            <option value="week">This Week</option>
+          </select>
         </div>
       </div>
-      
-      <div className="bg-slate-800/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+
+      <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-white/10">
-                <th className="text-left py-3 px-4 text-gray-400 text-sm font-medium">Timestamp</th>
-                <th className="text-left py-3 px-4 text-gray-400 text-sm font-medium">Active Matches</th>
-                <th className="text-left py-3 px-4 text-gray-400 text-sm font-medium">Users Online</th>
-                <th className="text-left py-3 px-4 text-gray-400 text-sm font-medium">Events/Min</th>
+                <th className="text-left p-4 text-gray-400 font-medium">Player</th>
+                <th className="text-left p-4 text-gray-400 font-medium">Team</th>
+                <th className="text-left p-4 text-gray-400 font-medium">Runs</th>
+                <th className="text-left p-4 text-gray-400 font-medium">Average</th>
+                <th className="text-left p-4 text-gray-400 font-medium">Strike Rate</th>
+                <th className="text-left p-4 text-gray-400 font-medium">Rating</th>
+                <th className="text-left p-4 text-gray-400 font-medium">Trend</th>
               </tr>
             </thead>
             <tbody>
-              {analyticsData.realTimeMetrics.map((metric, index) => (
+              {analyticsData.performanceMetrics.map((player, index) => (
                 <tr key={index} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                  <td className="py-3 px-4 text-white font-mono text-sm">{metric.timestamp}</td>
-                  <td className="py-3 px-4 text-white">{metric.matches}</td>
-                  <td className="py-3 px-4 text-white">{metric.users.toLocaleString()}</td>
-                  <td className="py-3 px-4 text-white">{metric.events.toLocaleString()}</td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
+                        <User className="w-4 h-4 text-white" />
+                      </div>
+                      <span className="text-white font-medium">{player.name}</span>
+                    </div>
+                  </td>
+                  <td className="p-4 text-gray-300">{player.team}</td>
+                  <td className="p-4 text-white font-medium">{player.runs || '-'}</td>
+                  <td className="p-4 text-gray-300">{player.average || '-'}</td>
+                  <td className="p-4 text-gray-300">{player.strikeRate || '-'}</td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-2">
+                      <div className="text-yellow-400 font-medium">{player.rating}</div>
+                      <div className="flex">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className={`w-3 h-3 ${i < Math.floor(player.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-600'}`} />
+                        ))}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="p-4">
+                    <div className={`flex items-center gap-1 text-sm ${
+                      player.trend === 'up' ? 'text-green-400' : 
+                      player.trend === 'down' ? 'text-red-400' : 'text-gray-400'
+                    }`}>
+                      {player.trend === 'up' ? <ArrowUpRight className="w-4 h-4" /> : 
+                       player.trend === 'down' ? <ArrowDownRight className="w-4 h-4" /> : 
+                       <div className="w-4 h-4 flex items-center justify-center">—</div>}
+                      {player.trend === 'up' ? 'Rising' : player.trend === 'down' ? 'Declining' : 'Stable'}
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -298,77 +264,178 @@ export default function AnalyticsPage() {
     </div>
   );
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      <AdminSidebar />
-      
-      <div className="lg:pl-64">
-        <div className="p-8">
-          <div className="max-w-7xl mx-auto">
-            {/* Header */}
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-8"
-            >
-              <div className="flex items-center justify-between">
+  const TeamAnalytics = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-xl font-semibold text-white">Team Analytics</h3>
+        <button
+          onClick={refreshData}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-400 hover:bg-blue-500/30 transition-colors"
+        >
+          <RefreshCw className="w-4 h-4" />
+          Refresh
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {analyticsData.teamStats.map((team, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="text-lg font-semibold text-white">{team.team}</h4>
+              <div className="flex items-center gap-2">
+                <Star className="w-4 h-4 text-yellow-400" />
+                <span className="text-yellow-400 font-medium">{team.avgRating.toFixed(1)}</span>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center p-3 bg-blue-500/10 rounded-lg">
+                <div className="text-xl font-bold text-blue-400">{team.players}</div>
+                <div className="text-xs text-gray-400">Players</div>
+              </div>
+              <div className="text-center p-3 bg-green-500/10 rounded-lg">
+                <div className="text-xl font-bold text-green-400">{team.totalRuns}</div>
+                <div className="text-xs text-gray-400">Total Runs</div>
+              </div>
+              <div className="text-center p-3 bg-purple-500/10 rounded-lg">
+                <div className="text-xl font-bold text-purple-400">{team.totalWickets}</div>
+                <div className="text-xs text-gray-400">Total Wickets</div>
+              </div>
+              <div className="text-center p-3 bg-orange-500/10 rounded-lg">
+                <div className="text-xl font-bold text-orange-400">{(team.totalRuns / team.players).toFixed(0)}</div>
+                <div className="text-xs text-gray-400">Avg Runs/Player</div>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const RecentActivity = () => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-xl font-semibold text-white">Recent Player Activity</h3>
+        <div className="flex items-center gap-2 text-gray-400 text-sm">
+          <Clock className="w-4 h-4" />
+          Last 24 hours
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {analyticsData.recentActivity.map((activity, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.1 }}
+            className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 rounded-xl p-4"
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex items-start gap-3">
+                <div className={`w-2 h-2 rounded-full mt-2 ${
+                  activity.impact === 'high' ? 'bg-red-400' : 'bg-yellow-400'
+                }`}></div>
                 <div>
-                  <h1 className="text-3xl font-bold text-white mb-2">Analytics Dashboard</h1>
-                  <p className="text-gray-400">Real-time data pipeline and system performance monitoring</p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <select
-                    value={selectedTimeRange}
-                    onChange={(e) => setSelectedTimeRange(e.target.value)}
-                    className="bg-slate-800 border border-white/10 rounded-lg px-4 py-2 text-white"
-                  >
-                    <option value="1h">Last Hour</option>
-                    <option value="24h">Last 24 Hours</option>
-                    <option value="7d">Last 7 Days</option>
-                    <option value="30d">Last 30 Days</option>
-                  </select>
-                  <button
-                    onClick={refreshData}
-                    disabled={isLoading}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
-                  >
-                    <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                    Refresh
-                  </button>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-white font-medium">{activity.player}</span>
+                    <span className="text-gray-400 text-sm">{activity.action}</span>
+                  </div>
+                  <div className="text-gray-500 text-sm">{activity.match}</div>
                 </div>
               </div>
-            </motion.div>
+              <div className="text-right">
+                <div className="text-gray-400 text-xs">{activity.time}</div>
+                <div className={`text-xs mt-1 ${
+                  activity.impact === 'high' ? 'text-red-400' : 'text-yellow-400'
+                }`}>
+                  {activity.impact === 'high' ? 'High Impact' : 'Medium Impact'}
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/10 to-slate-900">
+      <AdminSidebar />
+      
+      <div className="ml-64 p-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="text-3xl font-bold text-white mb-2">Player Analytics</h1>
+                <p className="text-gray-400">Comprehensive player performance analysis and insights</p>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 bg-slate-800/50 border border-white/10 rounded-lg px-4 py-2">
+                  <Search className="w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Search players..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="bg-transparent text-white placeholder-gray-400 outline-none text-sm"
+                  />
+                </div>
+                <button
+                  onClick={refreshData}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-400 hover:bg-blue-500/30 transition-colors"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </button>
+              </div>
+            </div>
 
             {/* Tabs */}
-            <div className="flex gap-1 mb-8 bg-slate-800/50 p-1 rounded-lg w-fit">
-              {['overview', 'pipeline', 'components', 'realtime'].map((tab) => (
+            <div className="flex items-center gap-1 bg-slate-800/50 border border-white/10 rounded-lg p-1">
+              {[
+                { id: 'overview', label: 'Overview', icon: BarChart3 },
+                { id: 'performers', label: 'Top Performers', icon: Trophy },
+                { id: 'teams', label: 'Team Analytics', icon: Users },
+                { id: 'activity', label: 'Recent Activity', icon: Activity }
+              ].map((tab) => (
                 <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                    activeTab === tab
-                      ? 'bg-blue-500 text-white'
-                      : 'text-gray-400 hover:text-white hover:bg-white/10'
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                    activeTab === tab.id
+                      ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                      : 'text-gray-400 hover:text-white hover:bg-white/5'
                   }`}
                 >
-                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                  <tab.icon className="w-4 h-4" />
+                  <span className="text-sm font-medium">{tab.label}</span>
                 </button>
               ))}
             </div>
+          </div>
 
-            {/* Content */}
-            <div className="space-y-8">
-              {activeTab === 'overview' && (
-                <div className="space-y-8">
-                  <PipelineStatus />
-                  <SystemComponents />
-                </div>
-              )}
-              
-              {activeTab === 'pipeline' && <PipelineStatus />}
-              {activeTab === 'components' && <SystemComponents />}
-              {activeTab === 'realtime' && <RealTimeMetrics />}
-            </div>
+          {/* Content */}
+          <div className="space-y-6">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <RefreshCw className="w-8 h-8 text-blue-400 animate-spin" />
+              </div>
+            ) : (
+              <>
+                {activeTab === 'overview' && <PlayerOverview />}
+                {activeTab === 'performers' && <TopPerformers />}
+                {activeTab === 'teams' && <TeamAnalytics />}
+                {activeTab === 'activity' && <RecentActivity />}
+              </>
+            )}
           </div>
         </div>
       </div>
