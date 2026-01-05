@@ -15,7 +15,7 @@ import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import FlagImage from '@/components/ui/FlagImage';
 import CustomSelect from '@/components/ui/CustomSelect';
-import { Search, Filter, Edit2, X, Users, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Plus, Trash2, Download, Upload, Shield, Activity, Hash, Grid3x3, List, Eye, Star } from 'lucide-react';
+import { Search, Filter, Edit2, X, Users, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Plus, Trash2, Download, Upload, Shield, Activity, Hash, Grid3x3, List, Eye, Star, Copy, History } from 'lucide-react';
 import '@/styles/flags.css';
 
 // Cricket-playing countries (exclude Pakistan – not part of IPL/WPL)
@@ -136,6 +136,7 @@ export default function AdminPlayers() {
   const [showRoleDropdown, setShowRoleDropdown] = useState(false);
   const [showPlayerDetailsModal, setShowPlayerDetailsModal] = useState(false);
   const [selectedPlayerForDetails, setSelectedPlayerForDetails] = useState<Player | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ visible: boolean; x: number; y: number; player: Player | null }>({ visible: false, x: 0, y: 0, player: null });
 
   // Performance helper functions
   const getPerformanceColor = (player: Player): string => {
@@ -493,6 +494,86 @@ export default function AdminPlayers() {
     setSelectedPlayerForDetails(null);
   };
 
+  // Context menu handlers
+  const handleContextMenu = (e: React.MouseEvent, player: Player) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({
+      visible: true,
+      x: e.clientX,
+      y: e.clientY,
+      player
+    });
+  };
+
+  const closeContextMenu = () => {
+    setContextMenu({ visible: false, x: 0, y: 0, player: null });
+  };
+
+  const handleContextMenuAction = (action: string, player: Player) => {
+    if (!player) return;
+    
+    switch (action) {
+      case 'edit':
+        handleEditPlayer(player);
+        break;
+      case 'view':
+        handleViewPlayerDetails(player);
+        break;
+      case 'copy':
+        copyPlayerData(player);
+        break;
+      case 'history':
+        viewPlayerHistory(player);
+        break;
+      case 'delete':
+        handleDeletePlayer(player.id, player.name);
+        break;
+    }
+    closeContextMenu();
+  };
+
+  const copyPlayerData = (player: Player) => {
+    const playerData = {
+      name: player.name,
+      role: player.role,
+      team: teams.find(t => String(t.id) === String(player.teamId))?.name || 'Unknown',
+      nationality: player.nationality,
+      age: player.age,
+      jerseyNumber: player.jerseyNumber,
+      battingStyle: player.battingStyle,
+      bowlingStyle: player.bowlingStyle,
+      isCaptain: player.isCaptain,
+      stats: {
+        matches: player.stats?.matches || 0,
+        runs: player.stats?.runs || 0,
+        wickets: player.stats?.wickets || 0,
+        average: player.stats?.average || 0,
+        strikeRate: player.stats?.strikeRate || 0,
+        economy: player.stats?.economy || 0,
+        highest: player.stats?.highest || 0,
+        fifties: player.stats?.fifties || 0,
+        hundreds: player.stats?.hundreds || 0
+      }
+    };
+    
+    navigator.clipboard.writeText(JSON.stringify(playerData, null, 2))
+      .then(() => {
+        // Show success message (you could add a toast notification here)
+        console.log('Player data copied to clipboard');
+      })
+      .catch(err => {
+        console.error('Failed to copy player data:', err);
+      });
+  };
+
+  const viewPlayerHistory = (player: Player) => {
+    // This could open a modal showing player history, recent matches, etc.
+    console.log('View player history:', player.name);
+    // For now, you could show a simple alert or implement a history modal
+    alert(`Player history for ${player.name}\n\nThis feature would show:\n- Recent matches\n- Performance trends\n- Injury history\n- Transfer history\n- Achievements and milestones`);
+  };
+
   // Close suggestions when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -502,11 +583,14 @@ export default function AdminPlayers() {
       if (showRoleDropdown) {
         setShowRoleDropdown(false);
       }
+      if (contextMenu.visible) {
+        closeContextMenu();
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showSuggestions, showRoleDropdown]);
+  }, [showSuggestions, showRoleDropdown, contextMenu.visible]);
 
   const fetchData = async () => {
     try {
@@ -2272,6 +2356,7 @@ export default function AdminPlayers() {
                       className={`group relative bg-gradient-to-br ${roleColors} rounded-2xl p-6 border backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-500 hover:scale-[1.03] cursor-pointer overflow-hidden`}
                       style={{ animationDelay: `${idx * 50}ms` }}
                       onClick={() => handleEditPlayer(player)}
+                      onContextMenu={(e) => handleContextMenu(e, player)}
                     >
                       {/* Animated background glow on hover - Enhanced for all role types */}
                       <div className={`absolute inset-0 transition-opacity duration-500 ${
@@ -4211,6 +4296,55 @@ export default function AdminPlayers() {
           </div>
         )}
       </ModernDialog>
+
+      {/* Context Menu */}
+      {contextMenu.visible && contextMenu.player && (
+        <div
+          className="fixed bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 py-2 z-[9999] min-w-[200px]"
+          style={{
+            left: `${contextMenu.x}px`,
+            top: `${contextMenu.y}px`,
+            transform: 'translate(0, -100%)'
+          }}
+        >
+          <button
+            onClick={() => handleContextMenuAction('view', contextMenu.player!)}
+            className="w-full px-4 py-3 text-left text-white hover:bg-blue-500/20 transition-colors flex items-center gap-3"
+          >
+            <Eye className="w-4 h-4 text-blue-400" />
+            View Details
+          </button>
+          <button
+            onClick={() => handleContextMenuAction('edit', contextMenu.player!)}
+            className="w-full px-4 py-3 text-left text-white hover:bg-green-500/20 transition-colors flex items-center gap-3"
+          >
+            <Edit2 className="w-4 h-4 text-green-400" />
+            Quick Edit
+          </button>
+          <button
+            onClick={() => handleContextMenuAction('copy', contextMenu.player!)}
+            className="w-full px-4 py-3 text-left text-white hover:bg-purple-500/20 transition-colors flex items-center gap-3"
+          >
+            <Copy className="w-4 h-4 text-purple-400" />
+            Copy Player Data
+          </button>
+          <button
+            onClick={() => handleContextMenuAction('history', contextMenu.player!)}
+            className="w-full px-4 py-3 text-left text-white hover:bg-orange-500/20 transition-colors flex items-center gap-3"
+          >
+            <History className="w-4 h-4 text-orange-400" />
+            View History
+          </button>
+          <div className="border-t border-white/10 my-2"></div>
+          <button
+            onClick={() => handleContextMenuAction('delete', contextMenu.player!)}
+            className="w-full px-4 py-3 text-left text-red-400 hover:bg-red-500/20 transition-colors flex items-center gap-3"
+          >
+            <Trash2 className="w-4 h-4" />
+            Delete Player
+          </button>
+        </div>
+      )}
     </div>
   );
 }
