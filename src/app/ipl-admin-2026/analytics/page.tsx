@@ -332,7 +332,7 @@ export default function AnalyticsPage() {
               <tr className="border-b border-white/10">
                 <th className="text-left p-4 text-gray-400 font-medium">Player</th>
                 <th className="text-left p-4 text-gray-400 font-medium">Team</th>
-                <th className="text-left p-4 text-gray-400 font-medium">Last Season Runs</th>
+                <th className="text-left p-4 text-gray-400 font-medium">Overall Runs</th>
                 <th className="text-left p-4 text-gray-400 font-medium">Average</th>
                 <th className="text-left p-4 text-gray-400 font-medium">Strike Rate</th>
                 <th className="text-left p-4 text-gray-400 font-medium">Pre-Season Rating</th>
