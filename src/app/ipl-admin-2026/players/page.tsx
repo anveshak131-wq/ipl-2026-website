@@ -10,6 +10,7 @@ import LeagueSwitch from '@/components/admin/LeagueSwitch';
 import WPLTeamsManager from '@/components/admin/WPLTeamsManager';
 import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
+import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { parseDateDDMMYYYY, calculateAge, isValidDate, formatDateMonthDDYYYY, parseDateMonthDDYYYY, isValidDateForLeague } from '@/lib/dateUtils';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import FlagImage from '@/components/ui/FlagImage';
