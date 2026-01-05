@@ -467,11 +467,10 @@ export default function AnalyticsPage() {
 
       
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/10 to-slate-900">
+    <div className="flex min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/10 to-slate-900">
       <AdminSidebar />
-      
-      <div className="ml-80 p-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="flex-1">
+        <div className="max-w-7xl mx-auto px-8 py-8">
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
@@ -538,6 +537,7 @@ export default function AnalyticsPage() {
             )}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
