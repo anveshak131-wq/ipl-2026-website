@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
+import { useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLeague } from '@/contexts/LeagueContext';
 import AdminSidebar from '@/components/admin/AdminSidebar';
@@ -11,13 +11,84 @@ import WPLTeamsManager from '@/components/admin/WPLTeamsManager';
 import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
 import { parseDateDDMMYYYY, calculateAge, isValidDate, formatDateMonthDDYYYY, parseDateMonthDDYYYY, isValidDateForLeague } from '@/lib/dateUtils';
-import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import FlagImage from '@/components/ui/FlagImage';
 import CustomSelect from '@/components/ui/CustomSelect';
-import { FixedSizeGrid as Grid } from 'react-window';
 import { Search, Filter, Edit2, X, Users, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Plus, Trash2, Download, Upload, Shield, Activity, Hash, Grid3x3, List, Eye, Star, Copy, History, FileSpreadsheet, FileText, Database } from 'lucide-react';
 import '@/styles/flags.css';
+
+// Data Integrity Helper Functions
+const findDuplicatePlayers = (players: Player[]): Array<{player: Player; reason: string}> => {
+  const duplicates: Array<{player: Player; reason: string}> = [];
+  const seen = new Map<string, Player>();
+  
+  players.forEach(player => {
+    const key = `${player.name.toLowerCase().trim()}-${player.teamId || ''}`;
+    
+    if (seen.has(key)) {
+      duplicates.push({
+        player,
+        reason: `Duplicate name "${player.name}" with same team`
+      });
+    } else {
+      seen.set(key, player);
+    }
+  });
+  
+  return duplicates;
+};
+
+const findDataInconsistencies = (players: Player[]): Array<{player: Player; issue: string; suggestion: string}> => {
+  const inconsistencies: Array<{player: Player; issue: string; suggestion: string}> = [];
+  
+  players.forEach(player => {
+    // Check for missing required fields
+    if (!player.name || player.name.trim() === '') {
+      inconsistencies.push({
+        player,
+        issue: 'Missing player name',
+        suggestion: 'Player name is required'
+      });
+    }
+    
+    if (!player.teamId) {
+      inconsistencies.push({
+        player,
+        issue: 'Missing team assignment',
+        suggestion: 'Player must be assigned to a team'
+      });
+    }
+    
+    // Check for invalid age
+    if (player.age && (parseInt(player.age) < 16 || parseInt(player.age) > 50)) {
+      inconsistencies.push({
+        player,
+        issue: 'Invalid age range',
+        suggestion: 'Player age should be between 16-50'
+      });
+    }
+    
+    // Check for invalid jersey numbers
+    if (player.jerseyNumber && (parseInt(player.jerseyNumber) < 0 || parseInt(player.jerseyNumber) > 999)) {
+      inconsistencies.push({
+        player,
+        issue: 'Invalid jersey number',
+        suggestion: 'Jersey number should be 1-999'
+      });
+    }
+    
+    // Check for empty stats
+    if (!player.stats || Object.keys(player.stats || {}).length === 0) {
+      inconsistencies.push({
+        player,
+        issue: 'Missing player statistics',
+        suggestion: 'Player should have at least basic statistics'
+      });
+    }
+  });
+  
+  return inconsistencies;
+};
 
 // Cricket-playing countries (exclude Pakistan – not part of IPL/WPL)
 const CRICKET_COUNTRIES = [
@@ -879,6 +950,20 @@ export default function AdminPlayers() {
       console.error('Failed to fetch data:', error);
     } finally {
       setIsLoading(false);
+      
+      // Data Integrity Checks
+      if (playersData && playersData.length > 0) {
+        const duplicates = findDuplicatePlayers(playersData);
+        const inconsistencies = findDataInconsistencies(playersData);
+        
+        if (duplicates.length > 0) {
+          console.warn('Duplicate players found:', duplicates);
+        }
+        
+        if (inconsistencies.length > 0) {
+          console.warn('Data inconsistencies found:', inconsistencies);
+        }
+      }
     }
   };
 
