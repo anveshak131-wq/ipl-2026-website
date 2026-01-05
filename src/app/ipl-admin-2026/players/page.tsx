@@ -16,7 +16,6 @@ import { CustomEmoji } from '@/components/emoji/Emoji';
 import FlagImage from '@/components/ui/FlagImage';
 import CustomSelect from '@/components/ui/CustomSelect';
 import { FixedSizeGrid as Grid } from 'react-window';
-import 'react-window/dist/style.css';
 import { Search, Filter, Edit2, X, Users, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Plus, Trash2, Download, Upload, Shield, Activity, Hash, Grid3x3, List, Eye, Star, Copy, History, FileSpreadsheet, FileText, Database } from 'lucide-react';
 import '@/styles/flags.css';
 
@@ -2704,6 +2703,7 @@ export default function AdminPlayers() {
                     handleContextMenu: handleContextMenu,
                     handleViewPlayerDetails: handleViewPlayerDetails
                   }}
+                  style={{ overflow: 'hidden' }}
                 >
                   {({ columnIndex, rowIndex, style }) => (
                     <VirtualizedPlayerCard
