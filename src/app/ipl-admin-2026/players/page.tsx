@@ -133,6 +133,7 @@ export default function AdminPlayers() {
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const [savedSearches, setSavedSearches] = useState<{ name: string; query: string; filters: any }[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showRoleDropdown, setShowRoleDropdown] = useState(false);
 
   // Performance helper functions
   const getPerformanceColor = (player: Player): string => {
@@ -485,11 +486,14 @@ export default function AdminPlayers() {
       if (showSuggestions) {
         setShowSuggestions(false);
       }
+      if (showRoleDropdown) {
+        setShowRoleDropdown(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showSuggestions]);
+  }, [showSuggestions, showRoleDropdown]);
 
   const fetchData = async () => {
     try {
@@ -1770,10 +1774,10 @@ export default function AdminPlayers() {
                   </div>
                 </div>  
                 {/* Role Filter - Enhanced */}
-              <div className="relative md:min-w-[200px] z-[100]" data-filter-dropdown>
+              <div className="relative md:min-w-[200px] z-[100]" data-role-dropdown>
                 <button
                   onClick={() => {
-                    setShowAdvancedFilters(!showAdvancedFilters);
+                    setShowRoleDropdown(!showRoleDropdown);
                     setIsDropdownOpen(false); // Close team dropdown when role filter opens
                   }}
                   className={`w-full bg-gray-900/70 border px-6 py-4 rounded-xl text-white font-medium flex items-center space-x-3 transition-all duration-300 h-full shadow-lg ${
@@ -1786,9 +1790,9 @@ export default function AdminPlayers() {
                   <span className="flex-1 text-left truncate">
                     {selectedRole === 'all' ? 'All Roles' : selectedRole}
                   </span>
-                  <ChevronDown className={`w-5 h-5 transition-all duration-300 flex-shrink-0 ${showAdvancedFilters ? 'rotate-180 text-purple-400' : 'text-gray-400'}`} />
+                  <ChevronDown className={`w-5 h-5 transition-all duration-300 flex-shrink-0 ${showRoleDropdown ? 'rotate-180 text-purple-400' : 'text-gray-400'}`} />
                 </button>
-                {showAdvancedFilters && (
+                {showRoleDropdown && (
                   <div className="absolute left-0 right-0 top-full mt-2 bg-gray-800/95 backdrop-blur-xl rounded-xl shadow-2xl border border-white/10 overflow-hidden z-[9999]">
                     <div className="py-2">
                       {['all', 'Batsman', 'Bowler', 'All-rounder', 'Wicket-keeper'].map((role) => (
@@ -1796,15 +1800,15 @@ export default function AdminPlayers() {
                           key={role}
                           onClick={() => {
                             setSelectedRole(role);
-                            setShowAdvancedFilters(false);
+                            setShowRoleDropdown(false);
                           }}
-                          className={`w-full px-6 py-3 text-left hover:bg-blue-500/20 transition-all duration-200 flex items-center justify-between ${
-                            selectedRole === role ? 'bg-blue-500/30 text-blue-200' : 'text-white'
+                          className={`w-full px-6 py-3 text-left hover:bg-purple-500/20 transition-all duration-200 flex items-center justify-between ${
+                            selectedRole === role ? 'bg-purple-500/30 text-purple-200' : 'text-white'
                           }`}
                         >
                           <span>{role === 'all' ? 'All Roles' : role}</span>
                           {selectedRole === role && (
-                            <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
+                            <div className="w-5 h-5 rounded-full bg-purple-500 flex items-center justify-center">
                               <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                               </svg>
