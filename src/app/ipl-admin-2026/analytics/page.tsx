@@ -467,72 +467,70 @@ export default function AnalyticsPage() {
       
   return (
     <div className="max-w-7xl mx-auto px-8 py-8">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h1 className="text-3xl font-bold text-white mb-2">IPL 2026 Pre-Season Analytics</h1>
-                <p className="text-gray-400">Player performance insights based on last season's data</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 bg-slate-800/50 border border-white/10 rounded-lg px-4 py-2">
-                  <Search className="w-4 h-4 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Search players..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="bg-transparent text-white placeholder-gray-400 outline-none text-sm"
-                  />
-                </div>
-                <button
-                  onClick={handleRefreshData}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-400 hover:bg-blue-500/30 transition-colors"
-                >
-                  <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-                  Refresh
-                </button>
-              </div>
-            </div>
-
-            {/* Tabs */}
-            <div className="flex items-center gap-1 bg-slate-800/50 border border-white/10 rounded-lg p-1">
-              {[
-                { id: 'overview', label: 'Overview', icon: BarChart3 },
-                { id: 'performers', label: 'Player Rankings', icon: Trophy },
-                { id: 'teams', label: 'Pre-Season Team Analysis', icon: Users }
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                    activeTab === tab.id
-                      ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-                      : 'text-gray-400 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <tab.icon className="w-4 h-4" />
-                  <span className="text-sm font-medium">{tab.label}</span>
-                </button>
-              ))}
-            </div>
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">IPL 2026 Pre-Season Analytics</h1>
+            <p className="text-gray-400">Player performance insights based on last season's data</p>
           </div>
-
-          {/* Content */}
-          <div className="space-y-6">
-            {loading || isLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <RefreshCw className="w-8 h-8 text-blue-400 animate-spin" />
-              </div>
-            ) : (
-              <>
-                {activeTab === 'overview' && <PlayerOverview />}
-                {activeTab === 'performers' && <TopPerformers />}
-                {activeTab === 'teams' && <TeamAnalytics />}
-              </>
-            )}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 bg-slate-800/50 border border-white/10 rounded-lg px-4 py-2">
+              <Search className="w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search players..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-transparent text-white placeholder-gray-400 outline-none text-sm"
+              />
+            </div>
+            <button
+              onClick={handleRefreshData}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-400 hover:bg-blue-500/30 transition-colors"
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
           </div>
         </div>
+
+        {/* Tabs */}
+        <div className="flex items-center gap-1 bg-slate-800/50 border border-white/10 rounded-lg p-1">
+          {[
+            { id: 'overview', label: 'Overview', icon: BarChart3 },
+            { id: 'performers', label: 'Player Rankings', icon: Trophy },
+            { id: 'teams', label: 'Pre-Season Team Analysis', icon: Users }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                activeTab === tab.id
+                  ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <tab.icon className="w-4 h-4" />
+              <span className="text-sm font-medium">{tab.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="space-y-6">
+        {loading || isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <RefreshCw className="w-8 h-8 text-blue-400 animate-spin" />
+          </div>
+        ) : (
+          <>
+            {activeTab === 'overview' && <PlayerOverview />}
+            {activeTab === 'performers' && <TopPerformers />}
+            {activeTab === 'teams' && <TeamAnalytics />}
+          </>
+        )}
       </div>
     </div>
   );
