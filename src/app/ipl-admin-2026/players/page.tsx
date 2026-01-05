@@ -944,10 +944,6 @@ export default function AdminPlayers() {
       const teamsData = await api.getTeams(currentLeague);
       setPlayers(playersData);
       setTeams(teamsData);
-    } catch (error) {
-      console.error('Failed to fetch data:', error);
-    } finally {
-      setIsLoading(false);
       
       // Data Integrity Checks
       if (playersData && playersData.length > 0) {
@@ -962,6 +958,10 @@ export default function AdminPlayers() {
           console.warn('Data inconsistencies found:', inconsistencies);
         }
       }
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
