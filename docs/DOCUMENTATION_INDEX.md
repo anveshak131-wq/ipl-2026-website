@@ -111,6 +111,19 @@ Start here: **[PRODUCTION_LAUNCH_CHECKLIST.md](./PRODUCTION_LAUNCH_CHECKLIST.md)
 
 ---
 
+### 🎯 Research & Strategy Documents
+
+| Document | Purpose | Audience |
+|----------|---------|----------|
+| [CRICKET_PLATFORM_RESEARCH_AND_RECOMMENDATIONS.md](./CRICKET_PLATFORM_RESEARCH_AND_RECOMMENDATIONS.md) | Comprehensive platform research and recommendations | Product Managers, Architects |
+| [ADVANCED_CRICKET_ANALYTICS.md](./ADVANCED_CRICKET_ANALYTICS.md) | Advanced analytics implementation guide | Data Scientists, Developers |
+| [MOBILE_APP_STRATEGY.md](./MOBILE_APP_STRATEGY.md) | Mobile app development strategy | Mobile Developers, Product Teams |
+| [CRICKBUZZ_LIVE_SCORING_ANALYSIS.md](./CRICKBUZZ_LIVE_SCORING_ANALYSIS.md) | Live scoring system analysis and improvements | Backend Developers, DevOps |
+| [IPL_ADMIN_FEATURE_RECOMMENDATIONS.md](./IPL_ADMIN_FEATURE_RECOMMENDATIONS.md) | Admin panel feature recommendations | Admin Users, Developers |
+| [CRICKET_PLAYER_PHOTOS_GUIDE.md](./CRICKET_PLAYER_PHOTOS_GUIDE.md) | Player photo management guide | Content Managers, Developers |
+
+---
+
 ## 🎯 Use Cases & How-To
 
 ### "I need to deploy the application to production"
