@@ -4269,6 +4269,108 @@ export default function AdminPlayers() {
         </div>
       </ModernDialog>
 
+      {/* Export Modal */}
+      <ModernDialog
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        title="Export Players"
+        description="Export player data in your preferred format"
+        variant="default"
+        size="lg"
+        icon={
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
+            <Download className="w-6 h-6 text-white" />
+          </div>
+        }
+      >
+        <div className="space-y-6">
+          {/* Format Selection */}
+          <div>
+            <h4 className="text-lg font-semibold text-white mb-4">Choose Export Format</h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* JSON Format */}
+              <button
+                onClick={() => handleExport('json')}
+                disabled={isExporting}
+                className="p-4 bg-gray-800/50 hover:bg-gray-700/50 border border-white/10 rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed group"
+              >
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
+                    <Database className="w-6 h-6 text-blue-400" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-white font-medium">JSON</p>
+                    <p className="text-xs text-gray-400">Structured data format</p>
+                  </div>
+                </div>
+              </button>
+
+              {/* CSV Format */}
+              <button
+                onClick={() => handleExport('csv')}
+                disabled={isExporting}
+                className="p-4 bg-gray-800/50 hover:bg-gray-700/50 border border-white/10 rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed group"
+              >
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-12 h-12 rounded-lg bg-green-500/20 flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
+                    <FileText className="w-6 h-6 text-green-400" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-white font-medium">CSV</p>
+                    <p className="text-xs text-gray-400">Excel compatible</p>
+                  </div>
+                </div>
+              </button>
+
+              {/* Excel Format */}
+              <button
+                onClick={() => handleExport('excel')}
+                disabled={isExporting}
+                className="p-4 bg-gray-800/50 hover:bg-gray-700/50 border border-white/10 rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed group"
+              >
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
+                    <FileSpreadsheet className="w-6 h-6 text-purple-400" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-white font-medium">Excel</p>
+                    <p className="text-xs text-gray-400">CSV for Excel</p>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Export Status */}
+          {isExporting && (
+            <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-blue-300">Exporting players...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Export Tips */}
+          <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
+            <div className="flex items-start gap-3">
+              <div className="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-amber-400 text-xs font-bold">!</span>
+              </div>
+              <div className="text-sm text-amber-300">
+                <p className="font-medium mb-1">Export Tips:</p>
+                <ul className="text-xs space-y-1 text-amber-200">
+                  <li>• JSON is best for data backup and API integration</li>
+                  <li>• CSV works directly with Excel and Google Sheets</li>
+                  <li>• Files are named with date and league for easy organization</li>
+                  <li>• All player statistics are included in the export</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </ModernDialog>
+
       {/* Player Details Modal */}
       <ModernDialog
         isOpen={showPlayerDetailsModal}
@@ -4466,91 +4568,6 @@ export default function AdminPlayers() {
                   />
                 ))}
               </div>
-          </div>
-
-          {/* Format Selection */}
-          <div>
-            <h4 className="text-lg font-semibold text-white mb-4">Choose Export Format</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* JSON Format */}
-              <button
-                onClick={() => handleExport('json')}
-                disabled={isExporting}
-                className="p-4 bg-gray-800/50 hover:bg-gray-700/50 border border-white/10 rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed group"
-              >
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
-                    <Database className="w-6 h-6 text-blue-400" />
-                  </div>
-                  <div className="text-center">
-                    <p className="text-white font-medium">JSON</p>
-                    <p className="text-xs text-gray-400">Structured data format</p>
-                  </div>
-                </div>
-              </button>
-
-              {/* CSV Format */}
-              <button
-                onClick={() => handleExport('csv')}
-                disabled={isExporting}
-                className="p-4 bg-gray-800/50 hover:bg-gray-700/50 border border-white/10 rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed group"
-              >
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-green-500/20 flex items-center justify-center group-hover:bg-green-500/30 transition-colors">
-                    <FileText className="w-6 h-6 text-green-400" />
-                  </div>
-                  <div className="text-center">
-                    <p className="text-white font-medium">CSV</p>
-                    <p className="text-xs text-gray-400">Excel compatible</p>
-                  </div>
-                </div>
-              </button>
-
-              {/* Excel Format */}
-              <button
-                onClick={() => handleExport('excel')}
-                disabled={isExporting}
-                className="p-4 bg-gray-800/50 hover:bg-gray-700/50 border border-white/10 rounded-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed group"
-              >
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
-                    <FileSpreadsheet className="w-6 h-6 text-purple-400" />
-                  </div>
-                  <div className="text-center">
-                    <p className="text-white font-medium">Excel</p>
-                    <p className="text-xs text-gray-400">CSV for Excel</p>
-                  </div>
-                </div>
-              </button>
-            </div>
-          </div>
-
-          {/* Export Status */}
-          {isExporting && (
-            <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
-              <div className="flex items-center gap-3">
-                <div className="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-blue-300">Exporting players...</p>
-              </div>
-            </div>
-          )}
-
-          {/* Export Tips */}
-          <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-amber-400 text-xs font-bold">!</span>
-              </div>
-              <div className="text-sm text-amber-300">
-                <p className="font-medium mb-1">Export Tips:</p>
-                <ul className="text-xs space-y-1 text-amber-200">
-                  <li>• JSON is best for data backup and API integration</li>
-                  <li>• CSV works directly with Excel and Google Sheets</li>
-                  <li>• Files are named with date and league for easy organization</li>
-                  <li>• All player statistics are included in the export</li>
-                </ul>
-              </div>
-            </div>
           </div>
         </div>
         )}
