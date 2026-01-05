@@ -470,7 +470,7 @@ export default function AnalyticsPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/10 to-slate-900">
       <AdminSidebar />
       
-      <div className="ml-64 p-8">
+      <div className="ml-80 p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8">

@@ -129,7 +129,7 @@ export default function AdminPredictionsPage() {
   return (
     <div className="flex min-h-screen bg-ipl-dark">
       <AdminSidebar currentPage="/ipl-admin-2026/predictions" />
-      <div className="flex-1 ml-64">
+      <div className="flex-1 ml-80">
         <GlobalSearch />
         <div className="p-6">
           <div className="mb-6">
