@@ -3008,8 +3008,9 @@ export default function AdminPlayers() {
                   <p className="text-gray-500 text-sm">Try adjusting your search or filters</p>
                 </div>
               )}
-            </div>
-            </div>
+                </div>
+              </div>
+            )
           ) : (
             /* List View - Enhanced Modern Players Table */
             <div className="relative bg-gradient-to-br from-slate-800/80 via-gray-800/60 to-slate-900/80 rounded-2xl border border-white/10 backdrop-blur-xl shadow-2xl overflow-hidden">

@@ -17,6 +17,7 @@
     "build:analyze": "ANALYZE=true next build"
   },
   "dependencies": {
+    "@types/react-window": "^1.8.8",
     "autoprefixer": "^10.4.22",
     "bcryptjs": "^3.0.3",
     "framer-motion": "^7.10.3",
@@ -28,6 +29,8 @@
     "react-dom": "^18.2.0",
     "react-intersection-observer": "^10.0.0",
     "react-markdown": "^10.1.0",
+    "react-window": "^2.2.4",
+    "react-window-infinite-loader": "^2.0.0",
     "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
