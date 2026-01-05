@@ -33,6 +33,8 @@ export default function AnalyticsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTeam, setSelectedTeam] = useState('all');
+  const [selectedRole, setSelectedRole] = useState('all');
 
   // Calculate analytics data from real player data
   const analyticsData = useMemo(() => {
@@ -57,8 +59,42 @@ export default function AnalyticsPage() {
       };
     }
 
+    // Apply filters to players
+    let filteredPlayers = players;
+    
+    // Filter by team
+    if (selectedTeam !== 'all') {
+      filteredPlayers = filteredPlayers.filter(player => player.teamId === selectedTeam);
+    }
+    
+    // Filter by role
+    if (selectedRole !== 'all') {
+      filteredPlayers = filteredPlayers.filter(player => {
+        const role = player.role?.toLowerCase() || '';
+        switch (selectedRole) {
+          case 'batsman':
+            return role.includes('batsman') || role.includes('batting');
+          case 'bowler':
+            return role.includes('bowler') || role.includes('bowling');
+          case 'all-rounder':
+            return role.includes('all-rounder') || role.includes('all rounder');
+          case 'wicket-keeper':
+            return role.includes('wicket keeper') || role.includes('keeper');
+          default:
+            return true;
+        }
+      });
+    }
+    
+    // Filter by search query
+    if (searchQuery) {
+      filteredPlayers = filteredPlayers.filter(player => 
+        player.name?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
     // Calculate player categories
-    const playerCategories = players.reduce((acc, player) => {
+    const playerCategories = filteredPlayers.reduce((acc, player) => {
       const role = player.role?.toLowerCase() || '';
       if (role.includes('batsman') || role.includes('batting')) {
         acc.batsmen++;
@@ -73,10 +109,10 @@ export default function AnalyticsPage() {
     }, { batsmen: 0, bowlers: 0, allRounders: 0, wicketKeepers: 0 });
 
     // For pre-season: Calculate active players as registered players (season hasn't started)
-    const activePlayers = players.length; // All registered players are considered active for pre-season
+    const activePlayers = filteredPlayers.length; // All registered players are considered active for pre-season
 
     // For pre-season: Use historical data for performance metrics with pre-season context
-    const performanceMetrics = players
+    const performanceMetrics = filteredPlayers
       .filter(player => player.stats && (player.stats.runs || player.stats.wickets))
       .map(player => {
         const stats = player.stats!;
@@ -141,7 +177,7 @@ export default function AnalyticsPage() {
 
     // Calculate team statistics (squad composition only, no performance stats)
     const teamStats = teams.map(team => {
-      const teamPlayers = players.filter(p => p.teamId === team.id);
+      const teamPlayers = filteredPlayers.filter(p => p.teamId === team.id);
       const playerCategories = teamPlayers.reduce((acc, player) => {
         const role = player.role?.toLowerCase() || '';
         if (role.includes('batsman') || role.includes('batting')) {
@@ -183,11 +219,11 @@ export default function AnalyticsPage() {
 
     return {
       overview: {
-        totalPlayers: players.length,
+        totalPlayers: filteredPlayers.length,
         activePlayers, // All registered players for pre-season
         averageRating,
         topPerformers,
-        emergingTalent: players.filter(p => p.age && parseInt(p.age) <= 25).length,
+        emergingTalent: filteredPlayers.filter(p => p.age && parseInt(p.age) <= 25).length,
         seasonStatus: 'pre-season' // Add season status indicator
       },
       performanceMetrics,
@@ -195,7 +231,7 @@ export default function AnalyticsPage() {
       playerCategories,
       recentActivity
     };
-  }, [players, teams]);
+  }, [players, teams, selectedTeam, selectedRole, searchQuery]);
 
   const handleRefreshData = async () => {
     setIsLoading(true);
@@ -237,13 +273,13 @@ export default function AnalyticsPage() {
 
   const PlayerOverview = () => (
     <div className="space-y-6">
-      {/* Pre-season Status Banner */}
-      <div className="bg-gradient-to-r from-orange-500/20 to-yellow-500/20 border border-orange-500/30 rounded-xl p-4">
+      {/* Season Status Banner */}
+      <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 rounded-xl p-4">
         <div className="flex items-center gap-3">
-          <Calendar className="w-5 h-5 text-orange-400" />
+          <Calendar className="w-5 h-5 text-blue-400" />
           <div>
-            <h3 className="text-orange-400 font-semibold">Pre-Season Analytics</h3>
-            <p className="text-gray-400 text-sm">Based on last season's performance data for IPL 2026 preview</p>
+            <h3 className="text-blue-400 font-semibold">Player Analytics</h3>
+            <p className="text-gray-400 text-sm">Comprehensive player performance analysis and rankings</p>
           </div>
         </div>
       </div>
@@ -320,19 +356,8 @@ export default function AnalyticsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-xl font-semibold text-white">Pre-Season Player Rankings</h3>
-          <p className="text-gray-400 text-sm">Based on last season's performance</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <select 
-            value={selectedTimeRange}
-            onChange={(e) => setSelectedTimeRange(e.target.value)}
-            className="bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-sm text-white"
-          >
-            <option value="season">Last Season</option>
-            <option value="month">Pre-Season</option>
-            <option value="week">Recent Form</option>
-          </select>
+          <h3 className="text-xl font-semibold text-white">Player Rankings</h3>
+          <p className="text-gray-400 text-sm">Based on performance metrics and ratings</p>
         </div>
       </div>
 
@@ -346,7 +371,7 @@ export default function AnalyticsPage() {
                 <th className="text-left p-4 text-gray-400 font-medium">Overall Runs</th>
                 <th className="text-left p-4 text-gray-400 font-medium">Average</th>
                 <th className="text-left p-4 text-gray-400 font-medium">Strike Rate</th>
-                <th className="text-left p-4 text-gray-400 font-medium">Pre-Season Rating</th>
+                <th className="text-left p-4 text-gray-400 font-medium">Rating</th>
                 <th className="text-left p-4 text-gray-400 font-medium">Form Trend</th>
               </tr>
             </thead>
@@ -399,8 +424,8 @@ export default function AnalyticsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-xl font-semibold text-white">Pre-Season Team Analysis</h3>
-          <p className="text-gray-400 text-sm">Last season performance and squad strength</p>
+          <h3 className="text-xl font-semibold text-white">Team Analysis</h3>
+          <p className="text-gray-400 text-sm">Squad composition and player statistics</p>
         </div>
         <button
           onClick={handleRefreshData}
@@ -483,8 +508,8 @@ export default function AnalyticsPage() {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">IPL 2026 Pre-Season Analytics</h1>
-            <p className="text-gray-400">Player performance insights based on last season's data</p>
+            <h1 className="text-3xl font-bold text-white mb-2">IPL 2026 Player Analytics</h1>
+            <p className="text-gray-400">Comprehensive player performance analysis and rankings</p>
           </div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 bg-slate-800/50 border border-white/10 rounded-lg px-4 py-2">
@@ -497,6 +522,27 @@ export default function AnalyticsPage() {
                 className="bg-transparent text-white placeholder-gray-400 outline-none text-sm"
               />
             </div>
+            <select
+              value={selectedTeam}
+              onChange={(e) => setSelectedTeam(e.target.value)}
+              className="flex items-center gap-2 bg-slate-800/50 border border-white/10 rounded-lg px-4 py-2 text-gray-300 hover:bg-slate-700 transition-colors outline-none"
+            >
+              <option value="all">All Teams</option>
+              {teams.map(team => (
+                <option key={team.id} value={team.id}>{team.name}</option>
+              ))}
+            </select>
+            <select
+              value={selectedRole}
+              onChange={(e) => setSelectedRole(e.target.value)}
+              className="flex items-center gap-2 bg-slate-800/50 border border-white/10 rounded-lg px-4 py-2 text-gray-300 hover:bg-slate-700 transition-colors outline-none"
+            >
+              <option value="all">All Roles</option>
+              <option value="batsman">Batsman</option>
+              <option value="bowler">Bowler</option>
+              <option value="all-rounder">All-Rounder</option>
+              <option value="wicket-keeper">Wicket-Keeper</option>
+            </select>
             <button
               onClick={handleRefreshData}
               className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-lg text-blue-400 hover:bg-blue-500/30 transition-colors"
@@ -512,7 +558,7 @@ export default function AnalyticsPage() {
           {[
             { id: 'overview', label: 'Overview', icon: BarChart3 },
             { id: 'performers', label: 'Player Rankings', icon: Trophy },
-            { id: 'teams', label: 'Pre-Season Team Analysis', icon: Users }
+            { id: 'teams', label: 'Team Analysis', icon: Users }
           ].map((tab) => (
             <button
               key={tab.id}
