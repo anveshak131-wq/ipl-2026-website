@@ -23,7 +23,6 @@ import {
   Shield,
   Heart
 } from 'lucide-react';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import { useLeague } from '@/contexts/LeagueContext';
 import { useAdminData } from '@/contexts/AdminDataContext';
 
@@ -467,10 +466,7 @@ export default function AnalyticsPage() {
 
       
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/10 to-slate-900">
-      <AdminSidebar />
-      <div className="flex-1">
-        <div className="max-w-7xl mx-auto px-8 py-8">
+    <div className="max-w-7xl mx-auto px-8 py-8">
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
@@ -537,7 +533,6 @@ export default function AnalyticsPage() {
             )}
           </div>
         </div>
-      </div>
       </div>
     </div>
   );
