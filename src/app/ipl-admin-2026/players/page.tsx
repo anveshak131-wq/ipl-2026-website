@@ -4633,8 +4633,9 @@ export default function AdminPlayers() {
         onClose={handleClosePlayerDetails}
         title="Player Details"
         description="Complete player information and statistics"
+        size="2xl"
         variant="info"
-        size="lg"
+        showCloseButton={true}
         icon={
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
             <Eye className="w-6 h-6 text-white" />

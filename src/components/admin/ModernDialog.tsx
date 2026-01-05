@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface ModernDialogProps {
@@ -9,7 +9,7 @@ interface ModernDialogProps {
   title: string;
   description?: string;
   children: ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
   variant?: 'default' | 'danger' | 'warning' | 'success' | 'info';
   footer?: ReactNode;
   showCloseButton?: boolean;
@@ -32,11 +32,33 @@ export default function ModernDialog({
   className = '',
   contentClassName = '',
 }: ModernDialogProps) {
+  // Add ESC key handler
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape);
+      // Prevent body scroll when modal is open
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      // Restore body scroll when modal is closed
+      document.body.style.overflow = '';
+    };
+  }, [isOpen, onClose]);
   const sizeClasses = {
     sm: 'max-w-sm',
     md: 'max-w-md',
     lg: 'max-w-lg',
     xl: 'max-w-2xl',
+    '2xl': 'max-w-4xl',
+    '3xl': 'max-w-6xl',
   };
 
   const variantClasses = {
@@ -182,7 +204,7 @@ export default function ModernDialog({
                 initial={{ y: 10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2, duration: 0.3 }}
-                className={`px-6 py-6 ${contentClassName}`}
+                className={`px-6 py-6 overflow-y-auto max-h-[70vh] ${contentClassName}`}
               >
                 {children}
               </motion.div>
