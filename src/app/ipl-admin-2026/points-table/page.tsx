@@ -41,6 +41,7 @@ export default function PointsTablePage() {
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
   const [showPopup, setShowPopup] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [editedFields, setEditedFields] = useState<Set<string>>(new Set());
 
   // Generate available years (2008 to current year)
   useEffect(() => {
@@ -121,6 +122,11 @@ export default function PointsTablePage() {
   const handleInputChange = (field: string, value: string) => {
     if (!editingTeam) return;
     
+    // Track edited fields
+    const newEditedFields = new Set(editedFields);
+    newEditedFields.add(field);
+    setEditedFields(newEditedFields);
+    
     // Validate numeric input - allow empty strings for better UX
     if (field === 'netRunRate') {
       const floatValue = value === '' ? 0 : parseFloat(value);
@@ -129,6 +135,11 @@ export default function PointsTablePage() {
       const numValue = value === '' ? 0 : parseInt(value);
       setEditingTeam({ ...editingTeam, [field]: numValue });
     }
+  };
+
+  // Helper function to determine if field should show placeholder
+  const shouldShowPlaceholder = (field: string, value: number): boolean => {
+    return !editedFields.has(field) && value === 0;
   };
 
   // Validate form data
@@ -177,6 +188,7 @@ export default function PointsTablePage() {
     setEditingTeam({ ...team });
     setShowPopup(true);
     setErrors({});
+    setEditedFields(new Set()); // Reset edited fields tracking
   };
 
   // Handle save team data
@@ -422,6 +434,9 @@ export default function PointsTablePage() {
                   </svg>
                 </button>
               </div>
+              <div className="mb-4 p-3 bg-blue-900/20 border border-blue-700 rounded-lg text-sm">
+                <p className="text-blue-300">💡 <strong>Tip:</strong> You can copy-paste values directly into these fields from spreadsheets or other sources.</p>
+              </div>
               
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-1">Team</label>
@@ -450,7 +465,8 @@ export default function PointsTablePage() {
                   <label className="block text-sm font-medium mb-1">Matches Played</label>
                   <input
                     type="number"
-                    value={editingTeam.matches}
+                    value={shouldShowPlaceholder('matches', editingTeam.matches) ? '' : editingTeam.matches}
+                    placeholder={shouldShowPlaceholder('matches', editingTeam.matches) ? '0' : undefined}
                     onChange={(e) => handleInputChange('matches', e.target.value)}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -461,7 +477,8 @@ export default function PointsTablePage() {
                   <label className="block text-sm font-medium mb-1">Wins</label>
                   <input
                     type="number"
-                    value={editingTeam.wins}
+                    value={shouldShowPlaceholder('wins', editingTeam.wins) ? '' : editingTeam.wins}
+                    placeholder={shouldShowPlaceholder('wins', editingTeam.wins) ? '0' : undefined}
                     onChange={(e) => handleInputChange('wins', e.target.value)}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -472,7 +489,8 @@ export default function PointsTablePage() {
                   <label className="block text-sm font-medium mb-1">Losses</label>
                   <input
                     type="number"
-                    value={editingTeam.losses}
+                    value={shouldShowPlaceholder('losses', editingTeam.losses) ? '' : editingTeam.losses}
+                    placeholder={shouldShowPlaceholder('losses', editingTeam.losses) ? '0' : undefined}
                     onChange={(e) => handleInputChange('losses', e.target.value)}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -483,7 +501,8 @@ export default function PointsTablePage() {
                   <label className="block text-sm font-medium mb-1">Ties</label>
                   <input
                     type="number"
-                    value={editingTeam.ties}
+                    value={shouldShowPlaceholder('ties', editingTeam.ties) ? '' : editingTeam.ties}
+                    placeholder={shouldShowPlaceholder('ties', editingTeam.ties) ? '0' : undefined}
                     onChange={(e) => handleInputChange('ties', e.target.value)}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -494,7 +513,8 @@ export default function PointsTablePage() {
                   <label className="block text-sm font-medium mb-1">No Results</label>
                   <input
                     type="number"
-                    value={editingTeam.noResults}
+                    value={shouldShowPlaceholder('noResults', editingTeam.noResults) ? '' : editingTeam.noResults}
+                    placeholder={shouldShowPlaceholder('noResults', editingTeam.noResults) ? '0' : undefined}
                     onChange={(e) => handleInputChange('noResults', e.target.value)}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
@@ -506,7 +526,8 @@ export default function PointsTablePage() {
                   <input
                     type="number"
                     step="0.01"
-                    value={editingTeam.netRunRate}
+                    value={shouldShowPlaceholder('netRunRate', editingTeam.netRunRate) ? '' : editingTeam.netRunRate}
+                    placeholder={shouldShowPlaceholder('netRunRate', editingTeam.netRunRate) ? '0.00' : undefined}
                     onChange={(e) => handleInputChange('netRunRate', e.target.value)}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
