@@ -14,6 +14,7 @@ interface Team {
   noResults: number;
   points: number;
   netRunRate: number;
+  position?: number;
 }
 
 // IPL Teams Data
@@ -36,6 +37,8 @@ export default function PointsTablePage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingTeam, setEditingTeam] = useState<string | null>(null);
+  const [selectedYear, setSelectedYear] = useState<number>(2026);
+  const [availableYears, setAvailableYears] = useState<number[]>([]);
   const [formData, setFormData] = useState({
     matches: 0,
     wins: 0,
@@ -48,40 +51,53 @@ export default function PointsTablePage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newTeamId, setNewTeamId] = useState('rcb');
 
+  // Generate available years (2008 to current year)
+  useEffect(() => {
+    const currentYear = new Date().getFullYear();
+    const years = [];
+    for (let year = 2008; year <= currentYear; year++) {
+      years.push(year);
+    }
+    setAvailableYears(years);
+    setSelectedYear(currentYear);
+  }, []);
+
   // Load data from localStorage on initial load
   useEffect(() => {
-    const savedData = localStorage.getItem('iplPointsTable2026');
-    if (savedData) {
-      try {
-        const parsedData = JSON.parse(savedData);
-        setTeams(calculatePositions(parsedData));
-      } catch (error) {
-        console.error('Error parsing saved data:', error);
+    if (selectedYear) {
+      const savedData = localStorage.getItem(`iplPointsTable${selectedYear}`);
+      if (savedData) {
+        try {
+          const parsedData = JSON.parse(savedData);
+          setTeams(calculatePositions(parsedData));
+        } catch (error) {
+          console.error('Error parsing saved data:', error);
+        }
+      } else {
+        // Initialize with default data if no saved data exists
+        const initialData = IPL_TEAMS.map(team => ({
+          id: team.id,
+          name: team.name,
+          matches: 0,
+          wins: 0,
+          losses: 0,
+          ties: 0,
+          noResults: 0,
+          points: 0,
+          netRunRate: 0.0,
+        }));
+        setTeams(calculatePositions(initialData));
       }
-    } else {
-      // Initialize with default data if no saved data exists
-      const initialData = IPL_TEAMS.map(team => ({
-        id: team.id,
-        name: team.name,
-        matches: 0,
-        wins: 0,
-        losses: 0,
-        ties: 0,
-        noResults: 0,
-        points: 0,
-        netRunRate: 0.0,
-      }));
-      setTeams(calculatePositions(initialData));
+      setLoading(false);
     }
-    setLoading(false);
-  }, []);
+  }, [selectedYear]);
 
   // Save data to localStorage whenever teams change
   useEffect(() => {
-    if (!loading) {
-      localStorage.setItem('iplPointsTable2026', JSON.stringify(teams));
+    if (!loading && selectedYear) {
+      localStorage.setItem(`iplPointsTable${selectedYear}`, JSON.stringify(teams));
     }
-  }, [teams, loading]);
+  }, [teams, loading, selectedYear]);
 
   // Calculate team positions based on points and NRR
   const calculatePositions = (teamsData: Team[]): Team[] => {
@@ -300,12 +316,26 @@ export default function PointsTablePage() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">IPL 2026 Points Table - Admin Panel</h1>
+          <h1 className="text-3xl font-bold mb-2">IPL {selectedYear} Points Table - Admin Panel</h1>
           <p className="text-gray-400">Manage team standings with full CRUD functionality</p>
         </div>
 
         {/* Controls */}
         <div className="flex flex-wrap gap-4 mb-6">
+          {/* Year Filter */}
+          <div className="flex-1 min-w-[200px]">
+            <label className="block text-sm font-medium mb-1">Season Year</label>
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              {availableYears.map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+          </div>
+          
           <div className="relative max-w-md flex-1 min-w-[250px]">
             <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -468,19 +498,19 @@ export default function PointsTablePage() {
             </thead>
             <tbody>
               {filteredTeams.length > 0 ? (
-                filteredTeams.map((team) => (
-                  <tr key={team.id} className="border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors">
-                    <td className="p-4">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                        team.position === 1 ? 'bg-yellow-500 text-black' :
-                        team.position === 2 ? 'bg-gray-400 text-white' :
-                        team.position === 3 ? 'bg-orange-600 text-white' :
-                        team.position === 4 ? 'bg-blue-600 text-white' :
-                        'bg-gray-600 text-white'
-                      }`}>
-                        {team.position}
-                      </div>
-                    </td>
+                  filteredTeams.map((team) => (
+                    <tr key={team.id} className="border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors">
+                      <td className="p-4">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                          team.position === 1 ? 'bg-yellow-500 text-black' :
+                          team.position === 2 ? 'bg-gray-400 text-white' :
+                          team.position === 3 ? 'bg-orange-600 text-white' :
+                          team.position === 4 ? 'bg-blue-600 text-white' :
+                          'bg-gray-600 text-white'
+                        }`}>
+                          {team.position || '?'}
+                        </div>
+                      </td>
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${
@@ -561,7 +591,7 @@ export default function PointsTablePage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="10" className="p-8 text-center text-gray-400">
+                  <td colSpan={10} className="p-8 text-center text-gray-400">
                     No teams found matching "{searchQuery}"
                   </td>
                 </tr>
