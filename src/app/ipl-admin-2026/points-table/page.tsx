@@ -15,6 +15,7 @@ interface Team {
   points: number;
   netRunRate: number;
   position?: number;
+  qualificationStatus?: 'Q' | 'E' | null;
 }
 
 // IPL Teams Data
@@ -82,6 +83,7 @@ export default function PointsTablePage() {
           noResults: 0,
           points: 0,
           netRunRate: 0.0,
+          qualificationStatus: null,
         }));
         setTeams(calculatePositions(initialData));
       }
@@ -183,6 +185,12 @@ export default function PointsTablePage() {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Handle qualification status selection
+  const handleQualificationStatus = (status: 'Q' | 'E') => {
+    if (!editingTeam) return;
+    setEditingTeam({ ...editingTeam, qualificationStatus: status });
+  };
+
   // Handle edit team
   const handleEdit = (team: Team) => {
     setEditingTeam({ ...team });
@@ -202,6 +210,7 @@ export default function PointsTablePage() {
         return {
           ...editingTeam,
           points: editingTeam.wins * 2 + editingTeam.ties * 1 + editingTeam.noResults * 1,
+          qualificationStatus: editingTeam.qualificationStatus || null,
         };
       }
       return team;
@@ -213,27 +222,28 @@ export default function PointsTablePage() {
   };
 
   // Handle delete team data
-  const handleDelete = (teamId: string) => {
-    if (confirm('Are you sure you want to reset this team\'s data? This cannot be undone.')) {
-      const updatedTeams = teams.map(team => {
-        if (team.id === teamId) {
-          return {
-            ...team,
-            matches: 0,
-            wins: 0,
-            losses: 0,
-            ties: 0,
-            noResults: 0,
-            points: 0,
-            netRunRate: 0.0,
-          };
-        }
-        return team;
-      });
-      
-      setTeams(calculatePositions(updatedTeams));
-    }
-  };
+const handleDelete = (teamId: string) => {
+if (confirm('Are you sure you want to reset this team\'s data? This cannot be undone.')) {
+const updatedTeams = teams.map(team => {
+  if (team.id === teamId) {
+    return {
+      ...team,
+      matches: 0,
+      wins: 0,
+      losses: 0,
+      ties: 0,
+      noResults: 0,
+      points: 0,
+      netRunRate: 0.0,
+      qualificationStatus: null,
+    };
+  }
+  return team;
+});
+
+setTeams(calculatePositions(updatedTeams));
+}
+};
 
   // Handle reset all data
   const handleResetAll = () => {
@@ -248,6 +258,7 @@ export default function PointsTablePage() {
         noResults: 0,
         points: 0,
         netRunRate: 0.0,
+        qualificationStatus: null,
       }));
       setTeams(calculatePositions(resetTeams));
     }
@@ -543,6 +554,39 @@ export default function PointsTablePage() {
                 <p className="text-xs text-gray-400 mt-1">
                   Points = (Wins × 2) + (Ties × 1) + (No Results × 1)
                 </p>
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">Qualification Status</label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleQualificationStatus('Q')}
+                    className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
+                      editingTeam.qualificationStatus === 'Q'
+                        ? 'bg-green-600 text-white'
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }`}
+                  >
+                    Q (Qualifier)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleQualificationStatus('E')}
+                    className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
+                      editingTeam.qualificationStatus === 'E'
+                        ? 'bg-red-600 text-white'
+                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    }`}
+                  >
+                    E (Eliminated)
+                  </button>
+                </div>
+                {editingTeam.qualificationStatus && (
+                  <p className="text-xs text-gray-400 mt-2 text-center">
+                    Current status: <strong>{editingTeam.qualificationStatus}</strong>
+                  </p>
+                )}
               </div>
               
               <div className="flex gap-2">
