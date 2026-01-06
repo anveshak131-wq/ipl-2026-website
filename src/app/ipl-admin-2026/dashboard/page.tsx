@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLeague } from '@/contexts/LeagueContext';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import { TrendingUp, Users, MessageSquare, Activity, Calendar, Eye, BarChart3, Zap, ArrowUpRight, Clock, Target, Globe, Database, Shield } from 'lucide-react';
 
 interface DashboardStats {
@@ -357,12 +356,9 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="flex min-h-screen bg-gray-950">
-      <AdminSidebar currentPage="/ipl-admin-2026/dashboard" />
-      <div className="flex-1">
-        <div className="max-w-7xl mx-auto px-8 py-8">
-          {/* Header - Redesigned */}
-          <div className="mb-12">
+    <div className="max-w-7xl mx-auto px-8 py-8">
+      {/* Header - Redesigned */}
+      <div className="mb-12">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               <div className="space-y-3">
                 <div className="flex items-center gap-4">
@@ -816,6 +812,5 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
-    </div>
   );
 }
