@@ -55,6 +55,36 @@ export default function PointsTablePage() {
     last5Matches: ['W', 'L', 'W', 'L', 'L']
   });
 
+  // Show loading state while admin data is loading
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-ipl-dark flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-white text-lg">Loading teams data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state if teams data failed to load
+  if (!teams || teams.length === 0) {
+    return (
+      <div className="min-h-screen bg-ipl-dark flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-400 text-xl mb-4">No teams data available</div>
+          <p className="text-gray-400 mb-4">Please ensure teams are properly configured</p>
+          <button
+            onClick={refreshData}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Refresh Data
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // Storage functions for points data
   const getStoredPointsData = (teamId: string) => {
     const stored = localStorage.getItem(`points_${teamId}_${selectedSeason}`);
@@ -250,14 +280,6 @@ export default function PointsTablePage() {
     
     showToast(`Points table exported as ${format.toUpperCase()}`, 'success');
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-ipl-dark flex items-center justify-center">
-        <LoadingSpinner size="large" />
-      </div>
-    );
-  }
 
   return (
     <PageTransition>
