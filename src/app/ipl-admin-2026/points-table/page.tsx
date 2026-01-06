@@ -160,7 +160,7 @@ export default function PointsTablePage() {
 
   // Calculate points table data
   const pointsData = useMemo(() => {
-    if (!teams.length) return [];
+    if (!teams || !Array.isArray(teams) || teams.length === 0) return [];
     
     // Use manually entered points data instead of mock data
     return teams.map(team => {
@@ -183,8 +183,8 @@ export default function PointsTablePage() {
         runsConceded: storedData.runsConceded,
         oversFaced: storedData.oversFaced,
         oversBowled: storedData.oversBowled,
-        last5Matches: storedData.last5Matches,
-        form: calculateForm(storedData.last5Matches)
+        last5Matches: storedData.last5Matches || ['-', '-', '-', '-', '-'],
+        form: calculateForm(storedData.last5Matches || ['-', '-', '-', '-', '-'])
       };
     }).sort((a, b) => {
       // Sort by points (descending), then NRR (descending)
@@ -200,10 +200,10 @@ export default function PointsTablePage() {
 
   // Filter data based on search
   const filteredData = useMemo(() => {
-    if (!searchQuery) return pointsData;
+    if (!searchQuery) return pointsData || [];
     
     const query = searchQuery.toLowerCase();
-    return pointsData.filter(team => 
+    return (pointsData || []).filter(team => 
       team.teamName.toLowerCase().includes(query) ||
       team.teamCode.toLowerCase().includes(query)
     );
@@ -222,7 +222,7 @@ export default function PointsTablePage() {
   };
 
   const handleExport = (format: 'csv' | 'json' | 'excel') => {
-    const exportData = filteredData.map(team => ({
+    const exportData = (filteredData || []).map(team => ({
       Position: team.position,
       Team: team.teamName,
       Matches: team.matches,
@@ -396,7 +396,7 @@ export default function PointsTablePage() {
             <div className="flex items-center justify-between mb-4">
               <Calendar className="w-8 h-8 text-green-400" />
               <span className="text-2xl font-bold text-green-400">
-                {filteredData.reduce((sum, team) => sum + team.matches, 0)}
+                {(filteredData || []).reduce((sum, team) => sum + team.matches, 0)}
               </span>
             </div>
             <div className="text-gray-300">Total Matches</div>
@@ -406,7 +406,7 @@ export default function PointsTablePage() {
             <div className="flex items-center justify-between mb-4">
               <Trophy className="w-8 h-8 text-yellow-400" />
               <span className="text-2xl font-bold text-yellow-400">
-                {Math.max(...filteredData.map(team => team.points), 0)}
+                {Math.max(...(filteredData || []).map(team => team.points), 0)}
               </span>
             </div>
             <div className="text-gray-300">Highest Points</div>
@@ -416,7 +416,7 @@ export default function PointsTablePage() {
             <div className="flex items-center justify-between mb-4">
               <BarChart3 className="w-8 h-8 text-purple-400" />
               <span className="text-2xl font-bold text-purple-400">
-                {filteredData.filter(team => team.netRunRate > 0).length}
+                {(filteredData || []).filter(team => team.netRunRate > 0).length}
               </span>
             </div>
             <div className="text-gray-300">Positive NRR</div>
@@ -501,7 +501,7 @@ export default function PointsTablePage() {
                   </thead>
                   <tbody>
                     <StaggeredList>
-                      {filteredData.map((team, index) => (
+                      {(filteredData || []).map((team: any, index: number) => (
                         <motion.tr
                           key={team.teamId}
                           initial={{ opacity: 0, x: -20 }}
@@ -633,7 +633,7 @@ export default function PointsTablePage() {
                           <td className="p-4">
                             <div className="flex gap-1">
                               {editingTeam === team.teamId ? (
-                                formData.last5Matches.map((result, idx) => (
+                                (formData.last5Matches || []).map((result: string, idx: number) => (
                                   <select
                                     key={idx}
                                     value={result}
@@ -647,7 +647,7 @@ export default function PointsTablePage() {
                                   </select>
                                 ))
                               ) : (
-                                team.last5Matches.map((result, idx) => (
+                                (team.last5Matches || []).map((result: string, idx: number) => (
                                   <div
                                     key={idx}
                                     className={`w-6 h-6 rounded text-xs font-bold flex items-center justify-center ${
@@ -722,7 +722,7 @@ export default function PointsTablePage() {
               <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <StaggeredList>
-                    {filteredData.map((team, index) => (
+                    {(filteredData || []).map((team: any, index: number) => (
                       <motion.div
                         key={team.teamId}
                         initial={{ opacity: 0, y: 20 }}
