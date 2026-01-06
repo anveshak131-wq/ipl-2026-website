@@ -71,13 +71,19 @@ export default function AnalyticsPage() {
     if (selectedRole !== 'all') {
       filteredPlayers = filteredPlayers.filter(player => {
         const role = player.role?.toLowerCase() || '';
+        const stats = player.stats;
+        
         switch (selectedRole) {
           case 'batsman':
             return role.includes('batsman') || role.includes('batting');
           case 'bowler':
             return role.includes('bowler') || role.includes('bowling');
-          case 'all-rounder':
-            return role.includes('all-rounder') || role.includes('all rounder');
+          case 'batting-all-rounder':
+            return (role.includes('all-rounder') || role.includes('all rounder')) && 
+                   stats && stats.runs && stats.runs > 300;
+          case 'bowling-all-rounder':
+            return (role.includes('all-rounder') || role.includes('all rounder')) && 
+                   stats && stats.wickets && stats.wickets > 15;
           case 'wicket-keeper':
             return role.includes('wicket keeper') || role.includes('keeper');
           default:
@@ -122,104 +128,194 @@ export default function AnalyticsPage() {
         let rating = 5.0; // Base rating
         const role = player.role?.toLowerCase() || '';
         
-        // Role-specific rating calculation
+        // Role-specific rating calculation with precise percentages
         if (role.includes('batsman') || role.includes('batting')) {
-          // Batsman rating based on batting stats
+          // Batsman rating: 100% batting stats
           if (stats.runs) {
-            rating += Math.min(stats.runs / 150, 4); // Higher weight for runs
+            rating += Math.min(stats.runs / 120, 5); // Full weight for runs
           }
           if (stats.battingAverage) {
             const avg = parseFloat(stats.battingAverage);
             if (!isNaN(avg)) {
-              rating += Math.min(avg / 30, 3); // Higher weight for average
+              rating += Math.min(avg / 25, 4); // Full weight for average
             }
           }
           if (stats.battingStrikeRate) {
             const sr = parseFloat(stats.battingStrikeRate);
             if (!isNaN(sr) && sr > 130) {
-              rating += Math.min((sr - 130) / 20, 2); // Strike rate bonus
+              rating += Math.min((sr - 130) / 15, 3); // Full weight for strike rate
             }
           }
         } else if (role.includes('bowler') || role.includes('bowling')) {
-          // Bowler rating based on bowling stats
+          // Bowler rating: 100% bowling stats
           if (stats.wickets) {
-            rating += Math.min(stats.wickets / 5, 4); // Higher weight for wickets
+            rating += Math.min(stats.wickets / 4, 5); // Full weight for wickets
           }
           if (stats.economy) {
             const econ = parseFloat(stats.economy);
             if (!isNaN(econ)) {
               if (econ < 7) {
-                rating += Math.min((7 - econ) / 2, 3); // Economy bonus
+                rating += Math.min((7 - econ) / 1.5, 4); // Full weight for economy
               } else if (econ > 9) {
-                rating -= Math.min((econ - 9) / 2, 2); // Economy penalty
+                rating -= Math.min((econ - 9) / 1.5, 3); // Full penalty for bad economy
               }
             }
           }
           if (stats.bowlingAverage) {
             const avg = parseFloat(stats.bowlingAverage);
             if (!isNaN(avg) && avg < 25) {
-              rating += Math.min((25 - avg) / 5, 2); // Bowling average bonus
+              rating += Math.min((25 - avg) / 4, 3); // Full weight for bowling average
             }
           }
         } else if (role.includes('all-rounder') || role.includes('all rounder')) {
-          // All-rounder rating based on both batting and bowling
-          if (stats.runs) {
-            rating += Math.min(stats.runs / 200, 2); // Moderate weight for runs
-          }
-          if (stats.wickets) {
-            rating += Math.min(stats.wickets / 8, 2); // Moderate weight for wickets
-          }
-          if (stats.battingAverage) {
-            const avg = parseFloat(stats.battingAverage);
-            if (!isNaN(avg)) {
-              rating += Math.min(avg / 35, 1.5); // Moderate weight for average
+          // Check if batting all-rounder or bowling all-rounder
+          const isBattingAllRounder = stats.runs && stats.runs > 300; // Threshold for batting all-rounder
+          const isBowlingAllRounder = stats.wickets && stats.wickets > 15; // Threshold for bowling all-rounder
+          
+          if (isBattingAllRounder) {
+            // Batting All-Rounder: 75% batting + 25% bowling
+            // Batting stats (75% weight)
+            if (stats.runs) {
+              rating += Math.min(stats.runs / 160, 3.75); // 75% of batsman weight
             }
-          }
-          if (stats.economy) {
-            const econ = parseFloat(stats.economy);
-            if (!isNaN(econ) && econ < 8) {
-              rating += Math.min((8 - econ) / 3, 1.5); // Moderate economy bonus
+            if (stats.battingAverage) {
+              const avg = parseFloat(stats.battingAverage);
+              if (!isNaN(avg)) {
+                rating += Math.min(avg / 33, 3); // 75% of batsman weight
+              }
+            }
+            if (stats.battingStrikeRate) {
+              const sr = parseFloat(stats.battingStrikeRate);
+              if (!isNaN(sr) && sr > 130) {
+                rating += Math.min((sr - 130) / 20, 2.25); // 75% of batsman weight
+              }
+            }
+            // Bowling stats (25% weight)
+            if (stats.wickets) {
+              rating += Math.min(stats.wickets / 16, 1.25); // 25% of bowler weight
+            }
+            if (stats.economy) {
+              const econ = parseFloat(stats.economy);
+              if (!isNaN(econ) && econ < 8) {
+                rating += Math.min((8 - econ) / 6, 1); // 25% of bowler weight
+              }
+            }
+          } else if (isBowlingAllRounder) {
+            // Bowling All-Rounder: 75% bowling + 25% batting
+            // Bowling stats (75% weight)
+            if (stats.wickets) {
+              rating += Math.min(stats.wickets / 5.3, 3.75); // 75% of bowler weight
+            }
+            if (stats.economy) {
+              const econ = parseFloat(stats.economy);
+              if (!isNaN(econ)) {
+                if (econ < 7) {
+                  rating += Math.min((7 - econ) / 2, 3); // 75% of bowler weight
+                } else if (econ > 9) {
+                  rating -= Math.min((econ - 9) / 2, 2.25); // 75% of bowler penalty
+                }
+              }
+            }
+            if (stats.bowlingAverage) {
+              const avg = parseFloat(stats.bowlingAverage);
+              if (!isNaN(avg) && avg < 25) {
+                rating += Math.min((25 - avg) / 5.3, 2.25); // 75% of bowler weight
+              }
+            }
+            // Batting stats (25% weight)
+            if (stats.runs) {
+              rating += Math.min(stats.runs / 480, 1.25); // 25% of batsman weight
+            }
+            if (stats.battingAverage) {
+              const avg = parseFloat(stats.battingAverage);
+              if (!isNaN(avg)) {
+                rating += Math.min(avg / 100, 1); // 25% of batsman weight
+              }
+            }
+          } else {
+            // Default all-rounder (balanced 50-50)
+            if (stats.runs) {
+              rating += Math.min(stats.runs / 240, 2.5); // 50% of batsman weight
+            }
+            if (stats.wickets) {
+              rating += Math.min(stats.wickets / 8, 2.5); // 50% of bowler weight
+            }
+            if (stats.battingAverage) {
+              const avg = parseFloat(stats.battingAverage);
+              if (!isNaN(avg)) {
+                rating += Math.min(avg / 50, 2); // 50% of batsman weight
+              }
+            }
+            if (stats.economy) {
+              const econ = parseFloat(stats.economy);
+              if (!isNaN(econ) && econ < 8) {
+                rating += Math.min((8 - econ) / 4, 2); // 50% of bowler weight
+              }
             }
           }
         } else if (role.includes('wicket keeper') || role.includes('keeper')) {
-          // Wicket-keeper rating based on batting with keeping bonus
+          // Wicket-keeper rating: 100% batting stats (same as batsman)
           if (stats.runs) {
-            rating += Math.min(stats.runs / 120, 3.5); // Good weight for runs
+            rating += Math.min(stats.runs / 120, 5); // Full weight for runs
           }
           if (stats.battingAverage) {
             const avg = parseFloat(stats.battingAverage);
             if (!isNaN(avg)) {
-              rating += Math.min(avg / 28, 2.5); // Good weight for average
+              rating += Math.min(avg / 25, 4); // Full weight for average
             }
           }
           if (stats.battingStrikeRate) {
             const sr = parseFloat(stats.battingStrikeRate);
-            if (!isNaN(sr) && sr > 125) {
-              rating += Math.min((sr - 125) / 25, 1.5); // Strike rate bonus
+            if (!isNaN(sr) && sr > 130) {
+              rating += Math.min((sr - 130) / 15, 3); // Full weight for strike rate
             }
           }
-          // Add keeping bonus (assuming dismissals data available)
+          // Add keeping bonus
           rating += 1; // Base keeping bonus
         }
         
-        // Role-specific trend calculation
+        // Role-specific trend calculation with precise thresholds
         let trend = 'stable';
         if (role.includes('batsman') || role.includes('batting')) {
-          if (stats.runs && stats.runs > 500) trend = 'up';
-          else if (stats.runs && stats.runs < 250) trend = 'down';
-          else if (stats.battingAverage && parseFloat(stats.battingAverage) > 35) trend = 'up';
-          else if (stats.battingAverage && parseFloat(stats.battingAverage) < 20) trend = 'down';
-        } else if (role.includes('bowler') || role.includes('bowling')) {
-          if (stats.wickets && stats.wickets > 25) trend = 'up';
-          else if (stats.wickets && stats.wickets < 12) trend = 'down';
-          else if (stats.economy && parseFloat(stats.economy) < 7.5) trend = 'up';
-          else if (stats.economy && parseFloat(stats.economy) > 9) trend = 'down';
-        } else if (role.includes('all-rounder') || role.includes('all rounder')) {
-          if (stats.runs && stats.runs > 300 && stats.wickets && stats.wickets > 15) trend = 'up';
-          else if ((stats.runs && stats.runs < 200) || (stats.wickets && stats.wickets < 8)) trend = 'down';
-        } else if (role.includes('wicket keeper') || role.includes('keeper')) {
+          // Batsman trends based on batting performance
           if (stats.runs && stats.runs > 400) trend = 'up';
           else if (stats.runs && stats.runs < 200) trend = 'down';
+          else if (stats.battingAverage && parseFloat(stats.battingAverage) > 30) trend = 'up';
+          else if (stats.battingAverage && parseFloat(stats.battingAverage) < 18) trend = 'down';
+        } else if (role.includes('bowler') || role.includes('bowling')) {
+          // Bowler trends based on bowling performance
+          if (stats.wickets && stats.wickets > 20) trend = 'up';
+          else if (stats.wickets && stats.wickets < 10) trend = 'down';
+          else if (stats.economy && parseFloat(stats.economy) < 7.5) trend = 'up';
+          else if (stats.economy && parseFloat(stats.economy) > 9.5) trend = 'down';
+        } else if (role.includes('all-rounder') || role.includes('all rounder')) {
+          // All-rounder trends based on both skills
+          const isBattingAllRounder = stats.runs && stats.runs > 300;
+          const isBowlingAllRounder = stats.wickets && stats.wickets > 15;
+          
+          if (isBattingAllRounder) {
+            // Batting all-rounder: 75% batting focus for trends
+            if (stats.runs && stats.runs > 350) trend = 'up';
+            else if (stats.runs && stats.runs < 250) trend = 'down';
+            else if (stats.battingAverage && parseFloat(stats.battingAverage) > 28) trend = 'up';
+            else if (stats.battingAverage && parseFloat(stats.battingAverage) < 20) trend = 'down';
+          } else if (isBowlingAllRounder) {
+            // Bowling all-rounder: 75% bowling focus for trends
+            if (stats.wickets && stats.wickets > 18) trend = 'up';
+            else if (stats.wickets && stats.wickets < 12) trend = 'down';
+            else if (stats.economy && parseFloat(stats.economy) < 8) trend = 'up';
+            else if (stats.economy && parseFloat(stats.economy) > 9) trend = 'down';
+          } else {
+            // Balanced all-rounder
+            if (stats.runs && stats.runs > 250 && stats.wickets && stats.wickets > 12) trend = 'up';
+            else if ((stats.runs && stats.runs < 200) || (stats.wickets && stats.wickets < 8)) trend = 'down';
+          }
+        } else if (role.includes('wicket keeper') || role.includes('keeper')) {
+          // Wicket-keeper trends based on batting performance (same as batsman)
+          if (stats.runs && stats.runs > 350) trend = 'up';
+          else if (stats.runs && stats.runs < 180) trend = 'down';
+          else if (stats.battingAverage && parseFloat(stats.battingAverage) > 28) trend = 'up';
+          else if (stats.battingAverage && parseFloat(stats.battingAverage) < 20) trend = 'down';
         }
         
         // Give Virat Kohli highest rating
@@ -447,22 +543,22 @@ export default function AnalyticsPage() {
                 <th className="text-left p-4 text-gray-400 font-medium">Player</th>
                 <th className="text-left p-4 text-gray-400 font-medium">Team</th>
                 <th className="text-left p-4 text-gray-400 font-medium">Role</th>
-                {(selectedRole === 'all' || selectedRole === 'batsman' || selectedRole === 'wicket-keeper') && (
+                {(selectedRole === 'all' || selectedRole === 'batsman' || selectedRole === 'wicket-keeper' || selectedRole === 'batting-all-rounder') && (
                   <th className="text-left p-4 text-gray-400 font-medium">Runs</th>
                 )}
-                {(selectedRole === 'all' || selectedRole === 'batsman' || selectedRole === 'wicket-keeper') && (
+                {(selectedRole === 'all' || selectedRole === 'batsman' || selectedRole === 'wicket-keeper' || selectedRole === 'batting-all-rounder') && (
                   <th className="text-left p-4 text-gray-400 font-medium">Average</th>
                 )}
-                {(selectedRole === 'all' || selectedRole === 'batsman' || selectedRole === 'wicket-keeper') && (
+                {(selectedRole === 'all' || selectedRole === 'batsman' || selectedRole === 'wicket-keeper' || selectedRole === 'batting-all-rounder') && (
                   <th className="text-left p-4 text-gray-400 font-medium">Strike Rate</th>
                 )}
-                {(selectedRole === 'all' || selectedRole === 'bowler') && (
+                {(selectedRole === 'all' || selectedRole === 'bowler' || selectedRole === 'bowling-all-rounder') && (
                   <th className="text-left p-4 text-gray-400 font-medium">Wickets</th>
                 )}
-                {(selectedRole === 'all' || selectedRole === 'bowler') && (
+                {(selectedRole === 'all' || selectedRole === 'bowler' || selectedRole === 'bowling-all-rounder') && (
                   <th className="text-left p-4 text-gray-400 font-medium">Economy</th>
                 )}
-                {(selectedRole === 'all' || selectedRole === 'bowler') && (
+                {(selectedRole === 'all' || selectedRole === 'bowler' || selectedRole === 'bowling-all-rounder') && (
                   <th className="text-left p-4 text-gray-400 font-medium">Bowling Avg</th>
                 )}
                 <th className="text-left p-4 text-gray-400 font-medium">Rating</th>
@@ -482,22 +578,22 @@ export default function AnalyticsPage() {
                   </td>
                   <td className="p-4 text-gray-300">{player.team}</td>
                   <td className="p-4 text-gray-400 text-sm capitalize">{player.role || 'Unknown'}</td>
-                  {(selectedRole === 'all' || selectedRole === 'batsman' || selectedRole === 'wicket-keeper') && (
+                  {(selectedRole === 'all' || selectedRole === 'batsman' || selectedRole === 'wicket-keeper' || selectedRole === 'batting-all-rounder') && (
                     <td className="p-4 text-white font-medium">{player.runs || '-'}</td>
                   )}
-                  {(selectedRole === 'all' || selectedRole === 'batsman' || selectedRole === 'wicket-keeper') && (
+                  {(selectedRole === 'all' || selectedRole === 'batsman' || selectedRole === 'wicket-keeper' || selectedRole === 'batting-all-rounder') && (
                     <td className="p-4 text-gray-300">{player.average ? player.average.toFixed(1) : '-'}</td>
                   )}
-                  {(selectedRole === 'all' || selectedRole === 'batsman' || selectedRole === 'wicket-keeper') && (
+                  {(selectedRole === 'all' || selectedRole === 'batsman' || selectedRole === 'wicket-keeper' || selectedRole === 'batting-all-rounder') && (
                     <td className="p-4 text-gray-300">{player.strikeRate ? player.strikeRate.toFixed(1) : '-'}</td>
                   )}
-                  {(selectedRole === 'all' || selectedRole === 'bowler') && (
+                  {(selectedRole === 'all' || selectedRole === 'bowler' || selectedRole === 'bowling-all-rounder') && (
                     <td className="p-4 text-white font-medium">{player.wickets || '-'}</td>
                   )}
-                  {(selectedRole === 'all' || selectedRole === 'bowler') && (
+                  {(selectedRole === 'all' || selectedRole === 'bowler' || selectedRole === 'bowling-all-rounder') && (
                     <td className="p-4 text-gray-300">{player.economy ? player.economy.toFixed(2) : '-'}</td>
                   )}
-                  {(selectedRole === 'all' || selectedRole === 'bowler') && (
+                  {(selectedRole === 'all' || selectedRole === 'bowler' || selectedRole === 'bowling-all-rounder') && (
                     <td className="p-4 text-gray-300">{player.bowlingAverage ? player.bowlingAverage.toFixed(1) : '-'}</td>
                   )}
                   <td className="p-4">
@@ -650,7 +746,8 @@ export default function AnalyticsPage() {
               <option value="all">All Roles</option>
               <option value="batsman">Batsman</option>
               <option value="bowler">Bowler</option>
-              <option value="all-rounder">All-Rounder</option>
+              <option value="batting-all-rounder">Batting All-Rounder</option>
+              <option value="bowling-all-rounder">Bowling All-Rounder</option>
               <option value="wicket-keeper">Wicket-Keeper</option>
             </select>
             <button
