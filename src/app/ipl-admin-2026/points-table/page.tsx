@@ -121,12 +121,12 @@ export default function PointsTablePage() {
   const handleInputChange = (field: string, value: string) => {
     if (!editingTeam) return;
     
-    // Validate numeric input
+    // Validate numeric input - allow empty strings for better UX
     if (field === 'netRunRate') {
-      const floatValue = parseFloat(value) || 0;
+      const floatValue = value === '' ? 0 : parseFloat(value);
       setEditingTeam({ ...editingTeam, [field]: floatValue });
     } else {
-      const numValue = parseInt(value) || 0;
+      const numValue = value === '' ? 0 : parseInt(value);
       setEditingTeam({ ...editingTeam, [field]: numValue });
     }
   };
@@ -450,7 +450,6 @@ export default function PointsTablePage() {
                   <label className="block text-sm font-medium mb-1">Matches Played</label>
                   <input
                     type="number"
-                    min="0"
                     value={editingTeam.matches}
                     onChange={(e) => handleInputChange('matches', e.target.value)}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -462,7 +461,6 @@ export default function PointsTablePage() {
                   <label className="block text-sm font-medium mb-1">Wins</label>
                   <input
                     type="number"
-                    min="0"
                     value={editingTeam.wins}
                     onChange={(e) => handleInputChange('wins', e.target.value)}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -474,7 +472,6 @@ export default function PointsTablePage() {
                   <label className="block text-sm font-medium mb-1">Losses</label>
                   <input
                     type="number"
-                    min="0"
                     value={editingTeam.losses}
                     onChange={(e) => handleInputChange('losses', e.target.value)}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -486,7 +483,6 @@ export default function PointsTablePage() {
                   <label className="block text-sm font-medium mb-1">Ties</label>
                   <input
                     type="number"
-                    min="0"
                     value={editingTeam.ties}
                     onChange={(e) => handleInputChange('ties', e.target.value)}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -498,7 +494,6 @@ export default function PointsTablePage() {
                   <label className="block text-sm font-medium mb-1">No Results</label>
                   <input
                     type="number"
-                    min="0"
                     value={editingTeam.noResults}
                     onChange={(e) => handleInputChange('noResults', e.target.value)}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
