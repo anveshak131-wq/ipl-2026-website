@@ -230,6 +230,7 @@ export default function PointsTablePage() {
 
   // Filter data based on search
   const filteredData = useMemo(() => {
+    if (!teams || !Array.isArray(teams) || teams.length === 0) return [];
     if (!searchQuery) return pointsData || [];
     
     const query = searchQuery.toLowerCase();
@@ -237,7 +238,7 @@ export default function PointsTablePage() {
       team.teamName.toLowerCase().includes(query) ||
       team.teamCode.toLowerCase().includes(query)
     );
-  }, [pointsData, searchQuery]);
+  }, [teams, searchQuery, selectedSeason]);
 
   const handleRefresh = async () => {
     setIsLoading(true);
