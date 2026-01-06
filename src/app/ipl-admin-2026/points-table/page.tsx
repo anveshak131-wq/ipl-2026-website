@@ -60,7 +60,12 @@ export default function PointsTablePage() {
       if (savedData) {
         try {
           const parsedData = JSON.parse(savedData);
-          setTeams(calculatePositions(parsedData));
+          // Ensure points are recalculated when loading from localStorage
+          const dataWithRecalculatedPoints = parsedData.map((team: Team) => ({
+            ...team,
+            points: team.wins * 2 + team.ties * 1 + team.noResults * 1,
+          }));
+          setTeams(calculatePositions(dataWithRecalculatedPoints));
         } catch (error) {
           console.error('Error parsing saved data:', error);
         }
