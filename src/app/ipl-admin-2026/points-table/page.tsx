@@ -547,7 +547,7 @@ setTeams(calculatePositions(updatedTeams));
                     <td className="p-4 text-center font-bold">{team.points}</td>
                     <td className="p-4 text-center">
                       <span className={team.netRunRate > 0 ? 'text-green-400' : team.netRunRate < 0 ? 'text-red-400' : 'text-gray-300'}>{
-                        team.netRunRate > 0 ? '+' : ''
+                        team.netRunRate > 0 ? '+' : (team.netRunRate < 0 ? '-' : '')
                       }{Math.abs(team.netRunRate).toFixed(2)}</span>
                     </td>
                     <td className="p-4 text-center">
@@ -699,7 +699,7 @@ setTeams(calculatePositions(updatedTeams));
                   />
                   {editingTeam.netRunRate !== undefined && editingTeam.netRunRate !== null && (
                     <p className="text-xs text-gray-400 mt-1">
-                      Current: {editingTeam.netRunRate > 0 ? '+' : ''}{Math.abs(editingTeam.netRunRate).toFixed(2)}
+                      Current: {editingTeam.netRunRate > 0 ? '+' : (editingTeam.netRunRate < 0 ? '-' : '')}{Math.abs(editingTeam.netRunRate).toFixed(2)}
                     </p>
                   )}
                 </div>
