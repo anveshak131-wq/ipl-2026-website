@@ -43,6 +43,10 @@ export default function PointsTablePage() {
   const [showPopup, setShowPopup] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [editedFields, setEditedFields] = useState<Set<string>>(new Set());
+  const [backups, setBackups] = useState<any[]>([]);
+  const [showBackupModal, setShowBackupModal] = useState(false);
+  const [backupLoading, setBackupLoading] = useState(false);
+  const [backupMessage, setBackupMessage] = useState<string | null>(null);
 
   // Generate available years (2008 to current year)
   useEffect(() => {
@@ -129,12 +133,18 @@ export default function PointsTablePage() {
     newEditedFields.add(field);
     setEditedFields(newEditedFields);
     
-    // Validate numeric input - allow empty strings for better UX
-    if (field === 'netRunRate') {
-      const floatValue = value === '' ? 0 : parseFloat(value);
+    // Handle empty values - convert to 0 for numeric fields
+    if (value === '') {
+      if (field === 'netRunRate') {
+        setEditingTeam({ ...editingTeam, [field]: 0.0 });
+      } else {
+        setEditingTeam({ ...editingTeam, [field]: 0 });
+      }
+    } else if (field === 'netRunRate') {
+      const floatValue = parseFloat(value);
       setEditingTeam({ ...editingTeam, [field]: floatValue });
     } else {
-      const numValue = value === '' ? 0 : parseInt(value);
+      const numValue = parseInt(value);
       setEditingTeam({ ...editingTeam, [field]: numValue });
     }
   };
@@ -264,6 +274,121 @@ setTeams(calculatePositions(updatedTeams));
     }
   };
 
+  // Backup functions
+  const createBackup = async () => {
+    setBackupLoading(true);
+    setBackupMessage(null);
+    
+    try {
+      const response = await fetch('/api/admin/backup-points-table?action=create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer admin-token'
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setBackupMessage(`✅ Backup created successfully! ${data.backup.teamCount} teams backed up.`);
+        loadBackups();
+      } else {
+        setBackupMessage(`❌ Error: ${data.error || 'Failed to create backup'}`);
+      }
+    } catch (error) {
+      setBackupMessage(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setBackupLoading(false);
+    }
+  };
+
+  const loadBackups = async () => {
+    try {
+      const response = await fetch('/api/admin/backup-points-table?action=list', {
+        headers: {
+          'Authorization': 'Bearer admin-token'
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setBackups(data.backups);
+      }
+    } catch (error) {
+      console.error('Error loading backups:', error);
+    }
+  };
+
+  const restoreBackup = async (backupKey: string) => {
+    if (!confirm('Are you sure you want to restore this backup? This will overwrite current data.')) {
+      return;
+    }
+    
+    setBackupLoading(true);
+    setBackupMessage(null);
+    
+    try {
+      const response = await fetch(`/api/admin/backup-points-table?action=restore&backupKey=${backupKey}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer admin-token'
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setBackupMessage(`✅ Backup restored successfully! ${data.restored.teamCount} teams restored.`);
+        // Refresh the points table
+        const savedData = localStorage.getItem(`iplPointsTable${data.restored.year}`);
+        if (savedData) {
+          const parsedData = JSON.parse(savedData);
+          setTeams(calculatePositions(parsedData));
+        }
+        loadBackups();
+      } else {
+        setBackupMessage(`❌ Error: ${data.error || 'Failed to restore backup'}`);
+      }
+    } catch (error) {
+      setBackupMessage(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setBackupLoading(false);
+    }
+  };
+
+  const deleteBackup = async (backupKey: string) => {
+    if (!confirm('Are you sure you want to delete this backup? This cannot be undone.')) {
+      return;
+    }
+    
+    setBackupLoading(true);
+    
+    try {
+      const response = await fetch(`/api/admin/backup-points-table?action=delete&backupKey=${backupKey}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': 'Bearer admin-token'
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setBackupMessage('✅ Backup deleted successfully');
+        loadBackups();
+      } else {
+        setBackupMessage(`❌ Error: ${data.error || 'Failed to delete backup'}`);
+      }
+    } catch (error) {
+      setBackupMessage(`❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setBackupLoading(false);
+    }
+  };
+
   const filteredTeams = teams.filter(team =>
     team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     team.id.toLowerCase().includes(searchQuery.toLowerCase())
@@ -329,6 +454,19 @@ setTeams(calculatePositions(updatedTeams));
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
             Reset All
+          </button>
+          
+          <button
+            onClick={() => {
+              setShowBackupModal(true);
+              loadBackups();
+            }}
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2 self-end"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+            </svg>
+            Manage Backups
           </button>
         </div>
 
@@ -602,6 +740,118 @@ setTeams(calculatePositions(updatedTeams));
                 >
                   Cancel
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Backup Management Modal */}
+        {showBackupModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-gray-800 border border-gray-600 rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold">Points Table Backup Management</h3>
+                <button
+                  onClick={() => setShowBackupModal(false)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Backup Message */}
+              {backupMessage && (
+                <div className={`mb-4 p-3 rounded-lg ${backupMessage.includes('✅') ? 'bg-green-900/30 border border-green-700' : 'bg-red-900/30 border border-red-700'}`}>
+                  <p className="text-sm">{backupMessage}</p>
+                </div>
+              )}
+
+              {/* Create Backup Button */}
+              <div className="mb-6">
+                <button
+                  onClick={createBackup}
+                  disabled={backupLoading}
+                  className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {backupLoading ? (
+                    <><span className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></span> Creating Backup...</>
+                  ) : (
+                    <><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                    </svg> Create New Backup</>
+                  )}
+                </button>
+              </div>
+
+              {/* Backups List */}
+              <div className="mb-4">
+                <h4 className="text-lg font-semibold mb-3">Existing Backups ({backups.length})</h4>
+                
+                {backups.length === 0 ? (
+                  <div className="text-center py-8 text-gray-400">
+                    <p>No backups found</p>
+                    <p className="text-sm mt-2">Create your first backup to protect your points table data</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {backups.map((backup) => (
+                      <div key={backup.key} className="bg-gray-700/50 border border-gray-600 rounded-lg p-4">
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-sm text-gray-400">
+                                {new Date(backup.timestamp).toLocaleString()}
+                              </span>
+                              <span className="bg-blue-600 text-xs px-2 py-1 rounded">Year: {backup.year}</span>
+                              <span className="bg-gray-600 text-xs px-2 py-1 rounded">
+                                {backup.teamCount} teams
+                              </span>
+                            </div>
+                            <div className="text-sm text-gray-300">
+                              {backup.metadata?.backupType === 'single_year' ? 'Single Year Backup' : 'Current Year Backup'}
+                            </div>
+                          </div>
+                          <div className="flex gap-2 ml-4">
+                            <button
+                              onClick={() => restoreBackup(backup.key)}
+                              disabled={backupLoading}
+                              className="p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                              title="Restore"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => deleteBackup(backup.key)}
+                              disabled={backupLoading}
+                              className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+                              title="Delete"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Info Section */}
+              <div className="mt-6 p-4 bg-blue-900/20 border border-blue-700 rounded-lg text-sm">
+                <p className="text-blue-300 mb-2">💡 <strong>Backup Information:</strong></p>
+                <ul className="list-disc list-inside space-y-1 text-gray-300">
+                  <li>Backups are stored in Cloudflare Workers KV for reliability</li>
+                  <li>Each backup contains the complete points table for a specific year</li>
+                  <li>You can restore any backup to revert to a previous state</li>
+                  <li>Backups are retained until manually deleted</li>
+                  <li>Create backups regularly to protect your data</li>
+                </ul>
               </div>
             </div>
           </div>
