@@ -27,6 +27,7 @@ import AdminMatchday from './components/AdminMatchday';
 import AdminStories from './components/AdminStories';
 import AdminPredictions from './predictions/page';
 import AdminAnalytics from './analytics/page';
+import AdminPointsTable from './points-table/page';
 
 export default function AdminRouter() {
   const router = useRouter();
@@ -176,6 +177,8 @@ export default function AdminRouter() {
       return <AdminTeams />;
     } else if (pathname === '/ipl-admin-2026/players') {
       return <AdminPlayers />;
+    } else if (pathname === '/ipl-admin-2026/points-table') {
+      return <AdminPointsTable />;
     } else if (pathname === '/ipl-admin-2026/content') {
       return <AdminContent />;
     } else if (pathname === '/ipl-admin-2026/datasets') {

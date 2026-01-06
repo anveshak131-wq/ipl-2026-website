@@ -3,11 +3,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import AdminLogin from '@/components/admin/AdminLogin';
-import AdminRouter from './AdminRouter';
+import { useAdminData } from '@/contexts/AdminDataContext';
 
 export default function AdminPage() {
   const router = useRouter();
   const pathname = usePathname();
+  const { refreshData } = useAdminData();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const hasCheckedAuth = useRef(false);
@@ -23,6 +24,8 @@ export default function AdminPage() {
         const token = localStorage.getItem('adminToken');
         if (token) {
           setIsAuthenticated(true);
+          // Refresh admin data when authenticated
+          refreshData();
         }
       } catch (error) {
         // localStorage not available, continue with login
@@ -33,13 +36,15 @@ export default function AdminPage() {
     };
 
     checkAuth();
-  }, []);
+  }, [refreshData]);
 
   const handleLogin = (token: string) => {
     setIsAuthenticated(true);
     // Store token in localStorage
     try {
       localStorage.setItem('adminToken', token);
+      // Refresh data after login
+      refreshData();
     } catch (error) {
       console.log('localStorage not available');
     }
@@ -57,6 +62,18 @@ export default function AdminPage() {
     return <AdminLogin onLogin={handleLogin} />;
   }
 
-  // Show admin router for authenticated users
-  return <AdminRouter />;
+  // For authenticated users, let Next.js handle routing through layout.tsx
+  // This page acts as the login page, other routes are handled by their respective page.tsx files
+  if (pathname === '/ipl-admin-2026' || pathname === '/ipl-admin-2026/') {
+    // Redirect to dashboard after login
+    router.push('/ipl-admin-2026/dashboard');
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-ipl-dark to-black flex items-center justify-center">
+        <div className="text-white">Redirecting to dashboard...</div>
+      </div>
+    );
+  }
+
+  // This should not be reached for other routes as they have their own page.tsx files
+  return null;
 }
