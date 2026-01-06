@@ -699,14 +699,20 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
       if (!e.metaKey && !e.ctrlKey && !e.altKey && !e.shiftKey) {
         const key = e.key.toLowerCase();
         
-        // Find menu item by shortcut
-        for (const items of Object.values(menuGroups)) {
-          const item = items.find((i) => i.shortcut?.toLowerCase() === key);
-          if (item) {
-            e.preventDefault();
-            router.push(item.href);
-            break;
+        try {
+          // Find menu item by shortcut
+          for (const items of Object.values(menuGroups)) {
+            if (Array.isArray(items)) {
+              const item = items.find((i) => i.shortcut?.toLowerCase() === key);
+              if (item) {
+                e.preventDefault();
+                router.push(item.href);
+                break;
+              }
+            }
           }
+        } catch (error) {
+          console.error('Error handling keyboard shortcut:', error);
         }
       }
     };
@@ -716,9 +722,15 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
   }, [collapsed, menuGroups, router]);
 
   const findMenuItemByHref = (href: string): MenuItem | null => {
-    for (const items of Object.values(menuGroups)) {
-      const item = items.find((i) => i.href === href || href.startsWith(i.href + '/'));
-      if (item) return item;
+    try {
+      for (const items of Object.values(menuGroups)) {
+        if (Array.isArray(items)) {
+          const item = items.find((i) => i.href === href || href.startsWith(i.href + '/'));
+          if (item) return item;
+        }
+      }
+    } catch (error) {
+      console.error('Error finding menu item:', error);
     }
     return null;
   };
@@ -827,39 +839,45 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
       )}
 
       {/* Recent Pages - Only show when searching or collapsed */}
-      {!collapsed && recentPages.length > 0 && searchQuery && (
-        <div className="px-4 py-2 border-b border-[#2A3440]">
-          <div className="flex items-center gap-2 mb-2">
-            <Clock className="w-3 h-3 text-[#6B7280]" />
-            <span className="text-xs text-[#6B7280]">Recent</span>
-          </div>
-          <div className="space-y-0.5">
-            {recentPages.slice(0, 3).map((page) => {
-              const isActive = currentPage === page.href || (!!currentPage && currentPage.startsWith(page.href + '/'));
-              return (
-                <button
-                  key={page.href}
-                  onClick={() => handleNavigation(page.href)}
-                  className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-all duration-200 ${
-                    isActive
-                      ? 'bg-[#1A2332] text-[#E6EDF3]'
-                      : 'text-[#AEBAC7] hover:text-[#E6EDF3] hover:bg-[#141A22]'
-                  }`}
-                >
-                  <span className={isActive ? 'text-[#2F6FED]' : 'text-[#6B7280]'}>
-                    {renderIconFromType(page.iconType)}
-                  </span>
-                  <span className="flex-1 text-left truncate">{page.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
+     {!collapsed && recentPages.length > 0 && searchQuery && (
+       <div className="px-4 py-2 border-b border-[#2A3440]">
+         <div className="flex items-center gap-2 mb-2">
+           <Clock className="w-3 h-3 text-[#6B7280]" />
+           <span className="text-xs text-[#6B7280]">Recent</span>
+         </div>
+         <div className="space-y-0.5">
+           {recentPages.slice(0, 3).map((page) => {
+             if (!page || !page.href) return null;
+             const isActive = currentPage === page.href || (!!currentPage && currentPage.startsWith(page.href + '/'));
+             return (
+               <button
+                 key={page.href}
+                 onClick={() => handleNavigation(page.href)}
+                 className={`w-full flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-all duration-200 ${
+                   isActive
+                     ? 'bg-[#1A2332] text-[#E6EDF3]'
+                     : 'text-[#AEBAC7] hover:text-[#E6EDF3] hover:bg-[#141A22]'
+                 }`}
+               >
+                 <span className={isActive ? 'text-[#2F6FED]' : 'text-[#6B7280]'}>
+                   {renderIconFromType(page.iconType)}
+                 </span>
+                 <span className="flex-1 text-left truncate">{page.label}</span>
+               </button>
+             );
+           })}
+         </div>
+       </div>
+     )}
 
       {/* Navigation - Redesigned with admin classes */}
       <nav className="flex-1 px-4 py-4 space-y-4 overflow-y-auto">
         {Object.entries(filteredMenuGroups).map(([groupName, items]) => {
+          if (!Array.isArray(items)) {
+            console.warn(`Menu group ${groupName} is not an array`);
+            return null;
+          }
+          
           const isExpanded = expandedGroups.has(groupName);
           const hasActiveItem = items.some(
             (item) =>
@@ -871,6 +889,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
             return (
               <div key={groupName} className="space-y-1">
                 {items.map((item) => {
+                  if (!item || !item.href) return null;
                   const isActive =
                     currentPage === item.href ||
                     (!!currentPage && currentPage.startsWith(item.href + '/'));
@@ -941,6 +960,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
                     className="space-y-1 overflow-hidden"
                   >
                     {items.map((item) => {
+                      if (!item || !item.href) return null;
                       const isActive =
                         currentPage === item.href ||
                         (!!currentPage && currentPage.startsWith(item.href + '/'));
