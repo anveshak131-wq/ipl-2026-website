@@ -109,6 +109,10 @@ export default function PointsTablePage() {
         ...team,
         // Calculate points: 2 for win, 1 for tie/no result, 0 for loss
         points: team.wins * 2 + team.ties * 1 + team.noResults * 1,
+        // Ensure netRunRate is preserved
+        netRunRate: team.netRunRate || 0.0,
+        // Ensure qualificationStatus is preserved
+        qualificationStatus: team.qualificationStatus || null,
       }))
       .sort((a, b) => {
         // First by points (descending)
@@ -196,14 +200,19 @@ export default function PointsTablePage() {
   };
 
   // Handle qualification status selection
-  const handleQualificationStatus = (status: 'Q' | 'E') => {
+  const handleQualificationStatus = (status: 'Q' | 'E' | null) => {
     if (!editingTeam) return;
     setEditingTeam({ ...editingTeam, qualificationStatus: status });
   };
 
   // Handle edit team
   const handleEdit = (team: Team) => {
-    setEditingTeam({ ...team });
+    // Ensure netRunRate is properly initialized
+    const teamToEdit = {
+      ...team,
+      netRunRate: team.netRunRate || 0.0
+    };
+    setEditingTeam(teamToEdit);
     setShowPopup(true);
     setErrors({});
     setEditedFields(new Set()); // Reset edited fields tracking
@@ -220,6 +229,7 @@ export default function PointsTablePage() {
         return {
           ...editingTeam,
           points: editingTeam.wins * 2 + editingTeam.ties * 1 + editingTeam.noResults * 1,
+          netRunRate: editingTeam.netRunRate, // Ensure netRunRate is preserved
           qualificationStatus: editingTeam.qualificationStatus || null,
         };
       }
@@ -520,6 +530,13 @@ setTeams(calculatePositions(updatedTeams));
                           {team.id.toUpperCase()}
                         </div>
                         <span className="font-medium">{team.name}</span>
+                        {team.qualificationStatus && (
+                          <span className={`ml-2 text-xs font-bold px-2 py-1 rounded ${
+                            team.qualificationStatus === 'Q' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
+                          }`}>
+                            {team.qualificationStatus}
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td className="p-4 text-center">{team.matches}</td>
@@ -529,9 +546,9 @@ setTeams(calculatePositions(updatedTeams));
                     <td className="p-4 text-center">{team.noResults}</td>
                     <td className="p-4 text-center font-bold">{team.points}</td>
                     <td className="p-4 text-center">
-                      <span className={team.netRunRate > 0 ? 'text-green-400' : 'text-red-400'}>{
+                      <span className={team.netRunRate > 0 ? 'text-green-400' : team.netRunRate < 0 ? 'text-red-400' : 'text-gray-300'}>{
                         team.netRunRate > 0 ? '+' : ''
-                      }{team.netRunRate.toFixed(2)}</span>
+                      }{Math.abs(team.netRunRate).toFixed(2)}</span>
                     </td>
                     <td className="p-4 text-center">
                       <div className="flex gap-2 justify-center">
@@ -680,6 +697,11 @@ setTeams(calculatePositions(updatedTeams));
                     onChange={(e) => handleInputChange('netRunRate', e.target.value)}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
+                  {editingTeam.netRunRate !== undefined && editingTeam.netRunRate !== null && (
+                    <p className="text-xs text-gray-400 mt-1">
+                      Current: {editingTeam.netRunRate > 0 ? '+' : ''}{Math.abs(editingTeam.netRunRate).toFixed(2)}
+                    </p>
+                  )}
                 </div>
               </div>
               
@@ -695,37 +717,48 @@ setTeams(calculatePositions(updatedTeams));
               </div>
               
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Qualification Status</label>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleQualificationStatus('Q')}
-                    className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
-                      editingTeam.qualificationStatus === 'Q'
-                        ? 'bg-green-600 text-white'
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                    }`}
-                  >
-                    Q (Qualifier)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleQualificationStatus('E')}
-                    className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
-                      editingTeam.qualificationStatus === 'E'
-                        ? 'bg-red-600 text-white'
-                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                    }`}
-                  >
-                    E (Eliminated)
-                  </button>
-                </div>
-                {editingTeam.qualificationStatus && (
-                  <p className="text-xs text-gray-400 mt-2 text-center">
-                    Current status: <strong>{editingTeam.qualificationStatus}</strong>
-                  </p>
-                )}
+              <label className="block text-sm font-medium mb-2">Qualification Status</label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleQualificationStatus('Q')}
+                  className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
+                    editingTeam.qualificationStatus === 'Q'
+                      ? 'bg-green-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                >
+                  Q (Qualifier)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQualificationStatus('E')}
+                  className={`flex-1 px-4 py-2 rounded-lg transition-colors ${
+                    editingTeam.qualificationStatus === 'E'
+                      ? 'bg-red-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                >
+                  E (Eliminated)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQualificationStatus(null)}
+                  className={`px-4 py-2 rounded-lg transition-colors ${
+                    !editingTeam.qualificationStatus
+                      ? 'bg-gray-600 text-white'
+                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  }`}
+                >
+                  Clear
+                </button>
               </div>
+              {editingTeam.qualificationStatus && (
+                <p className="text-xs text-gray-400 mt-2 text-center">
+                  Current status: <strong>{editingTeam.qualificationStatus}</strong>
+                </p>
+              )}
+            </div>
               
               <div className="flex gap-2">
                 <button
