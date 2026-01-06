@@ -36,20 +36,11 @@ export default function PointsTablePage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [editingTeam, setEditingTeam] = useState<string | null>(null);
   const [selectedYear, setSelectedYear] = useState<number>(2026);
   const [availableYears, setAvailableYears] = useState<number[]>([]);
-  const [formData, setFormData] = useState({
-    matches: 0,
-    wins: 0,
-    losses: 0,
-    ties: 0,
-    noResults: 0,
-    netRunRate: 0.0,
-  });
+  const [editingTeam, setEditingTeam] = useState<Team | null>(null);
+  const [showPopup, setShowPopup] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newTeamId, setNewTeamId] = useState('rcb');
 
   // Generate available years (2008 to current year)
   useEffect(() => {
@@ -122,51 +113,53 @@ export default function PointsTablePage() {
   };
 
   // Handle form input changes
-  const handleInputChange = (field: string, value: string | number) => {
+  const handleInputChange = (field: string, value: string) => {
+    if (!editingTeam) return;
+    
     // Validate numeric input
-    if (field !== 'netRunRate' && typeof value === 'string') {
-      const numValue = parseInt(value) || 0;
-      setFormData(prev => ({ ...prev, [field]: numValue }));
-    } else if (field === 'netRunRate' && typeof value === 'string') {
+    if (field === 'netRunRate') {
       const floatValue = parseFloat(value) || 0;
-      setFormData(prev => ({ ...prev, [field]: floatValue }));
+      setEditingTeam({ ...editingTeam, [field]: floatValue });
     } else {
-      setFormData(prev => ({ ...prev, [field]: value }));
+      const numValue = parseInt(value) || 0;
+      setEditingTeam({ ...editingTeam, [field]: numValue });
     }
   };
 
   // Validate form data
   const validateForm = (): boolean => {
+    if (!editingTeam) return false;
+    
     const newErrors: Record<string, string> = {};
     
     // Validate matches
-    if (formData.matches < 0) {
+    if (editingTeam.matches < 0) {
       newErrors.matches = 'Matches cannot be negative';
     }
     
     // Validate wins
-    if (formData.wins < 0) {
+    if (editingTeam.wins < 0) {
       newErrors.wins = 'Wins cannot be negative';
     }
     
     // Validate losses
-    if (formData.losses < 0) {
+    if (editingTeam.losses < 0) {
       newErrors.losses = 'Losses cannot be negative';
     }
     
     // Validate ties
-    if (formData.ties < 0) {
+    if (editingTeam.ties < 0) {
       newErrors.ties = 'Ties cannot be negative';
     }
     
     // Validate no results
-    if (formData.noResults < 0) {
+    if (editingTeam.noResults < 0) {
       newErrors.noResults = 'No Results cannot be negative';
     }
     
     // Validate that wins + losses + ties + noResults <= matches
-    const totalResults = formData.wins + formData.losses + formData.ties + formData.noResults;
-    if (totalResults > formData.matches) {
+    const totalResults = editingTeam.wins + editingTeam.losses + editingTeam.ties + editingTeam.noResults;
+    if (totalResults > editingTeam.matches) {
       newErrors.results = 'Total results cannot exceed matches played';
     }
     
@@ -175,45 +168,31 @@ export default function PointsTablePage() {
   };
 
   // Handle edit team
-  const handleEdit = (teamId: string) => {
-    const teamToEdit = teams.find(team => team.id === teamId);
-    if (teamToEdit) {
-      setEditingTeam(teamId);
-      setFormData({
-        matches: teamToEdit.matches,
-        wins: teamToEdit.wins,
-        losses: teamToEdit.losses,
-        ties: teamToEdit.ties,
-        noResults: teamToEdit.noResults,
-        netRunRate: teamToEdit.netRunRate,
-      });
-    }
+  const handleEdit = (team: Team) => {
+    setEditingTeam({ ...team });
+    setShowPopup(true);
+    setErrors({});
   };
 
   // Handle save team data
-  const handleSave = (teamId: string) => {
-    if (!validateForm()) {
+  const handleSave = () => {
+    if (!editingTeam || !validateForm()) {
       return;
     }
     
     const updatedTeams = teams.map(team => {
-      if (team.id === teamId) {
+      if (team.id === editingTeam.id) {
         return {
-          ...team,
-          ...formData,
+          ...editingTeam,
+          points: editingTeam.wins * 2 + editingTeam.ties * 1 + editingTeam.noResults * 1,
         };
       }
       return team;
     });
     
     setTeams(calculatePositions(updatedTeams));
+    setShowPopup(false);
     setEditingTeam(null);
-  };
-
-  // Handle cancel edit
-  const handleCancel = () => {
-    setEditingTeam(null);
-    setErrors({});
   };
 
   // Handle delete team data
@@ -237,41 +216,6 @@ export default function PointsTablePage() {
       
       setTeams(calculatePositions(updatedTeams));
     }
-  };
-
-  // Handle add new team
-  const handleAddTeam = () => {
-    if (!validateForm()) {
-      return;
-    }
-    
-    const teamExists = teams.some(team => team.id === newTeamId);
-    if (teamExists) {
-      alert('This team already exists in the points table.');
-      return;
-    }
-    
-    const teamName = IPL_TEAMS.find(team => team.id === newTeamId)?.name || 'Unknown Team';
-    
-    const newTeam: Team = {
-      id: newTeamId,
-      name: teamName,
-      ...formData,
-      points: formData.wins * 2 + formData.ties * 1 + formData.noResults * 1,
-    };
-    
-    const updatedTeams = [...teams, newTeam];
-    setTeams(calculatePositions(updatedTeams));
-    setShowAddForm(false);
-    setNewTeamId('rcb');
-    setFormData({
-      matches: 0,
-      wins: 0,
-      losses: 0,
-      ties: 0,
-      noResults: 0,
-      netRunRate: 0.0,
-    });
   };
 
   // Handle reset all data
@@ -350,18 +294,8 @@ export default function PointsTablePage() {
           </div>
           
           <button
-            onClick={() => setShowAddForm(true)}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Add Team
-          </button>
-          
-          <button
             onClick={handleResetAll}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 self-end"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -369,115 +303,6 @@ export default function PointsTablePage() {
             Reset All
           </button>
         </div>
-
-        {/* Add Team Form */}
-        {showAddForm && (
-          <div className="mb-6 bg-gray-800/50 border border-gray-700 rounded-lg p-6">
-            <h3 className="text-xl font-bold mb-4">Add New Team</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Team</label>
-                <select
-                  value={newTeamId}
-                  onChange={(e) => setNewTeamId(e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {IPL_TEAMS.map(team => (
-                    <option key={team.id} value={team.id}>{team.name}</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Matches Played</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={formData.matches}
-                  onChange={(e) => handleInputChange('matches', e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {errors.matches && <p className="text-red-400 text-sm mt-1">{errors.matches}</p>}
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Wins</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={formData.wins}
-                  onChange={(e) => handleInputChange('wins', e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {errors.wins && <p className="text-red-400 text-sm mt-1">{errors.wins}</p>}
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Losses</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={formData.losses}
-                  onChange={(e) => handleInputChange('losses', e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {errors.losses && <p className="text-red-400 text-sm mt-1">{errors.losses}</p>}
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Ties</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={formData.ties}
-                  onChange={(e) => handleInputChange('ties', e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {errors.ties && <p className="text-red-400 text-sm mt-1">{errors.ties}</p>}
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">No Results</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={formData.noResults}
-                  onChange={(e) => handleInputChange('noResults', e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {errors.noResults && <p className="text-red-400 text-sm mt-1">{errors.noResults}</p>}
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Net Run Rate</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={formData.netRunRate}
-                  onChange={(e) => handleInputChange('netRunRate', e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-            
-            {errors.results && <p className="text-red-400 text-sm mb-4">{errors.results}</p>}
-            
-            <div className="flex gap-2">
-              <button
-                onClick={handleAddTeam}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-              >
-                Add Team
-              </button>
-              <button
-                onClick={() => setShowAddForm(false)}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Points Table */}
         <div className="bg-gray-800/50 border border-gray-700 rounded-lg overflow-hidden">
@@ -498,19 +323,19 @@ export default function PointsTablePage() {
             </thead>
             <tbody>
               {filteredTeams.length > 0 ? (
-                  filteredTeams.map((team) => (
-                    <tr key={team.id} className="border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors">
-                      <td className="p-4">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                          team.position === 1 ? 'bg-yellow-500 text-black' :
-                          team.position === 2 ? 'bg-gray-400 text-white' :
-                          team.position === 3 ? 'bg-orange-600 text-white' :
-                          team.position === 4 ? 'bg-blue-600 text-white' :
-                          'bg-gray-600 text-white'
-                        }`}>
-                          {team.position || '?'}
-                        </div>
-                      </td>
+                filteredTeams.map((team) => (
+                  <tr key={team.id} className="border-b border-gray-700/50 hover:bg-gray-700/30 transition-colors">
+                    <td className="p-4">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                        team.position === 1 ? 'bg-yellow-500 text-black' :
+                        team.position === 2 ? 'bg-gray-400 text-white' :
+                        team.position === 3 ? 'bg-orange-600 text-white' :
+                        team.position === 4 ? 'bg-blue-600 text-white' :
+                        'bg-gray-600 text-white'
+                      }`}>
+                        {team.position || '?'}
+                      </div>
+                    </td>
                     <td className="p-4">
                       <div className="flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${
@@ -543,49 +368,26 @@ export default function PointsTablePage() {
                       }{team.netRunRate.toFixed(2)}</span>
                     </td>
                     <td className="p-4 text-center">
-                      {editingTeam === team.id ? (
-                        <div className="flex gap-2 justify-center">
-                          <button
-                            onClick={() => handleSave(team.id)}
-                            className="p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                            title="Save"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                          </button>
-                          <button
-                            onClick={handleCancel}
-                            className="p-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                            title="Cancel"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex gap-2 justify-center">
-                          <button
-                            onClick={() => handleEdit(team.id)}
-                            className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                            title="Edit"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                          </button>
-                          <button
-                            onClick={() => handleDelete(team.id)}
-                            className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                            title="Reset"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        </div>
-                      )}
+                      <div className="flex gap-2 justify-center">
+                        <button
+                          onClick={() => handleEdit(team)}
+                          className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                          title="Edit"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={() => handleDelete(team.id)}
+                          className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                          title="Reset"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -600,88 +402,143 @@ export default function PointsTablePage() {
           </table>
         </div>
 
-        {/* Edit Form (shown when editing a team) */}
-        {editingTeam && (
-          <div className="mt-6 bg-gray-800/50 border border-gray-700 rounded-lg p-6">
-            <h3 className="text-xl font-bold mb-4">Edit Team Data</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Matches Played</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={formData.matches}
-                  onChange={(e) => handleInputChange('matches', e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {errors.matches && <p className="text-red-400 text-sm mt-1">{errors.matches}</p>}
+        {/* Edit Popup Panel */}
+        {showPopup && editingTeam && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-gray-800 border border-gray-600 rounded-lg p-6 max-w-md w-full">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold">Edit Team Data</h3>
+                <button
+                  onClick={() => setShowPopup(false)}
+                  className="text-gray-400 hover:text-white"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
               
-              <div>
-                <label className="block text-sm font-medium mb-1">Wins</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={formData.wins}
-                  onChange={(e) => handleInputChange('wins', e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {errors.wins && <p className="text-red-400 text-sm mt-1">{errors.wins}</p>}
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Team</label>
+                <div className="flex items-center gap-3 p-3 bg-gray-700 rounded-lg">
+                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${
+                    editingTeam.id === 'rcb' ? 'from-red-500 to-red-600' :
+                    editingTeam.id === 'mi' ? 'from-blue-500 to-blue-600' :
+                    editingTeam.id === 'csk' ? 'from-yellow-500 to-yellow-600' :
+                    editingTeam.id === 'kkr' ? 'from-purple-500 to-purple-600' :
+                    editingTeam.id === 'srh' ? 'from-orange-500 to-orange-600' :
+                    editingTeam.id === 'rr' ? 'from-pink-500 to-pink-600' :
+                    editingTeam.id === 'dc' ? 'from-indigo-500 to-indigo-600' :
+                    editingTeam.id === 'lsg' ? 'from-green-500 to-green-600' :
+                    editingTeam.id === 'pbks' ? 'from-red-600 to-red-700' :
+                    editingTeam.id === 'gt' ? 'from-blue-400 to-blue-500' :
+                    'from-gray-500 to-gray-600'
+                  } flex items-center justify-center text-white font-bold text-xs`}>
+                    {editingTeam.id.toUpperCase()}
+                  </div>
+                  <span className="font-medium">{editingTeam.name}</span>
+                </div>
               </div>
               
-              <div>
-                <label className="block text-sm font-medium mb-1">Losses</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={formData.losses}
-                  onChange={(e) => handleInputChange('losses', e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {errors.losses && <p className="text-red-400 text-sm mt-1">{errors.losses}</p>}
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Matches Played</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editingTeam.matches}
+                    onChange={(e) => handleInputChange('matches', e.target.value)}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {errors.matches && <p className="text-red-400 text-sm mt-1">{errors.matches}</p>}
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">Wins</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editingTeam.wins}
+                    onChange={(e) => handleInputChange('wins', e.target.value)}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {errors.wins && <p className="text-red-400 text-sm mt-1">{errors.wins}</p>}
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">Losses</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editingTeam.losses}
+                    onChange={(e) => handleInputChange('losses', e.target.value)}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {errors.losses && <p className="text-red-400 text-sm mt-1">{errors.losses}</p>}
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">Ties</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editingTeam.ties}
+                    onChange={(e) => handleInputChange('ties', e.target.value)}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {errors.ties && <p className="text-red-400 text-sm mt-1">{errors.ties}</p>}
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">No Results</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editingTeam.noResults}
+                    onChange={(e) => handleInputChange('noResults', e.target.value)}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {errors.noResults && <p className="text-red-400 text-sm mt-1">{errors.noResults}</p>}
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-1">Net Run Rate</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={editingTeam.netRunRate}
+                    onChange={(e) => handleInputChange('netRunRate', e.target.value)}
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
               </div>
               
-              <div>
-                <label className="block text-sm font-medium mb-1">Ties</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={formData.ties}
-                  onChange={(e) => handleInputChange('ties', e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {errors.ties && <p className="text-red-400 text-sm mt-1">{errors.ties}</p>}
+              {errors.results && <p className="text-red-400 text-sm mb-4">{errors.results}</p>}
+              
+              <div className="bg-gray-700/50 border border-gray-600 rounded-lg p-3 mb-4">
+                <p className="text-sm">
+                  <strong>Calculated Points:</strong> {editingTeam.wins * 2 + editingTeam.ties * 1 + editingTeam.noResults * 1}
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Points = (Wins × 2) + (Ties × 1) + (No Results × 1)
+                </p>
               </div>
               
-              <div>
-                <label className="block text-sm font-medium mb-1">No Results</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={formData.noResults}
-                  onChange={(e) => handleInputChange('noResults', e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                {errors.noResults && <p className="text-red-400 text-sm mt-1">{errors.noResults}</p>}
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Net Run Rate</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={formData.netRunRate}
-                  onChange={(e) => handleInputChange('netRunRate', e.target.value)}
-                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+              <div className="flex gap-2">
+                <button
+                  onClick={handleSave}
+                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  Save Changes
+                </button>
+                <button
+                  onClick={() => setShowPopup(false)}
+                  className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
-            
-            {errors.results && <p className="text-red-400 text-sm mb-4">{errors.results}</p>}
-            
-            <p className="text-sm text-gray-400 mb-4">
-              <strong>Note:</strong> Points are calculated automatically (2 for win, 1 for tie/no result). Team positions are determined by points first, then net run rate.
-            </p>
           </div>
         )}
 
