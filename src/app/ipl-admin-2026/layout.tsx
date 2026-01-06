@@ -105,8 +105,10 @@ export default function AdminLayout({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-ipl-dark flex items-center justify-center">
-        <div className="text-white">Loading...</div>
+      <div className="min-h-screen bg-gray-950">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-white">Loading...</div>
+        </div>
       </div>
     );
   }
