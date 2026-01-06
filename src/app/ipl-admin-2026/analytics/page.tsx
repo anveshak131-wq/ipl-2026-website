@@ -318,11 +318,16 @@ export default function AnalyticsPage() {
           else if (stats.battingAverage && parseFloat(stats.battingAverage) < 20) trend = 'down';
         }
         
-        // Give Virat Kohli highest rating
+        // Give Virat Kohli highest rating only for batting-focused roles
         let finalRating = Math.min(rating, 10);
         if (player.name.toLowerCase().includes('virat')) {
-          finalRating = 10; // Maximum rating for Virat
-          trend = 'up'; // Always show positive trend for Virat
+          // Only give Virat #1 priority for batting-focused roles
+          if (role.includes('batsman') || role.includes('batting') || role.includes('wicket keeper') || role.includes('keeper')) {
+            finalRating = 10; // Maximum rating for Virat in batting roles
+            trend = 'up'; // Always show positive trend for Virat
+          }
+          // For bowling all-rounders, don't give automatic #1
+          // For pure bowlers, don't give automatic #1
         }
         
         return {
@@ -342,9 +347,21 @@ export default function AnalyticsPage() {
         };
       })
       .sort((a, b) => {
-        // Prioritize Virat Kohli at the top
-        if (a.name.toLowerCase().includes('virat') && !b.name.toLowerCase().includes('virat')) return -1;
-        if (b.name.toLowerCase().includes('virat') && !a.name.toLowerCase().includes('virat')) return 1;
+        // Prioritize Virat Kohli at the top only for batting-focused roles
+        const isBattingRole = (role: string) => 
+          role.includes('batsman') || role.includes('batting') || 
+          role.includes('wicket keeper') || role.includes('keeper');
+        
+        const aIsBatting = isBattingRole(a.role || '');
+        const bIsBatting = isBattingRole(b.role || '');
+        
+        // If both are batting roles and one is Virat, prioritize Virat
+        if (aIsBatting && bIsBatting) {
+          if (a.name.toLowerCase().includes('virat') && !b.name.toLowerCase().includes('virat')) return -1;
+          if (b.name.toLowerCase().includes('virat') && !a.name.toLowerCase().includes('virat')) return 1;
+        }
+        
+        // Otherwise, sort by rating
         return b.rating - a.rating;
       })
       .slice(0, 10);
