@@ -17,9 +17,6 @@ export default function AdminLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  
-  console.log('AdminLayout rendered with pathname:', pathname); // Debug log
-  
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,18 +24,15 @@ export default function AdminLayout({
   const hasCheckedAuth = useRef(false);
 
   useEffect(() => {
-    // Prevent multiple auth checks
     if (hasCheckedAuth.current) return;
     hasCheckedAuth.current = true;
 
-    // Check authentication on client side only
     const checkAuth = async () => {
       try {
         const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
         if (token) {
           setIsAuthenticated(true);
           
-          // Verify token and get user role
           try {
             const response = await fetch(`/api/auth?action=verify&token=${token}`);
             const data = await response.json();
@@ -47,7 +41,6 @@ export default function AdminLayout({
               const role = data.user?.role;
               setUserRole(role);
             } else {
-              // Fallback: try to parse token
               try {
                 const tokenPayload = JSON.parse(atob(token));
                 if (tokenPayload.role) {
@@ -58,7 +51,6 @@ export default function AdminLayout({
               }
             }
           } catch (error) {
-            // API call failed, try fallback
             try {
               const tokenPayload = JSON.parse(atob(token));
               if (tokenPayload.role) {
@@ -70,7 +62,6 @@ export default function AdminLayout({
           }
         }
       } catch (error) {
-        // localStorage not available, continue with login
         console.log('localStorage not available');
       } finally {
         setIsLoading(false);
@@ -80,25 +71,8 @@ export default function AdminLayout({
     checkAuth();
   }, []);
 
-  // Keyboard shortcut for search
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setIsSearchOpen(true);
-      }
-      if (e.key === 'Escape' && isSearchOpen) {
-        setIsSearchOpen(false);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSearchOpen]);
-
   const handleLogin = (token: string) => {
     setIsAuthenticated(true);
-    // Store token in localStorage
     try {
       localStorage.setItem('adminToken', token);
     } catch (error) {
@@ -118,6 +92,18 @@ export default function AdminLayout({
 
   if (!isAuthenticated) {
     return <AdminLogin onLogin={handleLogin} />;
+  }
+
+  // For authenticated users at the index route, redirect to dashboard
+  if (pathname === '/ipl-admin-2026' || pathname === '/ipl-admin-2026/') {
+    router.push('/ipl-admin-2026/dashboard');
+    return (
+      <div className="min-h-screen bg-gray-950">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-white">Redirecting to dashboard...</div>
+        </div>
+      </div>
+    );
   }
 
   // Show admin layout with sidebar for authenticated users
