@@ -465,6 +465,14 @@ export default function IPLHomePage() {
                     View Matches
                   </Link>
                   </motion.div>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Link
+                    href="/ipl/points-table"
+                      className="px-10 py-5 rounded-xl bg-white/10 backdrop-blur-xl text-white font-bold text-lg border-2 border-yellow-500/30 hover:border-yellow-500/50 hover:bg-yellow-500/20 transition-all duration-300 block"
+                  >
+                    Points Table
+                  </Link>
+                  </motion.div>
                 </motion.div>
               </motion.div>
 

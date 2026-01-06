@@ -594,7 +594,7 @@ function TeamsPageContent() {
                                     Compare Teams
                                 </span>
                             </motion.button>
-                            
+                             
                             <motion.button
                                 onClick={() => router.push('/stats')}
                                 className="px-8 py-4 rounded-2xl backdrop-blur-2xl border-2 border-white/20 bg-white/5 text-white font-black text-lg hover:bg-white/10 transition-all duration-300 flex items-center gap-3"
@@ -603,6 +603,16 @@ function TeamsPageContent() {
                             >
                                 <Trophy className="w-5 h-5" />
                                 View Statistics
+                            </motion.button>
+                             
+                            <motion.button
+                                onClick={() => router.push('/ipl/points-table')}
+                                className="px-8 py-4 rounded-2xl backdrop-blur-2xl border-2 border-white/20 bg-white/5 text-white font-black text-lg hover:bg-white/10 transition-all duration-300 flex items-center gap-3"
+                                whileHover={{ scale: 1.05, y: -2 }}
+                                whileTap={{ scale: 0.95 }}
+                            >
+                                <Award className="w-5 h-5" />
+                                Points Table
                             </motion.button>
                         </motion.div>
                         </div>
