@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Trophy, TrendingUp, TrendingDown, Minus, Search, Filter, Download, RefreshCw, Eye, BarChart3, Users, Calendar } from 'lucide-react';
+import { Trophy, TrendingUp, TrendingDown, Minus, Search, Filter, Download, RefreshCw, Eye, BarChart3, Users, Calendar, Edit2, Trash2, Plus, Save, X } from 'lucide-react';
 import { useAdminData } from '@/contexts/AdminDataContext';
 import { useLeague } from '@/contexts/LeagueContext';
 import { PageTransition, StaggeredList, LoadingSpinner } from '@/components/admin/animations';
@@ -39,39 +39,152 @@ export default function PointsTablePage() {
   const [selectedSeason, setSelectedSeason] = useState('2026');
   const [isLoading, setIsLoading] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
+  const [editingTeam, setEditingTeam] = useState<string | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [formData, setFormData] = useState({
+    matches: 0,
+    wins: 0,
+    losses: 0,
+    ties: 0,
+    noResults: 0,
+    netRunRate: 0,
+    runsScored: 0,
+    runsConceded: 0,
+    oversFaced: 0,
+    oversBowled: 0,
+    last5Matches: ['W', 'L', 'W', 'L', 'L']
+  });
+
+  // Storage functions for points data
+  const getStoredPointsData = (teamId: string) => {
+    const stored = localStorage.getItem(`points_${teamId}_${selectedSeason}`);
+    if (stored) {
+      return JSON.parse(stored);
+    }
+    // Default values
+    return {
+      matches: 0,
+      wins: 0,
+      losses: 0,
+      ties: 0,
+      noResults: 0,
+      points: 0,
+      netRunRate: 0,
+      runsScored: 0,
+      runsConceded: 0,
+      oversFaced: 0,
+      oversBowled: 0,
+      last5Matches: ['-', '-', '-', '-', '-']
+    };
+  };
+
+  const savePointsData = (teamId: string, data: any) => {
+    localStorage.setItem(`points_${teamId}_${selectedSeason}`, JSON.stringify(data));
+  };
+
+  const deletePointsData = (teamId: string) => {
+    localStorage.removeItem(`points_${teamId}_${selectedSeason}`);
+  };
+
+  const handleEdit = (team: any) => {
+    setEditingTeam(team.teamId);
+    setFormData({
+      matches: team.matches,
+      wins: team.wins,
+      losses: team.losses,
+      ties: team.ties,
+      noResults: team.noResults,
+      netRunRate: team.netRunRate,
+      runsScored: team.runsScored,
+      runsConceded: team.runsConceded,
+      oversFaced: team.oversFaced,
+      oversBowled: team.oversBowled,
+      last5Matches: team.last5Matches
+    });
+  };
+
+  const handleSave = (teamId: string) => {
+    const points = (formData.wins * 2) + (formData.ties * 1) + (formData.noResults * 1);
+    const dataToSave = {
+      ...formData,
+      points
+    };
+    savePointsData(teamId, dataToSave);
+    setEditingTeam(null);
+    showToast('Team data updated successfully', 'success');
+    // Trigger re-render
+    window.location.reload();
+  };
+
+  const handleDelete = (teamId: string) => {
+    if (confirm('Are you sure you want to delete this team\'s points data?')) {
+      deletePointsData(teamId);
+      showToast('Team data deleted successfully', 'success');
+      // Trigger re-render
+      window.location.reload();
+    }
+  };
+
+  const handleCancel = () => {
+    setEditingTeam(null);
+    setFormData({
+      matches: 0,
+      wins: 0,
+      losses: 0,
+      ties: 0,
+      noResults: 0,
+      netRunRate: 0,
+      runsScored: 0,
+      runsConceded: 0,
+      oversFaced: 0,
+      oversBowled: 0,
+      last5Matches: ['W', 'L', 'W', 'L', 'L']
+    });
+  };
+
+  const handleInputChange = (field: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleLast5Change = (index: number, value: string) => {
+    const newLast5 = [...formData.last5Matches];
+    newLast5[index] = value;
+    setFormData(prev => ({
+      ...prev,
+      last5Matches: newLast5
+    }));
+  };
 
   // Calculate points table data
   const pointsData = useMemo(() => {
-    if (!teams.length || !players.length) return [];
-
-    // Mock match data for demonstration - in real app, this would come from matches API
-    const mockMatchResults = generateMockMatchResults();
+    if (!teams.length) return [];
     
+    // Use manually entered points data instead of mock data
     return teams.map(team => {
-      const teamMatches = mockMatchResults.filter(match => 
-        match.team1Id === team.id || match.team2Id === team.id
-      );
-
-      const stats = calculateTeamStats(team.id, teamMatches);
+      // Get stored points data or use defaults
+      const storedData = getStoredPointsData(team.id);
       
       return {
         position: 0, // Will be calculated after sorting
         teamId: team.id,
         teamName: team.name,
         teamCode: team.shortName || team.name.substring(0, 3).toUpperCase(),
-        matches: stats.matches,
-        wins: stats.wins,
-        losses: stats.losses,
-        ties: stats.ties,
-        noResults: stats.noResults,
-        points: stats.points,
-        netRunRate: stats.netRunRate,
-        runsScored: stats.runsScored,
-        runsConceded: stats.runsConceded,
-        oversFaced: stats.oversFaced,
-        oversBowled: stats.oversBowled,
-        last5Matches: stats.last5Matches,
-        form: calculateForm(stats.last5Matches)
+        matches: storedData.matches,
+        wins: storedData.wins,
+        losses: storedData.losses,
+        ties: storedData.ties,
+        noResults: storedData.noResults,
+        points: storedData.points,
+        netRunRate: storedData.netRunRate,
+        runsScored: storedData.runsScored,
+        runsConceded: storedData.runsConceded,
+        oversFaced: storedData.oversFaced,
+        oversBowled: storedData.oversBowled,
+        last5Matches: storedData.last5Matches,
+        form: calculateForm(storedData.last5Matches)
       };
     }).sort((a, b) => {
       // Sort by points (descending), then NRR (descending)
@@ -83,7 +196,7 @@ export default function PointsTablePage() {
       ...team,
       position: index + 1
     }));
-  }, [teams, players]);
+  }, [teams]);
 
   // Filter data based on search
   const filteredData = useMemo(() => {
@@ -310,6 +423,55 @@ export default function PointsTablePage() {
           </div>
         </motion.div>
 
+        {/* Points System Legend */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6 mb-8"
+        >
+          <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-blue-400" />
+            IPL Points System & Qualification
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="text-sm font-medium text-gray-300 mb-2">Points Distribution</h4>
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Win</span>
+                  <span className="text-green-400 font-medium">2 points</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Tie / No Result</span>
+                  <span className="text-yellow-400 font-medium">1 point</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Loss</span>
+                  <span className="text-red-400 font-medium">0 points</span>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h4 className="text-sm font-medium text-gray-300 mb-2">Playoff Qualification</h4>
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Top 2</span>
+                  <span className="text-blue-400 font-medium">Qualifier 1 & 2</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">3rd & 4th</span>
+                  <span className="text-purple-400 font-medium">Eliminator</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Tie-breaker</span>
+                  <span className="text-orange-400 font-medium">Net Run Rate</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Points Table */}
         {filteredData.length > 0 ? (
           <motion.div
@@ -334,6 +496,7 @@ export default function PointsTablePage() {
                       <th className="text-center p-4 text-gray-400 font-medium">NRR</th>
                       <th className="text-left p-4 text-gray-400 font-medium">Last 5</th>
                       <th className="text-center p-4 text-gray-400 font-medium">Form</th>
+                      <th className="text-center p-4 text-gray-400 font-medium">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -349,60 +512,155 @@ export default function PointsTablePage() {
                           }`}
                         >
                           <td className="p-4">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                              team.position === 1 ? 'bg-yellow-500 text-black' :
-                              team.position === 2 ? 'bg-gray-400 text-black' :
-                              team.position === 3 ? 'bg-orange-600 text-white' :
-                              team.position === 4 ? 'bg-blue-600 text-white' :
-                              'bg-gray-600 text-white'
-                            }`}>
-                              {team.position}
+                            <div className="relative">
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                                team.position === 1 ? 'bg-gradient-to-br from-yellow-400 to-yellow-600 text-black shadow-lg' :
+                                team.position === 2 ? 'bg-gradient-to-br from-gray-300 to-gray-500 text-black shadow-lg' :
+                                team.position === 3 ? 'bg-gradient-to-br from-orange-500 to-orange-700 text-white shadow-lg' :
+                                team.position === 4 ? 'bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-lg' :
+                                'bg-gray-600 text-white'
+                              }`}>
+                                {team.position}
+                              </div>
+                              {team.position <= 4 && (
+                                <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse border-2 border-slate-900"></span>
+                              )}
                             </div>
                           </td>
                           <td className="p-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-                                <span className="text-white text-xs font-bold">{team.teamCode}</span>
+                              <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold shadow-lg ${getTeamColorClass(team.teamCode)}`}>
+                                {team.teamCode}
                               </div>
-                              <span className="text-white font-medium">{team.teamName}</span>
+                              <div>
+                                <span className="text-white font-medium">{team.teamName}</span>
+                                {team.position <= 4 && (
+                                  <div className="text-xs text-green-400 font-medium">
+                                    {team.position === 1 ? '🏆 Champion' : 
+                                     team.position === 2 ? '🥈 Qualifier 1' :
+                                     team.position === 3 ? '🥉 Qualifier 2' : '🎯 Playoffs'}
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </td>
-                          <td className="text-center p-4 text-gray-300">{team.matches}</td>
-                          <td className="text-center p-4 text-green-400 font-medium">{team.wins}</td>
-                          <td className="text-center p-4 text-red-400 font-medium">{team.losses}</td>
-                          <td className="text-center p-4 text-yellow-400 font-medium">{team.ties}</td>
-                          <td className="text-center p-4 text-gray-400">{team.noResults}</td>
+                          <td className="text-center p-4 text-gray-300">
+                            {editingTeam === team.teamId ? (
+                              <input
+                                type="number"
+                                value={formData.matches}
+                                onChange={(e) => handleInputChange('matches', parseInt(e.target.value) || 0)}
+                                className="w-16 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-gray-300 text-center"
+                              />
+                            ) : (
+                              team.matches
+                            )}
+                          </td>
+                          <td className="text-center p-4 text-green-400 font-medium">
+                            {editingTeam === team.teamId ? (
+                              <input
+                                type="number"
+                                value={formData.wins}
+                                onChange={(e) => handleInputChange('wins', parseInt(e.target.value) || 0)}
+                                className="w-16 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-green-400 text-center font-medium"
+                              />
+                            ) : (
+                              team.wins
+                            )}
+                          </td>
+                          <td className="text-center p-4 text-red-400 font-medium">
+                            {editingTeam === team.teamId ? (
+                              <input
+                                type="number"
+                                value={formData.losses}
+                                onChange={(e) => handleInputChange('losses', parseInt(e.target.value) || 0)}
+                                className="w-16 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-red-400 text-center font-medium"
+                              />
+                            ) : (
+                              team.losses
+                            )}
+                          </td>
+                          <td className="text-center p-4 text-yellow-400 font-medium">
+                            {editingTeam === team.teamId ? (
+                              <input
+                                type="number"
+                                value={formData.ties}
+                                onChange={(e) => handleInputChange('ties', parseInt(e.target.value) || 0)}
+                                className="w-16 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-yellow-400 text-center font-medium"
+                              />
+                            ) : (
+                              team.ties
+                            )}
+                          </td>
+                          <td className="text-center p-4 text-gray-400">
+                            {editingTeam === team.teamId ? (
+                              <input
+                                type="number"
+                                value={formData.noResults}
+                                onChange={(e) => handleInputChange('noResults', parseInt(e.target.value) || 0)}
+                                className="w-16 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-gray-400 text-center"
+                              />
+                            ) : (
+                              team.noResults
+                            )}
+                          </td>
                           <td className="text-center p-4">
                             <span className="text-xl font-bold text-yellow-400">{team.points}</span>
                           </td>
                           <td className="text-center p-4">
-                            <div className={`flex items-center justify-center gap-1 ${
-                              team.netRunRate > 0 ? 'text-green-400' : 
-                              team.netRunRate < 0 ? 'text-red-400' : 'text-gray-400'
-                            }`}>
-                              {team.netRunRate > 0 && <TrendingUp className="w-4 h-4" />}
-                              {team.netRunRate < 0 && <TrendingDown className="w-4 h-4" />}
-                              {team.netRunRate === 0 && <Minus className="w-4 h-4" />}
-                              <span className="font-medium">
-                                {team.netRunRate > 0 ? '+' : ''}{team.netRunRate.toFixed(3)}
-                              </span>
-                            </div>
+                            {editingTeam === team.teamId ? (
+                              <input
+                                type="number"
+                                step="0.001"
+                                value={formData.netRunRate}
+                                onChange={(e) => handleInputChange('netRunRate', parseFloat(e.target.value) || 0)}
+                                className="w-20 px-2 py-1 bg-slate-700 border border-slate-600 rounded text-gray-300 text-center"
+                              />
+                            ) : (
+                              <div className={`flex items-center justify-center gap-1 ${
+                                team.netRunRate > 0 ? 'text-green-400' : 
+                                team.netRunRate < 0 ? 'text-red-400' : 'text-gray-400'
+                              }`}>
+                                {team.netRunRate > 0 && <TrendingUp className="w-4 h-4" />}
+                                {team.netRunRate < 0 && <TrendingDown className="w-4 h-4" />}
+                                {team.netRunRate === 0 && <Minus className="w-4 h-4" />}
+                                <span className="font-medium">
+                                  {team.netRunRate > 0 ? '+' : ''}{team.netRunRate.toFixed(3)}
+                                </span>
+                              </div>
+                            )}
                           </td>
                           <td className="p-4">
                             <div className="flex gap-1">
-                              {team.last5Matches.map((result, idx) => (
-                                <div
-                                  key={idx}
-                                  className={`w-6 h-6 rounded text-xs font-bold flex items-center justify-center ${
-                                    result === 'W' ? 'bg-green-500 text-white' :
-                                    result === 'L' ? 'bg-red-500 text-white' :
-                                    result === 'T' ? 'bg-yellow-500 text-black' :
-                                    'bg-gray-500 text-white'
-                                  }`}
-                                >
-                                  {result}
-                                </div>
-                              ))}
+                              {editingTeam === team.teamId ? (
+                                formData.last5Matches.map((result, idx) => (
+                                  <select
+                                    key={idx}
+                                    value={result}
+                                    onChange={(e) => handleLast5Change(idx, e.target.value)}
+                                    className="w-8 h-6 text-xs font-bold rounded bg-slate-700 border border-slate-600 text-center"
+                                  >
+                                    <option value="W">W</option>
+                                    <option value="L">L</option>
+                                    <option value="T">T</option>
+                                    <option value="-">-</option>
+                                  </select>
+                                ))
+                              ) : (
+                                team.last5Matches.map((result, idx) => (
+                                  <div
+                                    key={idx}
+                                    className={`w-6 h-6 rounded text-xs font-bold flex items-center justify-center ${
+                                      result === 'W' ? 'bg-green-500 text-white' :
+                                      result === 'L' ? 'bg-red-500 text-white' :
+                                      result === 'T' ? 'bg-yellow-500 text-black' :
+                                      'bg-gray-500 text-white'
+                                    }`}
+                                  >
+                                    {result}
+                                  </div>
+                                ))
+                              )}
                             </div>
                           </td>
                           <td className="text-center p-4">
@@ -417,6 +675,41 @@ export default function PointsTablePage() {
                               {team.form === 'average' && <Minus className="w-3 h-3" />}
                               {team.form === 'poor' && <TrendingDown className="w-3 h-3" />}
                               <span className="capitalize">{team.form}</span>
+                            </div>
+                          </td>
+                          <td className="text-center p-4">
+                            <div className="flex items-center justify-center gap-2">
+                              {editingTeam === team.teamId ? (
+                                <div className="flex gap-1">
+                                  <button
+                                    onClick={() => handleSave(team.teamId)}
+                                    className="p-1 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+                                  >
+                                    <Save className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    onClick={handleCancel}
+                                    className="p-1 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="flex gap-1">
+                                  <button
+                                    onClick={() => handleEdit(team)}
+                                    className="p-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                                  >
+                                    <Edit2 className="w-4 h-4" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDelete(team.teamId)}
+                                    className="p-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           </td>
                         </motion.tr>
@@ -532,34 +825,20 @@ export default function PointsTablePage() {
 }
 
 // Helper functions
-function generateMockMatchResults() {
-  // This would normally come from your matches API
-  // For demo purposes, generating realistic IPL-style results
-  return [
-    // Mock data would be replaced with actual match results
-  ];
-}
-
-function calculateTeamStats(teamId: string, matches: any[]) {
-  // Calculate team statistics from match results
-  const stats = {
-    matches: 0,
-    wins: 0,
-    losses: 0,
-    ties: 0,
-    noResults: 0,
-    points: 0,
-    netRunRate: 0,
-    runsScored: 0,
-    runsConceded: 0,
-    oversFaced: 0,
-    oversBowled: 0,
-    last5Matches: ['W', 'W', 'L', 'T', 'W'].slice(0, 5) as string[]
+function getTeamColorClass(teamCode: string): string {
+  const teamColors: { [key: string]: string } = {
+    'CSK': 'bg-gradient-to-br from-yellow-400 to-yellow-600', // Chennai Super Kings - Yellow
+    'MI': 'bg-gradient-to-br from-blue-400 to-blue-600', // Mumbai Indians - Blue  
+    'RCB': 'bg-gradient-to-br from-red-500 to-red-700', // Royal Challengers Bangalore - Red
+    'KKR': 'bg-gradient-to-br from-purple-500 to-purple-700', // Kolkata Knight Riders - Purple
+    'SRH': 'bg-gradient-to-br from-orange-500 to-orange-700', // Sunrisers Hyderabad - Orange
+    'DC': 'bg-gradient-to-br from-blue-500 to-cyan-500', // Delhi Capitals - Blue/Cyan
+    'PBKS': 'bg-gradient-to-br from-red-600 to-red-800', // Punjab Kings - Red
+    'RR': 'bg-gradient-to-br from-pink-500 to-pink-700', // Rajasthan Royals - Pink
+    'GT': 'bg-gradient-to-br from-indigo-500 to-indigo-700', // Gujarat Titans - Indigo
+    'LSG': 'bg-gradient-to-br from-teal-500 to-teal-700' // Lucknow Super Giants - Teal
   };
-
-  // This would calculate actual stats from match data
-  // For demo, returning realistic values
-  return stats;
+  return teamColors[teamCode] || 'bg-gradient-to-br from-gray-500 to-gray-700';
 }
 
 function calculateForm(last5Matches: string[]): 'excellent' | 'good' | 'average' | 'poor' {

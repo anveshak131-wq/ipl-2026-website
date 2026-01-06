@@ -5,7 +5,6 @@ import { useRouter, usePathname } from 'next/navigation';
 import { LeagueProvider } from '@/contexts/LeagueContext';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import PlayersAdminSidebar from '@/components/admin/PlayersAdminSidebar';
-import GlobalSearch from '@/components/admin/GlobalSearch';
 import AdminDashboard from './dashboard/page';
 import AdminMatches from './matches/page';
 import AdminTeams from './teams/page';
@@ -226,16 +225,8 @@ export default function AdminRouter() {
 
   return (
     <LeagueProvider>
-      <div className="flex min-h-screen bg-ipl-dark">
-        {userRole === 'players_admin' ? (
-          isPlayersPage && <PlayersAdminSidebar currentPage={pathname} />
-        ) : (
-          <AdminSidebar currentPage={pathname} />
-        )}
-        <div className="flex-1">
-          {renderPage()}
-        </div>
-        {userRole !== 'players_admin' && <GlobalSearch />}
+      <div className="flex-1">
+        {renderPage()}
       </div>
     </LeagueProvider>
   );

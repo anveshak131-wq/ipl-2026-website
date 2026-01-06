@@ -5,6 +5,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Search } from 'lucide-react';
 import AdminLogin from '@/components/admin/AdminLogin';
 import AdminSidebar from '@/components/admin/AdminSidebar';
+import PlayersAdminSidebar from '@/components/admin/PlayersAdminSidebar';
+import GlobalSearch from '@/components/admin/GlobalSearch';
 import { LeagueProvider } from '@/contexts/LeagueContext';
 import { AdminDataProvider } from '@/contexts/AdminDataContext';
 
@@ -16,6 +18,7 @@ export default function AdminLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const hasCheckedAuth = useRef(false);
@@ -26,11 +29,42 @@ export default function AdminLayout({
     hasCheckedAuth.current = true;
 
     // Check authentication on client side only
-    const checkAuth = () => {
+    const checkAuth = async () => {
       try {
-        const token = localStorage.getItem('adminToken');
+        const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
         if (token) {
           setIsAuthenticated(true);
+          
+          // Verify token and get user role
+          try {
+            const response = await fetch(`/api/auth?action=verify&token=${token}`);
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+              const role = data.user?.role;
+              setUserRole(role);
+            } else {
+              // Fallback: try to parse token
+              try {
+                const tokenPayload = JSON.parse(atob(token));
+                if (tokenPayload.role) {
+                  setUserRole(tokenPayload.role);
+                }
+              } catch {
+                // Token parsing failed
+              }
+            }
+          } catch (error) {
+            // API call failed, try fallback
+            try {
+              const tokenPayload = JSON.parse(atob(token));
+              if (tokenPayload.role) {
+                setUserRole(tokenPayload.role);
+              }
+            } catch {
+              // Token parsing failed
+            }
+          }
         }
       } catch (error) {
         // localStorage not available, continue with login
@@ -86,7 +120,20 @@ export default function AdminLayout({
     <LeagueProvider>
       <AdminDataProvider>
         <div className="flex min-h-screen bg-ipl-dark">
-          <AdminSidebar />
+          {/* Show appropriate sidebar based on user role */}
+          {userRole === 'players_admin' ? (
+            (() => {
+              const isPlayersPage = [
+                '/ipl-admin-2026/players',
+                '/ipl-admin-2026/batting-stats',
+                '/ipl-admin-2026/bowling-stats'
+              ].includes(pathname);
+              return isPlayersPage && <PlayersAdminSidebar currentPage={pathname} />;
+            })()
+          ) : (
+            <AdminSidebar />
+          )}
+          
           <div className="flex-1 flex flex-col">
             <div className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur-sm border-b border-white/10">
               <div className="px-6 py-3">
@@ -106,7 +153,7 @@ export default function AdminLayout({
             <main className="p-6 overflow-y-auto flex-1">
               {children}
             </main>
-            {isSearchOpen && (
+            {userRole !== 'players_admin' && isSearchOpen && (
               <div 
                 className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center pt-[20vh]"
                 onClick={() => setIsSearchOpen(false)}
