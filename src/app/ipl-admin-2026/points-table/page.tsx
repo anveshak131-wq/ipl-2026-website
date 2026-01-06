@@ -228,8 +228,8 @@ export default function PointsTablePage() {
     }));
   }, [teams]);
 
-  // Filter data based on search
-  const filteredData = useMemo(() => {
+  // Filter data based on search - no useMemo to avoid circular dependency
+  const filteredData = (() => {
     if (!teams || !Array.isArray(teams) || teams.length === 0) return [];
     if (!searchQuery) return pointsData || [];
     
@@ -238,7 +238,7 @@ export default function PointsTablePage() {
       team.teamName.toLowerCase().includes(query) ||
       team.teamCode.toLowerCase().includes(query)
     );
-  }, [teams, searchQuery, selectedSeason]);
+  })();
 
   const handleRefresh = async () => {
     setIsLoading(true);
