@@ -17,6 +17,9 @@ export default function AdminLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  
+  console.log('AdminLayout rendered with pathname:', pathname); // Debug log
+  
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);

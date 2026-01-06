@@ -31,6 +31,8 @@ interface TeamPointsData {
 }
 
 export default function PointsTablePage() {
+  console.log('PointsTablePage rendered'); // Debug log
+  
   const { teams, players, loading, refreshData } = useAdminData();
   const { currentLeague } = useLeague();
   const { showToast } = useToast();
