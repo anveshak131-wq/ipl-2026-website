@@ -170,6 +170,9 @@ function formatMatch(match, teams) {
       score: match.score,
       matchNumber: match.matchNumber,
       playoffType: match.playoffType,
+      playing11: match.playing11,
+      toss: match.toss,
+      matchState: match.matchState,
       _isMock: match._isMock
     };
   }
@@ -221,6 +224,9 @@ function formatMatch(match, teams) {
     score: match.score,
     matchNumber: match.matchNumber,
     playoffType: match.playoffType,
+    playing11: match.playing11,
+    toss: match.toss,
+    matchState: match.matchState,
     _isMock: match._isMock
   };
 }
