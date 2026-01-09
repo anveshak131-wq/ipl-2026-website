@@ -893,18 +893,23 @@ export default function LiveScorePage() {
                     <EmojiPicker
                       onSelect={(code) => setNewMessage((prev) => (prev ? `${prev} ${code}`.trim() : code))}
                     />
-                    <input
-                      type="text"
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      placeholder="Type your comment..."
-                      maxLength={500}
-                      className="w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 text-sm focus:outline-none transition-all"
-                      style={{
-                        background: isWPL ? WPLColors.purpleRGBA[10] : 'rgba(30, 64, 175, 0.2)',
-                        border: `1px solid ${isWPL ? WPLColors.purpleRGBA[30] : 'rgba(59, 130, 246, 0.3)'}`,
-                      }}
-                    />
+                    <div className="space-y-1">
+                      <label htmlFor="message-input" className="sr-only">Comment</label>
+                      <input
+                        id="message-input"
+                        name="message"
+                        type="text"
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        placeholder="Type your comment..."
+                        maxLength={500}
+                        className="w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 text-sm focus:outline-none transition-all"
+                        style={{
+                          background: isWPL ? WPLColors.purpleRGBA[10] : 'rgba(30, 64, 175, 0.2)',
+                          border: `1px solid ${isWPL ? WPLColors.purpleRGBA[30] : 'rgba(59, 130, 246, 0.3)'}`,
+                        }}
+                      />
+                    </div>
                     <button
                       type="submit"
                       disabled={isSendingMessage || !newMessage.trim()}
@@ -1014,38 +1019,52 @@ export default function LiveScorePage() {
             </h2>
             <form onSubmit={handleAuth} className="space-y-4">
               {authMode === 'signup' && (
-                <input
-                  type="text"
-                  placeholder="Full Name"
-                  value={authFormData.name}
-                  onChange={(e) => setAuthFormData({ ...authFormData, name: e.target.value })}
-                  required
+                <div className="space-y-1">
+                  <label htmlFor="auth-name" className="block text-sm text-gray-300">Full Name</label>
+                  <input
+                    id="auth-name"
+                    name="fullname"
+                    type="text"
+                    placeholder="Full Name"
+                    value={authFormData.name}
+                    onChange={(e) => setAuthFormData({ ...authFormData, name: e.target.value })}
+                    required
                     className="w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 focus:outline-none transition-all"
                     style={{
                       background: isWPL ? WPLColors.purpleRGBA[10] : 'rgba(30, 64, 175, 0.2)',
                       border: `1px solid ${isWPL ? WPLColors.purpleRGBA[30] : 'rgba(59, 130, 246, 0.3)'}`,
                     }}
-                />
+                  />
+                </div>
               )}
-              <input
-                type="email"
-                placeholder="Email"
-                value={authFormData.email}
-                onChange={(e) => setAuthFormData({ ...authFormData, email: e.target.value })}
-                required
+              <div className="space-y-1">
+                <label htmlFor="auth-email" className="block text-sm text-gray-300">Email</label>
+                <input
+                  id="auth-email"
+                  name="email"
+                  type="email"
+                  placeholder="Email"
+                  value={authFormData.email}
+                  onChange={(e) => setAuthFormData({ ...authFormData, email: e.target.value })}
+                  required
                   className="w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 focus:outline-none transition-all"
                   style={{
                     background: isWPL ? WPLColors.purpleRGBA[10] : 'rgba(30, 64, 175, 0.2)',
                     border: `1px solid ${isWPL ? WPLColors.purpleRGBA[30] : 'rgba(59, 130, 246, 0.3)'}`,
                   }}
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                value={authFormData.password}
-                onChange={(e) => setAuthFormData({ ...authFormData, password: e.target.value })}
-                required
-                minLength={12}
+                />
+              </div>
+              <div className="space-y-1">
+                <label htmlFor="auth-password" className="block text-sm text-gray-300">Password</label>
+                <input
+                  id="auth-password"
+                  name="password"
+                  type="password"
+                  placeholder="Password"
+                  value={authFormData.password}
+                  onChange={(e) => setAuthFormData({ ...authFormData, password: e.target.value })}
+                  required
+                  minLength={12}
                   className="w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 focus:outline-none transition-all"
                   style={{
                     background: isWPL ? WPLColors.purpleRGBA[10] : 'rgba(30, 64, 175, 0.2)',

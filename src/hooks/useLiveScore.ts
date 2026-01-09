@@ -174,10 +174,10 @@ export function useLiveScore({
   
   // Track free hit - check last ball in history
   const isFreeHit = useMemo(() => {
-    if (state.ballHistory.length === 0) return false;
+    if (!state?.ballHistory || state.ballHistory.length === 0) return false;
     const lastBall = state.ballHistory[state.ballHistory.length - 1];
     return lastBall.type === 'NB' || (typeof lastBall.type === 'string' && lastBall.type.startsWith('NB'));
-  }, [state.ballHistory]);
+  }, [state?.ballHistory]);
 
   // Auto-detect innings transitions
   useEffect(() => {
@@ -413,7 +413,7 @@ export function useLiveScore({
   }, [recordBall]);
 
   const undo = useCallback(() => {
-    if (undoStack.length === 0) return false;
+    if (!undoStack || undoStack.length === 0) return false;
     const previousState = undoStack[undoStack.length - 1];
     setUndoStack((stack) => stack.slice(0, -1));
     setState(previousState);

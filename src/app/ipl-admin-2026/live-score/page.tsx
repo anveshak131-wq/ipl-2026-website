@@ -72,7 +72,7 @@ export default function AdminLiveScorePage() {
   }, [isAuthenticated, selectedMatchId, currentLeague]);
 
   const selectedMatch = useMemo(
-    () => matches.find((m) => m.id === selectedMatchId) || null,
+    () => (matches && Array.isArray(matches) ? matches.find((m) => m.id === selectedMatchId) : null) || null,
     [matches, selectedMatchId]
   );
 
