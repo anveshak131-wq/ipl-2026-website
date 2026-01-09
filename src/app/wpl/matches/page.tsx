@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import MatchCard from '@/components/matches/MatchCard';
-import { Match } from '@/types';
+import { Match, Player } from '@/types';
 import { api } from '@/lib/data';
 import { useLeague } from '@/contexts/LeagueContext';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -21,6 +21,7 @@ export default function WPLMatchesPage() {
   const { currentLeague, setCurrentLeague } = useLeague();
   const [matches, setMatches] = useState<Match[]>([]);
   const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'live' | 'completed'>('all');
 
@@ -34,8 +35,12 @@ export default function WPLMatchesPage() {
   useEffect(() => {
     const fetchMatches = async () => {
       try {
-        const matchesData = await api.getMatches('wpl');
+        const [matchesData, playersData] = await Promise.all([
+          api.getMatches('wpl'),
+          api.getPlayers(undefined, 'wpl')
+        ]);
         setMatches(matchesData);
+        setPlayers(playersData);
         setFilteredMatches(matchesData);
       } catch (error) {
         console.error('Failed to fetch WPL matches:', error);
@@ -251,7 +256,7 @@ export default function WPLMatchesPage() {
                     }}
                     whileHover={{ y: -8, transition: { duration: 0.2 } }}
                   >
-                    <MatchCard match={match} index={index} />
+                    <MatchCard match={match} index={index} players={players} />
                   </motion.div>
                 ))}
               </motion.div>

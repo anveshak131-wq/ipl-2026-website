@@ -1,7 +1,7 @@
 "use client";
 
 import Image from 'next/image';
-import { Match } from '@/types';
+import { Match, Player } from '@/types';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
 import RCBLottie from '@/components/ui/RCBLottie';
 import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
@@ -9,10 +9,12 @@ import { CustomEmoji } from '@/components/emoji/Emoji';
 import { formatMatchTime } from '@/lib/timeUtils';
 import { getMatchNumberDisplay } from '@/lib/matchNumberUtils';
 import CountdownTimer from '@/components/ui/CountdownTimer';
+import Playing11Display from '@/components/matches/Playing11Display';
 
 interface MatchCardProps {
   match: Match;
   index?: number;
+  players?: Player[]; // Optional players data for playing XI display
 }
 
 export default function MatchCard({ match, index = 0 }: MatchCardProps) {
@@ -260,8 +262,15 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
           </div>
         )}
 
+        {/* Playing XI Display */}
+        {match.playing11 && players && players.length > 0 && (
+          <div className="mt-4 pt-2 border-t border-white/10">
+            <Playing11Display match={match} players={players} />
+          </div>
+        )}
+
         {/* Action Button - Premium Design */}
-        <button 
+        <button
           onClick={() => alert(`${match.status === 'upcoming' ? 'Reminder set!' : match.status === 'live' ? 'Opening stream...' : 'Loading highlights...'}`)} 
           className="group w-full relative overflow-hidden rounded-xl font-bold text-sm py-3 mt-4 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
           style={{

@@ -115,8 +115,11 @@ export const AdminDataProvider = ({ children }: AdminDataProviderProps) => {
     loadData();
   }, [currentLeague]);
 
-  // Listen for custom events for real-time updates
+  // Listen for custom events for real-time updates (only on client side)
   useEffect(() => {
+    // Only run this effect on the client side
+    if (typeof window === 'undefined') return;
+
     const handleDataUpdate = async (event: CustomEvent) => {
       const { type, playerId } = event.detail || {};
       
