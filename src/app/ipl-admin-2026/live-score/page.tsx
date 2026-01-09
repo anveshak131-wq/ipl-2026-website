@@ -155,6 +155,7 @@ export default function AdminLiveScorePage() {
         innings: state.innings,
         battingTeam: state.battingTeam,
         toss: state.toss,
+        playing11: selectedMatch.playing11,
         strategicTimeout: extendedState.strategicTimeout,
         drsReviews: extendedState.drsReviews,
         impactPlayer: extendedState.impactPlayer,

@@ -203,7 +203,30 @@ export default function IPLHomePage() {
     };
 
     loadData();
-  }, []);
+
+    // Set up polling to refresh match data every 5 seconds for real-time updates
+    const pollInterval = setInterval(() => {
+      const loadMatchesOnly = async () => {
+        try {
+          const matchesData = await api.getMatches('ipl');
+          if (matchesData && Array.isArray(matchesData)) {
+            setMatches(matchesData);
+            const liveMatch = matchesData.some((match) => match.status === 'live');
+            if (liveMatch && !hasLiveMatch) {
+              setHasLiveMatch(true);
+              setShowConfetti(true);
+              setTimeout(() => setShowConfetti(false), 3000);
+            }
+          }
+        } catch (error) {
+          console.error('Error polling match data:', error);
+        }
+      };
+      loadMatchesOnly();
+    }, 5000);
+
+    return () => clearInterval(pollInterval);
+  }, [hasLiveMatch]);
 
   const handleAcceptTerms = () => {
     setShowTermsModal(false);
