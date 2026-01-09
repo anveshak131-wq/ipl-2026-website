@@ -160,7 +160,15 @@ export default function TermsAcceptanceModal({
               
               {/* Language selector */}
               <div className="flex justify-between items-start gap-4 mb-4">
+                <label
+                  htmlFor="terms-language-selector"
+                  className="block text-xs font-medium sr-only"
+                >
+                  Language selection
+                </label>
                 <select
+                  id="terms-language-selector"
+                  name="terms-language-selector"
                   value={language}
                   onChange={(e) => setLanguage(e.target.value as TermsLanguage)}
                   className="text-xs bg-slate-800/60 border border-white/10 text-gray-300 rounded px-2 py-1 hover:bg-slate-700"
@@ -276,6 +284,8 @@ export default function TermsAcceptanceModal({
                 <div className="space-y-2.5">
                   <label className="flex items-start gap-3 cursor-pointer group hover:bg-slate-800/30 p-2 rounded transition-colors">
                     <input
+                      id="read-terms"
+                      name="read-terms"
                       type="checkbox"
                       checked={checkedItems.readTerms}
                       onChange={(e) =>
@@ -292,6 +302,8 @@ export default function TermsAcceptanceModal({
 
                   <label className="flex items-start gap-3 cursor-pointer group hover:bg-slate-800/30 p-2 rounded transition-colors">
                     <input
+                      id="accept-terms"
+                      name="accept-terms"
                       type="checkbox"
                       checked={checkedItems.acceptTerms}
                       onChange={(e) =>
@@ -308,6 +320,8 @@ export default function TermsAcceptanceModal({
 
                   <label className="flex items-start gap-3 cursor-pointer group hover:bg-slate-800/30 p-2 rounded transition-colors">
                     <input
+                      id="understand-liability"
+                      name="understand-liability"
                       type="checkbox"
                       checked={checkedItems.understandLiability}
                       onChange={(e) =>

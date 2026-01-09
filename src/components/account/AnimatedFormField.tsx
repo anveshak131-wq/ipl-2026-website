@@ -71,6 +71,8 @@ export default function AnimatedFormField({
 
         {/* Input */}
         <input
+          id={name || label?.toLowerCase().replace(/\s+/g, '-')}
+          name={name || label?.toLowerCase().replace(/\s+/g, '-')}
           type={type}
           placeholder={placeholder}
           value={value}
@@ -90,6 +92,7 @@ export default function AnimatedFormField({
 
         {/* Floating Label */}
         <label
+          htmlFor={name || label?.toLowerCase().replace(/\s+/g, '-')}
           className={`form-field-label absolute left-4 top-3 text-gray-400 text-sm pointer-events-none ${
             isFocused || value ? 'floating' : ''
           }`}

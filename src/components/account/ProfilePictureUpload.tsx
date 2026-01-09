@@ -132,11 +132,14 @@ export default function ProfilePictureUpload({
       </div>
 
       <input
+        id="profile-picture-upload"
+        name="profile-picture-upload"
         ref={fileInputRef}
         type="file"
         accept="image/*"
         onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
         className="hidden"
+        aria-label="Upload profile picture"
       />
 
       <p className="text-center text-sm text-gray-400">

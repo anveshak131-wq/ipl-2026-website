@@ -129,10 +129,18 @@ export default function IPLPlayersPanel({ initialPlayers = [], teams }: IPLPlaye
       <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 border border-slate-700/50">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-grow">
+            <label
+              htmlFor="player-search"
+              className="block text-sm font-medium sr-only"
+            >
+              Search players
+            </label>
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-gray-400" />
             </div>
             <input
+              id="player-search"
+              name="player-search"
               type="text"
               placeholder="Search players..."
               className="block w-full pl-10 pr-3 py-2 border border-slate-700 rounded-lg bg-slate-800/50 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-ipl-gold/50 focus:border-transparent"
@@ -143,7 +151,15 @@ export default function IPLPlayersPanel({ initialPlayers = [], teams }: IPLPlaye
           
           <div className="flex gap-2">
             <div className="relative">
+              <label
+                htmlFor="team-filter"
+                className="block text-sm font-medium sr-only"
+              >
+                Filter by team
+              </label>
               <select
+                id="team-filter"
+                name="team-filter"
                 value={selectedTeam}
                 onChange={(e) => setSelectedTeam(e.target.value)}
                 className="appearance-none bg-slate-800/50 border border-slate-700 text-white pl-3 pr-8 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-ipl-gold/50"
@@ -161,7 +177,15 @@ export default function IPLPlayersPanel({ initialPlayers = [], teams }: IPLPlaye
             </div>
 
             <div className="relative">
+              <label
+                htmlFor="role-filter"
+                className="block text-sm font-medium sr-only"
+              >
+                Filter by role
+              </label>
               <select
+                id="role-filter"
+                name="role-filter"
                 value={selectedRole}
                 onChange={(e) => setSelectedRole(e.target.value)}
                 className="appearance-none bg-slate-800/50 border border-slate-700 text-white pl-3 pr-8 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-ipl-gold/50"

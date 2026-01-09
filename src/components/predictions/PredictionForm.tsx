@@ -175,8 +175,10 @@ export default function PredictionForm({ match, existingPrediction, onSuccess }:
 
         {/* Top Scorer */}
         <div>
-          <label className="block text-sm text-gray-300 mb-2">Top Scorer</label>
+          <label htmlFor="top-scorer" className="block text-sm text-gray-300 mb-2">Top Scorer</label>
           <select
+            id="top-scorer"
+            name="top-scorer"
             value={topScorer}
             onChange={(e) => setTopScorer(e.target.value)}
             className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-ipl-gold"
@@ -194,8 +196,10 @@ export default function PredictionForm({ match, existingPrediction, onSuccess }:
 
         {/* Most Wickets */}
         <div>
-          <label className="block text-sm text-gray-300 mb-2">Most Wickets</label>
+          <label htmlFor="most-wickets" className="block text-sm text-gray-300 mb-2">Most Wickets</label>
           <select
+            id="most-wickets"
+            name="most-wickets"
             value={mostWickets}
             onChange={(e) => setMostWickets(e.target.value)}
             className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-ipl-gold"
@@ -213,11 +217,13 @@ export default function PredictionForm({ match, existingPrediction, onSuccess }:
 
         {/* Player of the Match */}
         <div>
-          <label className="block text-sm text-gray-300 mb-2 flex items-center gap-2">
+          <label htmlFor="player-of-match" className="block text-sm text-gray-300 mb-2 flex items-center gap-2">
             <Award className="w-4 h-4 text-ipl-gold" />
             Player of the Match
           </label>
           <select
+            id="player-of-match"
+            name="player-of-match"
             value={playerOfMatch}
             onChange={(e) => setPlayerOfMatch(e.target.value)}
             className="w-full p-3 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-ipl-gold"

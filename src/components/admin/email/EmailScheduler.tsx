@@ -223,8 +223,10 @@ export default function EmailScheduler({
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-[#E6EDF3] mb-2">Schedule Name</label>
+                  <label htmlFor="schedule-name" className="block text-sm font-medium text-[#E6EDF3] mb-2">Schedule Name</label>
                   <input
+                    id="schedule-name"
+                    name="schedule-name"
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -234,8 +236,10 @@ export default function EmailScheduler({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-[#E6EDF3] mb-2">Email Template</label>
+                  <label htmlFor="email-template" className="block text-sm font-medium text-[#E6EDF3] mb-2">Email Template</label>
                   <select
+                    id="email-template"
+                    name="email-template"
                     value={formData.templateId}
                     onChange={(e) => setFormData({ ...formData, templateId: e.target.value })}
                     className="w-full px-4 py-2 bg-[#141A22] border border-[#2A3440] rounded-lg text-[#E6EDF3] focus:outline-none focus:ring-2 focus:ring-[#2F6FED]"
@@ -250,8 +254,10 @@ export default function EmailScheduler({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-[#E6EDF3] mb-2">Schedule Type</label>
+                  <label htmlFor="schedule-type" className="block text-sm font-medium text-[#E6EDF3] mb-2">Schedule Type</label>
                   <select
+                    id="schedule-type"
+                    name="schedule-type"
                     value={formData.scheduleType}
                     onChange={(e) =>
                       setFormData({ ...formData, scheduleType: e.target.value as ScheduleType })
@@ -275,8 +281,10 @@ export default function EmailScheduler({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-[#E6EDF3] mb-2">Time</label>
+                  <label htmlFor="scheduled-time" className="block text-sm font-medium text-[#E6EDF3] mb-2">Time</label>
                   <input
+                    id="scheduled-time"
+                    name="scheduled-time"
                     type="time"
                     value={formData.scheduledTime}
                     onChange={(e) => setFormData({ ...formData, scheduledTime: e.target.value })}
@@ -287,8 +295,10 @@ export default function EmailScheduler({
                 {formData.scheduleType === 'recurring' && (
                   <>
                     <div>
-                      <label className="block text-sm font-medium text-[#E6EDF3] mb-2">Frequency</label>
+                      <label htmlFor="recurrence-frequency" className="block text-sm font-medium text-[#E6EDF3] mb-2">Frequency</label>
                       <select
+                        id="recurrence-frequency"
+                        name="recurrence-frequency"
                         value={formData.recurrence.frequency}
                         onChange={(e) =>
                           setFormData({

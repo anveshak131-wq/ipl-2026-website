@@ -131,9 +131,17 @@ export default function PlayersAdminSidebar({ currentPage = '' }: PlayersAdminSi
         {/* Search */}
         {!collapsed && (
           <div className="p-4 border-b border-gray-800">
+            <label
+              htmlFor="sidebar-search"
+              className="block text-sm font-medium sr-only"
+            >
+              Search
+            </label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
+                id="sidebar-search"
+                name="sidebar-search"
                 type="text"
                 placeholder="Search..."
                 value={searchQuery}

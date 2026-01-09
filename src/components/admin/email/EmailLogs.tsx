@@ -225,7 +225,15 @@ export default function EmailLogs({ logs, onExport }: EmailLogsProps) {
       <div className="bg-[#141A22] border border-[#2A3440] rounded-xl p-4 space-y-4">
         <div className="flex flex-wrap items-center gap-4">
           <div className="relative flex-1 min-w-[200px]">
+            <label
+              htmlFor="email-search"
+              className="block text-sm font-medium sr-only"
+            >
+              Search by email, name, or subject
+            </label>
             <input
+              id="email-search"
+              name="email-search"
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -235,7 +243,15 @@ export default function EmailLogs({ logs, onExport }: EmailLogsProps) {
             <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#AEBAC7]" />
           </div>
 
+          <label
+            htmlFor="status-filter"
+            className="block text-sm font-medium sr-only"
+          >
+            Filter by status
+          </label>
           <select
+            id="status-filter"
+            name="status-filter"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as EmailStatus | 'all')}
             className="px-4 py-2 bg-[#0B0F13] border border-[#2A3440] rounded-lg text-sm text-[#E6EDF3] focus:outline-none focus:ring-2 focus:ring-[#2F6FED]"
@@ -250,7 +266,15 @@ export default function EmailLogs({ logs, onExport }: EmailLogsProps) {
             <option value="unsubscribed">Unsubscribed</option>
           </select>
 
+          <label
+            htmlFor="template-filter"
+            className="block text-sm font-medium sr-only"
+          >
+            Filter by template
+          </label>
           <select
+            id="template-filter"
+            name="template-filter"
             value={templateFilter}
             onChange={(e) => setTemplateFilter(e.target.value)}
             className="px-4 py-2 bg-[#0B0F13] border border-[#2A3440] rounded-lg text-sm text-[#E6EDF3] focus:outline-none focus:ring-2 focus:ring-[#2F6FED]"
