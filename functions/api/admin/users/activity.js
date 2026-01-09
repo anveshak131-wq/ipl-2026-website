@@ -42,14 +42,15 @@ export const onRequest = async (context) => {
 
     // tokenValue may be a plain email (from /api/auth) or JSON (from /api/admin/setup)
     let email = tokenValue;
-    if (tokenValue.trim().startsWith('{')) {
+    if (tokenValue && tokenValue.trim().startsWith('{')) {
       try {
         const parsed = JSON.parse(tokenValue);
-        if (parsed && typeof parsed.email === 'string') {
+        if (parsed && parsed.email && typeof parsed.email === 'string') {
           email = parsed.email;
         }
       } catch {
-        // fall back to using tokenValue directly
+        // fall back to using tokenValue directly if it's not valid JSON
+        console.error('Failed to parse token JSON:', tokenValue);
       }
     }
 
