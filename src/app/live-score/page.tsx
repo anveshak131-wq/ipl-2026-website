@@ -1071,7 +1071,7 @@ export default function LiveScorePage() {
                     border: `1px solid ${isWPL ? WPLColors.purpleRGBA[30] : 'rgba(59, 130, 246, 0.3)'}`,
                   }}
                 />
-              {authMode === 'signup' && authFormData.password && (
+                {authMode === 'signup' && authFormData.password && (
                   <div className="space-y-1 text-xs">
                   <div className="flex items-center justify-between text-gray-400">
                     <span>Password strength</span>
@@ -1092,6 +1092,7 @@ export default function LiveScorePage() {
                   </p>
                 </div>
               )}
+              </div>
               {authMode === 'signup' && (
                 <div className="mt-3 space-y-1">
                   <div id="turnstile-container" className="flex justify-center" />
