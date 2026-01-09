@@ -154,6 +154,7 @@ export default function BallEntryPanel({
   // Two-Ball Rule state
   const [ballChanged, setBallChanged] = useState(false);
   const [isEveningMatch, setIsEveningMatch] = useState(false);
+  const [autoSaveInterval, setAutoSaveInterval] = useState<NodeJS.Timeout | null>(null);
   
   // Determine if evening match (after 5 PM IST typically)
   useEffect(() => {
@@ -190,6 +191,36 @@ export default function BallEntryPanel({
       // You can save it to backend here if needed
     },
   });
+
+  // Auto-save every 30 seconds
+  useEffect(() => {
+    const saveInterval = setInterval(async () => {
+      if (isSaving || matchState.currentState === 'not-started') return;
+      
+      try {
+        const extendedState = {
+          ...state,
+          toss: matchState.toss ? {
+            winner: matchState.toss.winner,
+            decision: matchState.toss.decision,
+          } : undefined,
+          strategicTimeout: timeoutState,
+          drsReviews: drsState,
+          impactPlayer: impactPlayerState,
+          superOver: superOverState,
+          ballChanged,
+          isEveningMatch,
+        };
+        await onSave(extendedState as LiveScoreState);
+      } catch (error) {
+        console.warn('Auto-save failed:', error);
+      }
+    }, 30000); // Auto-save every 30 seconds
+    
+    setAutoSaveInterval(saveInterval);
+    
+    return () => clearInterval(saveInterval);
+  }, [state, matchState, timeoutState, drsState, impactPlayerState, superOverState, ballChanged, isEveningMatch, onSave, isSaving]);
 
   // Initialize previous state ref
   useEffect(() => {
@@ -365,8 +396,19 @@ export default function BallEntryPanel({
   };
 
   const handleSave = async () => {
+    if (!canRecordBalls && !isTestPage) {
+      alert('Cannot save during this match state. Please update the match state first.');
+      return;
+    }
+
     setIsSaving(true);
     try {
+      // Validate data before saving
+      if (state.team1.wickets > 10) state.team1.wickets = 10;
+      if (state.team2.wickets > 10) state.team2.wickets = 10;
+      if (state.team1.runs < 0) state.team1.runs = 0;
+      if (state.team2.runs < 0) state.team2.runs = 0;
+
       // Include all new state in the save
       const extendedState = {
         ...state,
@@ -382,11 +424,19 @@ export default function BallEntryPanel({
         superOver: superOverState,
         ballChanged,
         isEveningMatch,
+        matchState,
       };
+      
+      // Ensure ballHistory is an array
+      if (!Array.isArray(extendedState.ballHistory)) {
+        extendedState.ballHistory = [];
+      }
+
       await onSave(extendedState as LiveScoreState);
+      console.log('Score saved successfully');
     } catch (error) {
       console.error('Failed to save:', error);
-      alert('Failed to save score. Please try again.');
+      alert(`Failed to save score: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsSaving(false);
     }
