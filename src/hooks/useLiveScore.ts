@@ -353,6 +353,14 @@ export function useLiveScore({
       const isLegalDelivery = !illegalDeliveries.includes(ball.type as string);
       const isWicket = ball.type === 'W';
       
+      // Validate ball type
+      const validBallTypes = ['W', 'WD', 'NB', 'B', 'LB', '1B', '2B', '3B', '4B', '1LB', '2LB', '3LB', '4LB',
+        'NB+1', 'NB+2', 'NB+3', 'NB+4', 'NB+6', 'WD+1', 'WD+2', 'WD+3', 'WD+4', 0, 1, 2, 3, 4, 6];
+      if (!validBallTypes.includes(ball.type as any)) {
+        console.warn(`Invalid ball type: ${ball.type}`);
+        return prev;
+      }
+
       // Set free hit flag if no ball was bowled
       // Note: We'll handle this in a useEffect to avoid stale state
 
@@ -360,8 +368,8 @@ export function useLiveScore({
       // team.balls is stored as integer (total number of balls), not as overs
       const newTeamBalls = isLegalDelivery ? team.balls + 1 : team.balls;
       const newTeamOvers = ballsToOvers(newTeamBalls);
-      const newTeamRuns = team.runs + teamRunDelta;
-      const newTeamWickets = isWicket ? team.wickets + 1 : team.wickets;
+      const newTeamRuns = Math.max(0, team.runs + teamRunDelta); // Prevent negative runs
+      const newTeamWickets = Math.min(isWicket ? team.wickets + 1 : team.wickets, 10); // Max 10 wickets
       
       // Cap overs at maxOvers (20 for T20) - maxBalls already calculated above
       const cappedBalls = Math.min(newTeamBalls, maxBalls);
@@ -369,12 +377,12 @@ export function useLiveScore({
 
       // Update batter stats
       const batterBallDelta = isLegalDelivery ? 1 : 0;
-      const newBatterRuns = prev.currentBatter.runs + batterRunDelta;
+      const newBatterRuns = Math.max(0, prev.currentBatter.runs + batterRunDelta); // Prevent negative runs
       const newBatterBalls = prev.currentBatter.balls + batterBallDelta;
 
       // Update bowler stats
       const bowlerBallDelta = isLegalDelivery ? 1 : 0;
-      const newBowlerRuns = prev.currentBowler.runs + bowlerRunDelta;
+      const newBowlerRuns = Math.max(0, prev.currentBowler.runs + bowlerRunDelta); // Prevent negative runs
       const newBowlerBalls = prev.currentBowler.balls + bowlerBallDelta;
 
       return {
@@ -396,7 +404,7 @@ export function useLiveScore({
           runs: newBowlerRuns,
           balls: newBowlerBalls,
         },
-        ballHistory: [...prev.ballHistory, ball].slice(-100), // Keep last 100
+        ballHistory: [...(Array.isArray(prev.ballHistory) ? prev.ballHistory : []), ball].slice(-100), // Keep last 100, ensure it's an array
         matchState,
       };
     });
@@ -421,6 +429,11 @@ export function useLiveScore({
   }, [undoStack]);
 
   const changeBatter = useCallback((batter: { id: string; name: string }) => {
+    // Validate input
+    if (!batter || !batter.id || !batter.name) {
+      console.warn('Invalid batter data');
+      return;
+    }
     setState((prev) => ({
       ...prev,
       currentBatter: {
@@ -432,6 +445,11 @@ export function useLiveScore({
   }, []);
 
   const changeBowler = useCallback((bowler: { id: string; name: string }) => {
+    // Validate input
+    if (!bowler || !bowler.id || !bowler.name) {
+      console.warn('Invalid bowler data');
+      return;
+    }
     setState((prev) => ({
       ...prev,
       currentBowler: {
