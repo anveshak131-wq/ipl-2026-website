@@ -25,66 +25,6 @@ export default function AdminLiveScorePage() {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [liveScoreState, setLiveScoreState] = useState<LiveScoreState | undefined>(undefined);
   const [isScoreLoading, setIsScoreLoading] = useState(false);
-  const [lastSaveTime, setLastSaveTime] = useState<number>(0);
-
-  // Auto-sync with server periodically (every 30 seconds)
-  useEffect(() => {
-    if (!selectedMatchId || !liveScoreState) return;
-
-    const syncInterval = setInterval(async () => {
-      try {
-        const response = await fetch(`/api/live-score?matchId=${selectedMatchId}`);
-        if (response.ok) {
-          const serverData = await response.json();
-          // Only sync if server data is newer than our last save
-          if (serverData.lastUpdated && new Date(serverData.lastUpdated).getTime() > lastSaveTime) {
-            console.log('Syncing with newer server data');
-            setLiveScoreState(serverData);
-            setLastSaveTime(new Date(serverData.lastUpdated).getTime());
-          }
-        }
-      } catch (error) {
-        console.error('Error syncing live score:', error);
-      }
-    }, 30000); // 30 seconds
-
-    return () => clearInterval(syncInterval);
-  }, [selectedMatchId, liveScoreState, lastSaveTime]);
-
-  // Save state to localStorage as backup
-  useEffect(() => {
-    if (!selectedMatchId || !liveScoreState) return;
-
-    try {
-      localStorage.setItem(`liveScore_${selectedMatchId}`, JSON.stringify({
-        state: liveScoreState,
-        lastSaveTime,
-        timestamp: Date.now()
-      }));
-    } catch (error) {
-      console.error('Error saving to localStorage:', error);
-    }
-  }, [selectedMatchId, liveScoreState, lastSaveTime]);
-
-  // Restore state from localStorage on mount
-  useEffect(() => {
-    if (!selectedMatchId) return;
-
-    try {
-      const saved = localStorage.getItem(`liveScore_${selectedMatchId}`);
-      if (saved) {
-        const { state, lastSaveTime: savedTime, timestamp } = JSON.parse(saved);
-        // Only restore if saved within last 10 minutes
-        if (Date.now() - timestamp < 10 * 60 * 1000) {
-          console.log('Restoring live score state from localStorage');
-          setLiveScoreState(state);
-          setLastSaveTime(savedTime);
-        }
-      }
-    } catch (error) {
-      console.error('Error restoring from localStorage:', error);
-    }
-  }, [selectedMatchId]);
 
   // Check authentication
   useEffect(() => {
@@ -149,18 +89,7 @@ export default function AdminLiveScorePage() {
         const response = await fetch(`/api/live-score?matchId=${selectedMatchId}`);
         if (response.ok) {
           const data = await response.json();
-          // Only set live score state if we don't have local state
-          // This preserves current working state during the session
-          setLiveScoreState(prev => {
-            // If we already have state (user is actively working), keep it
-            if (prev && (prev.team1.runs > 0 || prev.team2.runs > 0 || prev.ballHistory.length > 0)) {
-              console.log('Preserving existing live score state during refresh');
-              return prev;
-            }
-            // Otherwise, use the fetched data
-            console.log('Loading live score state from API');
-            return data;
-          });
+          setLiveScoreState(data);
         }
       } catch (error) {
         console.error('Error fetching live score:', error);
@@ -241,10 +170,6 @@ export default function AdminLiveScorePage() {
       if (!response.ok) {
         throw new Error('Failed to save score');
       }
-
-      // Update last save time and local state
-      setLastSaveTime(Date.now());
-      setLiveScoreState(state);
 
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 2000);
