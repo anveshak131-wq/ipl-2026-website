@@ -460,7 +460,7 @@ export function useLiveScore({
     }));
   }, []);
 
-  const canUndo = useMemo(() => undoStack.length > 0, [undoStack.length]);
+  const canUndo = useMemo(() => (undoStack?.length || 0) > 0, [undoStack?.length]);
 
   const updateMatchState = useCallback((newMatchState: MatchState) => {
     setMatchState(newMatchState);

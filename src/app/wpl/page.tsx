@@ -75,8 +75,9 @@ export default function WPLHomePage() {
   }, [currentLeague, setCurrentLeague]);
   
   // Calculate derived data
-  const liveMatchCount = useMemo(() => matches.filter(m => m.status === 'live').length, [matches]);
+  const liveMatchCount = useMemo(() => (matches?.filter(m => m.status === 'live')?.length || 0), [matches]);
   const nextMatch = useMemo(() => {
+    if (!matches || !Array.isArray(matches)) return null;
     const upcoming = matches
       .filter(m => m.status === 'upcoming')
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
