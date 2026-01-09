@@ -77,6 +77,7 @@ interface UseLiveScoreProps {
   initialBatter?: { id: string; name: string };
   initialBowler?: { id: string; name: string };
   initialMatchState?: MatchState;
+  initialState?: LiveScoreState;
   maxOvers?: number;
   onMatchStateChange?: (matchState: MatchState) => void;
   isTestPage?: boolean; // For test pages, skip match state restrictions
@@ -101,6 +102,7 @@ export function useLiveScore({
   initialBatter,
   initialBowler,
   initialMatchState,
+  initialState,
   maxOvers = 20,
   onMatchStateChange,
   isTestPage = false,
@@ -122,26 +124,50 @@ export function useLiveScore({
 
   const [matchState, setMatchState] = useState<MatchState>(getInitialMatchState());
 
-  const [state, setState] = useState<LiveScoreState>({
-    innings: 1,
-    battingTeam: 'team1',
-    currentOver: 0.0,
-    team1: {
-      name: initialTeam1Name,
-      runs: 0,
-      wickets: 0,
-      balls: 0,
-    },
-    team2: {
-      name: initialTeam2Name,
-      runs: 0,
-      wickets: 0,
-      balls: 0,
-    },
-    currentBatter: initialBatter ? { ...initialBatter, runs: 0, balls: 0 } : { id: '', name: 'Select Batter', runs: 0, balls: 0 },
-    currentBowler: initialBowler ? { ...initialBowler, runs: 0, balls: 0 } : { id: '', name: 'Select Bowler', runs: 0, balls: 0 },
-    ballHistory: [],
-    matchState,
+  // Determine initial batting team based on toss
+  const getInitialBattingTeam = (): 'team1' | 'team2' => {
+    if (initialState) return initialState.battingTeam;
+    
+    const toss = initialMatchState?.toss;
+    if (toss) {
+      if (toss.winner === 'team1') {
+        return toss.decision === 'bat' ? 'team1' : 'team2';
+      } else {
+        return toss.decision === 'bat' ? 'team2' : 'team1';
+      }
+    }
+    return 'team1'; // Default
+  };
+
+  const [state, setState] = useState<LiveScoreState>(() => {
+    if (initialState) {
+      return {
+        ...initialState,
+        matchState: matchState, // Ensure matchState is synced
+      };
+    }
+
+    return {
+      innings: 1,
+      battingTeam: getInitialBattingTeam(),
+      currentOver: 0.0,
+      team1: {
+        name: initialTeam1Name,
+        runs: 0,
+        wickets: 0,
+        balls: 0,
+      },
+      team2: {
+        name: initialTeam2Name,
+        runs: 0,
+        wickets: 0,
+        balls: 0,
+      },
+      currentBatter: initialBatter ? { ...initialBatter, runs: 0, balls: 0 } : { id: '', name: 'Select Batter', runs: 0, balls: 0 },
+      currentBowler: initialBowler ? { ...initialBowler, runs: 0, balls: 0 } : { id: '', name: 'Select Bowler', runs: 0, balls: 0 },
+      ballHistory: [],
+      matchState,
+    };
   });
 
   const [undoStack, setUndoStack] = useState<LiveScoreState[]>([]);
@@ -381,7 +407,7 @@ export function useLiveScore({
       type: 'W',
       runs: 0,
       timestamp: Date.now(),
-      dismissalType,
+      dismissalType: dismissalType as DismissalType,
       fielderName,
     });
   }, [recordBall]);
@@ -458,4 +484,3 @@ export function useLiveScore({
     isFreeHit,
   };
 }
-

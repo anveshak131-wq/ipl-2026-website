@@ -10,7 +10,6 @@ import LeagueSwitch from '@/components/admin/LeagueSwitch';
 import WPLTeamsManager from '@/components/admin/WPLTeamsManager';
 import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
-import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { parseDateDDMMYYYY, calculateAge, isValidDate, formatDateMonthDDYYYY, parseDateMonthDDYYYY, isValidDateForLeague } from '@/lib/dateUtils';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import FlagImage from '@/components/ui/FlagImage';
@@ -181,9 +180,6 @@ export default function AdminPlayers() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
   const [isDeletingAll, setIsDeletingAll] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [showBackupModal, setShowBackupModal] = useState(false);
   const [backups, setBackups] = useState<any[]>([]);
   const [isLoadingBackups, setIsLoadingBackups] = useState(false);
@@ -403,7 +399,7 @@ export default function AdminPlayers() {
         </div>
       </div>
     );
-  };
+  }, []);
 
   const [formData, setFormData] = useState<{
     name: string;
@@ -944,6 +940,10 @@ export default function AdminPlayers() {
       const teamsData = await api.getTeams(currentLeague);
       setPlayers(playersData);
       setTeams(teamsData);
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+    } finally {
+      setIsLoading(false);
       
       // Data Integrity Checks
       if (playersData && playersData.length > 0) {
@@ -958,10 +958,6 @@ export default function AdminPlayers() {
           console.warn('Data inconsistencies found:', inconsistencies);
         }
       }
-    } catch (error) {
-      console.error('Failed to fetch data:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -4633,9 +4629,8 @@ export default function AdminPlayers() {
         onClose={handleClosePlayerDetails}
         title="Player Details"
         description="Complete player information and statistics"
-        size="2xl"
         variant="info"
-        showCloseButton={true}
+        size="lg"
         icon={
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
             <Eye className="w-6 h-6 text-white" />

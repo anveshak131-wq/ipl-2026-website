@@ -44,6 +44,7 @@ interface BallEntryPanelProps {
     team1: string[];
     team2: string[];
   };
+  initialState?: LiveScoreState;
   // Match context props
   venue?: string;
   date?: string;
@@ -66,6 +67,7 @@ interface BallEntryPanelProps {
     lastResult?: string;
   };
   isTestPage?: boolean; // For test pages, skip match state restrictions
+  isEveningMatch?: boolean;
 }
 
 export default function BallEntryPanel({
@@ -80,6 +82,7 @@ export default function BallEntryPanel({
   initialBatter,
   initialBowler,
   playing11,
+  initialState,
   venue,
   date,
   time,
@@ -179,6 +182,7 @@ export default function BallEntryPanel({
     initialBatter,
     initialBowler,
     initialMatchState: initializeMatchState(),
+    initialState,
     maxOvers: 20,
     isTestPage,
     onMatchStateChange: (newMatchState) => {
@@ -350,7 +354,7 @@ export default function BallEntryPanel({
       type: 'W',
       runs: 0,
       timestamp: Date.now(),
-      dismissalType,
+      dismissalType: dismissalType as any,
       fielderName,
     };
     
@@ -966,4 +970,3 @@ function ballsToOvers(balls: number): number {
   const rem = balls % 6;
   return parseFloat(`${whole}.${rem}`);
 }
-
