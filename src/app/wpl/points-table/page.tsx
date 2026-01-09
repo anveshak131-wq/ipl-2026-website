@@ -16,7 +16,7 @@ import AnimatedSection from '@/components/ui/AnimatedSection';
 import { formatMatchTime } from '@/lib/timeUtils';
 
 // Custom components for the points table
-export default function IPLPointsTablePage() {
+export default function WPLPointsTablePage() {
   const router = useRouter();
   const { currentLeague } = useLeague();
   const [teams, setTeams] = useState<Team[]>([]);
@@ -42,8 +42,8 @@ export default function IPLPointsTablePage() {
       setIsLoading(true);
       try {
         const [teamsData, matchesData] = await Promise.all([
-          api.getTeams(currentLeague),
-          api.getMatches(currentLeague)
+          api.getTeams('wpl'),
+          api.getMatches('wpl')
         ]);
         
         setTeams(teamsData);
@@ -56,13 +56,13 @@ export default function IPLPointsTablePage() {
     };
     
     fetchData();
-  }, [currentLeague]);
+  }, []);
 
-  // Generate available years (2008 to current year)
+  // Generate available years (2023 to current year for WPL)
   useEffect(() => {
     const currentYear = new Date().getFullYear();
     const years = [];
-    for (let year = 2008; year <= currentYear; year++) {
+    for (let year = 2023; year <= currentYear; year++) {
       years.push(year);
     }
     setAvailableYears(years);
@@ -183,7 +183,7 @@ export default function IPLPointsTablePage() {
   }, [matches]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-black overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-purple-950 via-pink-900 to-black overflow-hidden">
       <Navbar />
       <AuroraBackground />
 
@@ -192,8 +192,8 @@ export default function IPLPointsTablePage() {
         <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
           <div className="absolute inset-0 opacity-[0.03]" style={{
             backgroundImage: `
-              linear-gradient(rgba(236, 28, 36, 0.1) 1px, transparent 1px),
-              linear-gradient(90deg, rgba(236, 28, 36, 0.1) 1px, transparent 1px)
+              linear-gradient(rgba(168, 85, 247, 0.1) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(168, 85, 247, 0.1) 1px, transparent 1px)
             `,
             backgroundSize: '50px 50px'
           }} />
@@ -206,12 +206,12 @@ export default function IPLPointsTablePage() {
               className="mb-8"
             >
               <motion.span
-                className="inline-flex items-center gap-3 px-6 py-3 rounded-full backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-r from-red-500/20 via-yellow-500/20 to-red-500/20 shadow-2xl"
+                className="inline-flex items-center gap-3 px-6 py-3 rounded-full backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 shadow-2xl"
                 whileHover={{ scale: 1.05 }}
               >
-                <Trophy className="w-5 h-5 text-yellow-400" />
-                <span className="text-sm font-black uppercase tracking-widest bg-gradient-to-r from-red-400 via-yellow-400 to-red-400 bg-clip-text text-transparent">
-                  {currentLeague === 'wpl' ? 'WPL 2026' : 'IPL 2026'} POINTS TABLE
+                <Trophy className="w-5 h-5 text-pink-400" />
+                <span className="text-sm font-black uppercase tracking-widest bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
+                  WPL 2026 POINTS TABLE
                 </span>
               </motion.span>
             </motion.div>
@@ -222,7 +222,7 @@ export default function IPLPointsTablePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 0.2 }}
             >
-              <GradientText gradient="from-red-400 via-yellow-400 to-red-400" animate>
+              <GradientText gradient="from-purple-400 via-pink-400 to-purple-400" animate>
                 Championship Standings
               </GradientText>
             </motion.h1>
@@ -245,10 +245,10 @@ export default function IPLPointsTablePage() {
               transition={{ duration: 0.8, delay: 0.5 }}
             >
               {[
-                { label: 'Teams', value: teams.length, icon: Users, color: 'from-red-500 to-yellow-500' },
-                { label: 'Matches Played', value: matches.filter(m => m.status === 'completed').length, icon: Calendar, color: 'from-yellow-500 to-red-500' },
-                { label: 'Upcoming', value: upcomingMatches.length, icon: Clock, color: 'from-red-500 to-yellow-500' },
-                { label: 'Total Points', value: pointsTable.reduce((sum, team) => sum + team.points, 0), icon: Award, color: 'from-yellow-500 to-red-500' }
+                { label: 'Teams', value: teams.length, icon: Users, color: 'from-purple-500 to-pink-500' },
+                { label: 'Matches Played', value: matches.filter(m => m.status === 'completed').length, icon: Calendar, color: 'from-pink-500 to-purple-500' },
+                { label: 'Upcoming', value: upcomingMatches.length, icon: Clock, color: 'from-purple-500 to-pink-500' },
+                { label: 'Total Points', value: pointsTable.reduce((sum, team) => sum + team.points, 0), icon: Award, color: 'from-pink-500 to-purple-500' }
               ].map((stat, index) => (
                 <motion.div
                   key={index}
@@ -294,7 +294,7 @@ export default function IPLPointsTablePage() {
                     <select
                       value={selectedYear}
                       onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                      className="w-full px-4 py-3 bg-slate-800/60 border-2 border-white/15 text-white rounded-xl focus:outline-none focus:border-yellow-500 focus:ring-4 focus:ring-yellow-500/20 transition-all text-lg font-medium"
+                      className="w-full px-4 py-3 bg-slate-800/60 border-2 border-white/15 text-white rounded-xl focus:outline-none focus:border-pink-500 focus:ring-4 focus:ring-pink-500/20 transition-all text-lg font-medium"
                     >
                       {availableYears.map(year => (
                         <option key={year} value={year}>{year}</option>
@@ -305,15 +305,15 @@ export default function IPLPointsTablePage() {
 
                 {/* Search Bar */}
                 <div className="relative mb-6 group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 via-yellow-500/20 to-red-500/20 rounded-2xl blur-2xl opacity-0 group-focus-within:opacity-50 transition-opacity duration-500" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 rounded-2xl blur-2xl opacity-0 group-focus-within:opacity-50 transition-opacity duration-500" />
                   <div className="relative">
-                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 group-focus-within:text-yellow-400 transition-colors" />
+                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-gray-400 group-focus-within:text-pink-400 transition-colors" />
                     <input
                       type="text"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       placeholder="Search teams by name or abbreviation..."
-                      className="w-full pl-16 pr-14 py-4 rounded-2xl bg-slate-800/60 border-2 border-white/15 text-white placeholder-gray-400 focus:outline-none focus:border-yellow-500 focus:ring-4 focus:ring-yellow-500/20 transition-all text-lg font-medium"
+                      className="w-full pl-16 pr-14 py-4 rounded-2xl bg-slate-800/60 border-2 border-white/15 text-white placeholder-gray-400 focus:outline-none focus:border-pink-500 focus:ring-4 focus:ring-pink-500/20 transition-all text-lg font-medium"
                     />
                     {searchTerm && (
                       <motion.button
@@ -336,7 +336,7 @@ export default function IPLPointsTablePage() {
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value as 'points' | 'wins' | 'losses' | 'nrr')}
-                      className="px-5 py-2.5 rounded-xl text-sm font-bold bg-slate-800/60 text-white border-2 border-white/10 focus:border-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-500/20 hover:border-yellow-500/50 transition-all cursor-pointer"
+                      className="px-5 py-2.5 rounded-xl text-sm font-bold bg-slate-800/60 text-white border-2 border-white/10 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-500/20 hover:border-pink-500/50 transition-all cursor-pointer"
                     >
                       <option value="points">Points (High to Low)</option>
                       <option value="wins">Wins (Most first)</option>
@@ -353,13 +353,13 @@ export default function IPLPointsTablePage() {
                         onClick={() => setShowFavoritesFirst(!showFavoritesFirst)}
                         className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
                           showFavoritesFirst
-                            ? 'bg-gradient-to-r from-rose-500/30 to-pink-500/30 text-rose-300 border-2 border-rose-500/50 shadow-lg'
-                            : 'bg-slate-800/60 text-gray-300 border-2 border-white/10 hover:border-rose-500/50 hover:bg-slate-700/60'
+                            ? 'bg-gradient-to-r from-purple-500/30 to-pink-500/30 text-purple-300 border-2 border-purple-500/50 shadow-lg'
+                            : 'bg-slate-800/60 text-gray-300 border-2 border-white/10 hover:border-purple-500/50 hover:bg-slate-700/60'
                         }`}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
-                        <Star className={`w-4 h-4 ${showFavoritesFirst ? 'fill-rose-300' : ''}`} />
+                        <Star className={`w-4 h-4 ${showFavoritesFirst ? 'fill-purple-300' : ''}`} />
                         Favorites
                       </motion.button>
                     </>
@@ -371,7 +371,7 @@ export default function IPLPointsTablePage() {
                       <div className="flex-1" />
                       <motion.button
                         onClick={clearFilters}
-                        className="px-5 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-red-500/20 to-red-600/20 text-red-300 border-2 border-red-500/50 hover:from-red-500/30 hover:to-red-600/30 transition-all flex items-center gap-2"
+                        className="px-5 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-purple-500/20 to-purple-600/20 text-purple-300 border-2 border-purple-500/50 hover:from-purple-500/30 hover:to-purple-600/30 transition-all flex items-center gap-2"
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
@@ -389,7 +389,7 @@ export default function IPLPointsTablePage() {
                       Showing <span className="font-black text-white text-lg">{sortedPointsTable.length}</span> of <span className="font-black text-white text-lg">{teams.length}</span> teams
                     </span>
                     {hasActiveFilters && (
-                      <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                      <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">
                         Filtered
                       </span>
                     )}
@@ -435,7 +435,7 @@ export default function IPLPointsTablePage() {
                 </p>
                 <motion.button
                   onClick={clearFilters}
-                  className="px-10 py-5 rounded-2xl bg-gradient-to-r from-red-500 to-yellow-500 text-white font-black text-lg hover:shadow-2xl transition-all flex items-center gap-3 mx-auto"
+                  className="px-10 py-5 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-black text-lg hover:shadow-2xl transition-all flex items-center gap-3 mx-auto"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
@@ -474,7 +474,7 @@ export default function IPLPointsTablePage() {
                   {sortedPointsTable.map((team, index) => {
                     const isFavorite = favorites.includes(team.id);
                     const rank = index + 1;
-                    const isTop4 = rank <= 4;
+                    const isTop3 = rank <= 3; // Top 3 for 5 teams
                     const isBottom2 = rank >= sortedPointsTable.length - 1;
 
                     return (
@@ -495,22 +495,22 @@ export default function IPLPointsTablePage() {
                           transition: { duration: 0.3 }
                         }}
                         className={`relative group grid grid-cols-[40px_200px_1fr_100px_100px_100px_100px_100px_60px] gap-4 items-center px-6 py-5 rounded-3xl backdrop-blur-2xl border-2 border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/80 transition-all duration-300 cursor-pointer ${
-                          isTop4 ? 'border-yellow-500/50 bg-gradient-to-br from-yellow-900/30 via-yellow-800/20 to-yellow-900/30' :
-                          isBottom2 ? 'border-red-500/50 bg-gradient-to-br from-red-900/30 via-red-800/20 to-red-900/30' :
-                          'hover:border-yellow-500/50 hover:bg-gradient-to-br from-yellow-900/20 via-yellow-800/10 to-yellow-900/20'
+                          isTop3 ? 'border-pink-500/50 bg-gradient-to-br from-pink-900/30 via-purple-800/20 to-pink-900/30' :
+                          isBottom2 ? 'border-purple-500/50 bg-gradient-to-br from-purple-900/30 via-pink-800/20 to-purple-900/30' :
+                          'hover:border-pink-500/50 hover:bg-gradient-to-br from-pink-900/20 via-purple-800/10 to-pink-900/20'
                         }`}
                         onClick={() => router.push(`/teams/${team.id}`)}
                       >
                         {/* Rank */}
                         <div className={`flex items-center justify-center text-2xl font-black ${
-                          isTop4 ? 'text-yellow-400' : isBottom2 ? 'text-red-400' : 'text-white'
+                          isTop3 ? 'text-pink-400' : isBottom2 ? 'text-purple-400' : 'text-white'
                         }`}>
                           {rank}
                         </div>
 
                         {/* Team Logo */}
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-yellow-500 flex items-center justify-center text-white font-black text-lg shadow-lg">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-black text-lg shadow-lg">
                             {team.shortName.slice(0, 2)}
                           </div>
                           <span className="text-xl font-black text-white">{team.shortName}</span>
@@ -535,7 +535,7 @@ export default function IPLPointsTablePage() {
                         </div>
 
                         {/* Points */}
-                        <div className="text-yellow-400 font-black text-xl">{team.points}</div>
+                        <div className="text-pink-400 font-black text-xl">{team.points}</div>
 
                         {/* Net Run Rate */}
                         <div className={`font-bold ${
@@ -552,7 +552,7 @@ export default function IPLPointsTablePage() {
                               toggleFavorite(team.id);
                             }}
                             className={`p-2 rounded-full transition-all ${
-                              isFavorite ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white' : 'bg-slate-800/60 text-gray-400 hover:bg-slate-700/60'
+                              isFavorite ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white' : 'bg-slate-800/60 text-gray-400 hover:bg-slate-700/60'
                             }`}
                             whileHover={{ scale: 1.2, rotate: isFavorite ? 0 : 15 }}
                             whileTap={{ scale: 0.9 }}
@@ -563,9 +563,9 @@ export default function IPLPointsTablePage() {
 
                         {/* Hover effects */}
                         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 rounded-3xl blur-2xl" style={{
-                          background: isTop4 ? 'linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(236, 28, 36, 0.3))' :
-                                      isBottom2 ? 'linear-gradient(135deg, rgba(236, 28, 36, 0.3), rgba(255, 215, 0, 0.3))' :
-                                      'linear-gradient(135deg, rgba(236, 28, 36, 0.2), rgba(255, 215, 0, 0.2))'
+                          background: isTop3 ? 'linear-gradient(135deg, rgba(236, 72, 153, 0.3), rgba(168, 85, 247, 0.3))' :
+                                      isBottom2 ? 'linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(236, 72, 153, 0.3))' :
+                                      'linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(168, 85, 247, 0.2))'
                         }} />
                       </motion.div>
                     );
@@ -596,17 +596,17 @@ export default function IPLPointsTablePage() {
                     transition={{ duration: 0.6 }}
                   >
                     <motion.span
-                      className="inline-flex items-center gap-3 px-6 py-3 rounded-full backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-r from-red-500/20 via-yellow-500/20 to-red-500/20 mb-8"
+                      className="inline-flex items-center gap-3 px-6 py-3 rounded-full backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-purple-500/20 mb-8"
                       whileHover={{ scale: 1.05 }}
                     >
-                      <Calendar className="w-5 h-5 text-yellow-400" />
-                      <span className="text-sm font-black uppercase tracking-widest bg-gradient-to-r from-red-400 via-yellow-400 to-red-400 bg-clip-text text-transparent">
+                      <Calendar className="w-5 h-5 text-pink-400" />
+                      <span className="text-sm font-black uppercase tracking-widest bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
                         UPCOMING FIXTURES
                       </span>
                     </motion.span>
 
                     <h2 className="text-5xl md:text-6xl lg:text-7xl font-black text-white mb-6 leading-tight">
-                      Next <GradientText gradient="from-red-400 via-yellow-400 to-red-400" animate>Matches</GradientText>
+                      Next <GradientText gradient="from-purple-400 via-pink-400 to-purple-400" animate>Matches</GradientText>
                     </h2>
 
                     <p className="text-gray-300 text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed">
@@ -624,7 +624,7 @@ export default function IPLPointsTablePage() {
                     {upcomingMatches.map((match, index) => (
                       <motion.div
                         key={match.id}
-                        className="group relative overflow-hidden rounded-2xl backdrop-blur-2xl border-2 border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/80 p-6 hover:border-yellow-500/50 transition-all duration-300"
+                        className="group relative overflow-hidden rounded-2xl backdrop-blur-2xl border-2 border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/80 p-6 hover:border-pink-500/50 transition-all duration-300"
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
@@ -634,7 +634,7 @@ export default function IPLPointsTablePage() {
                         <div className="relative z-10">
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-4">
-                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-yellow-500 flex items-center justify-center text-white font-black text-lg shadow-lg">
+                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-black text-lg shadow-lg">
                                 {match.team1.shortName.slice(0, 2)}
                               </div>
                               <div>
@@ -655,7 +655,7 @@ export default function IPLPointsTablePage() {
                                 <div className="text-xl font-black text-white">{match.team2.shortName}</div>
                                 <div className="text-sm text-gray-400">{match.team2.name}</div>
                               </div>
-                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-yellow-500 flex items-center justify-center text-white font-black text-lg shadow-lg">
+                              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-black text-lg shadow-lg">
                                 {match.team2.shortName.slice(0, 2)}
                               </div>
                             </div>
@@ -677,149 +677,16 @@ export default function IPLPointsTablePage() {
                         </div>
 
                         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 rounded-2xl blur-2xl" style={{
-                          background: 'linear-gradient(135deg, rgba(236, 28, 36, 0.2), rgba(255, 215, 0, 0.2))'
+                          background: 'linear-gradient(135deg, rgba(236, 72, 153, 0.2), rgba(168, 85, 247, 0.2))'
                         }} />
                       </motion.div>
                     ))}
-                  </motion.div>
-
-                  <motion.div
-                    className="text-center mt-12"
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, delay: upcomingMatches.length * 0.1 }}
-                  >
-                    <motion.button
-                      onClick={() => router.push('/matches')}
-                      className="group relative overflow-hidden rounded-2xl font-black py-4 px-10 text-lg transition-all duration-500 cursor-pointer bg-gradient-to-r from-red-500 via-yellow-500 to-red-500 text-white shadow-2xl"
-                      whileHover={{ scale: 1.05, y: -2 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-                      <span className="relative z-10 flex items-center gap-3">
-                        View All Matches
-                        <ArrowRight className="w-5 h-5 transform group-hover:translate-x-2 transition-transform" />
-                      </span>
-                    </motion.button>
                   </motion.div>
                 </div>
               </motion.div>
             </div>
           </section>
         )}
-
-        {/* Legend Section */}
-        <section className="relative z-10 py-24">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div
-              className="relative overflow-hidden rounded-3xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 p-12 md:p-16"
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-            >
-              <div className="relative z-10">
-                <motion.div
-                  className="text-center mb-16"
-                  initial={{ opacity: 0, y: -20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <motion.span
-                    className="inline-flex items-center gap-3 px-6 py-3 rounded-full backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-r from-red-500/20 via-yellow-500/20 to-red-500/20 mb-8"
-                    whileHover={{ scale: 1.05 }}
-                  >
-                    <Info className="w-5 h-5 text-yellow-400" />
-                    <span className="text-sm font-black uppercase tracking-widest bg-gradient-to-r from-red-400 via-yellow-400 to-red-400 bg-clip-text text-transparent">
-                      POINTS TABLE GUIDE
-                    </span>
-                  </motion.span>
-
-                  <h2 className="text-5xl md:text-6xl lg:text-7xl font-black text-white mb-6 leading-tight">
-                    How It <GradientText gradient="from-red-400 via-yellow-400 to-red-400" animate>Works</GradientText>
-                  </h2>
-
-                  <p className="text-gray-300 text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed">
-                    Understanding the IPL points system and what these numbers mean
-                  </p>
-                </motion.div>
-
-                <motion.div
-                  className="grid grid-cols-1 md:grid-cols-3 gap-8"
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true }}
-                  transition={{ staggerChildren: 0.1 }}
-                >
-                  {[
-                    {
-                      title: 'Win',
-                      description: 'Each win earns a team 2 points in the standings.',
-                      icon: TrendingUp,
-                      color: 'from-green-500 to-emerald-500'
-                    },
-                    {
-                      title: 'Loss',
-                      description: 'Teams receive 0 points for a loss.',
-                      icon: TrendingDown,
-                      color: 'from-red-500 to-pink-500'
-                    },
-                    {
-                      title: 'Net Run Rate',
-                      description: 'NRR determines rankings when teams have equal points. Higher is better.',
-                      icon: Award,
-                      color: 'from-yellow-500 to-amber-500'
-                    },
-                    {
-                      title: 'Top 4',
-                      description: 'The top 4 teams qualify for the playoffs at the end of the league stage.',
-                      icon: Trophy,
-                      color: 'from-yellow-500 to-red-500'
-                    },
-                    {
-                      title: 'Tiebreaker',
-                      description: 'If points are equal, NRR is used to break the tie.',
-                      icon: Star,
-                      color: 'from-purple-500 to-pink-500'
-                    },
-                    {
-                      title: 'Playoffs',
-                      description: 'Top 4 teams compete in playoffs to determine the champion.',
-                      icon: Users,
-                      color: 'from-blue-500 to-cyan-500'
-                    }
-                  ].map((item, index) => (
-                    <motion.div
-                      key={index}
-                      className="group relative overflow-hidden rounded-2xl backdrop-blur-2xl border-2 border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/80 p-8 hover:border-yellow-500/50 transition-all duration-300"
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.6, delay: index * 0.1 }}
-                      whileHover={{ scale: 1.05, y: -5 }}
-                    >
-                      <div className="relative z-10">
-                        <motion.div
-                          className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-12 transition-all duration-300`}
-                        >
-                          <item.icon className="w-8 h-8 text-white" />
-                        </motion.div>
-                        <h3 className="text-2xl font-black text-white mb-4">{item.title}</h3>
-                        <p className="text-gray-300 text-sm leading-relaxed">{item.description}</p>
-                      </div>
-
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 rounded-2xl blur-2xl" style={{
-                        background: 'linear-gradient(135deg, rgba(236, 28, 36, 0.2), rgba(255, 215, 0, 0.2))'
-                      }} />
-                    </motion.div>
-                  ))}
-                </motion.div>
-              </div>
-            </motion.div>
-          </div>
-        </section>
       </main>
 
       <Footer />
