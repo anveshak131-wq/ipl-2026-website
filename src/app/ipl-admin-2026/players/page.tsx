@@ -62,8 +62,8 @@ export default function AdminPlayers() {
               <p className="text-gray-400 text-sm">This section is under development. Player management features will be available soon.</p>
             </div>
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 }
