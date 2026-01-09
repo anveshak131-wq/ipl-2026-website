@@ -82,7 +82,7 @@ export default function QuickActionsBar({
       label: isSaving ? 'Saving...' : 'Save',
       onClick: onSave,
       disabled: isSaving,
-      color: `bg-gradient-to-r ${league === 'ipl' ? 'from-blue-600 to-cyan-600' : 'from-purple-600 to-pink-600'}`,
+      color: `bg-gradient-to-r ${league === 'ipl' ? 'from-blue-600 to-cyan-600' : 'from-purple-600 to-pink-600'} ${isSaving ? 'animate-pulse' : ''}`,
       primary: true,
     },
   ];

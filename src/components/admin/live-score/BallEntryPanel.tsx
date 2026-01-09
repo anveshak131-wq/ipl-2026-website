@@ -23,6 +23,7 @@ import DRSReview from './DRSReview';
 import SuperOverPanel from './SuperOverPanel';
 import ImpactPlayerSelector from './ImpactPlayerSelector';
 import TwoBallRuleIndicator from './TwoBallRuleIndicator';
+import SaveStatusNotification from './SaveStatusNotification';
 import { useLiveScore, BallEvent } from '@/hooks/useLiveScore';
 import { Player } from '@/types';
 import { Users, RotateCcw, Save } from 'lucide-react';
@@ -495,6 +496,9 @@ export default function BallEntryPanel({
 
   return (
     <div className="space-y-4 md:space-y-6 pb-20 md:pb-0">
+      {/* Save Status Notification */}
+      <SaveStatusNotification status={isSaving ? 'saving' : 'idle'} league={league} />
+
       {/* Top Section: Match Context + State Manager */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 space-y-4">
