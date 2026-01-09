@@ -97,8 +97,8 @@ const oversToBalls = (overs: number): number => {
 };
 
 export function useLiveScore({
-  initialTeam1Name,
-  initialTeam2Name,
+  initialTeam1Name = '',
+  initialTeam2Name = '',
   initialBatter,
   initialBowler,
   initialMatchState,
