@@ -49,15 +49,16 @@ export default function RichCommentary({
     const entries: CommentaryEntry[] = [];
     let ballCount = 0;
 
-    ballHistory.forEach((event, index) => {
-      ballCount++;
-      const over = Math.floor(ballCount / 6);
-      const ballInOver = (ballCount % 6) || 6;
-      const ballString = `${over}.${ballInOver}`;
+    if (ballHistory && Array.isArray(ballHistory)) {
+      ballHistory.forEach((event, index) => {
+        ballCount++;
+        const over = Math.floor(ballCount / 6);
+        const ballInOver = (ballCount % 6) || 6;
+        const ballString = `${over}.${ballInOver}`;
 
-      // Determine event type
-      let eventType: CommentaryEntry['eventType'] = 'runs';
-      let isKeyMoment = false;
+        // Determine event type
+        let eventType: CommentaryEntry['eventType'] = 'runs';
+        let isKeyMoment = false;
 
       if (event.type === 'W') {
         eventType = 'wicket';
@@ -102,6 +103,7 @@ export default function RichCommentary({
         eventType,
       });
     });
+    }
 
     return entries.reverse(); // Most recent first
   }, [ballHistory, currentBatter, currentBowler]);

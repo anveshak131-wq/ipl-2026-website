@@ -26,38 +26,40 @@ export default function OverByOverAnalysis({ state, league = 'ipl' }: OverByOver
 
     // Process ball history to group by over
     let ballCount = 0;
-    state.ballHistory.forEach((ball) => {
-      // Count legal deliveries to determine which over we're in
-      if (!['WD', 'NB'].includes(ball.type as string)) {
-        ballCount++;
-      }
-      
-      const over = Math.floor((ballCount - 1) / 6);
-      
-      if (!overMap.has(over)) {
-        overMap.set(over, { runs: 0, wickets: 0, boundaries: 0, dotBalls: 0, balls: 0 });
-      }
-      
-      const overStats = overMap.get(over)!;
-      
-      if (ball.type === 'W') {
-        overStats.wickets += 1;
-      } else if (typeof ball.type === 'number') {
-        overStats.runs += ball.type;
-        if (ball.type === 4 || ball.type === 6) {
-          overStats.boundaries += 1;
+    if (state.ballHistory && Array.isArray(state.ballHistory)) {
+      state.ballHistory.forEach((ball) => {
+        // Count legal deliveries to determine which over we're in
+        if (!['WD', 'NB'].includes(ball.type as string)) {
+          ballCount++;
         }
-        if (ball.type === 0) {
-          overStats.dotBalls += 1;
-        }
-      } else if (ball.type === 'WD' || ball.type === 'NB') {
-        overStats.runs += 1;
-      }
+        
+        const over = Math.floor((ballCount - 1) / 6);
       
-      if (!['WD', 'NB'].includes(ball.type as string)) {
-        overStats.balls += 1;
-      }
-    });
+        if (!overMap.has(over)) {
+          overMap.set(over, { runs: 0, wickets: 0, boundaries: 0, dotBalls: 0, balls: 0 });
+        }
+        
+        const overStats = overMap.get(over)!;
+        
+        if (ball.type === 'W') {
+          overStats.wickets += 1;
+        } else if (typeof ball.type === 'number') {
+          overStats.runs += ball.type;
+          if (ball.type === 4 || ball.type === 6) {
+            overStats.boundaries += 1;
+          }
+          if (ball.type === 0) {
+            overStats.dotBalls += 1;
+          }
+        } else if (ball.type === 'WD' || ball.type === 'NB') {
+          overStats.runs += 1;
+        }
+        
+        if (!['WD', 'NB'].includes(ball.type as string)) {
+          overStats.balls += 1;
+        }
+      });
+    }
 
     // Convert to array and calculate run rates
     overMap.forEach((stats, over) => {

@@ -24,7 +24,7 @@ export default function EnhancedPlayerStats({
   const recentPattern = useMemo(() => {
     // Get balls where this player was batting/bowling
     // For simplicity, we'll use recent balls from history
-    const recentBalls = ballHistory.slice(-10);
+    const recentBalls = ballHistory && Array.isArray(ballHistory) ? ballHistory.slice(-10) : [];
     const pattern = recentBalls.map(ball => {
       if (typeof ball.type === 'number') {
         return ball.type;
@@ -45,11 +45,11 @@ export default function EnhancedPlayerStats({
     : null;
 
   const boundaries = useMemo(() => {
-    return ballHistory.filter(ball => ball.type === 4 || ball.type === 6).length;
+    return ballHistory && Array.isArray(ballHistory) ? ballHistory.filter(ball => ball.type === 4 || ball.type === 6).length : 0;
   }, [ballHistory]);
 
   const dotBalls = useMemo(() => {
-    return ballHistory.filter(ball => ball.type === 0).length;
+    return ballHistory && Array.isArray(ballHistory) ? ballHistory.filter(ball => ball.type === 0).length : 0;
   }, [ballHistory]);
 
   const runsPerBall = player.balls > 0 

@@ -141,14 +141,16 @@ export default function AdminLiveScorePage() {
               balls: state.currentBowler.balls,
             }
           : undefined,
-        commentary: state.ballHistory
-          .slice(-10)
-          .map((ball: any) => {
-            const totalBalls = Math.floor(state.currentOver) * 6 + Math.round((state.currentOver % 1) * 10);
-            const over = Math.floor(totalBalls / 6);
-            const ballInOver = totalBalls % 6;
-            return `Over ${over}.${ballInOver}: ${getBallDescription(ball)}`;
-          }),
+        commentary: (state.ballHistory && Array.isArray(state.ballHistory))
+          ? state.ballHistory
+              .slice(-10)
+              .map((ball: any) => {
+                const totalBalls = Math.floor(state.currentOver) * 6 + Math.round((state.currentOver % 1) * 10);
+                const over = Math.floor(totalBalls / 6);
+                const ballInOver = totalBalls % 6;
+                return `Over ${over}.${ballInOver}: ${getBallDescription(ball)}`;
+              })
+          : [],
         status: 'Live',
         innings: state.innings,
         battingTeam: state.battingTeam,
