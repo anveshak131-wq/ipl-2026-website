@@ -382,7 +382,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
           </svg>
         ),
         group: 'Main',
-        shortcut: 'P',
+        shortcut: 'Y',
       },
       {
         href: '/ipl-admin-2026/batting-stats',
@@ -439,7 +439,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
           </svg>
         ),
         group: 'Content',
-        shortcut: 'D',
+        shortcut: 'X',
       },
       {
         href: '/ipl-admin-2026/stories',
@@ -462,7 +462,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
           </svg>
         ),
         group: 'Content',
-        shortcut: 'S',
+        shortcut: 'I',
       }] : []),
       {
         href: '/ipl-admin-2026/predictions',
@@ -496,7 +496,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
           </svg>
         ),
         group: 'Tools',
-        shortcut: 'L',
+        shortcut: 'V',
       },
       {
         href: '/ipl-admin-2026/playing-11',
@@ -507,7 +507,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
           </svg>
         ),
         group: 'Tools',
-        shortcut: 'P',
+        shortcut: '1',
       },
       {
         href: '/ipl-admin-2026/test-live-score',
@@ -518,7 +518,7 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
           </svg>
         ),
         group: 'Tools',
-        shortcut: 'T',
+        shortcut: '2',
       },
       {
         href: '/ipl-admin-2026/moderation',
@@ -582,8 +582,8 @@ export default function AdminSidebar({ currentPage = '' }: AdminSidebarProps) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536-3.536m0 5.656l3.536-3.536M9.172 9.172L5.636 5.636m3.536 5.656l-3.536-3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
           </svg>
         ),
-        group: 'Management',
-        shortcut: 'U',
+        group: 'Settings',
+        shortcut: 'H',
       },
       {
         href: '/ipl-admin-2026/settings',

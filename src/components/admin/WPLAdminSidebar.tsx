@@ -205,11 +205,18 @@ export default function WPLAdminSidebar({ currentPage = '' }: WPLAdminSidebarPro
   }), []);
 
   const findMenuItemByHref = (href: string): MenuItem | null => {
-    for (const items of Object.values(menuGroups)) {
-      const item = items.find((i) => i.href === href || href.startsWith(i.href + '/'));
-      if (item) return item;
+    try {
+      for (const items of Object.values(menuGroups)) {
+        if (Array.isArray(items)) {
+          const item = items.find((i) => i.href === href || href.startsWith(i.href + '/'));
+          if (item) return item;
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('Error finding menu item by href:', error);
+      return null;
     }
-    return null;
   };
 
   const toggleGroup = (groupName: string) => {
@@ -278,23 +285,46 @@ export default function WPLAdminSidebar({ currentPage = '' }: WPLAdminSidebarPro
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Cmd/Ctrl + K for search
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        setSearchQuery('');
-        (document.querySelector('input[placeholder="Search..."]') as HTMLInputElement)?.focus();
-      }
+      try {
+        // Cmd/Ctrl + K for search
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+          e.preventDefault();
+          setSearchQuery('');
+          (document.querySelector('input[placeholder="Search..."]') as HTMLInputElement)?.focus();
+        }
 
-      // Escape to clear search
-      if (e.key === 'Escape' && searchQuery) {
-        setSearchQuery('');
-        (document.activeElement as HTMLElement)?.blur();
+        // Escape to clear search
+        if (e.key === 'Escape' && searchQuery) {
+          setSearchQuery('');
+          (document.activeElement as HTMLElement)?.blur();
+        }
+
+        // Shortcut navigation - letter keys
+        const key = e.key.toLowerCase();
+        
+        try {
+          // Find menu item by shortcut
+          for (const items of Object.values(menuGroups)) {
+            if (Array.isArray(items)) {
+              const item = items.find((i) => i.shortcut?.toLowerCase() === key);
+              if (item) {
+                e.preventDefault();
+                router.push(item.href);
+                break;
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error handling keyboard shortcut:', error);
+        }
+      } catch (err) {
+        console.error('Error in handleKeyDown:', err);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [searchQuery]);
+  }, [searchQuery, menuGroups, router]);
 
   return (
     <>
