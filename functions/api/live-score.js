@@ -20,6 +20,7 @@ export const onRequest = async (context) => {
             commentary: [],
             status: 'Not Started',
             lastUpdated: new Date().toISOString(),
+            toss: null, // Include toss field
             // New fields for IPL rules
             strategicTimeout: {
               team1: { used: 0, remaining: 2 },
@@ -111,6 +112,7 @@ export const onRequest = async (context) => {
             commentary: [],
             status: 'Live',
             lastUpdated: new Date().toISOString(),
+            toss: null, // Include toss field
             // New fields for IPL rules
             strategicTimeout: {
               team1: { used: 0, remaining: 2 },

@@ -65,6 +65,10 @@ export interface LiveScoreState {
   };
   ballHistory: BallEvent[];
   matchState?: MatchState; // Match state machine
+  toss?: {
+    winner: 'team1' | 'team2';
+    decision: 'bat' | 'bowl';
+  };
 }
 
 interface UseLiveScoreProps {

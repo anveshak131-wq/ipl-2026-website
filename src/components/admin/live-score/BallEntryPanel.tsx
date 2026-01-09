@@ -366,6 +366,11 @@ export default function BallEntryPanel({
       // Include all new state in the save
       const extendedState = {
         ...state,
+        // Add toss data from matchState
+        toss: matchState.toss ? {
+          winner: matchState.toss.winner,
+          decision: matchState.toss.decision,
+        } : undefined,
         // Add new fields for persistence
         strategicTimeout: timeoutState,
         drsReviews: drsState,

@@ -117,6 +117,7 @@ export default function AdminLiveScorePage() {
         status: 'Live',
         innings: state.innings,
         battingTeam: state.battingTeam,
+        toss: state.toss, // Include toss data
         // Include new IPL rules fields
         strategicTimeout: extendedState.strategicTimeout,
         drsReviews: extendedState.drsReviews,
