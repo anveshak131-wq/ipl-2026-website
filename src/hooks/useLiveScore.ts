@@ -273,225 +273,128 @@ export function useLiveScore({
 
   const recordBall = useCallback((ball: BallEvent) => {
     setState((prev) => {
-      // Ensure state structure is valid
-      if (!prev || !prev.team1 || !prev.team2 || typeof prev.battingTeam !== 'string') {
-        console.error('Invalid state structure in recordBall:', prev);
+      // ===== VALIDATION =====
+      if (!prev || !prev.team1 || !prev.team2) {
+        console.error('[recordBall] Invalid state:', prev);
         return prev;
       }
 
-      // Save current state for undo (keep last 5)
-      setUndoStack((stack) => {
-        const newStack = [...stack, { ...prev }];
-        return newStack.slice(-5);
-      });
+      const battingTeam = prev.battingTeam;
+      if (battingTeam !== 'team1' && battingTeam !== 'team2') {
+        console.error('[recordBall] Invalid batting team:', battingTeam);
+        return prev;
+      }
 
-      const battingKey = prev.battingTeam;
-      const team = prev[battingKey as keyof typeof prev] as any;
-      
-      // Additional safety check for team
-      if (!team || typeof team !== 'object' || typeof team.balls !== 'number') {
-        console.error('Invalid team structure:', { battingKey, team });
+      const currentTeam = prev[battingTeam];
+      if (!currentTeam || typeof currentTeam.balls !== 'number') {
+        console.error('[recordBall] Invalid team:', currentTeam);
         return prev;
       }
-      
-      // Check if innings is complete (20 overs or 10 wickets) - T20 format
-      const currentBalls = team.balls; // team.balls is stored as integer (total balls)
-      const maxBalls = maxOvers * 6; // 20 overs * 6 = 120 balls max
-      
-      // Prevent recording more balls if innings is complete
-      if (currentBalls >= maxBalls || team.wickets >= 10) {
-        if (!isTestPage) {
-          console.warn(`Innings complete! ${team.wickets >= 10 ? 'All 10 wickets fallen' : `${maxOvers} overs completed`}`);
-        }
-        return prev;
-      }
-      
-      // Calculate runs based on ball type
+
+      // ===== CALCULATE DELTAS =====
       let teamRunDelta = 0;
       let batterRunDelta = 0;
       let bowlerRunDelta = 0;
+      let ballCountDelta = 0;
+      let wicketDelta = 0;
 
-      // Regular runs (0, 1, 2, 3, 4, 6)
+      // Determine if legal delivery
+      const illegalDeliveries = ['WD', 'NB', 'NB+1', 'NB+2', 'NB+3', 'NB+4', 'NB+6', 'WD+1', 'WD+2', 'WD+3', 'WD+4'];
+      const isLegalDelivery = !illegalDeliveries.includes(ball.type as string);
+      
+      // Calculate runs
       if (typeof ball.type === 'number') {
         teamRunDelta = ball.type;
         batterRunDelta = ball.type;
         bowlerRunDelta = ball.type;
-      }
-      // No Ball + Runs
-      else if (ball.type === 'NB+1') {
-        teamRunDelta = 2; // 1 for no ball + 1 for run
-        batterRunDelta = 1;
-        bowlerRunDelta = 2;
-      } else if (ball.type === 'NB+2') {
-        teamRunDelta = 3;
-        batterRunDelta = 2;
-        bowlerRunDelta = 3;
-      } else if (ball.type === 'NB+3') {
-        teamRunDelta = 4;
-        batterRunDelta = 3;
-        bowlerRunDelta = 4;
-      } else if (ball.type === 'NB+4') {
-        teamRunDelta = 5;
-        batterRunDelta = 4;
-        bowlerRunDelta = 5;
-      } else if (ball.type === 'NB+6') {
-        teamRunDelta = 7;
-        batterRunDelta = 6;
-        bowlerRunDelta = 7;
-      }
-      // Wide + Runs
-      else if (ball.type === 'WD+1') {
-        teamRunDelta = 2; // 1 for wide + 1 for run
-        batterRunDelta = 1;
-        bowlerRunDelta = 2;
-      } else if (ball.type === 'WD+2') {
-        teamRunDelta = 3;
-        batterRunDelta = 2;
-        bowlerRunDelta = 3;
-      } else if (ball.type === 'WD+3') {
-        teamRunDelta = 4;
-        batterRunDelta = 3;
-        bowlerRunDelta = 4;
-      } else if (ball.type === 'WD+4') {
-        teamRunDelta = 5;
-        batterRunDelta = 4;
-        bowlerRunDelta = 5;
-      }
-      // Multiple Byes
-      else if (ball.type === '1B') {
-        teamRunDelta = 1;
-        batterRunDelta = 0;
-        bowlerRunDelta = 0;
-      } else if (ball.type === '2B') {
-        teamRunDelta = 2;
-        batterRunDelta = 0;
-        bowlerRunDelta = 0;
-      } else if (ball.type === '3B') {
-        teamRunDelta = 3;
-        batterRunDelta = 0;
-        bowlerRunDelta = 0;
-      } else if (ball.type === '4B') {
-        teamRunDelta = 4;
-        batterRunDelta = 0;
-        bowlerRunDelta = 0;
-      }
-      // Multiple Leg Byes
-      else if (ball.type === '1LB') {
-        teamRunDelta = 1;
-        batterRunDelta = 0;
-        bowlerRunDelta = 0;
-      } else if (ball.type === '2LB') {
-        teamRunDelta = 2;
-        batterRunDelta = 0;
-        bowlerRunDelta = 0;
-      } else if (ball.type === '3LB') {
-        teamRunDelta = 3;
-        batterRunDelta = 0;
-        bowlerRunDelta = 0;
-      } else if (ball.type === '4LB') {
-        teamRunDelta = 4;
-        batterRunDelta = 0;
-        bowlerRunDelta = 0;
-      }
-      // Basic extras
-      else if (ball.type === 'WD') {
-        teamRunDelta = 1;
-        batterRunDelta = 0;
-        bowlerRunDelta = 1;
-      } else if (ball.type === 'NB') {
-        teamRunDelta = 1;
-        batterRunDelta = 0;
-        bowlerRunDelta = 1;
-      } else if (ball.type === 'B') {
-        teamRunDelta = 1;
-        batterRunDelta = 0;
-        bowlerRunDelta = 0;
-      } else if (ball.type === 'LB') {
-        teamRunDelta = 1;
-        batterRunDelta = 0;
-        bowlerRunDelta = 0;
-      }
-      // Wicket
-      else if (ball.type === 'W') {
+        ballCountDelta = 1;
+      } else if (ball.type === 'W') {
         teamRunDelta = 0;
         batterRunDelta = 0;
         bowlerRunDelta = 0;
+        ballCountDelta = 1;
+        wicketDelta = 1;
+      } else if (ball.type === 'WD' || ball.type === 'NB') {
+        teamRunDelta = 1;
+        batterRunDelta = 0;
+        bowlerRunDelta = 1;
+        ballCountDelta = 0; // Illegal delivery
+      } else if (ball.type === 'B' || ball.type === 'LB') {
+        teamRunDelta = 1;
+        batterRunDelta = 0;
+        bowlerRunDelta = 0;
+        ballCountDelta = 1;
+      } else if (ball.type.startsWith('NB+')) {
+        const runs = parseInt(ball.type.substring(3));
+        teamRunDelta = 1 + runs;
+        batterRunDelta = runs;
+        bowlerRunDelta = 1 + runs;
+        ballCountDelta = 0;
+      } else if (ball.type.startsWith('WD+')) {
+        const runs = parseInt(ball.type.substring(3));
+        teamRunDelta = 1 + runs;
+        batterRunDelta = runs;
+        bowlerRunDelta = 1 + runs;
+        ballCountDelta = 0;
+      } else if (ball.type.match(/^[0-9]B$/)) {
+        const runs = parseInt(ball.type.substring(0, 1));
+        teamRunDelta = runs;
+        batterRunDelta = 0;
+        bowlerRunDelta = 0;
+        ballCountDelta = 1;
+      } else if (ball.type.match(/^[0-9]LB$/)) {
+        const runs = parseInt(ball.type.substring(0, 1));
+        teamRunDelta = runs;
+        batterRunDelta = 0;
+        bowlerRunDelta = 0;
+        ballCountDelta = 1;
       }
 
-      // Determine if legal delivery (illegal deliveries don't count as balls)
-      const illegalDeliveries = ['WD', 'NB', 'NB+1', 'NB+2', 'NB+3', 'NB+4', 'NB+6', 'WD+1', 'WD+2', 'WD+3', 'WD+4'];
-      const isLegalDelivery = !illegalDeliveries.includes(ball.type as string);
-      const isWicket = ball.type === 'W';
-      
-      // Validate ball type
-      const validBallTypes = ['W', 'WD', 'NB', 'B', 'LB', '1B', '2B', '3B', '4B', '1LB', '2LB', '3LB', '4LB',
-        'NB+1', 'NB+2', 'NB+3', 'NB+4', 'NB+6', 'WD+1', 'WD+2', 'WD+3', 'WD+4', 0, 1, 2, 3, 4, 6];
-      if (!validBallTypes.includes(ball.type as any)) {
-        console.warn(`Invalid ball type: ${ball.type}`);
-        return prev;
-      }
+      // ===== UPDATE STATE =====
+      const newBalls = currentTeam.balls + ballCountDelta;
+      const newRuns = Math.max(0, currentTeam.runs + teamRunDelta);
+      const newWickets = Math.min(currentTeam.wickets + wicketDelta, 10);
+      const newOvers = ballsToOvers(newBalls);
 
-      // Set free hit flag if no ball was bowled
-      // Note: We'll handle this in a useEffect to avoid stale state
+      console.log('[recordBall] Updating:', {
+        ballType: ball.type,
+        team: battingTeam,
+        oldBalls: currentTeam.balls,
+        newBalls: newBalls,
+        oldRuns: currentTeam.runs,
+        newRuns: newRuns,
+        runsDelta: teamRunDelta,
+      });
 
-      // Update team stats
-      // team.balls is stored as integer (total number of balls), not as overs
-      const newTeamBalls = isLegalDelivery ? team.balls + 1 : team.balls;
-      const newTeamOvers = ballsToOvers(newTeamBalls);
-      const newTeamRuns = Math.max(0, team.runs + teamRunDelta); // Prevent negative runs
-      const newTeamWickets = Math.min(isWicket ? team.wickets + 1 : team.wickets, 10); // Max 10 wickets
-      
-      // Cap overs at maxOvers (20 for T20) - maxBalls already calculated above
-      const cappedBalls = Math.min(newTeamBalls, maxBalls);
-      const cappedOvers = ballsToOvers(cappedBalls);
-
-      // Update batter stats
-      const batterBallDelta = isLegalDelivery ? 1 : 0;
-      const newBatterRuns = Math.max(0, prev.currentBatter.runs + batterRunDelta); // Prevent negative runs
-      const newBatterBalls = prev.currentBatter.balls + batterBallDelta;
-
-      // Update bowler stats
-      const bowlerBallDelta = isLegalDelivery ? 1 : 0;
-      const newBowlerRuns = Math.max(0, prev.currentBowler.runs + bowlerRunDelta); // Prevent negative runs
-      const newBowlerBalls = prev.currentBowler.balls + bowlerBallDelta;
-
-      const updatedState = {
+      // Create new state
+      const newState = {
         ...prev,
-        [battingKey]: {
-          ...team,
-          runs: newTeamRuns,
-          wickets: newTeamWickets,
-          balls: cappedBalls, // Store as integer (total balls)
+        [battingTeam]: {
+          ...currentTeam,
+          runs: newRuns,
+          wickets: newWickets,
+          balls: newBalls,
         },
-        currentOver: cappedOvers, // Display as decimal (overs.balls)
+        currentOver: newOvers,
         currentBatter: {
           ...prev.currentBatter,
-          runs: newBatterRuns,
-          balls: newBatterBalls,
+          runs: Math.max(0, prev.currentBatter.runs + batterRunDelta),
+          balls: prev.currentBatter.balls + ballCountDelta,
         },
         currentBowler: {
           ...prev.currentBowler,
-          runs: newBowlerRuns,
-          balls: newBowlerBalls,
+          runs: Math.max(0, prev.currentBowler.runs + bowlerRunDelta),
+          balls: prev.currentBowler.balls + ballCountDelta,
         },
-        ballHistory: [...(Array.isArray(prev.ballHistory) ? prev.ballHistory : []), ball].slice(-100), // Keep last 100, ensure it's an array
-        matchState,
+        ballHistory: [...(Array.isArray(prev.ballHistory) ? prev.ballHistory : []), ball],
       };
 
-      console.log('[useLiveScore] Ball recorded:', {
-        ballType: ball.type,
-        battingTeam: battingKey,
-        teamBallsOld: team.balls,
-        teamBallsNew: cappedBalls,
-        teamRunsOld: team.runs,
-        teamRunsNew: newTeamRuns,
-        deltaRuns: teamRunDelta,
-        newState: updatedState
-      });
+      // Save to undo stack
+      setUndoStack((stack) => [...stack, { ...prev }].slice(-5));
 
-      return updatedState;
+      return newState;
     });
-  }, [matchState, ballsToOvers]);
+  }, []);
 
   const recordWicket = useCallback((dismissalType: string, fielderName?: string) => {
     recordBall({
