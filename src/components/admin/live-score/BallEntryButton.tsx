@@ -1,7 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
-
 interface BallEntryButtonProps {
   value: number | string;
   label: string;
@@ -33,12 +31,23 @@ export default function BallEntryButton({
     lg: 'w-20 h-20 md:w-24 md:h-24 text-2xl md:text-3xl p-3 md:p-4',
   };
 
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('[BallEntryButton] clicked:', value);
+    onClick();
+  };
+
   return (
-    <motion.button
-      whileHover={disabled ? {} : { scale: 1.05 }}
-      whileTap={disabled ? {} : { scale: 0.95 }}
-      onClick={onClick}
+    <button
+      onClick={handleClick}
+      onMouseDown={(e) => e.preventDefault()}
       disabled={disabled}
+      type="button"
+      style={{
+        pointerEvents: 'auto !important',
+        cursor: 'pointer',
+      }}
       className={`
         ${colorClasses[color]}
         ${sizeClasses[size]}
@@ -48,6 +57,13 @@ export default function BallEntryButton({
         transition-all duration-200
         disabled:opacity-50 disabled:cursor-not-allowed
         flex flex-col items-center justify-center
+        !pointer-events-auto
+      `}
+    >
+      <div>{label}</div>
+    </button>
+  );
+}
         border-2 border-white/20
         touch-manipulation
         min-h-[60px] min-w-[60px]
