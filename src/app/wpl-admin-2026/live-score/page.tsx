@@ -177,16 +177,16 @@ export default function WPLAdminLiveScorePage() {
 
       const scoreUpdate = {
         team1: {
-          name: selectedMatch.team1.shortName || selectedMatch.team1.name,
-          runs: state.team1.runs,
-          wickets: state.team1.wickets,
-          overs: ballsToOvers(state.team1.balls),
+          name: (selectedMatch?.team1?.shortName) || (selectedMatch?.team1?.name) || 'Team 1',
+          runs: state?.team1?.runs || 0,
+          wickets: state?.team1?.wickets || 0,
+          overs: ballsToOvers(state?.team1?.balls || 0),
         },
         team2: {
-          name: selectedMatch.team2.shortName || selectedMatch.team2.name,
-          runs: state.team2.runs,
-          wickets: state.team2.wickets,
-          overs: ballsToOvers(state.team2.balls),
+          name: (selectedMatch?.team2?.shortName) || (selectedMatch?.team2?.name) || 'Team 2',
+          runs: state?.team2?.runs || 0,
+          wickets: state?.team2?.wickets || 0,
+          overs: ballsToOvers(state?.team2?.balls || 0),
         },
         currentBatter: state.currentBatter
           ? {
@@ -375,8 +375,8 @@ export default function WPLAdminLiveScorePage() {
                     .filter((m) => m.status === 'live' || m.status === 'upcoming')
                     .map((match) => (
                       <option key={match.id} value={match.id}>
-                        {match.team1.shortName} vs {match.team2.shortName} · {new Date(match.date).toLocaleDateString()}{' '}
-                        {match.time}
+                        {(match?.team1?.shortName) || (match?.team1?.name) || 'Team 1'} vs {(match?.team2?.shortName) || (match?.team2?.name) || 'Team 2'} · {new Date(match?.date || Date.now()).toLocaleDateString()}{' '}
+                        {match?.time || ''}
                       </option>
                     ))
                 ) : (
@@ -427,17 +427,17 @@ export default function WPLAdminLiveScorePage() {
               ) : (
                 <BallEntryPanel
                   key={selectedMatch.id}
-                  matchId={selectedMatch.id}
-                  team1Name={selectedMatch.team1.shortName || selectedMatch.team1.name}
-                  team2Name={selectedMatch.team2.shortName || selectedMatch.team2.name}
-                  team1Id={selectedMatch.team1.id}
-                  team2Id={selectedMatch.team2.id}
+                  matchId={selectedMatch?.id || ''}
+                  team1Name={(selectedMatch?.team1?.shortName) || (selectedMatch?.team1?.name) || 'Team 1'}
+                  team2Name={(selectedMatch?.team2?.shortName) || (selectedMatch?.team2?.name) || 'Team 2'}
+                  team1Id={selectedMatch?.team1?.id || ''}
+                  team2Id={selectedMatch?.team2?.id || ''}
                   onSave={handleSave}
-                  players={players.filter(
-                    (p) => p.teamId === selectedMatch.team1.id || p.teamId === selectedMatch.team2.id
-                  )}
+                  players={players?.filter(
+                    (p) => p?.teamId === selectedMatch?.team1?.id || p?.teamId === selectedMatch?.team2?.id
+                  ) || []}
                   league="wpl"
-                  playing11={selectedMatch.playing11}
+                  playing11={selectedMatch?.playing11}
                   initialState={liveScoreState}
                 />
               )}
