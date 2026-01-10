@@ -257,11 +257,17 @@ export function useLiveScore({
 
   const recordBall = useCallback((ball: BallEvent) => {
     // Skip match state check for test pages
-    if (!isTestPage) {
-      // Check if current state allows ball entry
-      if (!matchState || matchState.currentState !== 'innings-1' && matchState.currentState !== 'innings-2') {
-        alert(`Cannot record balls in ${matchState?.currentState || 'unknown'} state. Please transition to an innings state first.`);
-        return;
+    if (!isTestPage && matchState) {
+      // Auto-transition to innings-1 if we're in pre-match state and trying to record a ball
+      if (matchState.currentState !== 'innings-1' && matchState.currentState !== 'innings-2') {
+        console.log(`Auto-transitioning to innings-1 to record ball`);
+        const newMatchState = transitionState(matchState, 'innings-1', { 
+          battingTeam: matchState.innings1?.battingTeam || 'team1' 
+        });
+        setMatchState(newMatchState);
+        if (onMatchStateChange) {
+          onMatchStateChange(newMatchState);
+        }
       }
     }
 
