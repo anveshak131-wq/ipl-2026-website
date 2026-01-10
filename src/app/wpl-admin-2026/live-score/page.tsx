@@ -137,6 +137,9 @@ export default function WPLAdminLiveScorePage() {
     const fetchLiveScore = async () => {
       setIsScoreLoading(true);
       try {
+        // Small delay to let page settle
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
         const response = await fetch(`/api/live-score?matchId=${selectedMatchId}`);
         if (response.ok) {
           const data = await response.json();
@@ -155,7 +158,11 @@ export default function WPLAdminLiveScorePage() {
       }
     };
 
-    fetchLiveScore();
+    const timer = setTimeout(() => {
+      fetchLiveScore();
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [selectedMatchId, hasInitialized]);
 
   const handleSave = async (state: LiveScoreState) => {
