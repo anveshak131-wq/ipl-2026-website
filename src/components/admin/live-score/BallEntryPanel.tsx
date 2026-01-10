@@ -515,8 +515,9 @@ export default function BallEntryPanel({
   const colors = leagueColors[league];
 
   // Check if ball entry is allowed based on match state (always true for test pages)
-  const canRecordBalls = isTestPage || matchState?.currentState === 'innings-1' || matchState?.currentState === 'innings-2' || matchState?.currentState === 'break';
-  const buttonDisabledClass = `${!canRecordBalls && !isTestPage ? 'opacity-50 pointer-events-none' : ''}`;
+  // REMOVED ALL RESTRICTIONS FOR DEBUGGING
+  const canRecordBalls = true;
+  const buttonDisabledClass = ``;
 
   // Detect mobile device
   const [isMobile, setIsMobile] = useState(false);
@@ -843,13 +844,6 @@ export default function BallEntryPanel({
 
       {/* Ball Entry Buttons */}
       <div className="space-y-4">
-        {!isTestPage && !canRecordBalls && (
-          <div className="px-4 py-3 bg-yellow-500/20 border border-yellow-500/30 rounded-lg">
-            <p className="text-sm text-yellow-400 font-semibold">
-              ⚠️ Ball entry is disabled. Please transition to an innings state to record balls.
-            </p>
-          </div>
-        )}
         {/* Free Hit Indicator */}
         {isFreeHit && (
           <div className="mb-4 p-3 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border-2 border-yellow-500/50 rounded-xl">
