@@ -255,14 +255,13 @@ export function useLiveScore({
     }
   }, [state.innings, state.team1?.wickets, state.team2?.wickets, state.team1?.balls, state.team2?.balls, matchState, maxOvers, onMatchStateChange, state.battingTeam, state.team1?.runs, state.team2?.runs]);
 
-  const recordBall = useCallback((ball: BallEvent) => {
-    // Skip match state check for test pages
-    if (!isTestPage && matchState) {
-      // Auto-transition to innings-1 if we're in pre-match state and trying to record a ball
+  // Auto-transition to innings-1 when first ball is recorded
+  useEffect(() => {
+    if (!isTestPage && matchState && state.ballHistory && state.ballHistory.length > 0) {
       if (matchState.currentState !== 'innings-1' && matchState.currentState !== 'innings-2') {
-        console.log(`Auto-transitioning to innings-1 to record ball`);
-        const newMatchState = transitionState(matchState, 'innings-1', { 
-          battingTeam: matchState.innings1?.battingTeam || 'team1' 
+        console.log(`Auto-transitioning to innings-1 due to ball entry`);
+        const newMatchState = transitionState(matchState, 'innings-1', {
+          battingTeam: matchState.innings1?.battingTeam || state.battingTeam || 'team1'
         });
         setMatchState(newMatchState);
         if (onMatchStateChange) {
@@ -270,7 +269,9 @@ export function useLiveScore({
         }
       }
     }
+  }, [state.ballHistory?.length, matchState, isTestPage, onMatchStateChange, state.battingTeam]);
 
+  const recordBall = useCallback((ball: BallEvent) => {
     setState((prev) => {
       // Ensure state structure is valid
       if (!prev || !prev.team1 || !prev.team2 || typeof prev.battingTeam !== 'string') {
@@ -300,7 +301,7 @@ export function useLiveScore({
       // Prevent recording more balls if innings is complete
       if (currentBalls >= maxBalls || team.wickets >= 10) {
         if (!isTestPage) {
-          alert(`Innings complete! ${team.wickets >= 10 ? 'All 10 wickets fallen' : `${maxOvers} overs completed`}`);
+          console.warn(`Innings complete! ${team.wickets >= 10 ? 'All 10 wickets fallen' : `${maxOvers} overs completed`}`);
         }
         return prev;
       }
@@ -477,7 +478,7 @@ export function useLiveScore({
         matchState,
       };
     });
-  }, [matchState]);
+  }, [matchState, ballsToOvers]);
 
   const recordWicket = useCallback((dismissalType: string, fielderName?: string) => {
     recordBall({
