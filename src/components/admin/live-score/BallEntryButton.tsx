@@ -64,14 +64,4 @@ export default function BallEntryButton({
     </button>
   );
 }
-        border-2 border-white/20
-        touch-manipulation
-        min-h-[60px] min-w-[60px]
-      `}
-    >
-      <span className="leading-none">{value}</span>
-      <span className="text-xs font-normal mt-1 opacity-90">{label}</span>
-    </motion.button>
-  );
-}
 
