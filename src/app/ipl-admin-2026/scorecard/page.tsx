@@ -111,27 +111,46 @@ export default function ScorecardAdminPage() {
     fetchPlayers();
   }, []);
 
+  // Helper to get players by team
   const getPlayersByTeam = (teamId: number): Player[] => {
     return players.filter(player => player.teamId === teamId.toString());
   };
 
+  // Refresh data function
+  const refreshData = async () => {
+    setMessage('🔄 Refreshing data...');
+    await fetchMatches();
+    await fetchPlayers();
+    setMessage('');
+  };
+
   const fetchMatches = async () => {
     try {
+      console.log('Fetching WPL matches...');
       const res = await api.get('/matches?league=wpl');
+      console.log('WPL matches response:', res.data?.length || 0, 'matches found');
       setMatches(res.data || []);
+      if (res.data && res.data.length === 0) {
+        setMessage('⚠️ No WPL matches found. Please create WPL matches first.');
+      }
     } catch (err) {
-      console.error('Error fetching matches:', err);
-      setMessage('Error fetching WPL matches');
+      console.error('Error fetching WPL matches:', err);
+      setMessage('✗ Error fetching WPL matches. Check if development server is running on port 8787.');
     }
   };
 
   const fetchPlayers = async () => {
     try {
+      console.log('Fetching WPL players...');
       const res = await api.get('/players?league=wpl');
+      console.log('WPL players response:', res.data?.length || 0, 'players found');
       setPlayers(res.data || []);
+      if (res.data && res.data.length === 0) {
+        setMessage('⚠️ No WPL players found. Please add WPL players first.');
+      }
     } catch (err) {
-      console.error('Error fetching players:', err);
-      setMessage('Error fetching WPL players');
+      console.error('Error fetching WPL players:', err);
+      setMessage('✗ Error fetching WPL players. Check if development server is running on port 8787.');
     }
   };
 
@@ -378,7 +397,20 @@ export default function ScorecardAdminPage() {
         {/* Match Selection */}
         {!selectedMatch && (
           <div>
-            <h2 className="text-2xl font-bold mb-6">Select a Match</h2>
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold">Select a Match</h2>
+                <p className="text-gray-400 mt-1">
+                  {matches.length} WPL matches available • {players.length} WPL players loaded
+                </p>
+              </div>
+              <button
+                onClick={refreshData}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition flex items-center gap-2"
+              >
+                🔄 Refresh Data
+              </button>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {matches.map((match) => (
                 <button
