@@ -27,6 +27,7 @@ export default function WPLAdminLiveScorePage() {
   const [liveScoreState, setLiveScoreState] = useState<LiveScoreState | undefined>(undefined);
   const [isScoreLoading, setIsScoreLoading] = useState(false);
   const [missingPlaying11Error, setMissingPlaying11Error] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   // Check authentication
   useEffect(() => {
@@ -42,6 +43,17 @@ export default function WPLAdminLiveScorePage() {
     checkAuth();
   }, [router]);
 
+  // Restore selected match ID from localStorage on mount
+  useEffect(() => {
+    if (!hasInitialized && typeof window !== 'undefined') {
+      const savedMatchId = localStorage.getItem('wpl-live-score-matchId');
+      if (savedMatchId) {
+        setSelectedMatchId(savedMatchId);
+      }
+      setHasInitialized(true);
+    }
+  }, [hasInitialized]);
+
   // Load matches and players
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -55,14 +67,34 @@ export default function WPLAdminLiveScorePage() {
         setMatches(matchesData);
         setPlayers(playersData);
 
-        // Auto-select first live or upcoming match
-        if (!selectedMatchId && matchesData && Array.isArray(matchesData) && matchesData.length > 0) {
+        // Auto-select first live or upcoming match, or restore saved match
+        let targetMatchId = selectedMatchId;
+        
+        if (!targetMatchId && matchesData && Array.isArray(matchesData) && matchesData.length > 0) {
           const preferred =
             matchesData.find((m) => m.status === 'live') ||
             matchesData.find((m) => m.status === 'upcoming') ||
             matchesData[0];
           if (preferred) {
-            setSelectedMatchId(preferred.id);
+            targetMatchId = preferred.id;
+          }
+        }
+        
+        // Check if saved match still exists
+        if (targetMatchId && Array.isArray(matchesData)) {
+          const matchExists = matchesData.some(m => m.id === targetMatchId);
+          if (matchExists) {
+            setSelectedMatchId(targetMatchId);
+            localStorage.setItem('wpl-live-score-matchId', targetMatchId);
+          } else if (matchesData.length > 0) {
+            // Saved match no longer exists, select first available
+            const newMatch = matchesData.find((m) => m.status === 'live') ||
+              matchesData.find((m) => m.status === 'upcoming') ||
+              matchesData[0];
+            if (newMatch) {
+              setSelectedMatchId(newMatch.id);
+              localStorage.setItem('wpl-live-score-matchId', newMatch.id);
+            }
           }
         }
       } catch (error) {
@@ -70,8 +102,10 @@ export default function WPLAdminLiveScorePage() {
       }
     };
 
-    loadData();
-  }, [isAuthenticated]);
+    if (hasInitialized) {
+      loadData();
+    }
+  }, [isAuthenticated, hasInitialized]);
 
   const selectedMatch = useMemo(
     () => {
@@ -311,7 +345,10 @@ export default function WPLAdminLiveScorePage() {
                 id="match-selector"
                 name="match-selector"
                 value={selectedMatchId}
-                onChange={(e) => setSelectedMatchId(e.target.value)}
+                onChange={(e) => {
+                  setSelectedMatchId(e.target.value);
+                  localStorage.setItem('wpl-live-score-matchId', e.target.value);
+                }}
                 className="w-full md:w-96 px-4 py-3 rounded-lg text-white text-sm focus:outline-none transition-colors"
                 style={{
                   background: WPLColors.purpleRGBA[20],
