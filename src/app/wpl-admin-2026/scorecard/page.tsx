@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { api } from '@/lib/api';
+import { api as dataApi } from '@/lib/data';
 
 interface Match {
   id: string;
@@ -117,20 +117,26 @@ export default function ScorecardAdminPage() {
 
   const fetchMatches = async () => {
     try {
-      const res = await api.get('/matches?league=wpl');
-      setMatches(res.data || []);
+      const data = await dataApi.getMatches('wpl');
+      console.log('Fetched WPL matches:', data);
+      setMatches(data || []);
+      if (!data || data.length === 0) {
+        setMessage('⚠ No WPL matches found. Please check Cloudflare KV data.');
+      }
     } catch (err) {
       console.error('Error fetching matches:', err);
-      setMessage('Error fetching WPL matches');
+      setMessage('❌ Error fetching WPL matches');
     }
   };
 
   const fetchPlayers = async () => {
     try {
-      const res = await api.get('/players?league=wpl');
-      setPlayers(res.data || []);
+      const data = await dataApi.getPlayers(undefined, 'wpl');
+      console.log('Fetched WPL players:', data);
+      setPlayers(data || []);
     } catch (err) {
       console.error('Error fetching players:', err);
+      setMessage('❌ Error fetching WPL players');
     }
   };
 
@@ -139,9 +145,14 @@ export default function ScorecardAdminPage() {
     setLoading(true);
     setMessage('');
     try {
-      const res = await api.get(`/scorecards?matchId=${match.id}`);
-      if (res.data && res.data.length > 0) {
-        setScorecard(res.data[0]);
+      const response = await fetch(`/api/scorecards?matchId=${match.id}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.length > 0) {
+          setScorecard(data[0]);
+        } else {
+          setScorecard(initializeScorecard(match));
+        }
       } else {
         setScorecard(initializeScorecard(match));
       }
@@ -194,13 +205,21 @@ export default function ScorecardAdminPage() {
     setSaving(true);
     setMessage('');
     try {
-      let res;
-      if (scorecard.id) {
-        res = await api.put(`/scorecards/${scorecard.id}`, scorecard);
-      } else {
-        res = await api.post('/scorecards', scorecard);
+      const endpoint = scorecard.id ? `/api/scorecards/${scorecard.id}` : '/api/scorecards';
+      const method = scorecard.id ? 'PUT' : 'POST';
+
+      const response = await fetch(endpoint, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(scorecard),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
-      setScorecard(res.data);
+
+      const saved = await response.json();
+      setScorecard(saved);
       setMessage('✓ Scorecard saved successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
@@ -215,7 +234,15 @@ export default function ScorecardAdminPage() {
     setSaving(true);
     setMessage('');
     try {
-      await api.put(`/scorecards/${scorecard.id}/publish`);
+      const response = await fetch(`/api/scorecards/${scorecard.id}/publish`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
+      }
+
       setMessage('✓ Scorecard published successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
