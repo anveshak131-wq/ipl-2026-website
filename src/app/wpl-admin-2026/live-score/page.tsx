@@ -14,6 +14,7 @@ import { Player, Match } from '@/types';
 import { api } from '@/lib/data';
 
 export default function WPLLiveScorePage() {
+  console.log('[WPLLiveScorePage] Component rendering at:', new Date().toISOString());
   const router = useRouter();
   const { currentLeague } = useLeague();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -49,6 +50,12 @@ export default function WPLLiveScorePage() {
           api.getMatches('wpl'),
           api.getPlayers(undefined, 'wpl'),
         ]);
+        
+        console.log('[WPLLiveScorePage] Data loaded:', {
+          matchesCount: matchesData?.length,
+          playersCount: playersData?.length,
+          firstMatch: matchesData?.[0],
+        });
         
         setMatches(matchesData);
         setPlayers(playersData);
