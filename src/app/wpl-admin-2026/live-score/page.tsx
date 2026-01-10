@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import BallEntryPanel from '@/components/admin/live-score/BallEntryPanel';
+import SimpleBallEntryPanel from '@/components/admin/live-score/SimpleBallEntryPanel';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import { Match, Player } from '@/types';
 import { LiveScoreState, BallEvent } from '@/hooks/useLiveScore';
@@ -425,20 +426,12 @@ export default function WPLAdminLiveScorePage() {
                   <LoadingSpinner size="lg" color={spinnerColor} />
                 </div>
               ) : (
-                <BallEntryPanel
-                  key={selectedMatch.id}
+                <SimpleBallEntryPanel
+                  key={selectedMatch?.id}
                   matchId={selectedMatch?.id || ''}
                   team1Name={(selectedMatch?.team1?.shortName) || (selectedMatch?.team1?.name) || 'Team 1'}
                   team2Name={(selectedMatch?.team2?.shortName) || (selectedMatch?.team2?.name) || 'Team 2'}
-                  team1Id={selectedMatch?.team1?.id || ''}
-                  team2Id={selectedMatch?.team2?.id || ''}
                   onSave={handleSave}
-                  players={players?.filter(
-                    (p) => p?.teamId === selectedMatch?.team1?.id || p?.teamId === selectedMatch?.team2?.id
-                  ) || []}
-                  league="wpl"
-                  playing11={selectedMatch?.playing11}
-                  initialState={liveScoreState}
                 />
               )}
             </div>
