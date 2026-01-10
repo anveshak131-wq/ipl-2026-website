@@ -93,7 +93,7 @@ export default function SimpleBallEntryPanel({
             background:
               state.battingTeam === 'team1'
                 ? WPLColors.purpleRGBA[20]
-                : WPLColors.purpleRGBA[5],
+                : WPLColors.purpleRGBA[10],
             borderColor: WPLColors.purpleRGBA[20],
             borderWidth: state.battingTeam === 'team1' ? 2 : 1,
           }}
@@ -114,7 +114,7 @@ export default function SimpleBallEntryPanel({
             background:
               state.battingTeam === 'team2'
                 ? WPLColors.purpleRGBA[20]
-                : WPLColors.purpleRGBA[5],
+                : WPLColors.purpleRGBA[10],
             borderColor: WPLColors.purpleRGBA[20],
             borderWidth: state.battingTeam === 'team2' ? 2 : 1,
           }}
@@ -131,7 +131,7 @@ export default function SimpleBallEntryPanel({
 
       {/* Current Players */}
       <div className="grid grid-cols-2 gap-4 mb-8">
-        <div className="p-4 rounded-lg" style={{ background: WPLColors.purpleRGBA[5] }}>
+        <div className="p-4 rounded-lg" style={{ background: WPLColors.purpleRGBA[10] }}>
           <p style={{ color: WPLColors.textMuted }} className="text-xs font-semibold mb-2">
             BATTER
           </p>
@@ -141,7 +141,7 @@ export default function SimpleBallEntryPanel({
           </p>
         </div>
 
-        <div className="p-4 rounded-lg" style={{ background: WPLColors.purpleRGBA[5] }}>
+        <div className="p-4 rounded-lg" style={{ background: WPLColors.purpleRGBA[10] }}>
           <p style={{ color: WPLColors.textMuted }} className="text-xs font-semibold mb-2">
             BOWLER
           </p>
@@ -238,7 +238,7 @@ export default function SimpleBallEntryPanel({
 
       {/* Ball History */}
       {state.ballHistory.length > 0 && (
-        <div className="mt-8 p-4 rounded-lg" style={{ background: WPLColors.purpleRGBA[5] }}>
+        <div className="mt-8 p-4 rounded-lg" style={{ background: WPLColors.purpleRGBA[10] }}>
           <h3 className="text-sm font-semibold text-white mb-2">Ball History</h3>
           <div className="flex flex-wrap gap-2">
             {state.ballHistory.map((ball, idx) => (

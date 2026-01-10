@@ -213,7 +213,7 @@ export default function BallEntryPanel({
   // Auto-save every 30 seconds
   useEffect(() => {
     const saveInterval = setInterval(async () => {
-      if (isSaving || matchState.currentState === 'not-started') return;
+      if (isSaving || matchState?.currentState === 'pre-match' || !matchState?.currentState) return;
       
       try {
         const extendedState = {
@@ -501,7 +501,7 @@ export default function BallEntryPanel({
   const colors = leagueColors[league];
 
   // Check if ball entry is allowed based on match state (always true for test pages)
-  const canRecordBalls = isTestPage || matchState.currentState === 'innings-1' || matchState.currentState === 'innings-2' || matchState.currentState === 'not-started';
+  const canRecordBalls = isTestPage || matchState?.currentState === 'innings-1' || matchState?.currentState === 'innings-2' || matchState?.currentState === 'break';
   const buttonDisabledClass = `${!canRecordBalls && !isTestPage ? 'opacity-50 pointer-events-none' : ''}`;
 
   // Detect mobile device

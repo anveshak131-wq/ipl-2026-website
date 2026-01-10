@@ -78,7 +78,7 @@ export default function RichCommentary({
             isKeyMoment = true;
           }
         }
-      } else if (['WD', 'NB', 'B', 'LB', 'NB+1', 'NB+2', 'NB+3', 'NB+4', 'NB+6', 'WD+1', 'WD+2', 'WD+3', 'WD+4', '1B', '2B', '3B', '4B', '1LB', '2LB', '3LB', '4LB'].includes(event.type)) {
+      } else if (['WD', 'NB', 'B', 'LB', 'NB+1', 'NB+2', 'NB+3', 'NB+4', 'NB+6', 'WD+1', 'WD+2', 'WD+3', 'WD+4', '1B', '2B', '3B', '4B', '1LB', '2LB', '3LB', '4LB'].includes(String(event.type))) {
         eventType = 'extras';
         // Check if it's a boundary from extras
         if (event.type === 'NB+4' || event.type === 'NB+6' || event.type === 'WD+4' || event.type === '4B' || event.type === '4LB') {
