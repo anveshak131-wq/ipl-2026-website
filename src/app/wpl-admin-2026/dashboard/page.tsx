@@ -1,57 +1,202 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { BarChart3, Users, Calendar, TrendingUp, Star, Heart, MessageCircle, Eye, Trophy } from 'lucide-react';
-import AuroraBackground from '@/components/ui/AuroraBackground';
-import GradientText from '@/components/ui/GradientText';
-import AnimatedSection from '@/components/ui/AnimatedSection';
+import { Edit2, Save, X, Trash2, Plus } from 'lucide-react';
+
+interface Player {
+  id: string;
+  name: string;
+  teamId: number;
+  role: string;
+  isCaptain?: boolean;
+  isViceCaptain?: boolean;
+}
+
+interface Playing11 {
+  matchId: string;
+  team1Players: string[];
+  team2Players: string[];
+  team1Captain: string;
+  team1ViceCaptain: string;
+  team2Captain: string;
+  team2ViceCaptain: string;
+}
+
+interface Match {
+  id: string;
+  team1: { id: number; name: string };
+  team2: { id: number; name: string };
+  venue: string;
+  date: string;
+  time: string;
+  status: string;
+}
 
 export default function WPLAdminDashboard() {
-  const [stats, setStats] = useState({
-    totalStories: 156,
-    pendingStories: 23,
-    approvedStories: 133,
-    featuredStories: 12,
-    totalViews: 45678,
-    totalLikes: 8934,
-    totalComments: 2341,
-    activeUsers: 892
-  });
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [playing11, setPlaying11] = useState<Playing11 | null>(null);
+  const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
+  const [activeTab, setActiveTab] = useState('matches');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  
+  // Playing 11 selection
+  const [team1Selected, setTeam1Selected] = useState<string[]>([]);
+  const [team2Selected, setTeam2Selected] = useState<string[]>([]);
+  const [team1Captain, setTeam1Captain] = useState('');
+  const [team1ViceCaptain, setTeam1ViceCaptain] = useState('');
+  const [team2Captain, setTeam2Captain] = useState('');
+  const [team2ViceCaptain, setTeam2ViceCaptain] = useState('');
+  
+  // Edit modes
+  const [editingMatch, setEditingMatch] = useState<Match | null>(null);
+  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
 
-  const [recentActivity, setRecentActivity] = useState([
-    {
-      id: 1,
-      type: 'story_submitted',
-      title: 'New story: "My First WPL Match"',
-      author: 'Priya Sharma',
-      time: '2 minutes ago',
-      status: 'pending'
-    },
-    {
-      id: 2,
-      type: 'story_approved',
-      title: 'Story approved: "Meeting Harmanpreet Kaur"',
-      author: 'Anjali Patel',
-      time: '15 minutes ago',
-      status: 'approved'
-    },
-    {
-      id: 3,
-      type: 'story_featured',
-      title: 'Story featured: "WPL Final Experience"',
-      author: 'Rashmi Desai',
-      time: '1 hour ago',
-      status: 'featured'
+  useEffect(() => {
+    if (activeTab === 'matches') fetchMatches();
+    if (activeTab === 'players') fetchPlayers();
+  }, [activeTab]);
+
+  // Fetch WPL matches from KV
+  const fetchMatches = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/matches?league=wpl');
+      const data = await res.json();
+      setMatches(Array.isArray(data) ? data : []);
+      setMessage('✓ Matches loaded');
+      setTimeout(() => setMessage(''), 2000);
+    } catch (err) {
+      console.error('Error fetching matches:', err);
+      setMessage('✗ Error loading matches');
     }
-  ]);
+    setLoading(false);
+  };
+
+  // Fetch WPL players
+  const fetchPlayers = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/players?league=wpl');
+      const data = await res.json();
+      setPlayers(Array.isArray(data) ? data : []);
+      setMessage('✓ Players loaded');
+      setTimeout(() => setMessage(''), 2000);
+    } catch (err) {
+      console.error('Error fetching players:', err);
+      setMessage('✗ Error loading players');
+    }
+    setLoading(false);
+  };
+
+  // Fetch playing 11 for selected match
+  const fetchPlaying11 = async (match: Match) => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/playing11?matchId=${match.id}`);
+      const data = await res.json();
+      setPlaying11(data || null);
+
+      if (data) {
+        setTeam1Selected(data.team1Players || []);
+        setTeam2Selected(data.team2Players || []);
+        setTeam1Captain(data.team1Captain || '');
+        setTeam1ViceCaptain(data.team1ViceCaptain || '');
+        setTeam2Captain(data.team2Captain || '');
+        setTeam2ViceCaptain(data.team2ViceCaptain || '');
+      } else {
+        setTeam1Selected([]);
+        setTeam2Selected([]);
+        setTeam1Captain('');
+        setTeam1ViceCaptain('');
+        setTeam2Captain('');
+        setTeam2ViceCaptain('');
+      }
+
+      setSelectedMatch(match);
+      setActiveTab('playing11');
+      setMessage('✓ Playing 11 loaded');
+      setTimeout(() => setMessage(''), 2000);
+    } catch (err) {
+      console.error('Error fetching playing 11:', err);
+      setMessage('✗ Error loading playing 11');
+    }
+    setLoading(false);
+  };
+
+  // Save playing 11
+  const savePlaying11 = async () => {
+    if (!selectedMatch) return;
+
+    if (team1Selected.length !== 11 || team2Selected.length !== 11) {
+      setMessage('✗ Each team must have exactly 11 players');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const payload = {
+        matchId: selectedMatch.id,
+        team1Players: team1Selected,
+        team2Players: team2Selected,
+        team1Captain,
+        team1ViceCaptain,
+        team2Captain,
+        team2ViceCaptain,
+      };
+
+      const res = await fetch('/api/playing11', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        setMessage('✓ Playing 11 saved successfully');
+        setTimeout(() => setMessage(''), 2000);
+      } else {
+        setMessage('✗ Error saving playing 11');
+      }
+    } catch (err) {
+      console.error('Error saving playing 11:', err);
+      setMessage('✗ Error saving playing 11');
+    }
+    setLoading(false);
+  };
+
+  // Toggle player selection
+  const togglePlayerSelection = (playerId: string, team: 1 | 2) => {
+    if (team === 1) {
+      setTeam1Selected(prev =>
+        prev.includes(playerId)
+          ? prev.filter(id => id !== playerId)
+          : prev.length < 11
+          ? [...prev, playerId]
+          : prev
+      );
+    } else {
+      setTeam2Selected(prev =>
+        prev.includes(playerId)
+          ? prev.filter(id => id !== playerId)
+          : prev.length < 11
+          ? [...prev, playerId]
+          : prev
+      );
+    }
+  };
+
+  const getTeamPlayers = (teamId: number) => {
+    return players.filter(p => p.teamId === teamId);
+  };
+
+  const getPlayerName = (playerId: string) => {
+    return players.find(p => p.id === playerId)?.name || playerId;
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900">
-      <AuroraBackground />
-      
-      <div className="relative z-10">
-        <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-4 md:p-8">
+      <div className="max-w-7xl mx-auto">
           <AnimatedSection>
             <div className="text-center mb-8">
               <GradientText className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-purple-400 to-pink-400">

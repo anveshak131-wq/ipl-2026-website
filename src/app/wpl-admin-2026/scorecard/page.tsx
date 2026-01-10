@@ -5,11 +5,22 @@ import { api } from '@/lib/api';
 
 interface Match {
   id: string;
-  team1: { id: number; name: string };
-  team2: { id: number; name: string };
+  team1: { id: number; name: string; shortName?: string };
+  team2: { id: number; name: string; shortName?: string };
   venue: string;
   date: string;
   time: string;
+  status?: string;
+  league?: string;
+}
+
+interface Player {
+  id: string;
+  name: string;
+  teamId: string;
+  role?: string;
+  battingStyle?: string;
+  bowlingStyle?: string;
 }
 
 interface Batter {
@@ -63,12 +74,14 @@ interface Scorecard {
   matchId: string;
   league: string;
   matchInfo: {
-    team1: { id: number; name: string };
-    team2: { id: number; name: string };
+    team1: { id: number; name: string; shortName?: string };
+    team2: { id: number; name: string; shortName?: string };
     venue: string;
     date: string;
     time: string;
     toss?: { winner: string; decision: string };
+    weather?: string;
+    status?: string;
   };
   innings: Innings[];
   result?: {
@@ -76,11 +89,15 @@ interface Scorecard {
     margin: string;
     manOfTheMatch?: string;
   };
+  draft?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  publishedAt?: string;
 }
 
 export default function ScorecardAdminPage() {
   const [matches, setMatches] = useState<Match[]>([]);
-  const [players, setPlayers] = useState<any[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [scorecard, setScorecard] = useState<Scorecard | null>(null);
   const [activeTab, setActiveTab] = useState('matchInfo');
@@ -94,23 +111,24 @@ export default function ScorecardAdminPage() {
     fetchPlayers();
   }, []);
 
+  const getPlayersByTeam = (teamId: number): Player[] => {
+    return players.filter(player => player.teamId === teamId.toString());
+  };
+
   const fetchMatches = async () => {
     try {
-      // Fetch from a matches API endpoint
-      const res = await fetch('/api/matches?league=wpl');
-      const data = await res.json();
-      setMatches(data || []);
+      const res = await api.get('/matches?league=wpl');
+      setMatches(res.data || []);
     } catch (err) {
       console.error('Error fetching matches:', err);
-      setMessage('Error fetching matches');
+      setMessage('Error fetching WPL matches');
     }
   };
 
   const fetchPlayers = async () => {
     try {
-      const res = await fetch('/api/players?league=wpl');
-      const data = await res.json();
-      setPlayers(data || []);
+      const res = await api.get('/players?league=wpl');
+      setPlayers(res.data || []);
     } catch (err) {
       console.error('Error fetching players:', err);
     }
@@ -119,12 +137,11 @@ export default function ScorecardAdminPage() {
   const handleSelectMatch = async (match: Match) => {
     setSelectedMatch(match);
     setLoading(true);
+    setMessage('');
     try {
-      // Try to fetch existing scorecard
-      const res = await fetch(`/api/scorecards?matchId=${match.id}`);
-      const data = await res.json();
-      if (data && data.length > 0) {
-        setScorecard(data[0]);
+      const res = await api.get(`/scorecards?matchId=${match.id}`);
+      if (res.data && res.data.length > 0) {
+        setScorecard(res.data[0]);
       } else {
         setScorecard(initializeScorecard(match));
       }
@@ -175,24 +192,17 @@ export default function ScorecardAdminPage() {
   const handleSaveScorecard = async () => {
     if (!scorecard) return;
     setSaving(true);
+    setMessage('');
     try {
-      const endpoint = scorecard.id ? `/api/scorecards/${scorecard.id}` : '/api/scorecards';
-      const method = scorecard.id ? 'PUT' : 'POST';
-
-      const response = await fetch(endpoint, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(scorecard),
-      });
-
-      if (response.ok) {
-        const saved = await response.json();
-        setScorecard(saved);
-        setMessage('✓ Scorecard saved successfully!');
-        setTimeout(() => setMessage(''), 3000);
+      let res;
+      if (scorecard.id) {
+        res = await api.put(`/scorecards/${scorecard.id}`, scorecard);
       } else {
-        setMessage('✗ Error saving scorecard');
+        res = await api.post('/scorecards', scorecard);
       }
+      setScorecard(res.data);
+      setMessage('✓ Scorecard saved successfully!');
+      setTimeout(() => setMessage(''), 3000);
     } catch (err) {
       console.error('Error saving:', err);
       setMessage('✗ Error saving scorecard');
@@ -201,20 +211,13 @@ export default function ScorecardAdminPage() {
   };
 
   const handlePublishScorecard = async () => {
-    if (!scorecard) return;
+    if (!scorecard?.id) return;
     setSaving(true);
+    setMessage('');
     try {
-      const response = await fetch(`/api/scorecards/${scorecard.id}/publish`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      if (response.ok) {
-        setMessage('✓ Scorecard published!');
-        setTimeout(() => setMessage(''), 3000);
-      } else {
-        setMessage('✗ Error publishing scorecard');
-      }
+      await api.put(`/scorecards/${scorecard.id}/publish`);
+      setMessage('✓ Scorecard published successfully!');
+      setTimeout(() => setMessage(''), 3000);
     } catch (err) {
       console.error('Error publishing:', err);
       setMessage('✗ Error publishing scorecard');
@@ -240,6 +243,8 @@ export default function ScorecardAdminPage() {
   const addBatter = () => {
     if (!scorecard) return;
     const updated = { ...scorecard };
+    const teamPlayers = getPlayersByTeam(updated.innings[activeInnings].battingTeamId);
+    
     updated.innings[activeInnings].batting.push({
       playerId: '',
       name: '',
@@ -248,6 +253,7 @@ export default function ScorecardAdminPage() {
       fours: 0,
       sixes: 0,
       strikeRate: 0,
+      dismissal: { type: 'not-out' }
     });
     setScorecard(updated);
   };
@@ -256,6 +262,14 @@ export default function ScorecardAdminPage() {
     if (!scorecard) return;
     const updated = { ...scorecard };
     const batter = updated.innings[activeInnings].batting[playerIndex];
+    
+    if (field === 'playerId') {
+      const player = players.find(p => p.id === value);
+      if (player) {
+        batter.name = player.name;
+      }
+    }
+    
     (batter as any)[field] = value;
 
     // Calculate strike rate
@@ -276,6 +290,7 @@ export default function ScorecardAdminPage() {
   const addBowler = () => {
     if (!scorecard) return;
     const updated = { ...scorecard };
+    
     updated.innings[activeInnings].bowling.push({
       playerId: '',
       name: '',
@@ -293,6 +308,14 @@ export default function ScorecardAdminPage() {
     if (!scorecard) return;
     const updated = { ...scorecard };
     const bowler = updated.innings[activeInnings].bowling[bowlerIndex];
+    
+    if (field === 'playerId') {
+      const player = players.find(p => p.id === value);
+      if (player) {
+        bowler.name = player.name;
+      }
+    }
+    
     (bowler as any)[field] = value;
 
     // Calculate economy rate
@@ -499,78 +522,86 @@ export default function ScorecardAdminPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          {scorecard.innings[activeInnings].batting.map((batter, idx) => (
-                            <tr key={idx} className="border-b border-gray-700">
-                              <td className="p-2">
-                                <input
-                                  type="text"
-                                  value={batter.name}
-                                  onChange={(e) => updateBatter(idx, 'name', e.target.value)}
-                                  placeholder="Player name"
-                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-sm"
-                                />
-                              </td>
-                              <td className="p-2">
-                                <input
-                                  type="number"
-                                  value={batter.runs}
-                                  onChange={(e) => updateBatter(idx, 'runs', parseInt(e.target.value) || 0)}
-                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
-                                />
-                              </td>
-                              <td className="p-2">
-                                <input
-                                  type="number"
-                                  value={batter.balls}
-                                  onChange={(e) => updateBatter(idx, 'balls', parseInt(e.target.value) || 0)}
-                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
-                                />
-                              </td>
-                              <td className="p-2">
-                                <input
-                                  type="number"
-                                  value={batter.fours}
-                                  onChange={(e) => updateBatter(idx, 'fours', parseInt(e.target.value) || 0)}
-                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
-                                />
-                              </td>
-                              <td className="p-2">
-                                <input
-                                  type="number"
-                                  value={batter.sixes}
-                                  onChange={(e) => updateBatter(idx, 'sixes', parseInt(e.target.value) || 0)}
-                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
-                                />
-                              </td>
-                              <td className="p-2 text-center font-bold text-green-400">{batter.strikeRate}</td>
-                              <td className="p-2">
-                                <select
-                                  value={batter.dismissal?.type || 'not-out'}
-                                  onChange={(e) =>
-                                    updateBatter(idx, 'dismissal', {
-                                      ...batter.dismissal,
-                                      type: e.target.value,
-                                    })
-                                  }
-                                  className="bg-gray-700 p-2 rounded border border-gray-600 text-white text-sm"
-                                >
-                                  <option value="not-out">Not Out</option>
-                                  <option value="bowled">Bowled</option>
-                                  <option value="caught">Caught</option>
-                                  <option value="lbw">LBW</option>
-                                  <option value="run-out">Run Out</option>
-                                </select>
-                              </td>
-                              <td className="p-2 text-center">
-                                <button
-                                  onClick={() => removeBatter(idx)}
-                                  className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm"
-                                >
-                                  ✕
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
+                          {scorecard.innings[activeInnings].batting.map((batter, idx) => {
+                            const teamPlayers = getPlayersByTeam(scorecard.innings[activeInnings].battingTeamId);
+                            return (
+                              <tr key={idx} className="border-b border-gray-700">
+                                <td className="p-2">
+                                  <select
+                                    value={batter.playerId}
+                                    onChange={(e) => updateBatter(idx, 'playerId', e.target.value)}
+                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-sm"
+                                  >
+                                    <option value="">Select Player</option>
+                                    {teamPlayers.map(player => (
+                                      <option key={player.id} value={player.id}>{player.name}</option>
+                                    ))}
+                                  </select>
+                                </td>
+                                <td className="p-2">
+                                  <input
+                                    type="number"
+                                    value={batter.runs}
+                                    onChange={(e) => updateBatter(idx, 'runs', parseInt(e.target.value) || 0)}
+                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
+                                  />
+                                </td>
+                                <td className="p-2">
+                                  <input
+                                    type="number"
+                                    value={batter.balls}
+                                    onChange={(e) => updateBatter(idx, 'balls', parseInt(e.target.value) || 0)}
+                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
+                                  />
+                                </td>
+                                <td className="p-2">
+                                  <input
+                                    type="number"
+                                    value={batter.fours}
+                                    onChange={(e) => updateBatter(idx, 'fours', parseInt(e.target.value) || 0)}
+                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
+                                  />
+                                </td>
+                                <td className="p-2">
+                                  <input
+                                    type="number"
+                                    value={batter.sixes}
+                                    onChange={(e) => updateBatter(idx, 'sixes', parseInt(e.target.value) || 0)}
+                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
+                                  />
+                                </td>
+                                <td className="p-2 text-center font-bold text-green-400">{batter.strikeRate}</td>
+                                <td className="p-2">
+                                  <select
+                                    value={batter.dismissal?.type || 'not-out'}
+                                    onChange={(e) =>
+                                      updateBatter(idx, 'dismissal', {
+                                        ...batter.dismissal,
+                                        type: e.target.value,
+                                      })
+                                    }
+                                    className="bg-gray-700 p-2 rounded border border-gray-600 text-white text-sm"
+                                  >
+                                    <option value="not-out">Not Out</option>
+                                    <option value="bowled">Bowled</option>
+                                    <option value="caught">Caught</option>
+                                    <option value="lbw">LBW</option>
+                                    <option value="run-out">Run Out</option>
+                                    <option value="stumped">Stumped</option>
+                                    <option value="hit-wicket">Hit Wicket</option>
+                                  </select>
+                                </td>
+                                <td className="p-2 text-center">
+                                  <button
+                                    onClick={() => removeBatter(idx)}
+                                    className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm"
+                                  >
+                                    ✕
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
@@ -661,64 +692,74 @@ export default function ScorecardAdminPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          {scorecard.innings[activeInnings].bowling.map((bowler, idx) => (
-                            <tr key={idx} className="border-b border-gray-700">
-                              <td className="p-2">
-                                <input
-                                  type="text"
-                                  value={bowler.name}
-                                  onChange={(e) => updateBowler(idx, 'name', e.target.value)}
-                                  placeholder="Bowler name"
-                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-sm"
-                                />
-                              </td>
-                              <td className="p-2">
-                                <div className="flex gap-1">
+                          {scorecard.innings[activeInnings].bowling.map((bowler, idx) => {
+                            const bowlingTeamId = scorecard.innings[activeInnings].battingTeamId === scorecard.matchInfo.team1.id 
+                              ? scorecard.matchInfo.team2.id 
+                              : scorecard.matchInfo.team1.id;
+                            const bowlingPlayers = getPlayersByTeam(bowlingTeamId);
+                            
+                            return (
+                              <tr key={idx} className="border-b border-gray-700">
+                                <td className="p-2">
+                                  <select
+                                    value={bowler.playerId}
+                                    onChange={(e) => updateBowler(idx, 'playerId', e.target.value)}
+                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-sm"
+                                  >
+                                    <option value="">Select Player</option>
+                                    {bowlingPlayers.map(player => (
+                                      <option key={player.id} value={player.id}>{player.name}</option>
+                                    ))}
+                                  </select>
+                                </td>
+                                <td className="p-2">
+                                  <div className="flex gap-1">
+                                    <input
+                                      type="number"
+                                      value={bowler.overs}
+                                      onChange={(e) => updateBowler(idx, 'overs', parseInt(e.target.value) || 0)}
+                                      placeholder="O"
+                                      className="w-1/2 bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
+                                    />
+                                    <input
+                                      type="number"
+                                      value={bowler.balls}
+                                      onChange={(e) => updateBowler(idx, 'balls', parseInt(e.target.value) || 0)}
+                                      placeholder="B"
+                                      min="0"
+                                      max="5"
+                                      className="w-1/2 bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
+                                    />
+                                  </div>
+                                </td>
+                                <td className="p-2">
                                   <input
                                     type="number"
-                                    value={bowler.overs}
-                                    onChange={(e) => updateBowler(idx, 'overs', parseInt(e.target.value) || 0)}
-                                    placeholder="O"
-                                    className="w-1/2 bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
+                                    value={bowler.runs}
+                                    onChange={(e) => updateBowler(idx, 'runs', parseInt(e.target.value) || 0)}
+                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
+                                </td>
+                                <td className="p-2">
                                   <input
                                     type="number"
-                                    value={bowler.balls}
-                                    onChange={(e) => updateBowler(idx, 'balls', parseInt(e.target.value) || 0)}
-                                    placeholder="B"
-                                    min="0"
-                                    max="5"
-                                    className="w-1/2 bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
+                                    value={bowler.wickets}
+                                    onChange={(e) => updateBowler(idx, 'wickets', parseInt(e.target.value) || 0)}
+                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
-                                </div>
-                              </td>
-                              <td className="p-2">
-                                <input
-                                  type="number"
-                                  value={bowler.runs}
-                                  onChange={(e) => updateBowler(idx, 'runs', parseInt(e.target.value) || 0)}
-                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
-                                />
-                              </td>
-                              <td className="p-2">
-                                <input
-                                  type="number"
-                                  value={bowler.wickets}
-                                  onChange={(e) => updateBowler(idx, 'wickets', parseInt(e.target.value) || 0)}
-                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
-                                />
-                              </td>
-                              <td className="p-2 text-center font-bold text-green-400">{bowler.economyRate}</td>
-                              <td className="p-2 text-center">
-                                <button
-                                  onClick={() => removeBowler(idx)}
-                                  className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm"
-                                >
-                                  ✕
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
+                                </td>
+                                <td className="p-2 text-center font-bold text-green-400">{bowler.economyRate}</td>
+                                <td className="p-2 text-center">
+                                  <button
+                                    onClick={() => removeBowler(idx)}
+                                    className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm"
+                                  >
+                                    ✕
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>
@@ -772,17 +813,20 @@ export default function ScorecardAdminPage() {
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm text-gray-400 mb-2">Man of the Match</label>
-                    <input
-                      type="text"
+                    <select
                       value={scorecard.result?.manOfTheMatch || ''}
                       onChange={(e) => {
                         const updated = { ...scorecard };
                         updated.result = { ...updated.result, manOfTheMatch: e.target.value };
                         setScorecard(updated);
                       }}
-                      placeholder="Player name"
-                      className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white placeholder-gray-500"
-                    />
+                      className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
+                    >
+                      <option value="">Select Player</option>
+                      {players.map(player => (
+                        <option key={player.id} value={player.name}>{player.name}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
               </div>

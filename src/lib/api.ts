@@ -1,0 +1,75 @@
+// Simple API client for WPL scorecard system
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? '' 
+  : 'http://localhost:8787/api';
+
+class ApiClient {
+  private baseURL: string;
+
+  constructor(baseURL: string) {
+    this.baseURL = baseURL;
+  }
+
+  private async request(endpoint: string, options: RequestInit = {}): Promise<any> {
+    const url = `${this.baseURL}${endpoint}`;
+    
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    // Add auth token if available
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('authToken');
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+    }
+
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...headers,
+        ...(options.headers as Record<string, string>),
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 401 && typeof window !== 'undefined') {
+        localStorage.removeItem('authToken');
+        window.location.href = '/login';
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
+  }
+
+  async get(endpoint: string, params?: Record<string, string>): Promise<any> {
+    const url = params ? `${endpoint}?${new URLSearchParams(params)}` : endpoint;
+    return this.request(url);
+  }
+
+  async post(endpoint: string, data?: any): Promise<any> {
+    return this.request(endpoint, {
+      method: 'POST',
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  }
+
+  async put(endpoint: string, data?: any): Promise<any> {
+    return this.request(endpoint, {
+      method: 'PUT',
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  }
+
+  async delete(endpoint: string): Promise<any> {
+    return this.request(endpoint, {
+      method: 'DELETE',
+    });
+  }
+}
+
+const api = new ApiClient(API_BASE_URL);
+
+export { api };
