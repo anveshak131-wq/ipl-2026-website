@@ -126,30 +126,35 @@ export default function ScorecardAdminPage() {
 
   const fetchMatches = async () => {
     try {
-      console.log('Fetching WPL matches...');
+      console.log('Fetching WPL matches from:', 'http://localhost:8787/api/matches?league=wpl');
+      console.log('API_BASE_URL:', process.env.NODE_ENV === 'production' ? '' : 'http://localhost:8787/api');
       const res = await api.get('/matches?league=wpl');
-      console.log('WPL matches response:', res.data?.length || 0, 'matches found');
+      console.log('WPL matches response:', res);
+      console.log('WPL matches data length:', res.data?.length || 0);
       setMatches(res.data || []);
       if (res.data && res.data.length === 0) {
         setMessage('⚠️ No WPL matches found. Please create WPL matches first.');
       }
     } catch (err) {
       console.error('Error fetching WPL matches:', err);
+      console.error('Error details:', err.message, err.stack);
       setMessage('✗ Error fetching WPL matches. Check if development server is running on port 8787.');
     }
   };
 
   const fetchPlayers = async () => {
     try {
-      console.log('Fetching WPL players...');
+      console.log('Fetching WPL players from:', 'http://localhost:8787/api/players?league=wpl');
       const res = await api.get('/players?league=wpl');
-      console.log('WPL players response:', res.data?.length || 0, 'players found');
+      console.log('WPL players response:', res);
+      console.log('WPL players data length:', res.data?.length || 0);
       setPlayers(res.data || []);
       if (res.data && res.data.length === 0) {
         setMessage('⚠️ No WPL players found. Please add WPL players first.');
       }
     } catch (err) {
       console.error('Error fetching WPL players:', err);
+      console.error('Error details:', err.message, err.stack);
       setMessage('✗ Error fetching WPL players. Check if development server is running on port 8787.');
     }
   };

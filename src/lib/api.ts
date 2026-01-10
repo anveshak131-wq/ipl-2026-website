@@ -12,6 +12,7 @@ class ApiClient {
 
   private async request(endpoint: string, options: RequestInit = {}): Promise<any> {
     const url = `${this.baseURL}${endpoint}`;
+    console.log('API Request:', { method: options.method || 'GET', url, baseURL: this.baseURL });
     
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -25,23 +26,32 @@ class ApiClient {
       }
     }
 
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        ...headers,
-        ...(options.headers as Record<string, string>),
-      },
-    });
+    try {
+      const response = await fetch(url, {
+        ...options,
+        headers: {
+          ...headers,
+          ...(options.headers as Record<string, string>),
+        },
+      });
 
-    if (!response.ok) {
-      if (response.status === 401 && typeof window !== 'undefined') {
-        localStorage.removeItem('authToken');
-        window.location.href = '/login';
+      console.log('API Response:', { status: response.status, ok: response.ok, url });
+
+      if (!response.ok) {
+        if (response.status === 401 && typeof window !== 'undefined') {
+          localStorage.removeItem('authToken');
+          window.location.href = '/login';
+        }
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
 
-    return response.json();
+      const data = await response.json();
+      console.log('API Data received:', data);
+      return data;
+    } catch (error) {
+      console.error('API Request failed:', error);
+      throw error;
+    }
   }
 
   async get(endpoint: string, params?: Record<string, string>): Promise<any> {
