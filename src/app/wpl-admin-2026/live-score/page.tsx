@@ -43,33 +43,37 @@ export default function WPLAdminLiveScorePage() {
     checkAuth();
   }, [router]);
 
-  // Restore selected match ID from localStorage on mount
+  // Restore selected match ID from localStorage on mount and load data
   useEffect(() => {
-    if (!hasInitialized && typeof window !== 'undefined') {
-      const savedMatchId = localStorage.getItem('wpl-live-score-matchId');
-      if (savedMatchId) {
-        setSelectedMatchId(savedMatchId);
-      }
-      setHasInitialized(true);
-    }
-  }, [hasInitialized]);
+    if (!isAuthenticated || hasInitialized) return;
 
-  // Load matches and players
-  useEffect(() => {
-    if (!isAuthenticated) return;
-
-    const loadData = async () => {
+    const initializeData = async () => {
       try {
+        // Get saved match ID from localStorage
+        const savedMatchId = typeof window !== 'undefined' ? localStorage.getItem('wpl-live-score-matchId') : null;
+
+        // Load all data
         const [matchesData, playersData] = await Promise.all([
           api.getMatches('wpl'),
           api.getPlayers(undefined, 'wpl'),
         ]);
+        
         setMatches(matchesData);
         setPlayers(playersData);
 
-        // Auto-select first live or upcoming match, or restore saved match
-        let targetMatchId = selectedMatchId;
+        // Determine which match to select
+        let targetMatchId = savedMatchId;
         
+        // Validate saved match still exists
+        if (targetMatchId && Array.isArray(matchesData)) {
+          const matchExists = matchesData.some(m => m.id === targetMatchId);
+          if (!matchExists) {
+            // Saved match no longer exists
+            targetMatchId = null;
+          }
+        }
+
+        // If no valid saved match, select first available live or upcoming
         if (!targetMatchId && matchesData && Array.isArray(matchesData) && matchesData.length > 0) {
           const preferred =
             matchesData.find((m) => m.status === 'live') ||
@@ -79,32 +83,23 @@ export default function WPLAdminLiveScorePage() {
             targetMatchId = preferred.id;
           }
         }
-        
-        // Check if saved match still exists
-        if (targetMatchId && Array.isArray(matchesData)) {
-          const matchExists = matchesData.some(m => m.id === targetMatchId);
-          if (matchExists) {
-            setSelectedMatchId(targetMatchId);
+
+        // Set the selected match
+        if (targetMatchId) {
+          setSelectedMatchId(targetMatchId);
+          if (typeof window !== 'undefined') {
             localStorage.setItem('wpl-live-score-matchId', targetMatchId);
-          } else if (matchesData.length > 0) {
-            // Saved match no longer exists, select first available
-            const newMatch = matchesData.find((m) => m.status === 'live') ||
-              matchesData.find((m) => m.status === 'upcoming') ||
-              matchesData[0];
-            if (newMatch) {
-              setSelectedMatchId(newMatch.id);
-              localStorage.setItem('wpl-live-score-matchId', newMatch.id);
-            }
           }
         }
+
+        setHasInitialized(true);
       } catch (error) {
-        console.error('Error loading data:', error);
+        console.error('Error initializing live-score page:', error);
+        setHasInitialized(true);
       }
     };
 
-    if (hasInitialized) {
-      loadData();
-    }
+    initializeData();
   }, [isAuthenticated, hasInitialized]);
 
   const selectedMatch = useMemo(
@@ -134,7 +129,7 @@ export default function WPLAdminLiveScorePage() {
 
   // Fetch live score when match is selected
   useEffect(() => {
-    if (!selectedMatchId) {
+    if (!selectedMatchId || !hasInitialized) {
       setLiveScoreState(undefined);
       return;
     }
@@ -146,16 +141,22 @@ export default function WPLAdminLiveScorePage() {
         if (response.ok) {
           const data = await response.json();
           setLiveScoreState(data);
+          console.log('[WPL Live-Score] Successfully loaded state:', data);
+        } else {
+          console.warn('[WPL Live-Score] API returned non-ok status:', response.status);
+          // It's ok if no data exists yet, just continue
+          setLiveScoreState(undefined);
         }
       } catch (error) {
-        console.error('Error fetching live score:', error);
+        console.error('[WPL Live-Score] Error fetching live score:', error);
+        setLiveScoreState(undefined);
       } finally {
         setIsScoreLoading(false);
       }
     };
 
     fetchLiveScore();
-  }, [selectedMatchId]);
+  }, [selectedMatchId, hasInitialized]);
 
   const handleSave = async (state: LiveScoreState) => {
     if (!selectedMatch) return;
