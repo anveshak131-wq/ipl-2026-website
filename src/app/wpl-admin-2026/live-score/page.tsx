@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 import BallEntryPanel from '@/components/admin/live-score/BallEntryPanel';
-import SimpleBallEntryPanel from '@/components/admin/live-score/SimpleBallEntryPanel';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import { Match, Player } from '@/types';
 import { LiveScoreState, BallEvent } from '@/hooks/useLiveScore';
@@ -426,12 +425,26 @@ export default function WPLAdminLiveScorePage() {
                   <LoadingSpinner size="lg" color={spinnerColor} />
                 </div>
               ) : (
-                <SimpleBallEntryPanel
-                  key={selectedMatch?.id}
+                <BallEntryPanel
                   matchId={selectedMatch?.id || ''}
                   team1Name={(selectedMatch?.team1?.shortName) || (selectedMatch?.team1?.name) || 'Team 1'}
                   team2Name={(selectedMatch?.team2?.shortName) || (selectedMatch?.team2?.name) || 'Team 2'}
+                  team1Id={selectedMatch?.team1?.id || ''}
+                  team2Id={selectedMatch?.team2?.id || ''}
                   onSave={handleSave}
+                  players={players}
+                  league={currentLeague}
+                  playing11={selectedMatch?.playing11}
+                  isTestPage={true}
+                  venue={selectedMatch?.venue || ''}
+                  date={selectedMatch?.date?.split('T')[0] || new Date().toISOString().split('T')[0]}
+                  time={selectedMatch?.time || '19:30'}
+                  isEveningMatch={selectedMatch?.isEveningMatch !== false}
+                  toss={selectedMatch?.toss}
+                  weather={selectedMatch?.weather}
+                  pitchReport={selectedMatch?.pitchReport || ''}
+                  headToHead={selectedMatch?.headToHead}
+                  key={selectedMatch?.id}
                 />
               )}
             </div>
