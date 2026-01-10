@@ -285,7 +285,9 @@ export function useLiveScore({
   }, [state.ballHistory?.length, matchState, isTestPage, onMatchStateChange, state.battingTeam]);
 
   const recordBall = useCallback((ball: BallEvent) => {
+    console.log('[useLiveScore.recordBall] Called with:', ball);
     setState((prev) => {
+      console.log('[useLiveScore.recordBall] Previous state:', prev);
       // ===== VALIDATION =====
       if (!prev || !prev.team1 || !prev.team2) {
         console.error('[recordBall] Invalid state:', prev);
@@ -405,6 +407,8 @@ export function useLiveScore({
       // Save to undo stack
       setUndoStack((stack) => [...stack, { ...prev }].slice(-5));
 
+      console.log('[useLiveScore.recordBall] New state created:', newState);
+      console.log('[useLiveScore.recordBall] State changed:', newState.team1.runs, 'runs for batting team');
       return newState;
     });
   }, []);

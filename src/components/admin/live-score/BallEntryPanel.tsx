@@ -210,6 +210,20 @@ export default function BallEntryPanel({
     });
   }, []);
 
+  // Log every state change
+  useEffect(() => {
+    console.log('[BallEntryPanel] State updated:', {
+      team1_runs: state.team1.runs,
+      team1_wickets: state.team1.wickets,
+      team1_balls: state.team1.balls,
+      team2_runs: state.team2.runs,
+      team2_wickets: state.team2.wickets,
+      team2_balls: state.team2.balls,
+      currentBatter: state.currentBatter.name,
+      currentBowler: state.currentBowler.name,
+    });
+  }, [state]);
+
   // Auto-save every 30 seconds
   useEffect(() => {
     const saveInterval = setInterval(async () => {
