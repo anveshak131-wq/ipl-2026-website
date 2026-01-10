@@ -94,6 +94,12 @@ export default function BallEntryPanel({
   isTestPage = false,
   isEveningMatch: propIsEveningMatch,
 }: BallEntryPanelProps) {
+  // DIAGNOSTIC LOGGING - Check if component is even rendering
+  console.log('[BallEntryPanel] Component rendered!');
+  console.log('[BallEntryPanel] Props:', { 
+    matchId, team1Name, team2Name, isTestPage, initialBatter, initialBowler 
+  });
+
   const [showWicketModal, setShowWicketModal] = useState(false);
   const [showPlayerSelector, setShowPlayerSelector] = useState<'batter' | 'bowler' | null>(null);
   const [isSaving, setIsSaving] = useState(false);
