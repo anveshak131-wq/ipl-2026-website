@@ -99,7 +99,7 @@ var __toESM2 = /* @__PURE__ */ __name((mod, isNodeMode, target) => (target = mod
   mod
 )), "__toESM");
 var require_checked_fetch2 = __commonJS2({
-  "../.wrangler/tmp/bundle-yz4U4E/checked-fetch.js"() {
+  "../.wrangler/tmp/bundle-ouEufw/checked-fetch.js"() {
     "use strict";
     var urls = /* @__PURE__ */ new Set();
     function checkURL(request, init) {
