@@ -70,6 +70,7 @@ export default function WPLAdminSidebar({ currentPage = '' }: WPLAdminSidebarPro
     if (href.includes('matchday')) return 'matchday';
     if (href.includes('stories')) return 'stories';
     if (href.includes('live-score')) return 'live-score';
+    if (href.includes('scorecard')) return 'scorecard';
     return 'default';
   };
 
@@ -94,6 +95,11 @@ export default function WPLAdminSidebar({ currentPage = '' }: WPLAdminSidebarPro
       liveScore: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+      scorecard: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
       ),
       default: (
@@ -211,6 +217,17 @@ export default function WPLAdminSidebar({ currentPage = '' }: WPLAdminSidebarPro
         ),
         group: 'Tools',
         shortcut: 'W',
+      },
+      {
+        href: '/wpl-admin-2026/scorecard',
+        label: 'Scorecard',
+        icon: (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        ),
+        group: 'Tools',
+        shortcut: 'S',
       },
     ],
   }), []);
