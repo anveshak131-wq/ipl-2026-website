@@ -482,6 +482,7 @@ export default function BallEntryPanel({
 
   // Check if ball entry is allowed based on match state (always true for test pages)
   const canRecordBalls = isTestPage || matchState.currentState === 'innings-1' || matchState.currentState === 'innings-2' || matchState.currentState === 'not-started';
+  const buttonDisabledClass = `${!canRecordBalls && !isTestPage ? 'opacity-50 pointer-events-none' : ''}`;
 
   // Detect mobile device
   const [isMobile, setIsMobile] = useState(false);
@@ -829,7 +830,7 @@ export default function BallEntryPanel({
         {/* Regular Runs */}
         <div className="mb-4">
           <h4 className="text-sm font-semibold text-gray-400 mb-2">Regular Runs</h4>
-          <div className={`grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 ${!canRecordBalls ? 'opacity-50 pointer-events-none' : ''}`}>
+          <div className={`grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 ${buttonDisabledClass}`}>
             <BallEntryButton value={0} label={isMobile ? "0" : "Dot (0)"} color="green" onClick={() => handleBallClick(0)} />
             <BallEntryButton value={1} label={isMobile ? "1" : "Single (1)"} color="green" onClick={() => handleBallClick(1)} />
             <BallEntryButton value={2} label={isMobile ? "2" : "Double (2)"} color="green" onClick={() => handleBallClick(2)} />
@@ -841,7 +842,7 @@ export default function BallEntryPanel({
         {/* No Ball + Runs */}
         <div className="mb-4">
           <h4 className="text-sm font-semibold text-gray-400 mb-2">No Ball + Runs</h4>
-          <div className={`grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 ${!canRecordBalls ? 'opacity-50 pointer-events-none' : ''}`}>
+          <div className={`grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3 ${buttonDisabledClass}`}>
             <BallEntryButton value="NB" label={isMobile ? "NB" : "NB (0)"} color="orange" onClick={() => handleBallClick('NB')} />
             <BallEntryButton value="NB+1" label={isMobile ? "NB+1" : "NB+1"} color="orange" onClick={() => handleBallClick('NB+1')} />
             <BallEntryButton value="NB+2" label={isMobile ? "NB+2" : "NB+2"} color="orange" onClick={() => handleBallClick('NB+2')} />
@@ -853,7 +854,7 @@ export default function BallEntryPanel({
         {/* Wide + Runs */}
         <div className="mb-4">
           <h4 className="text-sm font-semibold text-gray-400 mb-2">Wide + Runs</h4>
-          <div className={`grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3 ${!canRecordBalls ? 'opacity-50 pointer-events-none' : ''}`}>
+          <div className={`grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3 ${buttonDisabledClass}`}>
             <BallEntryButton value="WD" label={isMobile ? "WD" : "WD (0)"} color="orange" onClick={() => handleBallClick('WD')} />
             <BallEntryButton value="WD+1" label={isMobile ? "WD+1" : "WD+1"} color="orange" onClick={() => handleBallClick('WD+1')} />
             <BallEntryButton value="WD+2" label={isMobile ? "WD+2" : "WD+2"} color="orange" onClick={() => handleBallClick('WD+2')} />
@@ -864,7 +865,7 @@ export default function BallEntryPanel({
         {/* Byes */}
         <div className="mb-4">
           <h4 className="text-sm font-semibold text-gray-400 mb-2">Byes</h4>
-          <div className={`grid grid-cols-4 gap-2 sm:gap-3 ${!canRecordBalls ? 'opacity-50 pointer-events-none' : ''}`}>
+          <div className={`grid grid-cols-4 gap-2 sm:gap-3 ${buttonDisabledClass}`}>
             <BallEntryButton value="1B" label={isMobile ? "1B" : "1 Bye"} color="orange" onClick={() => handleBallClick('1B')} />
             <BallEntryButton value="2B" label={isMobile ? "2B" : "2 Byes"} color="orange" onClick={() => handleBallClick('2B')} />
             <BallEntryButton value="3B" label={isMobile ? "3B" : "3 Byes"} color="orange" onClick={() => handleBallClick('3B')} />
@@ -875,7 +876,7 @@ export default function BallEntryPanel({
         {/* Leg Byes */}
         <div className="mb-4">
           <h4 className="text-sm font-semibold text-gray-400 mb-2">Leg Byes</h4>
-          <div className={`grid grid-cols-4 gap-2 sm:gap-3 ${!canRecordBalls ? 'opacity-50 pointer-events-none' : ''}`}>
+          <div className={`grid grid-cols-4 gap-2 sm:gap-3 ${buttonDisabledClass}`}>
             <BallEntryButton value="1LB" label={isMobile ? "1LB" : "1 Leg Bye"} color="orange" onClick={() => handleBallClick('1LB')} />
             <BallEntryButton value="2LB" label={isMobile ? "2LB" : "2 Leg Byes"} color="orange" onClick={() => handleBallClick('2LB')} />
             <BallEntryButton value="3LB" label={isMobile ? "3LB" : "3 Leg Byes"} color="orange" onClick={() => handleBallClick('3LB')} />
@@ -886,7 +887,7 @@ export default function BallEntryPanel({
         {/* Wicket */}
         <div className="mb-4">
           <h4 className="text-sm font-semibold text-gray-400 mb-2">Wicket</h4>
-          <div className={`grid grid-cols-1 gap-2 sm:gap-3 ${!canRecordBalls ? 'opacity-50 pointer-events-none' : ''}`}>
+          <div className={`grid grid-cols-1 gap-2 sm:gap-3 ${buttonDisabledClass}`}>
             <BallEntryButton value="W" label={isMobile ? "W" : "Wicket (W)"} color="red" onClick={() => handleBallClick('W')} />
           </div>
         </div>
