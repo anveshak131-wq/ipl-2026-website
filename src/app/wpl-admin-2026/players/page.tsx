@@ -62,29 +62,33 @@ export default function WPLPlayersManagementPage() {
 
     try {
       const token = localStorage.getItem('adminToken');
+      const updatedPlayerData = {
+        ...editingPlayer,
+        teamId: editedTeamId,
+        isCaptain: editingPlayer.isCaptain || false,
+      };
+
       const response = await fetch('/api/players', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          playerId: editingPlayer.id,
-          playerData: {
-            ...editingPlayer,
-            teamId: editedTeamId,
-            isCaptain: editingPlayer.isCaptain || false,
-          },
-        }),
+        body: JSON.stringify(updatedPlayerData),
       });
 
       if (response.ok) {
-        const updatedPlayer = { ...editingPlayer, teamId: editedTeamId };
+        const updatedPlayer = await response.json();
         setPlayers(players.map(p => p.id === editingPlayer.id ? updatedPlayer : p));
         setEditingPlayer(null);
+        alert('Player updated successfully!');
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.error || 'Failed to save player'}`);
       }
     } catch (error) {
       console.error('Error saving player:', error);
+      alert('Error saving player');
     }
   };
 
