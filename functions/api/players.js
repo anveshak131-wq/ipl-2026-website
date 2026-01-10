@@ -265,7 +265,7 @@ export const onRequest = async (context) => {
         'Smriti Mandhana': '12', // RCB-W captain
         'Ellyse Perry': '12', // RCB-W
         'Deepti Sharma': '13', // DC-W
-        'Sophie Devine': '15', // UP Warriorz captain
+        'Sophie Devine': '14', // Gujarat Giants (GG) captain - NOT UPW
         'Pooja Vastrakar': '12', // RCB-W
         'Renuka Singh': '12', // RCB-W
         'Devika Vaidya': '14', // Gujarat Giants
