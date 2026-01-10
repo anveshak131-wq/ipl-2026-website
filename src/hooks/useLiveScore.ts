@@ -230,9 +230,11 @@ export function useLiveScore({
 
   // Auto-detect innings transitions
   useEffect(() => {
+    if (!state?.team1 || !state?.team2) return; // Safety check
+    
     const battingTeam = state.battingTeam;
     const wickets = battingTeam === 'team1' ? state.team1.wickets : state.team2.wickets;
-    const overs = battingTeam === 'team1' ? state.team1.balls / 6 : state.team2.balls / 6;
+    const overs = battingTeam === 'team1' ? (state.team1.balls || 0) / 6 : (state.team2.balls || 0) / 6;
 
     if (shouldAutoTransitionInnings(matchState, state.innings, wickets, overs, maxOvers)) {
       // Auto-transition to break or complete
@@ -251,19 +253,25 @@ export function useLiveScore({
         }
       }
     }
-  }, [state.innings, state.team1.wickets, state.team2.wickets, state.team1.balls, state.team2.balls, matchState, maxOvers, onMatchStateChange, state.battingTeam, state.team1.runs, state.team2.runs]);
+  }, [state.innings, state.team1?.wickets, state.team2?.wickets, state.team1?.balls, state.team2?.balls, matchState, maxOvers, onMatchStateChange, state.battingTeam, state.team1?.runs, state.team2?.runs]);
 
   const recordBall = useCallback((ball: BallEvent) => {
     // Skip match state check for test pages
     if (!isTestPage) {
       // Check if current state allows ball entry
-      if (matchState.currentState !== 'innings-1' && matchState.currentState !== 'innings-2') {
-        alert(`Cannot record balls in ${matchState.currentState} state. Please transition to an innings state first.`);
+      if (!matchState || matchState.currentState !== 'innings-1' && matchState.currentState !== 'innings-2') {
+        alert(`Cannot record balls in ${matchState?.currentState || 'unknown'} state. Please transition to an innings state first.`);
         return;
       }
     }
 
     setState((prev) => {
+      // Ensure state structure is valid
+      if (!prev || !prev.team1 || !prev.team2 || typeof prev.battingTeam !== 'string') {
+        console.error('Invalid state structure in recordBall:', prev);
+        return prev;
+      }
+
       // Save current state for undo (keep last 5)
       setUndoStack((stack) => {
         const newStack = [...stack, { ...prev }];
@@ -271,7 +279,13 @@ export function useLiveScore({
       });
 
       const battingKey = prev.battingTeam;
-      const team = prev[battingKey];
+      const team = prev[battingKey as keyof typeof prev] as any;
+      
+      // Additional safety check for team
+      if (!team || typeof team !== 'object' || typeof team.balls !== 'number') {
+        console.error('Invalid team structure:', { battingKey, team });
+        return prev;
+      }
       
       // Check if innings is complete (20 overs or 10 wickets) - T20 format
       const currentBalls = team.balls; // team.balls is stored as integer (total balls)
