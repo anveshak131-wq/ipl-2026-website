@@ -455,7 +455,7 @@ export function useLiveScore({
       const newBowlerRuns = Math.max(0, prev.currentBowler.runs + bowlerRunDelta); // Prevent negative runs
       const newBowlerBalls = prev.currentBowler.balls + bowlerBallDelta;
 
-      return {
+      const updatedState = {
         ...prev,
         [battingKey]: {
           ...team,
@@ -477,6 +477,19 @@ export function useLiveScore({
         ballHistory: [...(Array.isArray(prev.ballHistory) ? prev.ballHistory : []), ball].slice(-100), // Keep last 100, ensure it's an array
         matchState,
       };
+
+      console.log('[useLiveScore] Ball recorded:', {
+        ballType: ball.type,
+        battingTeam: battingKey,
+        teamBallsOld: team.balls,
+        teamBallsNew: cappedBalls,
+        teamRunsOld: team.runs,
+        teamRunsNew: newTeamRuns,
+        deltaRuns: teamRunDelta,
+        newState: updatedState
+      });
+
+      return updatedState;
     });
   }, [matchState, ballsToOvers]);
 
