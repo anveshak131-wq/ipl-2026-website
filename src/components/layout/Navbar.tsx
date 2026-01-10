@@ -68,7 +68,8 @@ export default function Navbar() {
 
   const primaryNavItems: NavItem[] = [
     // Real-time & Core Features (Highest Priority)
-    { href: '/live-score', label: 'Live Score', emoji: 'lightning' },
+    // Live Score temporarily hidden - use scorecard instead
+    // { href: '/live-score', label: 'Live Score', emoji: 'lightning' },
     { href: getLeagueAwareHref('/matches'), label: 'Matches', emoji: 'cricket-bat' },
     // Explore & Discover
     { href: getLeagueAwareHref('/teams'), label: 'Teams', emoji: 'trophy' },
