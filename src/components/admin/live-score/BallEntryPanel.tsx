@@ -193,6 +193,17 @@ export default function BallEntryPanel({
     },
   });
 
+  // Log initial state
+  useEffect(() => {
+    console.log('[BallEntryPanel] Initialized with:', {
+      isTestPage,
+      initialBatter,
+      initialBowler,
+      currentState: matchState?.currentState,
+      state: state,
+    });
+  }, []);
+
   // Auto-save every 30 seconds
   useEffect(() => {
     const saveInterval = setInterval(async () => {
@@ -315,6 +326,8 @@ export default function BallEntryPanel({
   }, [state]);
 
   const handleBallClick = useCallback((value: number | string) => {
+    console.log('[BallEntryPanel] handleBallClick called with:', value);
+    
     if (value === 'W') {
       setShowWicketModal(true);
       return;
@@ -326,6 +339,7 @@ export default function BallEntryPanel({
       timestamp: Date.now(),
     };
     
+    console.log('[BallEntryPanel] recordBall called with event:', ballEvent);
     lastBallRef.current = ballEvent;
     recordBall(ballEvent);
   }, [recordBall]);
