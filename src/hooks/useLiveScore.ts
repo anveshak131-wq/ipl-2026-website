@@ -164,14 +164,8 @@ export function useLiveScore({
   };
 
   const [state, setState] = useState<LiveScoreState>(() => {
-    if (initialState) {
-      return {
-        ...initialState,
-        matchState: matchState, // Ensure matchState is synced
-      };
-    }
-
-    return {
+    // Create default state
+    const defaultState: LiveScoreState = {
       innings: 1,
       battingTeam: getInitialBattingTeam(),
       currentOver: 0.0,
@@ -192,6 +186,37 @@ export function useLiveScore({
       ballHistory: [],
       matchState,
     };
+
+    // If initialState is provided, merge it with defaults (defaults fill in missing properties)
+    if (initialState) {
+      return {
+        ...defaultState,
+        ...initialState,
+        // Ensure team1 and team2 have all required properties
+        team1: {
+          ...defaultState.team1,
+          ...(initialState.team1 || {}),
+        },
+        team2: {
+          ...defaultState.team2,
+          ...(initialState.team2 || {}),
+        },
+        currentBatter: initialState.currentBatter ? { 
+          ...initialState.currentBatter, 
+          runs: initialState.currentBatter.runs ?? 0, 
+          balls: initialState.currentBatter.balls ?? 0 
+        } : defaultState.currentBatter,
+        currentBowler: initialState.currentBowler ? { 
+          ...initialState.currentBowler, 
+          runs: initialState.currentBowler.runs ?? 0, 
+          balls: initialState.currentBowler.balls ?? 0 
+        } : defaultState.currentBowler,
+        ballHistory: initialState.ballHistory || [],
+        matchState: matchState, // Ensure matchState is synced
+      };
+    }
+
+    return defaultState;
   });
 
   const [undoStack, setUndoStack] = useState<LiveScoreState[]>([]);
