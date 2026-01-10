@@ -434,6 +434,22 @@ export default function WPLAdminLiveScorePage() {
                   onSave={handleSave}
                   players={players}
                   league={currentLeague}
+                  initialBatter={
+                    selectedMatch?.playing11?.team1?.[0]
+                      ? { 
+                          id: selectedMatch.playing11.team1[0], 
+                          name: players.find(p => p.id === selectedMatch.playing11?.team1?.[0])?.name || 'Batter 1'
+                        }
+                      : { id: 'unknown', name: 'Batter 1' }
+                  }
+                  initialBowler={
+                    selectedMatch?.playing11?.team2?.[0]
+                      ? { 
+                          id: selectedMatch.playing11.team2[0], 
+                          name: players.find(p => p.id === selectedMatch.playing11?.team2?.[0])?.name || 'Bowler 1'
+                        }
+                      : { id: 'unknown', name: 'Bowler 1' }
+                  }
                   playing11={selectedMatch?.playing11}
                   isTestPage={true}
                   venue={selectedMatch?.venue || ''}
