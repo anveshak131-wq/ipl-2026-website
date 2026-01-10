@@ -649,9 +649,29 @@ export default function IPLHomePage() {
                       transition={{ duration: 0.6, delay: 0.3, type: "spring" }}
                     >
                       <div className="text-5xl font-black text-white mb-3">VS</div>
-                      <div className="text-sm text-gray-300">
+                      <div className="text-sm text-gray-300 mb-4">
                         {formatMatchTime(featuredLiveMatch.date, featuredLiveMatch.time)}
                       </div>
+                      {/* Display Toss Information */}
+                      {featuredLiveMatch.toss && (
+                        <motion.div 
+                          className="text-xs px-3 py-2 rounded-lg inline-block"
+                          style={{
+                            background: 'rgba(219, 39, 119, 0.2)',
+                            color: '#FDB4D9',
+                          }}
+                          initial={{ opacity: 0 }}
+                          whileInView={{ opacity: 1 }}
+                          transition={{ duration: 0.5, delay: 0.5 }}
+                        >
+                          <div className="font-semibold">
+                            {featuredLiveMatch.toss.winner === 'team1' ? featuredLiveMatch.team1.shortName : featuredLiveMatch.team2.shortName} won the toss
+                          </div>
+                          <div className="text-xs text-gray-300">
+                            chose to {featuredLiveMatch.toss.decision === 'bat' ? 'bat' : 'bowl'}
+                          </div>
+                        </motion.div>
+                      )}
                     </motion.div>
                     <motion.div
                       className="text-center md:text-right"

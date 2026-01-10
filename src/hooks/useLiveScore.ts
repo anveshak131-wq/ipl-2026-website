@@ -124,6 +124,30 @@ export function useLiveScore({
 
   const [matchState, setMatchState] = useState<MatchState>(getInitialMatchState());
 
+  // Synchronize matchState with initialState when it contains persisted data (on page refresh)
+  useEffect(() => {
+    if (initialState && initialState.matchState) {
+      // If initialState has a matchState, use it to restore the exact match state
+      setMatchState(initialState.matchState);
+    } else if (initialState && initialState.toss) {
+      // If initialState has toss data but no explicit matchState, reconstruct it
+      const tossState = transitionState(matchState, 'toss', {
+        toss: initialState.toss,
+      });
+      
+      // Auto-determine batting team for innings 1
+      const battingTeam = initialState.toss.decision === 'bat' 
+        ? initialState.toss.winner 
+        : (initialState.toss.winner === 'team1' ? 'team2' : 'team1');
+      
+      const innings1State = transitionState(tossState, 'innings-1', {
+        battingTeam,
+      });
+      
+      setMatchState(innings1State);
+    }
+  }, [initialState?.matchState?.currentState, initialState?.toss]);
+
   // Determine initial batting team based on toss
   const getInitialBattingTeam = (): 'team1' | 'team2' => {
     if (initialState) return initialState.battingTeam;

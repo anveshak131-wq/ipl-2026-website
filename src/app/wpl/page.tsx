@@ -755,9 +755,29 @@ export default function WPLHomePage() {
                       transition={{ duration: 0.6, delay: 0.3, type: "spring" }}
                     >
                       <div className="text-5xl font-black mb-3" style={{ color: WPLColors.textPrimary }}>VS</div>
-                      <div className="text-sm" style={{ color: WPLColors.textSecondary }}>
+                      <div className="text-sm mb-4" style={{ color: WPLColors.textSecondary }}>
                         {formatMatchTime(featuredLiveMatch.date, featuredLiveMatch.time)}
                       </div>
+                      {/* Display Toss Information */}
+                      {featuredLiveMatch.toss && (
+                        <motion.div 
+                          className="text-xs px-3 py-2 rounded-lg inline-block"
+                          style={{
+                            background: WPLColors.roseRGBA[30],
+                            color: WPLColors.textPrimary,
+                          }}
+                          initial={{ opacity: 0 }}
+                          whileInView={{ opacity: 1 }}
+                          transition={{ duration: 0.5, delay: 0.5 }}
+                        >
+                          <div className="font-semibold">
+                            {featuredLiveMatch.toss.winner === 'team1' ? featuredLiveMatch.team1.shortName : featuredLiveMatch.team2.shortName} won the toss
+                          </div>
+                          <div style={{ color: WPLColors.textSecondary }} className="text-xs">
+                            chose to {featuredLiveMatch.toss.decision === 'bat' ? 'bat' : 'bowl'}
+                          </div>
+                        </motion.div>
+                      )}
                     </motion.div>
                     <motion.div
                       className="text-center md:text-right"
