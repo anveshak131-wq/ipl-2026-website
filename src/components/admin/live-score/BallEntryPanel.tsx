@@ -481,7 +481,7 @@ export default function BallEntryPanel({
   const colors = leagueColors[league];
 
   // Check if ball entry is allowed based on match state (always true for test pages)
-  const canRecordBalls = isTestPage || matchState.currentState === 'innings-1' || matchState.currentState === 'innings-2';
+  const canRecordBalls = isTestPage || matchState.currentState === 'innings-1' || matchState.currentState === 'innings-2' || matchState.currentState === 'not-started';
 
   // Detect mobile device
   const [isMobile, setIsMobile] = useState(false);
