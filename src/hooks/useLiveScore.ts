@@ -184,7 +184,7 @@ export function useLiveScore({
       currentBatter: initialBatter ? { ...initialBatter, runs: 0, balls: 0 } : { id: '', name: 'Select Batter', runs: 0, balls: 0 },
       currentBowler: initialBowler ? { ...initialBowler, runs: 0, balls: 0 } : { id: '', name: 'Select Bowler', runs: 0, balls: 0 },
       ballHistory: [],
-      matchState,
+      // Don't include matchState here - it will be set in a useEffect
     };
 
     // If initialState is provided, merge it with defaults (defaults fill in missing properties)
@@ -212,7 +212,6 @@ export function useLiveScore({
           balls: initialState.currentBowler.balls ?? 0 
         } : defaultState.currentBowler,
         ballHistory: initialState.ballHistory || [],
-        matchState: matchState, // Ensure matchState is synced
       };
     }
 
@@ -220,6 +219,20 @@ export function useLiveScore({
   });
 
   const [undoStack, setUndoStack] = useState<LiveScoreState[]>([]);
+  const stateRef = useRef(state);
+  
+  // Update ref whenever state changes
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+
+  // Sync matchState into state
+  useEffect(() => {
+    setState((prev) => ({
+      ...prev,
+      matchState,
+    }));
+  }, [matchState]);
   
   // Track free hit - check last ball in history
   const isFreeHit = useMemo(() => {

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ball Recording Test</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        .test { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+        button { padding: 10px 20px; margin: 5px; }
+        .log { background: #f0f0f0; padding: 10px; margin-top: 10px; max-height: 300px; overflow-y: auto; }
+        .pass { color: green; }
+        .fail { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Ball Recording Debug Tests</h1>
+    
+    <div class="test">
+        <h2>1. Check if recordBall Function Exists</h2>
+        <button onclick="testRecordBallExists()">Test</button>
+        <div id="test1" class="log"></div>
+    </div>
+
+    <div class="test">
+        <h2>2. Check if State Updates</h2>
+        <button onclick="testStateUpdate()">Test</button>
+        <div id="test2" class="log"></div>
+    </div>
+
+    <div class="test">
+        <h2>3. Open Network Inspector</h2>
+        <p>Press F12, go to Network tab, then click a ball button on the WPL page</p>
+        <p>You should see API calls to /api/live-score with POST requests</p>
+    </div>
+
+    <div class="test">
+        <h2>4. Check Browser Console</h2>
+        <p>Press F12, go to Console tab</p>
+        <p>Look for logs starting with "[recordBall]" when you click a button</p>
+        <p>If you see nothing, the button click is not reaching recordBall</p>
+    </div>
+
+    <div class="test">
+        <h2>5. Manual Test Steps</h2>
+        <ol>
+            <li>Open http://localhost:3000/wpl-admin-2026/live-score in Chrome</li>
+            <li>Press F12 to open Developer Tools</li>
+            <li>Go to Console tab</li>
+            <li>Click "Dot (0)" button</li>
+            <li>WATCH the console for messages</li>
+            <li>If you see "[recordBall] Updating: ...", the fix works</li>
+            <li>If nothing appears, there's still an issue</li>
+        </ol>
+    </div>
+
+    <script>
+        function testRecordBallExists() {
+            const div = document.getElementById('test1');
+            div.innerHTML = '<p class="fail">This test requires the app to be running. See manual test steps above.</p>';
+        }
+
+        function testStateUpdate() {
+            const div = document.getElementById('test2');
+            div.innerHTML = '<p class="fail">This test requires the app to be running. See manual test steps above.</p>';
+        }
+    </script>
+</body>
+</html>
