@@ -10,7 +10,6 @@ import LeagueSwitch from '@/components/admin/LeagueSwitch';
 import WPLTeamsManager from '@/components/admin/WPLTeamsManager';
 import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
-import { sortPlayersByRoleAndAge } from '@/lib/playerSort';
 import { parseDateDDMMYYYY, calculateAge, isValidDate, formatDateMonthDDYYYY, parseDateMonthDDYYYY, isValidDateForLeague } from '@/lib/dateUtils';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import FlagImage from '@/components/ui/FlagImage';
@@ -181,9 +180,6 @@ export default function AdminPlayers() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [showDeleteAllModal, setShowDeleteAllModal] = useState(false);
   const [isDeletingAll, setIsDeletingAll] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
   const [showBackupModal, setShowBackupModal] = useState(false);
   const [backups, setBackups] = useState<any[]>([]);
   const [isLoadingBackups, setIsLoadingBackups] = useState(false);
@@ -944,6 +940,10 @@ export default function AdminPlayers() {
       const teamsData = await api.getTeams(currentLeague);
       setPlayers(playersData);
       setTeams(teamsData);
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+    } finally {
+      setIsLoading(false);
       
       // Data Integrity Checks
       if (playersData && playersData.length > 0) {
@@ -958,10 +958,6 @@ export default function AdminPlayers() {
           console.warn('Data inconsistencies found:', inconsistencies);
         }
       }
-    } catch (error) {
-      console.error('Failed to fetch data:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -2174,8 +2170,6 @@ export default function AdminPlayers() {
                   </div>
                   <div className="relative">
                     <input
-                      id="player-search"
-                      name="search"
                       type="text"
                       placeholder="Search by player name, nationality..."
                       value={searchQuery}
@@ -2474,11 +2468,9 @@ export default function AdminPlayers() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {/* Age Range */}
                   <div>
-                    <label htmlFor="age-min" className="block text-sm font-medium text-gray-300 mb-2">Age Range</label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Age Range</label>
                     <div className="flex gap-2">
                       <input
-                        id="age-min"
-                        name="age-min"
                         type="number"
                         placeholder="Min"
                         value={advancedFilters.ageRange.min}
@@ -2489,8 +2481,6 @@ export default function AdminPlayers() {
                         className="w-full px-3 py-2 bg-gray-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                       />
                       <input
-                        id="age-max"
-                        name="age-max"
                         type="number"
                         placeholder="Max"
                         value={advancedFilters.ageRange.max}
@@ -2505,11 +2495,9 @@ export default function AdminPlayers() {
 
                   {/* Runs Range */}
                   <div>
-                    <label htmlFor="runs-min" className="block text-sm font-medium text-gray-300 mb-2">Runs Range</label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Runs Range</label>
                     <div className="flex gap-2">
                       <input
-                        id="runs-min"
-                        name="runs-min"
                         type="number"
                         placeholder="Min"
                         value={advancedFilters.runsRange.min}
@@ -2520,8 +2508,6 @@ export default function AdminPlayers() {
                         className="w-full px-3 py-2 bg-gray-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                       />
                       <input
-                        id="runs-max"
-                        name="runs-max"
                         type="number"
                         placeholder="Max"
                         value={advancedFilters.runsRange.max}
@@ -2536,11 +2522,9 @@ export default function AdminPlayers() {
 
                   {/* Wickets Range */}
                   <div>
-                    <label htmlFor="wickets-min" className="block text-sm font-medium text-gray-300 mb-2">Wickets Range</label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Wickets Range</label>
                     <div className="flex gap-2">
                       <input
-                        id="wickets-min"
-                        name="wickets-min"
                         type="number"
                         placeholder="Min"
                         value={advancedFilters.wicketsRange.min}
@@ -2551,8 +2535,6 @@ export default function AdminPlayers() {
                         className="w-full px-3 py-2 bg-gray-700 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
                       />
                       <input
-                        id="wickets-max"
-                        name="wickets-max"
                         type="number"
                         placeholder="Max"
                         value={advancedFilters.wicketsRange.max}
@@ -2567,10 +2549,8 @@ export default function AdminPlayers() {
 
                   {/* Batting Style */}
                   <div>
-                    <label htmlFor="batting-style" className="block text-sm font-medium text-gray-300 mb-2">Batting Style</label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Batting Style</label>
                     <select
-                      id="batting-style"
-                      name="batting-style"
                       value={advancedFilters.battingStyle}
                       onChange={(e) => setAdvancedFilters(prev => ({ ...prev, battingStyle: e.target.value }))}
                       className="w-full px-3 py-2 bg-gray-700 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
@@ -2584,10 +2564,8 @@ export default function AdminPlayers() {
 
                   {/* Bowling Style */}
                   <div>
-                    <label htmlFor="bowling-style" className="block text-sm font-medium text-gray-300 mb-2">Bowling Style</label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Bowling Style</label>
                     <select
-                      id="bowling-style"
-                      name="bowling-style"
                       value={advancedFilters.bowlingStyle}
                       onChange={(e) => setAdvancedFilters(prev => ({ ...prev, bowlingStyle: e.target.value }))}
                       className="w-full px-3 py-2 bg-gray-700 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
@@ -2601,10 +2579,8 @@ export default function AdminPlayers() {
 
                   {/* Captain Status */}
                   <div>
-                    <label htmlFor="captain-status" className="block text-sm font-medium text-gray-300 mb-2">Captain Status</label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Captain Status</label>
                     <select
-                      id="captain-status"
-                      name="captain-status"
                       value={advancedFilters.isCaptain}
                       onChange={(e) => setAdvancedFilters(prev => ({ ...prev, isCaptain: e.target.value }))}
                       className="w-full px-3 py-2 bg-gray-700 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
@@ -4653,9 +4629,8 @@ export default function AdminPlayers() {
         onClose={handleClosePlayerDetails}
         title="Player Details"
         description="Complete player information and statistics"
-        size="2xl"
         variant="info"
-        showCloseButton={true}
+        size="lg"
         icon={
           <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
             <Eye className="w-6 h-6 text-white" />
