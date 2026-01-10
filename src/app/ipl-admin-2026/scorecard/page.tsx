@@ -85,8 +85,8 @@ interface Scorecard {
   };
   innings: Innings[];
   result?: {
-    winner: string;
-    margin: string;
+    winner?: string;
+    margin?: string;
     manOfTheMatch?: string;
   };
   draft?: boolean;
@@ -117,20 +117,21 @@ export default function ScorecardAdminPage() {
 
   const fetchMatches = async () => {
     try {
-      const res = await api.get('/matches?league=ipl');
+      const res = await api.get('/matches?league=wpl');
       setMatches(res.data || []);
     } catch (err) {
       console.error('Error fetching matches:', err);
-      setMessage('Error fetching IPL matches');
+      setMessage('Error fetching WPL matches');
     }
   };
 
   const fetchPlayers = async () => {
     try {
-      const res = await api.get('/players?league=ipl');
+      const res = await api.get('/players?league=wpl');
       setPlayers(res.data || []);
     } catch (err) {
       console.error('Error fetching players:', err);
+      setMessage('Error fetching WPL players');
     }
   };
 
@@ -155,7 +156,7 @@ export default function ScorecardAdminPage() {
   const initializeScorecard = (match: Match): Scorecard => {
     return {
       matchId: match.id,
-      league: 'ipl',
+      league: 'wpl',
       matchInfo: {
         team1: match.team1,
         team2: match.team2,
@@ -365,8 +366,8 @@ export default function ScorecardAdminPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-4xl font-bold mb-2">IPL Scorecard Admin</h1>
-        <p className="text-gray-400 mb-8">Create and manage IPL match scorecards</p>
+        <h1 className="text-4xl font-bold mb-2">WPL Scorecard Admin</h1>
+        <p className="text-gray-400 mb-8">Create and manage WPL match scorecards</p>
 
         {message && (
           <div className={`mb-6 p-4 rounded-lg ${message.includes('✓') ? 'bg-green-900' : 'bg-red-900'}`}>
