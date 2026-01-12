@@ -128,9 +128,8 @@ export default function ScorecardAdminPage() {
 
   const fetchMatches = async () => {
     try {
-      console.log('Fetching WPL matches from:', 'http://localhost:8787/api/matches?league=wpl');
-      console.log('API_BASE_URL:', process.env.NODE_ENV === 'production' ? '' : 'http://localhost:8787/api');
-      const res = await api.get('/matches?league=wpl');
+      console.log('Fetching WPL matches (Workers KV) via API');
+      const res = await api.get('/matches', { league: 'wpl' });
       console.log('WPL matches response:', res);
       console.log('WPL matches data length:', res.data?.length || 0);
       setMatches(res.data || []);
@@ -140,24 +139,24 @@ export default function ScorecardAdminPage() {
     } catch (err) {
       console.error('Error fetching WPL matches:', err);
       console.error('Error details:', err.message, err.stack);
-      setMessage('✗ Error fetching WPL matches. Check if development server is running on port 8787.');
+      setMessage('✗ Error fetching WPL matches. Check if the Workers KV dev server is running (port 8787).');
     }
   };
 
   const fetchPlayers = async () => {
     try {
-      console.log('Fetching WPL players from:', 'http://localhost:8787/api/players?league=wpl');
-      const res = await api.get('/players?league=wpl');
+      console.log('Fetching WPL players (Workers KV) via API');
+      const res = await api.get('/players', { league: 'wpl' });
       console.log('WPL players response:', res);
       console.log('WPL players data length:', res.data?.length || 0);
       setPlayers(res.data || []);
       if (res.data && res.data.length === 0) {
-        setMessage('⚠️ No WPL players found. Please add WPL players first.');
+        setMessage('⚠️ No WPL players found in Workers KV. Please add WPL players first.');
       }
     } catch (err) {
       console.error('Error fetching WPL players:', err);
       console.error('Error details:', err.message, err.stack);
-      setMessage('✗ Error fetching WPL players. Check if development server is running on port 8787.');
+      setMessage('✗ Error fetching WPL players from Workers KV. Check if the Workers KV dev server is running on port 8787.');
     }
   };
 
@@ -177,6 +176,28 @@ export default function ScorecardAdminPage() {
       setScorecard(initializeScorecard(match));
     }
     setLoading(false);
+  };
+
+  const handleCreateMatch = () => {
+    // Matches are authored on the matchday page which writes to Workers KV.
+    // Navigate the admin to the match creation page where matches are created.
+    router.push('/ipl-admin-2026/matchday');
+  };
+
+  const handleImportPlayers = async () => {
+    setMessage('🔄 Importing players...');
+    try {
+      // Attempt to call an import endpoint on the API which should pull players into KV
+      const res = await api.post('/players/import', { league: 'wpl' });
+      console.log('Import players response:', res);
+      // If API returns an object with success/data, refresh players
+      await fetchPlayers();
+      setMessage('✓ Players imported and refreshed');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (err) {
+      console.error('Error importing players:', err);
+      setMessage('✗ Error importing players. Check Workers KV importer endpoint.');
+    }
   };
 
   const initializeScorecard = (match: Match): Scorecard => {
@@ -421,14 +442,14 @@ export default function ScorecardAdminPage() {
                 </button>
 
                 <button
-                  onClick={() => router.push('/ipl-admin-2026/matchday')}
+                  onClick={handleCreateMatch}
                   className="px-4 py-2 bg-pink-600 hover:bg-pink-700 rounded transition"
                 >
                   ➕ Create Match
                 </button>
 
                 <button
-                  onClick={() => router.push('/ipl-admin-2026/players')}
+                  onClick={handleImportPlayers}
                   className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded transition"
                 >
                   📥 Import Players
