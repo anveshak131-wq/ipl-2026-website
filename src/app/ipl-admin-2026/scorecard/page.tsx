@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 
 interface Match {
@@ -96,6 +97,7 @@ interface Scorecard {
 }
 
 export default function ScorecardAdminPage() {
+  const router = useRouter();
   const [matches, setMatches] = useState<Match[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
@@ -402,19 +404,36 @@ export default function ScorecardAdminPage() {
         {/* Match Selection */}
         {!selectedMatch && (
           <div>
-            <div className="mb-6 flex items-center justify-between">
+            <div className="mb-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div>
                 <h2 className="text-2xl font-bold">Select a Match</h2>
                 <p className="text-gray-400 mt-1">
                   {matches.length} WPL matches available • {players.length} WPL players loaded
                 </p>
               </div>
-              <button
-                onClick={refreshData}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition flex items-center gap-2"
-              >
-                🔄 Refresh Data
-              </button>
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={refreshData}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition flex items-center gap-2"
+                >
+                  🔄 Refresh Data
+                </button>
+
+                <button
+                  onClick={() => router.push('/ipl-admin-2026/matchday')}
+                  className="px-4 py-2 bg-pink-600 hover:bg-pink-700 rounded transition"
+                >
+                  ➕ Create Match
+                </button>
+
+                <button
+                  onClick={() => router.push('/ipl-admin-2026/players')}
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded transition"
+                >
+                  📥 Import Players
+                </button>
+              </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {matches.map((match) => (

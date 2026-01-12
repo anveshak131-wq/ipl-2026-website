@@ -170,16 +170,63 @@ export default function WPLLiveScorePage() {
     return null;
   }
 
-  // No matches
+  // No matches - render an empty state with counts and actions
   if (matches.length === 0) {
     return (
       <div className="flex min-h-screen" style={bgStyle}>
         <AuroraBackground />
         <AdminSidebar currentPage="/wpl-admin-2026/live-score" />
-        <main className="flex-1 relative z-20 p-8 flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold mb-2" style={{ color: WPLColors.textPrimary }}>No Matches</h2>
-            <p style={{ color: WPLColors.textSecondary }}>No WPL matches available</p>
+
+        <main className="flex-1 relative z-20 p-4 md:p-8 overflow-y-auto">
+          <div className="max-w-7xl mx-auto">
+            {/* Header */}
+            <div className="mb-6">
+              <div className="flex items-center gap-3 mb-2">
+                <Activity className="w-8 h-8" style={{ color: WPLColors.pink }} />
+                <h1 
+                  className="text-4xl font-bold"
+                  style={{
+                    background: `linear-gradient(to right, ${WPLColors.textPrimary}, ${WPLColors.purple}, ${WPLColors.pink})`,
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
+                >
+                  Live Score
+                </h1>
+              </div>
+              <p style={{ color: WPLColors.textSecondary }}>Create and manage WPL match scorecards</p>
+            </div>
+
+            {/* Counts + actions */}
+            <div className="rounded-2xl p-6 md:p-8 backdrop-blur-xl border flex flex-col items-center gap-4"
+              style={{ background: WPLColors.purpleRGBA[10], borderColor: WPLColors.purpleRGBA[30] }}>
+              <div className="text-lg font-medium" style={{ color: WPLColors.textPrimary }}>
+                {matches.length} WPL matches available • {players.length} WPL players loaded
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => router.push('/wpl-admin-2026/matchday')}
+                  className="px-4 py-2 rounded-lg font-semibold"
+                  style={{ background: WPLColors.pink, color: '#fff' }}
+                >
+                  Create Match
+                </button>
+
+                <button
+                  onClick={() => router.push('/wpl-admin-2026/players')}
+                  className="px-4 py-2 rounded-lg font-semibold"
+                  style={{ background: WPLColors.purple, color: '#fff' }}
+                >
+                  Import Players
+                </button>
+              </div>
+
+              <p className="text-sm mt-2" style={{ color: WPLColors.textSecondary }}>
+                You can create a match or import players to get started with live scoring.
+              </p>
+            </div>
           </div>
         </main>
       </div>
