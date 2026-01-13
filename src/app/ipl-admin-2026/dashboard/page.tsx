@@ -9,594 +9,1071 @@ interface DashboardStats {
   totalUsers: number;
   activeUsers: number;
   peakActiveUsers: number;
-  totalMatches: number;
-  upcomingMatches: number;
-  totalMessages: number;
-  messagesToday: number;
-  messagesPerHour: number;
-  pageViews: number;
-  engagementRate: number;
-}
+   'use client';
 
-export default function AdminDashboard() {
-  const router = useRouter();
-  const { currentLeague } = useLeague();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [stats, setStats] = useState<DashboardStats>({
-    totalUsers: 0,
-    activeUsers: 0,
-    peakActiveUsers: 0,
-    totalMatches: 0,
-    upcomingMatches: 0,
-    totalMessages: 0,
-    messagesToday: 0,
-    messagesPerHour: 0,
-    pageViews: 0,
-    engagementRate: 0,
-  });
+  import { useState, useEffect, useRef } from 'react';
+  import { useRouter } from 'next/navigation';
+  import { useLeague } from '@/contexts/LeagueContext';
+  import { TrendingUp, Users, MessageSquare, Activity, Calendar, Eye, BarChart3, Zap, ArrowUpRight, Clock, Target, Globe, Database, Shield } from 'lucide-react';
 
-  const hasCheckedAuth = useRef(false);
-
-  useEffect(() => {
-    if (isAuthenticated || hasCheckedAuth.current) return;
-    hasCheckedAuth.current = true;
-
-    const checkAuth = async () => {
-      const token = localStorage.getItem('auth_token') || localStorage.getItem('adminToken');
-      if (!token) {
-        router.push('/ipl-admin-2026');
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const response = await fetch(`/api/auth?action=verify&token=${token}`);
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-          localStorage.removeItem('adminToken');
-          localStorage.removeItem('auth_token');
-          router.push('/ipl-admin-2026');
-          setIsLoading(false);
-          return;
-        }
-
-        const userRole = data.user?.role;
-        if (userRole !== 'admin' && userRole !== 'super_admin') {
-          alert('Access denied. Admin privileges required.');
-          router.push('/');
-          setIsLoading(false);
-          return;
-        }
-
-        setIsAuthenticated(true);
-        setIsLoading(false);
-        await fetchStats();
-      } catch (error) {
-        console.error('Auth error:', error);
-        router.push('/ipl-admin-2026');
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
-  }, []);
-
-  const fetchStats = async () => {
-    try {
-      const token = localStorage.getItem('auth_token');
-
-      let usersData = { users: [] };
-      try {
-        const usersRes = await fetch('/api/admin/users?matchId=current', {
-          headers: { 'Authorization': `Bearer ${token}` },
-        });
-        usersData = await usersRes.ok ? await usersRes.json() : { users: [] };
-      } catch (err) {
-        console.error('Users API error:', err);
-      }
-
-      let messages: any[] = [];
-      try {
-        const messagesRes = await fetch('/api/messages?matchId=current&limit=1000');
-        messages = await messagesRes.ok ? await messagesRes.json() : [];
-      } catch (err) {
-        console.error('Messages API error:', err);
-      }
-
-      const now = new Date();
-      const today = new Date().setHours(0, 0, 0, 0);
-      const messagesToday = messages.filter((msg: any) => new Date(msg.timestamp).getTime() >= today).length;
-      const hoursElapsed = Math.max(1, Math.floor((now.getTime() - today) / (1000 * 60 * 60)));
-      const messagesPerHour = Math.round(messagesToday / hoursElapsed);
-
-      let matches: any[] = [];
-      try {
-        const matchesRes = await fetch(`/api/matches?league=${currentLeague}`);
-        matches = await matchesRes.ok ? await matchesRes.json() : [];
-      } catch (err) {
-        console.error('Matches API error:', err);
-      }
-
-      const upcomingMatches = matches.filter((m: any) => new Date(m.date) > now).length;
-      const peakActiveUsers = Math.max(usersData.users?.length || 0, Math.floor((usersData.users?.length || 0) * 1.3));
-
-      setStats({
-        totalUsers: usersData.users?.length || 0,
-        activeUsers: usersData.users?.length || 0,
-        peakActiveUsers,
-        totalMatches: matches.length || 0,
-        upcomingMatches,
-        totalMessages: messages.length || 0,
-        messagesToday,
-        messagesPerHour,
-        pageViews: Math.floor(Math.random() * 10000) + 5000,
-        engagementRate: usersData.users?.length > 0 ? Math.min(78 + Math.floor(Math.random() * 10), 99) : 0,
-      });
-    } catch (error) {
-      console.error('Error fetching stats:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  if (!isAuthenticated || isLoading) {
-    return (
-      <div className="flex min-h-screen bg-gray-950">
-        <div className="flex-1 flex items-center justify-center">
-          <div className="admin-glass p-8 rounded-2xl">
-            <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
-            <p className="text-white text-lg font-medium mt-4">Loading Dashboard...</p>
-          </div>
-        </div>
-      </div>
-    );
+  interface DashboardStats {
+    totalUsers: number;
+    activeUsers: number;
+    peakActiveUsers: number;
+    totalMatches: number;
+    upcomingMatches: number;
+    totalMessages: number;
+    messagesToday: number;
+    messagesPerHour: number;
+    pageViews: number;
+    engagementRate: number;
   }
 
-  return (
-    <div className="max-w-7xl mx-auto px-8 py-8">
-      <div className="mb-12">
-        <h1 className="text-4xl font-bold text-white mb-2">Dashboard Overview</h1>
-        <p className="text-gray-400">Monitor your {currentLeague.toUpperCase()} platform</p>
-      </div>
+  interface HourlyMessageData {
+    hour: string;
+    count: number;
+  }
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        <div className="admin-card p-6 rounded-xl">
-          <Users className="w-8 h-8 text-blue-400 mb-4" />
-          <p className="text-3xl font-bold text-white">{stats.activeUsers}</p>
-          <p className="text-gray-400 text-sm">Active Users</p>
-        </div>
+  interface TimeOfDayBuckets {
+    night: number; // 00:00 - 05:59
+    morning: number; // 06:00 - 11:59
+    afternoon: number; // 12:00 - 17:59
+    evening: number; // 18:00 - 23:59
+  }
 
-        <div className="admin-card p-6 rounded-xl">
-          <Activity className="w-8 h-8 text-emerald-400 mb-4" />
-          <p className="text-3xl font-bold text-white">{stats.upcomingMatches}</p>
-          <p className="text-gray-400 text-sm">Upcoming Matches</p>
-        </div>
+  export default function AdminDashboard() {
+    const router = useRouter();
+    const { currentLeague } = useLeague();
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [stats, setStats] = useState<DashboardStats>({
+      totalUsers: 0,
+      activeUsers: 0,
+      peakActiveUsers: 0,
+      totalMatches: 0,
+      upcomingMatches: 0,
+      totalMessages: 0,
+      messagesToday: 0,
+      messagesPerHour: 0,
+      pageViews: 0,
+      engagementRate: 0,
+    });
+    const [hourlyMessages, setHourlyMessages] = useState<HourlyMessageData[]>([]);
+    const [timeOfDayBuckets, setTimeOfDayBuckets] = useState<TimeOfDayBuckets>({
+      night: 0,
+      morning: 0,
+      afternoon: 0,
+      evening: 0,
+    });
+    const [apiStatus, setApiStatus] = useState<{
+      users: 'ok' | 'error' | 'loading';
+      messages: 'ok' | 'error' | 'loading';
+      matches: 'ok' | 'error' | 'loading';
+    }>({
+      users: 'loading',
+      messages: 'loading',
+      matches: 'loading',
+    });
 
-        <div className="admin-card p-6 rounded-xl">
-          <MessageSquare className="w-8 h-8 text-purple-400 mb-4" />
-          <p className="text-3xl font-bold text-white">{stats.messagesToday}</p>
-          <p className="text-gray-400 text-sm">Messages Today</p>
-        </div>
+    const hasCheckedAuth = useRef(false);
 
-        <div className="admin-card p-6 rounded-xl">
-          <Target className="w-8 h-8 text-amber-400 mb-4" />
-          <p className="text-3xl font-bold text-white">{stats.engagementRate}%</p>
-          <p className="text-gray-400 text-sm">Engagement Rate</p>
-        </div>
-      </div>
+    useEffect(() => {
+      // Skip auth check if already authenticated or already checked
+      if (isAuthenticated || hasCheckedAuth.current) return;
+      hasCheckedAuth.current = true;
 
-      <div className="mb-12">
-        <h2 className="text-2xl font-bold text-white mb-6">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <button onClick={() => router.push('/ipl-admin-2026/engagement')} className="admin-card p-6 rounded-xl hover:bg-white/5 transition cursor-pointer text-left">
-            <Users className="w-8 h-8 text-blue-400 mb-3" />
-            <h3 className="text-white font-semibold">User Management</h3>
-            <p className="text-gray-400 text-sm">Monitor users & activity</p>
-          </button>
-
-          <button onClick={() => router.push('/ipl-admin-2026/live-score')} className="admin-card p-6 rounded-xl hover:bg-white/5 transition cursor-pointer text-left">
-            <Activity className="w-8 h-8 text-emerald-400 mb-3" />
-            <h3 className="text-white font-semibold">Live Scoring</h3>
-            <p className="text-gray-400 text-sm">Update match scores</p>
-          </button>
-
-          <button onClick={() => router.push('/ipl-admin-2026/matches')} className="admin-card p-6 rounded-xl hover:bg-white/5 transition cursor-pointer text-left">
-            <Calendar className="w-8 h-8 text-violet-400 mb-3" />
-            <h3 className="text-white font-semibold">Match Control</h3>
-            <p className="text-gray-400 text-sm">Manage fixtures</p>
-          </button>
-
-          <button onClick={() => router.push('/ipl-admin-2026/content')} className="admin-card p-6 rounded-xl hover:bg-white/5 transition cursor-pointer text-left">
-            <BarChart3 className="w-8 h-8 text-amber-400 mb-3" />
-            <h3 className="text-white font-semibold">Content Hub</h3>
-            <p className="text-gray-400 text-sm">Publish content</p>
-          </button>
-        </div>
-      </div>
-
-      <div className="admin-card p-6 rounded-xl">
-        <h2 className="text-xl font-bold text-white mb-6">Platform Overview</h2>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
-            <div>
-              <p className="text-gray-400 text-sm">Total Matches</p>
-              <p className="text-2xl font-bold text-white">{stats.totalMatches}</p>
-            </div>
-            <Calendar className="w-6 h-6 text-blue-400" />
-          </div>
-
-          <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
-            <div>
-              <p className="text-gray-400 text-sm">Total Messages</p>
-              <p className="text-2xl font-bold text-white">{stats.totalMessages}</p>
-            </div>
-            <MessageSquare className="w-6 h-6 text-purple-400" />
-          </div>
-
-          <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
-            <div>
-              <p className="text-gray-400 text-sm">Page Views</p>
-              <p className="text-2xl font-bold text-white">{stats.pageViews.toLocaleString()}</p>
-            </div>
-            <Eye className="w-6 h-6 text-emerald-400" />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { useLeague } from '@/contexts/LeagueContext';
-import { TrendingUp, Users, MessageSquare, Activity, Calendar, Eye, BarChart3, Zap, ArrowUpRight, Clock, Target, Globe, Database, Shield } from 'lucide-react';
-
-interface DashboardStats {
-  totalUsers: number;
-  activeUsers: number;
-  peakActiveUsers: number;
-  totalMatches: number;
-  upcomingMatches: number;
-  totalMessages: number;
-  messagesToday: number;
-  messagesPerHour: number;
-  pageViews: number;
-  engagementRate: number;
-}
-
-interface HourlyMessageData {
-  hour: string;
-  count: number;
-}
-
-interface TimeOfDayBuckets {
-  night: number; // 00:00 - 05:59
-  morning: number; // 06:00 - 11:59
-  afternoon: number; // 12:00 - 17:59
-  evening: number; // 18:00 - 23:59
-}
-
-export default function AdminDashboard() {
-  const router = useRouter();
-  const { currentLeague } = useLeague();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [stats, setStats] = useState<DashboardStats>({
-    totalUsers: 0,
-    activeUsers: 0,
-    peakActiveUsers: 0,
-    totalMatches: 0,
-    upcomingMatches: 0,
-    totalMessages: 0,
-    messagesToday: 0,
-    messagesPerHour: 0,
-    pageViews: 0,
-    engagementRate: 0,
-  });
-  const [hourlyMessages, setHourlyMessages] = useState<HourlyMessageData[]>([]);
-  const [timeOfDayBuckets, setTimeOfDayBuckets] = useState<TimeOfDayBuckets>({
-    night: 0,
-    morning: 0,
-    afternoon: 0,
-    evening: 0,
-  });
-  const [apiStatus, setApiStatus] = useState<{
-    users: 'ok' | 'error' | 'loading';
-    messages: 'ok' | 'error' | 'loading';
-    matches: 'ok' | 'error' | 'loading';
-  }>({
-    users: 'loading',
-    messages: 'loading',
-    matches: 'loading',
-  });
-
-  const hasCheckedAuth = useRef(false);
-
-  useEffect(() => {
-    // Skip auth check if already authenticated or already checked
-    if (isAuthenticated || hasCheckedAuth.current) return;
-    hasCheckedAuth.current = true;
-
-    const checkAuth = async () => {
-      const token = localStorage.getItem('auth_token') || localStorage.getItem('adminToken');
-      if (!token) {
-        router.push('/ipl-admin-2026');
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const response = await fetch(`/api/auth?action=verify&token=${token}`);
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-          localStorage.removeItem('adminToken');
-          localStorage.removeItem('auth_token');
+      const checkAuth = async () => {
+        const token = localStorage.getItem('auth_token') || localStorage.getItem('adminToken');
+        if (!token) {
           router.push('/ipl-admin-2026');
           setIsLoading(false);
           return;
         }
 
-        const userRole = data.user?.role;
-        if (userRole !== 'admin' && userRole !== 'super_admin') {
-          alert('Access denied. Admin privileges required.');
-          router.push('/');
+        try {
+          const response = await fetch(`/api/auth?action=verify&token=${token}`);
+          const data = await response.json();
+
+          if (!response.ok || !data.success) {
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('auth_token');
+            router.push('/ipl-admin-2026');
+            setIsLoading(false);
+            return;
+          }
+
+          const userRole = data.user?.role;
+          if (userRole !== 'admin' && userRole !== 'super_admin') {
+            alert('Access denied. Admin privileges required.');
+            router.push('/');
+            setIsLoading(false);
+            return;
+          }
+
+          setIsAuthenticated(true);
           setIsLoading(false);
-          return;
+          await fetchStats();
+        } catch (error) {
+          console.error('Auth error:', error);
+          router.push('/ipl-admin-2026');
+          setIsLoading(false);
         }
-
-        setIsAuthenticated(true);
-        setIsLoading(false);
-        await fetchStats();
-      } catch (error) {
-        console.error('Auth error:', error);
-        router.push('/ipl-admin-2026');
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only run once on mount
-
-  const fetchStats = async () => {
-    try {
-      const token = localStorage.getItem('auth_token');
-
-      // Fetch active users
-      let usersData = { users: [] };
-      try {
-        const usersRes = await fetch('/api/admin/users?matchId=current', {
-          headers: { 'Authorization': `Bearer ${token}` },
-        });
-        usersData = await usersRes.ok ? await usersRes.json() : { users: [] };
-        setApiStatus(prev => ({ ...prev, users: 'ok' }));
-      } catch (err) {
-        console.error('Users API error:', err);
-        setApiStatus(prev => ({ ...prev, users: 'error' }));
-      }
-
-      // Fetch messages
-      let messages: any[] = [];
-      try {
-        const messagesRes = await fetch('/api/messages?matchId=current&limit=1000');
-        messages = await messagesRes.ok ? await messagesRes.json() : [];
-        setApiStatus(prev => ({ ...prev, messages: 'ok' }));
-      } catch (err) {
-        console.error('Messages API error:', err);
-        setApiStatus(prev => ({ ...prev, messages: 'error' }));
-      }
-
-      // Calculate messages today and hourly breakdown
-      const now = new Date();
-      const today = new Date().setHours(0, 0, 0, 0);
-      const messagesToday = messages.filter((msg: any) => 
-        new Date(msg.timestamp).getTime() >= today
-      ).length;
-
-      // Calculate messages per hour (average for today)
-      const hoursElapsed = Math.max(1, Math.floor((now.getTime() - today) / (1000 * 60 * 60)));
-      const messagesPerHour = Math.round(messagesToday / hoursElapsed);
-
-      // Build hourly chart data (last 24 hours)
-      const hourlyData: { [key: string]: number } = {};
-      const last24Hours = now.getTime() - (24 * 60 * 60 * 1000);
-      
-      for (let i = 23; i >= 0; i--) {
-        const hourTime = new Date(now.getTime() - (i * 60 * 60 * 1000));
-        const hourKey = hourTime.getHours().toString().padStart(2, '0');
-        hourlyData[hourKey] = 0;
-      }
-
-      messages.forEach((msg: any) => {
-        const msgTime = new Date(msg.timestamp);
-        if (msgTime.getTime() >= last24Hours) {
-          const hourKey = msgTime.getHours().toString().padStart(2, '0');
-          hourlyData[hourKey] = (hourlyData[hourKey] || 0) + 1;
-        }
-      });
-
-      const hourlyMessagesArray = Object.entries(hourlyData).map(([hour, count]) => ({
-        hour: `${hour}:00`,
-        count,
-      }));
-      setHourlyMessages(hourlyMessagesArray);
-
-      // Time-of-day buckets for advanced analytics (last 24 hours)
-      const buckets: TimeOfDayBuckets = {
-        night: 0,
-        morning: 0,
-        afternoon: 0,
-        evening: 0,
       };
 
-      messages.forEach((msg: any) => {
-        const msgTime = new Date(msg.timestamp);
-        if (msgTime.getTime() < last24Hours) return;
-        const hour = msgTime.getHours();
+      checkAuth();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Only run once on mount
 
-        if (hour < 6) {
-          buckets.night += 1;
-        } else if (hour < 12) {
-          buckets.morning += 1;
-        } else if (hour < 18) {
-          buckets.afternoon += 1;
-        } else {
-          buckets.evening += 1;
-        }
-      });
-
-      setTimeOfDayBuckets(buckets);
-
-      // Fetch matches (with league filter)
-      let matches: any[] = [];
+    const fetchStats = async () => {
       try {
-        const matchesRes = await fetch(`/api/matches?league=${currentLeague}`);
-        matches = await matchesRes.ok ? await matchesRes.json() : [];
-        setApiStatus(prev => ({ ...prev, matches: 'ok' }));
-      } catch (err) {
-        console.error('Matches API error:', err);
-        setApiStatus(prev => ({ ...prev, matches: 'error' }));
-      }
+        const token = localStorage.getItem('auth_token');
+
+        // Fetch active users
+        let usersData = { users: [] };
+        try {
+          const usersRes = await fetch('/api/admin/users?matchId=current', {
+            headers: { 'Authorization': `Bearer ${token}` },
+          });
+          usersData = await usersRes.ok ? await usersRes.json() : { users: [] };
+          setApiStatus(prev => ({ ...prev, users: 'ok' }));
+        } catch (err) {
+          console.error('Users API error:', err);
+          setApiStatus(prev => ({ ...prev, users: 'error' }));
+        }
+
+        // Fetch messages
+        let messages: any[] = [];
+        try {
+          const messagesRes = await fetch('/api/messages?matchId=current&limit=1000');
+          messages = await messagesRes.ok ? await messagesRes.json() : [];
+          setApiStatus(prev => ({ ...prev, messages: 'ok' }));
+        } catch (err) {
+          console.error('Messages API error:', err);
+          setApiStatus(prev => ({ ...prev, messages: 'error' }));
+        }
+
+        // Calculate messages today and hourly breakdown
+        const now = new Date();
+        const today = new Date().setHours(0, 0, 0, 0);
+        const messagesToday = messages.filter((msg: any) =>
+          new Date(msg.timestamp).getTime() >= today
+        ).length;
+
+        // Calculate messages per hour (average for today)
+        const hoursElapsed = Math.max(1, Math.floor((now.getTime() - today) / (1000 * 60 * 60)));
+        const messagesPerHour = Math.round(messagesToday / hoursElapsed);
+
+        // Build hourly chart data (last 24 hours)
+        const hourlyData: { [key: string]: number } = {};
+        const last24Hours = now.getTime() - (24 * 60 * 60 * 1000);
       
-      const upcomingMatches = matches.filter((m: any) => 
-        new Date(m.date) > now
-      ).length;
+        for (let i = 23; i >= 0; i--) {
+          const hourTime = new Date(now.getTime() - (i * 60 * 60 * 1000));
+          const hourKey = hourTime.getHours().toString().padStart(2, '0');
+          hourlyData[hourKey] = 0;
+        }
 
-      // Calculate peak active users (mock for now, would need historical tracking)
-      const peakActiveUsers = Math.max(usersData.users?.length || 0, Math.floor((usersData.users?.length || 0) * 1.3));
+        messages.forEach((msg: any) => {
+          const msgTime = new Date(msg.timestamp);
+          if (msgTime.getTime() >= last24Hours) {
+            const hourKey = msgTime.getHours().toString().padStart(2, '0');
+            hourlyData[hourKey] = (hourlyData[hourKey] || 0) + 1;
+          }
+        });
 
-      setStats({
-        totalUsers: usersData.users?.length || 0,
-        activeUsers: usersData.users?.length || 0,
-        peakActiveUsers,
-        totalMatches: matches.length || 0,
-        upcomingMatches,
-        totalMessages: messages.length || 0,
-        messagesToday,
-        messagesPerHour,
-        pageViews: Math.floor(Math.random() * 10000) + 5000, // Mock data
-        engagementRate: usersData.users?.length > 0 ? Math.min(78 + Math.floor(Math.random() * 10), 99) : 0,
-      });
-    } catch (error) {
-      console.error('Error fetching stats:', error);
-    } finally {
-      setIsLoading(false);
+        const hourlyMessagesArray = Object.entries(hourlyData).map(([hour, count]) => ({
+          hour: `${hour}:00`,
+          count,
+        }));
+        setHourlyMessages(hourlyMessagesArray);
+
+        // Time-of-day buckets for advanced analytics (last 24 hours)
+        const buckets: TimeOfDayBuckets = {
+          night: 0,
+          morning: 0,
+          afternoon: 0,
+          evening: 0,
+        };
+
+        messages.forEach((msg: any) => {
+          const msgTime = new Date(msg.timestamp);
+          if (msgTime.getTime() < last24Hours) return;
+          const hour = msgTime.getHours();
+
+          if (hour < 6) {
+            buckets.night += 1;
+          } else if (hour < 12) {
+            buckets.morning += 1;
+          } else if (hour < 18) {
+            buckets.afternoon += 1;
+          } else {
+            buckets.evening += 1;
+          }
+        });
+
+        setTimeOfDayBuckets(buckets);
+
+        // Fetch matches (with league filter)
+        let matches: any[] = [];
+        try {
+          const matchesRes = await fetch(`/api/matches?league=${currentLeague}`);
+          matches = await matchesRes.ok ? await matchesRes.json() : [];
+          setApiStatus(prev => ({ ...prev, matches: 'ok' }));
+        } catch (err) {
+          console.error('Matches API error:', err);
+          setApiStatus(prev => ({ ...prev, matches: 'error' }));
+        }
+      
+        const upcomingMatches = matches.filter((m: any) =>
+          new Date(m.date) > now
+        ).length;
+
+        // Calculate peak active users (mock for now, would need historical tracking)
+        const peakActiveUsers = Math.max(usersData.users?.length || 0, Math.floor((usersData.users?.length || 0) * 1.3));
+
+        setStats({
+          totalUsers: usersData.users?.length || 0,
+          activeUsers: usersData.users?.length || 0,
+          peakActiveUsers,
+          totalMatches: matches.length || 0,
+          upcomingMatches,
+          totalMessages: messages.length || 0,
+          messagesToday,
+          messagesPerHour,
+          pageViews: Math.floor(Math.random() * 10000) + 5000, // Mock data
+          engagementRate: usersData.users?.length > 0 ? Math.min(78 + Math.floor(Math.random() * 10), 99) : 0,
+        });
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      } finally {
+        setIsLoading(false);
+      }
     }
-  }
 
-  if (!isAuthenticated || isLoading) {
-    return (
-      <div className="flex min-h-screen bg-gray-950">
-        <div className="flex-1 flex items-center justify-center">
-          <div className="flex flex-col items-center gap-6">
-            <div className="admin-glass p-8 rounded-2xl">
-              <div className="flex flex-col items-center gap-4">
-                <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
-                <p className="text-white text-lg font-medium">Loading Dashboard...</p>
-                <p className="text-gray-400 text-sm">Fetching your analytics data</p>
+    if (!isAuthenticated || isLoading) {
+      return (
+        <div className="flex min-h-screen bg-gray-950">
+          <div className="flex-1 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-6">
+              <div className="admin-glass p-8 rounded-2xl">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
+                  <p className="text-white text-lg font-medium">Loading Dashboard...</p>
+                  <p className="text-gray-400 text-sm">Fetching your analytics data</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
+      );
+    }
+
+    const statCards = [
+      {
+        title: 'Active Users',
+        value: stats.activeUsers,
+        subtitle: 'Currently online',
+        change: '+12.5%',
+        trend: 'up',
+        icon: Users,
+        gradient: 'from-blue-500 to-indigo-600',
+        bgGradient: 'from-blue-500/5 to-indigo-600/5',
+        borderColor: 'border-blue-500/20',
+        glowColor: 'shadow-blue-500/20',
+      },
+      {
+        title: 'Live Matches',
+        value: stats.upcomingMatches,
+        subtitle: 'In progress',
+        change: '+3',
+        trend: 'up',
+        icon: Activity,
+        gradient: 'from-emerald-500 to-teal-600',
+        bgGradient: 'from-emerald-500/5 to-teal-600/5',
+        borderColor: 'border-emerald-500/20',
+        glowColor: 'shadow-emerald-500/20',
+      },
+      {
+        title: 'Messages Today',
+        value: stats.messagesToday,
+        subtitle: `${stats.messagesPerHour}/hr average`,
+        change: '+8.3%',
+        trend: 'up',
+        icon: MessageSquare,
+        gradient: 'from-purple-500 to-violet-600',
+        bgGradient: 'from-purple-500/5 to-violet-600/5',
+        borderColor: 'border-purple-500/20',
+        glowColor: 'shadow-purple-500/20',
+      },
+      {
+        title: 'Engagement Rate',
+        value: `${stats.engagementRate}%`,
+        subtitle: 'User interaction',
+        change: '+5.2%',
+        trend: 'up',
+        icon: Target,
+        gradient: 'from-amber-500 to-orange-600',
+        bgGradient: 'from-amber-500/5 to-orange-600/5',
+        borderColor: 'border-amber-500/20',
+        glowColor: 'shadow-amber-500/20',
+      },
+    ];
+
+    const quickActions = [
+      {
+        title: 'User Management',
+        description: 'Monitor engagement & user activity',
+        icon: Users,
+        path: '/ipl-admin-2026/engagement',
+        color: 'blue',
+        gradient: 'from-blue-500/10 to-blue-600/5',
+        borderColor: 'border-blue-500/20',
+        hoverColor: 'hover:shadow-blue-500/25',
+        bgColor: 'bg-blue-500/5',
+      },
+      {
+        title: 'Live Scoring',
+        description: 'Update real-time match scores',
+        icon: Activity,
+        path: '/ipl-admin-2026/live-score',
+        color: 'emerald',
+        gradient: 'from-emerald-500/10 to-emerald-600/5',
+        borderColor: 'border-emerald-500/20',
+        hoverColor: 'hover:shadow-emerald-500/25',
+        bgColor: 'bg-emerald-500/5',
+      },
+      {
+        title: 'Match Control',
+        description: 'Schedule & manage fixtures',
+        icon: Calendar,
+        path: '/ipl-admin-2026/matches',
+        color: 'violet',
+        gradient: 'from-violet-500/10 to-violet-600/5',
+        borderColor: 'border-violet-500/20',
+        hoverColor: 'hover:shadow-violet-500/25',
+        bgColor: 'bg-violet-500/5',
+      },
+      {
+        title: 'Content Hub',
+        description: 'Create & publish content',
+        icon: BarChart3,
+        path: '/ipl-admin-2026/content',
+        color: 'amber',
+        gradient: 'from-amber-500/10 to-amber-600/5',
+        borderColor: 'border-amber-500/20',
+        hoverColor: 'hover:shadow-amber-500/25',
+        bgColor: 'bg-amber-500/5',
+      },
+    ];
+
+    return (
+      <div className="max-w-7xl mx-auto px-8 py-8">
+        <div className="mb-12">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div className="space-y-3">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                  <BarChart3 className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
+                    Dashboard Overview
+                  </h1>
+                  <p className="text-gray-400 text-lg lg:text-xl">
+                    Monitor your {currentLeague.toUpperCase()} platform performance
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4">
+              {/* System Status - Redesigned */}
+              <div className="admin-glass px-4 py-3 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <div className={`w-3 h-3 rounded-full ${
+                    apiStatus.users === 'ok' && apiStatus.messages === 'ok' && apiStatus.matches === 'ok'
+                      ? 'bg-green-500 animate-pulse'
+                      : apiStatus.users === 'error' || apiStatus.messages === 'error' || apiStatus.matches === 'error'
+                      ? 'bg-red-500'
+                      : 'bg-yellow-500'
+                  }`}></div>
+                  <span className={`text-sm font-medium ${
+                    apiStatus.users === 'ok' && apiStatus.messages === 'ok' && apiStatus.matches === 'ok'
+                      ? 'text-green-400'
+                      : apiStatus.users === 'error' || apiStatus.messages === 'error' || apiStatus.matches === 'error'
+                      ? 'text-red-400'
+                      : 'text-yellow-400'
+                  }`}> 
+                    {apiStatus.users === 'ok' && apiStatus.messages === 'ok' && apiStatus.matches === 'ok'
+                      ? 'All Systems Operational'
+                      : apiStatus.users === 'error' || apiStatus.messages === 'error' || apiStatus.matches === 'error'
+                      ? 'Service Issues'
+                      : 'Loading Services...'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Date & Time - Redesigned */}
+              <div className="admin-glass px-4 py-3 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <Clock className="w-5 h-5 text-gray-400" />
+                  <div className="text-left">
+                    <div className="text-white text-sm font-medium">
+                      {new Date().toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric'
+                      })}
+                    </div>
+                    <div className="text-gray-400 text-xs">
+                      {new Date().toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Grid - Redesigned */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          {statCards.map((card, index) => (
+            <div
+              key={index}
+              className={`admin-card group relative overflow-hidden hover:scale-[1.02] transition-all duration-300 ${card.glowColor} hover:shadow-2xl`}
+            >
+              {/* Background gradient */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${card.bgGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl`}></div>
+
+              <div className="relative z-10 p-6">
+                {/* Icon */}
+                <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${card.gradient} mb-4 shadow-lg`}>
+                  <card.icon className="w-6 h-6 text-white" />
+                </div>
+
+                {/* Value */}
+                <div className="mb-4">
+                  <h3 className="text-3xl font-bold text-white mb-1">
+                    {isLoading ? (
+                      <div className="w-20 h-8 bg-gray-700/50 rounded animate-pulse"></div>
+                    ) : (
+                      card.value
+                    )}
+                  </h3>
+                  {card.subtitle && (
+                    <p className="text-gray-400 text-sm">{card.subtitle}</p>
+                  )}
+                </div>
+
+                {/* Title and Change */}
+                <div className="flex items-center justify-between">
+                  <p className="text-gray-300 text-sm font-medium">{card.title}</p>
+                  {card.trend === 'up' && (
+                    <div className="admin-badge admin-badge-success text-xs px-2 py-1">
+                      <ArrowUpRight className="w-3 h-3 mr-1" />
+                      {card.change}
+                    </div>
+                  )}
+                  {card.trend === 'neutral' && (
+                    <div className="admin-badge admin-badge-neutral text-xs px-2 py-1">
+                      {card.change}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Accent line */}
+              <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${card.gradient} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 rounded-b-xl`}></div>
+            </div>
+          ))}
+        </div>
+
+        {/* Quick Actions - Redesigned */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl font-bold text-white">Quick Actions</h2>
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <Zap className="w-5 h-5" />
+              <span>Frequently used</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {quickActions.map((action, index) => (
+              <button
+                key={index}
+                onClick={() => router.push(action.path)}
+                className={`admin-card group relative overflow-hidden hover:scale-[1.02] transition-all duration-300 text-left cursor-pointer`}
+              >
+                {/* Background gradient */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${action.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl`}></div>
+
+                <div className="relative z-10 p-6">
+                  <action.icon className="w-8 h-8 text-white mb-4 group-hover:scale-110 transition-transform duration-300" />
+                  <h3 className="text-white font-semibold mb-2 group-hover:text-white transition-colors">
+                    {action.title}
+                  </h3>
+                  <p className="text-gray-400 text-sm group-hover:text-gray-300 transition-colors">{action.description}</p>
+                </div>
+
+                {/* Hover arrow */}
+                <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <ArrowUpRight className="w-5 h-5 text-white" />
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Message Activity Chart - Redesigned */}
+        <div className="mb-12 admin-card">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center">
+                <MessageSquare className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-white">Message Activity</h2>
+                <p className="text-sm text-gray-400">Real-time conversation analytics</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="admin-glass p-3 rounded-xl text-center">
+                <p className="text-xs text-gray-400 mb-1">Peak Hour</p>
+                <p className="text-lg font-bold text-white">
+                  {hourlyMessages.length > 0
+                    ? hourlyMessages.reduce((max, curr) => curr.count > max.count ? curr : max, hourlyMessages[0]).hour
+                    : '--'}
+                </p>
+              </div>
+              <div className="admin-glass p-3 rounded-xl text-center">
+                <p className="text-xs text-gray-400 mb-1">Avg/Hour</p>
+                <p className="text-lg font-bold text-purple-400">{stats.messagesPerHour}</p>
+              </div>
+            </div>
+          </div>
+        
+          {/* Enhanced bar chart */}
+          <div className="relative">
+            {hourlyMessages.length > 0 ? (
+              <div className="bg-gradient-to-br from-slate-900/50 to-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                <div className="flex items-end justify-between h-48 gap-1">
+                  {hourlyMessages.map((data, idx) => {
+                    const maxCount = Math.max(...hourlyMessages.map(h => h.count));
+                    const height = maxCount === 0 ? 4 : Math.max(4, Math.round((data.count / maxCount) * 100));
+                    return (
+                      <div key={idx} className="flex flex-col items-center justify-end w-full mx-0.5">
+                        <div className="w-full bg-gradient-to-b from-indigo-500 to-purple-500 rounded-t" style={{ height: `${height}%` }}></div>
+                        <div className="text-xs text-gray-400 mt-2">{data.hour}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="p-6 text-gray-400">No message activity yet</div>
+            )}
+          </div>
+        </div>
+
+        {/* Time of day breakdown */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="admin-card p-6 rounded-xl">
+            <h3 className="text-lg font-semibold text-white">Time of Day Activity</h3>
+            <div className="mt-4 grid grid-cols-2 gap-4">
+              <div className="admin-glass p-4 rounded-lg text-center">
+                <p className="text-sm text-gray-400">Night</p>
+                <p className="text-xl font-bold text-white">{timeOfDayBuckets.night}</p>
+              </div>
+              <div className="admin-glass p-4 rounded-lg text-center">
+                <p className="text-sm text-gray-400">Morning</p>
+                <p className="text-xl font-bold text-white">{timeOfDayBuckets.morning}</p>
+              </div>
+              <div className="admin-glass p-4 rounded-lg text-center">
+                <p className="text-sm text-gray-400">Afternoon</p>
+                <p className="text-xl font-bold text-white">{timeOfDayBuckets.afternoon}</p>
+              </div>
+              <div className="admin-glass p-4 rounded-lg text-center">
+                <p className="text-sm text-gray-400">Evening</p>
+                <p className="text-xl font-bold text-white">{timeOfDayBuckets.evening}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="admin-card p-6 rounded-xl">
+            <h3 className="text-lg font-semibold text-white">Page Views</h3>
+            <p className="text-3xl font-bold text-white mt-4">{stats.pageViews.toLocaleString()}</p>
+            <p className="text-gray-400 text-sm mt-2">Estimated unique page views</p>
+          </div>
+
+          <div className="admin-card p-6 rounded-xl">
+            <h3 className="text-lg font-semibold text-white">Peak Active Users</h3>
+            <p className="text-3xl font-bold text-white mt-4">{stats.peakActiveUsers}</p>
+            <p className="text-gray-400 text-sm mt-2">Recorded peak active users (mock)</p>
+          </div>
+        </div>
+
+        {/* Platform Overview */}
+        <div className="admin-card p-6 rounded-xl">
+          <h2 className="text-xl font-bold text-white mb-6">Platform Overview</h2>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+              <div>
+                <p className="text-gray-400 text-sm">Total Matches</p>
+                <p className="text-2xl font-bold text-white">{stats.totalMatches}</p>
+              </div>
+              <Calendar className="w-6 h-6 text-blue-400" />
+            </div>
+
+            <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+              <div>
+                <p className="text-gray-400 text-sm">Total Messages</p>
+                <p className="text-2xl font-bold text-white">{stats.totalMessages}</p>
+              </div>
+              <MessageSquare className="w-6 h-6 text-purple-400" />
+            </div>
+
+            <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+              <div>
+                <p className="text-gray-400 text-sm">Page Views</p>
+                <p className="text-2xl font-bold text-white">{stats.pageViews.toLocaleString()}</p>
+              </div>
+              <Eye className="w-6 h-6 text-emerald-400" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
+              }
+      
+              const upcomingMatches = matches.filter((m: any) =>
+                new Date(m.date) > now
+              ).length;
 
-  const statCards = [
-    {
-      title: 'Active Users',
-      value: stats.activeUsers,
-      subtitle: 'Currently online',
-      change: '+12.5%',
-      trend: 'up',
-      icon: Users,
-      gradient: 'from-blue-500 to-indigo-600',
-      bgGradient: 'from-blue-500/5 to-indigo-600/5',
-      borderColor: 'border-blue-500/20',
-      glowColor: 'shadow-blue-500/20',
-    },
-    {
-      title: 'Live Matches',
-      value: stats.upcomingMatches,
-      subtitle: 'In progress',
-      change: '+3',
-      trend: 'up',
-      icon: Activity,
-      gradient: 'from-emerald-500 to-teal-600',
-      bgGradient: 'from-emerald-500/5 to-teal-600/5',
-      borderColor: 'border-emerald-500/20',
-      glowColor: 'shadow-emerald-500/20',
-    },
-    {
-      title: 'Messages Today',
-      value: stats.messagesToday,
-      subtitle: `${stats.messagesPerHour}/hr average`,
-      change: '+8.3%',
-      trend: 'up',
-      icon: MessageSquare,
-      gradient: 'from-purple-500 to-violet-600',
-      bgGradient: 'from-purple-500/5 to-violet-600/5',
-      borderColor: 'border-purple-500/20',
-      glowColor: 'shadow-purple-500/20',
-    },
-    {
-      title: 'Engagement Rate',
-      value: `${stats.engagementRate}%`,
-      subtitle: 'User interaction',
-      change: '+5.2%',
-      trend: 'up',
-      icon: Target,
-      gradient: 'from-amber-500 to-orange-600',
-      bgGradient: 'from-amber-500/5 to-orange-600/5',
-      borderColor: 'border-amber-500/20',
-      glowColor: 'shadow-amber-500/20',
-    },
-  ];
+              // Calculate peak active users (mock for now, would need historical tracking)
+              const peakActiveUsers = Math.max(usersData.users?.length || 0, Math.floor((usersData.users?.length || 0) * 1.3));
 
-  const quickActions = [
-    {
-      title: 'User Management',
-      description: 'Monitor engagement & user activity',
-      icon: Users,
-      path: '/ipl-admin-2026/engagement',
-      color: 'blue',
-      gradient: 'from-blue-500/10 to-blue-600/5',
-      borderColor: 'border-blue-500/20',
-      hoverColor: 'hover:shadow-blue-500/25',
-      bgColor: 'bg-blue-500/5',
-    },
-    {
-      title: 'Live Scoring',
-      description: 'Update real-time match scores',
-      icon: Activity,
-      path: '/ipl-admin-2026/live-score',
-      color: 'emerald',
-      gradient: 'from-emerald-500/10 to-emerald-600/5',
-      borderColor: 'border-emerald-500/20',
-      hoverColor: 'hover:shadow-emerald-500/25',
-      bgColor: 'bg-emerald-500/5',
-    },
-    {
-      title: 'Match Control',
-      description: 'Schedule & manage fixtures',
-      icon: Calendar,
-      path: '/ipl-admin-2026/matches',
-      color: 'violet',
-      gradient: 'from-violet-500/10 to-violet-600/5',
-      borderColor: 'border-violet-500/20',
-      hoverColor: 'hover:shadow-violet-500/25',
-      bgColor: 'bg-violet-500/5',
-    },
-    {
-      title: 'Content Hub',
-      description: 'Create & publish content',
-      icon: BarChart3,
-      path: '/ipl-admin-2026/content',
-      color: 'amber',
-      gradient: 'from-amber-500/10 to-amber-600/5',
+              setStats({
+                totalUsers: usersData.users?.length || 0,
+                activeUsers: usersData.users?.length || 0,
+                peakActiveUsers,
+                totalMatches: matches.length || 0,
+                upcomingMatches,
+                totalMessages: messages.length || 0,
+                messagesToday,
+                messagesPerHour,
+                pageViews: Math.floor(Math.random() * 10000) + 5000, // Mock data
+                engagementRate: usersData.users?.length > 0 ? Math.min(78 + Math.floor(Math.random() * 10), 99) : 0,
+              });
+            } catch (error) {
+              console.error('Error fetching stats:', error);
+            } finally {
+              setIsLoading(false);
+            }
+          }
+
+          if (!isAuthenticated || isLoading) {
+            return (
+              <div className="flex min-h-screen bg-gray-950">
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-6">
+                    <div className="admin-glass p-8 rounded-2xl">
+                      <div className="flex flex-col items-center gap-4">
+                        <div className="w-16 h-16 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
+                        <p className="text-white text-lg font-medium">Loading Dashboard...</p>
+                        <p className="text-gray-400 text-sm">Fetching your analytics data</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          const statCards = [
+            {
+              title: 'Active Users',
+              value: stats.activeUsers,
+              subtitle: 'Currently online',
+              change: '+12.5%',
+              trend: 'up',
+              icon: Users,
+              gradient: 'from-blue-500 to-indigo-600',
+              bgGradient: 'from-blue-500/5 to-indigo-600/5',
+              borderColor: 'border-blue-500/20',
+              glowColor: 'shadow-blue-500/20',
+            },
+            {
+              title: 'Live Matches',
+              value: stats.upcomingMatches,
+              subtitle: 'In progress',
+              change: '+3',
+              trend: 'up',
+              icon: Activity,
+              gradient: 'from-emerald-500 to-teal-600',
+              bgGradient: 'from-emerald-500/5 to-teal-600/5',
+              borderColor: 'border-emerald-500/20',
+              glowColor: 'shadow-emerald-500/20',
+            },
+            {
+              title: 'Messages Today',
+              value: stats.messagesToday,
+              subtitle: `${stats.messagesPerHour}/hr average`,
+              change: '+8.3%',
+              trend: 'up',
+              icon: MessageSquare,
+              gradient: 'from-purple-500 to-violet-600',
+              bgGradient: 'from-purple-500/5 to-violet-600/5',
+              borderColor: 'border-purple-500/20',
+              glowColor: 'shadow-purple-500/20',
+            },
+            {
+              title: 'Engagement Rate',
+              value: `${stats.engagementRate}%`,
+              subtitle: 'User interaction',
+              change: '+5.2%',
+              trend: 'up',
+              icon: Target,
+              gradient: 'from-amber-500 to-orange-600',
+              bgGradient: 'from-amber-500/5 to-orange-600/5',
+              borderColor: 'border-amber-500/20',
+              glowColor: 'shadow-amber-500/20',
+            },
+          ];
+
+          const quickActions = [
+            {
+              title: 'User Management',
+              description: 'Monitor engagement & user activity',
+              icon: Users,
+              path: '/ipl-admin-2026/engagement',
+              color: 'blue',
+              gradient: 'from-blue-500/10 to-blue-600/5',
+              borderColor: 'border-blue-500/20',
+              hoverColor: 'hover:shadow-blue-500/25',
+              bgColor: 'bg-blue-500/5',
+            },
+            {
+              title: 'Live Scoring',
+              description: 'Update real-time match scores',
+              icon: Activity,
+              path: '/ipl-admin-2026/live-score',
+              color: 'emerald',
+              gradient: 'from-emerald-500/10 to-emerald-600/5',
+              borderColor: 'border-emerald-500/20',
+              hoverColor: 'hover:shadow-emerald-500/25',
+              bgColor: 'bg-emerald-500/5',
+            },
+            {
+              title: 'Match Control',
+              description: 'Schedule & manage fixtures',
+              icon: Calendar,
+              path: '/ipl-admin-2026/matches',
+              color: 'violet',
+              gradient: 'from-violet-500/10 to-violet-600/5',
+              borderColor: 'border-violet-500/20',
+              hoverColor: 'hover:shadow-violet-500/25',
+              bgColor: 'bg-violet-500/5',
+            },
+            {
+              title: 'Content Hub',
+              description: 'Create & publish content',
+              icon: BarChart3,
+              path: '/ipl-admin-2026/content',
+              color: 'amber',
+              gradient: 'from-amber-500/10 to-amber-600/5',
+              borderColor: 'border-amber-500/20',
+              hoverColor: 'hover:shadow-amber-500/25',
+              bgColor: 'bg-amber-500/5',
+            },
+          ];
+
+          return (
+            <div className="max-w-7xl mx-auto px-8 py-8">
+              <div className="mb-12">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                        <BarChart3 className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
+                          Dashboard Overview
+                        </h1>
+                        <p className="text-gray-400 text-lg lg:text-xl">
+                          Monitor your {currentLeague.toUpperCase()} platform performance
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    {/* System Status - Redesigned */}
+                    <div className="admin-glass px-4 py-3 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-3 h-3 rounded-full ${
+                          apiStatus.users === 'ok' && apiStatus.messages === 'ok' && apiStatus.matches === 'ok'
+                            ? 'bg-green-500 animate-pulse'
+                            : apiStatus.users === 'error' || apiStatus.messages === 'error' || apiStatus.matches === 'error'
+                            ? 'bg-red-500'
+                            : 'bg-yellow-500'
+                        }`}></div>
+                        <span className={`text-sm font-medium ${
+                          apiStatus.users === 'ok' && apiStatus.messages === 'ok' && apiStatus.matches === 'ok'
+                            ? 'text-green-400'
+                            : apiStatus.users === 'error' || apiStatus.messages === 'error' || apiStatus.matches === 'error'
+                            ? 'text-red-400'
+                            : 'text-yellow-400'
+                        }`}> 
+                          {apiStatus.users === 'ok' && apiStatus.messages === 'ok' && apiStatus.matches === 'ok'
+                            ? 'All Systems Operational'
+                            : apiStatus.users === 'error' || apiStatus.messages === 'error' || apiStatus.matches === 'error'
+                            ? 'Service Issues'
+                            : 'Loading Services...'}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Date & Time - Redesigned */}
+                    <div className="admin-glass px-4 py-3 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <Clock className="w-5 h-5 text-gray-400" />
+                        <div className="text-left">
+                          <div className="text-white text-sm font-medium">
+                            {new Date().toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric'
+                            })}
+                          </div>
+                          <div className="text-gray-400 text-xs">
+                            {new Date().toLocaleTimeString('en-US', {
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stats Grid - Redesigned */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                {statCards.map((card, index) => (
+                  <div
+                    key={index}
+                    className={`admin-card group relative overflow-hidden hover:scale-[1.02] transition-all duration-300 ${card.glowColor} hover:shadow-2xl`}
+                  >
+                    {/* Background gradient */}
+                    <div className={`absolute inset-0 bg-gradient-to-br ${card.bgGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl`}></div>
+
+                    <div className="relative z-10 p-6">
+                      {/* Icon */}
+                      <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${card.gradient} mb-4 shadow-lg`}>
+                        <card.icon className="w-6 h-6 text-white" />
+                      </div>
+
+                      {/* Value */}
+                      <div className="mb-4">
+                        <h3 className="text-3xl font-bold text-white mb-1">
+                          {isLoading ? (
+                            <div className="w-20 h-8 bg-gray-700/50 rounded animate-pulse"></div>
+                          ) : (
+                            card.value
+                          )}
+                        </h3>
+                        {card.subtitle && (
+                          <p className="text-gray-400 text-sm">{card.subtitle}</p>
+                        )}
+                      </div>
+
+                      {/* Title and Change */}
+                      <div className="flex items-center justify-between">
+                        <p className="text-gray-300 text-sm font-medium">{card.title}</p>
+                        {card.trend === 'up' && (
+                          <div className="admin-badge admin-badge-success text-xs px-2 py-1">
+                            <ArrowUpRight className="w-3 h-3 mr-1" />
+                            {card.change}
+                          </div>
+                        )}
+                        {card.trend === 'neutral' && (
+                          <div className="admin-badge admin-badge-neutral text-xs px-2 py-1">
+                            {card.change}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Accent line */}
+                    <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r ${card.gradient} transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 rounded-b-xl`}></div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Quick Actions - Redesigned */}
+              <div className="mb-12">
+                <div className="flex items-center justify-between mb-8">
+                  <h2 className="text-2xl font-bold text-white">Quick Actions</h2>
+                  <div className="flex items-center gap-2 text-sm text-gray-400">
+                    <Zap className="w-5 h-5" />
+                    <span>Frequently used</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {quickActions.map((action, index) => (
+                    <button
+                      key={index}
+                      onClick={() => router.push(action.path)}
+                      className={`admin-card group relative overflow-hidden hover:scale-[1.02] transition-all duration-300 text-left cursor-pointer`}
+                    >
+                      {/* Background gradient */}
+                      <div className={`absolute inset-0 bg-gradient-to-br ${action.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl`}></div>
+
+                      <div className="relative z-10 p-6">
+                        <action.icon className="w-8 h-8 text-white mb-4 group-hover:scale-110 transition-transform duration-300" />
+                        <h3 className="text-white font-semibold mb-2 group-hover:text-white transition-colors">
+                          {action.title}
+                        </h3>
+                        <p className="text-gray-400 text-sm group-hover:text-gray-300 transition-colors">{action.description}</p>
+                      </div>
+
+                      {/* Hover arrow */}
+                      <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <ArrowUpRight className="w-5 h-5 text-white" />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Message Activity Chart - Redesigned */}
+              <div className="mb-12 admin-card">
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center">
+                      <MessageSquare className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-white">Message Activity</h2>
+                      <p className="text-sm text-gray-400">Real-time conversation analytics</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="admin-glass p-3 rounded-xl text-center">
+                      <p className="text-xs text-gray-400 mb-1">Peak Hour</p>
+                      <p className="text-lg font-bold text-white">
+                        {hourlyMessages.length > 0
+                          ? hourlyMessages.reduce((max, curr) => curr.count > max.count ? curr : max, hourlyMessages[0]).hour
+                          : '--'}
+                      </p>
+                    </div>
+                    <div className="admin-glass p-3 rounded-xl text-center">
+                      <p className="text-xs text-gray-400 mb-1">Avg/Hour</p>
+                      <p className="text-lg font-bold text-purple-400">{stats.messagesPerHour}</p>
+                    </div>
+                  </div>
+                </div>
+        
+                {/* Enhanced bar chart */}
+                <div className="relative">
+                  {hourlyMessages.length > 0 ? (
+                    <div className="bg-gradient-to-br from-slate-900/50 to-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+                      <div className="flex items-end justify-between h-48 gap-1">
+                        {hourlyMessages.map((data, idx) => {
+                          const maxCount = Math.max(...hourlyMessages.map(h => h.count));
+                          const height = maxCount === 0 ? 4 : Math.max(4, Math.round((data.count / maxCount) * 100));
+                          return (
+                            <div key={idx} className="flex flex-col items-center justify-end w-full mx-0.5">
+                              <div className="w-full bg-gradient-to-b from-indigo-500 to-purple-500 rounded-t" style={{ height: `${height}%` }}></div>
+                              <div className="text-xs text-gray-400 mt-2">{data.hour}</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-6 text-gray-400">No message activity yet</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Time of day breakdown */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <div className="admin-card p-6 rounded-xl">
+                  <h3 className="text-lg font-semibold text-white">Time of Day Activity</h3>
+                  <div className="mt-4 grid grid-cols-2 gap-4">
+                    <div className="admin-glass p-4 rounded-lg text-center">
+                      <p className="text-sm text-gray-400">Night</p>
+                      <p className="text-xl font-bold text-white">{timeOfDayBuckets.night}</p>
+                    </div>
+                    <div className="admin-glass p-4 rounded-lg text-center">
+                      <p className="text-sm text-gray-400">Morning</p>
+                      <p className="text-xl font-bold text-white">{timeOfDayBuckets.morning}</p>
+                    </div>
+                    <div className="admin-glass p-4 rounded-lg text-center">
+                      <p className="text-sm text-gray-400">Afternoon</p>
+                      <p className="text-xl font-bold text-white">{timeOfDayBuckets.afternoon}</p>
+                    </div>
+                    <div className="admin-glass p-4 rounded-lg text-center">
+                      <p className="text-sm text-gray-400">Evening</p>
+                      <p className="text-xl font-bold text-white">{timeOfDayBuckets.evening}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="admin-card p-6 rounded-xl">
+                  <h3 className="text-lg font-semibold text-white">Page Views</h3>
+                  <p className="text-3xl font-bold text-white mt-4">{stats.pageViews.toLocaleString()}</p>
+                  <p className="text-gray-400 text-sm mt-2">Estimated unique page views</p>
+                </div>
+
+                <div className="admin-card p-6 rounded-xl">
+                  <h3 className="text-lg font-semibold text-white">Peak Active Users</h3>
+                  <p className="text-3xl font-bold text-white mt-4">{stats.peakActiveUsers}</p>
+                  <p className="text-gray-400 text-sm mt-2">Recorded peak active users (mock)</p>
+                </div>
+              </div>
+
+              {/* Platform Overview */}
+              <div className="admin-card p-6 rounded-xl">
+                <h2 className="text-xl font-bold text-white mb-6">Platform Overview</h2>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                    <div>
+                      <p className="text-gray-400 text-sm">Total Matches</p>
+                      <p className="text-2xl font-bold text-white">{stats.totalMatches}</p>
+                    </div>
+                    <Calendar className="w-6 h-6 text-blue-400" />
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                    <div>
+                      <p className="text-gray-400 text-sm">Total Messages</p>
+                      <p className="text-2xl font-bold text-white">{stats.totalMessages}</p>
+                    </div>
+                    <MessageSquare className="w-6 h-6 text-purple-400" />
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                    <div>
+                      <p className="text-gray-400 text-sm">Page Views</p>
+                      <p className="text-2xl font-bold text-white">{stats.pageViews.toLocaleString()}</p>
+                    </div>
+                    <Eye className="w-6 h-6 text-emerald-400" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        }
       borderColor: 'border-amber-500/20',
       hoverColor: 'hover:shadow-amber-500/25',
       bgColor: 'bg-amber-500/5',
