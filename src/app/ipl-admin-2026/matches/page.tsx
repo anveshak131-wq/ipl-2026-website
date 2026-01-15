@@ -2517,7 +2517,7 @@ export default function AdminMatches() {
                                                 <td className="px-4 py-4" style={{ minWidth: '350px' }}>
                                                     {/* WPL Playoff Helper Text */}
                                                     {match.league === 'wpl' && match.playoffType && 
-                                                     (match.team1.id.includes('tbd-') || match.team2.id.includes('tbd-') || 
+                                                     (String(match.team1.id).includes('tbd-') || String(match.team2.id).includes('tbd-') || 
                                                       match.team1.shortName?.includes('Place') || match.team2.shortName?.includes('Place') ||
                                                       match.team1.shortName === 'Winner of Eliminator' || match.team2.shortName === 'Winner of Eliminator') && (
                                                         <div className="mb-2">
@@ -2532,11 +2532,11 @@ export default function AdminMatches() {
                                                                 // Check if it's a TBD team by ID, shortName, or name
                                                                 // Also check for teams 16, 17, 18, 19 which are placeholder teams
                                                                 const isPlaceholderTeam = 
-                                                                    match.team1.id.includes('tbd-') || 
-                                                                    match.team1.id === '16' || 
-                                                                    match.team1.id === '17' || 
-                                                                    match.team1.id === '18' || 
-                                                                    match.team1.id === '19' ||
+                                                                    String(match.team1.id).includes('tbd-') || 
+                                                                    String(match.team1.id) === '16' || 
+                                                                    String(match.team1.id) === '17' || 
+                                                                    String(match.team1.id) === '18' || 
+                                                                    String(match.team1.id) === '19' ||
                                                                     match.team1.shortName === 'TBD' || 
                                                                     match.team1.shortName?.includes('Place') || 
                                                                     match.team1.name?.includes('Place Team');
