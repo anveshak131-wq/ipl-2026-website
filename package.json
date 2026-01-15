@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "next dev --port 3001",
+    "dev:wrangler": "wrangler pages dev -- next dev --port 3000 --hostname localhost",
     "build": "NODE_OPTIONS='--max-old-space-size=2048' SKIP_TYPE_CHECK=true SKIP_LINT=true NEXT_WEBPACK_USEPOLLING=false next build && npm run clean-cache",
     "build:fast": "NODE_OPTIONS='--max-old-space-size=1024' SKIP_TYPE_CHECK=true SKIP_LINT=true NEXT_WEBPACK_USEPOLLING=false next build --no-lint",
     "clean-cache": "rm -rf .next/cache",

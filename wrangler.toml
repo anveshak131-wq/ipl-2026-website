@@ -1,9 +1,5 @@
-# Cloudflare Pages build configuration
+# Cloudflare Pages configuration
 name = "ipl-2026-website"
-pages_build_command = "npm run build:fast"
-pages_build_output_dir = "out"
-
-# Optimize build for faster deployment
 compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
 

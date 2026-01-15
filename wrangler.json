@@ -2,8 +2,6 @@
   "name": "ipl-2026-website",
   "compatibility_date": "2024-01-01",
   "compatibility_flags": ["nodejs_compat"],
-  "pages_build_command": "npm run build",
-  "pages_build_output_dir": "out",
   "kv_namespaces": [
     {
       "binding": "IPL_CACHE",
@@ -16,14 +14,6 @@
       "preview_id": "de6a22c437444d2eba9e63240f6e1f9b"
     }
   ],
-  "pages_build_config": {
-    "kv_namespaces": [
-      {
-        "binding": "SPORTS_KV",
-        "namespace_id": "5c1beb13cd564dd5892612ac9d2e04c4"
-      }
-    ]
-  },
   "env": {
     "production": {
       "vars": {
@@ -33,8 +23,7 @@
         {
           "binding": "IPL_CACHE",
           "id": "5c1beb13cd564dd5892612ac9d2e04c4"
-        }
-        ,
+        },
         {
           "binding": "SPORTS_KV",
           "id": "5c1beb13cd564dd5892612ac9d2e04c4"
@@ -49,8 +38,7 @@
         {
           "binding": "IPL_CACHE",
           "id": "de6a22c437444d2eba9e63240f6e1f9b"
-        }
-        ,
+        },
         {
           "binding": "SPORTS_KV",
           "id": "de6a22c437444d2eba9e63240f6e1f9b"
