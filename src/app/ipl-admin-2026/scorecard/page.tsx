@@ -188,21 +188,7 @@ export default function ScorecardAdminPage() {
     router.push('/ipl-admin-2026/matchday');
   };
 
-  const handleImportPlayers = async () => {
-    setMessage('🔄 Importing players...');
-    try {
-      // Attempt to call an import endpoint on the API which should pull players into KV
-      const res = await api.post('/players/import', { league: 'wpl' });
-      console.log('Import players response:', res);
-      // If API returns an object with success/data, refresh players
-      await fetchPlayers();
-      setMessage('✓ Players imported and refreshed');
-      setTimeout(() => setMessage(''), 3000);
-    } catch (err) {
-      console.error('Error importing players:', err);
-      setMessage('✗ Error importing players. Check Workers KV importer endpoint.');
-    }
-  };
+
 
   const initializeScorecard = (match: Match): Scorecard => {
     return {
@@ -450,13 +436,6 @@ export default function ScorecardAdminPage() {
                   className="px-4 py-2 bg-pink-600 hover:bg-pink-700 rounded transition"
                 >
                   ➕ Create Match
-                </button>
-
-                <button
-                  onClick={handleImportPlayers}
-                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded transition"
-                >
-                  📥 Import Players
                 </button>
               </div>
             </div>
