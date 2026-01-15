@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { LeagueProvider } from '@/contexts/LeagueContext';
 import WPLAdminSidebar from '@/components/admin/WPLAdminSidebar';
+import WPLPointsTable from './points-table/page';
 import GlobalSearch from '@/components/admin/GlobalSearch';
 import WPLAdminDashboard from './dashboard/page';
 
@@ -179,6 +180,20 @@ export default function WPLAdminRouter() {
             <GlobalSearch />
             <div className="p-6">
               {/* Predictions admin page will be rendered by Next.js routing */}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (pathname.includes('/points-table')) {
+      return (
+        <div>
+          <WPLAdminSidebar currentPage="points-table" />
+          <div className="ml-64">
+            <GlobalSearch />
+            <div className="p-6">
+              <WPLPointsTable />
             </div>
           </div>
         </div>
