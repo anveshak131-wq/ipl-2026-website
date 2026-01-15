@@ -27,7 +27,7 @@ function verifyAdminToken(request) {
 // WPL Teams data
 const wplTeams = [
   {
-    id: '11',
+    id: 11,
     league: 'wpl',
     name: 'Mumbai Indians (WPL)',
     shortName: 'MI-W',
@@ -35,7 +35,7 @@ const wplTeams = [
     colors: { primary: '#004BA0', secondary: '#FFD700' }
   },
   {
-    id: '12',
+    id: 12,
     league: 'wpl',
     name: 'Royal Challengers Bengaluru (WPL)',
     shortName: 'RCB-W',
@@ -43,7 +43,7 @@ const wplTeams = [
     colors: { primary: '#C8102E', secondary: '#FFD700' }
   },
   {
-    id: '13',
+    id: 13,
     league: 'wpl',
     name: 'Delhi Capitals (WPL)',
     shortName: 'DC-W',
@@ -51,7 +51,7 @@ const wplTeams = [
     colors: { primary: '#004BA0', secondary: '#DC2626' }
   },
   {
-    id: '14',
+    id: 14,
     league: 'wpl',
     name: 'Gujarat Giants (WPL)',
     shortName: 'GG',
@@ -59,7 +59,7 @@ const wplTeams = [
     colors: { primary: '#F97316', secondary: '#FFD700' }
   },
   {
-    id: '15',
+    id: 15,
     league: 'wpl',
     name: 'UP Warriorz (WPL)',
     shortName: 'UPW',
@@ -76,8 +76,8 @@ const wplMatches = [
     date: '2026-02-15',
     time: '19:30',
     venue: 'DY Patil Stadium, Mumbai',
-    team1Id: '11',
-    team2Id: '12',
+    team1Id: 11,
+    team2Id: 12,
     team1: wplTeams[0],
     team2: wplTeams[1],
     status: 'scheduled',
@@ -89,8 +89,8 @@ const wplMatches = [
     date: '2026-02-16',
     time: '15:30',
     venue: 'Ekana Cricket Stadium, Lucknow',
-    team1Id: '13',
-    team2Id: '14',
+    team1Id: 13,
+    team2Id: 14,
     team1: wplTeams[2],
     team2: wplTeams[3],
     status: 'scheduled',
@@ -102,8 +102,8 @@ const wplMatches = [
     date: '2026-02-17',
     time: '19:30',
     venue: 'Arun Jaitley Stadium, Delhi',
-    team1Id: '15',
-    team2Id: '11',
+    team1Id: 15,
+    team2Id: 11,
     team1: wplTeams[4],
     team2: wplTeams[0],
     status: 'scheduled',
@@ -115,8 +115,8 @@ const wplMatches = [
     date: '2026-02-18',
     time: '15:30',
     venue: 'M Chinnaswamy Stadium, Bengaluru',
-    team1Id: '12',
-    team2Id: '14',
+    team1Id: 12,
+    team2Id: 14,
     team1: wplTeams[1],
     team2: wplTeams[3],
     status: 'scheduled',
@@ -127,26 +127,26 @@ const wplMatches = [
 // Sample WPL Players
 const wplPlayers = [
   // Mumbai Indians Women (Team 11)
-  { id: 'wpl1', league: 'wpl', name: 'Harmanpreet Kaur', role: 'All-rounder', teamId: '11', age: 35, nationality: 'India', jerseyNumber: 18, isCaptain: true, bowlingStyle: 'Right-arm off-break', battingStyle: 'Right-handed bat', stats: { matches: 50, runs: 1200, wickets: 30, average: 28.5, strikeRate: 125, economy: 7.2, highest: 103, fours: 85, sixes: 45, fifties: 8, hundreds: 1, bestBowling: '3/15', bowlingAverage: 0 } },
-  { id: 'wpl2', league: 'wpl', name: 'Alyssa Healy', role: 'Wicket-keeper Batter', teamId: '11', age: 33, nationality: 'Australia', jerseyNumber: 1, isCaptain: false, bowlingStyle: 'N/A', battingStyle: 'Right-handed bat', stats: { matches: 45, runs: 980, wickets: 0, average: 26.5, strikeRate: 130, economy: 0, highest: 88, fours: 70, sixes: 35, fifties: 7, hundreds: 0, bestBowling: '-' } },
-  { id: 'wpl3', league: 'wpl', name: 'Nat Sciver-Brunt', role: 'All-rounder', teamId: '11', age: 31, nationality: 'England', jerseyNumber: 8, isCaptain: false, bowlingStyle: 'Right-arm medium', battingStyle: 'Right-handed bat', stats: { matches: 40, runs: 750, wickets: 45, average: 24, strikeRate: 118, economy: 6.8, highest: 75, fours: 55, sixes: 20, fifties: 5, hundreds: 0, bestBowling: '4/20', bowlingAverage: 0 } },
+  { id: 'wpl1', league: 'wpl', name: 'Harmanpreet Kaur', role: 'All-rounder', teamId: 11, age: 35, nationality: 'India', jerseyNumber: 18, isCaptain: true, bowlingStyle: 'Right-arm off-break', battingStyle: 'Right-handed bat', stats: { matches: 50, runs: 1200, wickets: 30, average: 28.5, strikeRate: 125, economy: 7.2, highest: 103, fours: 85, sixes: 45, fifties: 8, hundreds: 1, bestBowling: '3/15', bowlingAverage: 0 } },
+  { id: 'wpl2', league: 'wpl', name: 'Alyssa Healy', role: 'Wicket-keeper Batter', teamId: 11, age: 33, nationality: 'Australia', jerseyNumber: 1, isCaptain: false, bowlingStyle: 'N/A', battingStyle: 'Right-handed bat', stats: { matches: 45, runs: 980, wickets: 0, average: 26.5, strikeRate: 130, economy: 0, highest: 88, fours: 70, sixes: 35, fifties: 7, hundreds: 0, bestBowling: '-' } },
+  { id: 'wpl3', league: 'wpl', name: 'Nat Sciver-Brunt', role: 'All-rounder', teamId: 11, age: 31, nationality: 'England', jerseyNumber: 8, isCaptain: false, bowlingStyle: 'Right-arm medium', battingStyle: 'Right-handed bat', stats: { matches: 40, runs: 750, wickets: 45, average: 24, strikeRate: 118, economy: 6.8, highest: 75, fours: 55, sixes: 20, fifties: 5, hundreds: 0, bestBowling: '4/20', bowlingAverage: 0 } },
   
   // RCB Women (Team 12)
-  { id: 'wpl4', league: 'wpl', name: 'Smriti Mandhana', role: 'Batter', teamId: '12', age: 27, nationality: 'India', jerseyNumber: 10, isCaptain: true, bowlingStyle: 'Right-arm medium', battingStyle: 'Left-handed bat', stats: { matches: 48, runs: 1350, wickets: 8, average: 32.1, strikeRate: 135, economy: 8.5, highest: 87, fours: 95, sixes: 48, fifties: 10, hundreds: 0, bestBowling: '2/25', bowlingAverage: 0 } },
-  { id: 'wpl5', league: 'wpl', name: 'Ellyse Perry', role: 'All-rounder', teamId: '12', age: 33, nationality: 'Australia', jerseyNumber: 7, isCaptain: false, bowlingStyle: 'Right-arm fast', battingStyle: 'Right-handed bat', stats: { matches: 42, runs: 890, wickets: 55, average: 28.5, strikeRate: 120, economy: 6.5, highest: 85, fours: 65, sixes: 25, fifties: 6, hundreds: 0, bestBowling: '5/15', bowlingAverage: 0 } },
-  { id: 'wpl6', league: 'wpl', name: 'Richa Ghosh', role: 'Wicket-keeper Batter', teamId: '12', age: 21, nationality: 'India', jerseyNumber: 33, isCaptain: false, bowlingStyle: 'N/A', battingStyle: 'Right-handed bat', stats: { matches: 25, runs: 420, wickets: 0, average: 24, strikeRate: 140, economy: 0, highest: 65, fours: 30, sixes: 18, fifties: 2, hundreds: 0, bestBowling: '-' } },
+  { id: 'wpl4', league: 'wpl', name: 'Smriti Mandhana', role: 'Batter', teamId: 12, age: 27, nationality: 'India', jerseyNumber: 10, isCaptain: true, bowlingStyle: 'Right-arm medium', battingStyle: 'Left-handed bat', stats: { matches: 48, runs: 1350, wickets: 8, average: 32.1, strikeRate: 135, economy: 8.5, highest: 87, fours: 95, sixes: 48, fifties: 10, hundreds: 0, bestBowling: '2/25', bowlingAverage: 0 } },
+  { id: 'wpl5', league: 'wpl', name: 'Ellyse Perry', role: 'All-rounder', teamId: 12, age: 33, nationality: 'Australia', jerseyNumber: 7, isCaptain: false, bowlingStyle: 'Right-arm fast', battingStyle: 'Right-handed bat', stats: { matches: 42, runs: 890, wickets: 55, average: 28.5, strikeRate: 120, economy: 6.5, highest: 85, fours: 65, sixes: 25, fifties: 6, hundreds: 0, bestBowling: '5/15', bowlingAverage: 0 } },
+  { id: 'wpl6', league: 'wpl', name: 'Richa Ghosh', role: 'Wicket-keeper Batter', teamId: 12, age: 21, nationality: 'India', jerseyNumber: 33, isCaptain: false, bowlingStyle: 'N/A', battingStyle: 'Right-handed bat', stats: { matches: 25, runs: 420, wickets: 0, average: 24, strikeRate: 140, economy: 0, highest: 65, fours: 30, sixes: 18, fifties: 2, hundreds: 0, bestBowling: '-' } },
   
   // Delhi Capitals Women (Team 13)
-  { id: 'wpl7', league: 'wpl', name: 'Alyssa Perry', role: 'All-rounder', teamId: '13', age: 23, nationality: 'Australia', jerseyNumber: 17, isCaptain: false, bowlingStyle: 'Right-arm leg-break', battingStyle: 'Right-handed bat', stats: { matches: 18, runs: 320, wickets: 22, average: 22.5, strikeRate: 125, economy: 7, highest: 61, fours: 25, sixes: 10, fifties: 2, hundreds: 0, bestBowling: '3/18', bowlingAverage: 0 } },
+  { id: 'wpl7', league: 'wpl', name: 'Alyssa Perry', role: 'All-rounder', teamId: 13, age: 23, nationality: 'Australia', jerseyNumber: 17, isCaptain: false, bowlingStyle: 'Right-arm leg-break', battingStyle: 'Right-handed bat', stats: { matches: 18, runs: 320, wickets: 22, average: 22.5, strikeRate: 125, economy: 7, highest: 61, fours: 25, sixes: 10, fifties: 2, hundreds: 0, bestBowling: '3/18', bowlingAverage: 0 } },
   
   // Gujarat Giants (Team 14)
-  { id: 'wpl8', league: 'wpl', name: 'Sophie Devine', role: 'All-rounder', teamId: '14', age: 35, nationality: 'New Zealand', jerseyNumber: 6, isCaptain: true, bowlingStyle: 'Right-arm medium', battingStyle: 'Right-handed bat', stats: { matches: 38, runs: 780, wickets: 40, average: 26, strikeRate: 122, economy: 7.1, highest: 76, fours: 58, sixes: 22, fifties: 6, hundreds: 0, bestBowling: '4/22', bowlingAverage: 0 } },
-  { id: 'wpl9', league: 'wpl', name: 'Ashleigh Gardner', role: 'All-rounder', teamId: '14', age: 26, nationality: 'Australia', jerseyNumber: 8, isCaptain: true, bowlingStyle: 'Right-arm off-break', battingStyle: 'Right-handed bat', stats: { matches: 35, runs: 680, wickets: 48, average: 24.5, strikeRate: 128, economy: 6.8, highest: 66, fours: 52, sixes: 18, fifties: 4, hundreds: 0, bestBowling: '4/12', bowlingAverage: 0 } },
-  { id: 'wpl10', league: 'wpl', name: 'Beth Mooney', role: 'Wicket-keeper Batter', teamId: '14', age: 30, nationality: 'Australia', jerseyNumber: 5, isCaptain: false, bowlingStyle: 'N/A', battingStyle: 'Left-handed bat', stats: { matches: 40, runs: 920, wickets: 0, average: 28, strikeRate: 132, economy: 0, highest: 82, fours: 68, sixes: 28, fifties: 8, hundreds: 0, bestBowling: '-' } },
+  { id: 'wpl8', league: 'wpl', name: 'Sophie Devine', role: 'All-rounder', teamId: 14, age: 35, nationality: 'New Zealand', jerseyNumber: 6, isCaptain: true, bowlingStyle: 'Right-arm medium', battingStyle: 'Right-handed bat', stats: { matches: 38, runs: 780, wickets: 40, average: 26, strikeRate: 122, economy: 7.1, highest: 76, fours: 58, sixes: 22, fifties: 6, hundreds: 0, bestBowling: '4/22', bowlingAverage: 0 } },
+  { id: 'wpl9', league: 'wpl', name: 'Ashleigh Gardner', role: 'All-rounder', teamId: 14, age: 26, nationality: 'Australia', jerseyNumber: 8, isCaptain: true, bowlingStyle: 'Right-arm off-break', battingStyle: 'Right-handed bat', stats: { matches: 35, runs: 680, wickets: 48, average: 24.5, strikeRate: 128, economy: 6.8, highest: 66, fours: 52, sixes: 18, fifties: 4, hundreds: 0, bestBowling: '4/12', bowlingAverage: 0 } },
+  { id: 'wpl10', league: 'wpl', name: 'Beth Mooney', role: 'Wicket-keeper Batter', teamId: 14, age: 30, nationality: 'Australia', jerseyNumber: 5, isCaptain: false, bowlingStyle: 'N/A', battingStyle: 'Left-handed bat', stats: { matches: 40, runs: 920, wickets: 0, average: 28, strikeRate: 132, economy: 0, highest: 82, fours: 68, sixes: 28, fifties: 8, hundreds: 0, bestBowling: '-' } },
   
   // UP Warriorz (Team 15)
-  { id: 'wpl11', league: 'wpl', name: 'Meg Lanning', role: 'Batter', teamId: '15', age: 31, nationality: 'Australia', jerseyNumber: 1, isCaptain: true, bowlingStyle: 'Right-arm leg-break', battingStyle: 'Right-handed bat', stats: { matches: 36, runs: 840, wickets: 15, average: 26.5, strikeRate: 125, economy: 7.5, highest: 78, fours: 62, sixes: 24, fifties: 7, hundreds: 0, bestBowling: '2/28', bowlingAverage: 0 } },
-  { id: 'wpl12', league: 'wpl', name: 'Jemimah Rodrigues', role: 'Batter', teamId: '15', age: 24, nationality: 'India', jerseyNumber: 21, isCaptain: false, bowlingStyle: 'N/A', battingStyle: 'Right-handed bat', stats: { matches: 32, runs: 580, wickets: 0, average: 22, strikeRate: 118, economy: 0, highest: 69, fours: 42, sixes: 15, fifties: 4, hundreds: 0, bestBowling: '-' } }
+  { id: 'wpl11', league: 'wpl', name: 'Meg Lanning', role: 'Batter', teamId: 15, age: 31, nationality: 'Australia', jerseyNumber: 1, isCaptain: true, bowlingStyle: 'Right-arm leg-break', battingStyle: 'Right-handed bat', stats: { matches: 36, runs: 840, wickets: 15, average: 26.5, strikeRate: 125, economy: 7.5, highest: 78, fours: 62, sixes: 24, fifties: 7, hundreds: 0, bestBowling: '2/28', bowlingAverage: 0 } },
+  { id: 'wpl12', league: 'wpl', name: 'Jemimah Rodrigues', role: 'Batter', teamId: 15, age: 24, nationality: 'India', jerseyNumber: 21, isCaptain: false, bowlingStyle: 'N/A', battingStyle: 'Right-handed bat', stats: { matches: 32, runs: 580, wickets: 0, average: 22, strikeRate: 118, economy: 0, highest: 69, fours: 42, sixes: 15, fifties: 4, hundreds: 0, bestBowling: '-' } }
 ];
 
 export const onRequest = async (context) => {

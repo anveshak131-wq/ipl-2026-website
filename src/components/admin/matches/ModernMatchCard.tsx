@@ -98,12 +98,13 @@ export default function ModernMatchCard({
     };
 
     const renderTeamLogo = (team: Match['team1'] | Match['team2'], size: number = 48) => {
+        const teamIdStr = String(team.id || '');
         const isPlaceholderTeam = 
-            team.id.includes('tbd-') || 
-            team.id === '16' || 
-            team.id === '17' || 
-            team.id === '18' || 
-            team.id === '19' ||
+            teamIdStr.includes('tbd-') || 
+            teamIdStr === '16' || 
+            teamIdStr === '17' || 
+            teamIdStr === '18' || 
+            teamIdStr === '19' ||
             team.shortName === 'TBD' || 
             team.shortName?.includes('Place') || 
             team.name?.includes('Place Team');
@@ -246,11 +247,11 @@ export default function ModernMatchCard({
                         </div>
                         <div className="text-center">
                             <div className="text-white font-bold text-lg">
-                                {(match.team1.id.includes('tbd-') || 
-                                  match.team1.id === '16' || 
-                                  match.team1.id === '17' || 
-                                  match.team1.id === '18' || 
-                                  match.team1.id === '19' ||
+                                {(String(match.team1.id).includes('tbd-') || 
+                                  String(match.team1.id) === '16' || 
+                                  String(match.team1.id) === '17' || 
+                                  String(match.team1.id) === '18' || 
+                                  String(match.team1.id) === '19' ||
                                   match.team1.shortName?.includes('Place') || 
                                   match.team1.name?.includes('Place Team')) 
                                     ? 'TBD' 
@@ -269,11 +270,11 @@ export default function ModernMatchCard({
                         </div>
                         <div className="text-center">
                             <div className="text-white font-bold text-lg">
-                                {(match.team2.id.includes('tbd-') || 
-                                  match.team2.id === '16' || 
-                                  match.team2.id === '17' || 
-                                  match.team2.id === '18' || 
-                                  match.team2.id === '19' ||
+                                {(String(match.team2.id).includes('tbd-') || 
+                                  String(match.team2.id) === '16' || 
+                                  String(match.team2.id) === '17' || 
+                                  String(match.team2.id) === '18' || 
+                                  String(match.team2.id) === '19' ||
                                   match.team2.shortName?.includes('Place') || 
                                   match.team2.name?.includes('Place Team')) 
                                     ? 'TBD' 

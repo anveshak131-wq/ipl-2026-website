@@ -25,9 +25,9 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// .wrangler/tmp/bundle-M92pZS/checked-fetch.js
+// ../.wrangler/tmp/bundle-K1nr85/checked-fetch.js
 var require_checked_fetch = __commonJS({
-  ".wrangler/tmp/bundle-M92pZS/checked-fetch.js"() {
+  "../.wrangler/tmp/bundle-K1nr85/checked-fetch.js"() {
     "use strict";
     var urls = /* @__PURE__ */ new Set();
     function checkURL(request, init) {
@@ -56,80 +56,9 @@ var require_checked_fetch = __commonJS({
   }
 });
 
-// .wrangler/tmp/bundle-M92pZS/middleware-loader.entry.ts
-var import_checked_fetch74 = __toESM(require_checked_fetch());
-
-// wrangler-modules-watch:wrangler:modules-watch
+// api/admin/analytics/toss.js
 var import_checked_fetch = __toESM(require_checked_fetch());
-
-// .wrangler/tmp/bundle-M92pZS/middleware-insertion-facade.js
-var import_checked_fetch72 = __toESM(require_checked_fetch());
-
-// .wrangler/tmp/pages-b9AwII/functionsWorker-0.32127728194558647.mjs
-var import_checked_fetch2 = __toESM(require_checked_fetch(), 1);
-import crypto2 from "node:crypto";
-import crypto3 from "node:crypto";
-import crypto4 from "node:crypto";
-import crypto5 from "node:crypto";
-import crypto6 from "node:crypto";
-var __create2 = Object.create;
-var __defProp2 = Object.defineProperty;
-var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames2 = Object.getOwnPropertyNames;
-var __getProtoOf2 = Object.getPrototypeOf;
-var __hasOwnProp2 = Object.prototype.hasOwnProperty;
-var __name2 = /* @__PURE__ */ __name((target, value) => __defProp2(target, "name", { value, configurable: true }), "__name");
-var __commonJS2 = /* @__PURE__ */ __name((cb, mod) => /* @__PURE__ */ __name(function __require() {
-  return mod || (0, cb[__getOwnPropNames2(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
-}, "__require"), "__commonJS");
-var __copyProps2 = /* @__PURE__ */ __name((to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") {
-    for (let key of __getOwnPropNames2(from))
-      if (!__hasOwnProp2.call(to, key) && key !== except)
-        __defProp2(to, key, { get: /* @__PURE__ */ __name(() => from[key], "get"), enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
-  }
-  return to;
-}, "__copyProps");
-var __toESM2 = /* @__PURE__ */ __name((mod, isNodeMode, target) => (target = mod != null ? __create2(__getProtoOf2(mod)) : {}, __copyProps2(
-  // If the importer is in node compatibility mode or this is not an ESM
-  // file that has been converted to a CommonJS file using a Babel-
-  // compatible transform (i.e. "__esModule" has not been set), then set
-  // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp2(target, "default", { value: mod, enumerable: true }) : target,
-  mod
-)), "__toESM");
-var require_checked_fetch2 = __commonJS2({
-  "../.wrangler/tmp/bundle-oVDeu0/checked-fetch.js"() {
-    "use strict";
-    var urls = /* @__PURE__ */ new Set();
-    function checkURL(request, init) {
-      const url = request instanceof URL ? request : new URL(
-        (typeof request === "string" ? new Request(request, init) : request).url
-      );
-      if (url.port && url.port !== "443" && url.protocol === "https:") {
-        if (!urls.has(url.toString())) {
-          urls.add(url.toString());
-          console.warn(
-            `WARNING: known issue with \`fetch()\` requests to custom HTTPS ports in published Workers:
- - ${url.toString()} - the custom port will be ignored when the Worker is published using the \`wrangler deploy\` command.
-`
-          );
-        }
-      }
-    }
-    __name(checkURL, "checkURL");
-    __name2(checkURL, "checkURL");
-    globalThis.fetch = new Proxy(globalThis.fetch, {
-      apply(target, thisArg, argArray) {
-        const [request, init] = argArray;
-        checkURL(request, init);
-        return Reflect.apply(target, thisArg, argArray);
-      }
-    });
-  }
-});
-var import_checked_fetch3 = __toESM2(require_checked_fetch2());
-var normalizeTeamName = /* @__PURE__ */ __name2((name) => {
+var normalizeTeamName = /* @__PURE__ */ __name((name) => {
   if (!name) return name;
   const trimmed = String(name).trim();
   const lower = trimmed.toLowerCase();
@@ -141,7 +70,7 @@ var normalizeTeamName = /* @__PURE__ */ __name2((name) => {
   }
   return trimmed;
 }, "normalizeTeamName");
-var onRequest = /* @__PURE__ */ __name2(async (context) => {
+var onRequest = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
   const corsHeaders7 = {
@@ -257,7 +186,7 @@ var onRequest = /* @__PURE__ */ __name2(async (context) => {
     const teamStats = /* @__PURE__ */ new Map();
     const perVenue = /* @__PURE__ */ new Map();
     let totalMatches = 0;
-    const ensureTeamEntry = /* @__PURE__ */ __name2((teamName) => {
+    const ensureTeamEntry = /* @__PURE__ */ __name((teamName) => {
       if (!teamStats.has(teamName)) {
         teamStats.set(teamName, {
           team: teamName,
@@ -272,7 +201,7 @@ var onRequest = /* @__PURE__ */ __name2(async (context) => {
       }
       return teamStats.get(teamName);
     }, "ensureTeamEntry");
-    const ensureVenueEntry = /* @__PURE__ */ __name2((teamName, venueName) => {
+    const ensureVenueEntry = /* @__PURE__ */ __name((teamName, venueName) => {
       const key = `${teamName}||${venueName}`;
       if (!perVenue.has(key)) {
         perVenue.set(key, {
@@ -465,8 +394,10 @@ var onRequest = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch22 = __toESM2(require_checked_fetch2());
-var onRequest2 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/admin/ml/train.js
+var import_checked_fetch2 = __toESM(require_checked_fetch());
+var onRequest2 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
   const corsHeaders7 = {
@@ -673,7 +604,7 @@ var onRequest2 = /* @__PURE__ */ __name2(async (context) => {
       }
       W.push(w);
     }
-    const softmax = /* @__PURE__ */ __name2((logits) => {
+    const softmax = /* @__PURE__ */ __name((logits) => {
       let maxLogit = -Infinity;
       for (let i = 0; i < logits.length; i++) {
         if (logits[i] > maxLogit) maxLogit = logits[i];
@@ -764,8 +695,10 @@ var onRequest2 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch32 = __toESM2(require_checked_fetch2());
-var onRequest3 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/admin/users/activity.js
+var import_checked_fetch3 = __toESM(require_checked_fetch());
+var onRequest3 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
   const corsHeaders7 = {
@@ -898,13 +831,16 @@ var onRequest3 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch4 = __toESM2(require_checked_fetch2());
-var encryptPassword = /* @__PURE__ */ __name2((password, salt) => {
+
+// api/account/password.js
+var import_checked_fetch4 = __toESM(require_checked_fetch());
+import crypto2 from "node:crypto";
+var encryptPassword = /* @__PURE__ */ __name((password, salt) => {
   const hash = crypto2.createHash("sha256");
   hash.update(password + salt);
   return hash.digest("hex");
 }, "encryptPassword");
-var generateSalt = /* @__PURE__ */ __name2(() => crypto2.randomBytes(16).toString("hex"), "generateSalt");
+var generateSalt = /* @__PURE__ */ __name(() => crypto2.randomBytes(16).toString("hex"), "generateSalt");
 var COMMON_PASSWORDS = /* @__PURE__ */ new Set([
   "password",
   "password1",
@@ -917,7 +853,7 @@ var COMMON_PASSWORDS = /* @__PURE__ */ new Set([
   "letmein",
   "iloveyou"
 ]);
-var onRequest4 = /* @__PURE__ */ __name2(async (context) => {
+var onRequest4 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
   const corsHeaders7 = {
@@ -1025,8 +961,10 @@ var onRequest4 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch5 = __toESM2(require_checked_fetch2());
-var onRequest5 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/account/sessions.js
+var import_checked_fetch5 = __toESM(require_checked_fetch());
+var onRequest5 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
   const corsHeaders7 = {
@@ -1130,14 +1068,17 @@ var onRequest5 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch6 = __toESM2(require_checked_fetch2());
-var encryptPassword2 = /* @__PURE__ */ __name2((password, salt) => {
+
+// api/admin/admins.js
+var import_checked_fetch6 = __toESM(require_checked_fetch());
+import crypto3 from "node:crypto";
+var encryptPassword2 = /* @__PURE__ */ __name((password, salt) => {
   const hash = crypto3.createHash("sha256");
   hash.update(password + salt);
   return hash.digest("hex");
 }, "encryptPassword");
-var generateSalt2 = /* @__PURE__ */ __name2(() => crypto3.randomBytes(16).toString("hex"), "generateSalt");
-var generateToken = /* @__PURE__ */ __name2(() => crypto3.randomBytes(32).toString("hex"), "generateToken");
+var generateSalt2 = /* @__PURE__ */ __name(() => crypto3.randomBytes(16).toString("hex"), "generateSalt");
+var generateToken = /* @__PURE__ */ __name(() => crypto3.randomBytes(32).toString("hex"), "generateToken");
 async function verifyAdminToken(request, env) {
   const authHeader = request.headers.get("Authorization") || "";
   const token = authHeader.replace("Bearer", "").trim();
@@ -1172,8 +1113,7 @@ async function verifyAdminToken(request, env) {
   return user;
 }
 __name(verifyAdminToken, "verifyAdminToken");
-__name2(verifyAdminToken, "verifyAdminToken");
-var onRequest6 = /* @__PURE__ */ __name2(async (context) => {
+var onRequest6 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const method = request.method;
@@ -1559,7 +1499,9 @@ var onRequest6 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch7 = __toESM2(require_checked_fetch2());
+
+// api/admin/backup-players.js
+var import_checked_fetch7 = __toESM(require_checked_fetch());
 var corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
@@ -1572,16 +1514,14 @@ function verifyAdminToken2(request) {
   }
   return true;
 }
-__name(verifyAdminToken2, "verifyAdminToken2");
-__name2(verifyAdminToken2, "verifyAdminToken");
+__name(verifyAdminToken2, "verifyAdminToken");
 function generateBackupKey() {
   const now = /* @__PURE__ */ new Date();
   const timestamp = now.toISOString().replace(/[:.]/g, "-").slice(0, -5);
   return `players_backup:${timestamp}`;
 }
 __name(generateBackupKey, "generateBackupKey");
-__name2(generateBackupKey, "generateBackupKey");
-var onRequest7 = /* @__PURE__ */ __name2(async (context) => {
+var onRequest7 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
@@ -1767,7 +1707,9 @@ var onRequest7 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch8 = __toESM2(require_checked_fetch2());
+
+// api/admin/backup-points-table.js
+var import_checked_fetch8 = __toESM(require_checked_fetch());
 var corsHeaders2 = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
@@ -1780,16 +1722,14 @@ function verifyAdminToken3(request) {
   }
   return true;
 }
-__name(verifyAdminToken3, "verifyAdminToken3");
-__name2(verifyAdminToken3, "verifyAdminToken");
+__name(verifyAdminToken3, "verifyAdminToken");
 function generateBackupKey2() {
   const now = /* @__PURE__ */ new Date();
   const timestamp = now.toISOString().replace(/[:.]/g, "-").slice(0, -5);
   return `points_table_backup:${timestamp}`;
 }
-__name(generateBackupKey2, "generateBackupKey2");
-__name2(generateBackupKey2, "generateBackupKey");
-var onRequest8 = /* @__PURE__ */ __name2(async (context) => {
+__name(generateBackupKey2, "generateBackupKey");
+var onRequest8 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders2 });
@@ -1993,8 +1933,10 @@ var onRequest8 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch9 = __toESM2(require_checked_fetch2());
-var onRequest9 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/admin/datasets.js
+var import_checked_fetch9 = __toESM(require_checked_fetch());
+var onRequest9 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
   const url = new URL(request.url);
@@ -2199,8 +2141,10 @@ var onRequest9 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch10 = __toESM2(require_checked_fetch2());
-var onRequest10 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/admin/email-users.js
+var import_checked_fetch10 = __toESM(require_checked_fetch());
+var onRequest10 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const method = request.method;
@@ -2371,7 +2315,10 @@ var onRequest10 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch11 = __toESM2(require_checked_fetch2());
+
+// api/admin/login.js
+var import_checked_fetch11 = __toESM(require_checked_fetch());
+import crypto4 from "node:crypto";
 function base32ToBytes(base32) {
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
   const clean = base32.toUpperCase().replace(/[^A-Z2-7]/g, "");
@@ -2388,7 +2335,6 @@ function base32ToBytes(base32) {
   return new Uint8Array(bytes);
 }
 __name(base32ToBytes, "base32ToBytes");
-__name2(base32ToBytes, "base32ToBytes");
 async function generateTotpCode(secretBase32, timeStep = 30, digits = 6) {
   const webCrypto = globalThis.crypto;
   const keyBytes = base32ToBytes(secretBase32);
@@ -2415,7 +2361,6 @@ async function generateTotpCode(secretBase32, timeStep = 30, digits = 6) {
   return otp.toString().padStart(digits, "0");
 }
 __name(generateTotpCode, "generateTotpCode");
-__name2(generateTotpCode, "generateTotpCode");
 async function verifyTotpCode(secretBase32, code, window = 1) {
   if (!secretBase32) return true;
   const cleaned = String(code || "").replace(/\s+/g, "");
@@ -2439,7 +2384,6 @@ async function verifyTotpCode(secretBase32, code, window = 1) {
   return false;
 }
 __name(verifyTotpCode, "verifyTotpCode");
-__name2(verifyTotpCode, "verifyTotpCode");
 var ADMIN_USERS = {
   admin: {
     id: "1",
@@ -2459,7 +2403,7 @@ var ADMIN_USERS = {
 var PLAYERS_ONLY_ADMINS = /* @__PURE__ */ new Set([
   "sumanthvallam20@gmail.com"
 ]);
-var verifyPassword = /* @__PURE__ */ __name2((password, salt, hashedPassword) => {
+var verifyPassword = /* @__PURE__ */ __name((password, salt, hashedPassword) => {
   const hash = crypto4.createHash("sha256");
   hash.update(password + salt);
   return hash.digest("hex") === hashedPassword;
@@ -2475,9 +2419,8 @@ function generateToken2(user) {
   };
   return btoa(JSON.stringify(payload));
 }
-__name(generateToken2, "generateToken2");
-__name2(generateToken2, "generateToken");
-var onRequest11 = /* @__PURE__ */ __name2(async (context) => {
+__name(generateToken2, "generateToken");
+var onRequest11 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
@@ -2697,8 +2640,10 @@ var onRequest11 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch12 = __toESM2(require_checked_fetch2());
-var onRequest12 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/admin/ml-train.js
+var import_checked_fetch12 = __toESM(require_checked_fetch());
+var onRequest12 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
   const corsHeaders7 = {
@@ -2882,7 +2827,7 @@ var onRequest12 = /* @__PURE__ */ __name2(async (context) => {
       }
       W.push(w);
     }
-    const softmax = /* @__PURE__ */ __name2((logits) => {
+    const softmax = /* @__PURE__ */ __name((logits) => {
       let maxLogit = -Infinity;
       for (let i = 0; i < logits.length; i++) {
         if (logits[i] > maxLogit) maxLogit = logits[i];
@@ -2973,8 +2918,10 @@ var onRequest12 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch13 = __toESM2(require_checked_fetch2());
-var onRequest13 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/admin/moderation.js
+var import_checked_fetch13 = __toESM(require_checked_fetch());
+var onRequest13 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const url = new URL(request.url);
   const method = request.method;
@@ -3152,7 +3099,9 @@ var onRequest13 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch14 = __toESM2(require_checked_fetch2());
+
+// api/admin/seed-wpl-data.js
+var import_checked_fetch14 = __toESM(require_checked_fetch());
 var corsHeaders3 = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
@@ -3166,11 +3115,10 @@ function verifyAdminToken4(request) {
   }
   return true;
 }
-__name(verifyAdminToken4, "verifyAdminToken4");
-__name2(verifyAdminToken4, "verifyAdminToken");
+__name(verifyAdminToken4, "verifyAdminToken");
 var wplTeams = [
   {
-    id: "11",
+    id: 11,
     league: "wpl",
     name: "Mumbai Indians (WPL)",
     shortName: "MI-W",
@@ -3178,7 +3126,7 @@ var wplTeams = [
     colors: { primary: "#004BA0", secondary: "#FFD700" }
   },
   {
-    id: "12",
+    id: 12,
     league: "wpl",
     name: "Royal Challengers Bengaluru (WPL)",
     shortName: "RCB-W",
@@ -3186,7 +3134,7 @@ var wplTeams = [
     colors: { primary: "#C8102E", secondary: "#FFD700" }
   },
   {
-    id: "13",
+    id: 13,
     league: "wpl",
     name: "Delhi Capitals (WPL)",
     shortName: "DC-W",
@@ -3194,7 +3142,7 @@ var wplTeams = [
     colors: { primary: "#004BA0", secondary: "#DC2626" }
   },
   {
-    id: "14",
+    id: 14,
     league: "wpl",
     name: "Gujarat Giants (WPL)",
     shortName: "GG",
@@ -3202,7 +3150,7 @@ var wplTeams = [
     colors: { primary: "#F97316", secondary: "#FFD700" }
   },
   {
-    id: "15",
+    id: 15,
     league: "wpl",
     name: "UP Warriorz (WPL)",
     shortName: "UPW",
@@ -3217,8 +3165,8 @@ var wplMatches = [
     date: "2026-02-15",
     time: "19:30",
     venue: "DY Patil Stadium, Mumbai",
-    team1Id: "11",
-    team2Id: "12",
+    team1Id: 11,
+    team2Id: 12,
     team1: wplTeams[0],
     team2: wplTeams[1],
     status: "scheduled",
@@ -3230,8 +3178,8 @@ var wplMatches = [
     date: "2026-02-16",
     time: "15:30",
     venue: "Ekana Cricket Stadium, Lucknow",
-    team1Id: "13",
-    team2Id: "14",
+    team1Id: 13,
+    team2Id: 14,
     team1: wplTeams[2],
     team2: wplTeams[3],
     status: "scheduled",
@@ -3243,8 +3191,8 @@ var wplMatches = [
     date: "2026-02-17",
     time: "19:30",
     venue: "Arun Jaitley Stadium, Delhi",
-    team1Id: "15",
-    team2Id: "11",
+    team1Id: 15,
+    team2Id: 11,
     team1: wplTeams[4],
     team2: wplTeams[0],
     status: "scheduled",
@@ -3256,8 +3204,8 @@ var wplMatches = [
     date: "2026-02-18",
     time: "15:30",
     venue: "M Chinnaswamy Stadium, Bengaluru",
-    team1Id: "12",
-    team2Id: "14",
+    team1Id: 12,
+    team2Id: 14,
     team1: wplTeams[1],
     team2: wplTeams[3],
     status: "scheduled",
@@ -3266,24 +3214,24 @@ var wplMatches = [
 ];
 var wplPlayers = [
   // Mumbai Indians Women (Team 11)
-  { id: "wpl1", league: "wpl", name: "Harmanpreet Kaur", role: "All-rounder", teamId: "11", age: 35, nationality: "India", jerseyNumber: 18, isCaptain: true, bowlingStyle: "Right-arm off-break", battingStyle: "Right-handed bat", stats: { matches: 50, runs: 1200, wickets: 30, average: 28.5, strikeRate: 125, economy: 7.2, highest: 103, fours: 85, sixes: 45, fifties: 8, hundreds: 1, bestBowling: "3/15", bowlingAverage: 0 } },
-  { id: "wpl2", league: "wpl", name: "Alyssa Healy", role: "Wicket-keeper Batter", teamId: "11", age: 33, nationality: "Australia", jerseyNumber: 1, isCaptain: false, bowlingStyle: "N/A", battingStyle: "Right-handed bat", stats: { matches: 45, runs: 980, wickets: 0, average: 26.5, strikeRate: 130, economy: 0, highest: 88, fours: 70, sixes: 35, fifties: 7, hundreds: 0, bestBowling: "-" } },
-  { id: "wpl3", league: "wpl", name: "Nat Sciver-Brunt", role: "All-rounder", teamId: "11", age: 31, nationality: "England", jerseyNumber: 8, isCaptain: false, bowlingStyle: "Right-arm medium", battingStyle: "Right-handed bat", stats: { matches: 40, runs: 750, wickets: 45, average: 24, strikeRate: 118, economy: 6.8, highest: 75, fours: 55, sixes: 20, fifties: 5, hundreds: 0, bestBowling: "4/20", bowlingAverage: 0 } },
+  { id: "wpl1", league: "wpl", name: "Harmanpreet Kaur", role: "All-rounder", teamId: 11, age: 35, nationality: "India", jerseyNumber: 18, isCaptain: true, bowlingStyle: "Right-arm off-break", battingStyle: "Right-handed bat", stats: { matches: 50, runs: 1200, wickets: 30, average: 28.5, strikeRate: 125, economy: 7.2, highest: 103, fours: 85, sixes: 45, fifties: 8, hundreds: 1, bestBowling: "3/15", bowlingAverage: 0 } },
+  { id: "wpl2", league: "wpl", name: "Alyssa Healy", role: "Wicket-keeper Batter", teamId: 11, age: 33, nationality: "Australia", jerseyNumber: 1, isCaptain: false, bowlingStyle: "N/A", battingStyle: "Right-handed bat", stats: { matches: 45, runs: 980, wickets: 0, average: 26.5, strikeRate: 130, economy: 0, highest: 88, fours: 70, sixes: 35, fifties: 7, hundreds: 0, bestBowling: "-" } },
+  { id: "wpl3", league: "wpl", name: "Nat Sciver-Brunt", role: "All-rounder", teamId: 11, age: 31, nationality: "England", jerseyNumber: 8, isCaptain: false, bowlingStyle: "Right-arm medium", battingStyle: "Right-handed bat", stats: { matches: 40, runs: 750, wickets: 45, average: 24, strikeRate: 118, economy: 6.8, highest: 75, fours: 55, sixes: 20, fifties: 5, hundreds: 0, bestBowling: "4/20", bowlingAverage: 0 } },
   // RCB Women (Team 12)
-  { id: "wpl4", league: "wpl", name: "Smriti Mandhana", role: "Batter", teamId: "12", age: 27, nationality: "India", jerseyNumber: 10, isCaptain: true, bowlingStyle: "Right-arm medium", battingStyle: "Left-handed bat", stats: { matches: 48, runs: 1350, wickets: 8, average: 32.1, strikeRate: 135, economy: 8.5, highest: 87, fours: 95, sixes: 48, fifties: 10, hundreds: 0, bestBowling: "2/25", bowlingAverage: 0 } },
-  { id: "wpl5", league: "wpl", name: "Ellyse Perry", role: "All-rounder", teamId: "12", age: 33, nationality: "Australia", jerseyNumber: 7, isCaptain: false, bowlingStyle: "Right-arm fast", battingStyle: "Right-handed bat", stats: { matches: 42, runs: 890, wickets: 55, average: 28.5, strikeRate: 120, economy: 6.5, highest: 85, fours: 65, sixes: 25, fifties: 6, hundreds: 0, bestBowling: "5/15", bowlingAverage: 0 } },
-  { id: "wpl6", league: "wpl", name: "Richa Ghosh", role: "Wicket-keeper Batter", teamId: "12", age: 21, nationality: "India", jerseyNumber: 33, isCaptain: false, bowlingStyle: "N/A", battingStyle: "Right-handed bat", stats: { matches: 25, runs: 420, wickets: 0, average: 24, strikeRate: 140, economy: 0, highest: 65, fours: 30, sixes: 18, fifties: 2, hundreds: 0, bestBowling: "-" } },
+  { id: "wpl4", league: "wpl", name: "Smriti Mandhana", role: "Batter", teamId: 12, age: 27, nationality: "India", jerseyNumber: 10, isCaptain: true, bowlingStyle: "Right-arm medium", battingStyle: "Left-handed bat", stats: { matches: 48, runs: 1350, wickets: 8, average: 32.1, strikeRate: 135, economy: 8.5, highest: 87, fours: 95, sixes: 48, fifties: 10, hundreds: 0, bestBowling: "2/25", bowlingAverage: 0 } },
+  { id: "wpl5", league: "wpl", name: "Ellyse Perry", role: "All-rounder", teamId: 12, age: 33, nationality: "Australia", jerseyNumber: 7, isCaptain: false, bowlingStyle: "Right-arm fast", battingStyle: "Right-handed bat", stats: { matches: 42, runs: 890, wickets: 55, average: 28.5, strikeRate: 120, economy: 6.5, highest: 85, fours: 65, sixes: 25, fifties: 6, hundreds: 0, bestBowling: "5/15", bowlingAverage: 0 } },
+  { id: "wpl6", league: "wpl", name: "Richa Ghosh", role: "Wicket-keeper Batter", teamId: 12, age: 21, nationality: "India", jerseyNumber: 33, isCaptain: false, bowlingStyle: "N/A", battingStyle: "Right-handed bat", stats: { matches: 25, runs: 420, wickets: 0, average: 24, strikeRate: 140, economy: 0, highest: 65, fours: 30, sixes: 18, fifties: 2, hundreds: 0, bestBowling: "-" } },
   // Delhi Capitals Women (Team 13)
-  { id: "wpl7", league: "wpl", name: "Alyssa Perry", role: "All-rounder", teamId: "13", age: 23, nationality: "Australia", jerseyNumber: 17, isCaptain: false, bowlingStyle: "Right-arm leg-break", battingStyle: "Right-handed bat", stats: { matches: 18, runs: 320, wickets: 22, average: 22.5, strikeRate: 125, economy: 7, highest: 61, fours: 25, sixes: 10, fifties: 2, hundreds: 0, bestBowling: "3/18", bowlingAverage: 0 } },
+  { id: "wpl7", league: "wpl", name: "Alyssa Perry", role: "All-rounder", teamId: 13, age: 23, nationality: "Australia", jerseyNumber: 17, isCaptain: false, bowlingStyle: "Right-arm leg-break", battingStyle: "Right-handed bat", stats: { matches: 18, runs: 320, wickets: 22, average: 22.5, strikeRate: 125, economy: 7, highest: 61, fours: 25, sixes: 10, fifties: 2, hundreds: 0, bestBowling: "3/18", bowlingAverage: 0 } },
   // Gujarat Giants (Team 14)
-  { id: "wpl8", league: "wpl", name: "Sophie Devine", role: "All-rounder", teamId: "14", age: 35, nationality: "New Zealand", jerseyNumber: 6, isCaptain: true, bowlingStyle: "Right-arm medium", battingStyle: "Right-handed bat", stats: { matches: 38, runs: 780, wickets: 40, average: 26, strikeRate: 122, economy: 7.1, highest: 76, fours: 58, sixes: 22, fifties: 6, hundreds: 0, bestBowling: "4/22", bowlingAverage: 0 } },
-  { id: "wpl9", league: "wpl", name: "Ashleigh Gardner", role: "All-rounder", teamId: "14", age: 26, nationality: "Australia", jerseyNumber: 8, isCaptain: true, bowlingStyle: "Right-arm off-break", battingStyle: "Right-handed bat", stats: { matches: 35, runs: 680, wickets: 48, average: 24.5, strikeRate: 128, economy: 6.8, highest: 66, fours: 52, sixes: 18, fifties: 4, hundreds: 0, bestBowling: "4/12", bowlingAverage: 0 } },
-  { id: "wpl10", league: "wpl", name: "Beth Mooney", role: "Wicket-keeper Batter", teamId: "14", age: 30, nationality: "Australia", jerseyNumber: 5, isCaptain: false, bowlingStyle: "N/A", battingStyle: "Left-handed bat", stats: { matches: 40, runs: 920, wickets: 0, average: 28, strikeRate: 132, economy: 0, highest: 82, fours: 68, sixes: 28, fifties: 8, hundreds: 0, bestBowling: "-" } },
+  { id: "wpl8", league: "wpl", name: "Sophie Devine", role: "All-rounder", teamId: 14, age: 35, nationality: "New Zealand", jerseyNumber: 6, isCaptain: true, bowlingStyle: "Right-arm medium", battingStyle: "Right-handed bat", stats: { matches: 38, runs: 780, wickets: 40, average: 26, strikeRate: 122, economy: 7.1, highest: 76, fours: 58, sixes: 22, fifties: 6, hundreds: 0, bestBowling: "4/22", bowlingAverage: 0 } },
+  { id: "wpl9", league: "wpl", name: "Ashleigh Gardner", role: "All-rounder", teamId: 14, age: 26, nationality: "Australia", jerseyNumber: 8, isCaptain: true, bowlingStyle: "Right-arm off-break", battingStyle: "Right-handed bat", stats: { matches: 35, runs: 680, wickets: 48, average: 24.5, strikeRate: 128, economy: 6.8, highest: 66, fours: 52, sixes: 18, fifties: 4, hundreds: 0, bestBowling: "4/12", bowlingAverage: 0 } },
+  { id: "wpl10", league: "wpl", name: "Beth Mooney", role: "Wicket-keeper Batter", teamId: 14, age: 30, nationality: "Australia", jerseyNumber: 5, isCaptain: false, bowlingStyle: "N/A", battingStyle: "Left-handed bat", stats: { matches: 40, runs: 920, wickets: 0, average: 28, strikeRate: 132, economy: 0, highest: 82, fours: 68, sixes: 28, fifties: 8, hundreds: 0, bestBowling: "-" } },
   // UP Warriorz (Team 15)
-  { id: "wpl11", league: "wpl", name: "Meg Lanning", role: "Batter", teamId: "15", age: 31, nationality: "Australia", jerseyNumber: 1, isCaptain: true, bowlingStyle: "Right-arm leg-break", battingStyle: "Right-handed bat", stats: { matches: 36, runs: 840, wickets: 15, average: 26.5, strikeRate: 125, economy: 7.5, highest: 78, fours: 62, sixes: 24, fifties: 7, hundreds: 0, bestBowling: "2/28", bowlingAverage: 0 } },
-  { id: "wpl12", league: "wpl", name: "Jemimah Rodrigues", role: "Batter", teamId: "15", age: 24, nationality: "India", jerseyNumber: 21, isCaptain: false, bowlingStyle: "N/A", battingStyle: "Right-handed bat", stats: { matches: 32, runs: 580, wickets: 0, average: 22, strikeRate: 118, economy: 0, highest: 69, fours: 42, sixes: 15, fifties: 4, hundreds: 0, bestBowling: "-" } }
+  { id: "wpl11", league: "wpl", name: "Meg Lanning", role: "Batter", teamId: 15, age: 31, nationality: "Australia", jerseyNumber: 1, isCaptain: true, bowlingStyle: "Right-arm leg-break", battingStyle: "Right-handed bat", stats: { matches: 36, runs: 840, wickets: 15, average: 26.5, strikeRate: 125, economy: 7.5, highest: 78, fours: 62, sixes: 24, fifties: 7, hundreds: 0, bestBowling: "2/28", bowlingAverage: 0 } },
+  { id: "wpl12", league: "wpl", name: "Jemimah Rodrigues", role: "Batter", teamId: 15, age: 24, nationality: "India", jerseyNumber: 21, isCaptain: false, bowlingStyle: "N/A", battingStyle: "Right-handed bat", stats: { matches: 32, runs: 580, wickets: 0, average: 22, strikeRate: 118, economy: 0, highest: 69, fours: 42, sixes: 15, fifties: 4, hundreds: 0, bestBowling: "-" } }
 ];
-var onRequest14 = /* @__PURE__ */ __name2(async (context) => {
+var onRequest14 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders3 });
@@ -3339,7 +3287,9 @@ var onRequest14 = /* @__PURE__ */ __name2(async (context) => {
     });
   }
 }, "onRequest");
-var import_checked_fetch15 = __toESM2(require_checked_fetch2());
+
+// api/admin/send-bulk-email.js
+var import_checked_fetch15 = __toESM(require_checked_fetch());
 async function sendEmailViaProvider(emailData, env) {
   const resendKey = env.RESEND_API_KEY;
   const sendgridKey = env.SENDGRID_API_KEY;
@@ -3397,7 +3347,6 @@ async function sendEmailViaProvider(emailData, env) {
   };
 }
 __name(sendEmailViaProvider, "sendEmailViaProvider");
-__name2(sendEmailViaProvider, "sendEmailViaProvider");
 async function sendViaResend(emailData, apiKey) {
   try {
     const response = await fetch("https://api.resend.com/emails", {
@@ -3453,7 +3402,6 @@ async function sendViaResend(emailData, apiKey) {
   }
 }
 __name(sendViaResend, "sendViaResend");
-__name2(sendViaResend, "sendViaResend");
 async function sendViaElasticEmail(emailData, apiKey) {
   try {
     const response = await fetch("https://api.elasticemail.com/v2/email/send", {
@@ -3493,7 +3441,6 @@ async function sendViaElasticEmail(emailData, apiKey) {
   }
 }
 __name(sendViaElasticEmail, "sendViaElasticEmail");
-__name2(sendViaElasticEmail, "sendViaElasticEmail");
 async function sendViaSendGrid(emailData, apiKey) {
   try {
     const response = await fetch("https://api.sendgrid.com/v3/mail/send", {
@@ -3521,7 +3468,6 @@ async function sendViaSendGrid(emailData, apiKey) {
   }
 }
 __name(sendViaSendGrid, "sendViaSendGrid");
-__name2(sendViaSendGrid, "sendViaSendGrid");
 async function sendViaMailgun(emailData, apiKey, domain) {
   try {
     const formData = new FormData();
@@ -3548,8 +3494,7 @@ async function sendViaMailgun(emailData, apiKey, domain) {
   }
 }
 __name(sendViaMailgun, "sendViaMailgun");
-__name2(sendViaMailgun, "sendViaMailgun");
-var onRequest15 = /* @__PURE__ */ __name2(async (context) => {
+var onRequest15 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
   const corsHeaders7 = {
@@ -3813,7 +3758,10 @@ var onRequest15 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch16 = __toESM2(require_checked_fetch2());
+
+// api/admin/setup.js
+var import_checked_fetch16 = __toESM(require_checked_fetch());
+import crypto5 from "node:crypto";
 async function onRequest16(context) {
   const { request, env } = context;
   if (request.method !== "POST") {
@@ -3964,9 +3912,10 @@ async function onRequest16(context) {
     );
   }
 }
-__name(onRequest16, "onRequest16");
-__name2(onRequest16, "onRequest");
-var import_checked_fetch17 = __toESM2(require_checked_fetch2());
+__name(onRequest16, "onRequest");
+
+// api/admin/upload-players-csv.ts
+var import_checked_fetch17 = __toESM(require_checked_fetch());
 var corsHeaders4 = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -3979,8 +3928,7 @@ function verifyAdminToken5(request) {
   }
   return true;
 }
-__name(verifyAdminToken5, "verifyAdminToken5");
-__name2(verifyAdminToken5, "verifyAdminToken");
+__name(verifyAdminToken5, "verifyAdminToken");
 var teamMapping = {
   "RCB": "1",
   // Royal Challengers Bengaluru
@@ -4186,7 +4134,6 @@ function guessNationality(name) {
   return "India";
 }
 __name(guessNationality, "guessNationality");
-__name2(guessNationality, "guessNationality");
 function parseCSV(csvContent) {
   const lines = csvContent.trim().split("\n");
   if (lines.length < 2) return [];
@@ -4277,8 +4224,7 @@ function parseCSV(csvContent) {
   return players;
 }
 __name(parseCSV, "parseCSV");
-__name2(parseCSV, "parseCSV");
-var onRequest17 = /* @__PURE__ */ __name2(async (context) => {
+var onRequest17 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders4 });
@@ -4385,8 +4331,10 @@ var onRequest17 = /* @__PURE__ */ __name2(async (context) => {
     });
   }
 }, "onRequest");
-var import_checked_fetch18 = __toESM2(require_checked_fetch2());
-var onRequest18 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/admin/users.js
+var import_checked_fetch18 = __toESM(require_checked_fetch());
+var onRequest18 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { pathname, searchParams } = new URL(request.url);
   const method = request.method;
@@ -4556,7 +4504,9 @@ var onRequest18 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch19 = __toESM2(require_checked_fetch2());
+
+// api/calendar/ical.js
+var import_checked_fetch19 = __toESM(require_checked_fetch());
 async function onRequest19(context) {
   const { request, env } = context;
   const corsHeaders7 = {
@@ -4594,10 +4544,10 @@ async function onRequest19(context) {
     }
     const matchesData = await matchesResponse.json();
     const matches = Array.isArray(matchesData) ? matchesData : matchesData.matches || [];
-    const formatDate = /* @__PURE__ */ __name2((date) => {
+    const formatDate = /* @__PURE__ */ __name((date) => {
       return new Date(date).toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
     }, "formatDate");
-    const escapeText = /* @__PURE__ */ __name2((text) => {
+    const escapeText = /* @__PURE__ */ __name((text) => {
       if (!text) return "";
       return String(text).replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
     }, "escapeText");
@@ -4668,9 +4618,10 @@ LOCATION:${escapeText(venue)}`;
     );
   }
 }
-__name(onRequest19, "onRequest19");
-__name2(onRequest19, "onRequest");
-var import_checked_fetch20 = __toESM2(require_checked_fetch2());
+__name(onRequest19, "onRequest");
+
+// api/predictions/leaderboard.js
+var import_checked_fetch20 = __toESM(require_checked_fetch());
 async function getAllPredictions(matchId, userId, league, env) {
   const predictions = [];
   if (matchId) {
@@ -4712,7 +4663,6 @@ async function getAllPredictions(matchId, userId, league, env) {
   return predictions;
 }
 __name(getAllPredictions, "getAllPredictions");
-__name2(getAllPredictions, "getAllPredictions");
 async function getLeaderboard(matchId, env, corsHeaders7) {
   try {
     const cacheKey = matchId ? `leaderboard:match:${matchId}` : "leaderboard:global";
@@ -4774,8 +4724,7 @@ async function getLeaderboard(matchId, env, corsHeaders7) {
   }
 }
 __name(getLeaderboard, "getLeaderboard");
-__name2(getLeaderboard, "getLeaderboard");
-var onRequest20 = /* @__PURE__ */ __name2(async (context) => {
+var onRequest20 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const method = request.method;
@@ -4804,7 +4753,9 @@ var onRequest20 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch21 = __toESM2(require_checked_fetch2());
+
+// api/predictions/polls.js
+var import_checked_fetch21 = __toESM(require_checked_fetch());
 async function getUserFromToken(token, env) {
   if (!token) return null;
   const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
@@ -4825,8 +4776,7 @@ async function getUserFromToken(token, env) {
   return { ...user, email };
 }
 __name(getUserFromToken, "getUserFromToken");
-__name2(getUserFromToken, "getUserFromToken");
-var onRequest21 = /* @__PURE__ */ __name2(async (context) => {
+var onRequest21 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { pathname, searchParams } = new URL(request.url);
   const method = request.method;
@@ -4971,7 +4921,9 @@ var onRequest21 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch222 = __toESM2(require_checked_fetch2());
+
+// api/predictions/stats.js
+var import_checked_fetch22 = __toESM(require_checked_fetch());
 async function getAllPredictions2(matchId, userId, league, env) {
   const predictions = [];
   if (matchId) {
@@ -5012,9 +4964,8 @@ async function getAllPredictions2(matchId, userId, league, env) {
   }
   return predictions;
 }
-__name(getAllPredictions2, "getAllPredictions2");
-__name2(getAllPredictions2, "getAllPredictions");
-var onRequest22 = /* @__PURE__ */ __name2(async (context) => {
+__name(getAllPredictions2, "getAllPredictions");
+var onRequest22 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const method = request.method;
@@ -5091,7 +5042,9 @@ var onRequest22 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch23 = __toESM2(require_checked_fetch2());
+
+// api/weather/[venueId].js
+var import_checked_fetch23 = __toESM(require_checked_fetch());
 var WPL_VENUES = {
   "wpl-dy-patil": {
     name: "Dr. DY Patil Sports Academy, Navi Mumbai",
@@ -5217,7 +5170,6 @@ async function onRequestGet(context) {
   }
 }
 __name(onRequestGet, "onRequestGet");
-__name2(onRequestGet, "onRequestGet");
 function getFallbackWeatherData(venueId, venue) {
   const fallbackData = {
     "wpl-dy-patil": {
@@ -5288,7 +5240,6 @@ function getFallbackWeatherData(venueId, venue) {
   return fallbackData[venueId] || fallbackData["wpl-dy-patil"];
 }
 __name(getFallbackWeatherData, "getFallbackWeatherData");
-__name2(getFallbackWeatherData, "getFallbackWeatherData");
 function mapWeatherCondition(condition) {
   const conditionMap = {
     "Clear": "sunny",
@@ -5304,7 +5255,6 @@ function mapWeatherCondition(condition) {
   return conditionMap[condition] || "partly-cloudy";
 }
 __name(mapWeatherCondition, "mapWeatherCondition");
-__name2(mapWeatherCondition, "mapWeatherCondition");
 async function onRequestPost(context) {
   const WEATHER_API_KEY = context.env.OPENWEATHER_API_KEY || "demo_key";
   try {
@@ -5384,9 +5334,10 @@ async function onRequestPost(context) {
   }
 }
 __name(onRequestPost, "onRequestPost");
-__name2(onRequestPost, "onRequestPost");
-var import_checked_fetch24 = __toESM2(require_checked_fetch2());
-var onRequest23 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/messages/[id].js
+var import_checked_fetch24 = __toESM(require_checked_fetch());
+var onRequest23 = /* @__PURE__ */ __name(async (context) => {
   const { request, env, params } = context;
   const { id } = params || {};
   const method = request.method;
@@ -5522,7 +5473,9 @@ var onRequest23 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch25 = __toESM2(require_checked_fetch2());
+
+// api/coaches.js
+var import_checked_fetch25 = __toESM(require_checked_fetch());
 async function onRequestGet2(context) {
   try {
     const { searchParams } = new URL(context.request.url);
@@ -5564,8 +5517,7 @@ async function onRequestGet2(context) {
     });
   }
 }
-__name(onRequestGet2, "onRequestGet2");
-__name2(onRequestGet2, "onRequestGet");
+__name(onRequestGet2, "onRequestGet");
 async function onRequestPost2(context) {
   try {
     const authHeader = context.request.headers.get("Authorization");
@@ -5636,9 +5588,10 @@ async function onRequestPost2(context) {
     });
   }
 }
-__name(onRequestPost2, "onRequestPost2");
-__name2(onRequestPost2, "onRequestPost");
-var import_checked_fetch26 = __toESM2(require_checked_fetch2());
+__name(onRequestPost2, "onRequestPost");
+
+// api/key-players.js
+var import_checked_fetch26 = __toESM(require_checked_fetch());
 async function onRequestGet3(context) {
   try {
     const { searchParams } = new URL(context.request.url);
@@ -5669,8 +5622,7 @@ async function onRequestGet3(context) {
     });
   }
 }
-__name(onRequestGet3, "onRequestGet3");
-__name2(onRequestGet3, "onRequestGet");
+__name(onRequestGet3, "onRequestGet");
 async function onRequestPost3(context) {
   try {
     const authHeader = context.request.headers.get("Authorization");
@@ -5744,10 +5696,11 @@ async function onRequestPost3(context) {
     });
   }
 }
-__name(onRequestPost3, "onRequestPost3");
-__name2(onRequestPost3, "onRequestPost");
-var import_checked_fetch27 = __toESM2(require_checked_fetch2());
-var onRequest24 = /* @__PURE__ */ __name2(async (context) => {
+__name(onRequestPost3, "onRequestPost");
+
+// api/account.js
+var import_checked_fetch27 = __toESM(require_checked_fetch());
+var onRequest24 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const url = new URL(request.url);
   const method = request.method;
@@ -5889,8 +5842,10 @@ var onRequest24 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch28 = __toESM2(require_checked_fetch2());
-var onRequest25 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/admin-email-dashboard.js
+var import_checked_fetch28 = __toESM(require_checked_fetch());
+var onRequest25 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
   const url = new URL(request.url);
@@ -5984,7 +5939,6 @@ async function getDashboardStats(env, corsHeaders7) {
   }
 }
 __name(getDashboardStats, "getDashboardStats");
-__name2(getDashboardStats, "getDashboardStats");
 async function getSegmentStats(env, corsHeaders7) {
   try {
     const segments = {
@@ -6012,7 +5966,6 @@ async function getSegmentStats(env, corsHeaders7) {
   }
 }
 __name(getSegmentStats, "getSegmentStats");
-__name2(getSegmentStats, "getSegmentStats");
 async function getCampaigns(env, corsHeaders7) {
   try {
     const campaigns = [];
@@ -6029,7 +5982,6 @@ async function getCampaigns(env, corsHeaders7) {
   }
 }
 __name(getCampaigns, "getCampaigns");
-__name2(getCampaigns, "getCampaigns");
 async function createCampaign(body, env, corsHeaders7) {
   try {
     const { name, subject, template, targetSegments, schedule } = body;
@@ -6070,7 +6022,6 @@ async function createCampaign(body, env, corsHeaders7) {
   }
 }
 __name(createCampaign, "createCampaign");
-__name2(createCampaign, "createCampaign");
 async function getEmailTemplates(env, corsHeaders7) {
   try {
     const templates = {
@@ -6113,7 +6064,6 @@ async function getEmailTemplates(env, corsHeaders7) {
   }
 }
 __name(getEmailTemplates, "getEmailTemplates");
-__name2(getEmailTemplates, "getEmailTemplates");
 async function createABTest(body, env, corsHeaders7) {
   try {
     const { name, campaign, variants, trafficSplit, duration } = body;
@@ -6162,7 +6112,6 @@ async function createABTest(body, env, corsHeaders7) {
   }
 }
 __name(createABTest, "createABTest");
-__name2(createABTest, "createABTest");
 async function searchUsers(query, env, corsHeaders7) {
   try {
     if (!query) {
@@ -6185,9 +6134,10 @@ async function searchUsers(query, env, corsHeaders7) {
   }
 }
 __name(searchUsers, "searchUsers");
-__name2(searchUsers, "searchUsers");
-var import_checked_fetch29 = __toESM2(require_checked_fetch2());
-var onRequest26 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/ai-advanced.js
+var import_checked_fetch29 = __toESM(require_checked_fetch());
+var onRequest26 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const corsHeaders7 = {
@@ -6275,7 +6225,6 @@ async function generateAdvancedContent(request, corsHeaders7) {
   }
 }
 __name(generateAdvancedContent, "generateAdvancedContent");
-__name2(generateAdvancedContent, "generateAdvancedContent");
 async function analyzeStory(request, corsHeaders7) {
   try {
     const body = await request.json();
@@ -6305,7 +6254,6 @@ async function analyzeStory(request, corsHeaders7) {
   }
 }
 __name(analyzeStory, "analyzeStory");
-__name2(analyzeStory, "analyzeStory");
 async function batchAnalysis2(request, corsHeaders7) {
   try {
     const body = await request.json();
@@ -6343,8 +6291,7 @@ async function batchAnalysis2(request, corsHeaders7) {
     );
   }
 }
-__name(batchAnalysis2, "batchAnalysis2");
-__name2(batchAnalysis2, "batchAnalysis");
+__name(batchAnalysis2, "batchAnalysis");
 async function optimizeSEO2(request, corsHeaders7) {
   try {
     const body = await request.json();
@@ -6373,8 +6320,7 @@ async function optimizeSEO2(request, corsHeaders7) {
     );
   }
 }
-__name(optimizeSEO2, "optimizeSEO2");
-__name2(optimizeSEO2, "optimizeSEO");
+__name(optimizeSEO2, "optimizeSEO");
 async function getTrendingTopics2(request, corsHeaders7) {
   try {
     await new Promise((resolve) => setTimeout(resolve, 1e3));
@@ -6396,8 +6342,7 @@ async function getTrendingTopics2(request, corsHeaders7) {
     );
   }
 }
-__name(getTrendingTopics2, "getTrendingTopics2");
-__name2(getTrendingTopics2, "getTrendingTopics");
+__name(getTrendingTopics2, "getTrendingTopics");
 async function getContentSources2(request, corsHeaders7) {
   try {
     await new Promise((resolve) => setTimeout(resolve, 800));
@@ -6419,8 +6364,7 @@ async function getContentSources2(request, corsHeaders7) {
     );
   }
 }
-__name(getContentSources2, "getContentSources2");
-__name2(getContentSources2, "getContentSources");
+__name(getContentSources2, "getContentSources");
 async function syncContentSources2(request, corsHeaders7) {
   try {
     await new Promise((resolve) => setTimeout(resolve, 3e3));
@@ -6443,8 +6387,7 @@ async function syncContentSources2(request, corsHeaders7) {
     );
   }
 }
-__name(syncContentSources2, "syncContentSources2");
-__name2(syncContentSources2, "syncContentSources");
+__name(syncContentSources2, "syncContentSources");
 async function moderateContent2(request, corsHeaders7) {
   try {
     const body = await request.json();
@@ -6473,8 +6416,7 @@ async function moderateContent2(request, corsHeaders7) {
     );
   }
 }
-__name(moderateContent2, "moderateContent2");
-__name2(moderateContent2, "moderateContent");
+__name(moderateContent2, "moderateContent");
 async function factCheckContent2(request, corsHeaders7) {
   try {
     const body = await request.json();
@@ -6504,8 +6446,7 @@ async function factCheckContent2(request, corsHeaders7) {
     );
   }
 }
-__name(factCheckContent2, "factCheckContent2");
-__name2(factCheckContent2, "factCheckContent");
+__name(factCheckContent2, "factCheckContent");
 async function checkPlagiarism2(request, corsHeaders7) {
   try {
     const body = await request.json();
@@ -6535,8 +6476,7 @@ async function checkPlagiarism2(request, corsHeaders7) {
     );
   }
 }
-__name(checkPlagiarism2, "checkPlagiarism2");
-__name2(checkPlagiarism2, "checkPlagiarism");
+__name(checkPlagiarism2, "checkPlagiarism");
 async function getPerformanceAnalytics(request, corsHeaders7) {
   try {
     await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -6558,9 +6498,10 @@ async function getPerformanceAnalytics(request, corsHeaders7) {
   }
 }
 __name(getPerformanceAnalytics, "getPerformanceAnalytics");
-__name2(getPerformanceAnalytics, "getPerformanceAnalytics");
-var import_checked_fetch30 = __toESM2(require_checked_fetch2());
-var onRequest27 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/ai-advanced-complete.js
+var import_checked_fetch30 = __toESM(require_checked_fetch());
+var onRequest27 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const corsHeaders7 = {
@@ -6647,8 +6588,7 @@ async function generateAdvancedContent2(request, corsHeaders7) {
     );
   }
 }
-__name(generateAdvancedContent2, "generateAdvancedContent2");
-__name2(generateAdvancedContent2, "generateAdvancedContent");
+__name(generateAdvancedContent2, "generateAdvancedContent");
 async function analyzeStory2(request, corsHeaders7) {
   try {
     const body = await request.json();
@@ -6677,8 +6617,7 @@ async function analyzeStory2(request, corsHeaders7) {
     );
   }
 }
-__name(analyzeStory2, "analyzeStory2");
-__name2(analyzeStory2, "analyzeStory");
+__name(analyzeStory2, "analyzeStory");
 async function getTrendingTopics3(request, corsHeaders7) {
   try {
     await new Promise((resolve) => setTimeout(resolve, 1e3));
@@ -6700,8 +6639,7 @@ async function getTrendingTopics3(request, corsHeaders7) {
     );
   }
 }
-__name(getTrendingTopics3, "getTrendingTopics3");
-__name2(getTrendingTopics3, "getTrendingTopics");
+__name(getTrendingTopics3, "getTrendingTopics");
 async function getPerformanceAnalytics2(request, corsHeaders7) {
   try {
     await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -6722,8 +6660,7 @@ async function getPerformanceAnalytics2(request, corsHeaders7) {
     );
   }
 }
-__name(getPerformanceAnalytics2, "getPerformanceAnalytics2");
-__name2(getPerformanceAnalytics2, "getPerformanceAnalytics");
+__name(getPerformanceAnalytics2, "getPerformanceAnalytics");
 function generateAdvancedStoryContent2(prompt, category, tone, length, targetAudience, keywords) {
   const templates = {
     "match-experience": generateMatchExperienceContent(prompt, tone, length),
@@ -6745,8 +6682,7 @@ function generateAdvancedStoryContent2(prompt, category, tone, length, targetAud
     targetAudience
   };
 }
-__name(generateAdvancedStoryContent2, "generateAdvancedStoryContent2");
-__name2(generateAdvancedStoryContent2, "generateAdvancedStoryContent");
+__name(generateAdvancedStoryContent2, "generateAdvancedStoryContent");
 function generateMatchExperienceContent(prompt, tone, length) {
   const toneAdjustments = {
     "professional": "From a professional perspective, the match experience at",
@@ -6772,7 +6708,6 @@ This wasn't just a cricket match; it was an event that brought people together, 
   return lengthAdjustments[length] || lengthAdjustments["medium"];
 }
 __name(generateMatchExperienceContent, "generateMatchExperienceContent");
-__name2(generateMatchExperienceContent, "generateMatchExperienceContent");
 function generatePlayerFanContent(prompt, tone, length) {
   const toneAdjustments = {
     "professional": "As a cricket analyst, I can confidently say that",
@@ -6783,45 +6718,38 @@ function generatePlayerFanContent(prompt, tone, length) {
   return `${toneAdjustments[tone]} ${prompt} represents excellence in modern cricket. Their combination of skill, mental toughness, and consistency sets them apart from other players. Whether with bat or ball, they deliver performances that inspire fans and command respect from opponents. Their dedication to fitness and continuous improvement shows in every aspect of their game.`;
 }
 __name(generatePlayerFanContent, "generatePlayerFanContent");
-__name2(generatePlayerFanContent, "generatePlayerFanContent");
 function generateVenueMemoryContent(prompt, tone, length) {
   return `The ${prompt} holds a special place in cricket history. This venue has witnessed countless memorable matches and legendary performances. The unique characteristics of the ground - from pitch conditions to crowd atmosphere - create an experience that players and fans cherish. Every visit to ${prompt} is special, knowing you're walking in the footsteps of cricket greats.`;
 }
 __name(generateVenueMemoryContent, "generateVenueMemoryContent");
-__name2(generateVenueMemoryContent, "generateVenueMemoryContent");
 function generateCricketJourneyContent(prompt, tone, length) {
   return `My cricket journey with ${prompt} has been transformative. What started as casual interest evolved into a deep passion for the sport. Through matches, practices, and interactions with fellow fans, I've grown not just as a player but as a person. The lessons learned from cricket - teamwork, resilience, sportsmanship - extend far beyond the boundary ropes.`;
 }
 __name(generateCricketJourneyContent, "generateCricketJourneyContent");
-__name2(generateCricketJourneyContent, "generateCricketJourneyContent");
 function generateEmotionalMomentContent(prompt, tone, length) {
   return `The moment ${prompt} happened, time seemed to stand still. In that instant, all the emotions of cricket - joy, tension, relief, excitement - converged into one powerful experience. It's these moments that make cricket special, creating memories that last a lifetime and stories that get passed down through generations of fans.`;
 }
 __name(generateEmotionalMomentContent, "generateEmotionalMomentContent");
-__name2(generateEmotionalMomentContent, "generateEmotionalMomentContent");
 function generateTagsFromPrompt(prompt, category, keywords) {
   const baseTags = [prompt.toLowerCase(), category, "cricket", "ipl", "ai-generated"];
   const additionalTags = keywords || [];
   return [.../* @__PURE__ */ new Set([...baseTags, ...additionalTags])].slice(0, 8);
 }
 __name(generateTagsFromPrompt, "generateTagsFromPrompt");
-__name2(generateTagsFromPrompt, "generateTagsFromPrompt");
 function generateImageSuggestions2(prompt, category) {
   return [
     { url: `https://api.ai/images/${prompt}-hero.jpg`, description: `AI-generated hero image for ${prompt}` },
     { url: `https://api.ai/images/${category}-context.jpg`, description: `Context image for ${category}` }
   ];
 }
-__name(generateImageSuggestions2, "generateImageSuggestions2");
-__name2(generateImageSuggestions2, "generateImageSuggestions");
+__name(generateImageSuggestions2, "generateImageSuggestions");
 function generateVideoSuggestions2(prompt, category) {
   return [
     { url: `https://api.ai/videos/${prompt}-highlights.mp4`, description: `AI-generated highlights for ${prompt}` },
     { url: `https://api.ai/videos/${category}-analysis.mp4`, description: `Analysis video for ${category}` }
   ];
 }
-__name(generateVideoSuggestions2, "generateVideoSuggestions2");
-__name2(generateVideoSuggestions2, "generateVideoSuggestions");
+__name(generateVideoSuggestions2, "generateVideoSuggestions");
 function generateRelatedTopics2(prompt, category) {
   return [
     { topic: `${prompt} analysis`, relevance: 0.95 },
@@ -6829,8 +6757,7 @@ function generateRelatedTopics2(prompt, category) {
     { topic: "IPL 2025", relevance: 0.82 }
   ];
 }
-__name(generateRelatedTopics2, "generateRelatedTopics2");
-__name2(generateRelatedTopics2, "generateRelatedTopics");
+__name(generateRelatedTopics2, "generateRelatedTopics");
 function performAdvancedStoryAnalysis2(content, title, category, author) {
   const wordCount = content.split(" ").length;
   const sentences = content.split(".").length;
@@ -6859,8 +6786,7 @@ function performAdvancedStoryAnalysis2(content, title, category, author) {
     enhancementSuggestions: ["Add multimedia elements", "Include interactive content", "Optimize for SEO"]
   };
 }
-__name(performAdvancedStoryAnalysis2, "performAdvancedStoryAnalysis2");
-__name2(performAdvancedStoryAnalysis2, "performAdvancedStoryAnalysis");
+__name(performAdvancedStoryAnalysis2, "performAdvancedStoryAnalysis");
 function generateAdvancedTrendingTopics2() {
   return [
     {
@@ -6891,8 +6817,7 @@ function generateAdvancedTrendingTopics2() {
     }
   ];
 }
-__name(generateAdvancedTrendingTopics2, "generateAdvancedTrendingTopics2");
-__name2(generateAdvancedTrendingTopics2, "generateAdvancedTrendingTopics");
+__name(generateAdvancedTrendingTopics2, "generateAdvancedTrendingTopics");
 function generatePerformanceAnalytics2() {
   return {
     overview: {
@@ -6926,8 +6851,7 @@ function generatePerformanceAnalytics2() {
     }
   };
 }
-__name(generatePerformanceAnalytics2, "generatePerformanceAnalytics2");
-__name2(generatePerformanceAnalytics2, "generatePerformanceAnalytics");
+__name(generatePerformanceAnalytics2, "generatePerformanceAnalytics");
 function extractKeyTopics(content) {
   const words = content.toLowerCase().split(/\s+/);
   const commonWords = /* @__PURE__ */ new Set(["the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with", "by", "is", "was", "are", "were"]);
@@ -6940,9 +6864,10 @@ function extractKeyTopics(content) {
   return Object.entries(wordFreq).sort(([, a], [, b]) => b - a).slice(0, 10).map(([word]) => word);
 }
 __name(extractKeyTopics, "extractKeyTopics");
-__name2(extractKeyTopics, "extractKeyTopics");
-var import_checked_fetch31 = __toESM2(require_checked_fetch2());
-var onRequest28 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/ai-content.js
+var import_checked_fetch31 = __toESM(require_checked_fetch());
+var onRequest28 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const corsHeaders7 = {
@@ -7013,7 +6938,6 @@ async function generateContent(request, corsHeaders7) {
   }
 }
 __name(generateContent, "generateContent");
-__name2(generateContent, "generateContent");
 async function analyzeContent(request, corsHeaders7) {
   try {
     const body = await request.json();
@@ -7042,9 +6966,10 @@ async function analyzeContent(request, corsHeaders7) {
   }
 }
 __name(analyzeContent, "analyzeContent");
-__name2(analyzeContent, "analyzeContent");
-var import_checked_fetch322 = __toESM2(require_checked_fetch2());
-var onRequest29 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/ai-content-complete.js
+var import_checked_fetch32 = __toESM(require_checked_fetch());
+var onRequest29 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const corsHeaders7 = {
@@ -7114,8 +7039,7 @@ async function generateContent2(request, corsHeaders7) {
     );
   }
 }
-__name(generateContent2, "generateContent2");
-__name2(generateContent2, "generateContent");
+__name(generateContent2, "generateContent");
 async function analyzeContent2(request, corsHeaders7) {
   try {
     const body = await request.json();
@@ -7143,8 +7067,7 @@ async function analyzeContent2(request, corsHeaders7) {
     );
   }
 }
-__name(analyzeContent2, "analyzeContent2");
-__name2(analyzeContent2, "analyzeContent");
+__name(analyzeContent2, "analyzeContent");
 async function suggestTags2(request, corsHeaders7) {
   try {
     const body = await request.json();
@@ -7174,8 +7097,7 @@ async function suggestTags2(request, corsHeaders7) {
     );
   }
 }
-__name(suggestTags2, "suggestTags2");
-__name2(suggestTags2, "suggestTags");
+__name(suggestTags2, "suggestTags");
 async function getTrendingTopics4(request, corsHeaders7) {
   try {
     await new Promise((resolve) => setTimeout(resolve, 800));
@@ -7196,8 +7118,7 @@ async function getTrendingTopics4(request, corsHeaders7) {
     );
   }
 }
-__name(getTrendingTopics4, "getTrendingTopics4");
-__name2(getTrendingTopics4, "getTrendingTopics");
+__name(getTrendingTopics4, "getTrendingTopics");
 async function optimizeSEO3(request, corsHeaders7) {
   try {
     const body = await request.json();
@@ -7225,8 +7146,7 @@ async function optimizeSEO3(request, corsHeaders7) {
     );
   }
 }
-__name(optimizeSEO3, "optimizeSEO3");
-__name2(optimizeSEO3, "optimizeSEO");
+__name(optimizeSEO3, "optimizeSEO");
 async function factCheckContent3(request, corsHeaders7) {
   try {
     const body = await request.json();
@@ -7254,16 +7174,18 @@ async function factCheckContent3(request, corsHeaders7) {
     );
   }
 }
-__name(factCheckContent3, "factCheckContent3");
-__name2(factCheckContent3, "factCheckContent");
-var import_checked_fetch33 = __toESM2(require_checked_fetch2());
-var encryptPassword3 = /* @__PURE__ */ __name2((password, salt) => {
+__name(factCheckContent3, "factCheckContent");
+
+// api/auth.js
+var import_checked_fetch33 = __toESM(require_checked_fetch());
+import crypto6 from "node:crypto";
+var encryptPassword3 = /* @__PURE__ */ __name((password, salt) => {
   const hash = crypto6.createHash("sha256");
   hash.update(password + salt);
   return hash.digest("hex");
 }, "encryptPassword");
-var generateSalt3 = /* @__PURE__ */ __name2(() => crypto6.randomBytes(16).toString("hex"), "generateSalt");
-var generateToken3 = /* @__PURE__ */ __name2(() => crypto6.randomBytes(32).toString("hex"), "generateToken");
+var generateSalt3 = /* @__PURE__ */ __name(() => crypto6.randomBytes(16).toString("hex"), "generateSalt");
+var generateToken3 = /* @__PURE__ */ __name(() => crypto6.randomBytes(32).toString("hex"), "generateToken");
 var COMMON_PASSWORDS2 = /* @__PURE__ */ new Set([
   "password",
   "password1",
@@ -7276,7 +7198,7 @@ var COMMON_PASSWORDS2 = /* @__PURE__ */ new Set([
   "letmein",
   "iloveyou"
 ]);
-var onRequest30 = /* @__PURE__ */ __name2(async (context) => {
+var onRequest30 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const method = request.method;
@@ -7544,7 +7466,9 @@ var onRequest30 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch34 = __toESM2(require_checked_fetch2());
+
+// api/content.js
+var import_checked_fetch34 = __toESM(require_checked_fetch());
 async function getBody(request) {
   if (request.method === "GET" || request.method === "HEAD") {
     return null;
@@ -7556,7 +7480,6 @@ async function getBody(request) {
   }
 }
 __name(getBody, "getBody");
-__name2(getBody, "getBody");
 function verifyAdminToken6(request) {
   const authHeader = request.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -7564,11 +7487,10 @@ function verifyAdminToken6(request) {
   }
   return true;
 }
-__name(verifyAdminToken6, "verifyAdminToken6");
-__name2(verifyAdminToken6, "verifyAdminToken");
+__name(verifyAdminToken6, "verifyAdminToken");
 var kv = globalThis.IPL_CACHE;
 var KV_KEY = "ipl:content";
-var onRequest31 = /* @__PURE__ */ __name2(async (context) => {
+var onRequest31 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const kvNamespace = env.IPL_CACHE || kv;
   const corsHeaders7 = {
@@ -7837,8 +7759,10 @@ var onRequest31 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch35 = __toESM2(require_checked_fetch2());
-var onRequest32 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/email-analytics.js
+var import_checked_fetch35 = __toESM(require_checked_fetch());
+var onRequest32 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
   const url = new URL(request.url);
@@ -7921,7 +7845,6 @@ async function handleWebhook(request, env, corsHeaders7) {
   }
 }
 __name(handleWebhook, "handleWebhook");
-__name2(handleWebhook, "handleWebhook");
 function detectProvider(body) {
   if (body.type && body.data?.email) {
     return {
@@ -7967,7 +7890,6 @@ function detectProvider(body) {
   return null;
 }
 __name(detectProvider, "detectProvider");
-__name2(detectProvider, "detectProvider");
 function normalizeElasticEmailEvent(elasticStatus) {
   const statusMap = {
     "Sent": "email-sent",
@@ -7982,7 +7904,6 @@ function normalizeElasticEmailEvent(elasticStatus) {
   return statusMap[elasticStatus] || elasticStatus.toLowerCase();
 }
 __name(normalizeElasticEmailEvent, "normalizeElasticEmailEvent");
-__name2(normalizeElasticEmailEvent, "normalizeElasticEmailEvent");
 async function storeAnalyticsEvent(event, env) {
   const events = Array.isArray(event) ? event : [event];
   for (const evt of events) {
@@ -8011,7 +7932,6 @@ async function storeAnalyticsEvent(event, env) {
   }
 }
 __name(storeAnalyticsEvent, "storeAnalyticsEvent");
-__name2(storeAnalyticsEvent, "storeAnalyticsEvent");
 async function getAnalytics(email, rangeParam, env, corsHeaders7) {
   try {
     const range = Math.min(parseInt(rangeParam) || 30, 365);
@@ -8053,7 +7973,6 @@ async function getAnalytics(email, rangeParam, env, corsHeaders7) {
   }
 }
 __name(getAnalytics, "getAnalytics");
-__name2(getAnalytics, "getAnalytics");
 async function recordEvent(email, body, env, corsHeaders7) {
   try {
     const { eventType, matchId, action, metadata } = body;
@@ -8088,9 +8007,10 @@ async function recordEvent(email, body, env, corsHeaders7) {
   }
 }
 __name(recordEvent, "recordEvent");
-__name2(recordEvent, "recordEvent");
-var import_checked_fetch36 = __toESM2(require_checked_fetch2());
-var onRequest33 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/email-preferences.js
+var import_checked_fetch36 = __toESM(require_checked_fetch());
+var onRequest33 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { pathname } = new URL(request.url);
   const method = request.method;
@@ -8198,7 +8118,6 @@ async function handleUnsubscribe(token, env, corsHeaders7) {
   }
 }
 __name(handleUnsubscribe, "handleUnsubscribe");
-__name2(handleUnsubscribe, "handleUnsubscribe");
 async function getEmailPreferences(email, env, corsHeaders7) {
   try {
     const userData = await env.SPORTS_KV.get(`user:${email}`);
@@ -8239,7 +8158,6 @@ async function getEmailPreferences(email, env, corsHeaders7) {
   }
 }
 __name(getEmailPreferences, "getEmailPreferences");
-__name2(getEmailPreferences, "getEmailPreferences");
 async function updateEmailPreferences(email, body, env, corsHeaders7) {
   try {
     const userData = await env.SPORTS_KV.get(`user:${email}`);
@@ -8303,7 +8221,6 @@ async function updateEmailPreferences(email, body, env, corsHeaders7) {
   }
 }
 __name(updateEmailPreferences, "updateEmailPreferences");
-__name2(updateEmailPreferences, "updateEmailPreferences");
 async function deletePreference(email, body, env, corsHeaders7) {
   try {
     const { category } = body;
@@ -8338,7 +8255,6 @@ async function deletePreference(email, body, env, corsHeaders7) {
   }
 }
 __name(deletePreference, "deletePreference");
-__name2(deletePreference, "deletePreference");
 function getDefaultPreferences() {
   return {
     matchReminders: { enabled: true, frequency: "immediate" },
@@ -8351,9 +8267,10 @@ function getDefaultPreferences() {
   };
 }
 __name(getDefaultPreferences, "getDefaultPreferences");
-__name2(getDefaultPreferences, "getDefaultPreferences");
-var import_checked_fetch37 = __toESM2(require_checked_fetch2());
-var onRequest34 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/email-queue.js
+var import_checked_fetch37 = __toESM(require_checked_fetch());
+var onRequest34 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
   const url = new URL(request.url);
@@ -8446,7 +8363,6 @@ async function handleAdminRequest(request, env, method, corsHeaders7) {
   }
 }
 __name(handleAdminRequest, "handleAdminRequest");
-__name2(handleAdminRequest, "handleAdminRequest");
 async function getQueueStatus(email, env, corsHeaders7) {
   try {
     const queueKey = `queue:${email}`;
@@ -8471,7 +8387,6 @@ async function getQueueStatus(email, env, corsHeaders7) {
   }
 }
 __name(getQueueStatus, "getQueueStatus");
-__name2(getQueueStatus, "getQueueStatus");
 async function getFullQueue(env, corsHeaders7) {
   try {
     const queueStats = await env.SPORTS_KV.get("queue-stats");
@@ -8494,7 +8409,6 @@ async function getFullQueue(env, corsHeaders7) {
   }
 }
 __name(getFullQueue, "getFullQueue");
-__name2(getFullQueue, "getFullQueue");
 async function processQueue(env, corsHeaders7) {
   try {
     const maxRetries = 3;
@@ -8517,7 +8431,6 @@ async function processQueue(env, corsHeaders7) {
   }
 }
 __name(processQueue, "processQueue");
-__name2(processQueue, "processQueue");
 async function retryEmail(queueId, env, corsHeaders7) {
   try {
     const emailData = await env.SPORTS_KV.get(`queued-email:${queueId}`);
@@ -8548,7 +8461,6 @@ async function retryEmail(queueId, env, corsHeaders7) {
   }
 }
 __name(retryEmail, "retryEmail");
-__name2(retryEmail, "retryEmail");
 async function getQueueStats(env, corsHeaders7) {
   try {
     const stats = await env.SPORTS_KV.get("queue-stats");
@@ -8572,9 +8484,10 @@ async function getQueueStats(env, corsHeaders7) {
   }
 }
 __name(getQueueStats, "getQueueStats");
-__name2(getQueueStats, "getQueueStats");
-var import_checked_fetch38 = __toESM2(require_checked_fetch2());
-var onRequest35 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/email-segmentation.js
+var import_checked_fetch38 = __toESM(require_checked_fetch());
+var onRequest35 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
   const url = new URL(request.url);
@@ -8673,7 +8586,6 @@ async function getUserSegment(email, env, corsHeaders7) {
   }
 }
 __name(getUserSegment, "getUserSegment");
-__name2(getUserSegment, "getUserSegment");
 function calculateSegment(user, engagement) {
   const emailEngagement = {
     openRate: engagement.emailsOpened / Math.max(engagement.emailsSent || 1, 1),
@@ -8740,7 +8652,6 @@ function calculateSegment(user, engagement) {
   };
 }
 __name(calculateSegment, "calculateSegment");
-__name2(calculateSegment, "calculateSegment");
 function getSegmentRecommendations(segment) {
   const recommendations = {
     "at-risk": [
@@ -8783,7 +8694,6 @@ function getSegmentRecommendations(segment) {
   return recommendations[segment.name] || [];
 }
 __name(getSegmentRecommendations, "getSegmentRecommendations");
-__name2(getSegmentRecommendations, "getSegmentRecommendations");
 async function trackEngagement(email, body, env, corsHeaders7) {
   try {
     const { eventType, matchId, duration, metadata } = body;
@@ -8850,7 +8760,6 @@ async function trackEngagement(email, body, env, corsHeaders7) {
   }
 }
 __name(trackEngagement, "trackEngagement");
-__name2(trackEngagement, "trackEngagement");
 async function getPersonalization(email, env, corsHeaders7) {
   try {
     const userData = await env.SPORTS_KV.get(`user:${email}`);
@@ -8897,7 +8806,6 @@ async function getPersonalization(email, env, corsHeaders7) {
   }
 }
 __name(getPersonalization, "getPersonalization");
-__name2(getPersonalization, "getPersonalization");
 function getRecommendedTeams(user, engagement) {
   const teamMap = {
     "1": { name: "RCB", color: "#EC1C24" },
@@ -8921,7 +8829,6 @@ function getRecommendedTeams(user, engagement) {
   }));
 }
 __name(getRecommendedTeams, "getRecommendedTeams");
-__name2(getRecommendedTeams, "getRecommendedTeams");
 async function updateEngagementHistory(email, body, env, corsHeaders7) {
   try {
     const { events } = body;
@@ -8984,9 +8891,10 @@ async function updateEngagementHistory(email, body, env, corsHeaders7) {
   }
 }
 __name(updateEngagementHistory, "updateEngagementHistory");
-__name2(updateEngagementHistory, "updateEngagementHistory");
-var import_checked_fetch39 = __toESM2(require_checked_fetch2());
-var onRequest36 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/email-service.js
+var import_checked_fetch39 = __toESM(require_checked_fetch());
+var onRequest36 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
   const corsHeaders7 = {
@@ -9099,7 +9007,6 @@ async function sendMatchReminder(body, env, corsHeaders7) {
   }
 }
 __name(sendMatchReminder, "sendMatchReminder");
-__name2(sendMatchReminder, "sendMatchReminder");
 async function sendEmail(body, env, corsHeaders7) {
   try {
     const { to, subject, html } = body;
@@ -9135,7 +9042,6 @@ async function sendEmail(body, env, corsHeaders7) {
   }
 }
 __name(sendEmail, "sendEmail");
-__name2(sendEmail, "sendEmail");
 async function sendEmailViaProvider2(emailData, env) {
   if (env.RESEND_API_KEY) {
     return await sendViaResend2(emailData, env.RESEND_API_KEY);
@@ -9152,8 +9058,7 @@ async function sendEmailViaProvider2(emailData, env) {
   console.log("No email service configured. Email data:", emailData);
   return { success: true, messageId: "local-" + Date.now() };
 }
-__name(sendEmailViaProvider2, "sendEmailViaProvider2");
-__name2(sendEmailViaProvider2, "sendEmailViaProvider");
+__name(sendEmailViaProvider2, "sendEmailViaProvider");
 async function sendViaResend2(emailData, apiKey) {
   try {
     const response = await fetch("https://api.resend.com/emails", {
@@ -9180,8 +9085,7 @@ async function sendViaResend2(emailData, apiKey) {
     return { success: false, error: error.message };
   }
 }
-__name(sendViaResend2, "sendViaResend2");
-__name2(sendViaResend2, "sendViaResend");
+__name(sendViaResend2, "sendViaResend");
 async function sendViaElasticEmail2(emailData, apiKey) {
   try {
     const response = await fetch("https://api.elasticemail.com/v2/email/send", {
@@ -9212,8 +9116,7 @@ async function sendViaElasticEmail2(emailData, apiKey) {
     return { success: false, error: error.message };
   }
 }
-__name(sendViaElasticEmail2, "sendViaElasticEmail2");
-__name2(sendViaElasticEmail2, "sendViaElasticEmail");
+__name(sendViaElasticEmail2, "sendViaElasticEmail");
 async function sendViaSendGrid2(emailData, apiKey) {
   try {
     const response = await fetch("https://api.sendgrid.com/v3/mail/send", {
@@ -9240,8 +9143,7 @@ async function sendViaSendGrid2(emailData, apiKey) {
     return { success: false, error: error.message };
   }
 }
-__name(sendViaSendGrid2, "sendViaSendGrid2");
-__name2(sendViaSendGrid2, "sendViaSendGrid");
+__name(sendViaSendGrid2, "sendViaSendGrid");
 async function sendViaMailgun2(emailData, apiKey, domain) {
   try {
     const formData = new FormData();
@@ -9267,8 +9169,7 @@ async function sendViaMailgun2(emailData, apiKey, domain) {
     return { success: false, error: error.message };
   }
 }
-__name(sendViaMailgun2, "sendViaMailgun2");
-__name2(sendViaMailgun2, "sendViaMailgun");
+__name(sendViaMailgun2, "sendViaMailgun");
 function generateMatchReminderHTML(team1, team2, venue, time, date) {
   const team1Name = team1 && (team1.name || team1.shortName) || "Team 1";
   const team2Name = team2 && (team2.name || team2.shortName) || "Team 2";
@@ -9681,7 +9582,6 @@ function generateMatchReminderHTML(team1, team2, venue, time, date) {
 `;
 }
 __name(generateMatchReminderHTML, "generateMatchReminderHTML");
-__name2(generateMatchReminderHTML, "generateMatchReminderHTML");
 async function sendBatchEmails(body, env, corsHeaders7) {
   try {
     const { emails } = body;
@@ -9716,7 +9616,6 @@ async function sendBatchEmails(body, env, corsHeaders7) {
   }
 }
 __name(sendBatchEmails, "sendBatchEmails");
-__name2(sendBatchEmails, "sendBatchEmails");
 async function sendPersonalizedEmail(emailData, env) {
   try {
     const { email, matchId, team1, team2, venue, time, date, personalization } = emailData;
@@ -9789,8 +9688,9 @@ async function sendPersonalizedEmail(emailData, env) {
   }
 }
 __name(sendPersonalizedEmail, "sendPersonalizedEmail");
-__name2(sendPersonalizedEmail, "sendPersonalizedEmail");
-var import_checked_fetch40 = __toESM2(require_checked_fetch2());
+
+// api/enrichDescription.js
+var import_checked_fetch40 = __toESM(require_checked_fetch());
 async function onRequest37(context) {
   const { request } = context;
   try {
@@ -9826,10 +9726,11 @@ async function onRequest37(context) {
     return new Response(JSON.stringify({ error: "internal error" }), { status: 500, headers: { "Content-Type": "application/json" } });
   }
 }
-__name(onRequest37, "onRequest37");
-__name2(onRequest37, "onRequest");
-var import_checked_fetch41 = __toESM2(require_checked_fetch2());
-var onRequest38 = /* @__PURE__ */ __name2(async (context) => {
+__name(onRequest37, "onRequest");
+
+// api/geocoding.js
+var import_checked_fetch41 = __toESM(require_checked_fetch());
+var onRequest38 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("query");
@@ -9899,7 +9800,6 @@ async function searchOpenCage(query, apiKey) {
   }));
 }
 __name(searchOpenCage, "searchOpenCage");
-__name2(searchOpenCage, "searchOpenCage");
 async function searchNominatim(query) {
   const response = await fetch(
     `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query + " stadium")}&limit=3&addressdetails=1`,
@@ -9923,9 +9823,10 @@ async function searchNominatim(query) {
   }));
 }
 __name(searchNominatim, "searchNominatim");
-__name2(searchNominatim, "searchNominatim");
-var import_checked_fetch42 = __toESM2(require_checked_fetch2());
-var onRequest39 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/legal.js
+var import_checked_fetch42 = __toESM(require_checked_fetch());
+var onRequest39 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
   const corsHeaders7 = {
@@ -10027,8 +9928,10 @@ var onRequest39 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch43 = __toESM2(require_checked_fetch2());
-var onRequest40 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/live-score.js
+var import_checked_fetch43 = __toESM(require_checked_fetch());
+var onRequest40 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const method = request.method;
@@ -10168,7 +10071,9 @@ var onRequest40 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch44 = __toESM2(require_checked_fetch2());
+
+// api/matches.js
+var import_checked_fetch44 = __toESM(require_checked_fetch());
 var mockTeams = [
   // IPL Teams (IDs 1-10)
   {
@@ -10300,15 +10205,13 @@ function verifyAdminToken7(request) {
   }
   return true;
 }
-__name(verifyAdminToken7, "verifyAdminToken7");
-__name2(verifyAdminToken7, "verifyAdminToken");
+__name(verifyAdminToken7, "verifyAdminToken");
 function getTeamById(teamId, teams) {
   const team = teams.find((t) => t.id === teamId);
   if (team) return team;
   return mockTeams.find((t) => t.id === teamId);
 }
 __name(getTeamById, "getTeamById");
-__name2(getTeamById, "getTeamById");
 function formatMatch(match2, teams) {
   if (match2.team1 && match2.team1.name && match2.team1.shortName) {
     return {
@@ -10385,7 +10288,6 @@ function formatMatch(match2, teams) {
   };
 }
 __name(formatMatch, "formatMatch");
-__name2(formatMatch, "formatMatch");
 async function handleGetRequest(context) {
   const { env, request } = context;
   try {
@@ -10431,7 +10333,6 @@ async function handleGetRequest(context) {
   }
 }
 __name(handleGetRequest, "handleGetRequest");
-__name2(handleGetRequest, "handleGetRequest");
 async function handlePostRequest(context) {
   const { env, request } = context;
   if (!verifyAdminToken7(request)) {
@@ -10487,7 +10388,6 @@ async function handlePostRequest(context) {
   }
 }
 __name(handlePostRequest, "handlePostRequest");
-__name2(handlePostRequest, "handlePostRequest");
 async function handlePutRequest(context) {
   const { env, request } = context;
   if (!verifyAdminToken7(request)) {
@@ -10554,7 +10454,6 @@ async function handlePutRequest(context) {
   }
 }
 __name(handlePutRequest, "handlePutRequest");
-__name2(handlePutRequest, "handlePutRequest");
 async function handleDeleteRequest(context) {
   const { env, request } = context;
   if (!verifyAdminToken7(request)) {
@@ -10616,7 +10515,6 @@ async function handleDeleteRequest(context) {
   }
 }
 __name(handleDeleteRequest, "handleDeleteRequest");
-__name2(handleDeleteRequest, "handleDeleteRequest");
 async function onRequest41(context) {
   const { request } = context;
   const method = request.method;
@@ -10655,9 +10553,10 @@ async function onRequest41(context) {
   response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
   return response;
 }
-__name(onRequest41, "onRequest41");
-__name2(onRequest41, "onRequest");
-var import_checked_fetch45 = __toESM2(require_checked_fetch2());
+__name(onRequest41, "onRequest");
+
+// api/messages.js
+var import_checked_fetch45 = __toESM(require_checked_fetch());
 function getModerationFlagsForText(text) {
   const normalized = text.trim().toLowerCase();
   const badWords = ["idiot", "stupid", "hate"];
@@ -10676,8 +10575,7 @@ function getModerationFlagsForText(text) {
   return { isFlagged, flagReason, flagStatus, flaggedAt, flagDetails };
 }
 __name(getModerationFlagsForText, "getModerationFlagsForText");
-__name2(getModerationFlagsForText, "getModerationFlagsForText");
-var onRequest42 = /* @__PURE__ */ __name2(async (context) => {
+var onRequest42 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { pathname, searchParams } = new URL(request.url);
   const method = request.method;
@@ -10846,7 +10744,9 @@ var onRequest42 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch46 = __toESM2(require_checked_fetch2());
+
+// api/notifications.js
+var import_checked_fetch46 = __toESM(require_checked_fetch());
 var mockTeams2 = [
   { id: "1", name: "Royal Challengers Bengaluru", shortName: "RCB" },
   { id: "2", name: "Mumbai Indians", shortName: "MI" },
@@ -10905,7 +10805,6 @@ function getMatchStartDate(match2) {
   return null;
 }
 __name(getMatchStartDate, "getMatchStartDate");
-__name2(getMatchStartDate, "getMatchStartDate");
 function getTeamMeta(teamId, teamObj) {
   const id = teamId != null ? String(teamId) : teamObj && teamObj.id != null ? String(teamObj.id) : "";
   let name = teamObj && teamObj.name;
@@ -10924,8 +10823,7 @@ function getTeamMeta(teamId, teamObj) {
   };
 }
 __name(getTeamMeta, "getTeamMeta");
-__name2(getTeamMeta, "getTeamMeta");
-var onRequest43 = /* @__PURE__ */ __name2(async (context) => {
+var onRequest43 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
   const url = new URL(request.url);
@@ -11110,7 +11008,9 @@ var onRequest43 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch47 = __toESM2(require_checked_fetch2());
+
+// api/players.js
+var import_checked_fetch47 = __toESM(require_checked_fetch());
 var corsHeaders5 = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
@@ -11123,8 +11023,7 @@ function verifyAdminToken8(request) {
   }
   return true;
 }
-__name(verifyAdminToken8, "verifyAdminToken8");
-__name2(verifyAdminToken8, "verifyAdminToken");
+__name(verifyAdminToken8, "verifyAdminToken");
 async function getTeamNameById(players, teamId, league, env) {
   try {
     const teamsData = await env.IPL_CACHE.get("teams", "json");
@@ -11136,8 +11035,7 @@ async function getTeamNameById(players, teamId, league, env) {
   }
 }
 __name(getTeamNameById, "getTeamNameById");
-__name2(getTeamNameById, "getTeamNameById");
-var onRequest44 = /* @__PURE__ */ __name2(async (context) => {
+var onRequest44 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders5 });
@@ -11309,7 +11207,7 @@ var onRequest44 = /* @__PURE__ */ __name2(async (context) => {
           league: p.league
         })));
       }
-      const normalizeTeamId = /* @__PURE__ */ __name2((id) => {
+      const normalizeTeamId = /* @__PURE__ */ __name((id) => {
         let str = String(id || "").trim();
         if (str.startsWith("Team ")) str = str.replace("Team ", "");
         if (str.toLowerCase().startsWith("team")) str = str.replace(/^team/i, "");
@@ -11805,7 +11703,9 @@ var onRequest44 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch48 = __toESM2(require_checked_fetch2());
+
+// api/predictions.js
+var import_checked_fetch48 = __toESM(require_checked_fetch());
 async function getUserFromToken2(token, env) {
   if (!token) return null;
   const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
@@ -11829,8 +11729,7 @@ async function getUserFromToken2(token, env) {
   }
   return { ...user, email, id: String(user.id).trim() };
 }
-__name(getUserFromToken2, "getUserFromToken2");
-__name2(getUserFromToken2, "getUserFromToken");
+__name(getUserFromToken2, "getUserFromToken");
 function isMatchUpcoming(match2) {
   if (!match2 || match2.status !== "upcoming") return false;
   const matchDateTime = /* @__PURE__ */ new Date(`${match2.date}T${match2.time}`);
@@ -11838,7 +11737,6 @@ function isMatchUpcoming(match2) {
   return matchDateTime > now;
 }
 __name(isMatchUpcoming, "isMatchUpcoming");
-__name2(isMatchUpcoming, "isMatchUpcoming");
 async function getAllPredictions3(matchId, userId, league, env) {
   const predictions = [];
   if (matchId) {
@@ -11879,9 +11777,8 @@ async function getAllPredictions3(matchId, userId, league, env) {
   }
   return predictions;
 }
-__name(getAllPredictions3, "getAllPredictions3");
-__name2(getAllPredictions3, "getAllPredictions");
-var onRequest45 = /* @__PURE__ */ __name2(async (context) => {
+__name(getAllPredictions3, "getAllPredictions");
+var onRequest45 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { pathname, searchParams } = new URL(request.url);
   const method = request.method;
@@ -12108,8 +12005,10 @@ var onRequest45 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch49 = __toESM2(require_checked_fetch2());
-var onRequest46 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/preferences.js
+var import_checked_fetch49 = __toESM(require_checked_fetch());
+var onRequest46 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
   const corsHeaders7 = {
@@ -12242,9 +12141,10 @@ async function addUserToIndex(email, env) {
   }
 }
 __name(addUserToIndex, "addUserToIndex");
-__name2(addUserToIndex, "addUserToIndex");
-var import_checked_fetch50 = __toESM2(require_checked_fetch2());
-var onRequest47 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/profile.js
+var import_checked_fetch50 = __toESM(require_checked_fetch());
+var onRequest47 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const url = new URL(request.url);
   const method = request.method;
@@ -12362,8 +12262,10 @@ var onRequest47 = /* @__PURE__ */ __name2(async (context) => {
     );
   }
 }, "onRequest");
-var import_checked_fetch51 = __toESM2(require_checked_fetch2());
-var onRequest48 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/restore-players.js
+var import_checked_fetch51 = __toESM(require_checked_fetch());
+var onRequest48 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const url = new URL(request.url);
   const corsHeaders7 = {
@@ -12508,7 +12410,9 @@ var onRequest48 = /* @__PURE__ */ __name2(async (context) => {
     });
   }
 }, "onRequest");
-var import_checked_fetch52 = __toESM2(require_checked_fetch2());
+
+// api/scorecards.js
+var import_checked_fetch52 = __toESM(require_checked_fetch());
 var corsHeaders6 = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
@@ -12521,13 +12425,11 @@ function verifyAdminToken9(request) {
   }
   return true;
 }
-__name(verifyAdminToken9, "verifyAdminToken9");
-__name2(verifyAdminToken9, "verifyAdminToken");
+__name(verifyAdminToken9, "verifyAdminToken");
 function generateId() {
   return `scorecard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 __name(generateId, "generateId");
-__name2(generateId, "generateId");
 async function onRequest49(context) {
   const { request, env } = context;
   if (request.method === "OPTIONS") {
@@ -12716,10 +12618,11 @@ async function onRequest49(context) {
     });
   }
 }
-__name(onRequest49, "onRequest49");
-__name2(onRequest49, "onRequest");
-var import_checked_fetch53 = __toESM2(require_checked_fetch2());
-var onRequest50 = /* @__PURE__ */ __name2(async (context) => {
+__name(onRequest49, "onRequest");
+
+// api/seed.js
+var import_checked_fetch53 = __toESM(require_checked_fetch());
+var onRequest50 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const url = new URL(request.url);
   if (request.method === "OPTIONS") {
@@ -12944,8 +12847,10 @@ var onRequest50 = /* @__PURE__ */ __name2(async (context) => {
     });
   }
 }, "onRequest");
-var import_checked_fetch54 = __toESM2(require_checked_fetch2());
-var onRequest51 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/seed-wpl.js
+var import_checked_fetch54 = __toESM(require_checked_fetch());
+var onRequest51 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   if (request.method === "OPTIONS") {
     return new Response(null, {
@@ -13441,7 +13346,9 @@ var onRequest51 = /* @__PURE__ */ __name2(async (context) => {
     });
   }
 }, "onRequest");
-var import_checked_fetch55 = __toESM2(require_checked_fetch2());
+
+// api/settings.js
+var import_checked_fetch55 = __toESM(require_checked_fetch());
 function verifyAdminToken10(request) {
   const authHeader = request.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -13449,8 +13356,7 @@ function verifyAdminToken10(request) {
   }
   return true;
 }
-__name(verifyAdminToken10, "verifyAdminToken10");
-__name2(verifyAdminToken10, "verifyAdminToken");
+__name(verifyAdminToken10, "verifyAdminToken");
 var defaultSettings = {
   siteName: "SportsUP18",
   siteDescription: "The biggest cricket tournament in the world",
@@ -13493,8 +13399,7 @@ async function handleGetRequest2(context) {
     });
   }
 }
-__name(handleGetRequest2, "handleGetRequest2");
-__name2(handleGetRequest2, "handleGetRequest");
+__name(handleGetRequest2, "handleGetRequest");
 async function handlePutRequest2(context) {
   const { env, request } = context;
   if (!verifyAdminToken10(request)) {
@@ -13527,8 +13432,7 @@ async function handlePutRequest2(context) {
     });
   }
 }
-__name(handlePutRequest2, "handlePutRequest2");
-__name2(handlePutRequest2, "handlePutRequest");
+__name(handlePutRequest2, "handlePutRequest");
 async function onRequest52(context) {
   const { request } = context;
   const method = request.method;
@@ -13561,10 +13465,11 @@ async function onRequest52(context) {
   response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
   return response;
 }
-__name(onRequest52, "onRequest52");
-__name2(onRequest52, "onRequest");
-var import_checked_fetch56 = __toESM2(require_checked_fetch2());
-var onRequest53 = /* @__PURE__ */ __name2(async (context) => {
+__name(onRequest52, "onRequest");
+
+// api/stadium-info.js
+var import_checked_fetch56 = __toESM(require_checked_fetch());
+var onRequest53 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const venueName = searchParams.get("venue");
@@ -13637,7 +13542,6 @@ async function enrichStadiumInfo(venueName, city, env) {
   return enrichedData;
 }
 __name(enrichStadiumInfo, "enrichStadiumInfo");
-__name2(enrichStadiumInfo, "enrichStadiumInfo");
 async function checkKnownStadiums(venueName) {
   const knownStadiums = {
     "wankhede": {
@@ -13714,7 +13618,6 @@ async function checkKnownStadiums(venueName) {
   return null;
 }
 __name(checkKnownStadiums, "checkKnownStadiums");
-__name2(checkKnownStadiums, "checkKnownStadiums");
 async function getWikipediaInfo(venueName) {
   try {
     const response = await fetch(
@@ -13738,7 +13641,6 @@ async function getWikipediaInfo(venueName) {
   }
 }
 __name(getWikipediaInfo, "getWikipediaInfo");
-__name2(getWikipediaInfo, "getWikipediaInfo");
 async function getAIStadiumInfo(venueName, city, apiKey) {
   const prompt = `
     Provide information about the cricket stadium "${venueName}" in ${city || "unknown city"}.
@@ -13780,8 +13682,9 @@ async function getAIStadiumInfo(venueName, city, apiKey) {
   }
 }
 __name(getAIStadiumInfo, "getAIStadiumInfo");
-__name2(getAIStadiumInfo, "getAIStadiumInfo");
-var import_checked_fetch57 = __toESM2(require_checked_fetch2());
+
+// api/teams.js
+var import_checked_fetch57 = __toESM(require_checked_fetch());
 function verifyAdminToken11(request) {
   const authHeader = request.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -13789,8 +13692,7 @@ function verifyAdminToken11(request) {
   }
   return true;
 }
-__name(verifyAdminToken11, "verifyAdminToken11");
-__name2(verifyAdminToken11, "verifyAdminToken");
+__name(verifyAdminToken11, "verifyAdminToken");
 var defaultTeams = [
   {
     id: "1",
@@ -14023,8 +13925,7 @@ async function handleGetRequest3(context) {
     });
   }
 }
-__name(handleGetRequest3, "handleGetRequest3");
-__name2(handleGetRequest3, "handleGetRequest");
+__name(handleGetRequest3, "handleGetRequest");
 async function handlePostRequest2(context) {
   const { env, request } = context;
   if (!verifyAdminToken11(request)) {
@@ -14100,8 +14001,7 @@ async function handlePostRequest2(context) {
     });
   }
 }
-__name(handlePostRequest2, "handlePostRequest2");
-__name2(handlePostRequest2, "handlePostRequest");
+__name(handlePostRequest2, "handlePostRequest");
 async function handlePutRequest3(context) {
   const { env, request } = context;
   if (!verifyAdminToken11(request)) {
@@ -14156,8 +14056,7 @@ async function handlePutRequest3(context) {
     });
   }
 }
-__name(handlePutRequest3, "handlePutRequest3");
-__name2(handlePutRequest3, "handlePutRequest");
+__name(handlePutRequest3, "handlePutRequest");
 async function handleDeleteRequest2(context) {
   const { env, request } = context;
   if (!verifyAdminToken11(request)) {
@@ -14196,8 +14095,7 @@ async function handleDeleteRequest2(context) {
     });
   }
 }
-__name(handleDeleteRequest2, "handleDeleteRequest2");
-__name2(handleDeleteRequest2, "handleDeleteRequest");
+__name(handleDeleteRequest2, "handleDeleteRequest");
 async function onRequest54(context) {
   const { request } = context;
   const method = request.method;
@@ -14236,10 +14134,11 @@ async function onRequest54(context) {
   response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
   return response;
 }
-__name(onRequest54, "onRequest54");
-__name2(onRequest54, "onRequest");
-var import_checked_fetch58 = __toESM2(require_checked_fetch2());
-var onRequest55 = /* @__PURE__ */ __name2(async (context) => {
+__name(onRequest54, "onRequest");
+
+// api/venues.js
+var import_checked_fetch58 = __toESM(require_checked_fetch());
+var onRequest55 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { pathname, searchParams } = new URL(request.url);
   const method = request.method;
@@ -14255,7 +14154,7 @@ var onRequest55 = /* @__PURE__ */ __name2(async (context) => {
     });
   }
   try {
-    const verifyAdminToken12 = /* @__PURE__ */ __name2(async (request2) => {
+    const verifyAdminToken12 = /* @__PURE__ */ __name(async (request2) => {
       const authHeader = request2.headers.get("authorization");
       if (!authHeader || !authHeader.startsWith("Bearer ")) {
         return false;
@@ -14410,9 +14309,10 @@ function getDefaultVenues() {
   ];
 }
 __name(getDefaultVenues, "getDefaultVenues");
-__name2(getDefaultVenues, "getDefaultVenues");
-var import_checked_fetch59 = __toESM2(require_checked_fetch2());
-var onRequest56 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/weather-enhanced.js
+var import_checked_fetch59 = __toESM(require_checked_fetch());
+var onRequest56 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const corsHeaders7 = {
@@ -14470,7 +14370,6 @@ async function getCurrentWeather(env, venueId, lat, lng, corsHeaders7) {
   });
 }
 __name(getCurrentWeather, "getCurrentWeather");
-__name2(getCurrentWeather, "getCurrentWeather");
 async function getWeatherForecast(env, venueId, lat, lng, corsHeaders7) {
   const forecast = generateWeatherForecast(venueId, lat, lng);
   return new Response(JSON.stringify({
@@ -14484,7 +14383,6 @@ async function getWeatherForecast(env, venueId, lat, lng, corsHeaders7) {
   });
 }
 __name(getWeatherForecast, "getWeatherForecast");
-__name2(getWeatherForecast, "getWeatherForecast");
 async function getAIWeatherAnalysis(env, venueId, lat, lng, corsHeaders7) {
   const currentWeather = await getCachedWeatherData(env) || generateSampleWeatherData(venueId, lat, lng);
   const forecast = generateWeatherForecast(venueId, lat, lng);
@@ -14508,7 +14406,6 @@ async function getAIWeatherAnalysis(env, venueId, lat, lng, corsHeaders7) {
   });
 }
 __name(getAIWeatherAnalysis, "getAIWeatherAnalysis");
-__name2(getAIWeatherAnalysis, "getAIWeatherAnalysis");
 async function syncWeatherData(env, corsHeaders7) {
   try {
     const venues = [
@@ -14540,7 +14437,6 @@ async function syncWeatherData(env, corsHeaders7) {
   }
 }
 __name(syncWeatherData, "syncWeatherData");
-__name2(syncWeatherData, "syncWeatherData");
 function generateSampleWeatherData(venueId, lat, lng) {
   const baseTemp = 25 + Math.random() * 10;
   const conditions = ["sunny", "cloudy", "partly-cloudy", "overcast"];
@@ -14561,7 +14457,6 @@ function generateSampleWeatherData(venueId, lat, lng) {
   }];
 }
 __name(generateSampleWeatherData, "generateSampleWeatherData");
-__name2(generateSampleWeatherData, "generateSampleWeatherData");
 function generateWeatherForecast(venueId, lat, lng) {
   return Array.from({ length: 5 }, (_, i) => ({
     date: new Date(Date.now() + i * 24 * 60 * 60 * 1e3).toISOString().split("T")[0],
@@ -14575,7 +14470,6 @@ function generateWeatherForecast(venueId, lat, lng) {
   }));
 }
 __name(generateWeatherForecast, "generateWeatherForecast");
-__name2(generateWeatherForecast, "generateWeatherForecast");
 function generateAIWeatherPrediction(weather) {
   return {
     matchImpact: ["low", "medium", "high"][Math.floor(Math.random() * 3)],
@@ -14591,7 +14485,6 @@ function generateAIWeatherPrediction(weather) {
   };
 }
 __name(generateAIWeatherPrediction, "generateAIWeatherPrediction");
-__name2(generateAIWeatherPrediction, "generateAIWeatherPrediction");
 function calculateMatchImpact(weather) {
   let impact = "low";
   const factors = [];
@@ -14614,7 +14507,6 @@ function calculateMatchImpact(weather) {
   return { impact, factors };
 }
 __name(calculateMatchImpact, "calculateMatchImpact");
-__name2(calculateMatchImpact, "calculateMatchImpact");
 function getPlayingRecommendations(weather) {
   const recommendations = [];
   if (weather.humidity > 70) {
@@ -14632,7 +14524,6 @@ function getPlayingRecommendations(weather) {
   return recommendations;
 }
 __name(getPlayingRecommendations, "getPlayingRecommendations");
-__name2(getPlayingRecommendations, "getPlayingRecommendations");
 function predictPitchBehavior(weather, forecast) {
   return {
     day1: "Hard and dry surface, good for batting",
@@ -14642,7 +14533,6 @@ function predictPitchBehavior(weather, forecast) {
   };
 }
 __name(predictPitchBehavior, "predictPitchBehavior");
-__name2(predictPitchBehavior, "predictPitchBehavior");
 function predictPlayerConditions(weather) {
   return {
     batting: "Favorable conditions with minimal wind interference",
@@ -14652,7 +14542,6 @@ function predictPlayerConditions(weather) {
   };
 }
 __name(predictPlayerConditions, "predictPlayerConditions");
-__name2(predictPlayerConditions, "predictPlayerConditions");
 function getStrategicRecommendations(weather, forecast) {
   return [
     "Consider batting first if dew is expected",
@@ -14662,7 +14551,6 @@ function getStrategicRecommendations(weather, forecast) {
   ];
 }
 __name(getStrategicRecommendations, "getStrategicRecommendations");
-__name2(getStrategicRecommendations, "getStrategicRecommendations");
 function identifyRiskFactors(weather, forecast) {
   const risks = [];
   if (forecast.some((day) => day.precipitation > 70)) {
@@ -14677,7 +14565,6 @@ function identifyRiskFactors(weather, forecast) {
   return risks;
 }
 __name(identifyRiskFactors, "identifyRiskFactors");
-__name2(identifyRiskFactors, "identifyRiskFactors");
 async function getCachedWeatherData(env) {
   try {
     const latestWeather = await env.SPORTS_KV.get("weather:latest");
@@ -14703,7 +14590,6 @@ async function getCachedWeatherData(env) {
   }
 }
 __name(getCachedWeatherData, "getCachedWeatherData");
-__name2(getCachedWeatherData, "getCachedWeatherData");
 function getNextUpdateTime() {
   const now = /* @__PURE__ */ new Date();
   const currentHour = now.getUTCHours();
@@ -14723,9 +14609,10 @@ function getNextUpdateTime() {
   }
 }
 __name(getNextUpdateTime, "getNextUpdateTime");
-__name2(getNextUpdateTime, "getNextUpdateTime");
-var import_checked_fetch60 = __toESM2(require_checked_fetch2());
-var onRequest57 = /* @__PURE__ */ __name2(async (context) => {
+
+// api/weather-forecast.js
+var import_checked_fetch60 = __toESM(require_checked_fetch());
+var onRequest57 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const groundId = searchParams.get("groundId");
@@ -14801,23 +14688,27 @@ async function fetchWeatherForecast(ground, env, days) {
   }
 }
 __name(fetchWeatherForecast, "fetchWeatherForecast");
-__name2(fetchWeatherForecast, "fetchWeatherForecast");
 async function getGroundsFromKV(env) {
   const groundsList = await env.SPORTS_KV.get("grounds:list");
   return groundsList ? JSON.parse(groundsList) : [];
 }
 __name(getGroundsFromKV, "getGroundsFromKV");
-__name2(getGroundsFromKV, "getGroundsFromKV");
-var import_checked_fetch61 = __toESM2(require_checked_fetch2());
-var onRequest58 = /* @__PURE__ */ __name2(async (context) => {
+
+// [[route]].ts
+var import_checked_fetch61 = __toESM(require_checked_fetch());
+var onRequest58 = /* @__PURE__ */ __name(async (context) => {
   return context.next();
 }, "onRequest");
-var import_checked_fetch62 = __toESM2(require_checked_fetch2());
-var onRequest59 = /* @__PURE__ */ __name2(async (context) => {
+
+// _middleware.ts
+var import_checked_fetch62 = __toESM(require_checked_fetch());
+var onRequest59 = /* @__PURE__ */ __name(async (context) => {
   const { request } = context;
   console.log(`[Middleware] ${request.method} ${new URL(request.url).pathname}`);
   return context.next();
 }, "onRequest");
+
+// ../.wrangler/tmp/pages-4vAs48/functionsRoutes-0.4648661412764994.mjs
 var routes = [
   {
     routePath: "/api/admin/analytics/toss",
@@ -15275,10 +15166,18 @@ var routes = [
     modules: []
   }
 ];
-var import_checked_fetch69 = __toESM2(require_checked_fetch2());
-var import_checked_fetch67 = __toESM2(require_checked_fetch2());
-var import_checked_fetch64 = __toESM2(require_checked_fetch2());
-var import_checked_fetch63 = __toESM2(require_checked_fetch2());
+
+// ../.wrangler/tmp/bundle-K1nr85/middleware-loader.entry.ts
+var import_checked_fetch69 = __toESM(require_checked_fetch());
+
+// ../.wrangler/tmp/bundle-K1nr85/middleware-insertion-facade.js
+var import_checked_fetch67 = __toESM(require_checked_fetch());
+
+// ../../../../../opt/homebrew/lib/node_modules/wrangler/templates/pages-template-worker.ts
+var import_checked_fetch64 = __toESM(require_checked_fetch());
+
+// ../../../../../opt/homebrew/lib/node_modules/wrangler/node_modules/path-to-regexp/dist.es2015/index.js
+var import_checked_fetch63 = __toESM(require_checked_fetch());
 function lexer(str) {
   var tokens = [];
   var i = 0;
@@ -15363,7 +15262,6 @@ function lexer(str) {
   return tokens;
 }
 __name(lexer, "lexer");
-__name2(lexer, "lexer");
 function parse(str, options) {
   if (options === void 0) {
     options = {};
@@ -15374,18 +15272,18 @@ function parse(str, options) {
   var key = 0;
   var i = 0;
   var path = "";
-  var tryConsume = /* @__PURE__ */ __name2(function(type) {
+  var tryConsume = /* @__PURE__ */ __name(function(type) {
     if (i < tokens.length && tokens[i].type === type)
       return tokens[i++].value;
   }, "tryConsume");
-  var mustConsume = /* @__PURE__ */ __name2(function(type) {
+  var mustConsume = /* @__PURE__ */ __name(function(type) {
     var value2 = tryConsume(type);
     if (value2 !== void 0)
       return value2;
     var _a2 = tokens[i], nextType = _a2.type, index = _a2.index;
     throw new TypeError("Unexpected ".concat(nextType, " at ").concat(index, ", expected ").concat(type));
   }, "mustConsume");
-  var consumeText = /* @__PURE__ */ __name2(function() {
+  var consumeText = /* @__PURE__ */ __name(function() {
     var result2 = "";
     var value2;
     while (value2 = tryConsume("CHAR") || tryConsume("ESCAPED_CHAR")) {
@@ -15393,7 +15291,7 @@ function parse(str, options) {
     }
     return result2;
   }, "consumeText");
-  var isSafe = /* @__PURE__ */ __name2(function(value2) {
+  var isSafe = /* @__PURE__ */ __name(function(value2) {
     for (var _i = 0, delimiter_1 = delimiter; _i < delimiter_1.length; _i++) {
       var char2 = delimiter_1[_i];
       if (value2.indexOf(char2) > -1)
@@ -15401,7 +15299,7 @@ function parse(str, options) {
     }
     return false;
   }, "isSafe");
-  var safePattern = /* @__PURE__ */ __name2(function(prefix2) {
+  var safePattern = /* @__PURE__ */ __name(function(prefix2) {
     var prev = result[result.length - 1];
     var prevText = prefix2 || (prev && typeof prev === "string" ? prev : "");
     if (prev && !prevText) {
@@ -15464,14 +15362,12 @@ function parse(str, options) {
   return result;
 }
 __name(parse, "parse");
-__name2(parse, "parse");
 function match(str, options) {
   var keys = [];
   var re = pathToRegexp(str, keys, options);
   return regexpToFunction(re, keys, options);
 }
 __name(match, "match");
-__name2(match, "match");
 function regexpToFunction(re, keys, options) {
   if (options === void 0) {
     options = {};
@@ -15485,7 +15381,7 @@ function regexpToFunction(re, keys, options) {
       return false;
     var path = m[0], index = m.index;
     var params = /* @__PURE__ */ Object.create(null);
-    var _loop_1 = /* @__PURE__ */ __name2(function(i2) {
+    var _loop_1 = /* @__PURE__ */ __name(function(i2) {
       if (m[i2] === void 0)
         return "continue";
       var key = keys[i2 - 1];
@@ -15504,17 +15400,14 @@ function regexpToFunction(re, keys, options) {
   };
 }
 __name(regexpToFunction, "regexpToFunction");
-__name2(regexpToFunction, "regexpToFunction");
 function escapeString(str) {
   return str.replace(/([.+*?=^!:${}()[\]|/\\])/g, "\\$1");
 }
 __name(escapeString, "escapeString");
-__name2(escapeString, "escapeString");
 function flags(options) {
   return options && options.sensitive ? "" : "i";
 }
 __name(flags, "flags");
-__name2(flags, "flags");
 function regexpToRegexp(path, keys) {
   if (!keys)
     return path;
@@ -15535,7 +15428,6 @@ function regexpToRegexp(path, keys) {
   return path;
 }
 __name(regexpToRegexp, "regexpToRegexp");
-__name2(regexpToRegexp, "regexpToRegexp");
 function arrayToRegexp(paths, keys, options) {
   var parts = paths.map(function(path) {
     return pathToRegexp(path, keys, options).source;
@@ -15543,12 +15435,10 @@ function arrayToRegexp(paths, keys, options) {
   return new RegExp("(?:".concat(parts.join("|"), ")"), flags(options));
 }
 __name(arrayToRegexp, "arrayToRegexp");
-__name2(arrayToRegexp, "arrayToRegexp");
 function stringToRegexp(path, keys, options) {
   return tokensToRegexp(parse(path, options), keys, options);
 }
 __name(stringToRegexp, "stringToRegexp");
-__name2(stringToRegexp, "stringToRegexp");
 function tokensToRegexp(tokens, keys, options) {
   if (options === void 0) {
     options = {};
@@ -15604,7 +15494,6 @@ function tokensToRegexp(tokens, keys, options) {
   return new RegExp(route, flags(options));
 }
 __name(tokensToRegexp, "tokensToRegexp");
-__name2(tokensToRegexp, "tokensToRegexp");
 function pathToRegexp(path, keys, options) {
   if (path instanceof RegExp)
     return regexpToRegexp(path, keys);
@@ -15613,7 +15502,8 @@ function pathToRegexp(path, keys, options) {
   return stringToRegexp(path, keys, options);
 }
 __name(pathToRegexp, "pathToRegexp");
-__name2(pathToRegexp, "pathToRegexp");
+
+// ../../../../../opt/homebrew/lib/node_modules/wrangler/templates/pages-template-worker.ts
 var escapeRegex = /[.+?^${}()|[\]\\]/g;
 function* executeRequest(request) {
   const requestPath = new URL(request.url).pathname;
@@ -15664,14 +15554,13 @@ function* executeRequest(request) {
   }
 }
 __name(executeRequest, "executeRequest");
-__name2(executeRequest, "executeRequest");
 var pages_template_worker_default = {
   async fetch(originalRequest, env, workerContext) {
     let request = originalRequest;
     const handlerIterator = executeRequest(request);
     let data = {};
     let isFailOpen = false;
-    const next = /* @__PURE__ */ __name2(async (input, init) => {
+    const next = /* @__PURE__ */ __name(async (input, init) => {
       if (input !== void 0) {
         let url = input;
         if (typeof input === "string") {
@@ -15698,7 +15587,7 @@ var pages_template_worker_default = {
           },
           env,
           waitUntil: workerContext.waitUntil.bind(workerContext),
-          passThroughOnException: /* @__PURE__ */ __name2(() => {
+          passThroughOnException: /* @__PURE__ */ __name(() => {
             isFailOpen = true;
           }, "passThroughOnException")
         };
@@ -15726,15 +15615,17 @@ var pages_template_worker_default = {
     }
   }
 };
-var cloneResponse = /* @__PURE__ */ __name2((response) => (
+var cloneResponse = /* @__PURE__ */ __name((response) => (
   // https://fetch.spec.whatwg.org/#null-body-status
   new Response(
     [101, 204, 205, 304].includes(response.status) ? null : response.body,
     response
   )
 ), "cloneResponse");
-var import_checked_fetch65 = __toESM2(require_checked_fetch2());
-var drainBody = /* @__PURE__ */ __name2(async (request, env, _ctx, middlewareCtx) => {
+
+// ../../../../../opt/homebrew/lib/node_modules/wrangler/templates/middleware/middleware-ensure-req-body-drained.ts
+var import_checked_fetch65 = __toESM(require_checked_fetch());
+var drainBody = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx) => {
   try {
     return await middlewareCtx.next(request, env);
   } finally {
@@ -15750,7 +15641,9 @@ var drainBody = /* @__PURE__ */ __name2(async (request, env, _ctx, middlewareCtx
   }
 }, "drainBody");
 var middleware_ensure_req_body_drained_default = drainBody;
-var import_checked_fetch66 = __toESM2(require_checked_fetch2());
+
+// ../../../../../opt/homebrew/lib/node_modules/wrangler/templates/middleware/middleware-miniflare3-json-error.ts
+var import_checked_fetch66 = __toESM(require_checked_fetch());
 function reduceError(e) {
   return {
     name: e?.name,
@@ -15760,8 +15653,7 @@ function reduceError(e) {
   };
 }
 __name(reduceError, "reduceError");
-__name2(reduceError, "reduceError");
-var jsonError = /* @__PURE__ */ __name2(async (request, env, _ctx, middlewareCtx) => {
+var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx) => {
   try {
     return await middlewareCtx.next(request, env);
   } catch (e) {
@@ -15773,18 +15665,21 @@ var jsonError = /* @__PURE__ */ __name2(async (request, env, _ctx, middlewareCtx
   }
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
+
+// ../.wrangler/tmp/bundle-K1nr85/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
 ];
 var middleware_insertion_facade_default = pages_template_worker_default;
-var import_checked_fetch68 = __toESM2(require_checked_fetch2());
+
+// ../../../../../opt/homebrew/lib/node_modules/wrangler/templates/middleware/common.ts
+var import_checked_fetch68 = __toESM(require_checked_fetch());
 var __facade_middleware__ = [];
 function __facade_register__(...args) {
   __facade_middleware__.push(...args.flat());
 }
 __name(__facade_register__, "__facade_register__");
-__name2(__facade_register__, "__facade_register__");
 function __facade_invokeChain__(request, env, ctx, dispatch, middlewareChain) {
   const [head, ...tail] = middlewareChain;
   const middlewareCtx = {
@@ -15796,7 +15691,6 @@ function __facade_invokeChain__(request, env, ctx, dispatch, middlewareChain) {
   return head(request, env, ctx, middlewareCtx);
 }
 __name(__facade_invokeChain__, "__facade_invokeChain__");
-__name2(__facade_invokeChain__, "__facade_invokeChain__");
 function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
   return __facade_invokeChain__(request, env, ctx, dispatch, [
     ...__facade_middleware__,
@@ -15804,18 +15698,16 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
   ]);
 }
 __name(__facade_invoke__, "__facade_invoke__");
-__name2(__facade_invoke__, "__facade_invoke__");
+
+// ../.wrangler/tmp/bundle-K1nr85/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
-  static {
-    __name(this, "___Facade_ScheduledController__");
-  }
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
     this.cron = cron;
     this.#noRetry = noRetry;
   }
   static {
-    __name2(this, "__Facade_ScheduledController__");
+    __name(this, "__Facade_ScheduledController__");
   }
   #noRetry;
   noRetry() {
@@ -15832,7 +15724,7 @@ function wrapExportedHandler(worker) {
   for (const middleware of __INTERNAL_WRANGLER_MIDDLEWARE__) {
     __facade_register__(middleware);
   }
-  const fetchDispatcher = /* @__PURE__ */ __name2(function(request, env, ctx) {
+  const fetchDispatcher = /* @__PURE__ */ __name(function(request, env, ctx) {
     if (worker.fetch === void 0) {
       throw new Error("Handler does not export a fetch() function.");
     }
@@ -15841,7 +15733,7 @@ function wrapExportedHandler(worker) {
   return {
     ...worker,
     fetch(request, env, ctx) {
-      const dispatcher = /* @__PURE__ */ __name2(function(type, init) {
+      const dispatcher = /* @__PURE__ */ __name(function(type, init) {
         if (type === "scheduled" && worker.scheduled !== void 0) {
           const controller = new __Facade_ScheduledController__(
             Date.now(),
@@ -15857,7 +15749,6 @@ function wrapExportedHandler(worker) {
   };
 }
 __name(wrapExportedHandler, "wrapExportedHandler");
-__name2(wrapExportedHandler, "wrapExportedHandler");
 function wrapWorkerEntrypoint(klass) {
   if (__INTERNAL_WRANGLER_MIDDLEWARE__ === void 0 || __INTERNAL_WRANGLER_MIDDLEWARE__.length === 0) {
     return klass;
@@ -15866,7 +15757,7 @@ function wrapWorkerEntrypoint(klass) {
     __facade_register__(middleware);
   }
   return class extends klass {
-    #fetchDispatcher = /* @__PURE__ */ __name2((request, env, ctx) => {
+    #fetchDispatcher = /* @__PURE__ */ __name((request, env, ctx) => {
       this.env = env;
       this.ctx = ctx;
       if (super.fetch === void 0) {
@@ -15874,7 +15765,7 @@ function wrapWorkerEntrypoint(klass) {
       }
       return super.fetch(request);
     }, "#fetchDispatcher");
-    #dispatcher = /* @__PURE__ */ __name2((type, init) => {
+    #dispatcher = /* @__PURE__ */ __name((type, init) => {
       if (type === "scheduled" && super.scheduled !== void 0) {
         const controller = new __Facade_ScheduledController__(
           Date.now(),
@@ -15897,7 +15788,6 @@ function wrapWorkerEntrypoint(klass) {
   };
 }
 __name(wrapWorkerEntrypoint, "wrapWorkerEntrypoint");
-__name2(wrapWorkerEntrypoint, "wrapWorkerEntrypoint");
 var WRAPPED_ENTRY;
 if (typeof middleware_insertion_facade_default === "object") {
   WRAPPED_ENTRY = wrapExportedHandler(middleware_insertion_facade_default);
@@ -15905,181 +15795,8 @@ if (typeof middleware_insertion_facade_default === "object") {
   WRAPPED_ENTRY = wrapWorkerEntrypoint(middleware_insertion_facade_default);
 }
 var middleware_loader_entry_default = WRAPPED_ENTRY;
-
-// ../../../../opt/homebrew/lib/node_modules/wrangler/templates/middleware/middleware-ensure-req-body-drained.ts
-var import_checked_fetch70 = __toESM(require_checked_fetch());
-var drainBody2 = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx) => {
-  try {
-    return await middlewareCtx.next(request, env);
-  } finally {
-    try {
-      if (request.body !== null && !request.bodyUsed) {
-        const reader = request.body.getReader();
-        while (!(await reader.read()).done) {
-        }
-      }
-    } catch (e) {
-      console.error("Failed to drain the unused request body.", e);
-    }
-  }
-}, "drainBody");
-var middleware_ensure_req_body_drained_default2 = drainBody2;
-
-// ../../../../opt/homebrew/lib/node_modules/wrangler/templates/middleware/middleware-miniflare3-json-error.ts
-var import_checked_fetch71 = __toESM(require_checked_fetch());
-function reduceError2(e) {
-  return {
-    name: e?.name,
-    message: e?.message ?? String(e),
-    stack: e?.stack,
-    cause: e?.cause === void 0 ? void 0 : reduceError2(e.cause)
-  };
-}
-__name(reduceError2, "reduceError");
-var jsonError2 = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx) => {
-  try {
-    return await middlewareCtx.next(request, env);
-  } catch (e) {
-    const error = reduceError2(e);
-    return Response.json(error, {
-      status: 500,
-      headers: { "MF-Experimental-Error-Stack": "true" }
-    });
-  }
-}, "jsonError");
-var middleware_miniflare3_json_error_default2 = jsonError2;
-
-// .wrangler/tmp/bundle-M92pZS/middleware-insertion-facade.js
-var __INTERNAL_WRANGLER_MIDDLEWARE__2 = [
-  middleware_ensure_req_body_drained_default2,
-  middleware_miniflare3_json_error_default2
-];
-var middleware_insertion_facade_default2 = middleware_loader_entry_default;
-
-// ../../../../opt/homebrew/lib/node_modules/wrangler/templates/middleware/common.ts
-var import_checked_fetch73 = __toESM(require_checked_fetch());
-var __facade_middleware__2 = [];
-function __facade_register__2(...args) {
-  __facade_middleware__2.push(...args.flat());
-}
-__name(__facade_register__2, "__facade_register__");
-function __facade_invokeChain__2(request, env, ctx, dispatch, middlewareChain) {
-  const [head, ...tail] = middlewareChain;
-  const middlewareCtx = {
-    dispatch,
-    next(newRequest, newEnv) {
-      return __facade_invokeChain__2(newRequest, newEnv, ctx, dispatch, tail);
-    }
-  };
-  return head(request, env, ctx, middlewareCtx);
-}
-__name(__facade_invokeChain__2, "__facade_invokeChain__");
-function __facade_invoke__2(request, env, ctx, dispatch, finalMiddleware) {
-  return __facade_invokeChain__2(request, env, ctx, dispatch, [
-    ...__facade_middleware__2,
-    finalMiddleware
-  ]);
-}
-__name(__facade_invoke__2, "__facade_invoke__");
-
-// .wrangler/tmp/bundle-M92pZS/middleware-loader.entry.ts
-var __Facade_ScheduledController__2 = class ___Facade_ScheduledController__2 {
-  constructor(scheduledTime, cron, noRetry) {
-    this.scheduledTime = scheduledTime;
-    this.cron = cron;
-    this.#noRetry = noRetry;
-  }
-  static {
-    __name(this, "__Facade_ScheduledController__");
-  }
-  #noRetry;
-  noRetry() {
-    if (!(this instanceof ___Facade_ScheduledController__2)) {
-      throw new TypeError("Illegal invocation");
-    }
-    this.#noRetry();
-  }
-};
-function wrapExportedHandler2(worker) {
-  if (__INTERNAL_WRANGLER_MIDDLEWARE__2 === void 0 || __INTERNAL_WRANGLER_MIDDLEWARE__2.length === 0) {
-    return worker;
-  }
-  for (const middleware of __INTERNAL_WRANGLER_MIDDLEWARE__2) {
-    __facade_register__2(middleware);
-  }
-  const fetchDispatcher = /* @__PURE__ */ __name(function(request, env, ctx) {
-    if (worker.fetch === void 0) {
-      throw new Error("Handler does not export a fetch() function.");
-    }
-    return worker.fetch(request, env, ctx);
-  }, "fetchDispatcher");
-  return {
-    ...worker,
-    fetch(request, env, ctx) {
-      const dispatcher = /* @__PURE__ */ __name(function(type, init) {
-        if (type === "scheduled" && worker.scheduled !== void 0) {
-          const controller = new __Facade_ScheduledController__2(
-            Date.now(),
-            init.cron ?? "",
-            () => {
-            }
-          );
-          return worker.scheduled(controller, env, ctx);
-        }
-      }, "dispatcher");
-      return __facade_invoke__2(request, env, ctx, dispatcher, fetchDispatcher);
-    }
-  };
-}
-__name(wrapExportedHandler2, "wrapExportedHandler");
-function wrapWorkerEntrypoint2(klass) {
-  if (__INTERNAL_WRANGLER_MIDDLEWARE__2 === void 0 || __INTERNAL_WRANGLER_MIDDLEWARE__2.length === 0) {
-    return klass;
-  }
-  for (const middleware of __INTERNAL_WRANGLER_MIDDLEWARE__2) {
-    __facade_register__2(middleware);
-  }
-  return class extends klass {
-    #fetchDispatcher = /* @__PURE__ */ __name((request, env, ctx) => {
-      this.env = env;
-      this.ctx = ctx;
-      if (super.fetch === void 0) {
-        throw new Error("Entrypoint class does not define a fetch() function.");
-      }
-      return super.fetch(request);
-    }, "#fetchDispatcher");
-    #dispatcher = /* @__PURE__ */ __name((type, init) => {
-      if (type === "scheduled" && super.scheduled !== void 0) {
-        const controller = new __Facade_ScheduledController__2(
-          Date.now(),
-          init.cron ?? "",
-          () => {
-          }
-        );
-        return super.scheduled(controller);
-      }
-    }, "#dispatcher");
-    fetch(request) {
-      return __facade_invoke__2(
-        request,
-        this.env,
-        this.ctx,
-        this.#dispatcher,
-        this.#fetchDispatcher
-      );
-    }
-  };
-}
-__name(wrapWorkerEntrypoint2, "wrapWorkerEntrypoint");
-var WRAPPED_ENTRY2;
-if (typeof middleware_insertion_facade_default2 === "object") {
-  WRAPPED_ENTRY2 = wrapExportedHandler2(middleware_insertion_facade_default2);
-} else if (typeof middleware_insertion_facade_default2 === "function") {
-  WRAPPED_ENTRY2 = wrapWorkerEntrypoint2(middleware_insertion_facade_default2);
-}
-var middleware_loader_entry_default2 = WRAPPED_ENTRY2;
 export {
-  __INTERNAL_WRANGLER_MIDDLEWARE__2 as __INTERNAL_WRANGLER_MIDDLEWARE__,
-  middleware_loader_entry_default2 as default
+  __INTERNAL_WRANGLER_MIDDLEWARE__,
+  middleware_loader_entry_default as default
 };
-//# sourceMappingURL=functionsWorker-0.32127728194558647.js.map
+//# sourceMappingURL=functionsWorker-0.004430321436751594.mjs.map

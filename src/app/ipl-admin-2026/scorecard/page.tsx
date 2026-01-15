@@ -18,7 +18,7 @@ interface Match {
 interface Player {
   id: string;
   name: string;
-  teamId: string;
+  teamId: string | number;
   role?: string;
   battingStyle?: string;
   bowlingStyle?: string;
@@ -115,7 +115,11 @@ export default function ScorecardAdminPage() {
 
   // Helper to get players by team
   const getPlayersByTeam = (teamId: number): Player[] => {
-    return players.filter(player => player.teamId === teamId.toString());
+    const teamIdStr = String(teamId);
+    return players.filter(player => {
+      const playerTeamId = typeof player.teamId === 'number' ? String(player.teamId) : player.teamId;
+      return playerTeamId === teamIdStr;
+    });
   };
 
   // Refresh data function

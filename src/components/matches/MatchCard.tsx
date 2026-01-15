@@ -86,7 +86,8 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
     }
 
     // Check if it's a TBD team by ID or shortName
-    if (team.id.includes('tbd-') || team.shortName === 'TBD' || team.shortName?.includes('Place') || team.name?.includes('Place Team')) {
+    const teamIdStr = String(team.id || '');
+    if (teamIdStr.includes('tbd-') || team.shortName === 'TBD' || team.shortName?.includes('Place') || team.name?.includes('Place Team')) {
       return (
         <Image
           src="/logos/tba_logo.svg"
@@ -177,7 +178,7 @@ export default function MatchCard({ match, index = 0 }: MatchCardProps) {
         <div className="space-y-4">
           {/* WPL Playoff Helper Text */}
           {match.league === 'wpl' && match.playoffType && (
-            (match.team1.id.includes('tbd-') || match.team2.id.includes('tbd-') || 
+            (String(match.team1.id).includes('tbd-') || String(match.team2.id).includes('tbd-') || 
              match.team1.shortName?.includes('Place') || match.team2.shortName?.includes('Place') ||
              match.team1.shortName === 'Winner of Eliminator' || match.team2.shortName === 'Winner of Eliminator') && (
               <div className="bg-purple-500/10 border border-purple-500/30 rounded-lg p-2 mb-2">
