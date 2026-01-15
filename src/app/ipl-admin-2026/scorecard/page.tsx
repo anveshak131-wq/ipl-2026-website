@@ -139,7 +139,7 @@ export default function ScorecardAdminPage() {
     } catch (err) {
       console.error('Error fetching WPL matches:', err);
       console.error('Error details:', err.message, err.stack);
-      setMessage('✗ Error fetching WPL matches. Check if the Workers KV dev server is running (port 8787).');
+      setMessage('✗ No WPL matches available. Please create matches or seed WPL data.');
     }
   };
 
@@ -151,12 +151,12 @@ export default function ScorecardAdminPage() {
       console.log('WPL players data length:', res.data?.length || 0);
       setPlayers(res.data || []);
       if (res.data && res.data.length === 0) {
-        setMessage('⚠️ No WPL players found in Workers KV. Please add WPL players first.');
+        setMessage('⚠️ No WPL players found. Please add WPL players first.');
       }
     } catch (err) {
       console.error('Error fetching WPL players:', err);
       console.error('Error details:', err.message, err.stack);
-      setMessage('✗ Error fetching WPL players from Workers KV. Check if the Workers KV dev server is running on port 8787.');
+      setMessage('✗ No WPL players available. Please seed WPL data: POST /api/admin/seed-wpl-data');
     }
   };
 
