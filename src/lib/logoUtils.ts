@@ -17,21 +17,23 @@
 // 'DC-W' or ID '13' = Delhi Capitals (WPL)
 // 'GG' or ID '14' = Gujarat Giants (WPL)
 // 'UPW' or ID '15' = UP Warriorz (WPL)
-export function getAnimatedLogoPath(teamId: string, shortName?: string, league?: 'ipl' | 'wpl'): string {
+export function getAnimatedLogoPath(teamId: any, shortName?: string, league?: 'ipl' | 'wpl'): string {
+  // Coerce teamId to string to handle numeric IDs from KV or other callers
+  const idStr = String(teamId || '');
   // Check for TBD teams - they should use TBA logo
   // Also check for teams 16, 17, 18, 19 which are placeholder teams
-  if (teamId.includes('tbd-') || 
-      teamId === '16' || 
-      teamId === '17' || 
-      teamId === '18' || 
-      teamId === '19' ||
+  if (idStr.includes('tbd-') || 
+      idStr === '16' || 
+      idStr === '17' || 
+      idStr === '18' || 
+      idStr === '19' ||
       shortName === 'TBD' || 
       shortName?.includes('Place')) {
     return '/logos/tba_logo.svg';
   }
   
   // Check if it's a WPL team (by league, shortName pattern, or team ID)
-  const numericId = teamId.replace('team', '');
+  const numericId = idStr.replace('team', '');
   const isWPL = league === 'wpl' || 
                 shortName?.includes('-W') || 
                 shortName === 'GG' || 
@@ -99,7 +101,9 @@ export function getAnimatedLogoPath(teamId: string, shortName?: string, league?:
 
 
 // Get regular logo path (fallback - uses modern animated versions)
-export function getLogoPath(teamId: string): string {
+export function getLogoPath(teamId: any): string {
+  // Ensure teamId is a string
+  const idStr = String(teamId || '');
   const logoMap: { [key: string]: string } = {
     '1': 'rcb_logo_premium.svg',  // RCB - Canonical logo used across app
     '2': 'mi_logo_2026_modern.svg',    // MI - Modern animated version
@@ -113,7 +117,7 @@ export function getLogoPath(teamId: string): string {
     '10': 'csk_logo_2026_modern.svg', // CSK - Modern animated version
   };
 
-  const numericId = teamId.replace('team', '');
+  const numericId = idStr.replace('team', '');
   const logoFile = logoMap[numericId] || 'rcb_logo_premium.svg';
   return `/logos/${logoFile}`;
 }
