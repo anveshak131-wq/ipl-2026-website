@@ -11,6 +11,7 @@ import { onRequest as __api_admin_email_users_js_onRequest } from "/Users/anvesh
 import { onRequest as __api_admin_login_js_onRequest } from "/Users/anvesh/Downloads/sportsup99/functions/api/admin/login.js"
 import { onRequest as __api_admin_ml_train_js_onRequest_2 } from "/Users/anvesh/Downloads/sportsup99/functions/api/admin/ml-train.js"
 import { onRequest as __api_admin_moderation_js_onRequest } from "/Users/anvesh/Downloads/sportsup99/functions/api/admin/moderation.js"
+import { onRequest as __api_admin_seed_wpl_data_js_onRequest } from "/Users/anvesh/Downloads/sportsup99/functions/api/admin/seed-wpl-data.js"
 import { onRequest as __api_admin_send_bulk_email_js_onRequest } from "/Users/anvesh/Downloads/sportsup99/functions/api/admin/send-bulk-email.js"
 import { onRequest as __api_admin_setup_js_onRequest } from "/Users/anvesh/Downloads/sportsup99/functions/api/admin/setup.js"
 import { onRequest as __api_admin_upload_players_csv_ts_onRequest } from "/Users/anvesh/Downloads/sportsup99/functions/api/admin/upload-players-csv.ts"
@@ -154,6 +155,13 @@ export const routes = [
       method: "",
       middlewares: [],
       modules: [__api_admin_moderation_js_onRequest],
+    },
+  {
+      routePath: "/api/admin/seed-wpl-data",
+      mountPath: "/api/admin",
+      method: "",
+      middlewares: [],
+      modules: [__api_admin_seed_wpl_data_js_onRequest],
     },
   {
       routePath: "/api/admin/send-bulk-email",

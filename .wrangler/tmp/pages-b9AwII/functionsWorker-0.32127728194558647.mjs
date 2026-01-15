@@ -25,9 +25,9 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
-// ../.wrangler/tmp/bundle-FUkoku/checked-fetch.js
+// ../.wrangler/tmp/bundle-oVDeu0/checked-fetch.js
 var require_checked_fetch = __commonJS({
-  "../.wrangler/tmp/bundle-FUkoku/checked-fetch.js"() {
+  "../.wrangler/tmp/bundle-oVDeu0/checked-fetch.js"() {
     "use strict";
     var urls = /* @__PURE__ */ new Set();
     function checkURL(request, init) {
@@ -73,25 +73,25 @@ var normalizeTeamName = /* @__PURE__ */ __name((name) => {
 var onRequest = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
   if (method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders6 });
+    return new Response(null, { status: 204, headers: corsHeaders7 });
   }
   if (method !== "POST") {
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
   try {
     if (!env || !env.SPORTS_KV) {
       return new Response(
         JSON.stringify({ error: "KV not configured" }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const authHeader = request.headers.get("Authorization") || "";
@@ -99,14 +99,14 @@ var onRequest = /* @__PURE__ */ __name(async (context) => {
     if (!token) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
     if (!tokenValue) {
       return new Response(
         JSON.stringify({ error: "Invalid token" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     let email = tokenValue;
@@ -123,35 +123,35 @@ var onRequest = /* @__PURE__ */ __name(async (context) => {
     if (!userData) {
       return new Response(
         JSON.stringify({ error: "User not found" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const user = JSON.parse(userData);
     if (user.role !== "admin" && user.role !== "super_admin") {
       return new Response(
         JSON.stringify({ error: "Forbidden" }),
-        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const body = await request.json().catch(() => null);
     if (!body) {
       return new Response(
         JSON.stringify({ error: "Invalid JSON body" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const { datasetKeys, datasetWeights } = body;
     if (!Array.isArray(datasetKeys) || datasetKeys.length === 0) {
       return new Response(
         JSON.stringify({ error: "datasetKeys must be a non-empty array of dataset keys" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const trimmedKeys = datasetKeys.map((k) => typeof k === "string" ? k.trim() : "").filter((k) => k);
     if (trimmedKeys.length === 0) {
       return new Response(
         JSON.stringify({ error: "datasetKeys must contain at least one non-empty string" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const rawWeightsByKey = {};
@@ -221,7 +221,7 @@ var onRequest = /* @__PURE__ */ __name(async (context) => {
       if (!value) {
         return new Response(
           JSON.stringify({ error: `Dataset '${key}' not found` }),
-          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       let dataset;
@@ -230,7 +230,7 @@ var onRequest = /* @__PURE__ */ __name(async (context) => {
       } catch {
         return new Response(
           JSON.stringify({ error: `Malformed dataset in KV for key '${key}'` }),
-          { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const headers = Array.isArray(dataset.headers) ? dataset.headers : null;
@@ -238,7 +238,7 @@ var onRequest = /* @__PURE__ */ __name(async (context) => {
       if (!headers || !rows) {
         return new Response(
           JSON.stringify({ error: `Dataset '${key}' is missing headers or rows` }),
-          { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const idxTeam1 = headers.indexOf("team1");
@@ -254,7 +254,7 @@ var onRequest = /* @__PURE__ */ __name(async (context) => {
           JSON.stringify({
             error: `Dataset '${key}' must contain team1, team2, toss_winner, and winning_team or match_winner columns for toss analytics`
           }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const datasetWeight = normalisedWeightsByKey[key] ?? 1 / trimmedKeys.length;
@@ -384,13 +384,13 @@ var onRequest = /* @__PURE__ */ __name(async (context) => {
         teams,
         perVenue: perVenueByTeam
       }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Toss analytics error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
@@ -400,25 +400,25 @@ var import_checked_fetch2 = __toESM(require_checked_fetch());
 var onRequest2 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
   if (method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders6 });
+    return new Response(null, { status: 204, headers: corsHeaders7 });
   }
   if (method !== "POST") {
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
   try {
     if (!env || !env.SPORTS_KV) {
       return new Response(
         JSON.stringify({ error: "KV not configured" }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const authHeader = request.headers.get("Authorization") || "";
@@ -426,14 +426,14 @@ var onRequest2 = /* @__PURE__ */ __name(async (context) => {
     if (!token) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
     if (!tokenValue) {
       return new Response(
         JSON.stringify({ error: "Invalid token" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     let email = tokenValue;
@@ -450,21 +450,21 @@ var onRequest2 = /* @__PURE__ */ __name(async (context) => {
     if (!userData) {
       return new Response(
         JSON.stringify({ error: "User not found" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const user = JSON.parse(userData);
     if (user.role !== "admin" && user.role !== "super_admin") {
       return new Response(
         JSON.stringify({ error: "Forbidden" }),
-        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const body = await request.json().catch(() => null);
     if (!body) {
       return new Response(
         JSON.stringify({ error: "Invalid JSON body" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const {
@@ -484,19 +484,19 @@ var onRequest2 = /* @__PURE__ */ __name(async (context) => {
     if (datasetKeysList.length === 0) {
       return new Response(
         JSON.stringify({ error: "datasetKey or datasetKeys is required" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (!targetColumn || typeof targetColumn !== "string") {
       return new Response(
         JSON.stringify({ error: "targetColumn is required" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (!Array.isArray(featureColumns) || featureColumns.length === 0) {
       return new Response(
         JSON.stringify({ error: "featureColumns must be a non-empty array" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const datasetsMeta = [];
@@ -505,7 +505,7 @@ var onRequest2 = /* @__PURE__ */ __name(async (context) => {
       if (!value) {
         return new Response(
           JSON.stringify({ error: `Dataset '${key}' not found` }),
-          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       let dataset;
@@ -514,7 +514,7 @@ var onRequest2 = /* @__PURE__ */ __name(async (context) => {
       } catch {
         return new Response(
           JSON.stringify({ error: `Malformed dataset in KV for key '${key}'` }),
-          { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const headers = Array.isArray(dataset.headers) ? dataset.headers : null;
@@ -522,14 +522,14 @@ var onRequest2 = /* @__PURE__ */ __name(async (context) => {
       if (!headers || !rows) {
         return new Response(
           JSON.stringify({ error: `Dataset '${key}' is missing headers or rows` }),
-          { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const targetIndex = headers.indexOf(targetColumn);
       if (targetIndex === -1) {
         return new Response(
           JSON.stringify({ error: `Dataset '${key}' does not contain target column '${targetColumn}'` }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const missingFeatures = [];
@@ -545,7 +545,7 @@ var onRequest2 = /* @__PURE__ */ __name(async (context) => {
           JSON.stringify({
             error: `Dataset '${key}' is missing feature columns: ${missingFeatures.join(", ")}`
           }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       datasetsMeta.push({ key, headers, rows, targetIndex, featureIndices });
@@ -592,7 +592,7 @@ var onRequest2 = /* @__PURE__ */ __name(async (context) => {
           numSamples,
           numClasses
         }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const W = [];
@@ -685,13 +685,13 @@ var onRequest2 = /* @__PURE__ */ __name(async (context) => {
           trainAccuracy
         }
       }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("ML train error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
@@ -701,7 +701,7 @@ var import_checked_fetch3 = __toESM(require_checked_fetch());
 var onRequest3 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, PUT, DELETE, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
@@ -709,7 +709,7 @@ var onRequest3 = /* @__PURE__ */ __name(async (context) => {
   if (method === "OPTIONS") {
     return new Response(null, {
       status: 200,
-      headers: corsHeaders6
+      headers: corsHeaders7
     });
   }
   try {
@@ -717,20 +717,20 @@ var onRequest3 = /* @__PURE__ */ __name(async (context) => {
     if (!token) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (!env || !env.SPORTS_KV) {
       return new Response(
         JSON.stringify({ error: "KV not configured" }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
     if (!tokenValue) {
       return new Response(
         JSON.stringify({ error: "Invalid token" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     let email = tokenValue;
@@ -748,7 +748,7 @@ var onRequest3 = /* @__PURE__ */ __name(async (context) => {
     if (!userData) {
       return new Response(
         JSON.stringify({ error: "User not found" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const user = JSON.parse(userData);
@@ -763,7 +763,7 @@ var onRequest3 = /* @__PURE__ */ __name(async (context) => {
         if (user.role !== "admin" && user.role !== "super_admin") {
           return new Response(
             JSON.stringify({ error: "Forbidden" }),
-            { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+            { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
           );
         }
         const dateKey = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
@@ -788,14 +788,14 @@ var onRequest3 = /* @__PURE__ */ __name(async (context) => {
         });
         return new Response(
           JSON.stringify({ success: true }),
-          { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const matchId = body.matchId || "current";
       if (user.role === "admin" || user.role === "super_admin") {
         return new Response(JSON.stringify({ success: true, skipped: true }), {
           status: 200,
-          headers: { "Content-Type": "application/json", ...corsHeaders6 }
+          headers: { "Content-Type": "application/json", ...corsHeaders7 }
         });
       }
       const activeUsersKey = `active-users:${matchId}`;
@@ -816,18 +816,18 @@ var onRequest3 = /* @__PURE__ */ __name(async (context) => {
       });
       return new Response(JSON.stringify({ success: true }), {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders6 }
+        headers: { "Content-Type": "application/json", ...corsHeaders7 }
       });
     }
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Admin users activity error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
@@ -856,25 +856,25 @@ var COMMON_PASSWORDS = /* @__PURE__ */ new Set([
 var onRequest4 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
   if (method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders6 });
+    return new Response(null, { status: 204, headers: corsHeaders7 });
   }
   if (method !== "POST") {
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
   try {
     if (!env || !env.SPORTS_KV) {
       return new Response(
         JSON.stringify({ error: "KV not configured" }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const authHeader = request.headers.get("Authorization") || "";
@@ -882,14 +882,14 @@ var onRequest4 = /* @__PURE__ */ __name(async (context) => {
     if (!token) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
     if (!tokenValue) {
       return new Response(
         JSON.stringify({ error: "Invalid token" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     let email = tokenValue;
@@ -906,7 +906,7 @@ var onRequest4 = /* @__PURE__ */ __name(async (context) => {
     if (!userData) {
       return new Response(
         JSON.stringify({ error: "User not found" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const user = JSON.parse(userData);
@@ -915,27 +915,27 @@ var onRequest4 = /* @__PURE__ */ __name(async (context) => {
     if (!currentPassword || !newPassword) {
       return new Response(
         JSON.stringify({ error: "currentPassword and newPassword are required" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const currentHash = encryptPassword(String(currentPassword), user.salt);
     if (currentHash !== user.hashedPassword) {
       return new Response(
         JSON.stringify({ error: "Current password is incorrect" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const normalizedNew = String(newPassword).trim();
     if (normalizedNew.length < 12) {
       return new Response(
         JSON.stringify({ error: "New password must be at least 12 characters long" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (COMMON_PASSWORDS.has(normalizedNew.toLowerCase())) {
       return new Response(
         JSON.stringify({ error: "New password is too common. Please choose a stronger password." }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const newSalt = generateSalt();
@@ -951,13 +951,13 @@ var onRequest4 = /* @__PURE__ */ __name(async (context) => {
     });
     return new Response(
       JSON.stringify({ success: true }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Password change error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
@@ -967,25 +967,25 @@ var import_checked_fetch5 = __toESM(require_checked_fetch());
 var onRequest5 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
   if (method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders6 });
+    return new Response(null, { status: 204, headers: corsHeaders7 });
   }
   if (method !== "GET" && method !== "POST") {
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
   try {
     if (!env || !env.SPORTS_KV) {
       return new Response(
         JSON.stringify({ error: "KV not configured" }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const authHeader = request.headers.get("Authorization") || "";
@@ -993,14 +993,14 @@ var onRequest5 = /* @__PURE__ */ __name(async (context) => {
     if (!token) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
     if (!tokenValue) {
       return new Response(
         JSON.stringify({ error: "Invalid token" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     let email = tokenValue;
@@ -1035,7 +1035,7 @@ var onRequest5 = /* @__PURE__ */ __name(async (context) => {
       }
       return new Response(
         JSON.stringify({ sessions }),
-        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const result = await env.SPORTS_KV.list({ prefix: "token:" });
@@ -1058,13 +1058,13 @@ var onRequest5 = /* @__PURE__ */ __name(async (context) => {
     }
     return new Response(
       JSON.stringify({ success: true }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Sessions error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
@@ -1117,7 +1117,7 @@ var onRequest6 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const method = request.method;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
@@ -1125,7 +1125,7 @@ var onRequest6 = /* @__PURE__ */ __name(async (context) => {
   if (method === "OPTIONS") {
     return new Response(null, {
       status: 204,
-      headers: corsHeaders6
+      headers: corsHeaders7
     });
   }
   try {
@@ -1133,7 +1133,7 @@ var onRequest6 = /* @__PURE__ */ __name(async (context) => {
     if (!adminUser) {
       return new Response(
         JSON.stringify({ error: "Unauthorized or insufficient privileges" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (method === "GET") {
@@ -1185,7 +1185,7 @@ var onRequest6 = /* @__PURE__ */ __name(async (context) => {
       }
       return new Response(
         JSON.stringify({ success: true, admins }),
-        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (method === "PUT") {
@@ -1194,7 +1194,7 @@ var onRequest6 = /* @__PURE__ */ __name(async (context) => {
       if (!adminId) {
         return new Response(
           JSON.stringify({ error: "Admin ID is required for updates" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const body = await request.json();
@@ -1202,46 +1202,46 @@ var onRequest6 = /* @__PURE__ */ __name(async (context) => {
       if (!email || !name) {
         return new Response(
           JSON.stringify({ error: "Email and name are required" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         return new Response(
           JSON.stringify({ error: "Invalid email format" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       if (password && password.length > 0) {
         if (password.length < 8) {
           return new Response(
             JSON.stringify({ error: "Password must be at least 8 characters" }),
-            { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+            { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
           );
         }
         if (!/[A-Z]/.test(password)) {
           return new Response(
             JSON.stringify({ error: "Password must contain uppercase letter" }),
-            { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+            { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
           );
         }
         if (!/[0-9]/.test(password)) {
           return new Response(
             JSON.stringify({ error: "Password must contain number" }),
-            { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+            { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
           );
         }
       }
       if (!["admin", "super_admin", "players_admin"].includes(role)) {
         return new Response(
           JSON.stringify({ error: "Role must be admin, super_admin, or players_admin" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       if (adminId === "1" || adminId === "2") {
         return new Response(
           JSON.stringify({ error: "Cannot update hardcoded admin accounts" }),
-          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       try {
@@ -1262,7 +1262,7 @@ var onRequest6 = /* @__PURE__ */ __name(async (context) => {
         if (!adminFound || !adminKey) {
           return new Response(
             JSON.stringify({ error: "Admin not found" }),
-            { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+            { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
           );
         }
         const existingAdminStr = await env.SPORTS_KV.get(adminKey);
@@ -1272,7 +1272,7 @@ var onRequest6 = /* @__PURE__ */ __name(async (context) => {
           if (emailCheck) {
             return new Response(
               JSON.stringify({ error: "Email already exists" }),
-              { status: 409, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+              { status: 409, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
             );
           }
         }
@@ -1326,13 +1326,13 @@ var onRequest6 = /* @__PURE__ */ __name(async (context) => {
               lastLogin: updatedAdmin.lastLogin
             }
           }),
-          { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       } catch (error) {
         console.error("Error updating admin:", error);
         return new Response(
           JSON.stringify({ error: "Failed to update admin" }),
-          { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
     }
@@ -1342,45 +1342,45 @@ var onRequest6 = /* @__PURE__ */ __name(async (context) => {
       if (!email || !password || !name) {
         return new Response(
           JSON.stringify({ error: "Email, password, and name are required" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         return new Response(
           JSON.stringify({ error: "Invalid email format" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       if (password.length < 8) {
         return new Response(
           JSON.stringify({ error: "Password must be at least 8 characters" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       if (!/[A-Z]/.test(password)) {
         return new Response(
           JSON.stringify({ error: "Password must contain uppercase letter" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       if (!/[0-9]/.test(password)) {
         return new Response(
           JSON.stringify({ error: "Password must contain number" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       if (!["admin", "super_admin", "players_admin"].includes(role)) {
         return new Response(
           JSON.stringify({ error: "Role must be admin, super_admin, or players_admin" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const existingUser = await env.SPORTS_KV.get(`user:${email}`);
       if (existingUser) {
         return new Response(
           JSON.stringify({ error: "User already exists" }),
-          { status: 409, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 409, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const salt = generateSalt2();
@@ -1434,7 +1434,7 @@ var onRequest6 = /* @__PURE__ */ __name(async (context) => {
         }),
         {
           status: 201,
-          headers: { "Content-Type": "application/json", ...corsHeaders6 }
+          headers: { "Content-Type": "application/json", ...corsHeaders7 }
         }
       );
     }
@@ -1443,33 +1443,33 @@ var onRequest6 = /* @__PURE__ */ __name(async (context) => {
       if (!email) {
         return new Response(
           JSON.stringify({ error: "Email is required" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       if (email === "admin@ipl2026.com" || email === "manager@ipl2026.com") {
         return new Response(
           JSON.stringify({ error: "Cannot delete hardcoded admin accounts" }),
-          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       if (email === adminUser.email) {
         return new Response(
           JSON.stringify({ error: "Cannot delete your own admin account" }),
-          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const userData = await env.SPORTS_KV.get(`user:${email}`);
       if (!userData) {
         return new Response(
           JSON.stringify({ error: "Admin not found" }),
-          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const user = JSON.parse(userData);
       if (user.role !== "admin" && user.role !== "super_admin") {
         return new Response(
           JSON.stringify({ error: "User is not an admin" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       await env.SPORTS_KV.delete(`user:${email}`);
@@ -1483,19 +1483,19 @@ var onRequest6 = /* @__PURE__ */ __name(async (context) => {
         }),
         {
           status: 200,
-          headers: { "Content-Type": "application/json", ...corsHeaders6 }
+          headers: { "Content-Type": "application/json", ...corsHeaders7 }
         }
       );
     }
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Admin management error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error", message: error.message }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
@@ -1940,25 +1940,25 @@ var onRequest9 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
   const url = new URL(request.url);
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
   if (method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders6 });
+    return new Response(null, { status: 204, headers: corsHeaders7 });
   }
   if (method !== "POST" && method !== "GET" && method !== "DELETE") {
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
   try {
     if (!env || !env.SPORTS_KV) {
       return new Response(
         JSON.stringify({ error: "KV not configured" }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const authHeader = request.headers.get("Authorization") || "";
@@ -1966,14 +1966,14 @@ var onRequest9 = /* @__PURE__ */ __name(async (context) => {
     if (!token) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
     if (!tokenValue) {
       return new Response(
         JSON.stringify({ error: "Invalid token" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     let email = tokenValue;
@@ -1990,14 +1990,14 @@ var onRequest9 = /* @__PURE__ */ __name(async (context) => {
     if (!userData) {
       return new Response(
         JSON.stringify({ error: "User not found" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const user = JSON.parse(userData);
     if (user.role !== "admin" && user.role !== "super_admin") {
       return new Response(
         JSON.stringify({ error: "Forbidden" }),
-        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (method === "GET") {
@@ -2007,26 +2007,26 @@ var onRequest9 = /* @__PURE__ */ __name(async (context) => {
         if (!safeKey2) {
           return new Response(
             JSON.stringify({ error: "datasetKey cannot be empty" }),
-            { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+            { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
           );
         }
         const value = await env.SPORTS_KV.get(`dataset:${safeKey2}`);
         if (!value) {
           return new Response(
             JSON.stringify({ error: "Dataset not found" }),
-            { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+            { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
           );
         }
         try {
           const dataset2 = JSON.parse(value);
           return new Response(
             JSON.stringify({ dataset: dataset2 }),
-            { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+            { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
           );
         } catch {
           return new Response(
             JSON.stringify({ error: "Malformed dataset in KV" }),
-            { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+            { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
           );
         }
       }
@@ -2050,7 +2050,7 @@ var onRequest9 = /* @__PURE__ */ __name(async (context) => {
       }
       return new Response(
         JSON.stringify({ datasets }),
-        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (method === "DELETE") {
@@ -2058,14 +2058,14 @@ var onRequest9 = /* @__PURE__ */ __name(async (context) => {
       if (!datasetKey2 || !datasetKey2.trim()) {
         return new Response(
           JSON.stringify({ error: "datasetKey is required" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const safeKey2 = datasetKey2.trim();
       await env.SPORTS_KV.delete(`dataset:${safeKey2}`);
       return new Response(
         JSON.stringify({ success: true }),
-        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const body = await request.json();
@@ -2073,20 +2073,20 @@ var onRequest9 = /* @__PURE__ */ __name(async (context) => {
     if (!datasetKey || typeof datasetKey !== "string") {
       return new Response(
         JSON.stringify({ error: "datasetKey is required" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (!Array.isArray(headers) || !Array.isArray(rows)) {
       return new Response(
         JSON.stringify({ error: "headers and rows must be arrays" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const safeKey = datasetKey.trim();
     if (!safeKey) {
       return new Response(
         JSON.stringify({ error: "datasetKey cannot be empty" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     let seasonRange;
@@ -2131,13 +2131,13 @@ var onRequest9 = /* @__PURE__ */ __name(async (context) => {
     await env.SPORTS_KV.put(`dataset:${safeKey}`, JSON.stringify(dataset));
     return new Response(
       JSON.stringify({ success: true, datasetKey: safeKey, rowCount: dataset.meta.rowCount }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Admin dataset save error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
@@ -2148,7 +2148,7 @@ var onRequest10 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const method = request.method;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, PUT, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
@@ -2156,7 +2156,7 @@ var onRequest10 = /* @__PURE__ */ __name(async (context) => {
   if (method === "OPTIONS") {
     return new Response(null, {
       status: 200,
-      headers: corsHeaders6
+      headers: corsHeaders7
     });
   }
   try {
@@ -2165,20 +2165,20 @@ var onRequest10 = /* @__PURE__ */ __name(async (context) => {
     if (!token) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (!env || !env.SPORTS_KV) {
       return new Response(
         JSON.stringify({ error: "KV not configured" }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
     if (!tokenValue) {
       return new Response(
         JSON.stringify({ error: "Invalid token" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     let emailFromToken = tokenValue;
@@ -2199,7 +2199,7 @@ var onRequest10 = /* @__PURE__ */ __name(async (context) => {
     if (!adminUserData) {
       return new Response(
         JSON.stringify({ error: "User not found" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const adminUser = JSON.parse(adminUserData);
@@ -2207,7 +2207,7 @@ var onRequest10 = /* @__PURE__ */ __name(async (context) => {
     if (effectiveRole !== "admin" && effectiveRole !== "super_admin") {
       return new Response(
         JSON.stringify({ error: "Forbidden" }),
-        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (method === "GET") {
@@ -2252,7 +2252,7 @@ var onRequest10 = /* @__PURE__ */ __name(async (context) => {
       }
       return new Response(
         JSON.stringify({ users, total, offset, limit }),
-        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (method === "PUT") {
@@ -2261,14 +2261,14 @@ var onRequest10 = /* @__PURE__ */ __name(async (context) => {
       if (!email) {
         return new Response(
           JSON.stringify({ error: "Missing email" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const userData = await env.SPORTS_KV.get(`user:${email}`);
       if (!userData) {
         return new Response(
           JSON.stringify({ error: "User not found" }),
-          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const user = JSON.parse(userData);
@@ -2300,18 +2300,18 @@ var onRequest10 = /* @__PURE__ */ __name(async (context) => {
       };
       return new Response(
         JSON.stringify({ success: true, user: responseUser }),
-        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Admin email users error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
@@ -2422,7 +2422,7 @@ function generateToken2(user) {
 __name(generateToken2, "generateToken");
 var onRequest11 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type"
@@ -2430,7 +2430,7 @@ var onRequest11 = /* @__PURE__ */ __name(async (context) => {
   if (request.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
-      headers: corsHeaders6
+      headers: corsHeaders7
     });
   }
   if (request.method !== "POST") {
@@ -2440,7 +2440,7 @@ var onRequest11 = /* @__PURE__ */ __name(async (context) => {
         status: 405,
         headers: {
           "Content-Type": "application/json",
-          ...corsHeaders6
+          ...corsHeaders7
         }
       }
     );
@@ -2455,7 +2455,7 @@ var onRequest11 = /* @__PURE__ */ __name(async (context) => {
           status: 400,
           headers: {
             "Content-Type": "application/json",
-            ...corsHeaders6
+            ...corsHeaders7
           }
         }
       );
@@ -2472,7 +2472,7 @@ var onRequest11 = /* @__PURE__ */ __name(async (context) => {
               status: 401,
               headers: {
                 "Content-Type": "application/json",
-                ...corsHeaders6
+                ...corsHeaders7
               }
             }
           );
@@ -2538,7 +2538,7 @@ var onRequest11 = /* @__PURE__ */ __name(async (context) => {
           status: 200,
           headers: {
             "Content-Type": "application/json",
-            ...corsHeaders6
+            ...corsHeaders7
           }
         }
       );
@@ -2557,7 +2557,7 @@ var onRequest11 = /* @__PURE__ */ __name(async (context) => {
                   status: 401,
                   headers: {
                     "Content-Type": "application/json",
-                    ...corsHeaders6
+                    ...corsHeaders7
                   }
                 }
               );
@@ -2610,7 +2610,7 @@ var onRequest11 = /* @__PURE__ */ __name(async (context) => {
               status: 200,
               headers: {
                 "Content-Type": "application/json",
-                ...corsHeaders6
+                ...corsHeaders7
               }
             }
           );
@@ -2623,7 +2623,7 @@ var onRequest11 = /* @__PURE__ */ __name(async (context) => {
         status: 401,
         headers: {
           "Content-Type": "application/json",
-          ...corsHeaders6
+          ...corsHeaders7
         }
       }
     );
@@ -2634,7 +2634,7 @@ var onRequest11 = /* @__PURE__ */ __name(async (context) => {
         status: 500,
         headers: {
           "Content-Type": "application/json",
-          ...corsHeaders6
+          ...corsHeaders7
         }
       }
     );
@@ -2646,25 +2646,25 @@ var import_checked_fetch12 = __toESM(require_checked_fetch());
 var onRequest12 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
   if (method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders6 });
+    return new Response(null, { status: 204, headers: corsHeaders7 });
   }
   if (method !== "POST") {
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
   try {
     if (!env || !env.SPORTS_KV) {
       return new Response(
         JSON.stringify({ error: "KV not configured" }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const authHeader = request.headers.get("Authorization") || "";
@@ -2672,14 +2672,14 @@ var onRequest12 = /* @__PURE__ */ __name(async (context) => {
     if (!token) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
     if (!tokenValue) {
       return new Response(
         JSON.stringify({ error: "Invalid token" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     let email = tokenValue;
@@ -2696,21 +2696,21 @@ var onRequest12 = /* @__PURE__ */ __name(async (context) => {
     if (!userData) {
       return new Response(
         JSON.stringify({ error: "User not found" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const user = JSON.parse(userData);
     if (user.role !== "admin" && user.role !== "super_admin") {
       return new Response(
         JSON.stringify({ error: "Forbidden" }),
-        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const body = await request.json().catch(() => null);
     if (!body) {
       return new Response(
         JSON.stringify({ error: "Invalid JSON body" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const {
@@ -2723,19 +2723,19 @@ var onRequest12 = /* @__PURE__ */ __name(async (context) => {
     if (!datasetKey || typeof datasetKey !== "string") {
       return new Response(
         JSON.stringify({ error: "datasetKey is required" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (!targetColumn || typeof targetColumn !== "string") {
       return new Response(
         JSON.stringify({ error: "targetColumn is required" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (!Array.isArray(featureColumns) || featureColumns.length === 0) {
       return new Response(
         JSON.stringify({ error: "featureColumns must be a non-empty array" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const safeKey = datasetKey.trim();
@@ -2743,7 +2743,7 @@ var onRequest12 = /* @__PURE__ */ __name(async (context) => {
     if (!value) {
       return new Response(
         JSON.stringify({ error: "Dataset not found" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     let dataset;
@@ -2752,7 +2752,7 @@ var onRequest12 = /* @__PURE__ */ __name(async (context) => {
     } catch {
       return new Response(
         JSON.stringify({ error: "Malformed dataset in KV" }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const headers = Array.isArray(dataset.headers) ? dataset.headers : null;
@@ -2760,21 +2760,21 @@ var onRequest12 = /* @__PURE__ */ __name(async (context) => {
     if (!headers || !rows) {
       return new Response(
         JSON.stringify({ error: "Dataset format is invalid (missing headers/rows)" }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const targetIndex = headers.indexOf(targetColumn);
     if (targetIndex === -1) {
       return new Response(
         JSON.stringify({ error: `Target column '${targetColumn}' not found in dataset` }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const featureIndices = featureColumns.map((col) => ({ col, idx: headers.indexOf(col) })).filter((entry) => entry.idx !== -1);
     if (featureIndices.length === 0) {
       return new Response(
         JSON.stringify({ error: "None of the featureColumns were found in dataset headers" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const maxRows = hyperparams && Number(hyperparams.maxRows) || 1e3;
@@ -2815,7 +2815,7 @@ var onRequest12 = /* @__PURE__ */ __name(async (context) => {
           numSamples,
           numClasses
         }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const W = [];
@@ -2908,13 +2908,13 @@ var onRequest12 = /* @__PURE__ */ __name(async (context) => {
           trainAccuracy
         }
       }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("ML train error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
@@ -2925,7 +2925,7 @@ var onRequest13 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const url = new URL(request.url);
   const method = request.method;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
@@ -2933,7 +2933,7 @@ var onRequest13 = /* @__PURE__ */ __name(async (context) => {
   if (method === "OPTIONS") {
     return new Response(null, {
       status: 200,
-      headers: corsHeaders6
+      headers: corsHeaders7
     });
   }
   try {
@@ -2941,20 +2941,20 @@ var onRequest13 = /* @__PURE__ */ __name(async (context) => {
     if (!token) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (!env || !env.SPORTS_KV) {
       return new Response(
         JSON.stringify({ error: "KV not configured" }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
     if (!tokenValue) {
       return new Response(
         JSON.stringify({ error: "Invalid token" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     let email = tokenValue;
@@ -2971,14 +2971,14 @@ var onRequest13 = /* @__PURE__ */ __name(async (context) => {
     if (!userData) {
       return new Response(
         JSON.stringify({ error: "User not found" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const user = JSON.parse(userData);
     if (user.role !== "admin" && user.role !== "super_admin") {
       return new Response(
         JSON.stringify({ error: "Forbidden" }),
-        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (url.pathname === "/api/admin/moderation" && method === "GET") {
@@ -3004,7 +3004,7 @@ var onRequest13 = /* @__PURE__ */ __name(async (context) => {
       const sliced = flagged.slice(0, limit);
       return new Response(JSON.stringify({ messages: sliced, matchId }), {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders6 }
+        headers: { "Content-Type": "application/json", ...corsHeaders7 }
       });
     }
     if (url.pathname === "/api/admin/moderation" && method === "POST") {
@@ -3015,7 +3015,7 @@ var onRequest13 = /* @__PURE__ */ __name(async (context) => {
       if (!messageId || !action) {
         return new Response(
           JSON.stringify({ error: "messageId and action are required" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const messagesKey = `messages:${matchId}`;
@@ -3025,7 +3025,7 @@ var onRequest13 = /* @__PURE__ */ __name(async (context) => {
       if (index === -1) {
         return new Response(
           JSON.stringify({ success: false, notFound: true }),
-          { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const message = messages[index];
@@ -3036,7 +3036,7 @@ var onRequest13 = /* @__PURE__ */ __name(async (context) => {
         });
         return new Response(JSON.stringify({ success: true, action: "delete" }), {
           status: 200,
-          headers: { "Content-Type": "application/json", ...corsHeaders6 }
+          headers: { "Content-Type": "application/json", ...corsHeaders7 }
         });
       }
       if (action === "blockUser") {
@@ -3065,7 +3065,7 @@ var onRequest13 = /* @__PURE__ */ __name(async (context) => {
         });
         return new Response(JSON.stringify({ success: true, action: "blockUser" }), {
           status: 200,
-          headers: { "Content-Type": "application/json", ...corsHeaders6 }
+          headers: { "Content-Type": "application/json", ...corsHeaders7 }
         });
       }
       if (action === "markSafe") {
@@ -3079,29 +3079,217 @@ var onRequest13 = /* @__PURE__ */ __name(async (context) => {
         });
         return new Response(JSON.stringify({ success: true, action: "markSafe" }), {
           status: 200,
-          headers: { "Content-Type": "application/json", ...corsHeaders6 }
+          headers: { "Content-Type": "application/json", ...corsHeaders7 }
         });
       }
       return new Response(
         JSON.stringify({ error: "Unsupported action" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     return new Response(
       JSON.stringify({ error: "Not found" }),
-      { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Admin moderation error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
 
-// api/admin/send-bulk-email.js
+// api/admin/seed-wpl-data.js
 var import_checked_fetch14 = __toESM(require_checked_fetch());
+var corsHeaders3 = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization"
+};
+function verifyAdminToken4(request) {
+  const authHeader = request.headers.get("authorization");
+  const token = authHeader?.replace("Bearer ", "");
+  if (!token) {
+    return false;
+  }
+  return true;
+}
+__name(verifyAdminToken4, "verifyAdminToken");
+var wplTeams = [
+  {
+    id: "11",
+    league: "wpl",
+    name: "Mumbai Indians (WPL)",
+    shortName: "MI-W",
+    logo: "/logos/wpl_mi_logo_animated.svg",
+    colors: { primary: "#004BA0", secondary: "#FFD700" }
+  },
+  {
+    id: "12",
+    league: "wpl",
+    name: "Royal Challengers Bengaluru (WPL)",
+    shortName: "RCB-W",
+    logo: "/logos/wpl_rcb_logo_animated.svg",
+    colors: { primary: "#C8102E", secondary: "#FFD700" }
+  },
+  {
+    id: "13",
+    league: "wpl",
+    name: "Delhi Capitals (WPL)",
+    shortName: "DC-W",
+    logo: "/logos/wpl_dc_logo_animated.svg",
+    colors: { primary: "#004BA0", secondary: "#DC2626" }
+  },
+  {
+    id: "14",
+    league: "wpl",
+    name: "Gujarat Giants (WPL)",
+    shortName: "GG",
+    logo: "/logos/wpl_gg_logo_animated.svg",
+    colors: { primary: "#F97316", secondary: "#FFD700" }
+  },
+  {
+    id: "15",
+    league: "wpl",
+    name: "UP Warriorz (WPL)",
+    shortName: "UPW",
+    logo: "/logos/wpl_upw_logo_animated.svg",
+    colors: { primary: "#059669", secondary: "#F97316" }
+  }
+];
+var wplMatches = [
+  {
+    id: "wpl_match_1",
+    league: "wpl",
+    date: "2026-02-15",
+    time: "19:30",
+    venue: "DY Patil Stadium, Mumbai",
+    team1Id: "11",
+    team2Id: "12",
+    team1: wplTeams[0],
+    team2: wplTeams[1],
+    status: "scheduled",
+    matchNumber: 1
+  },
+  {
+    id: "wpl_match_2",
+    league: "wpl",
+    date: "2026-02-16",
+    time: "15:30",
+    venue: "Ekana Cricket Stadium, Lucknow",
+    team1Id: "13",
+    team2Id: "14",
+    team1: wplTeams[2],
+    team2: wplTeams[3],
+    status: "scheduled",
+    matchNumber: 2
+  },
+  {
+    id: "wpl_match_3",
+    league: "wpl",
+    date: "2026-02-17",
+    time: "19:30",
+    venue: "Arun Jaitley Stadium, Delhi",
+    team1Id: "15",
+    team2Id: "11",
+    team1: wplTeams[4],
+    team2: wplTeams[0],
+    status: "scheduled",
+    matchNumber: 3
+  },
+  {
+    id: "wpl_match_4",
+    league: "wpl",
+    date: "2026-02-18",
+    time: "15:30",
+    venue: "M Chinnaswamy Stadium, Bengaluru",
+    team1Id: "12",
+    team2Id: "14",
+    team1: wplTeams[1],
+    team2: wplTeams[3],
+    status: "scheduled",
+    matchNumber: 4
+  }
+];
+var wplPlayers = [
+  // Mumbai Indians Women (Team 11)
+  { id: "wpl1", league: "wpl", name: "Harmanpreet Kaur", role: "All-rounder", teamId: "11", age: 35, nationality: "India", jerseyNumber: 18, isCaptain: true, bowlingStyle: "Right-arm off-break", battingStyle: "Right-handed bat", stats: { matches: 50, runs: 1200, wickets: 30, average: 28.5, strikeRate: 125, economy: 7.2, highest: 103, fours: 85, sixes: 45, fifties: 8, hundreds: 1, bestBowling: "3/15", bowlingAverage: 0 } },
+  { id: "wpl2", league: "wpl", name: "Alyssa Healy", role: "Wicket-keeper Batter", teamId: "11", age: 33, nationality: "Australia", jerseyNumber: 1, isCaptain: false, bowlingStyle: "N/A", battingStyle: "Right-handed bat", stats: { matches: 45, runs: 980, wickets: 0, average: 26.5, strikeRate: 130, economy: 0, highest: 88, fours: 70, sixes: 35, fifties: 7, hundreds: 0, bestBowling: "-" } },
+  { id: "wpl3", league: "wpl", name: "Nat Sciver-Brunt", role: "All-rounder", teamId: "11", age: 31, nationality: "England", jerseyNumber: 8, isCaptain: false, bowlingStyle: "Right-arm medium", battingStyle: "Right-handed bat", stats: { matches: 40, runs: 750, wickets: 45, average: 24, strikeRate: 118, economy: 6.8, highest: 75, fours: 55, sixes: 20, fifties: 5, hundreds: 0, bestBowling: "4/20", bowlingAverage: 0 } },
+  // RCB Women (Team 12)
+  { id: "wpl4", league: "wpl", name: "Smriti Mandhana", role: "Batter", teamId: "12", age: 27, nationality: "India", jerseyNumber: 10, isCaptain: true, bowlingStyle: "Right-arm medium", battingStyle: "Left-handed bat", stats: { matches: 48, runs: 1350, wickets: 8, average: 32.1, strikeRate: 135, economy: 8.5, highest: 87, fours: 95, sixes: 48, fifties: 10, hundreds: 0, bestBowling: "2/25", bowlingAverage: 0 } },
+  { id: "wpl5", league: "wpl", name: "Ellyse Perry", role: "All-rounder", teamId: "12", age: 33, nationality: "Australia", jerseyNumber: 7, isCaptain: false, bowlingStyle: "Right-arm fast", battingStyle: "Right-handed bat", stats: { matches: 42, runs: 890, wickets: 55, average: 28.5, strikeRate: 120, economy: 6.5, highest: 85, fours: 65, sixes: 25, fifties: 6, hundreds: 0, bestBowling: "5/15", bowlingAverage: 0 } },
+  { id: "wpl6", league: "wpl", name: "Richa Ghosh", role: "Wicket-keeper Batter", teamId: "12", age: 21, nationality: "India", jerseyNumber: 33, isCaptain: false, bowlingStyle: "N/A", battingStyle: "Right-handed bat", stats: { matches: 25, runs: 420, wickets: 0, average: 24, strikeRate: 140, economy: 0, highest: 65, fours: 30, sixes: 18, fifties: 2, hundreds: 0, bestBowling: "-" } },
+  // Delhi Capitals Women (Team 13)
+  { id: "wpl7", league: "wpl", name: "Alyssa Perry", role: "All-rounder", teamId: "13", age: 23, nationality: "Australia", jerseyNumber: 17, isCaptain: false, bowlingStyle: "Right-arm leg-break", battingStyle: "Right-handed bat", stats: { matches: 18, runs: 320, wickets: 22, average: 22.5, strikeRate: 125, economy: 7, highest: 61, fours: 25, sixes: 10, fifties: 2, hundreds: 0, bestBowling: "3/18", bowlingAverage: 0 } },
+  // Gujarat Giants (Team 14)
+  { id: "wpl8", league: "wpl", name: "Sophie Devine", role: "All-rounder", teamId: "14", age: 35, nationality: "New Zealand", jerseyNumber: 6, isCaptain: true, bowlingStyle: "Right-arm medium", battingStyle: "Right-handed bat", stats: { matches: 38, runs: 780, wickets: 40, average: 26, strikeRate: 122, economy: 7.1, highest: 76, fours: 58, sixes: 22, fifties: 6, hundreds: 0, bestBowling: "4/22", bowlingAverage: 0 } },
+  { id: "wpl9", league: "wpl", name: "Ashleigh Gardner", role: "All-rounder", teamId: "14", age: 26, nationality: "Australia", jerseyNumber: 8, isCaptain: true, bowlingStyle: "Right-arm off-break", battingStyle: "Right-handed bat", stats: { matches: 35, runs: 680, wickets: 48, average: 24.5, strikeRate: 128, economy: 6.8, highest: 66, fours: 52, sixes: 18, fifties: 4, hundreds: 0, bestBowling: "4/12", bowlingAverage: 0 } },
+  { id: "wpl10", league: "wpl", name: "Beth Mooney", role: "Wicket-keeper Batter", teamId: "14", age: 30, nationality: "Australia", jerseyNumber: 5, isCaptain: false, bowlingStyle: "N/A", battingStyle: "Left-handed bat", stats: { matches: 40, runs: 920, wickets: 0, average: 28, strikeRate: 132, economy: 0, highest: 82, fours: 68, sixes: 28, fifties: 8, hundreds: 0, bestBowling: "-" } },
+  // UP Warriorz (Team 15)
+  { id: "wpl11", league: "wpl", name: "Meg Lanning", role: "Batter", teamId: "15", age: 31, nationality: "Australia", jerseyNumber: 1, isCaptain: true, bowlingStyle: "Right-arm leg-break", battingStyle: "Right-handed bat", stats: { matches: 36, runs: 840, wickets: 15, average: 26.5, strikeRate: 125, economy: 7.5, highest: 78, fours: 62, sixes: 24, fifties: 7, hundreds: 0, bestBowling: "2/28", bowlingAverage: 0 } },
+  { id: "wpl12", league: "wpl", name: "Jemimah Rodrigues", role: "Batter", teamId: "15", age: 24, nationality: "India", jerseyNumber: 21, isCaptain: false, bowlingStyle: "N/A", battingStyle: "Right-handed bat", stats: { matches: 32, runs: 580, wickets: 0, average: 22, strikeRate: 118, economy: 0, highest: 69, fours: 42, sixes: 15, fifties: 4, hundreds: 0, bestBowling: "-" } }
+];
+var onRequest14 = /* @__PURE__ */ __name(async (context) => {
+  const { request, env } = context;
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: corsHeaders3 });
+  }
+  try {
+    if (!verifyAdminToken4(request)) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+    let teams = await env.IPL_CACHE.get("teams", "json") || [];
+    let matches = await env.IPL_CACHE.get("matches", "json") || [];
+    let players = await env.IPL_CACHE.get("players", "json") || [];
+    const existingTeamIds = new Set(teams.map((t) => t.id));
+    const newTeams = wplTeams.filter((t) => !existingTeamIds.has(t.id));
+    teams = [...teams, ...newTeams];
+    const existingMatchIds = new Set(matches.map((m) => m.id));
+    const newMatches = wplMatches.filter((m) => !existingMatchIds.has(m.id));
+    matches = [...matches, ...newMatches];
+    const existingPlayerIds = new Set(players.map((p) => p.id));
+    const newPlayers = wplPlayers.filter((p) => !existingPlayerIds.has(p.id));
+    players = [...players, ...newPlayers];
+    await env.IPL_CACHE.put("teams", JSON.stringify(teams));
+    await env.IPL_CACHE.put("matches", JSON.stringify(matches));
+    await env.IPL_CACHE.put("players", JSON.stringify(players));
+    return new Response(JSON.stringify({
+      success: true,
+      message: "WPL data seeded successfully",
+      stats: {
+        teamsAdded: newTeams.length,
+        matchesAdded: newMatches.length,
+        playersAdded: newPlayers.length,
+        totalTeams: teams.length,
+        totalMatches: matches.length,
+        totalPlayers: players.length
+      }
+    }), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        ...corsHeaders3
+      }
+    });
+  } catch (error) {
+    console.error("Error seeding WPL data:", error);
+    return new Response(JSON.stringify({
+      error: "Failed to seed WPL data",
+      details: error.message
+    }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
+}, "onRequest");
+
+// api/admin/send-bulk-email.js
+var import_checked_fetch15 = __toESM(require_checked_fetch());
 async function sendEmailViaProvider(emailData, env) {
   const resendKey = env.RESEND_API_KEY;
   const sendgridKey = env.SENDGRID_API_KEY;
@@ -3306,10 +3494,10 @@ async function sendViaMailgun(emailData, apiKey, domain) {
   }
 }
 __name(sendViaMailgun, "sendViaMailgun");
-var onRequest14 = /* @__PURE__ */ __name(async (context) => {
+var onRequest15 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
@@ -3317,13 +3505,13 @@ var onRequest14 = /* @__PURE__ */ __name(async (context) => {
   if (method === "OPTIONS") {
     return new Response(null, {
       status: 200,
-      headers: corsHeaders6
+      headers: corsHeaders7
     });
   }
   if (method !== "POST") {
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
   try {
@@ -3332,20 +3520,20 @@ var onRequest14 = /* @__PURE__ */ __name(async (context) => {
     if (!token) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (!env || !env.SPORTS_KV) {
       return new Response(
         JSON.stringify({ error: "KV not configured" }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
     if (!tokenValue) {
       return new Response(
         JSON.stringify({ error: "Invalid token" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     let emailFromToken = tokenValue;
@@ -3366,7 +3554,7 @@ var onRequest14 = /* @__PURE__ */ __name(async (context) => {
     if (!adminUserData) {
       return new Response(
         JSON.stringify({ error: "User not found" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const adminUser = JSON.parse(adminUserData);
@@ -3374,7 +3562,7 @@ var onRequest14 = /* @__PURE__ */ __name(async (context) => {
     if (effectiveRole !== "admin" && effectiveRole !== "super_admin") {
       return new Response(
         JSON.stringify({ error: "Access denied" }),
-        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const body = await request.json();
@@ -3382,7 +3570,7 @@ var onRequest14 = /* @__PURE__ */ __name(async (context) => {
     if (!subject || !emailBody || !recipientIds || recipientIds.length === 0) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     let usersIndexRaw = await env.SPORTS_KV.get("users-index");
@@ -3418,7 +3606,7 @@ var onRequest14 = /* @__PURE__ */ __name(async (context) => {
       if (allMatchingUsers.length === 0) {
         return new Response(
           JSON.stringify({ error: "No users found matching the selected recipients. Please ensure users exist and try again." }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       } else {
         const disabledCount = allMatchingUsers.filter((u) => u.emailNotificationsEnabled === false).length;
@@ -3430,7 +3618,7 @@ var onRequest14 = /* @__PURE__ */ __name(async (context) => {
         errorMsg += issues.join(" and ") + ".";
         return new Response(
           JSON.stringify({ error: errorMsg }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
     }
@@ -3545,7 +3733,7 @@ var onRequest14 = /* @__PURE__ */ __name(async (context) => {
           failedCount,
           sentEmails
         }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     return new Response(
@@ -3559,22 +3747,22 @@ var onRequest14 = /* @__PURE__ */ __name(async (context) => {
       }),
       {
         status: successCount > 0 ? 200 : 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders6 }
+        headers: { "Content-Type": "application/json", ...corsHeaders7 }
       }
     );
   } catch (error) {
     console.error("Bulk email send error:", error);
     return new Response(
       JSON.stringify({ error: error.message || "Failed to send emails" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
 
 // api/admin/setup.js
-var import_checked_fetch15 = __toESM(require_checked_fetch());
+var import_checked_fetch16 = __toESM(require_checked_fetch());
 import crypto5 from "node:crypto";
-async function onRequest15(context) {
+async function onRequest16(context) {
   const { request, env } = context;
   if (request.method !== "POST") {
     return new Response(JSON.stringify({ message: "Method not allowed" }), {
@@ -3724,23 +3912,23 @@ async function onRequest15(context) {
     );
   }
 }
-__name(onRequest15, "onRequest");
+__name(onRequest16, "onRequest");
 
 // api/admin/upload-players-csv.ts
-var import_checked_fetch16 = __toESM(require_checked_fetch());
-var corsHeaders3 = {
+var import_checked_fetch17 = __toESM(require_checked_fetch());
+var corsHeaders4 = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization"
 };
-function verifyAdminToken4(request) {
+function verifyAdminToken5(request) {
   const authHeader = request.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return false;
   }
   return true;
 }
-__name(verifyAdminToken4, "verifyAdminToken");
+__name(verifyAdminToken5, "verifyAdminToken");
 var teamMapping = {
   "RCB": "1",
   // Royal Challengers Bengaluru
@@ -4036,21 +4224,21 @@ function parseCSV(csvContent) {
   return players;
 }
 __name(parseCSV, "parseCSV");
-var onRequest16 = /* @__PURE__ */ __name(async (context) => {
+var onRequest17 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   if (request.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders3 });
+    return new Response(null, { status: 204, headers: corsHeaders4 });
   }
   if (request.method !== "POST") {
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
       status: 405,
-      headers: { "Content-Type": "application/json", ...corsHeaders3 }
+      headers: { "Content-Type": "application/json", ...corsHeaders4 }
     });
   }
-  if (!verifyAdminToken4(request)) {
+  if (!verifyAdminToken5(request)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
-      headers: { "Content-Type": "application/json", ...corsHeaders3 }
+      headers: { "Content-Type": "application/json", ...corsHeaders4 }
     });
   }
   try {
@@ -4059,7 +4247,7 @@ var onRequest16 = /* @__PURE__ */ __name(async (context) => {
     if (!file) {
       return new Response(JSON.stringify({ error: "No file uploaded" }), {
         status: 400,
-        headers: { "Content-Type": "application/json", ...corsHeaders3 }
+        headers: { "Content-Type": "application/json", ...corsHeaders4 }
       });
     }
     const csvContent = await file.text();
@@ -4067,7 +4255,7 @@ var onRequest16 = /* @__PURE__ */ __name(async (context) => {
     if (parsedPlayers.length === 0) {
       return new Response(JSON.stringify({ error: "No valid players found in CSV" }), {
         status: 400,
-        headers: { "Content-Type": "application/json", ...corsHeaders3 }
+        headers: { "Content-Type": "application/json", ...corsHeaders4 }
       });
     }
     const existingPlayersData = await env.IPL_CACHE.get("players", "json");
@@ -4130,7 +4318,7 @@ var onRequest16 = /* @__PURE__ */ __name(async (context) => {
       }))
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders3 }
+      headers: { "Content-Type": "application/json", ...corsHeaders4 }
     });
   } catch (error) {
     console.error("Error processing CSV upload:", error);
@@ -4139,18 +4327,18 @@ var onRequest16 = /* @__PURE__ */ __name(async (context) => {
       details: error.message
     }), {
       status: 500,
-      headers: { "Content-Type": "application/json", ...corsHeaders3 }
+      headers: { "Content-Type": "application/json", ...corsHeaders4 }
     });
   }
 }, "onRequest");
 
 // api/admin/users.js
-var import_checked_fetch17 = __toESM(require_checked_fetch());
-var onRequest17 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch18 = __toESM(require_checked_fetch());
+var onRequest18 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { pathname, searchParams } = new URL(request.url);
   const method = request.method;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, PUT, DELETE, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
@@ -4158,7 +4346,7 @@ var onRequest17 = /* @__PURE__ */ __name(async (context) => {
   if (method === "OPTIONS") {
     return new Response(null, {
       status: 200,
-      headers: corsHeaders6
+      headers: corsHeaders7
     });
   }
   try {
@@ -4166,20 +4354,20 @@ var onRequest17 = /* @__PURE__ */ __name(async (context) => {
     if (!token) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (!env || !env.SPORTS_KV) {
       return new Response(
         JSON.stringify({ error: "KV not configured" }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
     if (!tokenValue) {
       return new Response(
         JSON.stringify({ error: "Invalid token" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     let email = tokenValue;
@@ -4197,7 +4385,7 @@ var onRequest17 = /* @__PURE__ */ __name(async (context) => {
     if (!userData) {
       return new Response(
         JSON.stringify({ error: "User not found" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const user = JSON.parse(userData);
@@ -4206,7 +4394,7 @@ var onRequest17 = /* @__PURE__ */ __name(async (context) => {
       if (user.role === "admin" || user.role === "super_admin") {
         return new Response(JSON.stringify({ success: true, skipped: true }), {
           status: 200,
-          headers: { "Content-Type": "application/json", ...corsHeaders6 }
+          headers: { "Content-Type": "application/json", ...corsHeaders7 }
         });
       }
       const activeUsersKey = `active-users:${matchId}`;
@@ -4228,13 +4416,13 @@ var onRequest17 = /* @__PURE__ */ __name(async (context) => {
       });
       return new Response(JSON.stringify({ success: true }), {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders6 }
+        headers: { "Content-Type": "application/json", ...corsHeaders7 }
       });
     }
     if (user.role !== "admin" && user.role !== "super_admin") {
       return new Response(
         JSON.stringify({ error: "Forbidden" }),
-        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (pathname === "/api/admin/users" && method === "GET") {
@@ -4244,7 +4432,7 @@ var onRequest17 = /* @__PURE__ */ __name(async (context) => {
       const activeUsers = activeUsersData ? JSON.parse(activeUsersData) : [];
       return new Response(JSON.stringify({ users: activeUsers }), {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders6 }
+        headers: { "Content-Type": "application/json", ...corsHeaders7 }
       });
     }
     if (pathname === "/api/admin/users" && method === "PUT") {
@@ -4252,14 +4440,14 @@ var onRequest17 = /* @__PURE__ */ __name(async (context) => {
       if (!userId) {
         return new Response(
           JSON.stringify({ error: "Missing userId" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const userEmail = await env.SPORTS_KV.get(`userId:${userId}`);
       if (!userEmail) {
         return new Response(
           JSON.stringify({ error: "User not found" }),
-          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const targetUserData = await env.SPORTS_KV.get(`user:${userEmail}`);
@@ -4274,7 +4462,7 @@ var onRequest17 = /* @__PURE__ */ __name(async (context) => {
       });
       return new Response(
         JSON.stringify({ success: true, user: targetUser }),
-        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (pathname === "/api/admin/users" && method === "DELETE") {
@@ -4282,14 +4470,14 @@ var onRequest17 = /* @__PURE__ */ __name(async (context) => {
       if (!userId) {
         return new Response(
           JSON.stringify({ error: "Missing userId" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const userEmail = await env.SPORTS_KV.get(`userId:${userId}`);
       if (!userEmail) {
         return new Response(
           JSON.stringify({ error: "User not found" }),
-          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const targetUserData = await env.SPORTS_KV.get(`user:${userEmail}`);
@@ -4301,27 +4489,27 @@ var onRequest17 = /* @__PURE__ */ __name(async (context) => {
       }
       return new Response(JSON.stringify({ success: true }), {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders6 }
+        headers: { "Content-Type": "application/json", ...corsHeaders7 }
       });
     }
     return new Response(
       JSON.stringify({ error: "Not found" }),
-      { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Admin users error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
 
 // api/calendar/ical.js
-var import_checked_fetch18 = __toESM(require_checked_fetch());
-async function onRequest18(context) {
+var import_checked_fetch19 = __toESM(require_checked_fetch());
+async function onRequest19(context) {
   const { request, env } = context;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type"
@@ -4329,13 +4517,13 @@ async function onRequest18(context) {
   if (request.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
-      headers: corsHeaders6
+      headers: corsHeaders7
     });
   }
   if (request.method !== "GET") {
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
       status: 405,
-      headers: { ...corsHeaders6, "Content-Type": "application/json" }
+      headers: { ...corsHeaders7, "Content-Type": "application/json" }
     });
   }
   try {
@@ -4412,7 +4600,7 @@ LOCATION:${escapeText(venue)}`;
     return new Response(ics, {
       status: 200,
       headers: {
-        ...corsHeaders6,
+        ...corsHeaders7,
         "Content-Type": "text/calendar;charset=utf-8",
         "Content-Disposition": 'attachment; filename="ipl-2026-matches.ics"',
         "Cache-Control": "public, max-age=3600"
@@ -4425,15 +4613,15 @@ LOCATION:${escapeText(venue)}`;
       JSON.stringify({ error: "Failed to generate calendar feed" }),
       {
         status: 500,
-        headers: { ...corsHeaders6, "Content-Type": "application/json" }
+        headers: { ...corsHeaders7, "Content-Type": "application/json" }
       }
     );
   }
 }
-__name(onRequest18, "onRequest");
+__name(onRequest19, "onRequest");
 
 // api/predictions/leaderboard.js
-var import_checked_fetch19 = __toESM(require_checked_fetch());
+var import_checked_fetch20 = __toESM(require_checked_fetch());
 async function getAllPredictions(matchId, userId, league, env) {
   const predictions = [];
   if (matchId) {
@@ -4475,14 +4663,14 @@ async function getAllPredictions(matchId, userId, league, env) {
   return predictions;
 }
 __name(getAllPredictions, "getAllPredictions");
-async function getLeaderboard(matchId, env, corsHeaders6) {
+async function getLeaderboard(matchId, env, corsHeaders7) {
   try {
     const cacheKey = matchId ? `leaderboard:match:${matchId}` : "leaderboard:global";
     const cached = await env.SPORTS_KV.get(cacheKey);
     if (cached) {
       return new Response(cached, {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders6 }
+        headers: { "Content-Type": "application/json", ...corsHeaders7 }
       });
     }
     const allPredictions = await getAllPredictions(matchId, null, null, env);
@@ -4525,49 +4713,49 @@ async function getLeaderboard(matchId, env, corsHeaders6) {
     await env.SPORTS_KV.put(cacheKey, result, { expirationTtl: 300 });
     return new Response(result, {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     console.error("Leaderboard error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to calculate leaderboard" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(getLeaderboard, "getLeaderboard");
-var onRequest19 = /* @__PURE__ */ __name(async (context) => {
+var onRequest20 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const method = request.method;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
   if (method === "OPTIONS") {
-    return new Response(null, { status: 200, headers: corsHeaders6 });
+    return new Response(null, { status: 200, headers: corsHeaders7 });
   }
   if (method !== "GET") {
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
   try {
     const matchId = searchParams.get("matchId");
-    return await getLeaderboard(matchId, env, corsHeaders6);
+    return await getLeaderboard(matchId, env, corsHeaders7);
   } catch (error) {
     console.error("Leaderboard error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
 
 // api/predictions/polls.js
-var import_checked_fetch20 = __toESM(require_checked_fetch());
+var import_checked_fetch21 = __toESM(require_checked_fetch());
 async function getUserFromToken(token, env) {
   if (!token) return null;
   const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
@@ -4588,17 +4776,17 @@ async function getUserFromToken(token, env) {
   return { ...user, email };
 }
 __name(getUserFromToken, "getUserFromToken");
-var onRequest20 = /* @__PURE__ */ __name(async (context) => {
+var onRequest21 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { pathname, searchParams } = new URL(request.url);
   const method = request.method;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
   if (method === "OPTIONS") {
-    return new Response(null, { status: 200, headers: corsHeaders6 });
+    return new Response(null, { status: 200, headers: corsHeaders7 });
   }
   try {
     if (method === "GET") {
@@ -4606,19 +4794,19 @@ var onRequest20 = /* @__PURE__ */ __name(async (context) => {
       if (!matchId) {
         return new Response(
           JSON.stringify({ error: "Match ID required" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const pollData = await env.SPORTS_KV.get(`poll:${matchId}`);
       if (!pollData) {
         return new Response(JSON.stringify(null), {
           status: 200,
-          headers: { "Content-Type": "application/json", ...corsHeaders6 }
+          headers: { "Content-Type": "application/json", ...corsHeaders7 }
         });
       }
       return new Response(pollData, {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders6 }
+        headers: { "Content-Type": "application/json", ...corsHeaders7 }
       });
     }
     if (method === "POST") {
@@ -4627,7 +4815,7 @@ var onRequest20 = /* @__PURE__ */ __name(async (context) => {
       if (!user) {
         return new Response(
           JSON.stringify({ error: "Unauthorized" }),
-          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const body = await request.json();
@@ -4636,13 +4824,13 @@ var onRequest20 = /* @__PURE__ */ __name(async (context) => {
         if (user.role !== "admin" && user.role !== "super_admin") {
           return new Response(
             JSON.stringify({ error: "Forbidden" }),
-            { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+            { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
           );
         }
         if (!matchId || !question || !options || !Array.isArray(options)) {
           return new Response(
             JSON.stringify({ error: "Missing required fields" }),
-            { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+            { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
           );
         }
         const pollId2 = crypto.randomUUID();
@@ -4665,28 +4853,28 @@ var onRequest20 = /* @__PURE__ */ __name(async (context) => {
         });
         return new Response(JSON.stringify(poll), {
           status: 201,
-          headers: { "Content-Type": "application/json", ...corsHeaders6 }
+          headers: { "Content-Type": "application/json", ...corsHeaders7 }
         });
       }
       if (action === "vote") {
         if (!pollId || !optionId) {
           return new Response(
             JSON.stringify({ error: "Poll ID and option ID required" }),
-            { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+            { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
           );
         }
         const pollData = await env.SPORTS_KV.get(`poll:${matchId}`);
         if (!pollData) {
           return new Response(
             JSON.stringify({ error: "Poll not found" }),
-            { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+            { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
           );
         }
         const poll = JSON.parse(pollData);
         if (!poll.isActive) {
           return new Response(
             JSON.stringify({ error: "Poll is not active" }),
-            { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+            { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
           );
         }
         const voteKey = `poll:${matchId}:vote:${user.id}`;
@@ -4694,14 +4882,14 @@ var onRequest20 = /* @__PURE__ */ __name(async (context) => {
         if (existingVote) {
           return new Response(
             JSON.stringify({ error: "You have already voted on this poll" }),
-            { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+            { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
           );
         }
         const option = poll.options.find((opt) => opt.id === optionId);
         if (!option) {
           return new Response(
             JSON.stringify({ error: "Invalid option" }),
-            { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+            { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
           );
         }
         option.votes++;
@@ -4713,29 +4901,29 @@ var onRequest20 = /* @__PURE__ */ __name(async (context) => {
         });
         return new Response(JSON.stringify(poll), {
           status: 200,
-          headers: { "Content-Type": "application/json", ...corsHeaders6 }
+          headers: { "Content-Type": "application/json", ...corsHeaders7 }
         });
       }
       return new Response(
         JSON.stringify({ error: "Invalid action" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Polls error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
 
 // api/predictions/stats.js
-var import_checked_fetch21 = __toESM(require_checked_fetch());
+var import_checked_fetch22 = __toESM(require_checked_fetch());
 async function getAllPredictions2(matchId, userId, league, env) {
   const predictions = [];
   if (matchId) {
@@ -4777,22 +4965,22 @@ async function getAllPredictions2(matchId, userId, league, env) {
   return predictions;
 }
 __name(getAllPredictions2, "getAllPredictions");
-var onRequest21 = /* @__PURE__ */ __name(async (context) => {
+var onRequest22 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const method = request.method;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
   if (method === "OPTIONS") {
-    return new Response(null, { status: 200, headers: corsHeaders6 });
+    return new Response(null, { status: 200, headers: corsHeaders7 });
   }
   if (method !== "GET") {
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
   try {
@@ -4800,7 +4988,7 @@ var onRequest21 = /* @__PURE__ */ __name(async (context) => {
     if (!userId) {
       return new Response(
         JSON.stringify({ error: "User ID required" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const predictions = await getAllPredictions2(null, userId, null, env);
@@ -4844,19 +5032,19 @@ var onRequest21 = /* @__PURE__ */ __name(async (context) => {
     }
     return new Response(JSON.stringify(stats), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     console.error("Stats error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
 
 // api/weather/[venueId].js
-var import_checked_fetch22 = __toESM(require_checked_fetch());
+var import_checked_fetch23 = __toESM(require_checked_fetch());
 var WPL_VENUES = {
   "wpl-dy-patil": {
     name: "Dr. DY Patil Sports Academy, Navi Mumbai",
@@ -5148,12 +5336,12 @@ async function onRequestPost(context) {
 __name(onRequestPost, "onRequestPost");
 
 // api/messages/[id].js
-var import_checked_fetch23 = __toESM(require_checked_fetch());
-var onRequest22 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch24 = __toESM(require_checked_fetch());
+var onRequest23 = /* @__PURE__ */ __name(async (context) => {
   const { request, env, params } = context;
   const { id } = params || {};
   const method = request.method;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
@@ -5161,20 +5349,20 @@ var onRequest22 = /* @__PURE__ */ __name(async (context) => {
   if (method === "OPTIONS") {
     return new Response(null, {
       status: 200,
-      headers: corsHeaders6
+      headers: corsHeaders7
     });
   }
   if (method !== "DELETE" && method !== "POST") {
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
   try {
     if (!id) {
       return new Response(
         JSON.stringify({ error: "Message ID required" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const url = new URL(request.url);
@@ -5183,20 +5371,20 @@ var onRequest22 = /* @__PURE__ */ __name(async (context) => {
     if (!token) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (!env || !env.SPORTS_KV) {
       return new Response(
         JSON.stringify({ error: "KV not configured" }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
     if (!tokenValue) {
       return new Response(
         JSON.stringify({ error: "Invalid token" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     let email = tokenValue;
@@ -5213,7 +5401,7 @@ var onRequest22 = /* @__PURE__ */ __name(async (context) => {
     if (!userData) {
       return new Response(
         JSON.stringify({ error: "User not found" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const user = JSON.parse(userData);
@@ -5221,7 +5409,7 @@ var onRequest22 = /* @__PURE__ */ __name(async (context) => {
       if (user.role !== "admin" && user.role !== "super_admin") {
         return new Response(
           JSON.stringify({ error: "Forbidden" }),
-          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const messagesKey = `messages:${matchId}`;
@@ -5232,7 +5420,7 @@ var onRequest22 = /* @__PURE__ */ __name(async (context) => {
       if (messages.length === beforeLength) {
         return new Response(JSON.stringify({ success: true, deleted: false }), {
           status: 200,
-          headers: { "Content-Type": "application/json", ...corsHeaders6 }
+          headers: { "Content-Type": "application/json", ...corsHeaders7 }
         });
       }
       await env.SPORTS_KV.put(messagesKey, JSON.stringify(messages), {
@@ -5240,7 +5428,7 @@ var onRequest22 = /* @__PURE__ */ __name(async (context) => {
       });
       return new Response(JSON.stringify({ success: true, deleted: true }), {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders6 }
+        headers: { "Content-Type": "application/json", ...corsHeaders7 }
       });
     }
     if (method === "POST") {
@@ -5257,7 +5445,7 @@ var onRequest22 = /* @__PURE__ */ __name(async (context) => {
       if (index === -1) {
         return new Response(JSON.stringify({ success: false, notFound: true }), {
           status: 200,
-          headers: { "Content-Type": "application/json", ...corsHeaders6 }
+          headers: { "Content-Type": "application/json", ...corsHeaders7 }
         });
       }
       const existing = messages[index] || {};
@@ -5274,20 +5462,20 @@ var onRequest22 = /* @__PURE__ */ __name(async (context) => {
       });
       return new Response(JSON.stringify({ success: true, reported: true }), {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders6 }
+        headers: { "Content-Type": "application/json", ...corsHeaders7 }
       });
     }
   } catch (error) {
     console.error("Messages delete error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
 
 // api/coaches.js
-var import_checked_fetch24 = __toESM(require_checked_fetch());
+var import_checked_fetch25 = __toESM(require_checked_fetch());
 async function onRequestGet2(context) {
   try {
     const { searchParams } = new URL(context.request.url);
@@ -5403,7 +5591,7 @@ async function onRequestPost2(context) {
 __name(onRequestPost2, "onRequestPost");
 
 // api/key-players.js
-var import_checked_fetch25 = __toESM(require_checked_fetch());
+var import_checked_fetch26 = __toESM(require_checked_fetch());
 async function onRequestGet3(context) {
   try {
     const { searchParams } = new URL(context.request.url);
@@ -5511,13 +5699,13 @@ async function onRequestPost3(context) {
 __name(onRequestPost3, "onRequestPost");
 
 // api/account.js
-var import_checked_fetch26 = __toESM(require_checked_fetch());
-var onRequest23 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch27 = __toESM(require_checked_fetch());
+var onRequest24 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const url = new URL(request.url);
   const method = request.method;
   const action = url.searchParams.get("action") || "delete";
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
@@ -5525,7 +5713,7 @@ var onRequest23 = /* @__PURE__ */ __name(async (context) => {
   if (method === "OPTIONS") {
     return new Response(null, {
       status: 200,
-      headers: corsHeaders6
+      headers: corsHeaders7
     });
   }
   try {
@@ -5535,20 +5723,20 @@ var onRequest23 = /* @__PURE__ */ __name(async (context) => {
       if (!token) {
         return new Response(
           JSON.stringify({ error: "Unauthorized" }),
-          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       if (!env || !env.SPORTS_KV) {
         return new Response(
           JSON.stringify({ error: "KV not configured" }),
-          { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
       if (!tokenValue) {
         return new Response(
           JSON.stringify({ error: "Invalid token" }),
-          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       let email = tokenValue;
@@ -5565,7 +5753,7 @@ var onRequest23 = /* @__PURE__ */ __name(async (context) => {
       if (!userData) {
         return new Response(
           JSON.stringify({ error: "User not found" }),
-          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const user = JSON.parse(userData);
@@ -5637,88 +5825,88 @@ var onRequest23 = /* @__PURE__ */ __name(async (context) => {
             "Content-Type": "application/json",
             // Clear auth cookie if present
             "Set-Cookie": "auth_token=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0",
-            ...corsHeaders6
+            ...corsHeaders7
           }
         }
       );
     }
     return new Response(
       JSON.stringify({ error: "Not found" }),
-      { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Account error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
 
 // api/admin-email-dashboard.js
-var import_checked_fetch27 = __toESM(require_checked_fetch());
-var onRequest24 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch28 = __toESM(require_checked_fetch());
+var onRequest25 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
   const url = new URL(request.url);
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Admin-Token"
   };
   if (method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders6 });
+    return new Response(null, { status: 204, headers: corsHeaders7 });
   }
   try {
     const adminToken = request.headers.get("X-Admin-Token");
     if (!adminToken || adminToken !== env.ADMIN_EMAIL_TOKEN) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (url.pathname.includes("/dashboard/stats")) {
-      return await getDashboardStats(env, corsHeaders6);
+      return await getDashboardStats(env, corsHeaders7);
     }
     if (url.pathname.includes("/dashboard/segments")) {
-      return await getSegmentStats(env, corsHeaders6);
+      return await getSegmentStats(env, corsHeaders7);
     }
     if (url.pathname.includes("/dashboard/campaigns")) {
       if (method === "GET") {
-        return await getCampaigns(env, corsHeaders6);
+        return await getCampaigns(env, corsHeaders7);
       } else if (method === "POST") {
         const body = await request.json();
-        return await createCampaign(body, env, corsHeaders6);
+        return await createCampaign(body, env, corsHeaders7);
       }
     }
     if (url.pathname.includes("/dashboard/templates")) {
-      return await getEmailTemplates(env, corsHeaders6);
+      return await getEmailTemplates(env, corsHeaders7);
     }
     if (url.pathname.includes("/dashboard/ab-test")) {
       if (method === "POST") {
         const body = await request.json();
-        return await createABTest(body, env, corsHeaders6);
+        return await createABTest(body, env, corsHeaders7);
       }
     }
     if (url.pathname.includes("/dashboard/users")) {
       if (method === "GET") {
         const searchParam = url.searchParams.get("search");
-        return await searchUsers(searchParam, env, corsHeaders6);
+        return await searchUsers(searchParam, env, corsHeaders7);
       }
     }
     return new Response(
       JSON.stringify({ error: "Not found" }),
-      { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Admin dashboard error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
-async function getDashboardStats(env, corsHeaders6) {
+async function getDashboardStats(env, corsHeaders7) {
   try {
     const stats = {
       emailsSent: 0,
@@ -5740,18 +5928,18 @@ async function getDashboardStats(env, corsHeaders6) {
     stats.bounceRate = stats.emailsSent > 0 ? Math.round(stats.emailsBounced / stats.emailsSent * 100) : 0;
     return new Response(
       JSON.stringify(stats),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Get dashboard stats error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to get stats" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(getDashboardStats, "getDashboardStats");
-async function getSegmentStats(env, corsHeaders6) {
+async function getSegmentStats(env, corsHeaders7) {
   try {
     const segments = {
       "super-fan": { users: 0, emails: 0, openRate: 0 },
@@ -5767,40 +5955,40 @@ async function getSegmentStats(env, corsHeaders6) {
     }
     return new Response(
       JSON.stringify(segments),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Get segment stats error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to get segment stats" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(getSegmentStats, "getSegmentStats");
-async function getCampaigns(env, corsHeaders6) {
+async function getCampaigns(env, corsHeaders7) {
   try {
     const campaigns = [];
     return new Response(
       JSON.stringify({ campaigns }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Get campaigns error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to get campaigns" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(getCampaigns, "getCampaigns");
-async function createCampaign(body, env, corsHeaders6) {
+async function createCampaign(body, env, corsHeaders7) {
   try {
     const { name, subject, template, targetSegments, schedule } = body;
     if (!name || !subject || !template) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const campaign = {
@@ -5823,18 +6011,18 @@ async function createCampaign(body, env, corsHeaders6) {
         success: true,
         campaign
       }),
-      { status: 201, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 201, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Create campaign error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to create campaign" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(createCampaign, "createCampaign");
-async function getEmailTemplates(env, corsHeaders6) {
+async function getEmailTemplates(env, corsHeaders7) {
   try {
     const templates = {
       "match-reminder": {
@@ -5865,24 +6053,24 @@ async function getEmailTemplates(env, corsHeaders6) {
     };
     return new Response(
       JSON.stringify(templates),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Get templates error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to get templates" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(getEmailTemplates, "getEmailTemplates");
-async function createABTest(body, env, corsHeaders6) {
+async function createABTest(body, env, corsHeaders7) {
   try {
     const { name, campaign, variants, trafficSplit, duration } = body;
     if (!name || !campaign || !Array.isArray(variants) || variants.length < 2) {
       return new Response(
         JSON.stringify({ error: "Need at least 2 variants" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const test = {
@@ -5913,97 +6101,97 @@ async function createABTest(body, env, corsHeaders6) {
         success: true,
         test
       }),
-      { status: 201, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 201, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Create A/B test error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to create A/B test" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(createABTest, "createABTest");
-async function searchUsers(query, env, corsHeaders6) {
+async function searchUsers(query, env, corsHeaders7) {
   try {
     if (!query) {
       return new Response(
         JSON.stringify({ error: "Search query required" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const results = [];
     return new Response(
       JSON.stringify({ results }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Search users error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to search users" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(searchUsers, "searchUsers");
 
 // api/ai-advanced.js
-var import_checked_fetch28 = __toESM(require_checked_fetch());
-var onRequest25 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch29 = __toESM(require_checked_fetch());
+var onRequest26 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
   if (request.method === "OPTIONS") {
-    return new Response(null, { status: 200, headers: corsHeaders6 });
+    return new Response(null, { status: 200, headers: corsHeaders7 });
   }
   try {
     const action = searchParams.get("action") || "generate";
     switch (action) {
       case "generate-content":
-        return await generateAdvancedContent(request, corsHeaders6);
+        return await generateAdvancedContent(request, corsHeaders7);
       case "analyze-story":
-        return await analyzeStory(request, corsHeaders6);
+        return await analyzeStory(request, corsHeaders7);
       case "batch-analysis":
-        return await batchAnalysis2(request, corsHeaders6);
+        return await batchAnalysis2(request, corsHeaders7);
       case "seo-optimization":
-        return await optimizeSEO2(request, corsHeaders6);
+        return await optimizeSEO2(request, corsHeaders7);
       case "trending-topics":
-        return await getTrendingTopics2(request, corsHeaders6);
+        return await getTrendingTopics2(request, corsHeaders7);
       case "content-sources":
-        return await getContentSources2(request, corsHeaders6);
+        return await getContentSources2(request, corsHeaders7);
       case "sync-sources":
-        return await syncContentSources2(request, corsHeaders6);
+        return await syncContentSources2(request, corsHeaders7);
       case "moderation":
-        return await moderateContent2(request, corsHeaders6);
+        return await moderateContent2(request, corsHeaders7);
       case "fact-check":
-        return await factCheckContent2(request, corsHeaders6);
+        return await factCheckContent2(request, corsHeaders7);
       case "plagiarism-check":
-        return await checkPlagiarism2(request, corsHeaders6);
+        return await checkPlagiarism2(request, corsHeaders7);
       case "performance-analytics":
-        return await getPerformanceAnalytics(request, corsHeaders6);
+        return await getPerformanceAnalytics(request, corsHeaders7);
       default:
-        return await generateAdvancedContent(request, corsHeaders6);
+        return await generateAdvancedContent(request, corsHeaders7);
     }
   } catch (error) {
     console.error("Advanced AI API error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to process advanced AI request" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
-async function generateAdvancedContent(request, corsHeaders6) {
+async function generateAdvancedContent(request, corsHeaders7) {
   try {
     const body = await request.json();
     const { prompt, category, tone, length, targetAudience, keywords, includeImages, includeVideos } = body;
     if (!prompt) {
       return new Response(
         JSON.stringify({ error: "Prompt is required" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     await new Promise((resolve) => setTimeout(resolve, 3e3));
@@ -6027,24 +6215,24 @@ async function generateAdvancedContent(request, corsHeaders6) {
       }
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Failed to generate advanced content" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(generateAdvancedContent, "generateAdvancedContent");
-async function analyzeStory(request, corsHeaders6) {
+async function analyzeStory(request, corsHeaders7) {
   try {
     const body = await request.json();
     const { content, title, category, author } = body;
     if (!content) {
       return new Response(
         JSON.stringify({ error: "Content is required for analysis" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     await new Promise((resolve) => setTimeout(resolve, 2500));
@@ -6056,24 +6244,24 @@ async function analyzeStory(request, corsHeaders6) {
       model: "Advanced AI Analysis v2.0"
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Failed to analyze story" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(analyzeStory, "analyzeStory");
-async function batchAnalysis2(request, corsHeaders6) {
+async function batchAnalysis2(request, corsHeaders7) {
   try {
     const body = await request.json();
     const { stories } = body;
     if (!stories || !Array.isArray(stories)) {
       return new Response(
         JSON.stringify({ error: "Stories array is required for batch analysis" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     await new Promise((resolve) => setTimeout(resolve, 5e3));
@@ -6094,24 +6282,24 @@ async function batchAnalysis2(request, corsHeaders6) {
       processedAt: (/* @__PURE__ */ new Date()).toISOString()
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Failed to perform batch analysis" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(batchAnalysis2, "batchAnalysis");
-async function optimizeSEO2(request, corsHeaders6) {
+async function optimizeSEO2(request, corsHeaders7) {
   try {
     const body = await request.json();
     const { content, title, targetKeywords, category } = body;
     if (!content || !title) {
       return new Response(
         JSON.stringify({ error: "Content and title are required for SEO optimization" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     await new Promise((resolve) => setTimeout(resolve, 2e3));
@@ -6123,17 +6311,17 @@ async function optimizeSEO2(request, corsHeaders6) {
       estimatedImprovement: "25-35% increase in search visibility"
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Failed to optimize SEO" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(optimizeSEO2, "optimizeSEO");
-async function getTrendingTopics2(request, corsHeaders6) {
+async function getTrendingTopics2(request, corsHeaders7) {
   try {
     await new Promise((resolve) => setTimeout(resolve, 1e3));
     const topics = generateAdvancedTrendingTopics();
@@ -6145,17 +6333,17 @@ async function getTrendingTopics2(request, corsHeaders6) {
       nextUpdate: new Date(Date.now() + 60 * 60 * 1e3).toISOString()
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Failed to fetch trending topics" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(getTrendingTopics2, "getTrendingTopics");
-async function getContentSources2(request, corsHeaders6) {
+async function getContentSources2(request, corsHeaders7) {
   try {
     await new Promise((resolve) => setTimeout(resolve, 800));
     const sources = generateContentSources();
@@ -6167,17 +6355,17 @@ async function getContentSources2(request, corsHeaders6) {
       activeSources: sources.filter((s) => s.status === "active").length
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Failed to fetch content sources" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(getContentSources2, "getContentSources");
-async function syncContentSources2(request, corsHeaders6) {
+async function syncContentSources2(request, corsHeaders7) {
   try {
     await new Promise((resolve) => setTimeout(resolve, 3e3));
     return new Response(JSON.stringify({
@@ -6190,24 +6378,24 @@ async function syncContentSources2(request, corsHeaders6) {
       nextSync: new Date(Date.now() + 30 * 60 * 1e3).toISOString()
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Failed to sync content sources" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(syncContentSources2, "syncContentSources");
-async function moderateContent2(request, corsHeaders6) {
+async function moderateContent2(request, corsHeaders7) {
   try {
     const body = await request.json();
     const { content, title, category } = body;
     if (!content) {
       return new Response(
         JSON.stringify({ error: "Content is required for moderation" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     await new Promise((resolve) => setTimeout(resolve, 2e3));
@@ -6219,24 +6407,24 @@ async function moderateContent2(request, corsHeaders6) {
       aiModel: "Content Safety AI v2.1"
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Failed to moderate content" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(moderateContent2, "moderateContent");
-async function factCheckContent2(request, corsHeaders6) {
+async function factCheckContent2(request, corsHeaders7) {
   try {
     const body = await request.json();
     const { content, claims } = body;
     if (!content && !claims) {
       return new Response(
         JSON.stringify({ error: "Content or claims are required for fact checking" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     await new Promise((resolve) => setTimeout(resolve, 2500));
@@ -6249,24 +6437,24 @@ async function factCheckContent2(request, corsHeaders6) {
       confidence: 88 + Math.random() * 10
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Failed to fact check content" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(factCheckContent2, "factCheckContent");
-async function checkPlagiarism2(request, corsHeaders6) {
+async function checkPlagiarism2(request, corsHeaders7) {
   try {
     const body = await request.json();
     const { content, title } = body;
     if (!content) {
       return new Response(
         JSON.stringify({ error: "Content is required for plagiarism check" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     await new Promise((resolve) => setTimeout(resolve, 3e3));
@@ -6279,17 +6467,17 @@ async function checkPlagiarism2(request, corsHeaders6) {
       processingTime: "2.8s"
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Failed to check plagiarism" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(checkPlagiarism2, "checkPlagiarism");
-async function getPerformanceAnalytics(request, corsHeaders6) {
+async function getPerformanceAnalytics(request, corsHeaders7) {
   try {
     await new Promise((resolve) => setTimeout(resolve, 1500));
     const analytics = generatePerformanceAnalytics();
@@ -6300,74 +6488,74 @@ async function getPerformanceAnalytics(request, corsHeaders6) {
       dataRange: "Last 30 days"
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Failed to fetch performance analytics" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(getPerformanceAnalytics, "getPerformanceAnalytics");
 
 // api/ai-advanced-complete.js
-var import_checked_fetch29 = __toESM(require_checked_fetch());
-var onRequest26 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch30 = __toESM(require_checked_fetch());
+var onRequest27 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
   if (request.method === "OPTIONS") {
-    return new Response(null, { status: 200, headers: corsHeaders6 });
+    return new Response(null, { status: 200, headers: corsHeaders7 });
   }
   try {
     const action = searchParams.get("action") || "generate-content";
     switch (action) {
       case "generate-content":
-        return await generateAdvancedContent2(request, corsHeaders6);
+        return await generateAdvancedContent2(request, corsHeaders7);
       case "analyze-story":
-        return await analyzeStory2(request, corsHeaders6);
+        return await analyzeStory2(request, corsHeaders7);
       case "batch-analysis":
-        return await batchAnalysis(request, corsHeaders6);
+        return await batchAnalysis(request, corsHeaders7);
       case "seo-optimization":
-        return await optimizeSEO(request, corsHeaders6);
+        return await optimizeSEO(request, corsHeaders7);
       case "trending-topics":
-        return await getTrendingTopics3(request, corsHeaders6);
+        return await getTrendingTopics3(request, corsHeaders7);
       case "content-sources":
-        return await getContentSources(request, corsHeaders6);
+        return await getContentSources(request, corsHeaders7);
       case "sync-sources":
-        return await syncContentSources(request, corsHeaders6);
+        return await syncContentSources(request, corsHeaders7);
       case "moderation":
-        return await moderateContent(request, corsHeaders6);
+        return await moderateContent(request, corsHeaders7);
       case "fact-check":
-        return await factCheckContent(request, corsHeaders6);
+        return await factCheckContent(request, corsHeaders7);
       case "plagiarism-check":
-        return await checkPlagiarism(request, corsHeaders6);
+        return await checkPlagiarism(request, corsHeaders7);
       case "performance-analytics":
-        return await getPerformanceAnalytics2(request, corsHeaders6);
+        return await getPerformanceAnalytics2(request, corsHeaders7);
       default:
-        return await generateAdvancedContent2(request, corsHeaders6);
+        return await generateAdvancedContent2(request, corsHeaders7);
     }
   } catch (error) {
     console.error("Advanced AI API error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to process advanced AI request" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
-async function generateAdvancedContent2(request, corsHeaders6) {
+async function generateAdvancedContent2(request, corsHeaders7) {
   try {
     const body = await request.json();
     const { prompt, category, tone, length, targetAudience, keywords, includeImages, includeVideos } = body;
     if (!prompt) {
       return new Response(
         JSON.stringify({ error: "Prompt is required" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     await new Promise((resolve) => setTimeout(resolve, 3e3));
@@ -6391,24 +6579,24 @@ async function generateAdvancedContent2(request, corsHeaders6) {
       }
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Failed to generate advanced content" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(generateAdvancedContent2, "generateAdvancedContent");
-async function analyzeStory2(request, corsHeaders6) {
+async function analyzeStory2(request, corsHeaders7) {
   try {
     const body = await request.json();
     const { content, title, category, author } = body;
     if (!content) {
       return new Response(
         JSON.stringify({ error: "Content is required for analysis" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     await new Promise((resolve) => setTimeout(resolve, 2500));
@@ -6420,17 +6608,17 @@ async function analyzeStory2(request, corsHeaders6) {
       model: "Advanced AI Analysis v2.0"
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Failed to analyze story" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(analyzeStory2, "analyzeStory");
-async function getTrendingTopics3(request, corsHeaders6) {
+async function getTrendingTopics3(request, corsHeaders7) {
   try {
     await new Promise((resolve) => setTimeout(resolve, 1e3));
     const topics = generateAdvancedTrendingTopics2();
@@ -6442,17 +6630,17 @@ async function getTrendingTopics3(request, corsHeaders6) {
       nextUpdate: new Date(Date.now() + 60 * 60 * 1e3).toISOString()
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Failed to fetch trending topics" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(getTrendingTopics3, "getTrendingTopics");
-async function getPerformanceAnalytics2(request, corsHeaders6) {
+async function getPerformanceAnalytics2(request, corsHeaders7) {
   try {
     await new Promise((resolve) => setTimeout(resolve, 1500));
     const analytics = generatePerformanceAnalytics2();
@@ -6463,12 +6651,12 @@ async function getPerformanceAnalytics2(request, corsHeaders6) {
       dataRange: "Last 30 days"
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Failed to fetch performance analytics" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
@@ -6678,52 +6866,52 @@ function extractKeyTopics(content) {
 __name(extractKeyTopics, "extractKeyTopics");
 
 // api/ai-content.js
-var import_checked_fetch30 = __toESM(require_checked_fetch());
-var onRequest27 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch31 = __toESM(require_checked_fetch());
+var onRequest28 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
   if (request.method === "OPTIONS") {
-    return new Response(null, { status: 200, headers: corsHeaders6 });
+    return new Response(null, { status: 200, headers: corsHeaders7 });
   }
   try {
     const action = searchParams.get("action") || "generate";
     switch (action) {
       case "generate":
-        return await generateContent(request, corsHeaders6);
+        return await generateContent(request, corsHeaders7);
       case "analyze":
-        return await analyzeContent(request, corsHeaders6);
+        return await analyzeContent(request, corsHeaders7);
       case "suggest-tags":
-        return await suggestTags(request, corsHeaders6);
+        return await suggestTags(request, corsHeaders7);
       case "trending-topics":
-        return await getTrendingTopics(request, corsHeaders6);
+        return await getTrendingTopics(request, corsHeaders7);
       case "seo-optimize":
-        return await optimizeSEO(request, corsHeaders6);
+        return await optimizeSEO(request, corsHeaders7);
       case "fact-check":
-        return await factCheckContent(request, corsHeaders6);
+        return await factCheckContent(request, corsHeaders7);
       default:
-        return await generateContent(request, corsHeaders6);
+        return await generateContent(request, corsHeaders7);
     }
   } catch (error) {
     console.error("AI Content API error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to process AI request" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
-async function generateContent(request, corsHeaders6) {
+async function generateContent(request, corsHeaders7) {
   try {
     const body = await request.json();
     const { prompt, category, tone = "engaging", length = "medium" } = body;
     if (!prompt) {
       return new Response(
         JSON.stringify({ error: "Prompt is required" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     await new Promise((resolve) => setTimeout(resolve, 2e3));
@@ -6740,24 +6928,24 @@ async function generateContent(request, corsHeaders6) {
       }
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Failed to generate content" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(generateContent, "generateContent");
-async function analyzeContent(request, corsHeaders6) {
+async function analyzeContent(request, corsHeaders7) {
   try {
     const body = await request.json();
     const { content, title } = body;
     if (!content) {
       return new Response(
         JSON.stringify({ error: "Content is required for analysis" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -6768,64 +6956,64 @@ async function analyzeContent(request, corsHeaders6) {
       processedAt: (/* @__PURE__ */ new Date()).toISOString()
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Failed to analyze content" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(analyzeContent, "analyzeContent");
 
 // api/ai-content-complete.js
-var import_checked_fetch31 = __toESM(require_checked_fetch());
-var onRequest28 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch32 = __toESM(require_checked_fetch());
+var onRequest29 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
   if (request.method === "OPTIONS") {
-    return new Response(null, { status: 200, headers: corsHeaders6 });
+    return new Response(null, { status: 200, headers: corsHeaders7 });
   }
   try {
     const action = searchParams.get("action") || "generate";
     switch (action) {
       case "generate":
-        return await generateContent2(request, corsHeaders6);
+        return await generateContent2(request, corsHeaders7);
       case "analyze":
-        return await analyzeContent2(request, corsHeaders6);
+        return await analyzeContent2(request, corsHeaders7);
       case "suggest-tags":
-        return await suggestTags2(request, corsHeaders6);
+        return await suggestTags2(request, corsHeaders7);
       case "trending-topics":
-        return await getTrendingTopics4(request, corsHeaders6);
+        return await getTrendingTopics4(request, corsHeaders7);
       case "seo-optimize":
-        return await optimizeSEO3(request, corsHeaders6);
+        return await optimizeSEO3(request, corsHeaders7);
       case "fact-check":
-        return await factCheckContent3(request, corsHeaders6);
+        return await factCheckContent3(request, corsHeaders7);
       default:
-        return await generateContent2(request, corsHeaders6);
+        return await generateContent2(request, corsHeaders7);
     }
   } catch (error) {
     console.error("AI Content API error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to process AI request" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
-async function generateContent2(request, corsHeaders6) {
+async function generateContent2(request, corsHeaders7) {
   try {
     const body = await request.json();
     const { prompt, category, tone = "engaging", length = "medium" } = body;
     if (!prompt) {
       return new Response(
         JSON.stringify({ error: "Prompt is required" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     await new Promise((resolve) => setTimeout(resolve, 2e3));
@@ -6842,24 +7030,24 @@ async function generateContent2(request, corsHeaders6) {
       }
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Failed to generate content" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(generateContent2, "generateContent");
-async function analyzeContent2(request, corsHeaders6) {
+async function analyzeContent2(request, corsHeaders7) {
   try {
     const body = await request.json();
     const { content, title } = body;
     if (!content) {
       return new Response(
         JSON.stringify({ error: "Content is required for analysis" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -6870,24 +7058,24 @@ async function analyzeContent2(request, corsHeaders6) {
       processedAt: (/* @__PURE__ */ new Date()).toISOString()
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Failed to analyze content" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(analyzeContent2, "analyzeContent");
-async function suggestTags2(request, corsHeaders6) {
+async function suggestTags2(request, corsHeaders7) {
   try {
     const body = await request.json();
     const { content, title, category } = body;
     if (!content) {
       return new Response(
         JSON.stringify({ error: "Content is required for tag suggestions" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     await new Promise((resolve) => setTimeout(resolve, 1e3));
@@ -6900,17 +7088,17 @@ async function suggestTags2(request, corsHeaders6) {
       generatedAt: (/* @__PURE__ */ new Date()).toISOString()
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Failed to generate tags" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(suggestTags2, "suggestTags");
-async function getTrendingTopics4(request, corsHeaders6) {
+async function getTrendingTopics4(request, corsHeaders7) {
   try {
     await new Promise((resolve) => setTimeout(resolve, 800));
     const topics = generateTrendingTopics();
@@ -6921,24 +7109,24 @@ async function getTrendingTopics4(request, corsHeaders6) {
       source: "AI Analysis"
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Failed to fetch trending topics" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(getTrendingTopics4, "getTrendingTopics");
-async function optimizeSEO3(request, corsHeaders6) {
+async function optimizeSEO3(request, corsHeaders7) {
   try {
     const body = await request.json();
     const { content, title, targetKeywords = [] } = body;
     if (!content || !title) {
       return new Response(
         JSON.stringify({ error: "Content and title are required for SEO optimization" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     await new Promise((resolve) => setTimeout(resolve, 1200));
@@ -6949,24 +7137,24 @@ async function optimizeSEO3(request, corsHeaders6) {
       optimizedAt: (/* @__PURE__ */ new Date()).toISOString()
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Failed to optimize SEO" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(optimizeSEO3, "optimizeSEO");
-async function factCheckContent3(request, corsHeaders6) {
+async function factCheckContent3(request, corsHeaders7) {
   try {
     const body = await request.json();
     const { content } = body;
     if (!content) {
       return new Response(
         JSON.stringify({ error: "Content is required for fact checking" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     await new Promise((resolve) => setTimeout(resolve, 2e3));
@@ -6977,19 +7165,19 @@ async function factCheckContent3(request, corsHeaders6) {
       checkedAt: (/* @__PURE__ */ new Date()).toISOString()
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Failed to fact check content" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(factCheckContent3, "factCheckContent");
 
 // api/auth.js
-var import_checked_fetch32 = __toESM(require_checked_fetch());
+var import_checked_fetch33 = __toESM(require_checked_fetch());
 import crypto6 from "node:crypto";
 var encryptPassword3 = /* @__PURE__ */ __name((password, salt) => {
   const hash = crypto6.createHash("sha256");
@@ -7010,17 +7198,17 @@ var COMMON_PASSWORDS2 = /* @__PURE__ */ new Set([
   "letmein",
   "iloveyou"
 ]);
-var onRequest29 = /* @__PURE__ */ __name(async (context) => {
+var onRequest30 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const method = request.method;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
   if (method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders6 });
+    return new Response(null, { status: 204, headers: corsHeaders7 });
   }
   try {
     let action = searchParams.get("action") || "signin";
@@ -7041,7 +7229,7 @@ var onRequest29 = /* @__PURE__ */ __name(async (context) => {
       if (!email || !password || !name) {
         return new Response(
           JSON.stringify({ error: "Missing required fields" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const secretKey = env.TURNSTILE_SECRET_KEY;
@@ -7062,40 +7250,40 @@ var onRequest29 = /* @__PURE__ */ __name(async (context) => {
           if (!verifyData.success) {
             return new Response(
               JSON.stringify({ error: "Human verification failed. Please try again." }),
-              { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+              { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
             );
           }
         } catch (e) {
           console.error("Turnstile verification error:", e);
           return new Response(
             JSON.stringify({ error: "Unable to verify human check. Please try again." }),
-            { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+            { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
           );
         }
       } else if (secretKey && !turnstileToken) {
         return new Response(
           JSON.stringify({ error: "Human verification is required to create an account." }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const normalizedPassword = String(password).trim();
       if (normalizedPassword.length < 12) {
         return new Response(
           JSON.stringify({ error: "Password must be at least 12 characters long" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       if (COMMON_PASSWORDS2.has(normalizedPassword.toLowerCase())) {
         return new Response(
           JSON.stringify({ error: "Password is too common. Please choose a stronger password." }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const existingUser = await env.SPORTS_KV.get(`user:${email}`);
       if (existingUser) {
         return new Response(
           JSON.stringify({ error: "User already exists" }),
-          { status: 409, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 409, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const salt = generateSalt3();
@@ -7136,7 +7324,7 @@ var onRequest29 = /* @__PURE__ */ __name(async (context) => {
           headers: {
             "Content-Type": "application/json",
             "Set-Cookie": `auth_token=${token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=2592000`,
-            ...corsHeaders6
+            ...corsHeaders7
           }
         }
       );
@@ -7146,28 +7334,28 @@ var onRequest29 = /* @__PURE__ */ __name(async (context) => {
       if (!email || !password) {
         return new Response(
           JSON.stringify({ error: "Missing email or password" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const userData = await env.SPORTS_KV.get(`user:${email}`);
       if (!userData) {
         return new Response(
           JSON.stringify({ error: "Invalid credentials" }),
-          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const user = JSON.parse(userData);
       if (user.isBlocked) {
         return new Response(
           JSON.stringify({ error: "Your account has been blocked" }),
-          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const hashedPassword = encryptPassword3(password, user.salt);
       if (hashedPassword !== user.hashedPassword) {
         return new Response(
           JSON.stringify({ error: "Invalid credentials" }),
-          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const newToken = generateToken3();
@@ -7191,7 +7379,7 @@ var onRequest29 = /* @__PURE__ */ __name(async (context) => {
           headers: {
             "Content-Type": "application/json",
             "Set-Cookie": `auth_token=${newToken}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=2592000`,
-            ...corsHeaders6
+            ...corsHeaders7
           }
         }
       );
@@ -7201,14 +7389,14 @@ var onRequest29 = /* @__PURE__ */ __name(async (context) => {
       if (!token) {
         return new Response(
           JSON.stringify({ error: "No token provided" }),
-          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
       if (!tokenValue) {
         return new Response(
           JSON.stringify({ error: "Invalid or expired token" }),
-          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       let email = tokenValue;
@@ -7225,14 +7413,14 @@ var onRequest29 = /* @__PURE__ */ __name(async (context) => {
       if (!userData) {
         return new Response(
           JSON.stringify({ error: "User not found" }),
-          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const user = JSON.parse(userData);
       if (user.isBlocked) {
         return new Response(
           JSON.stringify({ error: "Account blocked" }),
-          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       return new Response(
@@ -7246,7 +7434,7 @@ var onRequest29 = /* @__PURE__ */ __name(async (context) => {
             // Include role field
           }
         }),
-        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (action === "signout" && method === "POST") {
@@ -7261,26 +7449,26 @@ var onRequest29 = /* @__PURE__ */ __name(async (context) => {
           headers: {
             "Content-Type": "application/json",
             "Set-Cookie": "auth_token=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0",
-            ...corsHeaders6
+            ...corsHeaders7
           }
         }
       );
     }
     return new Response(
       JSON.stringify({ error: "Not found" }),
-      { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Auth error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
 
 // api/content.js
-var import_checked_fetch33 = __toESM(require_checked_fetch());
+var import_checked_fetch34 = __toESM(require_checked_fetch());
 async function getBody(request) {
   if (request.method === "GET" || request.method === "HEAD") {
     return null;
@@ -7292,20 +7480,20 @@ async function getBody(request) {
   }
 }
 __name(getBody, "getBody");
-function verifyAdminToken5(request) {
+function verifyAdminToken6(request) {
   const authHeader = request.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return false;
   }
   return true;
 }
-__name(verifyAdminToken5, "verifyAdminToken");
+__name(verifyAdminToken6, "verifyAdminToken");
 var kv = globalThis.IPL_CACHE;
 var KV_KEY = "ipl:content";
-var onRequest30 = /* @__PURE__ */ __name(async (context) => {
+var onRequest31 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const kvNamespace = env.IPL_CACHE || kv;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type"
@@ -7313,7 +7501,7 @@ var onRequest30 = /* @__PURE__ */ __name(async (context) => {
   if (request.method === "OPTIONS") {
     return new Response(null, {
       status: 204,
-      headers: corsHeaders6
+      headers: corsHeaders7
     });
   }
   try {
@@ -7341,19 +7529,19 @@ var onRequest30 = /* @__PURE__ */ __name(async (context) => {
         status: 200,
         headers: {
           "Content-Type": "application/json",
-          ...corsHeaders6
+          ...corsHeaders7
         }
       });
     }
     if (request.method === "POST") {
-      if (!verifyAdminToken5(request)) {
+      if (!verifyAdminToken6(request)) {
         return new Response(
           JSON.stringify({ error: "Unauthorized" }),
           {
             status: 401,
             headers: {
               "Content-Type": "application/json",
-              ...corsHeaders6
+              ...corsHeaders7
             }
           }
         );
@@ -7366,7 +7554,7 @@ var onRequest30 = /* @__PURE__ */ __name(async (context) => {
             status: 400,
             headers: {
               "Content-Type": "application/json",
-              ...corsHeaders6
+              ...corsHeaders7
             }
           }
         );
@@ -7411,20 +7599,20 @@ var onRequest30 = /* @__PURE__ */ __name(async (context) => {
           status: 200,
           headers: {
             "Content-Type": "application/json",
-            ...corsHeaders6
+            ...corsHeaders7
           }
         }
       );
     }
     if (request.method === "PUT") {
-      if (!verifyAdminToken5(request)) {
+      if (!verifyAdminToken6(request)) {
         return new Response(
           JSON.stringify({ error: "Unauthorized" }),
           {
             status: 401,
             headers: {
               "Content-Type": "application/json",
-              ...corsHeaders6
+              ...corsHeaders7
             }
           }
         );
@@ -7437,7 +7625,7 @@ var onRequest30 = /* @__PURE__ */ __name(async (context) => {
             status: 400,
             headers: {
               "Content-Type": "application/json",
-              ...corsHeaders6
+              ...corsHeaders7
             }
           }
         );
@@ -7483,20 +7671,20 @@ var onRequest30 = /* @__PURE__ */ __name(async (context) => {
           status: 200,
           headers: {
             "Content-Type": "application/json",
-            ...corsHeaders6
+            ...corsHeaders7
           }
         }
       );
     }
     if (request.method === "DELETE") {
-      if (!verifyAdminToken5(request)) {
+      if (!verifyAdminToken6(request)) {
         return new Response(
           JSON.stringify({ error: "Unauthorized" }),
           {
             status: 401,
             headers: {
               "Content-Type": "application/json",
-              ...corsHeaders6
+              ...corsHeaders7
             }
           }
         );
@@ -7510,7 +7698,7 @@ var onRequest30 = /* @__PURE__ */ __name(async (context) => {
             status: 400,
             headers: {
               "Content-Type": "application/json",
-              ...corsHeaders6
+              ...corsHeaders7
             }
           }
         );
@@ -7545,7 +7733,7 @@ var onRequest30 = /* @__PURE__ */ __name(async (context) => {
           status: 200,
           headers: {
             "Content-Type": "application/json",
-            ...corsHeaders6
+            ...corsHeaders7
           }
         }
       );
@@ -7554,7 +7742,7 @@ var onRequest30 = /* @__PURE__ */ __name(async (context) => {
       status: 405,
       headers: {
         "Content-Type": "application/json",
-        ...corsHeaders6
+        ...corsHeaders7
       }
     });
   } catch (error) {
@@ -7565,7 +7753,7 @@ var onRequest30 = /* @__PURE__ */ __name(async (context) => {
         status: 500,
         headers: {
           "Content-Type": "application/json",
-          ...corsHeaders6
+          ...corsHeaders7
         }
       }
     );
@@ -7573,36 +7761,36 @@ var onRequest30 = /* @__PURE__ */ __name(async (context) => {
 }, "onRequest");
 
 // api/email-analytics.js
-var import_checked_fetch34 = __toESM(require_checked_fetch());
-var onRequest31 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch35 = __toESM(require_checked_fetch());
+var onRequest32 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
   const url = new URL(request.url);
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
   if (method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders6 });
+    return new Response(null, { status: 204, headers: corsHeaders7 });
   }
   try {
     if (url.pathname.includes("/webhooks/")) {
-      return await handleWebhook(request, env, corsHeaders6);
+      return await handleWebhook(request, env, corsHeaders7);
     }
     const authHeader = request.headers.get("Authorization") || "";
     const token = authHeader.replace("Bearer", "").trim();
     if (!token) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
     if (!tokenValue) {
       return new Response(
         JSON.stringify({ error: "Invalid token" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     let email = tokenValue;
@@ -7615,44 +7803,44 @@ var onRequest31 = /* @__PURE__ */ __name(async (context) => {
     }
     if (method === "GET") {
       const range = url.searchParams.get("range") || "30";
-      return await getAnalytics(email, range, env, corsHeaders6);
+      return await getAnalytics(email, range, env, corsHeaders7);
     }
     if (method === "POST") {
       const body = await request.json();
-      return await recordEvent(email, body, env, corsHeaders6);
+      return await recordEvent(email, body, env, corsHeaders7);
     }
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Email analytics error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
-async function handleWebhook(request, env, corsHeaders6) {
+async function handleWebhook(request, env, corsHeaders7) {
   try {
     const body = await request.json();
     const event = detectProvider(body);
     if (!event) {
       return new Response(
         JSON.stringify({ error: "Unknown provider" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     await storeAnalyticsEvent(event, env);
     return new Response(
       JSON.stringify({ success: true }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Webhook error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to process webhook" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
@@ -7744,7 +7932,7 @@ async function storeAnalyticsEvent(event, env) {
   }
 }
 __name(storeAnalyticsEvent, "storeAnalyticsEvent");
-async function getAnalytics(email, rangeParam, env, corsHeaders6) {
+async function getAnalytics(email, rangeParam, env, corsHeaders7) {
   try {
     const range = Math.min(parseInt(rangeParam) || 30, 365);
     const startDate = /* @__PURE__ */ new Date();
@@ -7774,24 +7962,24 @@ async function getAnalytics(email, rangeParam, env, corsHeaders6) {
         events: summaryData.events,
         lastUpdated: summaryData.lastUpdated
       }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Get analytics error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to get analytics" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(getAnalytics, "getAnalytics");
-async function recordEvent(email, body, env, corsHeaders6) {
+async function recordEvent(email, body, env, corsHeaders7) {
   try {
     const { eventType, matchId, action, metadata } = body;
     if (!eventType) {
       return new Response(
         JSON.stringify({ error: "eventType required" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const event = {
@@ -7808,50 +7996,50 @@ async function recordEvent(email, body, env, corsHeaders6) {
     });
     return new Response(
       JSON.stringify({ success: true, event }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Record event error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to record event" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(recordEvent, "recordEvent");
 
 // api/email-preferences.js
-var import_checked_fetch35 = __toESM(require_checked_fetch());
-var onRequest32 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch36 = __toESM(require_checked_fetch());
+var onRequest33 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { pathname } = new URL(request.url);
   const method = request.method;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
   if (method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders6 });
+    return new Response(null, { status: 204, headers: corsHeaders7 });
   }
   try {
     if (pathname.includes("/api/email-preferences/unsubscribe/")) {
       const token = pathname.split("/").pop();
-      return await handleUnsubscribe(token, env, corsHeaders6);
+      return await handleUnsubscribe(token, env, corsHeaders7);
     }
     const authHeader = request.headers.get("Authorization") || "";
     const authToken = authHeader.replace("Bearer", "").trim();
     if (!authToken) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const tokenValue = await env.SPORTS_KV.get(`token:${authToken}`);
     if (!tokenValue) {
       return new Response(
         JSON.stringify({ error: "Invalid token" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     let email = tokenValue;
@@ -7863,35 +8051,35 @@ var onRequest32 = /* @__PURE__ */ __name(async (context) => {
       }
     }
     if (method === "GET") {
-      return await getEmailPreferences(email, env, corsHeaders6);
+      return await getEmailPreferences(email, env, corsHeaders7);
     }
     if (method === "PUT") {
       const body = await request.json();
-      return await updateEmailPreferences(email, body, env, corsHeaders6);
+      return await updateEmailPreferences(email, body, env, corsHeaders7);
     }
     if (method === "DELETE") {
       const body = await request.json();
-      return await deletePreference(email, body, env, corsHeaders6);
+      return await deletePreference(email, body, env, corsHeaders7);
     }
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Email preferences error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error", details: error.message }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
-async function handleUnsubscribe(token, env, corsHeaders6) {
+async function handleUnsubscribe(token, env, corsHeaders7) {
   try {
     const unsubscribeData = await env.SPORTS_KV.get(`unsubscribe-token:${token}`);
     if (!unsubscribeData) {
       return new Response(
         JSON.stringify({ error: "Invalid or expired unsubscribe link" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const { email, category } = JSON.parse(unsubscribeData);
@@ -7899,7 +8087,7 @@ async function handleUnsubscribe(token, env, corsHeaders6) {
     if (!userData) {
       return new Response(
         JSON.stringify({ error: "User not found" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const user = JSON.parse(userData);
@@ -7919,24 +8107,24 @@ async function handleUnsubscribe(token, env, corsHeaders6) {
     await env.SPORTS_KV.delete(`unsubscribe-token:${token}`);
     return new Response(
       JSON.stringify({ success: true, message: "Successfully unsubscribed" }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Unsubscribe error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to process unsubscribe" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(handleUnsubscribe, "handleUnsubscribe");
-async function getEmailPreferences(email, env, corsHeaders6) {
+async function getEmailPreferences(email, env, corsHeaders7) {
   try {
     const userData = await env.SPORTS_KV.get(`user:${email}`);
     if (!userData) {
       return new Response(
         JSON.stringify({ error: "User not found" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const user = JSON.parse(userData);
@@ -7959,24 +8147,24 @@ async function getEmailPreferences(email, env, corsHeaders6) {
         timezone: user.timezone || "UTC",
         lastModified: user.preferencesModifiedAt || null
       }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Get preferences error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to get preferences" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(getEmailPreferences, "getEmailPreferences");
-async function updateEmailPreferences(email, body, env, corsHeaders6) {
+async function updateEmailPreferences(email, body, env, corsHeaders7) {
   try {
     const userData = await env.SPORTS_KV.get(`user:${email}`);
     if (!userData) {
       return new Response(
         JSON.stringify({ error: "User not found" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const user = JSON.parse(userData);
@@ -8022,25 +8210,25 @@ async function updateEmailPreferences(email, body, env, corsHeaders6) {
         message: "Preferences updated",
         preferences: user.emailPreferences
       }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Update preferences error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to update preferences" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(updateEmailPreferences, "updateEmailPreferences");
-async function deletePreference(email, body, env, corsHeaders6) {
+async function deletePreference(email, body, env, corsHeaders7) {
   try {
     const { category } = body;
     const userData = await env.SPORTS_KV.get(`user:${email}`);
     if (!userData) {
       return new Response(
         JSON.stringify({ error: "User not found" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const user = JSON.parse(userData);
@@ -8056,13 +8244,13 @@ async function deletePreference(email, body, env, corsHeaders6) {
     });
     return new Response(
       JSON.stringify({ success: true, message: `${category} disabled` }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Delete preference error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to delete preference" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
@@ -8081,36 +8269,36 @@ function getDefaultPreferences() {
 __name(getDefaultPreferences, "getDefaultPreferences");
 
 // api/email-queue.js
-var import_checked_fetch36 = __toESM(require_checked_fetch());
-var onRequest33 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch37 = __toESM(require_checked_fetch());
+var onRequest34 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
   const url = new URL(request.url);
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
   if (method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders6 });
+    return new Response(null, { status: 204, headers: corsHeaders7 });
   }
   try {
     if (url.pathname.includes("/admin/")) {
-      return await handleAdminRequest(request, env, method, corsHeaders6);
+      return await handleAdminRequest(request, env, method, corsHeaders7);
     }
     const authHeader = request.headers.get("Authorization") || "";
     const token = authHeader.replace("Bearer", "").trim();
     if (!token) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
     if (!tokenValue) {
       return new Response(
         JSON.stringify({ error: "Invalid token" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     let email = tokenValue;
@@ -8122,60 +8310,60 @@ var onRequest33 = /* @__PURE__ */ __name(async (context) => {
       }
     }
     if (method === "GET") {
-      return await getQueueStatus(email, env, corsHeaders6);
+      return await getQueueStatus(email, env, corsHeaders7);
     }
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Email queue error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
-async function handleAdminRequest(request, env, method, corsHeaders6) {
+async function handleAdminRequest(request, env, method, corsHeaders7) {
   try {
     const adminToken = request.headers.get("X-Admin-Token");
     if (adminToken !== env.ADMIN_EMAIL_TOKEN) {
       return new Response(
         JSON.stringify({ error: "Invalid admin token" }),
-        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const url = new URL(request.url);
     if (url.pathname.includes("/admin/queue")) {
       if (method === "GET") {
-        return await getFullQueue(env, corsHeaders6);
+        return await getFullQueue(env, corsHeaders7);
       } else if (method === "POST") {
-        return await processQueue(env, corsHeaders6);
+        return await processQueue(env, corsHeaders7);
       }
     }
     if (url.pathname.includes("/admin/retry")) {
       if (method === "POST") {
         const body = await request.json();
-        return await retryEmail(body.queueId, env, corsHeaders6);
+        return await retryEmail(body.queueId, env, corsHeaders7);
       }
     }
     if (url.pathname.includes("/admin/stats")) {
-      return await getQueueStats(env, corsHeaders6);
+      return await getQueueStats(env, corsHeaders7);
     }
     return new Response(
       JSON.stringify({ error: "Not found" }),
-      { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Admin request error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to process admin request" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(handleAdminRequest, "handleAdminRequest");
-async function getQueueStatus(email, env, corsHeaders6) {
+async function getQueueStatus(email, env, corsHeaders7) {
   try {
     const queueKey = `queue:${email}`;
     const queueData = await env.SPORTS_KV.get(queueKey);
@@ -8188,18 +8376,18 @@ async function getQueueStatus(email, env, corsHeaders6) {
         processed: queue.processed || 0,
         queue
       }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Get queue status error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to get queue status" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(getQueueStatus, "getQueueStatus");
-async function getFullQueue(env, corsHeaders6) {
+async function getFullQueue(env, corsHeaders7) {
   try {
     const queueStats = await env.SPORTS_KV.get("queue-stats");
     const stats = queueStats ? JSON.parse(queueStats) : {
@@ -8210,18 +8398,18 @@ async function getFullQueue(env, corsHeaders6) {
     };
     return new Response(
       JSON.stringify(stats),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Get full queue error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to get queue" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(getFullQueue, "getFullQueue");
-async function processQueue(env, corsHeaders6) {
+async function processQueue(env, corsHeaders7) {
   try {
     const maxRetries = 3;
     const baseDelay = 5 * 60 * 1e3;
@@ -8232,24 +8420,24 @@ async function processQueue(env, corsHeaders6) {
         processed,
         message: "Queue processed"
       }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Process queue error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to process queue" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(processQueue, "processQueue");
-async function retryEmail(queueId, env, corsHeaders6) {
+async function retryEmail(queueId, env, corsHeaders7) {
   try {
     const emailData = await env.SPORTS_KV.get(`queued-email:${queueId}`);
     if (!emailData) {
       return new Response(
         JSON.stringify({ error: "Email not found in queue" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const email = JSON.parse(emailData);
@@ -8262,18 +8450,18 @@ async function retryEmail(queueId, env, corsHeaders6) {
         message: `Email queued for retry (attempt ${email.retryCount})`,
         email
       }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Retry email error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to retry email" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(retryEmail, "retryEmail");
-async function getQueueStats(env, corsHeaders6) {
+async function getQueueStats(env, corsHeaders7) {
   try {
     const stats = await env.SPORTS_KV.get("queue-stats");
     const queueStats = stats ? JSON.parse(stats) : {
@@ -8285,31 +8473,31 @@ async function getQueueStats(env, corsHeaders6) {
     };
     return new Response(
       JSON.stringify(queueStats),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Get queue stats error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to get stats" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(getQueueStats, "getQueueStats");
 
 // api/email-segmentation.js
-var import_checked_fetch37 = __toESM(require_checked_fetch());
-var onRequest34 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch38 = __toESM(require_checked_fetch());
+var onRequest35 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
   const url = new URL(request.url);
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
   if (method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders6 });
+    return new Response(null, { status: 204, headers: corsHeaders7 });
   }
   try {
     const authHeader = request.headers.get("Authorization") || "";
@@ -8317,14 +8505,14 @@ var onRequest34 = /* @__PURE__ */ __name(async (context) => {
     if (!token) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
     if (!tokenValue) {
       return new Response(
         JSON.stringify({ error: "Invalid token" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     let email = tokenValue;
@@ -8336,38 +8524,38 @@ var onRequest34 = /* @__PURE__ */ __name(async (context) => {
       }
     }
     if (method === "GET" && url.pathname.includes("/segment")) {
-      return await getUserSegment(email, env, corsHeaders6);
+      return await getUserSegment(email, env, corsHeaders7);
     }
     if (method === "POST" && url.pathname.includes("/track")) {
       const body = await request.json();
-      return await trackEngagement(email, body, env, corsHeaders6);
+      return await trackEngagement(email, body, env, corsHeaders7);
     }
     if (method === "GET" && url.pathname.includes("/personalization")) {
-      return await getPersonalization(email, env, corsHeaders6);
+      return await getPersonalization(email, env, corsHeaders7);
     }
     if (method === "PUT") {
       const body = await request.json();
-      return await updateEngagementHistory(email, body, env, corsHeaders6);
+      return await updateEngagementHistory(email, body, env, corsHeaders7);
     }
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("User segmentation error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
-async function getUserSegment(email, env, corsHeaders6) {
+async function getUserSegment(email, env, corsHeaders7) {
   try {
     const userData = await env.SPORTS_KV.get(`user:${email}`);
     if (!userData) {
       return new Response(
         JSON.stringify({ error: "User not found" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const user = JSON.parse(userData);
@@ -8387,13 +8575,13 @@ async function getUserSegment(email, env, corsHeaders6) {
         engagement: engagementData,
         recommendations: getSegmentRecommendations(segment)
       }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Get user segment error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to get segment" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
@@ -8506,7 +8694,7 @@ function getSegmentRecommendations(segment) {
   return recommendations[segment.name] || [];
 }
 __name(getSegmentRecommendations, "getSegmentRecommendations");
-async function trackEngagement(email, body, env, corsHeaders6) {
+async function trackEngagement(email, body, env, corsHeaders7) {
   try {
     const { eventType, matchId, duration, metadata } = body;
     const engagementKey = `engagement:${email}`;
@@ -8561,24 +8749,24 @@ async function trackEngagement(email, body, env, corsHeaders6) {
         eventType,
         engagement
       }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Track engagement error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to track engagement" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(trackEngagement, "trackEngagement");
-async function getPersonalization(email, env, corsHeaders6) {
+async function getPersonalization(email, env, corsHeaders7) {
   try {
     const userData = await env.SPORTS_KV.get(`user:${email}`);
     if (!userData) {
       return new Response(
         JSON.stringify({ error: "User not found" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const user = JSON.parse(userData);
@@ -8607,13 +8795,13 @@ async function getPersonalization(email, env, corsHeaders6) {
         segment,
         personalization
       }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Get personalization error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to get personalization" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
@@ -8641,13 +8829,13 @@ function getRecommendedTeams(user, engagement) {
   }));
 }
 __name(getRecommendedTeams, "getRecommendedTeams");
-async function updateEngagementHistory(email, body, env, corsHeaders6) {
+async function updateEngagementHistory(email, body, env, corsHeaders7) {
   try {
     const { events } = body;
     if (!Array.isArray(events)) {
       return new Response(
         JSON.stringify({ error: "events must be an array" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const engagementKey = `engagement:${email}`;
@@ -8692,81 +8880,81 @@ async function updateEngagementHistory(email, body, env, corsHeaders6) {
         success: true,
         engagement
       }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Update engagement error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to update engagement" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(updateEngagementHistory, "updateEngagementHistory");
 
 // api/email-service.js
-var import_checked_fetch38 = __toESM(require_checked_fetch());
-var onRequest35 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch39 = __toESM(require_checked_fetch());
+var onRequest36 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
   if (method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders6 });
+    return new Response(null, { status: 204, headers: corsHeaders7 });
   }
   if (method !== "POST") {
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
   try {
     const body = await request.json();
     const { action } = body;
     if (action === "send-match-reminder") {
-      return await sendMatchReminder(body, env, corsHeaders6);
+      return await sendMatchReminder(body, env, corsHeaders7);
     } else if (action === "send-email") {
-      return await sendEmail(body, env, corsHeaders6);
+      return await sendEmail(body, env, corsHeaders7);
     } else if (action === "send-batch") {
-      return await sendBatchEmails(body, env, corsHeaders6);
+      return await sendBatchEmails(body, env, corsHeaders7);
     } else {
       return new Response(
         JSON.stringify({ error: "Invalid action" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
   } catch (error) {
     console.error("Email service error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error", details: error.message }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
-async function sendMatchReminder(body, env, corsHeaders6) {
+async function sendMatchReminder(body, env, corsHeaders7) {
   try {
     const { email, matchId, team1, team2, venue, time, date } = body;
     if (!email || !matchId || !team1 || !team2) {
       return new Response(
         JSON.stringify({ error: "Missing required fields" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const userData = await env.SPORTS_KV.get(`user:${email}`);
     if (!userData) {
       return new Response(
         JSON.stringify({ error: "User not found" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const user = JSON.parse(userData);
     if (!user.termsAccepted || !user.emailNotificationsEnabled) {
       return new Response(
         JSON.stringify({ error: "User has not opted in for notifications" }),
-        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     let htmlContent = generateMatchReminderHTML(team1, team2, venue, time, date);
@@ -8805,7 +8993,7 @@ async function sendMatchReminder(body, env, corsHeaders6) {
       );
       return new Response(
         JSON.stringify({ success: true, message: "Email sent successfully", messageId: emailResult.messageId }),
-        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     } else {
       throw new Error(`Email provider error: ${emailResult.error}`);
@@ -8814,18 +9002,18 @@ async function sendMatchReminder(body, env, corsHeaders6) {
     console.error("Send match reminder error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to send email", details: error.message }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
 __name(sendMatchReminder, "sendMatchReminder");
-async function sendEmail(body, env, corsHeaders6) {
+async function sendEmail(body, env, corsHeaders7) {
   try {
     const { to, subject, html } = body;
     if (!to || !subject || !html) {
       return new Response(
         JSON.stringify({ error: "Missing required fields (to, subject, html)" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const emailResult = await sendEmailViaProvider2(
@@ -8840,7 +9028,7 @@ async function sendEmail(body, env, corsHeaders6) {
     if (emailResult.success) {
       return new Response(
         JSON.stringify({ success: true, messageId: emailResult.messageId }),
-        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     } else {
       throw new Error(`Email provider error: ${emailResult.error}`);
@@ -8849,7 +9037,7 @@ async function sendEmail(body, env, corsHeaders6) {
     console.error("Send email error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to send email", details: error.message }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
@@ -9394,13 +9582,13 @@ function generateMatchReminderHTML(team1, team2, venue, time, date) {
 `;
 }
 __name(generateMatchReminderHTML, "generateMatchReminderHTML");
-async function sendBatchEmails(body, env, corsHeaders6) {
+async function sendBatchEmails(body, env, corsHeaders7) {
   try {
     const { emails } = body;
     if (!Array.isArray(emails) || emails.length === 0) {
       return new Response(
         JSON.stringify({ error: "emails must be a non-empty array" }),
-        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const results = [];
@@ -9417,13 +9605,13 @@ async function sendBatchEmails(body, env, corsHeaders6) {
         failed,
         results
       }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Send batch error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to send batch" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }
@@ -9502,8 +9690,8 @@ async function sendPersonalizedEmail(emailData, env) {
 __name(sendPersonalizedEmail, "sendPersonalizedEmail");
 
 // api/enrichDescription.js
-var import_checked_fetch39 = __toESM(require_checked_fetch());
-async function onRequest36(context) {
+var import_checked_fetch40 = __toESM(require_checked_fetch());
+async function onRequest37(context) {
   const { request } = context;
   try {
     let teamName = "";
@@ -9538,15 +9726,15 @@ async function onRequest36(context) {
     return new Response(JSON.stringify({ error: "internal error" }), { status: 500, headers: { "Content-Type": "application/json" } });
   }
 }
-__name(onRequest36, "onRequest");
+__name(onRequest37, "onRequest");
 
 // api/geocoding.js
-var import_checked_fetch40 = __toESM(require_checked_fetch());
-var onRequest37 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch41 = __toESM(require_checked_fetch());
+var onRequest38 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("query");
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
@@ -9554,13 +9742,13 @@ var onRequest37 = /* @__PURE__ */ __name(async (context) => {
   if (request.method === "OPTIONS") {
     return new Response(null, {
       status: 200,
-      headers: corsHeaders6
+      headers: corsHeaders7
     });
   }
   if (!query) {
     return new Response(
       JSON.stringify({ error: "Query parameter required" }),
-      { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
   try {
@@ -9586,13 +9774,13 @@ var onRequest37 = /* @__PURE__ */ __name(async (context) => {
     ).slice(0, 5);
     return new Response(JSON.stringify({ results: uniqueResults }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     console.error("Geocoding error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to search venues" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
@@ -9637,11 +9825,11 @@ async function searchNominatim(query) {
 __name(searchNominatim, "searchNominatim");
 
 // api/legal.js
-var import_checked_fetch41 = __toESM(require_checked_fetch());
-var onRequest38 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch42 = __toESM(require_checked_fetch());
+var onRequest39 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, PUT, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
@@ -9649,7 +9837,7 @@ var onRequest38 = /* @__PURE__ */ __name(async (context) => {
   if (method === "OPTIONS") {
     return new Response(null, {
       status: 200,
-      headers: corsHeaders6
+      headers: corsHeaders7
     });
   }
   const url = new URL(request.url);
@@ -9660,20 +9848,20 @@ var onRequest38 = /* @__PURE__ */ __name(async (context) => {
       if (!env || !env.SPORTS_KV) {
         return new Response(
           JSON.stringify({ error: "KV not configured", content: null }),
-          { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const stored = await env.SPORTS_KV.get(key, "json");
       return new Response(
         JSON.stringify({ page, content: stored?.content || null, updatedAt: stored?.updatedAt || null }),
-        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (method === "PUT") {
       if (!env || !env.SPORTS_KV) {
         return new Response(
           JSON.stringify({ error: "KV not configured" }),
-          { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const authHeader = request.headers.get("Authorization") || request.headers.get("authorization");
@@ -9681,14 +9869,14 @@ var onRequest38 = /* @__PURE__ */ __name(async (context) => {
       if (!token) {
         return new Response(
           JSON.stringify({ error: "Unauthorized" }),
-          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
       if (!tokenValue) {
         return new Response(
           JSON.stringify({ error: "Invalid token" }),
-          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       let email = tokenValue;
@@ -9705,14 +9893,14 @@ var onRequest38 = /* @__PURE__ */ __name(async (context) => {
       if (!userData) {
         return new Response(
           JSON.stringify({ error: "User not found" }),
-          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const user = JSON.parse(userData);
       if (user.role !== "admin" && user.role !== "super_admin") {
         return new Response(
           JSON.stringify({ error: "Forbidden" }),
-          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const body = await request.json();
@@ -9725,25 +9913,25 @@ var onRequest38 = /* @__PURE__ */ __name(async (context) => {
       await env.SPORTS_KV.put(key, JSON.stringify(record));
       return new Response(
         JSON.stringify({ success: true, page, content: record.content, updatedAt: record.updatedAt }),
-        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Legal API error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
 
 // api/live-score.js
-var import_checked_fetch42 = __toESM(require_checked_fetch());
-var onRequest39 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch43 = __toESM(require_checked_fetch());
+var onRequest40 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const method = request.method;
@@ -9885,7 +10073,7 @@ var onRequest39 = /* @__PURE__ */ __name(async (context) => {
 }, "onRequest");
 
 // api/matches.js
-var import_checked_fetch43 = __toESM(require_checked_fetch());
+var import_checked_fetch44 = __toESM(require_checked_fetch());
 var mockTeams = [
   // IPL Teams (IDs 1-10)
   {
@@ -10010,14 +10198,14 @@ var mockTeams = [
     colors: { primary: "#059669", secondary: "#F97316" }
   }
 ];
-function verifyAdminToken6(request) {
+function verifyAdminToken7(request) {
   const authHeader = request.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return false;
   }
   return true;
 }
-__name(verifyAdminToken6, "verifyAdminToken");
+__name(verifyAdminToken7, "verifyAdminToken");
 function getTeamById(teamId, teams) {
   const team = teams.find((t) => t.id === teamId);
   if (team) return team;
@@ -10147,7 +10335,7 @@ async function handleGetRequest(context) {
 __name(handleGetRequest, "handleGetRequest");
 async function handlePostRequest(context) {
   const { env, request } = context;
-  if (!verifyAdminToken6(request)) {
+  if (!verifyAdminToken7(request)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" }
@@ -10202,7 +10390,7 @@ async function handlePostRequest(context) {
 __name(handlePostRequest, "handlePostRequest");
 async function handlePutRequest(context) {
   const { env, request } = context;
-  if (!verifyAdminToken6(request)) {
+  if (!verifyAdminToken7(request)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" }
@@ -10268,7 +10456,7 @@ async function handlePutRequest(context) {
 __name(handlePutRequest, "handlePutRequest");
 async function handleDeleteRequest(context) {
   const { env, request } = context;
-  if (!verifyAdminToken6(request)) {
+  if (!verifyAdminToken7(request)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" }
@@ -10327,7 +10515,7 @@ async function handleDeleteRequest(context) {
   }
 }
 __name(handleDeleteRequest, "handleDeleteRequest");
-async function onRequest40(context) {
+async function onRequest41(context) {
   const { request } = context;
   const method = request.method;
   if (method === "OPTIONS") {
@@ -10365,10 +10553,10 @@ async function onRequest40(context) {
   response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
   return response;
 }
-__name(onRequest40, "onRequest");
+__name(onRequest41, "onRequest");
 
 // api/messages.js
-var import_checked_fetch44 = __toESM(require_checked_fetch());
+var import_checked_fetch45 = __toESM(require_checked_fetch());
 function getModerationFlagsForText(text) {
   const normalized = text.trim().toLowerCase();
   const badWords = ["idiot", "stupid", "hate"];
@@ -10387,11 +10575,11 @@ function getModerationFlagsForText(text) {
   return { isFlagged, flagReason, flagStatus, flaggedAt, flagDetails };
 }
 __name(getModerationFlagsForText, "getModerationFlagsForText");
-var onRequest41 = /* @__PURE__ */ __name(async (context) => {
+var onRequest42 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { pathname, searchParams } = new URL(request.url);
   const method = request.method;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
@@ -10399,7 +10587,7 @@ var onRequest41 = /* @__PURE__ */ __name(async (context) => {
   if (method === "OPTIONS") {
     return new Response(null, {
       status: 200,
-      headers: corsHeaders6
+      headers: corsHeaders7
     });
   }
   try {
@@ -10412,7 +10600,7 @@ var onRequest41 = /* @__PURE__ */ __name(async (context) => {
       if (!messagesData) {
         return new Response(JSON.stringify([]), {
           status: 200,
-          headers: { "Content-Type": "application/json", ...corsHeaders6 }
+          headers: { "Content-Type": "application/json", ...corsHeaders7 }
         });
       }
       let messages = JSON.parse(messagesData);
@@ -10422,7 +10610,7 @@ var onRequest41 = /* @__PURE__ */ __name(async (context) => {
       );
       return new Response(JSON.stringify(messages), {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders6 }
+        headers: { "Content-Type": "application/json", ...corsHeaders7 }
       });
     }
     if (pathname === "/api/messages" && method === "POST") {
@@ -10430,14 +10618,14 @@ var onRequest41 = /* @__PURE__ */ __name(async (context) => {
       if (!token) {
         return new Response(
           JSON.stringify({ error: "Unauthorized" }),
-          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
       if (!tokenValue) {
         return new Response(
           JSON.stringify({ error: "Invalid token" }),
-          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       let email = tokenValue;
@@ -10455,20 +10643,20 @@ var onRequest41 = /* @__PURE__ */ __name(async (context) => {
       if (user.isBlocked) {
         return new Response(
           JSON.stringify({ error: "Your account is blocked" }),
-          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const { matchId = "current", text } = await request.json();
       if (!text || text.trim().length === 0) {
         return new Response(
           JSON.stringify({ error: "Message cannot be empty" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       if (text.length > 500) {
         return new Response(
           JSON.stringify({ error: "Message too long (max 500 chars)" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const messagesKey = `messages:${matchId}`;
@@ -10494,7 +10682,7 @@ var onRequest41 = /* @__PURE__ */ __name(async (context) => {
       });
       return new Response(JSON.stringify({ success: true, message }), {
         status: 201,
-        headers: { "Content-Type": "application/json", ...corsHeaders6 }
+        headers: { "Content-Type": "application/json", ...corsHeaders7 }
       });
     }
     if (pathname.startsWith("/api/messages/") && method === "DELETE") {
@@ -10503,14 +10691,14 @@ var onRequest41 = /* @__PURE__ */ __name(async (context) => {
       if (!token) {
         return new Response(
           JSON.stringify({ error: "Unauthorized" }),
-          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
       if (!tokenValue) {
         return new Response(
           JSON.stringify({ error: "Invalid token" }),
-          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       let email = tokenValue;
@@ -10528,7 +10716,7 @@ var onRequest41 = /* @__PURE__ */ __name(async (context) => {
       if (user.role !== "admin" && user.role !== "super_admin") {
         return new Response(
           JSON.stringify({ error: "Forbidden" }),
-          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const matchId = searchParams.get("matchId") || "current";
@@ -10541,24 +10729,24 @@ var onRequest41 = /* @__PURE__ */ __name(async (context) => {
       });
       return new Response(JSON.stringify({ success: true }), {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders6 }
+        headers: { "Content-Type": "application/json", ...corsHeaders7 }
       });
     }
     return new Response(
       JSON.stringify({ error: "Not found" }),
-      { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Messages error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
 
 // api/notifications.js
-var import_checked_fetch45 = __toESM(require_checked_fetch());
+var import_checked_fetch46 = __toESM(require_checked_fetch());
 var mockTeams2 = [
   { id: "1", name: "Royal Challengers Bengaluru", shortName: "RCB" },
   { id: "2", name: "Mumbai Indians", shortName: "MI" },
@@ -10635,29 +10823,29 @@ function getTeamMeta(teamId, teamObj) {
   };
 }
 __name(getTeamMeta, "getTeamMeta");
-var onRequest42 = /* @__PURE__ */ __name(async (context) => {
+var onRequest43 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
   const url = new URL(request.url);
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
   if (method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders6 });
+    return new Response(null, { status: 204, headers: corsHeaders7 });
   }
   if (method !== "GET") {
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
   try {
     if (!env || !env.SPORTS_KV || !env.IPL_CACHE) {
       return new Response(
         JSON.stringify({ error: "KV not configured" }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const authHeader = request.headers.get("Authorization") || "";
@@ -10665,14 +10853,14 @@ var onRequest42 = /* @__PURE__ */ __name(async (context) => {
     if (!token) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
     if (!tokenValue) {
       return new Response(
         JSON.stringify({ error: "Invalid token" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     let email = tokenValue;
@@ -10689,7 +10877,7 @@ var onRequest42 = /* @__PURE__ */ __name(async (context) => {
     if (!userData) {
       return new Response(
         JSON.stringify({ error: "User not found" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const user = JSON.parse(userData);
@@ -10697,7 +10885,7 @@ var onRequest42 = /* @__PURE__ */ __name(async (context) => {
     if (favoriteTeamIds.length === 0) {
       return new Response(
         JSON.stringify({ notifications: [], windowHours: 48 }),
-        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     let matches = await env.IPL_CACHE.get("matches", "json");
@@ -10810,32 +10998,32 @@ var onRequest42 = /* @__PURE__ */ __name(async (context) => {
     const notifications = [...matchReminderNotifications, ...liveChatNotifications];
     return new Response(
       JSON.stringify({ notifications, windowHours }),
-      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Notifications error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
 
 // api/players.js
-var import_checked_fetch46 = __toESM(require_checked_fetch());
-var corsHeaders4 = {
+var import_checked_fetch47 = __toESM(require_checked_fetch());
+var corsHeaders5 = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization"
 };
-function verifyAdminToken7(request) {
+function verifyAdminToken8(request) {
   const authHeader = request.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return false;
   }
   return true;
 }
-__name(verifyAdminToken7, "verifyAdminToken");
+__name(verifyAdminToken8, "verifyAdminToken");
 async function getTeamNameById(players, teamId, league, env) {
   try {
     const teamsData = await env.IPL_CACHE.get("teams", "json");
@@ -10847,10 +11035,10 @@ async function getTeamNameById(players, teamId, league, env) {
   }
 }
 __name(getTeamNameById, "getTeamNameById");
-var onRequest43 = /* @__PURE__ */ __name(async (context) => {
+var onRequest44 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   if (request.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders4 });
+    return new Response(null, { status: 204, headers: corsHeaders5 });
   }
   try {
     if (request.method === "GET") {
@@ -10963,7 +11151,7 @@ var onRequest43 = /* @__PURE__ */ __name(async (context) => {
           const teamId = String(p.teamId || "").trim();
           return playerLeague === "ipl" || ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"].includes(teamId) && playerLeague !== "wpl";
         });
-        const wplPlayers2 = players.filter((p) => {
+        const wplPlayers3 = players.filter((p) => {
           const playerLeague = p.league || "ipl";
           const teamId = String(p.teamId || "").trim();
           return playerLeague === "wpl" || ["11", "12", "13", "14", "15"].includes(teamId);
@@ -10980,7 +11168,7 @@ var onRequest43 = /* @__PURE__ */ __name(async (context) => {
           summary: {
             total: players.length,
             ipl: iplPlayers.length,
-            wpl: wplPlayers2.length,
+            wpl: wplPlayers3.length,
             unknown: unknownPlayers.length
           },
           iplPlayers: iplPlayers.map((p) => ({
@@ -10990,7 +11178,7 @@ var onRequest43 = /* @__PURE__ */ __name(async (context) => {
             league: p.league || "ipl",
             role: p.role
           })),
-          wplPlayers: wplPlayers2.map((p) => ({
+          wplPlayers: wplPlayers3.map((p) => ({
             id: p.id,
             name: p.name,
             teamId: p.teamId,
@@ -11007,13 +11195,13 @@ var onRequest43 = /* @__PURE__ */ __name(async (context) => {
           rawCount: players.length
         }, null, 2), {
           status: 200,
-          headers: { "Content-Type": "application/json", ...corsHeaders4 }
+          headers: { "Content-Type": "application/json", ...corsHeaders5 }
         });
       }
-      const wplPlayers = players.filter((p) => (p.league || "ipl") === "wpl" || ["11", "12", "13", "14", "15"].includes(String(p.teamId)));
-      console.log(`WPL-related players found: ${wplPlayers.length}`);
-      if (wplPlayers.length > 0) {
-        console.log("Sample WPL players:", wplPlayers.slice(0, 3).map((p) => ({
+      const wplPlayers2 = players.filter((p) => (p.league || "ipl") === "wpl" || ["11", "12", "13", "14", "15"].includes(String(p.teamId)));
+      console.log(`WPL-related players found: ${wplPlayers2.length}`);
+      if (wplPlayers2.length > 0) {
+        console.log("Sample WPL players:", wplPlayers2.slice(0, 3).map((p) => ({
           name: p.name,
           teamId: p.teamId,
           league: p.league
@@ -11118,7 +11306,7 @@ var onRequest43 = /* @__PURE__ */ __name(async (context) => {
       }
       return new Response(JSON.stringify(players), {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders4 }
+        headers: { "Content-Type": "application/json", ...corsHeaders5 }
       });
     }
     if (request.method === "POST") {
@@ -11136,7 +11324,7 @@ var onRequest43 = /* @__PURE__ */ __name(async (context) => {
             player: players2[ellyseIndex]
           }), {
             status: 200,
-            headers: { "Content-Type": "application/json", ...corsHeaders4 }
+            headers: { "Content-Type": "application/json", ...corsHeaders5 }
           });
         } else {
           return new Response(JSON.stringify({
@@ -11144,21 +11332,21 @@ var onRequest43 = /* @__PURE__ */ __name(async (context) => {
             message: "Ellyse Perry not found"
           }), {
             status: 404,
-            headers: { "Content-Type": "application/json", ...corsHeaders4 }
+            headers: { "Content-Type": "application/json", ...corsHeaders5 }
           });
         }
       }
-      if (!verifyAdminToken7(request)) {
+      if (!verifyAdminToken8(request)) {
         return new Response(JSON.stringify({ error: "Unauthorized" }), {
           status: 401,
-          headers: { "Content-Type": "application/json", ...corsHeaders4 }
+          headers: { "Content-Type": "application/json", ...corsHeaders5 }
         });
       }
       const newPlayer = body;
       if (!newPlayer.name || !newPlayer.role || !newPlayer.teamId) {
         return new Response(JSON.stringify({ error: "Missing required fields: name, role, teamId" }), {
           status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders4 }
+          headers: { "Content-Type": "application/json", ...corsHeaders5 }
         });
       }
       const playersData = await env.IPL_CACHE.get("players", "json");
@@ -11173,7 +11361,7 @@ var onRequest43 = /* @__PURE__ */ __name(async (context) => {
           error: 'Player "' + newPlayer.name + '" already exists in ' + existingTeamName + " for " + playerLeague.toUpperCase() + ". A player cannot play for multiple teams in the same league."
         }), {
           status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders4 }
+          headers: { "Content-Type": "application/json", ...corsHeaders5 }
         });
       }
       if (playerLeague === "ipl") {
@@ -11185,7 +11373,7 @@ var onRequest43 = /* @__PURE__ */ __name(async (context) => {
             error: "IPL teams cannot have more than 25 players. This team already has " + existingTeamPlayers.length + " players."
           }), {
             status: 400,
-            headers: { "Content-Type": "application/json", ...corsHeaders4 }
+            headers: { "Content-Type": "application/json", ...corsHeaders5 }
           });
         }
       } else if (playerLeague === "wpl") {
@@ -11197,7 +11385,7 @@ var onRequest43 = /* @__PURE__ */ __name(async (context) => {
             error: "WPL teams cannot have more than 18 players. This team already has " + existingTeamPlayers.length + " players."
           }), {
             status: 400,
-            headers: { "Content-Type": "application/json", ...corsHeaders4 }
+            headers: { "Content-Type": "application/json", ...corsHeaders5 }
           });
         }
       }
@@ -11240,7 +11428,7 @@ var onRequest43 = /* @__PURE__ */ __name(async (context) => {
       await env.IPL_CACHE.put("players", JSON.stringify(players));
       return new Response(JSON.stringify(playerToAdd), {
         status: 201,
-        headers: { "Content-Type": "application/json", ...corsHeaders4 }
+        headers: { "Content-Type": "application/json", ...corsHeaders5 }
       });
     }
     if (request.method === "PUT") {
@@ -11254,20 +11442,20 @@ var onRequest43 = /* @__PURE__ */ __name(async (context) => {
           await env.IPL_CACHE.put("players", JSON.stringify(players2));
           return new Response(JSON.stringify(players2[index2]), {
             status: 200,
-            headers: { "Content-Type": "application/json", ...corsHeaders4 }
+            headers: { "Content-Type": "application/json", ...corsHeaders5 }
           });
         }
       }
-      if (!verifyAdminToken7(request)) {
+      if (!verifyAdminToken8(request)) {
         return new Response(JSON.stringify({ error: "Unauthorized" }), {
           status: 401,
-          headers: { "Content-Type": "application/json", ...corsHeaders4 }
+          headers: { "Content-Type": "application/json", ...corsHeaders5 }
         });
       }
       if (!updatedPlayer.id) {
         return new Response(JSON.stringify({ error: "Player ID is required" }), {
           status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders4 }
+          headers: { "Content-Type": "application/json", ...corsHeaders5 }
         });
       }
       const playersData = await env.IPL_CACHE.get("players", "json");
@@ -11276,7 +11464,7 @@ var onRequest43 = /* @__PURE__ */ __name(async (context) => {
       if (index === -1) {
         return new Response(JSON.stringify({ error: "Player not found" }), {
           status: 404,
-          headers: { "Content-Type": "application/json", ...corsHeaders4 }
+          headers: { "Content-Type": "application/json", ...corsHeaders5 }
         });
       }
       const playerLeague = updatedPlayer.league || players[index].league || "ipl";
@@ -11290,7 +11478,7 @@ var onRequest43 = /* @__PURE__ */ __name(async (context) => {
           error: 'Player "' + updatedPlayer.name + '" already exists in ' + existingTeamName + " for " + playerLeague.toUpperCase() + ". A player cannot play for multiple teams in the same league."
         }), {
           status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders4 }
+          headers: { "Content-Type": "application/json", ...corsHeaders5 }
         });
       }
       const runs = updatedPlayer.stats?.runs !== void 0 ? parseInt(updatedPlayer.stats.runs) || 0 : players[index].stats?.runs || 0;
@@ -11435,14 +11623,14 @@ var onRequest43 = /* @__PURE__ */ __name(async (context) => {
       });
       return new Response(JSON.stringify(players[index]), {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders4 }
+        headers: { "Content-Type": "application/json", ...corsHeaders5 }
       });
     }
     if (request.method === "DELETE") {
-      if (!verifyAdminToken7(request)) {
+      if (!verifyAdminToken8(request)) {
         return new Response(JSON.stringify({ error: "Unauthorized" }), {
           status: 401,
-          headers: { "Content-Type": "application/json", ...corsHeaders4 }
+          headers: { "Content-Type": "application/json", ...corsHeaders5 }
         });
       }
       const url = new URL(request.url);
@@ -11461,29 +11649,29 @@ var onRequest43 = /* @__PURE__ */ __name(async (context) => {
           deletedCount: totalCount
         }), {
           status: 200,
-          headers: { "Content-Type": "application/json", ...corsHeaders4 }
+          headers: { "Content-Type": "application/json", ...corsHeaders5 }
         });
       }
       if (deleteAllWPL === "true") {
         const playersData2 = await env.IPL_CACHE.get("players", "json");
         const players2 = playersData2 || [];
-        const wplPlayers = players2.filter((p) => (p.league || "ipl") === "wpl");
+        const wplPlayers2 = players2.filter((p) => (p.league || "ipl") === "wpl");
         const nonWPLPlayers = players2.filter((p) => (p.league || "ipl") !== "wpl");
-        console.log(`[BULK DELETE] Removing ${wplPlayers.length} WPL players`);
+        console.log(`[BULK DELETE] Removing ${wplPlayers2.length} WPL players`);
         await env.IPL_CACHE.put("players", JSON.stringify(nonWPLPlayers));
         return new Response(JSON.stringify({
           success: true,
-          message: `Deleted ${wplPlayers.length} WPL players`,
-          deletedCount: wplPlayers.length
+          message: `Deleted ${wplPlayers2.length} WPL players`,
+          deletedCount: wplPlayers2.length
         }), {
           status: 200,
-          headers: { "Content-Type": "application/json", ...corsHeaders4 }
+          headers: { "Content-Type": "application/json", ...corsHeaders5 }
         });
       }
       if (!playerId) {
         return new Response(JSON.stringify({ error: "Player ID is required" }), {
           status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders4 }
+          headers: { "Content-Type": "application/json", ...corsHeaders5 }
         });
       }
       const playersData = await env.IPL_CACHE.get("players", "json");
@@ -11492,32 +11680,32 @@ var onRequest43 = /* @__PURE__ */ __name(async (context) => {
       if (filteredPlayers.length === players.length) {
         return new Response(JSON.stringify({ error: "Player not found" }), {
           status: 404,
-          headers: { "Content-Type": "application/json", ...corsHeaders4 }
+          headers: { "Content-Type": "application/json", ...corsHeaders5 }
         });
       }
       await env.IPL_CACHE.put("players", JSON.stringify(filteredPlayers));
       return new Response(JSON.stringify({ success: true, message: "Player deleted" }), {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders4 }
+        headers: { "Content-Type": "application/json", ...corsHeaders5 }
       });
     }
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
       status: 405,
-      headers: { "Content-Type": "application/json", ...corsHeaders4 }
+      headers: { "Content-Type": "application/json", ...corsHeaders5 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Internal server error", message: error.message }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders4 }
+        headers: { "Content-Type": "application/json", ...corsHeaders5 }
       }
     );
   }
 }, "onRequest");
 
 // api/predictions.js
-var import_checked_fetch47 = __toESM(require_checked_fetch());
+var import_checked_fetch48 = __toESM(require_checked_fetch());
 async function getUserFromToken2(token, env) {
   if (!token) return null;
   const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
@@ -11590,11 +11778,11 @@ async function getAllPredictions3(matchId, userId, league, env) {
   return predictions;
 }
 __name(getAllPredictions3, "getAllPredictions");
-var onRequest44 = /* @__PURE__ */ __name(async (context) => {
+var onRequest45 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { pathname, searchParams } = new URL(request.url);
   const method = request.method;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, PUT, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
@@ -11602,7 +11790,7 @@ var onRequest44 = /* @__PURE__ */ __name(async (context) => {
   if (method === "OPTIONS") {
     return new Response(null, {
       status: 200,
-      headers: corsHeaders6
+      headers: corsHeaders7
     });
   }
   try {
@@ -11613,7 +11801,7 @@ var onRequest44 = /* @__PURE__ */ __name(async (context) => {
       const predictions = await getAllPredictions3(matchId, userId, league, env);
       return new Response(JSON.stringify(predictions), {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders6 }
+        headers: { "Content-Type": "application/json", ...corsHeaders7 }
       });
     }
     if (pathname === "/api/predictions" && method === "POST") {
@@ -11622,13 +11810,13 @@ var onRequest44 = /* @__PURE__ */ __name(async (context) => {
       if (!user) {
         return new Response(
           JSON.stringify({ error: "Unauthorized" }),
-          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       if (user.isBlocked) {
         return new Response(
           JSON.stringify({ error: "Your account is blocked" }),
-          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const body = await request.json();
@@ -11636,14 +11824,14 @@ var onRequest44 = /* @__PURE__ */ __name(async (context) => {
       if (!matchId || !predictedWinner || !league) {
         return new Response(
           JSON.stringify({ error: "Missing required fields" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const matchesData = await env.SPORTS_KV.get("matches");
       if (!matchesData) {
         return new Response(
           JSON.stringify({ error: "Matches data not found" }),
-          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const matches = JSON.parse(matchesData);
@@ -11651,13 +11839,13 @@ var onRequest44 = /* @__PURE__ */ __name(async (context) => {
       if (!match2) {
         return new Response(
           JSON.stringify({ error: "Match not found" }),
-          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       if (!isMatchUpcoming(match2)) {
         return new Response(
           JSON.stringify({ error: "Predictions only allowed for upcoming matches" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const existingKey = `predictions:match:${matchId}:user:${user.id}`;
@@ -11665,7 +11853,7 @@ var onRequest44 = /* @__PURE__ */ __name(async (context) => {
       if (existingPredId) {
         return new Response(
           JSON.stringify({ error: "You already have a prediction for this match" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const predictionId = crypto.randomUUID();
@@ -11705,7 +11893,7 @@ var onRequest44 = /* @__PURE__ */ __name(async (context) => {
       });
       return new Response(JSON.stringify(prediction), {
         status: 201,
-        headers: { "Content-Type": "application/json", ...corsHeaders6 }
+        headers: { "Content-Type": "application/json", ...corsHeaders7 }
       });
     }
     if (pathname === "/api/predictions" && method === "PUT") {
@@ -11714,13 +11902,13 @@ var onRequest44 = /* @__PURE__ */ __name(async (context) => {
       if (!user) {
         return new Response(
           JSON.stringify({ error: "Unauthorized. Please log in to update predictions." }),
-          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       if (user.isBlocked) {
         return new Response(
           JSON.stringify({ error: "Your account is blocked" }),
-          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       let body;
@@ -11729,21 +11917,21 @@ var onRequest44 = /* @__PURE__ */ __name(async (context) => {
       } catch (e) {
         return new Response(
           JSON.stringify({ error: "Invalid request body" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const { id, predictedWinner, playerPredictions } = body;
       if (!id) {
         return new Response(
           JSON.stringify({ error: "Prediction ID required" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const predData = await env.SPORTS_KV.get(`prediction:${id}`);
       if (!predData) {
         return new Response(
           JSON.stringify({ error: "Prediction not found" }),
-          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const prediction = JSON.parse(predData);
@@ -11756,7 +11944,7 @@ var onRequest44 = /* @__PURE__ */ __name(async (context) => {
         console.error(`[UPDATE PREDICTION] Missing user ID: prediction.userId="${predictionUserId}", user.id="${currentUserId}"`);
         return new Response(
           JSON.stringify({ error: "Invalid user identification. Please try logging in again." }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const directMatch = String(prediction.userId || "").trim() === String(user.id || "").trim();
@@ -11768,7 +11956,7 @@ var onRequest44 = /* @__PURE__ */ __name(async (context) => {
         console.log(`[UPDATE PREDICTION] Direct match: ${directMatch}, Normalized match: ${normalizedMatch}, Email match: ${emailMatch}, Name match: ${nameMatch}`);
         return new Response(
           JSON.stringify({ error: "You can only update your own predictions" }),
-          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       if ((emailMatch || nameMatch) && !directMatch && !normalizedMatch) {
@@ -11783,7 +11971,7 @@ var onRequest44 = /* @__PURE__ */ __name(async (context) => {
         if (match2 && !isMatchUpcoming(match2)) {
           return new Response(
             JSON.stringify({ error: "Cannot update prediction after match starts" }),
-            { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+            { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
           );
         }
       }
@@ -11802,34 +11990,34 @@ var onRequest44 = /* @__PURE__ */ __name(async (context) => {
       });
       return new Response(JSON.stringify(prediction), {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders6 }
+        headers: { "Content-Type": "application/json", ...corsHeaders7 }
       });
     }
     return new Response(
       JSON.stringify({ error: "Not found" }),
-      { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Predictions error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error", details: error.message }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
 
 // api/preferences.js
-var import_checked_fetch48 = __toESM(require_checked_fetch());
-var onRequest45 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch49 = __toESM(require_checked_fetch());
+var onRequest46 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const method = request.method;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, PUT, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
   if (method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders6 });
+    return new Response(null, { status: 204, headers: corsHeaders7 });
   }
   try {
     const authHeader = request.headers.get("Authorization") || "";
@@ -11837,14 +12025,14 @@ var onRequest45 = /* @__PURE__ */ __name(async (context) => {
     if (!token) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
     if (!tokenValue) {
       return new Response(
         JSON.stringify({ error: "Invalid token" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     let email = tokenValue;
@@ -11861,7 +12049,7 @@ var onRequest45 = /* @__PURE__ */ __name(async (context) => {
     if (!userData) {
       return new Response(
         JSON.stringify({ error: "User not found" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const user = JSON.parse(userData);
@@ -11876,7 +12064,7 @@ var onRequest45 = /* @__PURE__ */ __name(async (context) => {
           // Default to true
           favoriteTeamIds: user.favoriteTeamIds || []
         }),
-        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (method === "PUT") {
@@ -11914,18 +12102,18 @@ var onRequest45 = /* @__PURE__ */ __name(async (context) => {
             favoriteTeamIds: user.favoriteTeamIds
           }
         }),
-        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Preferences error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error", details: error.message }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
@@ -11955,12 +12143,12 @@ async function addUserToIndex(email, env) {
 __name(addUserToIndex, "addUserToIndex");
 
 // api/profile.js
-var import_checked_fetch49 = __toESM(require_checked_fetch());
-var onRequest46 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch50 = __toESM(require_checked_fetch());
+var onRequest47 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const url = new URL(request.url);
   const method = request.method;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, PUT, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
@@ -11968,20 +12156,20 @@ var onRequest46 = /* @__PURE__ */ __name(async (context) => {
   if (method === "OPTIONS") {
     return new Response(null, {
       status: 204,
-      headers: corsHeaders6
+      headers: corsHeaders7
     });
   }
   if (method !== "GET" && method !== "PUT") {
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
   try {
     if (!env || !env.SPORTS_KV) {
       return new Response(
         JSON.stringify({ error: "KV not configured" }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const authHeader = request.headers.get("Authorization") || "";
@@ -11989,14 +12177,14 @@ var onRequest46 = /* @__PURE__ */ __name(async (context) => {
     if (!token) {
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const tokenValue = await env.SPORTS_KV.get(`token:${token}`);
     if (!tokenValue) {
       return new Response(
         JSON.stringify({ error: "Invalid token" }),
-        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 401, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     let email = tokenValue;
@@ -12013,7 +12201,7 @@ var onRequest46 = /* @__PURE__ */ __name(async (context) => {
     if (!userData) {
       return new Response(
         JSON.stringify({ error: "User not found" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const user = JSON.parse(userData);
@@ -12028,7 +12216,7 @@ var onRequest46 = /* @__PURE__ */ __name(async (context) => {
       };
       return new Response(JSON.stringify({ profile: profile2 }), {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders6 }
+        headers: { "Content-Type": "application/json", ...corsHeaders7 }
       });
     }
     let body = {};
@@ -12064,33 +12252,33 @@ var onRequest46 = /* @__PURE__ */ __name(async (context) => {
     };
     return new Response(JSON.stringify({ profile }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     console.error("Profile error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
 
 // api/restore-players.js
-var import_checked_fetch50 = __toESM(require_checked_fetch());
-var onRequest47 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch51 = __toESM(require_checked_fetch());
+var onRequest48 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const url = new URL(request.url);
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type"
   };
   if (request.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders6 });
+    return new Response(null, { status: 204, headers: corsHeaders7 });
   }
   try {
     const existingPlayers = await env.IPL_CACHE.get("players", "json") || [];
-    const wplPlayers = existingPlayers.filter((p) => {
+    const wplPlayers2 = existingPlayers.filter((p) => {
       const teamId = String(p.teamId || "").trim();
       const league = p.league || "ipl";
       return league === "wpl" || ["11", "12", "13", "14", "15"].includes(teamId);
@@ -12104,7 +12292,7 @@ var onRequest47 = /* @__PURE__ */ __name(async (context) => {
           hint: 'Send JSON: { "players": [...] }'
         }), {
           status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders6 }
+          headers: { "Content-Type": "application/json", ...corsHeaders7 }
         });
       }
       const iplPlayersToAdd = playersToRestore.map((p) => ({
@@ -12119,18 +12307,18 @@ var onRequest47 = /* @__PURE__ */ __name(async (context) => {
       const newIPLPlayers = iplPlayersToAdd.filter(
         (p) => !existingIPLPlayerNames.includes(p.name.toLowerCase())
       );
-      const allPlayers = [...wplPlayers, ...newIPLPlayers];
+      const allPlayers = [...wplPlayers2, ...newIPLPlayers];
       await env.IPL_CACHE.put("players", JSON.stringify(allPlayers));
       return new Response(JSON.stringify({
         success: true,
         message: "IPL players restored successfully",
         restored: newIPLPlayers.length,
         skipped: iplPlayersToAdd.length - newIPLPlayers.length,
-        existingWPL: wplPlayers.length,
+        existingWPL: wplPlayers2.length,
         totalPlayers: allPlayers.length
       }), {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders6 }
+        headers: { "Content-Type": "application/json", ...corsHeaders7 }
       });
     }
     if (request.method === "GET") {
@@ -12145,7 +12333,7 @@ var onRequest47 = /* @__PURE__ */ __name(async (context) => {
           }
         }), {
           status: 400,
-          headers: { "Content-Type": "application/json", ...corsHeaders6 }
+          headers: { "Content-Type": "application/json", ...corsHeaders7 }
         });
       }
       const comprehensiveIPLPlayers = [
@@ -12192,25 +12380,25 @@ var onRequest47 = /* @__PURE__ */ __name(async (context) => {
       const newIPLPlayers = comprehensiveIPLPlayers.filter(
         (p) => !existingIPLPlayerNames.includes(p.name.toLowerCase())
       );
-      const allPlayers = [...wplPlayers, ...newIPLPlayers];
+      const allPlayers = [...wplPlayers2, ...newIPLPlayers];
       await env.IPL_CACHE.put("players", JSON.stringify(allPlayers));
       return new Response(JSON.stringify({
         success: true,
         message: "IPL players restored successfully",
         restored: newIPLPlayers.length,
-        existingWPL: wplPlayers.length,
-        existingIPL: existingPlayers.length - wplPlayers.length,
+        existingWPL: wplPlayers2.length,
+        existingIPL: existingPlayers.length - wplPlayers2.length,
         totalPlayers: allPlayers.length,
         note: "This restored a starter set. To restore 200+ players, use POST endpoint with your player dataset.",
         nextStep: 'POST /api/restore-players with body: { "players": [your player array] }'
       }), {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders6 }
+        headers: { "Content-Type": "application/json", ...corsHeaders7 }
       });
     }
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
       status: 405,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(JSON.stringify({
@@ -12218,34 +12406,34 @@ var onRequest47 = /* @__PURE__ */ __name(async (context) => {
       message: error.message
     }), {
       status: 500,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   }
 }, "onRequest");
 
 // api/scorecards.js
-var import_checked_fetch51 = __toESM(require_checked_fetch());
-var corsHeaders5 = {
+var import_checked_fetch52 = __toESM(require_checked_fetch());
+var corsHeaders6 = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization"
 };
-function verifyAdminToken8(request) {
+function verifyAdminToken9(request) {
   const authHeader = request.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return false;
   }
   return true;
 }
-__name(verifyAdminToken8, "verifyAdminToken");
+__name(verifyAdminToken9, "verifyAdminToken");
 function generateId() {
   return `scorecard_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 __name(generateId, "generateId");
-async function onRequest48(context) {
+async function onRequest49(context) {
   const { request, env } = context;
   if (request.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders5 });
+    return new Response(null, { status: 204, headers: corsHeaders6 });
   }
   try {
     const url = new URL(request.url);
@@ -12269,19 +12457,19 @@ async function onRequest48(context) {
         }
         return new Response(JSON.stringify(scorecards), {
           status: 200,
-          headers: { ...corsHeaders5, "Content-Type": "application/json" }
+          headers: { ...corsHeaders6, "Content-Type": "application/json" }
         });
       } else if (scorecardId && scorecardId !== "scorecards") {
         const scorecardData = await env.IPL_CACHE.get(`scorecard_${scorecardId}`);
         if (!scorecardData) {
           return new Response(JSON.stringify({ error: "Scorecard not found" }), {
             status: 404,
-            headers: { ...corsHeaders5, "Content-Type": "application/json" }
+            headers: { ...corsHeaders6, "Content-Type": "application/json" }
           });
         }
         return new Response(scorecardData, {
           status: 200,
-          headers: { ...corsHeaders5, "Content-Type": "application/json" }
+          headers: { ...corsHeaders6, "Content-Type": "application/json" }
         });
       } else {
         const list = await env.IPL_CACHE.list({ prefix: "scorecard_" });
@@ -12296,22 +12484,22 @@ async function onRequest48(context) {
         }
         return new Response(JSON.stringify(scorecards), {
           status: 200,
-          headers: { ...corsHeaders5, "Content-Type": "application/json" }
+          headers: { ...corsHeaders6, "Content-Type": "application/json" }
         });
       }
     }
     if (request.method === "POST") {
-      if (!verifyAdminToken8(request)) {
+      if (!verifyAdminToken9(request)) {
         return new Response(JSON.stringify({ error: "Unauthorized" }), {
           status: 401,
-          headers: { ...corsHeaders5, "Content-Type": "application/json" }
+          headers: { ...corsHeaders6, "Content-Type": "application/json" }
         });
       }
       const data = await request.json();
       if (!data.matchId || !data.league || !data.matchInfo || !data.innings) {
         return new Response(JSON.stringify({ error: "Missing required fields" }), {
           status: 400,
-          headers: { ...corsHeaders5, "Content-Type": "application/json" }
+          headers: { ...corsHeaders6, "Content-Type": "application/json" }
         });
       }
       const scorecardId2 = generateId();
@@ -12329,14 +12517,14 @@ async function onRequest48(context) {
       );
       return new Response(JSON.stringify(scorecard), {
         status: 201,
-        headers: { ...corsHeaders5, "Content-Type": "application/json" }
+        headers: { ...corsHeaders6, "Content-Type": "application/json" }
       });
     }
     if (request.method === "PUT") {
-      if (!verifyAdminToken8(request)) {
+      if (!verifyAdminToken9(request)) {
         return new Response(JSON.stringify({ error: "Unauthorized" }), {
           status: 401,
-          headers: { ...corsHeaders5, "Content-Type": "application/json" }
+          headers: { ...corsHeaders6, "Content-Type": "application/json" }
         });
       }
       if (url.pathname.endsWith("/publish")) {
@@ -12345,7 +12533,7 @@ async function onRequest48(context) {
         if (!existingData2) {
           return new Response(JSON.stringify({ error: "Scorecard not found" }), {
             status: 404,
-            headers: { ...corsHeaders5, "Content-Type": "application/json" }
+            headers: { ...corsHeaders6, "Content-Type": "application/json" }
           });
         }
         const scorecard = JSON.parse(existingData2);
@@ -12358,20 +12546,20 @@ async function onRequest48(context) {
         );
         return new Response(JSON.stringify(scorecard), {
           status: 200,
-          headers: { ...corsHeaders5, "Content-Type": "application/json" }
+          headers: { ...corsHeaders6, "Content-Type": "application/json" }
         });
       }
       if (!scorecardId || scorecardId === "scorecards") {
         return new Response(JSON.stringify({ error: "Scorecard ID required" }), {
           status: 400,
-          headers: { ...corsHeaders5, "Content-Type": "application/json" }
+          headers: { ...corsHeaders6, "Content-Type": "application/json" }
         });
       }
       const existingData = await env.IPL_CACHE.get(`scorecard_${scorecardId}`);
       if (!existingData) {
         return new Response(JSON.stringify({ error: "Scorecard not found" }), {
           status: 404,
-          headers: { ...corsHeaders5, "Content-Type": "application/json" }
+          headers: { ...corsHeaders6, "Content-Type": "application/json" }
         });
       }
       const updateData = await request.json();
@@ -12389,52 +12577,52 @@ async function onRequest48(context) {
       );
       return new Response(JSON.stringify(updatedScorecard), {
         status: 200,
-        headers: { ...corsHeaders5, "Content-Type": "application/json" }
+        headers: { ...corsHeaders6, "Content-Type": "application/json" }
       });
     }
     if (request.method === "DELETE") {
-      if (!verifyAdminToken8(request)) {
+      if (!verifyAdminToken9(request)) {
         return new Response(JSON.stringify({ error: "Unauthorized" }), {
           status: 401,
-          headers: { ...corsHeaders5, "Content-Type": "application/json" }
+          headers: { ...corsHeaders6, "Content-Type": "application/json" }
         });
       }
       if (!scorecardId || scorecardId === "scorecards") {
         return new Response(JSON.stringify({ error: "Scorecard ID required" }), {
           status: 400,
-          headers: { ...corsHeaders5, "Content-Type": "application/json" }
+          headers: { ...corsHeaders6, "Content-Type": "application/json" }
         });
       }
       const existingData = await env.IPL_CACHE.get(`scorecard_${scorecardId}`);
       if (!existingData) {
         return new Response(JSON.stringify({ error: "Scorecard not found" }), {
           status: 404,
-          headers: { ...corsHeaders5, "Content-Type": "application/json" }
+          headers: { ...corsHeaders6, "Content-Type": "application/json" }
         });
       }
       await env.IPL_CACHE.delete(`scorecard_${scorecardId}`);
       return new Response(JSON.stringify({ message: "Scorecard deleted successfully" }), {
         status: 200,
-        headers: { ...corsHeaders5, "Content-Type": "application/json" }
+        headers: { ...corsHeaders6, "Content-Type": "application/json" }
       });
     }
     return new Response(JSON.stringify({ error: "Method not allowed" }), {
       status: 405,
-      headers: { ...corsHeaders5, "Content-Type": "application/json" }
+      headers: { ...corsHeaders6, "Content-Type": "application/json" }
     });
   } catch (error) {
     console.error("Scorecard API error:", error);
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,
-      headers: { ...corsHeaders5, "Content-Type": "application/json" }
+      headers: { ...corsHeaders6, "Content-Type": "application/json" }
     });
   }
 }
-__name(onRequest48, "onRequest");
+__name(onRequest49, "onRequest");
 
 // api/seed.js
-var import_checked_fetch52 = __toESM(require_checked_fetch());
-var onRequest49 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch53 = __toESM(require_checked_fetch());
+var onRequest50 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const url = new URL(request.url);
   if (request.method === "OPTIONS") {
@@ -12615,7 +12803,7 @@ var onRequest49 = /* @__PURE__ */ __name(async (context) => {
     const restoreIPL = url.searchParams.get("restoreIPL") === "true";
     const existingPlayers = await env.IPL_CACHE.get("players", "json") || [];
     if (restoreIPL && existingPlayers.length > 0) {
-      const wplPlayers = existingPlayers.filter((p) => {
+      const wplPlayers2 = existingPlayers.filter((p) => {
         const teamId = String(p.teamId || "").trim();
         const league = p.league || "ipl";
         return league === "wpl" || ["11", "12", "13", "14", "15"].includes(teamId);
@@ -12628,12 +12816,12 @@ var onRequest49 = /* @__PURE__ */ __name(async (context) => {
       const newIPLPlayers = mockPlayers.filter(
         (p) => !existingIPLPlayerNames.includes(p.name.toLowerCase())
       );
-      const allPlayers = [...wplPlayers, ...newIPLPlayers];
+      const allPlayers = [...wplPlayers2, ...newIPLPlayers];
       await env.IPL_CACHE.put("players", JSON.stringify(allPlayers));
       return new Response(JSON.stringify({
         message: "IPL players restored successfully",
         restored: newIPLPlayers.length,
-        existingWPL: wplPlayers.length,
+        existingWPL: wplPlayers2.length,
         totalPlayers: allPlayers.length,
         restoredPlayers: newIPLPlayers.map((p) => p.name)
       }), {
@@ -12661,8 +12849,8 @@ var onRequest49 = /* @__PURE__ */ __name(async (context) => {
 }, "onRequest");
 
 // api/seed-wpl.js
-var import_checked_fetch53 = __toESM(require_checked_fetch());
-var onRequest50 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch54 = __toESM(require_checked_fetch());
+var onRequest51 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   if (request.method === "OPTIONS") {
     return new Response(null, {
@@ -12674,7 +12862,7 @@ var onRequest50 = /* @__PURE__ */ __name(async (context) => {
     return new Response(JSON.stringify({ error: "Method not allowed" }), { status: 405, headers: { "Content-Type": "application/json" } });
   }
   try {
-    const wplTeams = [
+    const wplTeams2 = [
       {
         id: "11",
         league: "wpl",
@@ -12726,7 +12914,7 @@ var onRequest50 = /* @__PURE__ */ __name(async (context) => {
         homeVenue: "Arun Jaitley Stadium, Delhi"
       }
     ];
-    const wplPlayers = [
+    const wplPlayers2 = [
       // MI-W Players
       {
         id: "wpl1",
@@ -13057,7 +13245,7 @@ var onRequest50 = /* @__PURE__ */ __name(async (context) => {
         }
       }
     ];
-    const wplMatches = [
+    const wplMatches2 = [
       {
         id: "wpl_match_1",
         league: "wpl",
@@ -13113,19 +13301,19 @@ var onRequest50 = /* @__PURE__ */ __name(async (context) => {
     const existingPlayers = await env.IPL_CACHE.get("players", "json") || [];
     const existingMatches = await env.IPL_CACHE.get("matches", "json") || [];
     const allTeams = [...existingTeams];
-    wplTeams.forEach((team) => {
+    wplTeams2.forEach((team) => {
       if (!allTeams.find((t) => t.id === team.id)) {
         allTeams.push(team);
       }
     });
     const allPlayers = [...existingPlayers];
-    wplPlayers.forEach((player) => {
+    wplPlayers2.forEach((player) => {
       if (!allPlayers.find((p) => p.id === player.id)) {
         allPlayers.push(player);
       }
     });
     const allMatches = [...existingMatches];
-    wplMatches.forEach((match2) => {
+    wplMatches2.forEach((match2) => {
       if (!allMatches.find((m) => m.id === match2.id)) {
         allMatches.push(match2);
       }
@@ -13136,9 +13324,9 @@ var onRequest50 = /* @__PURE__ */ __name(async (context) => {
     return new Response(JSON.stringify({
       message: "WPL data seeded successfully",
       data: {
-        teamsAdded: wplTeams.length,
-        playersAdded: wplPlayers.length,
-        matchesAdded: wplMatches.length,
+        teamsAdded: wplTeams2.length,
+        playersAdded: wplPlayers2.length,
+        matchesAdded: wplMatches2.length,
         totalTeams: allTeams.length,
         totalPlayers: allPlayers.length,
         totalMatches: allMatches.length
@@ -13160,15 +13348,15 @@ var onRequest50 = /* @__PURE__ */ __name(async (context) => {
 }, "onRequest");
 
 // api/settings.js
-var import_checked_fetch54 = __toESM(require_checked_fetch());
-function verifyAdminToken9(request) {
+var import_checked_fetch55 = __toESM(require_checked_fetch());
+function verifyAdminToken10(request) {
   const authHeader = request.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return false;
   }
   return true;
 }
-__name(verifyAdminToken9, "verifyAdminToken");
+__name(verifyAdminToken10, "verifyAdminToken");
 var defaultSettings = {
   siteName: "SportsUP18",
   siteDescription: "The biggest cricket tournament in the world",
@@ -13214,7 +13402,7 @@ async function handleGetRequest2(context) {
 __name(handleGetRequest2, "handleGetRequest");
 async function handlePutRequest2(context) {
   const { env, request } = context;
-  if (!verifyAdminToken9(request)) {
+  if (!verifyAdminToken10(request)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" }
@@ -13245,7 +13433,7 @@ async function handlePutRequest2(context) {
   }
 }
 __name(handlePutRequest2, "handlePutRequest");
-async function onRequest51(context) {
+async function onRequest52(context) {
   const { request } = context;
   const method = request.method;
   if (method === "OPTIONS") {
@@ -13277,16 +13465,16 @@ async function onRequest51(context) {
   response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
   return response;
 }
-__name(onRequest51, "onRequest");
+__name(onRequest52, "onRequest");
 
 // api/stadium-info.js
-var import_checked_fetch55 = __toESM(require_checked_fetch());
-var onRequest52 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch56 = __toESM(require_checked_fetch());
+var onRequest53 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const venueName = searchParams.get("venue");
   const city = ample = searchParams.get("city");
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
@@ -13294,26 +13482,26 @@ var onRequest52 = /* @__PURE__ */ __name(async (context) => {
   if (request.method === "OPTIONS") {
     return new Response(null, {
       status: 200,
-      headers: corsHeaders6
+      headers: corsHeaders7
     });
   }
   if (!venueName) {
     return new Response(
       JSON.stringify({ error: "Venue name required" }),
-      { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
   try {
     const enrichedData = await enrichStadiumInfo(venueName, city, env);
     return new Response(JSON.stringify(enrichedData), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     console.error("Stadium info enrichment error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to enrich stadium information" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
@@ -13496,15 +13684,15 @@ async function getAIStadiumInfo(venueName, city, apiKey) {
 __name(getAIStadiumInfo, "getAIStadiumInfo");
 
 // api/teams.js
-var import_checked_fetch56 = __toESM(require_checked_fetch());
-function verifyAdminToken10(request) {
+var import_checked_fetch57 = __toESM(require_checked_fetch());
+function verifyAdminToken11(request) {
   const authHeader = request.headers.get("authorization");
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return false;
   }
   return true;
 }
-__name(verifyAdminToken10, "verifyAdminToken");
+__name(verifyAdminToken11, "verifyAdminToken");
 var defaultTeams = [
   {
     id: "1",
@@ -13740,7 +13928,7 @@ async function handleGetRequest3(context) {
 __name(handleGetRequest3, "handleGetRequest");
 async function handlePostRequest2(context) {
   const { env, request } = context;
-  if (!verifyAdminToken10(request)) {
+  if (!verifyAdminToken11(request)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" }
@@ -13816,7 +14004,7 @@ async function handlePostRequest2(context) {
 __name(handlePostRequest2, "handlePostRequest");
 async function handlePutRequest3(context) {
   const { env, request } = context;
-  if (!verifyAdminToken10(request)) {
+  if (!verifyAdminToken11(request)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" }
@@ -13871,7 +14059,7 @@ async function handlePutRequest3(context) {
 __name(handlePutRequest3, "handlePutRequest");
 async function handleDeleteRequest2(context) {
   const { env, request } = context;
-  if (!verifyAdminToken10(request)) {
+  if (!verifyAdminToken11(request)) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
       headers: { "Content-Type": "application/json" }
@@ -13908,7 +14096,7 @@ async function handleDeleteRequest2(context) {
   }
 }
 __name(handleDeleteRequest2, "handleDeleteRequest");
-async function onRequest53(context) {
+async function onRequest54(context) {
   const { request } = context;
   const method = request.method;
   if (method === "OPTIONS") {
@@ -13946,15 +14134,15 @@ async function onRequest53(context) {
   response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
   return response;
 }
-__name(onRequest53, "onRequest");
+__name(onRequest54, "onRequest");
 
 // api/venues.js
-var import_checked_fetch57 = __toESM(require_checked_fetch());
-var onRequest54 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch58 = __toESM(require_checked_fetch());
+var onRequest55 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { pathname, searchParams } = new URL(request.url);
   const method = request.method;
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, PUT, DELETE, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
@@ -13962,11 +14150,11 @@ var onRequest54 = /* @__PURE__ */ __name(async (context) => {
   if (method === "OPTIONS") {
     return new Response(null, {
       status: 200,
-      headers: corsHeaders6
+      headers: corsHeaders7
     });
   }
   try {
-    const verifyAdminToken11 = /* @__PURE__ */ __name(async (request2) => {
+    const verifyAdminToken12 = /* @__PURE__ */ __name(async (request2) => {
       const authHeader = request2.headers.get("authorization");
       if (!authHeader || !authHeader.startsWith("Bearer ")) {
         return false;
@@ -13994,14 +14182,14 @@ var onRequest54 = /* @__PURE__ */ __name(async (context) => {
       const venues = venuesList ? JSON.parse(venuesList) : getDefaultVenues();
       return new Response(JSON.stringify({ venues }), {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders6 }
+        headers: { "Content-Type": "application/json", ...corsHeaders7 }
       });
     }
-    const isAdmin = await verifyAdminToken11(request);
+    const isAdmin = await verifyAdminToken12(request);
     if (!isAdmin) {
       return new Response(
         JSON.stringify({ error: "Forbidden" }),
-        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 403, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     if (method === "POST") {
@@ -14017,7 +14205,7 @@ var onRequest54 = /* @__PURE__ */ __name(async (context) => {
       await env.SPORTS_KV.put("venues:list", JSON.stringify(venues));
       return new Response(JSON.stringify({ venue: newVenue }), {
         status: 201,
-        headers: { "Content-Type": "application/json", ...corsHeaders6 }
+        headers: { "Content-Type": "application/json", ...corsHeaders7 }
       });
     }
     if (method === "PUT") {
@@ -14026,7 +14214,7 @@ var onRequest54 = /* @__PURE__ */ __name(async (context) => {
       if (!id) {
         return new Response(
           JSON.stringify({ error: "Venue ID required" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const venuesList = await env.SPORTS_KV.get("venues:list");
@@ -14035,14 +14223,14 @@ var onRequest54 = /* @__PURE__ */ __name(async (context) => {
       if (venueIndex === -1) {
         return new Response(
           JSON.stringify({ error: "Venue not found" }),
-          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       venues[venueIndex] = { ...venues[venueIndex], ...updateData, updatedAt: (/* @__PURE__ */ new Date()).toISOString() };
       await env.SPORTS_KV.put("venues:list", JSON.stringify(venues));
       return new Response(JSON.stringify({ venue: venues[venueIndex] }), {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders6 }
+        headers: { "Content-Type": "application/json", ...corsHeaders7 }
       });
     }
     if (method === "DELETE") {
@@ -14050,7 +14238,7 @@ var onRequest54 = /* @__PURE__ */ __name(async (context) => {
       if (!id) {
         return new Response(
           JSON.stringify({ error: "Venue ID required" }),
-          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       const venuesList = await env.SPORTS_KV.get("venues:list");
@@ -14059,24 +14247,24 @@ var onRequest54 = /* @__PURE__ */ __name(async (context) => {
       if (filteredVenues.length === venues.length) {
         return new Response(
           JSON.stringify({ error: "Venue not found" }),
-          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+          { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
         );
       }
       await env.SPORTS_KV.put("venues:list", JSON.stringify(filteredVenues));
       return new Response(JSON.stringify({ success: true }), {
         status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders6 }
+        headers: { "Content-Type": "application/json", ...corsHeaders7 }
       });
     }
     return new Response(
       JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 405, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   } catch (error) {
     console.error("Venues API error:", error);
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
@@ -14123,17 +14311,17 @@ function getDefaultVenues() {
 __name(getDefaultVenues, "getDefaultVenues");
 
 // api/weather-enhanced.js
-var import_checked_fetch58 = __toESM(require_checked_fetch());
-var onRequest55 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch59 = __toESM(require_checked_fetch());
+var onRequest56 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
   if (request.method === "OPTIONS") {
-    return new Response(null, { status: 200, headers: corsHeaders6 });
+    return new Response(null, { status: 200, headers: corsHeaders7 });
   }
   try {
     const action = searchParams.get("action") || "current";
@@ -14142,25 +14330,25 @@ var onRequest55 = /* @__PURE__ */ __name(async (context) => {
     const lng = searchParams.get("lng");
     switch (action) {
       case "current":
-        return await getCurrentWeather(env, venueId, lat, lng, corsHeaders6);
+        return await getCurrentWeather(env, venueId, lat, lng, corsHeaders7);
       case "forecast":
-        return await getWeatherForecast(env, venueId, lat, lng, corsHeaders6);
+        return await getWeatherForecast(env, venueId, lat, lng, corsHeaders7);
       case "ai-analysis":
-        return await getAIWeatherAnalysis(env, venueId, lat, lng, corsHeaders6);
+        return await getAIWeatherAnalysis(env, venueId, lat, lng, corsHeaders7);
       case "sync":
-        return await syncWeatherData(env, corsHeaders6);
+        return await syncWeatherData(env, corsHeaders7);
       default:
-        return await getCurrentWeather(env, venueId, lat, lng, corsHeaders6);
+        return await getCurrentWeather(env, venueId, lat, lng, corsHeaders7);
     }
   } catch (error) {
     console.error("Weather API error:", error);
     return new Response(
       JSON.stringify({ error: "Failed to fetch weather data" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
-async function getCurrentWeather(env, venueId, lat, lng, corsHeaders6) {
+async function getCurrentWeather(env, venueId, lat, lng, corsHeaders7) {
   let weatherData = await getCachedWeatherData(env);
   if (!weatherData) {
     weatherData = generateSampleWeatherData(venueId, lat, lng);
@@ -14178,11 +14366,11 @@ async function getCurrentWeather(env, venueId, lat, lng, corsHeaders6) {
     nextUpdate: getNextUpdateTime()
   }), {
     status: 200,
-    headers: { "Content-Type": "application/json", ...corsHeaders6 }
+    headers: { "Content-Type": "application/json", ...corsHeaders7 }
   });
 }
 __name(getCurrentWeather, "getCurrentWeather");
-async function getWeatherForecast(env, venueId, lat, lng, corsHeaders6) {
+async function getWeatherForecast(env, venueId, lat, lng, corsHeaders7) {
   const forecast = generateWeatherForecast(venueId, lat, lng);
   return new Response(JSON.stringify({
     forecast,
@@ -14191,11 +14379,11 @@ async function getWeatherForecast(env, venueId, lat, lng, corsHeaders6) {
     aiEnhanced: true
   }), {
     status: 200,
-    headers: { "Content-Type": "application/json", ...corsHeaders6 }
+    headers: { "Content-Type": "application/json", ...corsHeaders7 }
   });
 }
 __name(getWeatherForecast, "getWeatherForecast");
-async function getAIWeatherAnalysis(env, venueId, lat, lng, corsHeaders6) {
+async function getAIWeatherAnalysis(env, venueId, lat, lng, corsHeaders7) {
   const currentWeather = await getCachedWeatherData(env) || generateSampleWeatherData(venueId, lat, lng);
   const forecast = generateWeatherForecast(venueId, lat, lng);
   const analysis = {
@@ -14214,11 +14402,11 @@ async function getAIWeatherAnalysis(env, venueId, lat, lng, corsHeaders6) {
   };
   return new Response(JSON.stringify(analysis), {
     status: 200,
-    headers: { "Content-Type": "application/json", ...corsHeaders6 }
+    headers: { "Content-Type": "application/json", ...corsHeaders7 }
   });
 }
 __name(getAIWeatherAnalysis, "getAIWeatherAnalysis");
-async function syncWeatherData(env, corsHeaders6) {
+async function syncWeatherData(env, corsHeaders7) {
   try {
     const venues = [
       { id: "1", name: "Narendra Modi Stadium", lat: 23.0225, lng: 72.5714 },
@@ -14236,7 +14424,7 @@ async function syncWeatherData(env, corsHeaders6) {
       nextUpdate: getNextUpdateTime()
     }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(JSON.stringify({
@@ -14244,7 +14432,7 @@ async function syncWeatherData(env, corsHeaders6) {
       error: "Failed to sync weather data"
     }), {
       status: 500,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   }
 }
@@ -14423,19 +14611,19 @@ function getNextUpdateTime() {
 __name(getNextUpdateTime, "getNextUpdateTime");
 
 // api/weather-forecast.js
-var import_checked_fetch59 = __toESM(require_checked_fetch());
-var onRequest56 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch60 = __toESM(require_checked_fetch());
+var onRequest57 = /* @__PURE__ */ __name(async (context) => {
   const { request, env } = context;
   const { searchParams } = new URL(request.url);
   const groundId = searchParams.get("groundId");
   const days = parseInt(searchParams.get("days") || "3");
-  const corsHeaders6 = {
+  const corsHeaders7 = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type, Authorization"
   };
   if (request.method === "OPTIONS") {
-    return new Response(null, { status: 200, headers: corsHeaders6 });
+    return new Response(null, { status: 200, headers: corsHeaders7 });
   }
   try {
     const grounds = await getGroundsFromKV(env);
@@ -14443,18 +14631,18 @@ var onRequest56 = /* @__PURE__ */ __name(async (context) => {
     if (!ground) {
       return new Response(
         JSON.stringify({ error: "Ground not found" }),
-        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+        { status: 404, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
       );
     }
     const forecast = await fetchWeatherForecast(ground, env, days);
     return new Response(JSON.stringify({ forecast }), {
       status: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders6 }
+      headers: { "Content-Type": "application/json", ...corsHeaders7 }
     });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: "Failed to fetch weather forecast" }),
-      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders6 } }
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders7 } }
     );
   }
 }, "onRequest");
@@ -14507,14 +14695,14 @@ async function getGroundsFromKV(env) {
 __name(getGroundsFromKV, "getGroundsFromKV");
 
 // [[route]].ts
-var import_checked_fetch60 = __toESM(require_checked_fetch());
-var onRequest57 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch61 = __toESM(require_checked_fetch());
+var onRequest58 = /* @__PURE__ */ __name(async (context) => {
   return context.next();
 }, "onRequest");
 
 // _middleware.ts
-var import_checked_fetch61 = __toESM(require_checked_fetch());
-var onRequest58 = /* @__PURE__ */ __name(async (context) => {
+var import_checked_fetch62 = __toESM(require_checked_fetch());
+var onRequest59 = /* @__PURE__ */ __name(async (context) => {
   const { request } = context;
   console.log(`[Middleware] ${request.method} ${new URL(request.url).pathname}`);
   return context.next();
@@ -14614,60 +14802,67 @@ var routes = [
     modules: [onRequest13]
   },
   {
-    routePath: "/api/admin/send-bulk-email",
+    routePath: "/api/admin/seed-wpl-data",
     mountPath: "/api/admin",
     method: "",
     middlewares: [],
     modules: [onRequest14]
   },
   {
-    routePath: "/api/admin/setup",
+    routePath: "/api/admin/send-bulk-email",
     mountPath: "/api/admin",
     method: "",
     middlewares: [],
     modules: [onRequest15]
   },
   {
-    routePath: "/api/admin/upload-players-csv",
+    routePath: "/api/admin/setup",
     mountPath: "/api/admin",
     method: "",
     middlewares: [],
     modules: [onRequest16]
   },
   {
-    routePath: "/api/admin/users",
+    routePath: "/api/admin/upload-players-csv",
     mountPath: "/api/admin",
     method: "",
     middlewares: [],
     modules: [onRequest17]
   },
   {
+    routePath: "/api/admin/users",
+    mountPath: "/api/admin",
+    method: "",
+    middlewares: [],
+    modules: [onRequest18]
+  },
+  {
     routePath: "/api/calendar/ical",
     mountPath: "/api/calendar",
     method: "",
     middlewares: [],
-    modules: [onRequest18]
+    modules: [onRequest19]
   },
   {
     routePath: "/api/predictions/leaderboard",
     mountPath: "/api/predictions",
     method: "",
     middlewares: [],
-    modules: [onRequest19]
+    modules: [onRequest20]
   },
   {
     routePath: "/api/predictions/polls",
     mountPath: "/api/predictions",
     method: "",
     middlewares: [],
-    modules: [onRequest20]
+    modules: [onRequest21]
   },
   {
     routePath: "/api/predictions/stats",
     mountPath: "/api/predictions",
     method: "",
     middlewares: [],
-    modules: [onRequest21]
+    modules: [onRequest22]
   },
   {
     routePath: "/api/weather/:venueId",
@@ -14688,7 +14883,7 @@ var routes = [
     mountPath: "/api/messages",
     method: "",
     middlewares: [],
-    modules: [onRequest22]
+    modules: [onRequest23]
   },
   {
     routePath: "/api/coaches",
@@ -14723,266 +14918,266 @@ var routes = [
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest23]
+    modules: [onRequest24]
   },
   {
     routePath: "/api/admin-email-dashboard",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest24]
+    modules: [onRequest25]
   },
   {
     routePath: "/api/ai-advanced",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest25]
+    modules: [onRequest26]
   },
   {
     routePath: "/api/ai-advanced-complete",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest26]
+    modules: [onRequest27]
   },
   {
     routePath: "/api/ai-content",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest27]
+    modules: [onRequest28]
   },
   {
     routePath: "/api/ai-content-complete",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest28]
+    modules: [onRequest29]
   },
   {
     routePath: "/api/auth",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest29]
+    modules: [onRequest30]
   },
   {
     routePath: "/api/content",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest30]
+    modules: [onRequest31]
   },
   {
     routePath: "/api/email-analytics",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest31]
+    modules: [onRequest32]
   },
   {
     routePath: "/api/email-preferences",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest32]
+    modules: [onRequest33]
   },
   {
     routePath: "/api/email-queue",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest33]
+    modules: [onRequest34]
   },
   {
     routePath: "/api/email-segmentation",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest34]
+    modules: [onRequest35]
   },
   {
     routePath: "/api/email-service",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest35]
+    modules: [onRequest36]
   },
   {
     routePath: "/api/enrichDescription",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest36]
+    modules: [onRequest37]
   },
   {
     routePath: "/api/geocoding",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest37]
+    modules: [onRequest38]
   },
   {
     routePath: "/api/legal",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest38]
+    modules: [onRequest39]
   },
   {
     routePath: "/api/live-score",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest39]
+    modules: [onRequest40]
   },
   {
     routePath: "/api/matches",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest40]
+    modules: [onRequest41]
   },
   {
     routePath: "/api/messages",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest41]
+    modules: [onRequest42]
   },
   {
     routePath: "/api/notifications",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest42]
+    modules: [onRequest43]
   },
   {
     routePath: "/api/players",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest43]
+    modules: [onRequest44]
   },
   {
     routePath: "/api/predictions",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest44]
+    modules: [onRequest45]
   },
   {
     routePath: "/api/preferences",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest45]
+    modules: [onRequest46]
   },
   {
     routePath: "/api/profile",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest46]
+    modules: [onRequest47]
   },
   {
     routePath: "/api/restore-players",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest47]
+    modules: [onRequest48]
   },
   {
     routePath: "/api/scorecards",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest48]
+    modules: [onRequest49]
   },
   {
     routePath: "/api/seed",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest49]
+    modules: [onRequest50]
   },
   {
     routePath: "/api/seed-wpl",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest50]
+    modules: [onRequest51]
   },
   {
     routePath: "/api/settings",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest51]
+    modules: [onRequest52]
   },
   {
     routePath: "/api/stadium-info",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest52]
+    modules: [onRequest53]
   },
   {
     routePath: "/api/teams",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest53]
+    modules: [onRequest54]
   },
   {
     routePath: "/api/venues",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest54]
+    modules: [onRequest55]
   },
   {
     routePath: "/api/weather-enhanced",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest55]
+    modules: [onRequest56]
   },
   {
     routePath: "/api/weather-forecast",
     mountPath: "/api",
     method: "",
     middlewares: [],
-    modules: [onRequest56]
+    modules: [onRequest57]
   },
   {
     routePath: "/:route*",
     mountPath: "/",
     method: "",
     middlewares: [],
-    modules: [onRequest57]
+    modules: [onRequest58]
   },
   {
     routePath: "/",
     mountPath: "/",
     method: "",
-    middlewares: [onRequest58],
+    middlewares: [onRequest59],
     modules: []
   }
 ];
 
-// ../.wrangler/tmp/bundle-FUkoku/middleware-loader.entry.ts
-var import_checked_fetch68 = __toESM(require_checked_fetch());
+// ../.wrangler/tmp/bundle-oVDeu0/middleware-loader.entry.ts
+var import_checked_fetch69 = __toESM(require_checked_fetch());
 
-// ../.wrangler/tmp/bundle-FUkoku/middleware-insertion-facade.js
-var import_checked_fetch66 = __toESM(require_checked_fetch());
+// ../.wrangler/tmp/bundle-oVDeu0/middleware-insertion-facade.js
+var import_checked_fetch67 = __toESM(require_checked_fetch());
 
 // ../../../../../opt/homebrew/lib/node_modules/wrangler/templates/pages-template-worker.ts
-var import_checked_fetch63 = __toESM(require_checked_fetch());
+var import_checked_fetch64 = __toESM(require_checked_fetch());
 
 // ../../../../../opt/homebrew/lib/node_modules/wrangler/node_modules/path-to-regexp/dist.es2015/index.js
-var import_checked_fetch62 = __toESM(require_checked_fetch());
+var import_checked_fetch63 = __toESM(require_checked_fetch());
 function lexer(str) {
   var tokens = [];
   var i = 0;
@@ -15429,7 +15624,7 @@ var cloneResponse = /* @__PURE__ */ __name((response) => (
 ), "cloneResponse");
 
 // ../../../../../opt/homebrew/lib/node_modules/wrangler/templates/middleware/middleware-ensure-req-body-drained.ts
-var import_checked_fetch64 = __toESM(require_checked_fetch());
+var import_checked_fetch65 = __toESM(require_checked_fetch());
 var drainBody = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx) => {
   try {
     return await middlewareCtx.next(request, env);
@@ -15448,7 +15643,7 @@ var drainBody = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 var middleware_ensure_req_body_drained_default = drainBody;
 
 // ../../../../../opt/homebrew/lib/node_modules/wrangler/templates/middleware/middleware-miniflare3-json-error.ts
-var import_checked_fetch65 = __toESM(require_checked_fetch());
+var import_checked_fetch66 = __toESM(require_checked_fetch());
 function reduceError(e) {
   return {
     name: e?.name,
@@ -15471,7 +15666,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// ../.wrangler/tmp/bundle-FUkoku/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-oVDeu0/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -15479,7 +15674,7 @@ var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
 var middleware_insertion_facade_default = pages_template_worker_default;
 
 // ../../../../../opt/homebrew/lib/node_modules/wrangler/templates/middleware/common.ts
-var import_checked_fetch67 = __toESM(require_checked_fetch());
+var import_checked_fetch68 = __toESM(require_checked_fetch());
 var __facade_middleware__ = [];
 function __facade_register__(...args) {
   __facade_middleware__.push(...args.flat());
@@ -15504,7 +15699,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// ../.wrangler/tmp/bundle-FUkoku/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-oVDeu0/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
