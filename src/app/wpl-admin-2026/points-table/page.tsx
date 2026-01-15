@@ -99,8 +99,14 @@ export default function WPLAdminPointsTablePage() {
         netRunRate = (totalRunsScored - totalRunsConceded) / (teamMatches.length * 20);
       }
        
+      // Normalize display names for WPL teams to avoid confusion with IPL names
+      const displayShortName = team.shortName && team.shortName.includes('-W') ? team.shortName : `${team.shortName || ''}-W`;
+      const displayName = team.name && team.name.includes('(WPL)') ? team.name : `${team.name || ''} (WPL)`;
+
       return {
         ...team,
+        shortName: displayShortName,
+        name: displayName,
         matchesPlayed: teamMatches.length,
         wins,
         losses,
