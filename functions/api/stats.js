@@ -157,6 +157,7 @@ function calculateStatsFromScorecards(scorecards) {
           battingMap[playerId] = {
             playerId,
             playerName: batsman.name || 'Unknown',
+            teamName: batsman.teamName || inning.battingTeam || 'Unknown Team',
             runs: 0,
             ballsFaced: 0,
             fours: 0,
@@ -212,6 +213,7 @@ function calculateStatsFromScorecards(scorecards) {
     return {
       playerId: stats.playerId,
       playerName: stats.playerName,
+      teamName: stats.teamName,
       matches,
       innings: stats.innings,
       runs: stats.runs,
@@ -245,15 +247,19 @@ function calculateStatsFromScorecards(scorecards) {
           bowlingMap[playerId] = {
             playerId,
             playerName: bowler.name || 'Unknown',
+            teamName: bowler.teamName || inning.bowlingTeam || 'Unknown Team',
             wickets: 0,
             runs: 0,
             overs: 0,
             maidens: 0,
             wides: 0,
             noBalls: 0,
+            innings: 0,
             matches: new Set(),
             bestWickets: 0,
             bestRuns: 999,
+            fourWickets: 0,
+            fiveWickets: 0,
           };
         }
         
@@ -271,7 +277,15 @@ function calculateStatsFromScorecards(scorecards) {
         stats.maidens += maidens;
         stats.wides += wides;
         stats.noBalls += noBalls;
+        stats.innings += 1;
         stats.matches.add(scorecard.matchId);
+        
+        // Track 4-wicket and 5-wicket hauls
+        if (wickets >= 5) {
+          stats.fiveWickets += 1;
+        } else if (wickets >= 4) {
+          stats.fourWickets += 1;
+        }
         
         // Track best bowling
         if (wickets > stats.bestWickets || (wickets === stats.bestWickets && runs < stats.bestRuns)) {
@@ -293,7 +307,9 @@ function calculateStatsFromScorecards(scorecards) {
     return {
       playerId: stats.playerId,
       playerName: stats.playerName,
+      teamName: stats.teamName,
       matches,
+      innings: stats.innings,
       wickets: stats.wickets,
       runs: stats.runs,
       overs: stats.overs,
@@ -304,6 +320,8 @@ function calculateStatsFromScorecards(scorecards) {
       bestBowling,
       wides: stats.wides,
       noBalls: stats.noBalls,
+      fourWickets: stats.fourWickets,
+      fiveWickets: stats.fiveWickets,
     };
   }).sort((a, b) => b.wickets - a.wickets || a.economy - b.economy);
   
