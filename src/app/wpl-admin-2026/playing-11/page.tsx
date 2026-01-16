@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import { Match, Player, Team } from '@/types';

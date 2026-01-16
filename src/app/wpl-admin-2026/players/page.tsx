@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import AdminSidebar from '@/components/admin/AdminSidebar';
+import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 import { Player, Team } from '@/types';
 import { api } from '@/lib/data';
 import { WPLColors } from '@/lib/wplColors';
@@ -122,7 +122,7 @@ export default function WPLPlayersManagementPage() {
   return (
     <div className="flex min-h-screen" style={bgStyle}>
       <AuroraBackground />
-      <AdminSidebar currentPage="/wpl-admin-2026/players" />
+      <WPLAdminSidebarNew />
       
       <main className="flex-1 relative z-20 p-4 md:p-8 overflow-y-auto">
         <div className="max-w-7xl mx-auto">

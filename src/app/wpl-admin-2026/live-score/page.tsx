@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import AdminSidebar from '@/components/admin/AdminSidebar';
+import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 import BallEntryPanel from '@/components/admin/live-score/BallEntryPanel';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import { LiveScoreState } from '@/hooks/useLiveScore';
@@ -154,7 +154,7 @@ export default function WPLLiveScorePage() {
     return (
       <div className="flex min-h-screen" style={bgStyle}>
         <AuroraBackground />
-        <AdminSidebar currentPage="/wpl-admin-2026/live-score" />
+        <WPLAdminSidebarNew />
         <main className="flex-1 relative z-20 p-8 flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-2" style={{ color: WPLColors.textPrimary }}>Error</h2>
@@ -175,7 +175,7 @@ export default function WPLLiveScorePage() {
     return (
       <div className="flex min-h-screen" style={bgStyle}>
         <AuroraBackground />
-        <AdminSidebar currentPage="/wpl-admin-2026/live-score" />
+        <WPLAdminSidebarNew />
 
         <main className="flex-1 relative z-20 p-4 md:p-8 overflow-y-auto">
           <div className="max-w-7xl mx-auto">
@@ -237,7 +237,7 @@ export default function WPLLiveScorePage() {
   return (
     <div className="flex min-h-screen" style={bgStyle}>
       <AuroraBackground />
-      <AdminSidebar currentPage="/wpl-admin-2026/live-score" />
+      <WPLAdminSidebarNew />
       
       <main className="flex-1 relative z-20 p-4 md:p-8 overflow-y-auto">
         <div className="max-w-7xl mx-auto">

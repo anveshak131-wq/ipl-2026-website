@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import AdminSidebar from '@/components/admin/AdminSidebar';
+import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 import { Search, Edit2, X, TrendingUp, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, BarChart3, Hash, Activity, LayoutGrid, Table2, Save } from 'lucide-react';
 import { api } from '@/lib/data';
 import { Player, Match } from '@/types';
@@ -297,7 +297,7 @@ const WPLBowlingStatsPage = () => {
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-purple-900">
-      <AdminSidebar league="wpl" />
+      <WPLAdminSidebarNew />
 
       <main className="flex-1 p-6">
         {/* Header */}
