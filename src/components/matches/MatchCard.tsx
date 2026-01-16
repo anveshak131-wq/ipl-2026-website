@@ -17,7 +17,7 @@ interface MatchCardProps {
   players?: Player[]; // Optional players data for playing XI display
 }
 
-export default function MatchCard({ match, index = 0 }: MatchCardProps) {
+export default function MatchCard({ match, index = 0, players }: MatchCardProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
