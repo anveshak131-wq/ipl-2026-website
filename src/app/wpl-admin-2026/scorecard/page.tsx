@@ -113,6 +113,15 @@ export default function ScorecardAdminPage() {
     fetchPlayers();
   }, []);
 
+  // Sync activeInnings with activeTab
+  useEffect(() => {
+    if (activeTab === 'innings1') {
+      setActiveInnings(0);
+    } else if (activeTab === 'innings2') {
+      setActiveInnings(1);
+    }
+  }, [activeTab]);
+
   const getPlayersByTeam = (teamId: number): Player[] => {
     return players.filter(player => player.teamId === teamId.toString());
   };
