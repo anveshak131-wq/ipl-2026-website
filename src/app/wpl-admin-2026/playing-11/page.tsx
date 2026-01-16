@@ -366,7 +366,6 @@ export default function WPLPlaying11Page() {
               >
                 <option value="">Select a match...</option>
                 {matches
-                  .filter(m => m.status === 'upcoming' || m.status === 'live')
                   .map((match) => (
                     <option key={match.id} value={match.id}>
                       {match.team1.shortName} vs {match.team2.shortName} · {new Date(match.date).toLocaleDateString()} {match.time}
