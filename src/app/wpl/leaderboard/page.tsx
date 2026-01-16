@@ -643,7 +643,7 @@ export default function WPLLeaderboardPage() {
                 ) : (
                   <div className="space-y-3">
                     {sortedTeamStats.map((stat, index) => {
-                      const isQualifyingPosition = index < 4;
+                      const isQualifyingPosition = index < 3;
                       const isChampion = index === 0;
                       
                       return (
@@ -801,18 +801,16 @@ export default function WPLLeaderboardPage() {
                                   <div className="text-center hidden md:block">
                                     <div className="text-xs text-gray-500 uppercase mb-1 font-semibold">Form</div>
                                     <div className="flex items-center justify-center gap-1">
-                                      {[...Array(Math.min(5, stat.matches ?? 0))].map((_, i) => {
-                                        const isWin = i < (stat.wins ?? 0);
-                                        return (
-                                          <motion.div
-                                            key={i}
-                                            initial={{ scale: 0 }}
-                                            animate={{ scale: 1 }}
-                                            transition={{ delay: index * 0.08 + 0.5 + i * 0.05 }}
-                                            className={`w-2 h-2 rounded-full ${isWin ? 'bg-green-400' : 'bg-red-400'}`}
-                                          />
-                                        );
-                                      })}
+                                      {stat.matches > 0 ? (
+                                        <>
+                                          {/* Win percentage indicator */}
+                                          <div className="text-sm font-bold text-gray-300">
+                                            {((stat.wins ?? 0) / (stat.matches ?? 1) * 100).toFixed(0)}%
+                                          </div>
+                                        </>
+                                      ) : (
+                                        <div className="text-sm text-gray-500">-</div>
+                                      )}
                                     </div>
                                   </div>
                                 </div>
