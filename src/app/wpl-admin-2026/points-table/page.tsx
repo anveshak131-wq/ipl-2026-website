@@ -82,8 +82,8 @@ export default function WPLAdminPointsTablePage() {
 
   // Calculate points table data
   const pointsTable = useMemo(() => {
-    // Check if we have calculated stats from the API
-    const calculatedStats = (window as any).calculatedTeamStats;
+    // Check if we have calculated stats from the API (only in browser)
+    const calculatedStats = typeof window !== 'undefined' ? (window as any).calculatedTeamStats : null;
     if (calculatedStats && calculatedStats.length > 0) {
       return teams.map(team => {
         const teamStat = calculatedStats.find((s: any) => s.teamId === parseInt(team.id) || s.teamName === team.name);
