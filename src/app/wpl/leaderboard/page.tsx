@@ -481,8 +481,7 @@ export default function WPLLeaderboardPage() {
                             </tr>
                           </thead>
                           <tbody>
-                            {teamStats.map((stat) => {
-                              const globalIndex = filteredBattingStats.findIndex(s => s.playerId === stat.playerId);
+                            {teamStats.map((stat, teamIndex) => {
                               return (
                                 <motion.tr
                                   key={stat.playerId}
@@ -492,17 +491,17 @@ export default function WPLLeaderboardPage() {
                                 >
                                   <td className="py-5 px-4">
                                     <div className="flex items-center gap-3">
-                                      {globalIndex < 3 ? (
+                                      {teamIndex < 3 ? (
                                         <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                                          globalIndex === 0 ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-gray-900' :
-                                          globalIndex === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-400 text-gray-900' :
+                                          teamIndex === 0 ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-gray-900' :
+                                          teamIndex === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-400 text-gray-900' :
                                           'bg-gradient-to-br from-orange-400 to-orange-500 text-white'
                                         }`}>
-                                          {globalIndex + 1}
+                                          #{teamIndex + 1}
                                         </div>
                                       ) : (
                                         <div className="w-8 h-8 rounded-full flex items-center justify-center font-semibold text-gray-400 bg-white/5">
-                                          {globalIndex + 1}
+                                          #{teamIndex + 1}
                                         </div>
                                       )}
                                     </div>
@@ -576,8 +575,7 @@ export default function WPLLeaderboardPage() {
                             </tr>
                           </thead>
                           <tbody>
-                            {teamStats.map((stat) => {
-                              const globalIndex = filteredBowlingStats.findIndex(s => s.playerId === stat.playerId);
+                            {teamStats.map((stat, teamIndex) => {
                               return (
                                 <motion.tr
                                   key={stat.playerId}
@@ -587,17 +585,17 @@ export default function WPLLeaderboardPage() {
                                 >
                                   <td className="py-5 px-4">
                                     <div className="flex items-center gap-3">
-                                      {globalIndex < 3 ? (
+                                      {teamIndex < 3 ? (
                                         <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                                          globalIndex === 0 ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-gray-900' :
-                                          globalIndex === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-400 text-gray-900' :
+                                          teamIndex === 0 ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-gray-900' :
+                                          teamIndex === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-400 text-gray-900' :
                                           'bg-gradient-to-br from-orange-400 to-orange-500 text-white'
                                         }`}>
-                                          {globalIndex + 1}
+                                          #{teamIndex + 1}
                                         </div>
                                       ) : (
                                         <div className="w-8 h-8 rounded-full flex items-center justify-center font-semibold text-gray-400 bg-white/5">
-                                          {globalIndex + 1}
+                                          #{teamIndex + 1}
                                         </div>
                                       )}
                                     </div>
