@@ -412,8 +412,15 @@ async function handlePutRequest(context) {
       ...(trophies !== undefined && { trophies }),
       ...(homeGrounds !== undefined && { homeGrounds }),
       ...(league && { league }), // Update league if provided
-      ...(stats !== undefined && { stats }) // Update stats if provided
     };
+    
+    // Always update stats if provided, even if it's an object
+    if (stats !== undefined && stats !== null) {
+      updatedTeam.stats = stats;
+    }
+    
+    // Log for debugging
+    console.log('Updating team:', id, 'with stats:', stats);
     
     // Ensure league property exists (default to existing or 'ipl')
     if (!updatedTeam.league) {
@@ -424,6 +431,8 @@ async function handlePutRequest(context) {
     
     // Save to KV
     await env.IPL_CACHE.put('teams', JSON.stringify(teams));
+    
+    console.log('Team saved successfully:', updatedTeam.name, 'Stats:', updatedTeam.stats);
     
     return new Response(JSON.stringify(updatedTeam), {
       status: 200,
