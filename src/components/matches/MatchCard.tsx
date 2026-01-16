@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, Fragment } from 'react';
+import { useState, Fragment, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { Match, Player } from '@/types';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
@@ -22,6 +23,11 @@ interface MatchCardProps {
 export default function MatchCard({ match, index = 0, players }: MatchCardProps) {
   const [showScorecardModal, setShowScorecardModal] = useState(false);
   const [showPlaying11Modal, setShowPlaying11Modal] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
@@ -375,10 +381,10 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
       </div>
     </div>
 
-      {/* Scorecard Modal */}
-      {showScorecardModal && (
+      {/* Scorecard Modal - Using Portal */}
+      {mounted && showScorecardModal && createPortal(
         <div 
-          className="fixed inset-0 z-[100] bg-black"
+          className="fixed inset-0 z-[9999] bg-black"
         >
           <div 
             className="w-full h-full overflow-y-auto"
@@ -387,7 +393,7 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
             {/* Close Button */}
             <button
               onClick={() => setShowScorecardModal(false)}
-              className="fixed top-4 right-4 md:top-8 md:right-8 p-4 rounded-full bg-red-600 hover:bg-red-700 text-white transition-all z-[101] shadow-2xl hover:scale-110"
+              className="fixed top-4 right-4 md:top-8 md:right-8 p-4 rounded-full bg-red-600 hover:bg-red-700 text-white transition-all z-[10000] shadow-2xl hover:scale-110"
             >
               <X size={32} strokeWidth={3} />
             </button>
@@ -448,13 +454,14 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
             </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
-      {/* Playing 11 Modal */}
-      {showPlaying11Modal && match.playing11 && players && (
+      {/* Playing 11 Modal - Using Portal */}
+      {mounted && showPlaying11Modal && match.playing11 && players && createPortal(
         <div 
-          className="fixed inset-0 z-[100] bg-black"
+          className="fixed inset-0 z-[9999] bg-black"
         >
           <div 
             className="w-full h-full overflow-y-auto"
@@ -463,7 +470,7 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
             {/* Close Button */}
             <button
               onClick={() => setShowPlaying11Modal(false)}
-              className="fixed top-4 right-4 md:top-8 md:right-8 p-4 rounded-full bg-red-600 hover:bg-red-700 text-white transition-all z-[101] shadow-2xl hover:scale-110"
+              className="fixed top-4 right-4 md:top-8 md:right-8 p-4 rounded-full bg-red-600 hover:bg-red-700 text-white transition-all z-[10000] shadow-2xl hover:scale-110"
             >
               <X size={32} strokeWidth={3} />
             </button>
@@ -477,7 +484,8 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
             </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
