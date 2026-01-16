@@ -148,57 +148,57 @@ const defaultTeams = [
   {
     id: '11',
     league: 'wpl',
-    name: 'Mumbai Indians',
-    shortName: 'MI',
+    name: 'Mumbai Indians (WPL)',
+    shortName: 'MI-W',
     logo: '/logos/wpl_mi_logo_animated.svg',
     description: 'The women\'s franchise of Mumbai Indians bringing championship pedigree',
     colors: { primary: '#004BA0', secondary: '#FFD700' },
     trophies: [],
-    homeGrounds: ['Wankhede Stadium']
+    homeGrounds: ['Wankhede Stadium, Mumbai']
   },
   {
     id: '12',
     league: 'wpl',
-    name: 'Royal Challengers Bangalore',
-    shortName: 'RCB',
+    name: 'Royal Challengers Bengaluru (WPL)',
+    shortName: 'RCB-W',
     logo: '/logos/wpl_rcb_logo_animated.svg',
     description: 'The women\'s franchise of RCB with explosive talent',
-    colors: { primary: '#EC1C24', secondary: '#FFD700' },
+    colors: { primary: '#C8102E', secondary: '#FFD700' },
     trophies: [],
-    homeGrounds: ['M. Chinnaswamy Stadium']
+    homeGrounds: ['M. Chinnaswamy Stadium, Bengaluru']
   },
   {
     id: '13',
     league: 'wpl',
-    name: 'Delhi Capitals',
-    shortName: 'DC',
+    name: 'Delhi Capitals (WPL)',
+    shortName: 'DC-W',
     logo: '/logos/wpl_dc_logo_animated.svg',
     description: 'The women\'s franchise of Delhi Capitals combining youth and experience',
     colors: { primary: '#004BA0', secondary: '#DC2626' },
     trophies: [],
-    homeGrounds: ['Arun Jaitley Stadium']
+    homeGrounds: ['Arun Jaitley Stadium, Delhi']
   },
   {
     id: '14',
     league: 'wpl',
-    name: 'Gujarat Giants',
+    name: 'Gujarat Giants (WPL)',
     shortName: 'GG',
     logo: '/logos/wpl_gg_logo_animated.svg',
     description: 'The women\'s franchise of Gujarat Giants aiming for glory',
     colors: { primary: '#F97316', secondary: '#FFD700' },
     trophies: [],
-    homeGrounds: ['Narendra Modi Stadium']
+    homeGrounds: ['Narendra Modi Stadium, Ahmedabad']
   },
   {
     id: '15',
     league: 'wpl',
-    name: 'UP Warriorz',
+    name: 'UP Warriorz (WPL)',
     shortName: 'UPW',
     logo: '/logos/wpl_upw_logo_animated.svg',
     description: 'The women\'s franchise of UP Warriorz bringing fierce competition',
     colors: { primary: '#059669', secondary: '#F97316' },
     trophies: [],
-    homeGrounds: ['Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium']
+    homeGrounds: ['Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium, Lucknow']
   }
 ];
 
@@ -217,11 +217,13 @@ async function handleGetRequest(context) {
     // Force refresh from default teams if:
     // 1. CSK has old color
     // 2. WPL teams are missing
+    // 3. WPL teams have wrong shortName format (should be MI-W, RCB-W, DC-W not MI, RCB, DC)
     const hasCSKColorIssue = teams && teams.find(t => t.shortName === 'CSK' && t.colors.primary === '#FFFF00');
     const hasWPLTeams = teams && teams.find(t => t.league === 'wpl');
+    const hasWPLShortNameIssue = teams && teams.find(t => t.league === 'wpl' && t.name.includes('Mumbai Indians') && t.shortName === 'MI');
     
-    if (hasCSKColorIssue || !hasWPLTeams) {
-      console.log('Clearing KV cache and using default teams (CSK color fix:', !!hasCSKColorIssue, ', WPL teams missing:', !hasWPLTeams, ')');
+    if (hasCSKColorIssue || !hasWPLTeams || hasWPLShortNameIssue) {
+      console.log('Clearing KV cache and using default teams (CSK color fix:', !!hasCSKColorIssue, ', WPL teams missing:', !hasWPLTeams, ', WPL shortName issue:', !!hasWPLShortNameIssue, ')');
       teams = defaultTeams;
       // Update KV storage with fresh data
       await env.IPL_CACHE.put('teams', JSON.stringify(teams));
