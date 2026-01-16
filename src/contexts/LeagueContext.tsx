@@ -21,13 +21,20 @@ export function LeagueProvider({ children }: { children: ReactNode }) {
     // Only use stored value if we're on an admin page
     if (typeof window !== 'undefined') {
       const pathname = window.location.pathname;
-      // If on admin pages, allow stored preference
+      
+      // If on WPL admin pages, always use WPL
+      if (pathname.includes('/wpl-admin-2026')) {
+        return 'wpl';
+      }
+      
+      // If on IPL admin pages, allow stored preference
       if (pathname.includes('/ipl-admin-2026')) {
-      const stored = localStorage.getItem(LEAGUE_STORAGE_KEY);
-      if (stored === 'ipl' || stored === 'wpl') {
-        return stored as League;
+        const stored = localStorage.getItem(LEAGUE_STORAGE_KEY);
+        if (stored === 'ipl' || stored === 'wpl') {
+          return stored as League;
         }
       }
+      
       // For end-user pages, always default to IPL
       // Only set to WPL if explicitly on a WPL route
       if (pathname.startsWith('/wpl/') || pathname === '/wpl') {
