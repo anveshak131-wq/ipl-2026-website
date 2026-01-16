@@ -143,19 +143,20 @@ function calculateStatsFromScorecards(scorecards) {
   const battingMap = {};
   
   scorecards.forEach(scorecard => {
-    const { innings1, innings2 } = scorecard;
+    // Handle both old format (innings1, innings2) and new format (innings array)
+    const innings = scorecard.innings || [scorecard.innings1, scorecard.innings2].filter(Boolean);
     
-    [innings1, innings2].forEach(innings => {
-      if (!innings?.battingCard) return;
+    innings.forEach(inning => {
+      if (!inning?.batting) return;
       
-      innings.battingCard.forEach(batsman => {
-        if (!batsman.batsmanId) return;
+      inning.batting.forEach(batsman => {
+        if (!batsman.playerId) return;
         
-        const playerId = batsman.batsmanId;
+        const playerId = batsman.playerId;
         if (!battingMap[playerId]) {
           battingMap[playerId] = {
             playerId,
-            playerName: batsman.batsman || 'Unknown',
+            playerName: batsman.name || 'Unknown',
             runs: 0,
             ballsFaced: 0,
             fours: 0,
@@ -182,7 +183,9 @@ function calculateStatsFromScorecards(scorecards) {
         stats.innings += 1;
         stats.matches.add(scorecard.matchId);
         
-        if (!batsman.howOut || batsman.howOut.toLowerCase() === 'not out') {
+        // Check dismissal type - handle both old and new formats
+        const dismissalType = batsman.dismissal?.type || batsman.howOut;
+        if (!dismissalType || dismissalType.toLowerCase() === 'not-out' || dismissalType.toLowerCase() === 'not out') {
           stats.notOuts += 1;
         }
         
@@ -228,19 +231,20 @@ function calculateStatsFromScorecards(scorecards) {
   const bowlingMap = {};
   
   scorecards.forEach(scorecard => {
-    const { innings1, innings2 } = scorecard;
+    // Handle both old format (innings1, innings2) and new format (innings array)
+    const innings = scorecard.innings || [scorecard.innings1, scorecard.innings2].filter(Boolean);
     
-    [innings1, innings2].forEach(innings => {
-      if (!innings?.bowlingCard) return;
+    innings.forEach(inning => {
+      if (!inning?.bowling) return;
       
-      innings.bowlingCard.forEach(bowler => {
-        if (!bowler.bowlerId) return;
+      inning.bowling.forEach(bowler => {
+        if (!bowler.playerId) return;
         
-        const playerId = bowler.bowlerId;
+        const playerId = bowler.playerId;
         if (!bowlingMap[playerId]) {
           bowlingMap[playerId] = {
             playerId,
-            playerName: bowler.bowler || 'Unknown',
+            playerName: bowler.name || 'Unknown',
             wickets: 0,
             runs: 0,
             overs: 0,
