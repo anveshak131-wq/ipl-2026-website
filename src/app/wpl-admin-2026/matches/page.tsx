@@ -59,26 +59,62 @@ export default function WPLMatchesPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const token = localStorage.getItem('adminToken');
       
       if (editingMatch) {
-        setMatches(matches.map(m => m.id === editingMatch.id ? 
-          { ...m, ...formData } : m
-        ));
-        setMessage('Match updated successfully!');
+        // Update existing match
+        const response = await fetch('/api/matches', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            id: editingMatch.id,
+            team1Id: formData.team1Id,
+            team2Id: formData.team2Id,
+            venue: formData.venue,
+            date: formData.date,
+            time: formData.time,
+            status: formData.status
+          })
+        });
+
+        if (response.ok) {
+          const updatedMatch = await response.json();
+          setMatches(matches.map(m => m.id === editingMatch.id ? updatedMatch : m));
+          setMessage('Match updated successfully!');
+        } else {
+          const error = await response.json();
+          setMessage(`Error: ${error.error || 'Failed to update match'}`);
+        }
       } else {
-        const newMatch: Match = {
-          id: Date.now().toString(),
-          team1: { id: formData.team1Id, name: 'Team 1', shortName: 'T1' },
-          team2: { id: formData.team2Id, name: 'Team 2', shortName: 'T2' },
-          venue: formData.venue,
-          date: formData.date,
-          time: formData.time,
-          status: formData.status
-        };
-        setMatches([...matches, newMatch]);
-        setMessage('Match created successfully!');
+        // Create new match
+        const response = await fetch('/api/matches', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            team1Id: formData.team1Id,
+            team2Id: formData.team2Id,
+            venue: formData.venue,
+            date: formData.date,
+            time: formData.time,
+            status: formData.status,
+            league: 'wpl'
+          })
+        });
+
+        if (response.ok) {
+          const newMatch = await response.json();
+          setMatches([...matches, newMatch]);
+          setMessage('Match created successfully!');
+        } else {
+          const error = await response.json();
+          setMessage(`Error: ${error.error || 'Failed to create match'}`);
+        }
       }
       
       setShowForm(false);
@@ -93,6 +129,7 @@ export default function WPLMatchesPage() {
       });
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
+      console.error('Error saving match:', error);
       setMessage('Failed to save match');
     } finally {
       setLoading(false);
