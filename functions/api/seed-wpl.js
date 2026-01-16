@@ -349,13 +349,13 @@ export const onRequest = async (context) => {
           bestBowling: '-'
         }
       },
-      // DC-W Players
+      // UP Warriorz Players
       {
         id: 'wpl11',
         league: 'wpl',
         name: 'Meg Lanning',
         role: 'Batter',
-        teamId: '15',
+        teamId: '13',
         age: 31,
         nationality: 'Australia',
         jerseyNumber: 1,
@@ -386,7 +386,7 @@ export const onRequest = async (context) => {
         age: 24,
         nationality: 'India',
         jerseyNumber: 21,
-        isCaptain: false,
+        isCaptain: true,
         bowlingStyle: 'N/A',
         battingStyle: 'Right-handed bat',
         stats: {
