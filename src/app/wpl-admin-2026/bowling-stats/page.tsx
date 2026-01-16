@@ -23,6 +23,7 @@ const WPLBowlingStatsPage = () => {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [viewMode, setViewMode] = useState<'table' | 'teams'>('table');
   const [savingStats, setSavingStats] = useState(false);
+  const [loadedFromStatsAPI, setLoadedFromStatsAPI] = useState(false);
 
   const [editForm, setEditForm] = useState({
     matches: '',
@@ -86,6 +87,7 @@ const WPLBowlingStatsPage = () => {
             const statsData = await statsResponse.json();
             if (statsData.bowlingStats && statsData.bowlingStats.length > 0) {
               console.log('Loaded stats from statistics API');
+              setLoadedFromStatsAPI(true);
               // Convert stats to player format
               setPlayers(statsData.bowlingStats.map((stat: any) => ({
                 id: stat.playerId,
@@ -151,6 +153,11 @@ const WPLBowlingStatsPage = () => {
 
   // Calculate player stats from live scores
   const playerStatsMap = useMemo(() => {
+    // Skip if loaded from scorecard stats API
+    if (loadedFromStatsAPI) {
+      return {};
+    }
+    
     const statsMap: Record<string, any> = {};
 
     matches.forEach((match) => {
@@ -219,7 +226,8 @@ const WPLBowlingStatsPage = () => {
   // Filter and sort players
   const filteredPlayers = useMemo(() => {
     let filtered = players.filter((p) => {
-      const hasStats = playerStatsMap[p.id];
+      // If loaded from stats API, use player.stats directly
+      const hasStats = loadedFromStatsAPI ? (p.stats && p.stats.wickets > 0) : playerStatsMap[p.id];
       const matchesSearch =
         p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.jerseyNumber.toString().includes(searchQuery);
@@ -230,8 +238,8 @@ const WPLBowlingStatsPage = () => {
 
     // Sort
     filtered.sort((a, b) => {
-      const aStats = playerStatsMap[a.id] || {};
-      const bStats = playerStatsMap[b.id] || {};
+      const aStats = loadedFromStatsAPI ? (a.stats || {}) : (playerStatsMap[a.id] || {});
+      const bStats = loadedFromStatsAPI ? (b.stats || {}) : (playerStatsMap[b.id] || {});
       let aVal = aStats[sortField] || 0;
       let bVal = bStats[sortField] || 0;
 
@@ -242,10 +250,10 @@ const WPLBowlingStatsPage = () => {
     });
 
     return filtered;
-  }, [players, playerStatsMap, searchQuery, selectedTeam, sortField, sortDirection]);
+  }, [players, playerStatsMap, searchQuery, selectedTeam, sortField, sortDirection, loadedFromStatsAPI]);
 
   const handleEditPlayer = (player: Player) => {
-    const stats = playerStatsMap[player.id] || {};
+    const stats = loadedFromStatsAPI ? (player.stats || {}) : (playerStatsMap[player.id] || {});
     setEditingPlayer(player.id);
     setEditForm({
       matches: stats.matches?.toString() || '',
@@ -405,7 +413,7 @@ const WPLBowlingStatsPage = () => {
             </thead>
             <tbody className="divide-y divide-purple-600/20">
               {filteredPlayers.map((player) => {
-                const stats = playerStatsMap[player.id] || {};
+                const stats = loadedFromStatsAPI ? (player.stats || {}) : (playerStatsMap[player.id] || {});
                 return (
                   <tr key={player.id} className="hover:bg-purple-700/20 transition-colors">
                     <td className="px-4 py-3 text-white font-medium">

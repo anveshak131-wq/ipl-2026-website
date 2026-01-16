@@ -23,6 +23,7 @@ const WPLBattingStatsPage = () => {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [viewMode, setViewMode] = useState<'table' | 'teams'>('table');
   const [savingStats, setSavingStats] = useState(false);
+  const [statsFromScorecard, setStatsFromScorecard] = useState(false);
 
   const [editForm, setEditForm] = useState({
     matches: '',
@@ -35,6 +36,8 @@ const WPLBattingStatsPage = () => {
     average: '',
     strikeRate: ''
   });
+
+  const [loadedFromStatsAPI, setLoadedFromStatsAPI] = useState(false);
 
   // Check authentication
   useEffect(() => {
@@ -86,12 +89,22 @@ const WPLBattingStatsPage = () => {
           const statsResponse = await fetch('/api/stats?league=wpl&type=batting');
           if (statsResponse.ok) {
             const statsData = await statsResponse.json();
+            console.log('Stats API response:', statsData);
             if (statsData.battingStats && statsData.battingStats.length > 0) {
-              console.log('Loaded stats from statistics API');
+              console.log('Loaded', statsData.battingStats.length, 'batting stats from statistics API');
               // Convert stats to player format
               setPlayers(statsData.battingStats.map((stat: any) => ({
                 id: stat.playerId,
                 name: stat.playerName,
+                teamId: '', // Not critical for display
+                role: 'Batsman' as const,
+                age: 0,
+                nationality: '',
+                jerseyNumber: 0,
+                isCaptain: false,
+                bowlingStyle: '',
+                battingStyle: '',
+                league: 'wpl' as const,
                 stats: {
                   matches: stat.matches,
                   runs: stat.runs,
@@ -104,14 +117,19 @@ const WPLBattingStatsPage = () => {
                   strikeRate: stat.strikeRate,
                   wickets: 0,
                   economy: 0,
+                  bowlingAverage: 0,
+                  bestBowling: '0/0',
                 }
               })));
+              setLoadedFromStatsAPI(true);
               setLoading(false);
               return;
+            } else {
+              console.log('No batting stats found in API response');
             }
           }
         } catch (err) {
-          console.log('Statistics API not available, falling back to live scores');
+          console.error('Statistics API error:', err);
         }
 
         // Fallback to old method
@@ -152,6 +170,11 @@ const WPLBattingStatsPage = () => {
 
   // Calculate player stats from live scores
   const playerStatsMap = useMemo(() => {
+    // Skip if loaded from scorecard stats API
+    if (loadedFromStatsAPI) {
+      return {};
+    }
+
     const statsMap: Record<string, any> = {};
 
     matches.forEach((match) => {
@@ -254,6 +277,30 @@ const WPLBattingStatsPage = () => {
 
   // Filter and sort players
   const filteredPlayers = useMemo(() => {
+    // If loaded from stats API, use player.stats directly
+    if (loadedFromStatsAPI) {
+      let filtered = players.filter((p) => {
+        const matchesSearch =
+          p.name.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesTeam = selectedTeam === 'all' || p.teamId === selectedTeam;
+        return matchesSearch && matchesTeam;
+      });
+
+      // Sort by stats
+      filtered.sort((a, b) => {
+        let aVal = (a.stats as any)[sortField] || 0;
+        let bVal = (b.stats as any)[sortField] || 0;
+
+        if (typeof aVal === 'string') aVal = parseFloat(aVal) || 0;
+        if (typeof bVal === 'string') bVal = parseFloat(bVal) || 0;
+
+        return sortDirection === 'desc' ? bVal - aVal : aVal - bVal;
+      });
+
+      return filtered;
+    }
+
+    // Original logic for live scores
     let filtered = players.filter((p) => {
       const hasStats = playerStatsMap[p.id];
       const matchesSearch =
@@ -278,7 +325,7 @@ const WPLBattingStatsPage = () => {
     });
 
     return filtered;
-  }, [players, playerStatsMap, searchQuery, selectedTeam, sortField, sortDirection]);
+  }, [players, playerStatsMap, searchQuery, selectedTeam, sortField, sortDirection, loadedFromStatsAPI]);
 
   const handleEditPlayer = (player: Player) => {
     const stats = playerStatsMap[player.id] || {};
@@ -444,13 +491,13 @@ const WPLBattingStatsPage = () => {
             </thead>
             <tbody className="divide-y divide-purple-600/20">
               {filteredPlayers.map((player) => {
-                const stats = playerStatsMap[player.id] || {};
+                const stats = loadedFromStatsAPI ? player.stats : (playerStatsMap[player.id] || {});
                 return (
                   <tr key={player.id} className="hover:bg-purple-700/20 transition-colors">
                     <td className="px-4 py-3 text-white font-medium">
                       <div className="flex items-center gap-2">
                         <Shirt className="w-4 h-4 text-purple-300" />
-                        {player.name} <span className="text-purple-300">#{player.jerseyNumber}</span>
+                        {player.name} {player.jerseyNumber > 0 && <span className="text-purple-300">#{player.jerseyNumber}</span>}
                       </div>
                     </td>
                     <td className="px-4 py-3 text-center text-purple-100">{stats.matches || 0}</td>
