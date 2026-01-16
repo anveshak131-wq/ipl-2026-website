@@ -1,6 +1,7 @@
 /**
- * Cloudflare Pages Function for scorecards API
- * Handles GET, POST, PUT operations for cricket scorecards
+ * Cloudflare Pages Function for scorecards API base route
+ * Handles GET (list all) and POST (create new) operations
+ * Individual scorecard operations are handled by [id].js
  */
 
 const corsHeaders = {
@@ -33,8 +34,6 @@ export async function onRequest(context) {
 
   try {
     const url = new URL(request.url);
-    const pathSegments = url.pathname.split('/').filter(Boolean);
-    const scorecardId = pathSegments[pathSegments.length - 1];
     const isMatchQuery = url.searchParams.has('matchId');
     const matchId = url.searchParams.get('matchId');
 
@@ -57,20 +56,6 @@ export async function onRequest(context) {
         }
         
         return new Response(JSON.stringify(scorecards), {
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      } else if (scorecardId && scorecardId !== 'scorecards') {
-        // Get specific scorecard by ID
-        const scorecardData = await env.IPL_CACHE.get(`scorecard_${scorecardId}`);
-        if (!scorecardData) {
-          return new Response(JSON.stringify({ error: 'Scorecard not found' }), {
-            status: 404,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          });
-        }
-        
-        return new Response(scorecardData, {
           status: 200,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
@@ -134,112 +119,6 @@ export async function onRequest(context) {
       });
     }
 
-    // PUT update scorecard
-    if (request.method === 'PUT') {
-      if (!verifyAdminToken(request)) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      // Check if this is a publish request
-      if (url.pathname.endsWith('/publish')) {
-        const actualId = pathSegments[pathSegments.length - 2]; // Get ID before 'publish'
-        const existingData = await env.IPL_CACHE.get(`scorecard_${actualId}`);
-        
-        if (!existingData) {
-          return new Response(JSON.stringify({ error: 'Scorecard not found' }), {
-            status: 404,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          });
-        }
-
-        const scorecard = JSON.parse(existingData);
-        scorecard.draft = false;
-        scorecard.publishedAt = new Date().toISOString();
-        scorecard.updatedAt = new Date().toISOString();
-
-        await env.IPL_CACHE.put(
-          `scorecard_${actualId}`,
-          JSON.stringify(scorecard)
-        );
-
-        return new Response(JSON.stringify(scorecard), {
-          status: 200,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      // Regular update
-      if (!scorecardId || scorecardId === 'scorecards') {
-        return new Response(JSON.stringify({ error: 'Scorecard ID required' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      const existingData = await env.IPL_CACHE.get(`scorecard_${scorecardId}`);
-      if (!existingData) {
-        return new Response(JSON.stringify({ error: 'Scorecard not found' }), {
-          status: 404,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      const updateData = await request.json();
-      const existingScorecard = JSON.parse(existingData);
-      
-      const updatedScorecard = {
-        ...existingScorecard,
-        ...updateData,
-        id: scorecardId, // Preserve original ID
-        updatedAt: new Date().toISOString()
-      };
-
-      await env.IPL_CACHE.put(
-        `scorecard_${scorecardId}`,
-        JSON.stringify(updatedScorecard)
-      );
-
-      return new Response(JSON.stringify(updatedScorecard), {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-
-    // DELETE scorecard
-    if (request.method === 'DELETE') {
-      if (!verifyAdminToken(request)) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-          status: 401,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      if (!scorecardId || scorecardId === 'scorecards') {
-        return new Response(JSON.stringify({ error: 'Scorecard ID required' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      const existingData = await env.IPL_CACHE.get(`scorecard_${scorecardId}`);
-      if (!existingData) {
-        return new Response(JSON.stringify({ error: 'Scorecard not found' }), {
-          status: 404,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      await env.IPL_CACHE.delete(`scorecard_${scorecardId}`);
-
-      return new Response(JSON.stringify({ message: 'Scorecard deleted successfully' }), {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      });
-    }
-
     // Method not allowed
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
@@ -248,9 +127,10 @@ export async function onRequest(context) {
 
   } catch (error) {
     console.error('Scorecard API error:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+    return new Response(JSON.stringify({ error: 'Internal server error', details: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
 }
+
