@@ -82,15 +82,29 @@ export default function WPLAdminPointsTablePage() {
 
   // Calculate points table data
   const pointsTable = useMemo(() => {
-    // Check if we have calculated stats from the API (only in browser)
-    const calculatedStats = typeof window !== 'undefined' ? (window as any).calculatedTeamStats : null;
-    if (calculatedStats && calculatedStats.length > 0) {
-      return teams.map(team => {
+    return teams.map(team => {
+      // Add shortName display
+      const displayShortName = team.shortName || team.name.split(' ').map(w => w[0]).join('');
+      const displayName = team.name && team.name.includes('(WPL)') ? team.name : `${team.name || ''} (WPL)`;
+      
+      // Priority 1: Use saved team.stats if available (manually edited values)
+      if (team.stats && typeof team.stats === 'object') {
+        return {
+          ...team,
+          shortName: displayShortName,
+          name: displayName,
+          matchesPlayed: team.stats.matchesPlayed || 0,
+          wins: team.stats.wins || 0,
+          losses: team.stats.losses || 0,
+          points: team.stats.points || 0,
+          netRunRate: team.stats.netRunRate || 0.00
+        };
+      }
+      
+      // Priority 2: Check if we have calculated stats from the API (only in browser)
+      const calculatedStats = typeof window !== 'undefined' ? (window as any).calculatedTeamStats : null;
+      if (calculatedStats && calculatedStats.length > 0) {
         const teamStat = calculatedStats.find((s: any) => s.teamId === parseInt(team.id) || s.teamName === team.name);
-        
-        // Add shortName display
-        const displayShortName = team.shortName || team.name.split(' ').map(w => w[0]).join('');
-        const displayName = team.name && team.name.includes('(WPL)') ? team.name : `${team.name || ''} (WPL)`;
         
         if (teamStat) {
           return {
@@ -104,74 +118,18 @@ export default function WPLAdminPointsTablePage() {
             netRunRate: teamStat.netRunRate
           };
         }
-        
-        // Return team with zero stats if no data yet
-        return {
-          ...team,
-          shortName: displayShortName,
-          name: displayName,
-          matchesPlayed: 0,
-          wins: 0,
-          losses: 0,
-          points: 0,
-          netRunRate: 0.00
-        };
-      });
-    }
-
-    // Fallback to calculating from matches
-    return teams.map(team => {
-      const teamMatches = matches.filter(m =>
-        (m.team1.id === team.id || m.team2.id === team.id) &&
-        m.status === 'completed' &&
-        new Date(m.date).getFullYear() === selectedYear
-      );
-       
-      const wins = teamMatches.filter(m => {
-        if (!m.result) return false;
-        return m.result.includes(team.shortName) || m.result.includes(team.name);
-      }).length;
-       
-      const losses = teamMatches.length - wins;
-      const points = wins * 2;
-       
-      // Calculate Net Run Rate (simplified)
-      let netRunRate = 0;
-      if (teamMatches.length > 0) {
-        const totalRunsScored = teamMatches.reduce((sum, match) => {
-          if (match.team1.id === team.id) {
-            return sum + (match.team1Score || 0);
-          } else if (match.team2.id === team.id) {
-            return sum + (match.team2Score || 0);
-          }
-          return sum;
-        }, 0);
-         
-        const totalRunsConceded = teamMatches.reduce((sum, match) => {
-          if (match.team1.id === team.id) {
-            return sum + (match.team2Score || 0);
-          } else if (match.team2.id === team.id) {
-            return sum + (match.team1Score || 0);
-          }
-          return sum;
-        }, 0);
-         
-        netRunRate = (totalRunsScored - totalRunsConceded) / (teamMatches.length * 20);
       }
-       
-      // Normalize display names for WPL teams to avoid confusion with IPL names
-      const displayShortName = team.shortName && team.shortName.includes('-W') ? team.shortName : `${team.shortName || ''}-W`;
-      const displayName = team.name && team.name.includes('(WPL)') ? team.name : `${team.name || ''} (WPL)`;
-
+      
+      // Priority 3: Return team with zero stats if no data yet
       return {
         ...team,
         shortName: displayShortName,
         name: displayName,
-        matchesPlayed: teamMatches.length,
-        wins,
-        losses,
-        points,
-        netRunRate: parseFloat(netRunRate.toFixed(2))
+        matchesPlayed: 0,
+        wins: 0,
+        losses: 0,
+        points: 0,
+        netRunRate: 0.00
       };
     });
   }, [teams, matches, selectedYear]);
