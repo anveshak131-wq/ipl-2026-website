@@ -292,6 +292,40 @@ export default function ScorecardAdminPage() {
     } else {
       updated.matchInfo = { ...updated.matchInfo, [field]: value };
     }
+
+    // Update innings batting order based on toss decision
+    if ((field === 'toss.winner' || field === 'toss.decision') && updated.matchInfo.toss?.winner && updated.matchInfo.toss?.decision) {
+      const tossWinner = updated.matchInfo.toss.winner;
+      const tossDecision = updated.matchInfo.toss.decision;
+      
+      // Determine which team bats first
+      let firstBattingTeam: number;
+      let secondBattingTeam: number;
+      
+      if (tossDecision === 'bat') {
+        // Toss winner chose to bat, so they bat first
+        if (tossWinner === updated.matchInfo.team1.name) {
+          firstBattingTeam = updated.matchInfo.team1.id;
+          secondBattingTeam = updated.matchInfo.team2.id;
+        } else {
+          firstBattingTeam = updated.matchInfo.team2.id;
+          secondBattingTeam = updated.matchInfo.team1.id;
+        }
+      } else {
+        // Toss winner chose to bowl, so other team bats first
+        if (tossWinner === updated.matchInfo.team1.name) {
+          firstBattingTeam = updated.matchInfo.team2.id;
+          secondBattingTeam = updated.matchInfo.team1.id;
+        } else {
+          firstBattingTeam = updated.matchInfo.team1.id;
+          secondBattingTeam = updated.matchInfo.team2.id;
+        }
+      }
+      
+      updated.innings[0].battingTeamId = firstBattingTeam;
+      updated.innings[1].battingTeamId = secondBattingTeam;
+    }
+
     setScorecard(updated);
   };
 
@@ -504,8 +538,16 @@ export default function ScorecardAdminPage() {
                   }`}
                 >
                   {tab === 'matchInfo' && '📋 Match Info'}
-                  {tab === 'innings1' && `🏏 ${scorecard.matchInfo.team1.name} Innings`}
-                  {tab === 'innings2' && `🏏 ${scorecard.matchInfo.team2.name} Innings`}
+                  {tab === 'innings1' && `🏏 ${
+                    scorecard.innings[0].battingTeamId === scorecard.matchInfo.team1.id 
+                      ? scorecard.matchInfo.team1.name 
+                      : scorecard.matchInfo.team2.name
+                  } Innings`}
+                  {tab === 'innings2' && `🏏 ${
+                    scorecard.innings[1].battingTeamId === scorecard.matchInfo.team1.id 
+                      ? scorecard.matchInfo.team1.name 
+                      : scorecard.matchInfo.team2.name
+                  } Innings`}
                   {tab === 'result' && '🏆 Result'}
                 </button>
               ))}
