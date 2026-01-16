@@ -13,6 +13,7 @@ import type {
 
 export default function WPLStatsPage() {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'batting' | 'bowling' | 'teams'>('overview');
   const [battingStats, setBattingStats] = useState<PlayerBattingStats[]>([]);
   const [bowlingStats, setBowlingStats] = useState<PlayerBowlingStats[]>([]);
@@ -26,17 +27,28 @@ export default function WPLStatsPage() {
 
   const fetchStats = async () => {
     setLoading(true);
+    setError(null);
     try {
       const response = await fetch('/api/stats?league=wpl&type=all');
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+      
       const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
       
       setBattingStats(data.battingStats || []);
       setBowlingStats(data.bowlingStats || []);
       setTeamStats(data.teamStats || []);
       setOrangeCap(data.orangeCap);
       setPurpleCap(data.purpleCap);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching stats:', error);
+      setError(error.message || 'Failed to fetch statistics');
     } finally {
       setLoading(false);
     }
@@ -147,6 +159,31 @@ export default function WPLStatsPage() {
           <div className="text-center text-white py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
             <p>Calculating statistics...</p>
+          </div>
+        ) : error ? (
+          <div className="bg-red-500/20 border border-red-500/40 rounded-lg p-6 text-center">
+            <p className="text-red-300 font-semibold mb-2">Error loading statistics</p>
+            <p className="text-red-200 text-sm mb-4">{error}</p>
+            <button
+              onClick={fetchStats}
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white transition"
+            >
+              Retry
+            </button>
+          </div>
+        ) : battingStats.length === 0 && bowlingStats.length === 0 && teamStats.length === 0 ? (
+          <div className="bg-yellow-500/20 border border-yellow-500/40 rounded-lg p-8 text-center">
+            <Trophy className="w-16 h-16 text-yellow-400 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-white mb-2">No Statistics Available</h3>
+            <p className="text-gray-300 mb-4">
+              Statistics will appear once you publish scorecards from the Scorecard admin page.
+            </p>
+            <a
+              href="/wpl-admin-2026/scorecard"
+              className="inline-block px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition"
+            >
+              Go to Scorecard Admin
+            </a>
           </div>
         ) : (
           <>

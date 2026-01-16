@@ -12,7 +12,7 @@ export async function GET(request: Request) {
 
     // Fetch all published scorecards for the league
     const env = process.env as any;
-    const kvNamespace = env.KV;
+    const kvNamespace = env.IPL_CACHE;
     
     if (!kvNamespace) {
       return new Response(JSON.stringify({ error: 'KV namespace not configured' }), {
@@ -21,13 +21,18 @@ export async function GET(request: Request) {
       });
     }
 
-    // Get all scorecard keys for the league
-    const listResult = await kvNamespace.list({ prefix: `scorecard:${league}:` });
+    // Get all scorecard keys
+    const listResult = await kvNamespace.list({ prefix: 'scorecard_' });
     const keys = listResult.keys.map((k: any) => k.name);
 
-    // Fetch all scorecards
+    // Fetch all scorecards and filter by league
     const scorecardPromises = keys.map((key: string) => kvNamespace.get(key, 'json'));
-    const scorecards = (await Promise.all(scorecardPromises)).filter(Boolean);
+    const allScorecards = (await Promise.all(scorecardPromises)).filter(Boolean);
+    
+    // Filter by league and only get published (non-draft) scorecards
+    const scorecards = allScorecards.filter((s: any) => 
+      s.league === league && s.draft === false
+    );
 
     // Initialize stats calculator
     const calculator = new StatsCalculator(scorecards);
