@@ -89,30 +89,37 @@ export default function WPLLeaderboardPage() {
         if (statsResponse.ok) {
           const statsData = await statsResponse.json();
           
-          if (statsData.battingStats && Array.isArray(statsData.battingStats)) {
+          // Only set stats if there's actual data from scorecards
+          if (statsData.battingStats && Array.isArray(statsData.battingStats) && statsData.battingStats.length > 0) {
             setBattingStats(statsData.battingStats);
           }
           
-          if (statsData.bowlingStats && Array.isArray(statsData.bowlingStats)) {
+          if (statsData.bowlingStats && Array.isArray(statsData.bowlingStats) && statsData.bowlingStats.length > 0) {
             setBowlingStats(statsData.bowlingStats);
           }
           
-          if (statsData.teamStats && Array.isArray(statsData.teamStats)) {
+          if (statsData.teamStats && Array.isArray(statsData.teamStats) && statsData.teamStats.length > 0) {
             setTeamStats(statsData.teamStats);
+          } else {
+            // Fallback to teams data only if available
+            if (teamsData && teamsData.length > 0) {
+              const fallbackTeamStats = teamsData
+                .filter(team => team.stats && (team.stats.matchesPlayed || 0) > 0) // Only teams with matches
+                .map(team => ({
+                  teamId: parseInt(team.id),
+                  teamName: team.name,
+                  matches: team.stats?.matchesPlayed || 0,
+                  wins: team.stats?.wins || 0,
+                  losses: team.stats?.losses || 0,
+                  points: team.stats?.points || 0,
+                  netRunRate: team.stats?.netRunRate || 0.00
+                }));
+              
+              if (fallbackTeamStats.length > 0) {
+                setTeamStats(fallbackTeamStats);
+              }
+            }
           }
-        }
-
-        if (teamStats.length === 0 && teamsData && teamsData.length > 0) {
-          const fallbackTeamStats = teamsData.map(team => ({
-            teamId: parseInt(team.id),
-            teamName: team.name,
-            matches: team.stats?.matchesPlayed || 0,
-            wins: team.stats?.wins || 0,
-            losses: team.stats?.losses || 0,
-            points: team.stats?.points || 0,
-            netRunRate: team.stats?.netRunRate || 0.00
-          }));
-          setTeamStats(fallbackTeamStats);
         }
 
       } catch (err) {
