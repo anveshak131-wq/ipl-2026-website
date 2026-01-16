@@ -638,7 +638,8 @@ export default function ScorecardAdminPage() {
                                     <option value="stumped">Stumped</option>
                                     <option value="hit-wicket">Hit Wicket</option>
                                   </select>
-                                </td>">
+                                </td>
+                                <td className="p-2">
                                   {batter.dismissal?.type && batter.dismissal.type !== 'not-out' && (
                                     <input
                                       type="text"
@@ -653,6 +654,7 @@ export default function ScorecardAdminPage() {
                                       className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-sm"
                                     />
                                   )}
+                                </td>
                                 </td>
                                 <td className="p-2
                                 <td className="p-2 text-center">

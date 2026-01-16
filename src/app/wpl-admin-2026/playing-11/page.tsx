@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/AdminSidebar';
-import WPLAdminSidebar from '@/components/admin/WPLAdminSidebar';
+import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import { Match, Player, Team } from '@/types';
 import { api } from '@/lib/data';
@@ -284,7 +284,7 @@ export default function WPLPlaying11Page() {
   return (
     <div className="flex min-h-screen" style={bgStyle}>
       <AuroraBackground />
-      <WPLAdminSidebar currentPage="/wpl-admin-2026/playing-11" />
+      <WPLAdminSidebarNew />
 
       <main className="flex-1 relative z-20 p-4 md:p-8 overflow-y-auto" style={{ position: 'relative', zIndex: 20 }}>
         <div className="max-w-7xl mx-auto">
