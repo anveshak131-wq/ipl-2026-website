@@ -295,85 +295,133 @@ export default function WPLStatsPage() {
 
             {/* Batting Stats Tab */}
             {activeTab === 'batting' && (
-              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-6 overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-white/20 text-gray-300">
-                      <th className="text-left p-3">Rank</th>
-                      <th className="text-left p-3">Player</th>
-                      <th className="text-center p-3">Mat</th>
-                      <th className="text-center p-3">Inns</th>
-                      <th className="text-center p-3">Runs</th>
-                      <th className="text-center p-3">HS</th>
-                      <th className="text-center p-3">Avg</th>
-                      <th className="text-center p-3">SR</th>
-                      <th className="text-center p-3">50s</th>
-                      <th className="text-center p-3">100s</th>
-                      <th className="text-center p-3">4s</th>
-                      <th className="text-center p-3">6s</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {battingStats.map((player, idx) => (
-                      <tr key={player.playerId} className="border-b border-white/10 hover:bg-white/5">
-                        <td className="p-3 font-bold text-purple-400">#{idx + 1}</td>
-                        <td className="p-3 font-semibold text-white">{player.playerName}</td>
-                        <td className="p-3 text-center text-gray-300">{player.matches}</td>
-                        <td className="p-3 text-center text-gray-300">{player.innings}</td>
-                        <td className="p-3 text-center font-bold text-orange-400">{player.runs}</td>
-                        <td className="p-3 text-center text-gray-300">{player.highestScore}</td>
-                        <td className="p-3 text-center text-gray-300">{player.average}</td>
-                        <td className="p-3 text-center text-gray-300">{player.strikeRate}</td>
-                        <td className="p-3 text-center text-gray-300">{player.fifties}</td>
-                        <td className="p-3 text-center text-gray-300">{player.hundreds}</td>
-                        <td className="p-3 text-center text-gray-300">{player.fours}</td>
-                        <td className="p-3 text-center text-gray-300">{player.sixes}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="space-y-6">
+                {(() => {
+                  // Group batting stats by team
+                  const grouped: { [key: string]: typeof battingStats } = {};
+                  battingStats.forEach(stat => {
+                    const teamName = stat.teamName || 'Unknown Team';
+                    if (!grouped[teamName]) {
+                      grouped[teamName] = [];
+                    }
+                    grouped[teamName].push(stat);
+                  });
+
+                  return Object.entries(grouped).map(([teamName, teamPlayers]) => (
+                    <div key={teamName} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg overflow-hidden">
+                      {/* Team Header */}
+                      <div className="bg-gradient-to-r from-orange-500/30 to-pink-500/30 border-b border-white/20 px-6 py-4">
+                        <h3 className="text-xl font-bold text-white">{teamName}</h3>
+                      </div>
+                      
+                      {/* Team Table */}
+                      <div className="p-6 overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b border-white/20 text-gray-300">
+                              <th className="text-left p-3">Rank</th>
+                              <th className="text-left p-3">Player</th>
+                              <th className="text-center p-3">Mat</th>
+                              <th className="text-center p-3">Inns</th>
+                              <th className="text-center p-3">Runs</th>
+                              <th className="text-center p-3">HS</th>
+                              <th className="text-center p-3">Avg</th>
+                              <th className="text-center p-3">SR</th>
+                              <th className="text-center p-3">50s</th>
+                              <th className="text-center p-3">100s</th>
+                              <th className="text-center p-3">4s</th>
+                              <th className="text-center p-3">6s</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {teamPlayers.map((player, idx) => (
+                              <tr key={player.playerId} className="border-b border-white/10 hover:bg-white/5">
+                                <td className="p-3 font-bold text-purple-400">#{idx + 1}</td>
+                                <td className="p-3 font-semibold text-white">{player.playerName}</td>
+                                <td className="p-3 text-center text-gray-300">{player.matches}</td>
+                                <td className="p-3 text-center text-gray-300">{player.innings}</td>
+                                <td className="p-3 text-center font-bold text-orange-400">{player.runs}</td>
+                                <td className="p-3 text-center text-gray-300">{player.highestScore}</td>
+                                <td className="p-3 text-center text-gray-300">{player.average}</td>
+                                <td className="p-3 text-center text-gray-300">{player.strikeRate}</td>
+                                <td className="p-3 text-center text-gray-300">{player.fifties}</td>
+                                <td className="p-3 text-center text-gray-300">{player.hundreds}</td>
+                                <td className="p-3 text-center text-gray-300">{player.fours}</td>
+                                <td className="p-3 text-center text-gray-300">{player.sixes}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  ));
+                })()}
               </div>
             )}
 
             {/* Bowling Stats Tab */}
             {activeTab === 'bowling' && (
-              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-6 overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-white/20 text-gray-300">
-                      <th className="text-left p-3">Rank</th>
-                      <th className="text-left p-3">Player</th>
-                      <th className="text-center p-3">Mat</th>
-                      <th className="text-center p-3">Inns</th>
-                      <th className="text-center p-3">Wkts</th>
-                      <th className="text-center p-3">Best</th>
-                      <th className="text-center p-3">Avg</th>
-                      <th className="text-center p-3">Econ</th>
-                      <th className="text-center p-3">SR</th>
-                      <th className="text-center p-3">4W</th>
-                      <th className="text-center p-3">5W</th>
-                      <th className="text-center p-3">Maidens</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {bowlingStats.map((player, idx) => (
-                      <tr key={player.playerId} className="border-b border-white/10 hover:bg-white/5">
-                        <td className="p-3 font-bold text-pink-400">#{idx + 1}</td>
-                        <td className="p-3 font-semibold text-white">{player.playerName}</td>
-                        <td className="p-3 text-center text-gray-300">{player.matches}</td>
-                        <td className="p-3 text-center text-gray-300">{player.innings}</td>
-                        <td className="p-3 text-center font-bold text-purple-400">{player.wickets}</td>
-                        <td className="p-3 text-center text-gray-300">{player.bestBowling}</td>
-                        <td className="p-3 text-center text-gray-300">{player.average}</td>
-                        <td className="p-3 text-center text-gray-300">{player.economy}</td>
-                        <td className="p-3 text-center text-gray-300">{player.strikeRate}</td>
-                        <td className="p-3 text-center text-gray-300">{player.fourWickets}</td>
-                        <td className="p-3 text-center text-gray-300">{player.fiveWickets}</td>
-                        <td className="p-3 text-center text-gray-300">{player.maidens}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="space-y-6">
+                {(() => {
+                  // Group bowling stats by team
+                  const grouped: { [key: string]: typeof bowlingStats } = {};
+                  bowlingStats.forEach(stat => {
+                    const teamName = stat.teamName || 'Unknown Team';
+                    if (!grouped[teamName]) {
+                      grouped[teamName] = [];
+                    }
+                    grouped[teamName].push(stat);
+                  });
+
+                  return Object.entries(grouped).map(([teamName, teamPlayers]) => (
+                    <div key={teamName} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg overflow-hidden">
+                      {/* Team Header */}
+                      <div className="bg-gradient-to-r from-purple-500/30 to-pink-500/30 border-b border-white/20 px-6 py-4">
+                        <h3 className="text-xl font-bold text-white">{teamName}</h3>
+                      </div>
+                      
+                      {/* Team Table */}
+                      <div className="p-6 overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b border-white/20 text-gray-300">
+                              <th className="text-left p-3">Rank</th>
+                              <th className="text-left p-3">Player</th>
+                              <th className="text-center p-3">Mat</th>
+                              <th className="text-center p-3">Inns</th>
+                              <th className="text-center p-3">Wkts</th>
+                              <th className="text-center p-3">Best</th>
+                              <th className="text-center p-3">Avg</th>
+                              <th className="text-center p-3">Econ</th>
+                              <th className="text-center p-3">SR</th>
+                              <th className="text-center p-3">4W</th>
+                              <th className="text-center p-3">5W</th>
+                              <th className="text-center p-3">Maidens</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {teamPlayers.map((player, idx) => (
+                              <tr key={player.playerId} className="border-b border-white/10 hover:bg-white/5">
+                                <td className="p-3 font-bold text-pink-400">#{idx + 1}</td>
+                                <td className="p-3 font-semibold text-white">{player.playerName}</td>
+                                <td className="p-3 text-center text-gray-300">{player.matches}</td>
+                                <td className="p-3 text-center text-gray-300">{player.innings}</td>
+                                <td className="p-3 text-center font-bold text-purple-400">{player.wickets}</td>
+                                <td className="p-3 text-center text-gray-300">{player.bestBowling}</td>
+                                <td className="p-3 text-center text-gray-300">{player.average}</td>
+                                <td className="p-3 text-center text-gray-300">{player.economy}</td>
+                                <td className="p-3 text-center text-gray-300">{player.strikeRate}</td>
+                                <td className="p-3 text-center text-gray-300">{player.fourWickets}</td>
+                                <td className="p-3 text-center text-gray-300">{player.fiveWickets}</td>
+                                <td className="p-3 text-center text-gray-300">{player.maidens}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  ));
+                })()}
               </div>
             )}
 
