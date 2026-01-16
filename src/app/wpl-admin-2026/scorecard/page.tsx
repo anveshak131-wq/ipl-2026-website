@@ -1040,9 +1040,18 @@ export default function ScorecardAdminPage() {
                       className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
                     >
                       <option value="">Select Player</option>
-                      {players.map(player => (
-                        <option key={player.id} value={player.name}>{player.name}</option>
-                      ))}
+                      {/* Team 1 Players */}
+                      <optgroup label={scorecard.matchInfo.team1.name}>
+                        {getPlayersByTeam(scorecard.matchInfo.team1.id).map(player => (
+                          <option key={player.id} value={player.name}>{player.name}</option>
+                        ))}
+                      </optgroup>
+                      {/* Team 2 Players */}
+                      <optgroup label={scorecard.matchInfo.team2.name}>
+                        {getPlayersByTeam(scorecard.matchInfo.team2.id).map(player => (
+                          <option key={player.id} value={player.name}>{player.name}</option>
+                        ))}
+                      </optgroup>
                     </select>
                   </div>
                 </div>
