@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { 
   Home, Calendar, MapPin, FileText, Target, Activity, 
-  Users, Shield, BarChart3, TrendingUp, Menu, X, ChevronRight 
+  Users, Shield, BarChart3, TrendingUp, Menu, X, ChevronRight, Award 
 } from 'lucide-react';
 
 const menuItems = [
@@ -23,6 +23,7 @@ const menuItems = [
   { href: '/wpl-admin-2026/batting-stats', label: 'Batting Stats', icon: TrendingUp },
   { href: '/wpl-admin-2026/bowling-stats', label: 'Bowling Stats', icon: TrendingUp },
   { href: '/wpl-admin-2026/scorecard', label: 'Scorecard', icon: FileText },
+  { href: '/wpl-admin-2026/statistics', label: 'Statistics', icon: Award },
 ];
 
 export default function WPLAdminSidebarNew() {
