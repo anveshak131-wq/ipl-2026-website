@@ -259,18 +259,25 @@ export default function ScorecardAdminPage() {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch(`/api/scorecards/${scorecard.id}/publish`, {
+      const response = await fetch(`/api/scorecards/${scorecard.id}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
+        body: JSON.stringify({
+          ...scorecard,
+          draft: false,
+          publishedAt: new Date().toISOString()
+        })
       });
 
       if (!response.ok) {
         throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
 
+      const updatedScorecard = await response.json();
+      setScorecard(updatedScorecard);
       setMessage('✓ Scorecard published successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
@@ -1068,7 +1075,16 @@ export default function ScorecardAdminPage() {
             )}
 
             {/* Action Buttons */}
-            <div className="mt-8 flex gap-4 flex-wrap">
+            <div className="mt-8 flex gap-4 flex-wrap items-center">
+              {scorecard.id && (
+                <div className={`px-4 py-2 rounded-full text-sm font-semibold ${
+                  scorecard.draft === false 
+                    ? 'bg-green-500/20 text-green-400 border border-green-500/40' 
+                    : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/40'
+                }`}>
+                  {scorecard.draft === false ? '✓ Published' : '📝 Draft'}
+                </div>
+              )}
               <button
                 onClick={handleSaveScorecard}
                 disabled={saving}
@@ -1076,13 +1092,13 @@ export default function ScorecardAdminPage() {
               >
                 {saving ? 'Saving...' : '💾 Save Scorecard'}
               </button>
-              {scorecard.id && (
+              {scorecard.id && scorecard.draft !== false && (
                 <button
                   onClick={handlePublishScorecard}
                   disabled={saving}
                   className="px-6 py-3 bg-green-600 hover:bg-green-700 rounded font-bold transition disabled:opacity-50"
                 >
-                  {saving ? 'Publishing...' : '🚀 Publish'}
+                  {saving ? 'Publishing...' : '🚀 Publish Scorecard'}
                 </button>
               )}
             </div>
