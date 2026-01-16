@@ -35,6 +35,7 @@ interface Batter {
     type: string;
     bowlerId?: string;
     fielderId?: string;
+    details?: string; // e.g., "c Shabnim Ismail b Nat Sciver-Brunt"
   };
 }
 
@@ -563,7 +564,8 @@ export default function ScorecardAdminPage() {
                             <th className="text-center p-2">4s</th>
                             <th className="text-center p-2">6s</th>
                             <th className="text-center p-2">SR</th>
-                            <th className="text-left p-2">Dismissal</th>
+                            <th className="text-left p-2">Dismissal Type</th>
+                            <th className="text-left p-2">Dismissal Details</th>
                             <th className="text-center p-2">Action</th>
                           </tr>
                         </thead>
@@ -636,7 +638,23 @@ export default function ScorecardAdminPage() {
                                     <option value="stumped">Stumped</option>
                                     <option value="hit-wicket">Hit Wicket</option>
                                   </select>
+                                </td>">
+                                  {batter.dismissal?.type && batter.dismissal.type !== 'not-out' && (
+                                    <input
+                                      type="text"
+                                      value={batter.dismissal?.details || ''}
+                                      onChange={(e) =>
+                                        updateBatter(idx, 'dismissal', {
+                                          ...batter.dismissal,
+                                          details: e.target.value,
+                                        })
+                                      }
+                                      placeholder="e.g., c Shabnim Ismail b Nat Sciver-Brunt"
+                                      className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-sm"
+                                    />
+                                  )}
                                 </td>
+                                <td className="p-2
                                 <td className="p-2 text-center">
                                   <button
                                     onClick={() => removeBatter(idx)}
