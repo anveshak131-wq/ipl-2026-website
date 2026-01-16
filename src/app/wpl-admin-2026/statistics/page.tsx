@@ -195,23 +195,37 @@ export default function WPLStatsPage() {
                     <TrendingUp className="text-orange-400" />
                     Top 5 Run Scorers
                   </h3>
-                  <div className="space-y-3">
-                    {battingStats.slice(0, 5).map((player, idx) => (
-                      <div key={player.playerId} className="flex items-center justify-between bg-white/5 p-3 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div className="text-2xl font-bold text-purple-400">#{idx + 1}</div>
-                          <div>
-                            <div className="font-semibold text-white">{player.playerName}</div>
-                            <div className="text-sm text-gray-400">{player.matches} matches</div>
+                  {battingStats.length === 0 ? (
+                    <div className="text-center py-8 text-gray-400">
+                      <p>No batting stats available yet.</p>
+                      <p className="text-sm mt-2">Stats will appear once scorecards are published.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {battingStats.slice(0, 5).map((player, idx) => (
+                        <div key={player.playerId} className="flex items-center justify-between bg-white/5 p-3 rounded-lg hover:bg-white/10 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className={`text-2xl font-bold ${
+                              idx === 0 ? 'text-yellow-400' : 
+                              idx === 1 ? 'text-gray-300' : 
+                              idx === 2 ? 'text-orange-400' : 
+                              'text-purple-400'
+                            }`}>
+                              #{idx + 1}
+                            </div>
+                            <div>
+                              <div className="font-semibold text-white">{player.playerName}</div>
+                              <div className="text-sm text-gray-400">{player.teamName} • {player.matches} matches</div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-xl font-bold text-orange-400">{player.runs}</div>
+                            <div className="text-xs text-gray-400">Avg: {player.average} • SR: {player.strikeRate}</div>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="text-xl font-bold text-orange-400">{player.runs}</div>
-                          <div className="text-xs text-gray-400">Avg: {player.average}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Top 5 Bowlers */}
@@ -220,23 +234,37 @@ export default function WPLStatsPage() {
                     <Target className="text-purple-400" />
                     Top 5 Wicket Takers
                   </h3>
-                  <div className="space-y-3">
-                    {bowlingStats.slice(0, 5).map((player, idx) => (
-                      <div key={player.playerId} className="flex items-center justify-between bg-white/5 p-3 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div className="text-2xl font-bold text-pink-400">#{idx + 1}</div>
-                          <div>
-                            <div className="font-semibold text-white">{player.playerName}</div>
-                            <div className="text-sm text-gray-400">{player.matches} matches</div>
+                  {bowlingStats.length === 0 ? (
+                    <div className="text-center py-8 text-gray-400">
+                      <p>No bowling stats available yet.</p>
+                      <p className="text-sm mt-2">Stats will appear once scorecards are published.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {bowlingStats.slice(0, 5).map((player, idx) => (
+                        <div key={player.playerId} className="flex items-center justify-between bg-white/5 p-3 rounded-lg hover:bg-white/10 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className={`text-2xl font-bold ${
+                              idx === 0 ? 'text-yellow-400' : 
+                              idx === 1 ? 'text-gray-300' : 
+                              idx === 2 ? 'text-orange-400' : 
+                              'text-pink-400'
+                            }`}>
+                              #{idx + 1}
+                            </div>
+                            <div>
+                              <div className="font-semibold text-white">{player.playerName}</div>
+                              <div className="text-sm text-gray-400">{player.teamName} • {player.matches} matches</div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-xl font-bold text-purple-400">{player.wickets}</div>
+                            <div className="text-xs text-gray-400">Econ: {player.economy} • Avg: {player.average}</div>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="text-xl font-bold text-purple-400">{player.wickets}</div>
-                          <div className="text-xs text-gray-400">Econ: {player.economy}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
