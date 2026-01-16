@@ -551,7 +551,10 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
                                   {inning.batting.map((batter: any, bidx: number) => (
                                     <tr key={bidx} className="border-b border-white/10 text-white">
                                       <td className="p-2">
-                                        <div className="font-semibold">{batter.name}</div>
+                                        <div className="font-semibold">
+                                          {batter.name}
+                                          {batter.isCaptain && <span className="ml-2 text-xs font-bold text-yellow-400">(C)</span>}
+                                        </div>
                                         {batter.dismissal?.details && (
                                           <div className="text-xs text-gray-400">{batter.dismissal.details}</div>
                                         )}
@@ -600,7 +603,10 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
                                 <tbody>
                                   {inning.bowling.map((bowler: any, boidx: number) => (
                                     <tr key={boidx} className="border-b border-white/10 text-white">
-                                      <td className="p-2 font-semibold">{bowler.name}</td>
+                                      <td className="p-2 font-semibold">
+                                        {bowler.name}
+                                        {bowler.isCaptain && <span className="ml-2 text-xs font-bold text-yellow-400">(C)</span>}
+                                      </td>
                                       <td className="text-center p-2">{bowler.overs || 0}.{bowler.balls || 0}</td>
                                       <td className="text-center p-2">{bowler.maidens || 0}</td>
                                       <td className="text-center p-2">{bowler.runs || 0}</td>

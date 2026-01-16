@@ -356,6 +356,7 @@ export default function ScorecardAdminPage() {
       const player = players.find(p => p.id === value);
       if (player) {
         batter.name = player.name;
+        batter.isCaptain = player.isCaptain;
       }
     }
     
@@ -402,6 +403,7 @@ export default function ScorecardAdminPage() {
       const player = players.find(p => p.id === value);
       if (player) {
         bowler.name = player.name;
+        bowler.isCaptain = player.isCaptain;
       }
     }
     

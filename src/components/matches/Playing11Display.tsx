@@ -65,7 +65,10 @@ export default function Playing11Display({ match, players }: Playing11DisplayPro
         <div className="space-y-2">
           {team1Players.map((player) => (
             <div key={player.id} className="flex items-center justify-between p-2 bg-white/5 rounded">
-              <span className="text-sm text-gray-200">{player.name}</span>
+              <span className="text-sm text-gray-200">
+                {player.name}
+                {player.isCaptain && <span className="ml-2 text-xs font-bold text-yellow-400">(C)</span>}
+              </span>
               <span className="text-xs text-gray-400">#{player.jerseyNumber || '-'}</span>
             </div>
           ))}
@@ -81,7 +84,10 @@ export default function Playing11Display({ match, players }: Playing11DisplayPro
         <div className="space-y-2">
           {team2Players.map((player) => (
             <div key={player.id} className="flex items-center justify-between p-2 bg-white/5 rounded">
-              <span className="text-sm text-gray-200">{player.name}</span>
+              <span className="text-sm text-gray-200">
+                {player.name}
+                {player.isCaptain && <span className="ml-2 text-xs font-bold text-yellow-400">(C)</span>}
+              </span>
               <span className="text-xs text-gray-400">#{player.jerseyNumber || '-'}</span>
             </div>
           ))}
