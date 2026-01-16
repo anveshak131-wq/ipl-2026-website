@@ -696,6 +696,111 @@ export default function ScorecardAdminPage() {
                     Calculate Totals
                   </button>
                 </div>
+
+                {/* Bowling Section */}
+                <div className="bg-gray-800 p-6 rounded-lg">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold">Bowling</h3>
+                    <button
+                      onClick={addBowler}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition"
+                    >
+                      + Add Bowler
+                    </button>
+                  </div>
+
+                  {scorecard.innings[activeInnings].bowling.length === 0 ? (
+                    <p className="text-gray-400">No bowlers added yet</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-gray-600">
+                            <th className="text-left p-2">Player</th>
+                            <th className="text-center p-2">Overs</th>
+                            <th className="text-center p-2">Balls</th>
+                            <th className="text-center p-2">Runs</th>
+                            <th className="text-center p-2">Wickets</th>
+                            <th className="text-center p-2">Maidens</th>
+                            <th className="text-center p-2">Economy</th>
+                            <th className="text-center p-2">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {scorecard.innings[activeInnings].bowling.map((bowler, idx) => {
+                            const teamPlayers = getPlayersByTeam(scorecard.innings[activeInnings].battingTeamId === scorecard.matchInfo.team1.id ? scorecard.matchInfo.team2.id : scorecard.matchInfo.team1.id);
+                            return (
+                              <tr key={idx} className="border-b border-gray-700">
+                                <td className="p-2">
+                                  <select
+                                    value={bowler.playerId}
+                                    onChange={(e) => updateBowler(idx, 'playerId', e.target.value)}
+                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-sm"
+                                  >
+                                    <option value="">Select Player</option>
+                                    {teamPlayers.map(player => (
+                                      <option key={player.id} value={player.id}>{player.name}</option>
+                                    ))}
+                                  </select>
+                                </td>
+                                <td className="p-2">
+                                  <input
+                                    type="number"
+                                    step="0.1"
+                                    value={bowler.overs}
+                                    onChange={(e) => updateBowler(idx, 'overs', parseFloat(e.target.value) || 0)}
+                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
+                                  />
+                                </td>
+                                <td className="p-2">
+                                  <input
+                                    type="number"
+                                    value={bowler.balls}
+                                    onChange={(e) => updateBowler(idx, 'balls', parseInt(e.target.value) || 0)}
+                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
+                                  />
+                                </td>
+                                <td className="p-2">
+                                  <input
+                                    type="number"
+                                    value={bowler.runs}
+                                    onChange={(e) => updateBowler(idx, 'runs', parseInt(e.target.value) || 0)}
+                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
+                                  />
+                                </td>
+                                <td className="p-2">
+                                  <input
+                                    type="number"
+                                    value={bowler.wickets}
+                                    onChange={(e) => updateBowler(idx, 'wickets', parseInt(e.target.value) || 0)}
+                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
+                                  />
+                                </td>
+                                <td className="p-2">
+                                  <input
+                                    type="number"
+                                    value={bowler.maidens}
+                                    onChange={(e) => updateBowler(idx, 'maidens', parseInt(e.target.value) || 0)}
+                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm font-bold text-yellow-400"
+                                  />
+                                </td>
+                                <td className="p-2 text-center font-bold text-green-400">{bowler.economyRate}</td>
+                                <td className="p-2 text-center">
+                                  <button
+                                    onClick={() => removeBowler(idx)}
+                                    className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-sm"
+                                  >
+                                    ✕
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 

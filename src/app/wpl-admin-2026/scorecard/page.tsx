@@ -859,6 +859,7 @@ export default function ScorecardAdminPage() {
                             <th className="text-center p-2">Ovrs</th>
                             <th className="text-center p-2">Runs</th>
                             <th className="text-center p-2">Wkts</th>
+                            <th className="text-center p-2">Maidens</th>
                             <th className="text-center p-2">Wides</th>
                             <th className="text-center p-2">No Balls</th>
                             <th className="text-center p-2">Econ</th>
@@ -920,6 +921,15 @@ export default function ScorecardAdminPage() {
                                     type="number"
                                     value={bowler.wickets || ''}
                                     onChange={(e) => updateBowler(idx, 'wickets', e.target.value ? parseInt(e.target.value) : '')}
+                                    placeholder="0"
+                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
+                                  />
+                                </td>
+                                <td className="p-2">
+                                  <input
+                                    type="number"
+                                    value={bowler.maidens || ''}
+                                    onChange={(e) => updateBowler(idx, 'maidens', e.target.value ? parseInt(e.target.value) : '')}
                                     placeholder="0"
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
