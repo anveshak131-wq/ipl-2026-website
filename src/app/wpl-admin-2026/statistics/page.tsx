@@ -37,6 +37,9 @@ export default function WPLStatsPage() {
       
       const data = await response.json();
       
+      // Log the full response for debugging
+      console.log('Stats API Response:', data);
+      
       // Don't treat "No published scorecards" as an error - it's just an empty state
       // The API returns empty arrays in this case, which is fine
       setBattingStats(data.battingStats || []);
