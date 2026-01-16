@@ -623,83 +623,252 @@ export default function WPLLeaderboardPage() {
             {activeTab === 'points' && (
               <motion.div
                 key="points"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-                className="rounded-2xl overflow-hidden"
-                style={{ ...getWPLGlassmorphism(), border: `1px solid #f59e0b30` }}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
               >
                 {sortedTeamStats.length === 0 ? (
-                  <div className="text-center py-20">
-                    <Trophy className="mx-auto mb-4 text-gray-600" size={64} />
+                  <div className="text-center py-20 rounded-2xl" style={{ ...getWPLGlassmorphism(), border: `1px solid #f59e0b30` }}>
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                    >
+                      <Trophy className="mx-auto mb-4 text-amber-500" size={64} />
+                    </motion.div>
                     <p className="text-xl font-semibold text-gray-400 mb-2">No standings available yet</p>
                     <p className="text-sm text-gray-500">Standings will appear once matches are played</p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="border-b border-white/10" style={{ background: 'linear-gradient(to right, #f59e0b10, #eab30810)' }}>
-                        <tr>
-                          <th className="py-4 px-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Pos</th>
-                          <th className="py-4 px-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Team</th>
-                          <th className="py-4 px-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider hidden sm:table-cell">M</th>
-                          <th className="py-4 px-4 text-center text-xs font-bold text-green-400 uppercase tracking-wider">W</th>
-                          <th className="py-4 px-4 text-center text-xs font-bold text-red-400 uppercase tracking-wider">L</th>
-                          <th className="py-4 px-4 text-center text-xs font-bold text-yellow-400 uppercase tracking-wider">Pts</th>
-                          <th className="py-4 px-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider hidden md:table-cell">NRR</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {sortedTeamStats.map((stat, index) => (
-                          <motion.tr
-                            key={stat.teamId}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.05 }}
-                            className="border-b border-white/5 hover:bg-white/5 transition-all group"
-                          >
-                            <td className="py-5 px-4">
-                              <div className="flex items-center gap-3">
-                                {index < 4 ? (
-                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                                    index === 0 ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-gray-900' :
-                                    index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-400 text-gray-900' :
-                                    index === 2 ? 'bg-gradient-to-br from-orange-400 to-orange-500 text-white' :
-                                    'bg-gradient-to-br from-green-400 to-emerald-500 text-white'
-                                  }`}>
-                                    {index + 1}
-                                  </div>
+                  <div className="space-y-3">
+                    {sortedTeamStats.map((stat, index) => {
+                      const isQualifyingPosition = index < 4;
+                      const isChampion = index === 0;
+                      
+                      return (
+                        <motion.div
+                          key={stat.teamId}
+                          initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          transition={{ 
+                            delay: index * 0.08,
+                            duration: 0.5,
+                            ease: [0.16, 1, 0.3, 1]
+                          }}
+                          whileHover={{ 
+                            scale: 1.02, 
+                            y: -4,
+                            transition: { duration: 0.2 }
+                          }}
+                          className="relative rounded-2xl overflow-hidden group cursor-pointer"
+                          style={{
+                            ...getWPLGlassmorphism(),
+                            border: `2px solid ${
+                              isChampion ? '#fbbf24' :
+                              isQualifyingPosition ? '#10b98150' :
+                              '#ffffff10'
+                            }`,
+                          }}
+                        >
+                          {/* Animated background glow */}
+                          <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
+                            isChampion ? 'bg-gradient-to-r from-amber-500/10 via-yellow-500/10 to-amber-500/10' :
+                            isQualifyingPosition ? 'bg-gradient-to-r from-green-500/10 via-emerald-500/10 to-green-500/10' :
+                            'bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-purple-500/10'
+                          }`}></div>
+                          
+                          {/* Qualifying badge */}
+                          {isQualifyingPosition && (
+                            <motion.div
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: index * 0.08 + 0.3 }}
+                              className="absolute top-3 right-3"
+                            >
+                              <div className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${
+                                isChampion ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-gray-900' :
+                                'bg-gradient-to-r from-green-500 to-emerald-500 text-white'
+                              }`}>
+                                {isChampion ? (
+                                  <>
+                                    <Crown size={12} />
+                                    <span>Leader</span>
+                                  </>
                                 ) : (
-                                  <div className="w-8 h-8 rounded-full flex items-center justify-center font-semibold text-gray-400 bg-white/5">
-                                    {index + 1}
-                                  </div>
+                                  <>
+                                    <Star size={12} />
+                                    <span>Playoffs</span>
+                                  </>
                                 )}
                               </div>
-                            </td>
-                            <td className="py-5 px-4">
-                              <div className="font-bold text-white group-hover:text-yellow-400 transition-colors">{stat.teamName}</div>
-                            </td>
-                            <td className="py-5 px-4 text-center text-sm text-gray-400 hidden sm:table-cell">{stat.matches || 'N/A'}</td>
-                            <td className="py-5 px-4 text-center">
-                              <div className="text-base font-bold text-green-400">{stat.wins || 'N/A'}</div>
-                            </td>
-                            <td className="py-5 px-4 text-center">
-                              <div className="text-base font-bold text-red-400">{stat.losses || 'N/A'}</div>
-                            </td>
-                            <td className="py-5 px-4 text-center">
-                              <div className="text-xl font-black text-yellow-400">{stat.points || 'N/A'}</div>
-                            </td>
-                            <td className="py-5 px-4 text-center hidden md:table-cell">
-                              <div className={`inline-flex items-center gap-1 text-sm font-bold ${stat.netRunRate >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                {stat.netRunRate > 0 ? <ArrowUp size={14} /> : stat.netRunRate < 0 ? <ArrowDown size={14} /> : null}
-                                {stat.netRunRate >= 0 ? '+' : ''}{stat.netRunRate ? stat.netRunRate.toFixed(3) : 'N/A'}
+                            </motion.div>
+                          )}
+                          
+                          <div className="relative p-6">
+                            <div className="flex items-center gap-6">
+                              {/* Position Badge */}
+                              <motion.div
+                                whileHover={{ rotate: [0, -10, 10, -10, 0], scale: 1.1 }}
+                                transition={{ duration: 0.5 }}
+                                className="flex-shrink-0"
+                              >
+                                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black relative overflow-hidden ${
+                                  isChampion ? 'bg-gradient-to-br from-amber-400 via-yellow-500 to-amber-600 text-gray-900 shadow-2xl shadow-amber-500/50' :
+                                  index === 1 ? 'bg-gradient-to-br from-gray-300 via-gray-400 to-gray-500 text-gray-900 shadow-xl shadow-gray-500/30' :
+                                  index === 2 ? 'bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 text-white shadow-xl shadow-orange-500/30' :
+                                  isQualifyingPosition ? 'bg-gradient-to-br from-green-400 via-emerald-500 to-green-600 text-white shadow-xl shadow-green-500/30' :
+                                  'bg-gradient-to-br from-purple-500/20 to-pink-500/20 text-white border-2 border-white/20'
+                                }`}>
+                                  {isChampion && (
+                                    <motion.div
+                                      animate={{ 
+                                        scale: [1, 1.2, 1],
+                                        rotate: [0, 5, -5, 0]
+                                      }}
+                                      transition={{ 
+                                        duration: 2,
+                                        repeat: Infinity,
+                                        repeatType: "reverse"
+                                      }}
+                                      className="absolute inset-0 flex items-center justify-center"
+                                    >
+                                      <Sparkles size={20} className="absolute top-1 right-1" />
+                                    </motion.div>
+                                  )}
+                                  <span className="relative z-10">{index + 1}</span>
+                                </div>
+                              </motion.div>
+                              
+                              {/* Team Info */}
+                              <div className="flex-1 min-w-0">
+                                <motion.h3 
+                                  className={`text-xl md:text-2xl font-black mb-2 truncate ${
+                                    isChampion ? 'text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-yellow-500' :
+                                    'text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-pink-400 group-hover:to-purple-400'
+                                  }`}
+                                  transition={{ duration: 0.3 }}
+                                >
+                                  {stat.teamName}
+                                </motion.h3>
+                                
+                                {/* Stats Grid */}
+                                <div className="grid grid-cols-3 md:grid-cols-6 gap-3 md:gap-4">
+                                  <div className="text-center">
+                                    <div className="text-xs text-gray-500 uppercase mb-1 font-semibold">Matches</div>
+                                    <div className="text-lg md:text-xl font-bold text-gray-300">{stat.matches || 0}</div>
+                                  </div>
+                                  
+                                  <div className="text-center">
+                                    <div className="text-xs text-gray-500 uppercase mb-1 font-semibold">Won</div>
+                                    <div className="text-lg md:text-xl font-bold text-green-400 flex items-center justify-center gap-1">
+                                      <TrendingUp size={16} />
+                                      {stat.wins || 0}
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="text-center">
+                                    <div className="text-xs text-gray-500 uppercase mb-1 font-semibold">Lost</div>
+                                    <div className="text-lg md:text-xl font-bold text-red-400 flex items-center justify-center gap-1">
+                                      <TrendingDown size={16} />
+                                      {stat.losses || 0}
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="text-center">
+                                    <div className="text-xs text-gray-500 uppercase mb-1 font-semibold">Points</div>
+                                    <motion.div 
+                                      className={`text-2xl md:text-3xl font-black ${
+                                        isChampion ? 'text-amber-400' : 'text-yellow-400'
+                                      }`}
+                                      whileHover={{ scale: 1.2 }}
+                                      transition={{ type: "spring", stiffness: 300 }}
+                                    >
+                                      {stat.points || 0}
+                                    </motion.div>
+                                  </div>
+                                  
+                                  <div className="text-center hidden md:block">
+                                    <div className="text-xs text-gray-500 uppercase mb-1 font-semibold">NRR</div>
+                                    <div className={`text-lg font-bold flex items-center justify-center gap-1 ${
+                                      stat.netRunRate >= 0 ? 'text-green-400' : 'text-red-400'
+                                    }`}>
+                                      {stat.netRunRate > 0 ? <ArrowUp size={16} /> : stat.netRunRate < 0 ? <ArrowDown size={16} /> : null}
+                                      {stat.netRunRate >= 0 ? '+' : ''}{stat.netRunRate ? stat.netRunRate.toFixed(3) : '0.000'}
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="text-center hidden md:block">
+                                    <div className="text-xs text-gray-500 uppercase mb-1 font-semibold">Form</div>
+                                    <div className="flex items-center justify-center gap-1">
+                                      {[...Array(Math.min(5, stat.matches || 0))].map((_, i) => {
+                                        const isWin = i < (stat.wins || 0);
+                                        return (
+                                          <motion.div
+                                            key={i}
+                                            initial={{ scale: 0 }}
+                                            animate={{ scale: 1 }}
+                                            transition={{ delay: index * 0.08 + 0.5 + i * 0.05 }}
+                                            className={`w-2 h-2 rounded-full ${isWin ? 'bg-green-400' : 'bg-red-400'}`}
+                                          />
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
-                            </td>
-                          </motion.tr>
-                        ))}
-                      </tbody>
-                    </table>
+                            </div>
+                          </div>
+                          
+                          {/* Animated border shimmer */}
+                          {isQualifyingPosition && (
+                            <motion.div
+                              className="absolute inset-0 rounded-2xl"
+                              style={{
+                                background: `linear-gradient(90deg, transparent, ${isChampion ? '#fbbf2440' : '#10b98140'}, transparent)`,
+                              }}
+                              animate={{
+                                x: ['-100%', '200%'],
+                              }}
+                              transition={{
+                                duration: 3,
+                                repeat: Infinity,
+                                ease: "linear",
+                                delay: index * 0.3
+                              }}
+                            />
+                          )}
+                        </motion.div>
+                      );
+                    })}
+                    
+                    {/* Legend */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: sortedTeamStats.length * 0.08 + 0.3 }}
+                      className="mt-8 p-4 rounded-xl"
+                      style={{ ...getWPLGlassmorphism(), border: '1px solid #ffffff10' }}
+                    >
+                      <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-gradient-to-br from-amber-400 to-yellow-500"></div>
+                          <span className="text-gray-400">League Leader</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-gradient-to-br from-green-400 to-emerald-500"></div>
+                          <span className="text-gray-400">Playoff Qualification</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <ArrowUp size={14} className="text-green-400" />
+                          <span className="text-gray-400">Positive NRR</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <ArrowDown size={14} className="text-red-400" />
+                          <span className="text-gray-400">Negative NRR</span>
+                        </div>
+                      </div>
+                    </motion.div>
                   </div>
                 )}
               </motion.div>
