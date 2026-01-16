@@ -163,32 +163,6 @@ export default function WPLLeaderboardPage() {
     return showTopOnly ? stats.slice(0, 10) : stats;
   }, [bowlingStats, searchTerm, showTopOnly]);
 
-  // Group batting stats by team
-  const battingStatsByTeam = useMemo(() => {
-    const grouped: Record<string, typeof filteredBattingStats> = {};
-    filteredBattingStats.forEach(stat => {
-      const teamName = stat.teamName || 'Unknown Team';
-      if (!grouped[teamName]) {
-        grouped[teamName] = [];
-      }
-      grouped[teamName].push(stat);
-    });
-    return grouped;
-  }, [filteredBattingStats]);
-
-  // Group bowling stats by team
-  const bowlingStatsByTeam = useMemo(() => {
-    const grouped: Record<string, typeof filteredBowlingStats> = {};
-    filteredBowlingStats.forEach(stat => {
-      const teamName = stat.teamName || 'Unknown Team';
-      if (!grouped[teamName]) {
-        grouped[teamName] = [];
-      }
-      grouped[teamName].push(stat);
-    });
-    return grouped;
-  }, [filteredBowlingStats]);
-
   // Get top performers
   const orangeCap = battingStats[0];
   const purpleCap = bowlingStats[0];
@@ -459,74 +433,65 @@ export default function WPLLeaderboardPage() {
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
-                    {Object.entries(battingStatsByTeam).map(([teamName, teamStats]) => (
-                      <div key={teamName} className="mb-6 last:mb-0">
-                        {/* Team Header */}
-                        <div className="px-6 py-3 border-b border-white/10" style={{ background: `linear-gradient(to right, ${WPLColors.accent}20, ${WPLColors.secondary}20)` }}>
-                          <h3 className="text-lg font-bold text-white">{teamName}</h3>
-                        </div>
-                        
-                        <table className="w-full">
-                          <thead className="border-b border-white/10" style={{ background: `linear-gradient(to right, ${WPLColors.accent}10, ${WPLColors.secondary}10)` }}>
-                            <tr>
-                              <th className="py-4 px-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Rank</th>
-                              <th className="py-4 px-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Player</th>
-                              <th className="py-4 px-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider hidden lg:table-cell">M</th>
-                              <th className="py-4 px-4 text-center text-xs font-bold text-pink-400 uppercase tracking-wider">Runs</th>
-                              <th className="py-4 px-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider hidden sm:table-cell">Avg</th>
-                              <th className="py-4 px-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider hidden sm:table-cell">SR</th>
-                              <th className="py-4 px-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider hidden xl:table-cell">HS</th>
-                              <th className="py-4 px-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider hidden lg:table-cell">100s/50s</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {teamStats.map((stat, index) => {
-                              const globalIndex = filteredBattingStats.indexOf(stat);
-                              return (
-                                <motion.tr
-                                  key={stat.playerId}
-                                  initial={{ opacity: 0, x: -20 }}
-                                  animate={{ opacity: 1, x: 0 }}
-                                  transition={{ delay: index * 0.03 }}
-                                  className="border-b border-white/5 hover:bg-white/5 transition-all group"
-                                >
-                                  <td className="py-5 px-4">
-                                    <div className="flex items-center gap-3">
-                                      {globalIndex < 3 ? (
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                                          globalIndex === 0 ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-gray-900' :
-                                          globalIndex === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-400 text-gray-900' :
-                                          'bg-gradient-to-br from-orange-400 to-orange-500 text-white'
-                                        }`}>
-                                          {globalIndex + 1}
-                                        </div>
-                                      ) : (
-                                        <div className="w-8 h-8 rounded-full flex items-center justify-center font-semibold text-gray-400 bg-white/5">
-                                          {globalIndex + 1}
-                                        </div>
-                                      )}
-                                    </div>
-                                  </td>
-                                  <td className="py-5 px-4">
-                                    <div className="font-bold text-white group-hover:text-pink-400 transition-colors">{stat.playerName}</div>
-                                  </td>
-                                  <td className="py-5 px-4 text-center text-sm text-gray-400 hidden lg:table-cell">{stat.matches}</td>
-                                  <td className="py-5 px-4 text-center">
-                                    <div className="text-lg font-black text-pink-400">{stat.runs}</div>
-                                  </td>
-                                  <td className="py-5 px-4 text-center text-sm text-gray-300 hidden sm:table-cell">{stat.average.toFixed(2)}</td>
-                                  <td className="py-5 px-4 text-center text-sm text-gray-300 hidden sm:table-cell">{stat.strikeRate.toFixed(2)}</td>
-                                  <td className="py-5 px-4 text-center text-sm text-gray-400 hidden xl:table-cell">{stat.highScore}</td>
-                                  <td className="py-5 px-4 text-center text-sm text-gray-400 hidden lg:table-cell">
-                                    <span className="text-amber-400 font-semibold">{stat.hundreds}</span> / <span className="text-green-400 font-semibold">{stat.fifties}</span>
-                                  </td>
-                                </motion.tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    ))}
+                    <table className="w-full">
+                      <thead className="border-b border-white/10" style={{ background: `linear-gradient(to right, ${WPLColors.accent}10, ${WPLColors.secondary}10)` }}>
+                        <tr>
+                          <th className="py-4 px-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Rank</th>
+                          <th className="py-4 px-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Player</th>
+                          <th className="py-4 px-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider hidden md:table-cell">Team</th>
+                          <th className="py-4 px-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider hidden lg:table-cell">M</th>
+                          <th className="py-4 px-4 text-center text-xs font-bold text-pink-400 uppercase tracking-wider">Runs</th>
+                          <th className="py-4 px-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider hidden sm:table-cell">Avg</th>
+                          <th className="py-4 px-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider hidden sm:table-cell">SR</th>
+                          <th className="py-4 px-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider hidden xl:table-cell">HS</th>
+                          <th className="py-4 px-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider hidden lg:table-cell">100s/50s</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredBattingStats.map((stat, index) => (
+                          <motion.tr
+                            key={stat.playerId}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.03 }}
+                            className="border-b border-white/5 hover:bg-white/5 transition-all group"
+                          >
+                            <td className="py-5 px-4">
+                              <div className="flex items-center gap-3">
+                                {index < 3 ? (
+                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                                    index === 0 ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-gray-900' :
+                                    index === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-400 text-gray-900' :
+                                    'bg-gradient-to-br from-orange-400 to-orange-500 text-white'
+                                  }`}>
+                                    {index + 1}
+                                  </div>
+                                ) : (
+                                  <div className="w-8 h-8 rounded-full flex items-center justify-center font-semibold text-gray-400 bg-white/5">
+                                    {index + 1}
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                            <td className="py-5 px-4">
+                              <div className="font-bold text-white group-hover:text-pink-400 transition-colors">{stat.playerName}</div>
+                              <div className="text-xs text-gray-500 md:hidden">{stat.teamName}</div>
+                            </td>
+                            <td className="py-5 px-4 text-center text-sm text-gray-400 hidden md:table-cell">{stat.teamName}</td>
+                            <td className="py-5 px-4 text-center text-sm text-gray-400 hidden lg:table-cell">{stat.matches}</td>
+                            <td className="py-5 px-4 text-center">
+                              <div className="text-lg font-black text-pink-400">{stat.runs}</div>
+                            </td>
+                            <td className="py-5 px-4 text-center text-sm text-gray-300 hidden sm:table-cell">{stat.average.toFixed(2)}</td>
+                            <td className="py-5 px-4 text-center text-sm text-gray-300 hidden sm:table-cell">{stat.strikeRate.toFixed(2)}</td>
+                            <td className="py-5 px-4 text-center text-sm text-gray-400 hidden xl:table-cell">{stat.highScore}</td>
+                            <td className="py-5 px-4 text-center text-sm text-gray-400 hidden lg:table-cell">
+                              <span className="text-amber-400 font-semibold">{stat.hundreds}</span> / <span className="text-green-400 font-semibold">{stat.fifties}</span>
+                            </td>
+                          </motion.tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 )}
               </motion.div>
@@ -606,74 +571,11 @@ export default function WPLLeaderboardPage() {
                             <td className="py-5 px-4 text-center text-sm text-gray-300 hidden sm:table-cell">{stat.average.toFixed(2)}</td>
                             <td className="py-5 px-4 text-center text-sm text-gray-300 hidden sm:table-cell">{stat.economy.toFixed(2)}</td>
                             <td className="py-5 px-4 text-center text-sm text-gray-400 hidden xl:table-cell">{stat.strikeRate.toFixed(2)}</td>
-                ) : (
-                  <div className="overflow-x-auto">
-                    {Object.entries(bowlingStatsByTeam).map(([teamName, teamStats]) => (
-                      <div key={teamName} className="mb-6 last:mb-0">
-                        {/* Team Header */}
-                        <div className="px-6 py-3 border-b border-white/10" style={{ background: `linear-gradient(to right, ${WPLColors.secondary}20, ${WPLColors.accent}20)` }}>
-                          <h3 className="text-lg font-bold text-white">{teamName}</h3>
-                        </div>
-                        
-                        <table className="w-full">
-                          <thead className="border-b border-white/10" style={{ background: `linear-gradient(to right, ${WPLColors.secondary}10, ${WPLColors.accent}10)` }}>
-                            <tr>
-                              <th className="py-4 px-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Rank</th>
-                              <th className="py-4 px-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Player</th>
-                              <th className="py-4 px-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider hidden lg:table-cell">M</th>
-                              <th className="py-4 px-4 text-center text-xs font-bold text-purple-400 uppercase tracking-wider">Wkts</th>
-                              <th className="py-4 px-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider hidden sm:table-cell">Avg</th>
-                              <th className="py-4 px-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider hidden sm:table-cell">Econ</th>
-                              <th className="py-4 px-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider hidden xl:table-cell">SR</th>
-                              <th className="py-4 px-4 text-center text-xs font-bold text-gray-400 uppercase tracking-wider hidden lg:table-cell">Best</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {teamStats.map((stat, index) => {
-                              const globalIndex = filteredBowlingStats.indexOf(stat);
-                              return (
-                                <motion.tr
-                                  key={stat.playerId}
-                                  initial={{ opacity: 0, x: -20 }}
-                                  animate={{ opacity: 1, x: 0 }}
-                                  transition={{ delay: index * 0.03 }}
-                                  className="border-b border-white/5 hover:bg-white/5 transition-all group"
-                                >
-                                  <td className="py-5 px-4">
-                                    <div className="flex items-center gap-3">
-                                      {globalIndex < 3 ? (
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                                          globalIndex === 0 ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-gray-900' :
-                                          globalIndex === 1 ? 'bg-gradient-to-br from-gray-300 to-gray-400 text-gray-900' :
-                                          'bg-gradient-to-br from-orange-400 to-orange-500 text-white'
-                                        }`}>
-                                          {globalIndex + 1}
-                                        </div>
-                                      ) : (
-                                        <div className="w-8 h-8 rounded-full flex items-center justify-center font-semibold text-gray-400 bg-white/5">
-                                          {globalIndex + 1}
-                                        </div>
-                                      )}
-                                    </div>
-                                  </td>
-                                  <td className="py-5 px-4">
-                                    <div className="font-bold text-white group-hover:text-purple-400 transition-colors">{stat.playerName}</div>
-                                  </td>
-                                  <td className="py-5 px-4 text-center text-sm text-gray-400 hidden lg:table-cell">{stat.matches}</td>
-                                  <td className="py-5 px-4 text-center">
-                                    <div className="text-lg font-black text-purple-400">{stat.wickets}</div>
-                                  </td>
-                                  <td className="py-5 px-4 text-center text-sm text-gray-300 hidden sm:table-cell">{stat.average.toFixed(2)}</td>
-                                  <td className="py-5 px-4 text-center text-sm text-gray-300 hidden sm:table-cell">{stat.economy.toFixed(2)}</td>
-                                  <td className="py-5 px-4 text-center text-sm text-gray-400 hidden xl:table-cell">{stat.strikeRate.toFixed(2)}</td>
-                                  <td className="py-5 px-4 text-center text-sm font-semibold text-purple-400 hidden lg:table-cell">{stat.bestBowling}</td>
-                                </motion.tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
-                    ))}
+                            <td className="py-5 px-4 text-center text-sm font-semibold text-purple-400 hidden lg:table-cell">{stat.bestBowling}</td>
+                          </motion.tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 )}
               </motion.div>

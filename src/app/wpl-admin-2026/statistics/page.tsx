@@ -22,28 +22,20 @@ export default function WPLStatsPage() {
   const [purpleCap, setPurpleCap] = useState<PurpleCap | null>(null);
 
   useEffect(() => {
-    console.log('WPL Stats page mounted, calling fetchStats...');
     fetchStats();
   }, []);
 
   const fetchStats = async () => {
-    console.log('fetchStats called - starting...');
     setLoading(true);
     setError(null);
     try {
-      console.log('Fetching from /api/stats?league=wpl&type=all');
       const response = await fetch('/api/stats?league=wpl&type=all');
-      
-      console.log('Response status:', response.status);
       
       if (!response.ok) {
         throw new Error(`API error: ${response.status}`);
       }
       
       const data = await response.json();
-      
-      // Log the full response for debugging
-      console.log('Stats API Response:', data);
       
       // Don't treat "No published scorecards" as an error - it's just an empty state
       // The API returns empty arrays in this case, which is fine
@@ -57,7 +49,6 @@ export default function WPLStatsPage() {
       setError(error.message || 'Failed to fetch statistics');
     } finally {
       setLoading(false);
-      console.log('fetchStats complete');
     }
   };
 
