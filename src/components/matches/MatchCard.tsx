@@ -494,16 +494,37 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
                       <div className="text-green-400 text-sm font-semibold mb-2">Match Result</div>
                       <div className="text-white font-bold text-xl">
                         {(() => {
-                          // Clean up result text - handle cases where winner already contains full result
                           const winner = scorecard.result.winner;
                           const margin = scorecard.result.margin;
                           
-                          // If winner already contains "won by", just show it
+                          // Handle duplicate/malformed result text
                           if (winner.includes('won by')) {
+                            // Look for pattern: "TeamName won by margin"
+                            // If there are multiple "won by", extract the last complete result
+                            const regex = /([^w]+?)\s+won by\s+(.+)$/i;
+                            const match = winner.match(regex);
+                            
+                            if (match) {
+                              // If the matched result already has complete information
+                              const teamName = match[1].trim();
+                              const winMargin = match[2].trim();
+                              
+                              // Check if we have nested "won by" - take the innermost one
+                              if (winMargin.includes('won by')) {
+                                const innerMatch = winMargin.match(/([^w]+?)\s+won by\s+(.+)$/i);
+                                if (innerMatch) {
+                                  return `${innerMatch[1].trim()} won by ${innerMatch[2].trim()}`;
+                                }
+                              }
+                              
+                              return `${teamName} won by ${winMargin}`;
+                            }
+                            
+                            // Fallback: return as-is
                             return winner;
                           }
                           
-                          // Otherwise construct the full result
+                          // Normal case: construct result
                           return `${winner} won by ${margin}`;
                         })()}
                       </div>
