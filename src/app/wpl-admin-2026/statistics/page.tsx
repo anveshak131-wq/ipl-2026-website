@@ -232,7 +232,7 @@ export default function WPLStatsPage() {
                             </div>
                             <div>
                               <div className="font-semibold text-white">{player.playerName}</div>
-                              <div className="text-sm text-gray-400">{player.teamName} • {player.matches} matches</div>
+                              <div className="text-sm text-gray-400">{player.matches} matches</div>
                             </div>
                           </div>
                           <div className="text-right">
@@ -246,7 +246,14 @@ export default function WPLStatsPage() {
                 </div>
 
                 {/* Top 5 Bowlers */}
-                <div clTarget className="mx-auto mb-3 text-gray-600" size={48} />
+                <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-6">
+                  <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                    <Target className="text-purple-400" />
+                    Top 5 Wicket Takers
+                  </h3>
+                  {bowlingStats.length === 0 ? (
+                    <div className="text-center py-8 text-gray-400">
+                      <Target className="mx-auto mb-3 text-gray-600" size={48} />
                       <p className="font-semibold">No bowling stats available yet.</p>
                       <p className="text-sm mt-2">Publish scorecards from the Scorecard Admin page to see stats.</p>
                       <a
@@ -254,14 +261,7 @@ export default function WPLStatsPage() {
                         className="inline-block mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg transition"
                       >
                         Go to Scorecard Admin
-                      </a
-                    <Target className="text-purple-400" />
-                    Top 5 Wicket Takers
-                  </h3>
-                  {bowlingStats.length === 0 ? (
-                    <div className="text-center py-8 text-gray-400">
-                      <p>No bowling stats available yet.</p>
-                      <p className="text-sm mt-2">Stats will appear once scorecards are published.</p>
+                      </a>
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -278,7 +278,7 @@ export default function WPLStatsPage() {
                             </div>
                             <div>
                               <div className="font-semibold text-white">{player.playerName}</div>
-                              <div className="text-sm text-gray-400">{player.teamName} • {player.matches} matches</div>
+                              <div className="text-sm text-gray-400">{player.matches} matches</div>
                             </div>
                           </div>
                           <div className="text-right">
