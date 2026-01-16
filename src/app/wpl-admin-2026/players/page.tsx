@@ -104,13 +104,12 @@ export default function WPLPlayersManagementPage() {
 
     try {
       const token = localStorage.getItem('adminToken');
-      const response = await fetch('/api/players', {
+      const response = await fetch(`/api/players?id=${player.id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ id: player.id }),
       });
 
       if (response.ok) {
