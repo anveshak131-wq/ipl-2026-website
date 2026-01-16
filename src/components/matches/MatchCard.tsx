@@ -378,11 +378,11 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
       {/* Scorecard Modal */}
       {showScorecardModal && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm"
           onClick={() => setShowScorecardModal(false)}
         >
           <div 
-            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl border-2 border-ipl-gold/50 shadow-2xl"
+            className="relative w-full h-full overflow-y-auto bg-gradient-to-br from-gray-900 to-gray-800"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
@@ -453,11 +453,11 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
       {/* Playing 11 Modal */}
       {showPlaying11Modal && match.playing11 && players && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm"
           onClick={() => setShowPlaying11Modal(false)}
         >
           <div 
-            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl border-2 border-ipl-gold/50 shadow-2xl"
+            className="relative w-full h-full overflow-y-auto bg-gradient-to-br from-gray-900 to-gray-800"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
