@@ -558,6 +558,36 @@ export default function ScorecardAdminPage() {
               <div className="bg-gray-800 p-6 rounded-lg">
                 <h3 className="text-xl font-bold mb-6">Match Information</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Innings Batting Order Selection */}
+                  <div className="md:col-span-2">
+                    <label className="block text-sm text-gray-400 mb-2">1st Innings Batting Team</label>
+                    <select
+                      value={scorecard.innings[0].battingTeamId}
+                      onChange={(e) => {
+                        const firstBattingTeamId = Number(e.target.value);
+                        const secondBattingTeamId = firstBattingTeamId === scorecard.matchInfo.team1.id 
+                          ? scorecard.matchInfo.team2.id 
+                          : scorecard.matchInfo.team1.id;
+                        
+                        const updated = { ...scorecard };
+                        updated.innings[0].battingTeamId = firstBattingTeamId;
+                        updated.innings[1].battingTeamId = secondBattingTeamId;
+                        setScorecard(updated);
+                      }}
+                      className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
+                    >
+                      <option value={scorecard.matchInfo.team1.id}>{scorecard.matchInfo.team1.name} (Team 1)</option>
+                      <option value={scorecard.matchInfo.team2.id}>{scorecard.matchInfo.team2.name} (Team 2)</option>
+                    </select>
+                    <p className="text-xs text-gray-500 mt-2">
+                      2nd Innings will automatically be assigned to: {
+                        scorecard.innings[1].battingTeamId === scorecard.matchInfo.team1.id 
+                          ? scorecard.matchInfo.team1.name 
+                          : scorecard.matchInfo.team2.name
+                      }
+                    </p>
+                  </div>
+
                   <div>
                     <label className="block text-sm text-gray-400 mb-2">Toss Winner</label>
                     <select

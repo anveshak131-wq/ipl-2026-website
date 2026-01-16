@@ -510,11 +510,17 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
                   {/* Innings */}
                   {scorecard.innings?.map((inning: any, idx: number) => {
                     const battingTeam = inning.battingTeamId === match.team1.id ? match.team1.name : match.team2.name;
+                    const inningsLabel = inning.inningsNumber || (idx + 1);
                     return (
                       <div key={idx} className="bg-white/5 rounded-2xl p-6 border-2 border-white/10">
-                        <h3 className="text-2xl font-bold text-ipl-gold mb-4">
-                          {battingTeam} Innings
-                        </h3>
+                        <div className="flex items-center justify-between mb-4">
+                          <h3 className="text-2xl font-bold text-ipl-gold">
+                            {battingTeam} Innings
+                          </h3>
+                          <span className="text-sm font-semibold text-gray-400 bg-gray-700 px-3 py-1 rounded-full">
+                            {inningsLabel === 1 ? '1st Innings' : '2nd Innings'}
+                          </span>
+                        </div>
 
                         {/* Innings Total */}
                         {inning.totalRuns !== undefined && (
