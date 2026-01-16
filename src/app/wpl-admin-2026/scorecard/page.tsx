@@ -205,17 +205,26 @@ export default function ScorecardAdminPage() {
     setSaving(true);
     setMessage('');
     try {
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
       const endpoint = scorecard.id ? `/api/scorecards/${scorecard.id}` : '/api/scorecards';
       const method = scorecard.id ? 'PUT' : 'POST';
 
       const response = await fetch(endpoint, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(scorecard),
       });
 
       if (!response.ok) {
-        throw new Error(`Error: ${response.status} ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Error: ${response.status} ${response.statusText}`);
       }
 
       const saved = await response.json();
@@ -224,7 +233,7 @@ export default function ScorecardAdminPage() {
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
       console.error('Error saving:', err);
-      setMessage('✗ Error saving scorecard');
+      setMessage(`✗ Error saving scorecard: ${err.message}`);
     }
     setSaving(false);
   };
@@ -234,9 +243,17 @@ export default function ScorecardAdminPage() {
     setSaving(true);
     setMessage('');
     try {
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
       const response = await fetch(`/api/scorecards/${scorecard.id}/publish`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
       });
 
       if (!response.ok) {
