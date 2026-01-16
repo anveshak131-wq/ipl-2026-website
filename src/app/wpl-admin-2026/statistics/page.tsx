@@ -336,7 +336,8 @@ export default function WPLStatsPage() {
               Points Table Admin page
             </a>
           </p>
-        </div>v>
+        </div>
+      </div>
     </div>
   );
 }
