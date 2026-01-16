@@ -118,12 +118,31 @@ export default function WPLMatchesPage() {
     
     setLoading(true);
     try {
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
+      const response = await fetch('/api/matches', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          id: matchId,
+          status: 'completed'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update match');
+      }
+
+      // Update local state
       setMatches(matches.map(m => 
         m.id === matchId ? { ...m, status: 'completed' as const } : m
       ));
       setMessage('Match marked as completed!');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
+      console.error('Error updating match:', error);
       setMessage('Failed to update match status');
     } finally {
       setLoading(false);
@@ -135,12 +154,31 @@ export default function WPLMatchesPage() {
     
     setLoading(true);
     try {
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
+      const response = await fetch('/api/matches', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          id: matchId,
+          status: 'upcoming'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update match');
+      }
+
+      // Update local state
       setMatches(matches.map(m => 
         m.id === matchId ? { ...m, status: 'upcoming' as const } : m
       ));
       setMessage('Match status reverted to upcoming!');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
+      console.error('Error updating match:', error);
       setMessage('Failed to update match status');
     } finally {
       setLoading(false);
