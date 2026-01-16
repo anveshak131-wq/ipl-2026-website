@@ -756,14 +756,14 @@ export default function WPLLeaderboardPage() {
                                 <div className="grid grid-cols-3 md:grid-cols-6 gap-3 md:gap-4">
                                   <div className="text-center">
                                     <div className="text-xs text-gray-500 uppercase mb-1 font-semibold">Matches</div>
-                                    <div className="text-lg md:text-xl font-bold text-gray-300">{stat.matches || 0}</div>
+                                    <div className="text-lg md:text-xl font-bold text-gray-300">{stat.matches ?? 0}</div>
                                   </div>
                                   
                                   <div className="text-center">
                                     <div className="text-xs text-gray-500 uppercase mb-1 font-semibold">Won</div>
                                     <div className="text-lg md:text-xl font-bold text-green-400 flex items-center justify-center gap-1">
                                       <TrendingUp size={16} />
-                                      {stat.wins || 0}
+                                      {stat.wins ?? 0}
                                     </div>
                                   </div>
                                   
@@ -771,7 +771,7 @@ export default function WPLLeaderboardPage() {
                                     <div className="text-xs text-gray-500 uppercase mb-1 font-semibold">Lost</div>
                                     <div className="text-lg md:text-xl font-bold text-red-400 flex items-center justify-center gap-1">
                                       <TrendingDown size={16} />
-                                      {stat.losses || 0}
+                                      {stat.losses ?? 0}
                                     </div>
                                   </div>
                                   
@@ -784,25 +784,25 @@ export default function WPLLeaderboardPage() {
                                       whileHover={{ scale: 1.2 }}
                                       transition={{ type: "spring", stiffness: 300 }}
                                     >
-                                      {stat.points || 0}
+                                      {stat.points ?? 0}
                                     </motion.div>
                                   </div>
                                   
                                   <div className="text-center hidden md:block">
                                     <div className="text-xs text-gray-500 uppercase mb-1 font-semibold">NRR</div>
                                     <div className={`text-lg font-bold flex items-center justify-center gap-1 ${
-                                      stat.netRunRate >= 0 ? 'text-green-400' : 'text-red-400'
+                                      (stat.netRunRate ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'
                                     }`}>
-                                      {stat.netRunRate > 0 ? <ArrowUp size={16} /> : stat.netRunRate < 0 ? <ArrowDown size={16} /> : null}
-                                      {stat.netRunRate >= 0 ? '+' : ''}{stat.netRunRate ? stat.netRunRate.toFixed(3) : '0.000'}
+                                      {(stat.netRunRate ?? 0) > 0 ? <ArrowUp size={16} /> : (stat.netRunRate ?? 0) < 0 ? <ArrowDown size={16} /> : null}
+                                      {(stat.netRunRate ?? 0) >= 0 ? '+' : ''}{(stat.netRunRate ?? 0).toFixed(3)}
                                     </div>
                                   </div>
                                   
                                   <div className="text-center hidden md:block">
                                     <div className="text-xs text-gray-500 uppercase mb-1 font-semibold">Form</div>
                                     <div className="flex items-center justify-center gap-1">
-                                      {[...Array(Math.min(5, stat.matches || 0))].map((_, i) => {
-                                        const isWin = i < (stat.wins || 0);
+                                      {[...Array(Math.min(5, stat.matches ?? 0))].map((_, i) => {
+                                        const isWin = i < (stat.wins ?? 0);
                                         return (
                                           <motion.div
                                             key={i}
