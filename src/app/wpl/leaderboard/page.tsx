@@ -85,6 +85,26 @@ export default function WPLLeaderboardPage() {
         const teamsData = await api.getTeams('wpl');
         setTeams(teamsData || []);
 
+        // Use points table data from WPL admin (stored in teams stats)
+        if (teamsData && teamsData.length > 0) {
+          const pointsTableStats = teamsData
+            .filter(team => team.stats && (team.stats.matchesPlayed || 0) > 0) // Only teams with matches
+            .map(team => ({
+              teamId: parseInt(team.id),
+              teamName: team.name,
+              matches: team.stats?.matchesPlayed || 0,
+              wins: team.stats?.wins || 0,
+              losses: team.stats?.losses || 0,
+              points: team.stats?.points || 0,
+              netRunRate: team.stats?.netRunRate || 0.00
+            }));
+          
+          if (pointsTableStats.length > 0) {
+            setTeamStats(pointsTableStats);
+          }
+        }
+
+        // Fetch batting and bowling stats from scorecards
         const statsResponse = await fetch('/api/stats?league=wpl&type=all');
         if (statsResponse.ok) {
           const statsData = await statsResponse.json();
@@ -96,29 +116,6 @@ export default function WPLLeaderboardPage() {
           
           if (statsData.bowlingStats && Array.isArray(statsData.bowlingStats) && statsData.bowlingStats.length > 0) {
             setBowlingStats(statsData.bowlingStats);
-          }
-          
-          if (statsData.teamStats && Array.isArray(statsData.teamStats) && statsData.teamStats.length > 0) {
-            setTeamStats(statsData.teamStats);
-          } else {
-            // Fallback to teams data only if available
-            if (teamsData && teamsData.length > 0) {
-              const fallbackTeamStats = teamsData
-                .filter(team => team.stats && (team.stats.matchesPlayed || 0) > 0) // Only teams with matches
-                .map(team => ({
-                  teamId: parseInt(team.id),
-                  teamName: team.name,
-                  matches: team.stats?.matchesPlayed || 0,
-                  wins: team.stats?.wins || 0,
-                  losses: team.stats?.losses || 0,
-                  points: team.stats?.points || 0,
-                  netRunRate: team.stats?.netRunRate || 0.00
-                }));
-              
-              if (fallbackTeamStats.length > 0) {
-                setTeamStats(fallbackTeamStats);
-              }
-            }
           }
         }
 
