@@ -612,7 +612,9 @@ export default function WPLAdminPointsTablePage() {
                             placeholder="0.00"
                           />
                         ) : (
-                          team.matchesPlayed > 0 ? team.netRunRate.toFixed(2) : <span className="text-gray-500">N/A</span>
+                          team.matchesPlayed > 0 ? (
+                            team.netRunRate > 0 ? `+${team.netRunRate.toFixed(2)}` : team.netRunRate.toFixed(2)
+                          ) : <span className="text-gray-500">N/A</span>
                         )}
                       </div>
 
