@@ -143,11 +143,19 @@ function calculateStatsFromScorecards(scorecards) {
   const battingMap = {};
   
   scorecards.forEach(scorecard => {
+    const matchInfo = scorecard.matchInfo || {};
+    const team1Name = matchInfo.team1?.name || matchInfo.team1?.shortName || 'Team 1';
+    const team2Name = matchInfo.team2?.name || matchInfo.team2?.shortName || 'Team 2';
+    
     // Handle both old format (innings1, innings2) and new format (innings array)
     const innings = scorecard.innings || [scorecard.innings1, scorecard.innings2].filter(Boolean);
     
-    innings.forEach(inning => {
+    innings.forEach((inning, inningIndex) => {
       if (!inning?.batting) return;
+      
+      // Determine which team is batting in this inning
+      // Innings 0 (or innings1) = team1 batting, Innings 1 (or innings2) = team2 batting
+      const battingTeamName = inningIndex === 0 ? team1Name : team2Name;
       
       inning.batting.forEach(batsman => {
         if (!batsman.playerId) return;
@@ -157,7 +165,7 @@ function calculateStatsFromScorecards(scorecards) {
           battingMap[playerId] = {
             playerId,
             playerName: batsman.name || 'Unknown',
-            teamName: batsman.teamName || inning.battingTeam || 'Unknown Team',
+            teamName: batsman.teamName || inning.battingTeam || battingTeamName,
             runs: 0,
             ballsFaced: 0,
             fours: 0,
@@ -233,11 +241,19 @@ function calculateStatsFromScorecards(scorecards) {
   const bowlingMap = {};
   
   scorecards.forEach(scorecard => {
+    const matchInfo = scorecard.matchInfo || {};
+    const team1Name = matchInfo.team1?.name || matchInfo.team1?.shortName || 'Team 1';
+    const team2Name = matchInfo.team2?.name || matchInfo.team2?.shortName || 'Team 2';
+    
     // Handle both old format (innings1, innings2) and new format (innings array)
     const innings = scorecard.innings || [scorecard.innings1, scorecard.innings2].filter(Boolean);
     
-    innings.forEach(inning => {
+    innings.forEach((inning, inningIndex) => {
       if (!inning?.bowling) return;
+      
+      // Determine which team is bowling in this inning
+      // Innings 0 (or innings1) = team2 bowling (team1 batting), Innings 1 (or innings2) = team1 bowling (team2 batting)
+      const bowlingTeamName = inningIndex === 0 ? team2Name : team1Name;
       
       inning.bowling.forEach(bowler => {
         if (!bowler.playerId) return;
@@ -247,7 +263,7 @@ function calculateStatsFromScorecards(scorecards) {
           bowlingMap[playerId] = {
             playerId,
             playerName: bowler.name || 'Unknown',
-            teamName: bowler.teamName || inning.bowlingTeam || 'Unknown Team',
+            teamName: bowler.teamName || inning.bowlingTeam || bowlingTeamName,
             wickets: 0,
             runs: 0,
             overs: 0,
