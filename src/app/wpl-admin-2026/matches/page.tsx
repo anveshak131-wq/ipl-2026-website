@@ -3,16 +3,8 @@
 import { useState, useEffect } from 'react';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import { Calendar, MapPin, Clock, Plus, Edit, Trash2 } from 'lucide-react';
-
-interface Match {
-  id: string;
-  team1: { id: string; name: string; shortName: string };
-  team2: { id: string; name: string; shortName: string };
-  venue: string;
-  date: string;
-  time: string;
-  status: 'upcoming' | 'live' | 'completed';
-}
+import { api } from '@/lib/data';
+import { Match } from '@/types';
 
 export default function WPLMatchesPage() {
   const [matches, setMatches] = useState<Match[]>([]);
@@ -37,29 +29,11 @@ export default function WPLMatchesPage() {
   const fetchMatches = async () => {
     setLoading(true);
     try {
-      // Mock data for WPL matches
-      const mockMatches: Match[] = [
-        {
-          id: '1',
-          team1: { id: '1', name: 'Mumbai Indians', shortName: 'MI' },
-          team2: { id: '2', name: 'Delhi Capitals', shortName: 'DC' },
-          venue: 'Wankhede Stadium, Mumbai',
-          date: '2026-03-15',
-          time: '19:30',
-          status: 'upcoming'
-        },
-        {
-          id: '2',
-          team1: { id: '3', name: 'Royal Challengers Bangalore', shortName: 'RCB' },
-          team2: { id: '4', name: 'Chennai Super Kings', shortName: 'CSK' },
-          venue: 'M. Chinnaswamy Stadium, Bengaluru',
-          date: '2026-03-16',
-          time: '15:30',
-          status: 'upcoming'
-        }
-      ];
-      setMatches(mockMatches);
+      // Fetch WPL matches from API
+      const wplMatches = await api.getMatches('wpl');
+      setMatches(wplMatches);
     } catch (error) {
+      console.error('Error fetching WPL matches:', error);
       setMessage('Failed to fetch matches');
     } finally {
       setLoading(false);
