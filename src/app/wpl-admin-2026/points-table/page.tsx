@@ -87,11 +87,12 @@ export default function WPLAdminPointsTablePage() {
     if (calculatedStats && calculatedStats.length > 0) {
       return teams.map(team => {
         const teamStat = calculatedStats.find((s: any) => s.teamId === parseInt(team.id) || s.teamName === team.name);
+        
+        // Add shortName display
+        const displayShortName = team.shortName || team.name.split(' ').map(w => w[0]).join('');
+        const displayName = team.name && team.name.includes('(WPL)') ? team.name : `${team.name || ''} (WPL)`;
+        
         if (teamStat) {
-          // Add shortName display
-          const displayShortName = team.shortName || team.name.split(' ').map(w => w[0]).join('');
-          const displayName = team.name && team.name.includes('(WPL)') ? team.name : `${team.name || ''} (WPL)`;
-          
           return {
             ...team,
             shortName: displayShortName,
@@ -103,8 +104,19 @@ export default function WPLAdminPointsTablePage() {
             netRunRate: teamStat.netRunRate
           };
         }
-        return null;
-      }).filter(Boolean);
+        
+        // Return team with zero stats if no data yet
+        return {
+          ...team,
+          shortName: displayShortName,
+          name: displayName,
+          matchesPlayed: 0,
+          wins: 0,
+          losses: 0,
+          points: 0,
+          netRunRate: 0.00
+        };
+      });
     }
 
     // Fallback to calculating from matches
