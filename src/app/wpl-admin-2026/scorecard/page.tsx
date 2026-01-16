@@ -655,8 +655,6 @@ export default function ScorecardAdminPage() {
                                     />
                                   )}
                                 </td>
-                                </td>
-                                <td className="p-2
                                 <td className="p-2 text-center">
                                   <button
                                     onClick={() => removeBatter(idx)}
