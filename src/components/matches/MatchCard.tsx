@@ -508,7 +508,9 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
                   )}
 
                   {/* Innings */}
-                  {scorecard.innings?.map((inning: any, idx: number) => {
+                  {scorecard.innings
+                    ?.sort((a: any, b: any) => (a.inningsNumber || 1) - (b.inningsNumber || 1))
+                    .map((inning: any, idx: number) => {
                     const battingTeam = inning.battingTeamId === match.team1.id ? match.team1.name : match.team2.name;
                     const inningsLabel = inning.inningsNumber || (idx + 1);
                     return (
