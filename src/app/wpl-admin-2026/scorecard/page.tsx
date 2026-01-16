@@ -398,6 +398,16 @@ export default function ScorecardAdminPage() {
       (b) => b.dismissal && b.dismissal.type !== 'not-out'
     ).length;
 
+    // Calculate total overs from bowling data
+    const totalBalls = inning.bowling.reduce((sum, bowler) => {
+      const overs = Number(bowler.overs) || 0;
+      const balls = Number(bowler.balls) || 0;
+      return sum + (overs * 6) + balls;
+    }, 0);
+    const oversComplete = Math.floor(totalBalls / 6);
+    const ballsRemaining = totalBalls % 6;
+    inning.totalOvers = `${oversComplete}.${ballsRemaining}`;
+
     setScorecard(updated);
   };
 
