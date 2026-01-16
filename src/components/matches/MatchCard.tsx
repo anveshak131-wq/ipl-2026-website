@@ -378,24 +378,24 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
       {/* Scorecard Modal */}
       {showScorecardModal && (
         <div 
-          className="fixed inset-0 z-50"
-          onClick={() => setShowScorecardModal(false)}
+          className="fixed inset-0 z-[100] bg-black"
         >
           <div 
-            className="w-screen h-screen overflow-y-auto bg-gradient-to-br from-gray-900 to-gray-800"
+            className="w-full h-full overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
             <button
               onClick={() => setShowScorecardModal(false)}
-              className="fixed top-6 right-6 p-3 rounded-full bg-red-500/20 hover:bg-red-500/40 text-white transition-colors z-50 backdrop-blur-sm"
+              className="fixed top-4 right-4 md:top-8 md:right-8 p-4 rounded-full bg-red-600 hover:bg-red-700 text-white transition-all z-[101] shadow-2xl hover:scale-110"
             >
-              <X size={28} />
+              <X size={32} strokeWidth={3} />
             </button>
 
-            {/* Modal Content */}
-            <div className="p-6 md:p-8">
-              <h2 className="text-2xl md:text-3xl font-bold text-ipl-gold mb-6">Match Scorecard</h2>
+            {/* Modal Content Container */}
+            <div className="min-h-screen flex items-center justify-center p-4 md:p-8">
+              <div className="w-full max-w-6xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-3xl border-4 border-ipl-gold/60 shadow-[0_0_100px_rgba(255,215,0,0.3)] p-6 md:p-12 my-8">
+                <h2 className="text-3xl md:text-5xl font-bold text-ipl-gold mb-8 text-center">Match Scorecard</h2>
               
               {/* Teams Header */}
               <div className="flex items-center justify-between mb-6 p-4 bg-white/5 rounded-xl">
@@ -441,10 +441,11 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
               )}
 
               {/* Placeholder for detailed scorecard */}
-              <div className="p-6 bg-white/5 rounded-xl text-center">
-                <div className="text-gray-400 mb-2">Detailed scorecard coming soon</div>
-                <div className="text-sm text-gray-500">Ball-by-ball commentary, partnerships, and statistics will be available here</div>
+              <div className="p-8 bg-gradient-to-br from-white/10 to-white/5 rounded-2xl text-center border-2 border-white/20">
+                <div className="text-gray-300 mb-3 text-lg font-semibold">Detailed scorecard coming soon</div>
+                <div className="text-gray-400">Ball-by-ball commentary, partnerships, and statistics will be available here</div>
               </div>
+            </div>
             </div>
           </div>
         </div>
@@ -453,26 +454,27 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
       {/* Playing 11 Modal */}
       {showPlaying11Modal && match.playing11 && players && (
         <div 
-          className="fixed inset-0 z-50"
-          onClick={() => setShowPlaying11Modal(false)}
+          className="fixed inset-0 z-[100] bg-black"
         >
           <div 
-            className="w-screen h-screen overflow-y-auto bg-gradient-to-br from-gray-900 to-gray-800"
+            className="w-full h-full overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
             <button
               onClick={() => setShowPlaying11Modal(false)}
-              className="fixed top-6 right-6 p-3 rounded-full bg-red-500/20 hover:bg-red-500/40 text-white transition-colors z-50 backdrop-blur-sm"
+              className="fixed top-4 right-4 md:top-8 md:right-8 p-4 rounded-full bg-red-600 hover:bg-red-700 text-white transition-all z-[101] shadow-2xl hover:scale-110"
             >
-              <X size={28} />
+              <X size={32} strokeWidth={3} />
             </button>
 
-            {/* Modal Content */}
-            <div className="p-6 md:p-8">
-              <h2 className="text-2xl md:text-3xl font-bold text-ipl-gold mb-6">Playing XI</h2>
+            {/* Modal Content Container */}
+            <div className="min-h-screen flex items-center justify-center p-4 md:p-8">
+              <div className="w-full max-w-6xl bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-3xl border-4 border-ipl-gold/60 shadow-[0_0_100px_rgba(255,215,0,0.3)] p-6 md:p-12 my-8">
+                <h2 className="text-3xl md:text-5xl font-bold text-ipl-gold mb-8 text-center">Playing XI</h2>
               
               <Playing11Display match={match} players={players} />
+            </div>
             </div>
           </div>
         </div>
