@@ -1022,38 +1022,23 @@ export default function ScorecardAdminPage() {
             {activeTab === 'result' && (
               <div className="bg-gray-800 p-6 rounded-lg">
                 <h3 className="text-xl font-bold mb-6">Match Result</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6">
                   <div>
-                    <label className="block text-sm text-gray-400 mb-2">Winner</label>
-                    <select
+                    <label className="block text-sm text-gray-400 mb-2">Match Result (Full Text)</label>
+                    <input
+                      type="text"
                       value={scorecard.result?.winner || ''}
                       onChange={(e) => {
                         const updated = { ...scorecard };
-                        updated.result = { ...updated.result, winner: e.target.value };
+                        updated.result = { ...updated.result, winner: e.target.value, margin: '' };
                         setScorecard(updated);
                       }}
-                      className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
-                    >
-                      <option value="">Select...</option>
-                      <option value={scorecard.matchInfo.team1.name}>{scorecard.matchInfo.team1.name}</option>
-                      <option value={scorecard.matchInfo.team2.name}>{scorecard.matchInfo.team2.name}</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-2">Margin (e.g., "by 5 runs")</label>
-                    <input
-                      type="text"
-                      value={scorecard.result?.margin || ''}
-                      onChange={(e) => {
-                        const updated = { ...scorecard };
-                        updated.result = { ...updated.result, margin: e.target.value };
-                        setScorecard(updated);
-                      }}
-                      placeholder="e.g., by 5 runs or by 3 wickets"
+                      placeholder="e.g., Royal Challengers Bengaluru Women won by 3 wkts"
                       className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white placeholder-gray-500"
                     />
+                    <p className="text-xs text-gray-500 mt-1">Enter the complete match result as you want it to appear</p>
                   </div>
-                  <div className="md:col-span-2">
+                  <div>
                     <label className="block text-sm text-gray-400 mb-2">Man of the Match</label>
                     <select
                       value={scorecard.result?.manOfTheMatch || ''}

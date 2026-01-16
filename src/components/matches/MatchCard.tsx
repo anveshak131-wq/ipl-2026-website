@@ -489,44 +489,11 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
                   )}
 
                   {/* Match Result - Moved here after Toss */}
-                  {scorecard.result && (
+                  {scorecard.result && scorecard.result.winner && (
                     <div className="p-6 bg-gradient-to-r from-green-500/20 to-emerald-600/20 border-2 border-green-500/40 rounded-2xl">
                       <div className="text-green-400 text-sm font-semibold mb-2">Match Result</div>
                       <div className="text-white font-bold text-xl">
-                        {(() => {
-                          const winner = scorecard.result.winner;
-                          const margin = scorecard.result.margin;
-                          
-                          // Handle duplicate/malformed result text
-                          if (winner.includes('won by')) {
-                            // Look for pattern: "TeamName won by margin"
-                            // If there are multiple "won by", extract the last complete result
-                            const regex = /([^w]+?)\s+won by\s+(.+)$/i;
-                            const match = winner.match(regex);
-                            
-                            if (match) {
-                              // If the matched result already has complete information
-                              const teamName = match[1].trim();
-                              const winMargin = match[2].trim();
-                              
-                              // Check if we have nested "won by" - take the innermost one
-                              if (winMargin.includes('won by')) {
-                                const innerMatch = winMargin.match(/([^w]+?)\s+won by\s+(.+)$/i);
-                                if (innerMatch) {
-                                  return `${innerMatch[1].trim()} won by ${innerMatch[2].trim()}`;
-                                }
-                              }
-                              
-                              return `${teamName} won by ${winMargin}`;
-                            }
-                            
-                            // Fallback: return as-is
-                            return winner;
-                          }
-                          
-                          // Normal case: construct result
-                          return `${winner} won by ${margin}`;
-                        })()}
+                        {scorecard.result.winner}
                       </div>
                       {scorecard.result.manOfTheMatch && (
                         <div className="text-yellow-400 mt-2">Player of the Match: {scorecard.result.manOfTheMatch}</div>
