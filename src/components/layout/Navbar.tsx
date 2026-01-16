@@ -78,8 +78,11 @@ export default function Navbar() {
     { href: '/matchday', label: 'Match Day', emoji: 'venue' },
     // Fan Stories temporarily hidden from end-user navigation
     // { href: '/stories', label: 'Fan Stories', emoji: 'people' },
-    // Analytics & Insights (only for IPL, not WPL)
-    ...(currentLeague !== 'wpl' ? [{ href: '/stats', label: 'Stats', emoji: 'chart' as NavEmojiName }] : []),
+    // Analytics & Insights - WPL gets leaderboard, IPL gets stats
+    ...(currentLeague === 'wpl' 
+      ? [{ href: '/wpl/leaderboard', label: 'Leaderboard', emoji: 'chart' as NavEmojiName }] 
+      : [{ href: '/stats', label: 'Stats', emoji: 'chart' as NavEmojiName }]
+    ),
   ];
 
   const secondaryNavItems: NavItem[] = [
