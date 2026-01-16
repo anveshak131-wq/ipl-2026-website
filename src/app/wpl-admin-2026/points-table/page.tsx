@@ -539,7 +539,7 @@ export default function WPLAdminPointsTablePage() {
                             min="0"
                           />
                         ) : (
-                          team.matchesPlayed || <span className="text-gray-500">-</span>
+                          team.matchesPlayed > 0 ? team.matchesPlayed : <span className="text-gray-500">-</span>
                         )}
                       </div>
 
@@ -556,7 +556,7 @@ export default function WPLAdminPointsTablePage() {
                         ) : (
                           <>
                             <TrendingUp className="w-4 h-4" />
-                            {team.matchesPlayed ? team.wins : <span className="text-gray-500">-</span>}
+                            {team.matchesPlayed > 0 ? team.wins : <span className="text-gray-500">-</span>}
                           </>
                         )}
                       </div>
@@ -574,7 +574,7 @@ export default function WPLAdminPointsTablePage() {
                         ) : (
                           <>
                             <TrendingDown className="w-4 h-4" />
-                            {team.matchesPlayed ? team.losses : <span className="text-gray-500">-</span>}
+                            {team.matchesPlayed > 0 ? team.losses : <span className="text-gray-500">-</span>}
                           </>
                         )}
                       </div>
@@ -590,7 +590,7 @@ export default function WPLAdminPointsTablePage() {
                             min="0"
                           />
                         ) : (
-                          team.matchesPlayed ? team.points : <span className="text-gray-500">-</span>
+                          team.matchesPlayed > 0 ? team.points : <span className="text-gray-500">-</span>
                         )}
                       </div>
 
@@ -607,7 +607,7 @@ export default function WPLAdminPointsTablePage() {
                             className="w-20 px-2 py-1 bg-slate-700 border border-white rounded text-center"
                           />
                         ) : (
-                          team.matchesPlayed ? team.netRunRate.toFixed(2) : <span className="text-gray-500">-</span>
+                          team.matchesPlayed > 0 ? team.netRunRate.toFixed(2) : <span className="text-gray-500">-</span>
                         )}
                       </div>
 
