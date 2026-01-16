@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, Fragment } from 'react';
 import Image from 'next/image';
 import { Match, Player } from '@/types';
 import { getAnimatedLogoPath, getLogoPath } from '@/lib/logoUtils';
@@ -10,6 +11,7 @@ import { formatMatchTime } from '@/lib/timeUtils';
 import { getMatchNumberDisplay } from '@/lib/matchNumberUtils';
 import CountdownTimer from '@/components/ui/CountdownTimer';
 import Playing11Display from '@/components/matches/Playing11Display';
+import { X } from 'lucide-react';
 
 interface MatchCardProps {
   match: Match;
@@ -18,6 +20,8 @@ interface MatchCardProps {
 }
 
 export default function MatchCard({ match, index = 0, players }: MatchCardProps) {
+  const [showScorecardModal, setShowScorecardModal] = useState(false);
+  const [showPlaying11Modal, setShowPlaying11Modal] = useState(false);
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
@@ -121,10 +125,11 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
   };
 
   return (
-    <div
-      className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 hover:border-ipl-gold/50 transition-all duration-300 hover:shadow-2xl hover:shadow-ipl-gold/20 transform hover:scale-105 animate-scale-in"
-      style={{ animationDelay: `${index * 80}ms` }}
-    >
+    <>
+      <div
+        className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm border border-white/10 hover:border-ipl-gold/50 transition-all duration-300 hover:shadow-2xl hover:shadow-ipl-gold/20 transform hover:scale-105 animate-scale-in"
+        style={{ animationDelay: `${index * 80}ms` }}
+      >
       {/* Animated background on hover */}
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
         <div className="absolute inset-0 bg-gradient-to-br from-ipl-gold/10 to-ipl-purple/10" />
@@ -263,79 +268,215 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
           </div>
         )}
 
-        {/* Playing XI Display */}
-        {match.playing11 && players && players.length > 0 && (
-          <div className="mt-4 pt-2 border-t border-white/10">
-            <Playing11Display match={match} players={players} />
-          </div>
-        )}
+        {/* Action Buttons - Premium Design */}
+        <div className="flex gap-3 mt-4">
+          {/* Playing 11 Button */}
+          {match.playing11 && players && players.length > 0 && (
+            <button
+              onClick={() => setShowPlaying11Modal(true)}
+              className="group flex-1 relative overflow-hidden rounded-xl font-bold text-sm py-3 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+              style={{
+                background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 50%, #B45309 100%)',
+                boxShadow: '0 10px 40px rgba(245, 158, 11, 0.4), 0 0 60px rgba(217, 119, 6, 0.3)',
+                border: '2px solid rgba(245, 158, 11, 0.5)',
+                color: '#fff',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = '0 20px 60px rgba(245, 158, 11, 0.6), 0 0 80px rgba(217, 119, 6, 0.5)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = '0 10px 40px rgba(245, 158, 11, 0.4), 0 0 60px rgba(217, 119, 6, 0.3)';
+              }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+              <span className="relative z-10 flex items-center justify-center gap-2 font-black tracking-tight">
+                Playing 11
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              </span>
+            </button>
+          )}
 
-        {/* Action Button - Premium Design */}
-        <button
-          onClick={() => alert(`${match.status === 'upcoming' ? 'Reminder set!' : match.status === 'live' ? 'Opening stream...' : 'Loading highlights...'}`)} 
-          className="group w-full relative overflow-hidden rounded-xl font-bold text-sm py-3 mt-4 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-          style={{
-            background: match.status === 'live' 
-              ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 50%, #B91C1C 100%)'
-              : match.status === 'completed'
-              ? 'linear-gradient(135deg, #10B981 0%, #059669 50%, #047857 100%)'
-              : 'linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #A855F7 100%)',
-            boxShadow: match.status === 'live'
-              ? '0 10px 40px rgba(239, 68, 68, 0.4), 0 0 60px rgba(220, 38, 38, 0.3)'
-              : match.status === 'completed'
-              ? '0 10px 40px rgba(16, 185, 129, 0.4), 0 0 60px rgba(5, 150, 105, 0.3)'
-              : '0 10px 40px rgba(124, 58, 237, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)',
-            border: match.status === 'live'
-              ? '2px solid rgba(239, 68, 68, 0.5)'
-              : match.status === 'completed'
-              ? '2px solid rgba(16, 185, 129, 0.5)'
-              : '2px solid rgba(124, 58, 237, 0.5)',
-            color: '#fff',
-          }}
-          onMouseEnter={(e) => {
-            if (match.status === 'live') {
-              e.currentTarget.style.boxShadow = '0 20px 60px rgba(239, 68, 68, 0.6), 0 0 80px rgba(220, 38, 38, 0.5)';
-            } else if (match.status === 'completed') {
-              e.currentTarget.style.boxShadow = '0 20px 60px rgba(16, 185, 129, 0.6), 0 0 80px rgba(5, 150, 105, 0.5)';
-            } else {
-              e.currentTarget.style.boxShadow = '0 20px 60px rgba(124, 58, 237, 0.6), 0 0 80px rgba(147, 51, 234, 0.4)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (match.status === 'live') {
-              e.currentTarget.style.boxShadow = '0 10px 40px rgba(239, 68, 68, 0.4), 0 0 60px rgba(220, 38, 38, 0.3)';
-            } else if (match.status === 'completed') {
-              e.currentTarget.style.boxShadow = '0 10px 40px rgba(16, 185, 129, 0.4), 0 0 60px rgba(5, 150, 105, 0.3)';
-            } else {
-              e.currentTarget.style.boxShadow = '0 10px 40px rgba(124, 58, 237, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)';
-            }
-          }}
-        >
-          {/* Shimmer effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-          
-          {/* Glow effect */}
-          <div 
-            className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10"
+          {/* Main Action Button */}
+          <button
+            onClick={() => {
+              if (match.status === 'completed') {
+                setShowScorecardModal(true);
+              } else if (match.status === 'upcoming') {
+                alert('Reminder set!');
+              } else {
+                alert('Opening stream...');
+              }
+            }} 
+            className="group flex-1 relative overflow-hidden rounded-xl font-bold text-sm py-3 transition-all duration-500 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
             style={{
-              background: match.status === 'live'
-                ? 'radial-gradient(circle, rgba(239, 68, 68, 0.6), transparent)'
+              background: match.status === 'live' 
+                ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 50%, #B91C1C 100%)'
                 : match.status === 'completed'
-                ? 'radial-gradient(circle, rgba(16, 185, 129, 0.6), transparent)'
-                : 'radial-gradient(circle, rgba(124, 58, 237, 0.6), transparent)',
+                ? 'linear-gradient(135deg, #10B981 0%, #059669 50%, #047857 100%)'
+                : 'linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #A855F7 100%)',
+              boxShadow: match.status === 'live'
+                ? '0 10px 40px rgba(239, 68, 68, 0.4), 0 0 60px rgba(220, 38, 38, 0.3)'
+                : match.status === 'completed'
+                ? '0 10px 40px rgba(16, 185, 129, 0.4), 0 0 60px rgba(5, 150, 105, 0.3)'
+                : '0 10px 40px rgba(124, 58, 237, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)',
+              border: match.status === 'live'
+                ? '2px solid rgba(239, 68, 68, 0.5)'
+                : match.status === 'completed'
+                ? '2px solid rgba(16, 185, 129, 0.5)'
+                : '2px solid rgba(124, 58, 237, 0.5)',
+              color: '#fff',
             }}
-          />
-          
-          <span className="relative z-10 flex items-center justify-center gap-2 font-black tracking-tight">
-            {match.status === 'upcoming' && 'Set Reminder'}
-            {match.status === 'live' && 'Watch Live'}
-            {match.status === 'completed' && 'View Highlights'}
-            <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </span>
-        </button>
+            onMouseEnter={(e) => {
+              if (match.status === 'live') {
+                e.currentTarget.style.boxShadow = '0 20px 60px rgba(239, 68, 68, 0.6), 0 0 80px rgba(220, 38, 38, 0.5)';
+              } else if (match.status === 'completed') {
+                e.currentTarget.style.boxShadow = '0 20px 60px rgba(16, 185, 129, 0.6), 0 0 80px rgba(5, 150, 105, 0.5)';
+              } else {
+                e.currentTarget.style.boxShadow = '0 20px 60px rgba(124, 58, 237, 0.6), 0 0 80px rgba(147, 51, 234, 0.4)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (match.status === 'live') {
+                e.currentTarget.style.boxShadow = '0 10px 40px rgba(239, 68, 68, 0.4), 0 0 60px rgba(220, 38, 38, 0.3)';
+              } else if (match.status === 'completed') {
+                e.currentTarget.style.boxShadow = '0 10px 40px rgba(16, 185, 129, 0.4), 0 0 60px rgba(5, 150, 105, 0.3)';
+              } else {
+                e.currentTarget.style.boxShadow = '0 10px 40px rgba(124, 58, 237, 0.4), 0 0 60px rgba(147, 51, 234, 0.2)';
+              }
+            }}
+          >
+            {/* Shimmer effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent transform translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+            
+            {/* Glow effect */}
+            <div 
+              className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-xl -z-10"
+              style={{
+                background: match.status === 'live'
+                  ? 'radial-gradient(circle, rgba(239, 68, 68, 0.6), transparent)'
+                  : match.status === 'completed'
+                  ? 'radial-gradient(circle, rgba(16, 185, 129, 0.6), transparent)'
+                  : 'radial-gradient(circle, rgba(124, 58, 237, 0.6), transparent)',
+              }}
+            />
+            
+            <span className="relative z-10 flex items-center justify-center gap-2 font-black tracking-tight">
+              {match.status === 'upcoming' && 'Set Reminder'}
+              {match.status === 'live' && 'Watch Live'}
+              {match.status === 'completed' && 'Show Scorecard'}
+              <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </span>
+          </button>
+        </div>
       </div>
     </div>
+
+      {/* Scorecard Modal */}
+      {showScorecardModal && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          onClick={() => setShowScorecardModal(false)}
+        >
+          <div 
+            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl border-2 border-ipl-gold/50 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setShowScorecardModal(false)}
+              className="absolute top-4 right-4 p-2 rounded-full bg-red-500/20 hover:bg-red-500/40 text-white transition-colors z-10"
+            >
+              <X size={24} />
+            </button>
+
+            {/* Modal Content */}
+            <div className="p-6 md:p-8">
+              <h2 className="text-2xl md:text-3xl font-bold text-ipl-gold mb-6">Match Scorecard</h2>
+              
+              {/* Teams Header */}
+              <div className="flex items-center justify-between mb-6 p-4 bg-white/5 rounded-xl">
+                <div className="flex items-center gap-3">
+                  {renderTeamLogo(match.team1)}
+                  <div>
+                    <div className="font-bold text-white">{match.team1.name}</div>
+                    {match.team1Score && (
+                      <div className="text-2xl font-bold text-ipl-gold">{match.team1Score}</div>
+                    )}
+                  </div>
+                </div>
+                <div className="text-gray-400 font-bold">VS</div>
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <div className="font-bold text-white">{match.team2.name}</div>
+                    {match.team2Score && (
+                      <div className="text-2xl font-bold text-ipl-gold">{match.team2Score}</div>
+                    )}
+                  </div>
+                  {renderTeamLogo(match.team2)}
+                </div>
+              </div>
+
+              {/* Match Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div className="p-4 bg-white/5 rounded-xl">
+                  <div className="text-gray-400 text-sm">Venue</div>
+                  <div className="text-white font-semibold">{match.venue}</div>
+                </div>
+                <div className="p-4 bg-white/5 rounded-xl">
+                  <div className="text-gray-400 text-sm">Date & Time</div>
+                  <div className="text-white font-semibold">{formatDate(match.date)} • {formatMatchTime(match.time)}</div>
+                </div>
+              </div>
+
+              {/* Result */}
+              {match.result && (
+                <div className="p-4 bg-gradient-to-r from-green-500/20 to-green-600/20 border border-green-500/30 rounded-xl mb-6">
+                  <div className="text-green-400 text-sm font-semibold mb-1">Match Result</div>
+                  <div className="text-white font-bold text-lg">{match.result}</div>
+                </div>
+              )}
+
+              {/* Placeholder for detailed scorecard */}
+              <div className="p-6 bg-white/5 rounded-xl text-center">
+                <div className="text-gray-400 mb-2">Detailed scorecard coming soon</div>
+                <div className="text-sm text-gray-500">Ball-by-ball commentary, partnerships, and statistics will be available here</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Playing 11 Modal */}
+      {showPlaying11Modal && match.playing11 && players && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          onClick={() => setShowPlaying11Modal(false)}
+        >
+          <div 
+            className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl border-2 border-ipl-gold/50 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setShowPlaying11Modal(false)}
+              className="absolute top-4 right-4 p-2 rounded-full bg-red-500/20 hover:bg-red-500/40 text-white transition-colors z-10"
+            >
+              <X size={24} />
+            </button>
+
+            {/* Modal Content */}
+            <div className="p-6 md:p-8">
+              <h2 className="text-2xl md:text-3xl font-bold text-ipl-gold mb-6">Playing XI</h2>
+              
+              <Playing11Display match={match} players={players} />
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
