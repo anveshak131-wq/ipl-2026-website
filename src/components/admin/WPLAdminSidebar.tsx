@@ -419,7 +419,6 @@ export default function WPLAdminSidebar({ currentPage = '' }: WPLAdminSidebarPro
           collapsed ? 'w-16' : 'w-64'
         } ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
         initial={false}
-        animate={{ x: mobileOpen ? 0 : collapsed ? -256 : 0 }}
       >
         {/* Header */}
         <div className="p-4 border-b border-purple-400/20">
@@ -433,9 +432,15 @@ export default function WPLAdminSidebar({ currentPage = '' }: WPLAdminSidebarPro
                 </div>
               </div>
             )}
+            {collapsed && (
+              <div className="mx-auto">
+                <WPLLogo size={32} />
+              </div>
+            )}
             <button
               onClick={() => setCollapsed(!collapsed)}
               className="p-2 rounded-lg hover:bg-purple-800/50 text-white transition-colors"
+              title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
               {collapsed ? (
                 <ChevronRight className="w-4 h-4" />
@@ -542,7 +547,7 @@ export default function WPLAdminSidebar({ currentPage = '' }: WPLAdminSidebarPro
                 <p className="text-sm font-medium text-white truncate">{adminName}</p>
                 <p className="text-xs text-purple-300 truncate">{adminEmail}</p>
               </div>
-            </div>
+            </div> md:hidden
           </div>
         )}
 
