@@ -32,16 +32,14 @@ export async function onRequest(context) {
         league: s.league,
         draft: s.draft,
         publishedAt: s.publishedAt,
-        matchInfo: {
-          team1: s.matchInfo?.team1,
-          team2: s.matchInfo?.team2,
-        },
+        // Show ALL property names to debug the structure
+        allKeys: Object.keys(s),
+        // Try different possible structures
+        hasInnings: !!s.innings,
         hasInnings1: !!s.innings1,
         hasInnings2: !!s.innings2,
-        innings1Batting: s.innings1?.battingCard?.length || 0,
-        innings1Bowling: s.innings1?.bowlingCard?.length || 0,
-        innings2Batting: s.innings2?.battingCard?.length || 0,
-        innings2Bowling: s.innings2?.bowlingCard?.length || 0,
+        // Show first innings if it exists
+        firstInningsPreview: s.innings ? s.innings[0] : null,
       }))
     };
 
