@@ -417,8 +417,8 @@ export default function ScorecardAdminPage() {
     (bowler as any)[field] = value;
 
     // Calculate economy rate
-    if (field === 'overs' || field === 'balls' || field === 'runs') {
-      const totalOvers = bowler.overs + bowler.balls / 6;
+    if (field === 'overs' || field === 'runs') {
+      const totalOvers = parseFloat(bowler.overs) || 0;
       bowler.economyRate = totalOvers > 0 ? parseFloat((bowler.runs / totalOvers).toFixed(2)) : 0;
     }
 
@@ -452,9 +452,10 @@ export default function ScorecardAdminPage() {
 
     // Calculate total overs from bowling data
     const totalBalls = inning.bowling.reduce((sum, bowler) => {
-      const overs = Number(bowler.overs) || 0;
-      const balls = Number(bowler.balls) || 0;
-      return sum + (overs * 6) + balls;
+      const overs = parseFloat(bowler.overs) || 0;
+      const completeOvers = Math.floor(overs);
+      const balls = Math.round((overs - completeOvers) * 10); // 3.5 -> 5 balls
+      return sum + (completeOvers * 6) + balls;
     }, 0);
     const oversComplete = Math.floor(totalBalls / 6);
     const ballsRemaining = totalBalls % 6;
@@ -863,7 +864,7 @@ export default function ScorecardAdminPage() {
                         <thead>
                           <tr className="border-b border-gray-600">
                             <th className="text-left p-2">Bowler</th>
-                            <th className="text-center p-2">Ovrs</th>
+                            <th className="text-center p-2">Overs</th>
                             <th className="text-center p-2">Runs</th>
                             <th className="text-center p-2">Wkts</th>
                             <th className="text-center p-2">Maidens</th>
@@ -895,19 +896,12 @@ export default function ScorecardAdminPage() {
                                   </select>
                                 </td>
                                 <td className="p-2">
-                                  <div className="flex gap-1">
-                                    <input
-                                      type="number"
-                                      value={bowler.overs || ''}
-                                      onChange={(e) => updateBowler(idx, 'overs', e.target.value ? parseInt(e.target.value) : '')}
-                                      placeholder="O"
-                                      className="w-1/2 bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
-                                    />
-                                    <input
-                                      type="number"
-                                      value={bowler.balls || ''}
-                                      onChange={(e) => updateBowler(idx, 'balls', e.target.value ? parseInt(e.target.value) : '')}
-                                      placeholder="B"
+                                  <input
+                                    type="text"
+                                    value={bowler.overs || ''}
+                                    onChange={(e) => updateBowler(idx, 'overs', e.target.value)}
+                                    placeholder="3.5"
+                                    className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                       min="0"
                                       max="5"
                                       className="w-1/2 bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
