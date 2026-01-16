@@ -225,7 +225,19 @@ export default function WPLMatchesPage() {
           <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-6 mb-6">
             <h2 className="text-xl font-semibold text-white mb-4">
               {editingMatch ? 'Edit Match' : 'Add New Match'}
-            </h2>{teams.map(team => (
+            </h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-white text-sm font-medium mb-2">Team 1</label>
+                  <select
+                    value={formData.team1Id}
+                    onChange={(e) => setFormData({...formData, team1Id: e.target.value})}
+                    className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-white/40"
+                    required
+                  >
+                    <option value="">Select Team 1</option>
+                    {teams.map(team => (
                       <option key={team.id} value={team.id}>
                         {team.name}
                       </option>
@@ -247,18 +259,6 @@ export default function WPLMatchesPage() {
                         {team.name}
                       </option>
                     ))}
-                  <label className="block text-white text-sm font-medium mb-2">Team 2</label>
-                  <select
-                    value={formData.team2Id}
-                    onChange={(e) => setFormData({...formData, team2Id: e.target.value})}
-                    className="w-full px-4 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-white/40"
-                    required
-                  >
-                    <option value="">Select Team 2</option>
-                    <option value="1">Mumbai Indians</option>
-                    <option value="2">Delhi Capitals</option>
-                    <option value="3">Royal Challengers Bangalore</option>
-                    <option value="4">Chennai Super Kings</option>
                   </select>
                 </div>
               </div>
