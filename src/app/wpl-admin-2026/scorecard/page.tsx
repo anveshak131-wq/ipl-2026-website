@@ -874,6 +874,37 @@ export default function ScorecardAdminPage() {
                 >
                   Calculate Totals
                 </button>
+
+                {/* Display Calculated Totals */}
+                {scorecard.innings[activeInnings].totalRuns !== undefined && (
+                  <div className="mt-6 bg-gray-700 p-6 rounded-lg">
+                    <h3 className="text-xl font-bold mb-4 text-green-400">Innings Totals</h3>
+                    <div className="grid grid-cols-3 gap-6">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-white">{scorecard.innings[activeInnings].totalRuns || 0}</div>
+                        <div className="text-sm text-gray-400 mt-1">Total Runs</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-white">{scorecard.innings[activeInnings].totalWickets || 0}</div>
+                        <div className="text-sm text-gray-400 mt-1">Wickets</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-white">
+                          {scorecard.innings[activeInnings].totalOvers || '0.0'}
+                        </div>
+                        <div className="text-sm text-gray-400 mt-1">Overs</div>
+                      </div>
+                    </div>
+                    <div className="mt-4 text-center text-gray-300">
+                      <span className="font-semibold text-lg">
+                        {scorecard.innings[activeInnings].totalRuns || 0}/{scorecard.innings[activeInnings].totalWickets || 0}
+                      </span>
+                      {scorecard.innings[activeInnings].totalOvers && (
+                        <span className="ml-2">({scorecard.innings[activeInnings].totalOvers} overs)</span>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
