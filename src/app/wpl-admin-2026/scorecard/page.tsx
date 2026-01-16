@@ -474,13 +474,15 @@ export default function ScorecardAdminPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm text-gray-400 mb-2">Toss Winner</label>
-                    <input
-                      type="text"
-                      placeholder={`${scorecard.matchInfo.team1.name} or ${scorecard.matchInfo.team2.name}`}
+                    <select
                       value={scorecard.matchInfo.toss?.winner || ''}
                       onChange={(e) => updateMatchInfo('toss.winner', e.target.value)}
-                      className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white placeholder-gray-500"
-                    />
+                      className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
+                    >
+                      <option value="">Select team...</option>
+                      <option value={scorecard.matchInfo.team1.name}>{scorecard.matchInfo.team1.name}</option>
+                      <option value={scorecard.matchInfo.team2.name}>{scorecard.matchInfo.team2.name}</option>
+                    </select>
                   </div>
                   <div>
                     <label className="block text-sm text-gray-400 mb-2">Toss Decision</label>
