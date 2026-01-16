@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import AnimatedSection from '@/components/ui/AnimatedSection';
-import { Calendar, MapPin, Clock, Plus, Edit, Trash2 } from 'lucide-react';
+import { Calendar, MapPin, Clock, Plus, Edit, Trash2, CheckCircle, RotateCcw } from 'lucide-react';
 import { api } from '@/lib/data';
 import { Match } from '@/types';
 import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
@@ -108,6 +108,40 @@ export default function WPLMatchesPage() {
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
       setMessage('Failed to delete match');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCompleteMatch = async (matchId: string) => {
+    if (!confirm('Mark this match as completed?')) return;
+    
+    setLoading(true);
+    try {
+      setMatches(matches.map(m => 
+        m.id === matchId ? { ...m, status: 'completed' as const } : m
+      ));
+      setMessage('Match marked as completed!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      setMessage('Failed to update match status');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRedoMatch = async (matchId: string) => {
+    if (!confirm('Revert match to upcoming status?')) return;
+    
+    setLoading(true);
+    try {
+      setMatches(matches.map(m => 
+        m.id === matchId ? { ...m, status: 'upcoming' as const } : m
+      ));
+      setMessage('Match status reverted to upcoming!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      setMessage('Failed to update match status');
     } finally {
       setLoading(false);
     }
@@ -292,6 +326,26 @@ export default function WPLMatchesPage() {
                       }`}>
                         {match.status}
                       </span>
+                      
+                      {match.status !== 'completed' && (
+                        <button
+                          onClick={() => handleCompleteMatch(match.id)}
+                          className="p-2 text-green-400 hover:text-green-300 transition-colors"
+                          title="Mark as Complete"
+                        >
+                          <CheckCircle size={16} />
+                        </button>
+                      )}
+                      
+                      {match.status === 'completed' && (
+                        <button
+                          onClick={() => handleRedoMatch(match.id)}
+                          className="p-2 text-yellow-400 hover:text-yellow-300 transition-colors"
+                          title="Redo Match"
+                        >
+                          <RotateCcw size={16} />
+                        </button>
+                      )}
                       
                       <button
                         onClick={() => handleEdit(match)}
