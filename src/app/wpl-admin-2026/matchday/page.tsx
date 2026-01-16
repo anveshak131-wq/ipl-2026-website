@@ -6,6 +6,7 @@ import { Calendar, MapPin, Thermometer, Wind, Droplets, Eye, Edit, Trash2, Plus,
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import GradientText from '@/components/ui/GradientText';
 import AnimatedSection from '@/components/ui/AnimatedSection';
+import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 
 interface VenueInfo {
   id: string;
@@ -144,8 +145,9 @@ export default function WPLMatchDayAdmin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900">
+      <WPLAdminSidebarNew />
       <AuroraBackground />
-      <div className="relative z-10">
+      <div className="relative z-10 lg:ml-64">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <h1 className="text-4xl font-bold text-white mb-4">WPL Match Day Admin</h1>
           <p className="text-gray-300">Manage venues, weather data, and match conditions for Women's Premier League</p>

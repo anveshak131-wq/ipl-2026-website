@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Search, MapPin, Plus, Trash2, Edit3, Loader2, Check, X } from 'lucide-react';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import AnimatedSection from '@/components/ui/AnimatedSection';
+import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 
 interface Venue {
   id: string;
@@ -268,12 +269,15 @@ export default function VenuesAdmin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900">
+      <WPLAdminSidebarNew />
+      <div className="lg:ml-64">
       <AuroraBackground />
       <div className="relative z-10">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <h1 className="text-4xl font-bold text-white mb-4">Venue Management</h1>
           <p className="text-gray-300">Add and manage cricket venues with automatic information retrieval</p>
         </div>
+      </div>
       </div>
     </div>
   );

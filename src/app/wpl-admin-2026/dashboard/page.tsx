@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import GradientText from '@/components/ui/GradientText';
+import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 
 interface Player {
   id: string;
@@ -64,7 +65,9 @@ export default function WPLAdminDashboard() {
     : 'bg-red-600/20 text-red-400 border border-red-400/30';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white">
+      <WPLAdminSidebarNew />
+      <div className="lg:ml-64 p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         <AnimatedSection>
           <div className="text-center mb-8">
@@ -163,6 +166,7 @@ export default function WPLAdminDashboard() {
             )}
           </div>
         </AnimatedSection>
+      </div>
       </div>
     </div>
   );

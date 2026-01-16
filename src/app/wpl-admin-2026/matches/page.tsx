@@ -5,6 +5,7 @@ import AnimatedSection from '@/components/ui/AnimatedSection';
 import { Calendar, MapPin, Clock, Plus, Edit, Trash2 } from 'lucide-react';
 import { api } from '@/lib/data';
 import { Match } from '@/types';
+import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 
 export default function WPLMatchesPage() {
   const [matches, setMatches] = useState<Match[]>([]);
@@ -113,7 +114,9 @@ export default function WPLMatchesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900">
+      <WPLAdminSidebarNew />
+      <div className="lg:ml-64 p-6">
       <AnimatedSection>
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-4xl font-bold text-white">WPL Matches Management</h1>
@@ -311,6 +314,7 @@ export default function WPLMatchesPage() {
           </div>
         )}
       </AnimatedSection>
+      </div>
     </div>
   );
 }

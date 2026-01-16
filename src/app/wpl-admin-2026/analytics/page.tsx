@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import GradientText from '@/components/ui/GradientText';
 import { BarChart3, TrendingUp, Users, Eye } from 'lucide-react';
+import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 
 interface AnalyticsData {
   totalViews: number;
@@ -60,7 +61,9 @@ export default function WPLAnalyticsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-pink-900 to-purple-900">
+      <WPLAdminSidebarNew />
+      <div className="lg:ml-64 p-6">
       <AnimatedSection>
         <GradientText className="text-4xl font-bold mb-8">
           WPL Analytics
@@ -166,6 +169,7 @@ export default function WPLAnalyticsPage() {
           </div>
         )}
       </AnimatedSection>
+      </div>
     </div>
   );
 }
