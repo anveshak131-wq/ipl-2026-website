@@ -492,7 +492,21 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
                   {scorecard.result && (
                     <div className="p-6 bg-gradient-to-r from-green-500/20 to-emerald-600/20 border-2 border-green-500/40 rounded-2xl">
                       <div className="text-green-400 text-sm font-semibold mb-2">Match Result</div>
-                      <div className="text-white font-bold text-xl">{scorecard.result.winner} won by {scorecard.result.margin}</div>
+                      <div className="text-white font-bold text-xl">
+                        {(() => {
+                          // Clean up result text - handle cases where winner already contains full result
+                          const winner = scorecard.result.winner;
+                          const margin = scorecard.result.margin;
+                          
+                          // If winner already contains "won by", just show it
+                          if (winner.includes('won by')) {
+                            return winner;
+                          }
+                          
+                          // Otherwise construct the full result
+                          return `${winner} won by ${margin}`;
+                        })()}
+                      </div>
                       {scorecard.result.manOfTheMatch && (
                         <div className="text-yellow-400 mt-2">Player of the Match: {scorecard.result.manOfTheMatch}</div>
                       )}
