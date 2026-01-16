@@ -7,6 +7,13 @@ import WPLAdminSidebar from '@/components/admin/WPLAdminSidebar';
 import WPLPointsTable from './points-table/page';
 import GlobalSearch from '@/components/admin/GlobalSearch';
 import WPLAdminDashboard from './dashboard/page';
+import WPLBattingStats from './batting-stats/page';
+import WPLBowlingStats from './bowling-stats/page';
+import WPLPlaying11 from './playing-11/page';
+import WPLScorecard from './scorecard/page';
+import WPLPlayers from './players/page';
+import WPLTeams from './teams/page';
+import WPLMatches from './matches/page';
 
 export default function WPLAdminRouter() {
   const router = useRouter();
@@ -194,6 +201,104 @@ export default function WPLAdminRouter() {
             <GlobalSearch />
             <div className="p-6">
               <WPLPointsTable />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (pathname.includes('/batting-stats')) {
+      return (
+        <div>
+          <WPLAdminSidebar currentPage="batting-stats" />
+          <div className="ml-64">
+            <GlobalSearch />
+            <div className="p-6">
+              <WPLBattingStats />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (pathname.includes('/bowling-stats')) {
+      return (
+        <div>
+          <WPLAdminSidebar currentPage="bowling-stats" />
+          <div className="ml-64">
+            <GlobalSearch />
+            <div className="p-6">
+              <WPLBowlingStats />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (pathname.includes('/playing-11')) {
+      return (
+        <div>
+          <WPLAdminSidebar currentPage="playing-11" />
+          <div className="ml-64">
+            <GlobalSearch />
+            <div className="p-6">
+              <WPLPlaying11 />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (pathname.includes('/scorecard')) {
+      return (
+        <div>
+          <WPLAdminSidebar currentPage="scorecard" />
+          <div className="ml-64">
+            <GlobalSearch />
+            <div className="p-6">
+              <WPLScorecard />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (pathname.includes('/players')) {
+      return (
+        <div>
+          <WPLAdminSidebar currentPage="players" />
+          <div className="ml-64">
+            <GlobalSearch />
+            <div className="p-6">
+              <WPLPlayers />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (pathname.includes('/teams')) {
+      return (
+        <div>
+          <WPLAdminSidebar currentPage="teams" />
+          <div className="ml-64">
+            <GlobalSearch />
+            <div className="p-6">
+              <WPLTeams />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (pathname.includes('/matches')) {
+      return (
+        <div>
+          <WPLAdminSidebar currentPage="matches" />
+          <div className="ml-64">
+            <GlobalSearch />
+            <div className="p-6">
+              <WPLMatches />
             </div>
           </div>
         </div>
