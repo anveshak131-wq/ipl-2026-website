@@ -138,14 +138,31 @@ export async function onRequest(context) {
   }
 }
 
+// Helper function to normalize team names for consistency
+function normalizeTeamName(name) {
+  if (!name) return 'Unknown Team';
+  
+  // Map of variations to standardized names
+  const teamNameMap = {
+    'Royal Challengers Bangalore': 'Royal Challengers Bengaluru (WPL)',
+    'Mumbai Indians': 'Mumbai Indians (WPL)',
+    'Delhi Capitals': 'Delhi Capitals (WPL)',
+    'Gujarat Giants': 'Gujarat Giants (WPL)',
+    'UP Warriorz': 'UP Warriorz (WPL)',
+  };
+  
+  // Check if the name needs normalization
+  return teamNameMap[name] || name;
+}
+
 function calculateStatsFromScorecards(scorecards) {
   // Batting statistics
   const battingMap = {};
   
   scorecards.forEach(scorecard => {
     const matchInfo = scorecard.matchInfo || {};
-    const team1Name = matchInfo.team1?.name || matchInfo.team1?.shortName || 'Team 1';
-    const team2Name = matchInfo.team2?.name || matchInfo.team2?.shortName || 'Team 2';
+    const team1Name = normalizeTeamName(matchInfo.team1?.name || matchInfo.team1?.shortName || 'Team 1');
+    const team2Name = normalizeTeamName(matchInfo.team2?.name || matchInfo.team2?.shortName || 'Team 2');
     
     // Handle both old format (innings1, innings2) and new format (innings array)
     const innings = scorecard.innings || [scorecard.innings1, scorecard.innings2].filter(Boolean);
@@ -165,7 +182,7 @@ function calculateStatsFromScorecards(scorecards) {
           battingMap[playerId] = {
             playerId,
             playerName: batsman.name || 'Unknown',
-            teamName: batsman.teamName || inning.battingTeam || battingTeamName,
+            teamName: normalizeTeamName(batsman.teamName || inning.battingTeam || battingTeamName),
             runs: 0,
             ballsFaced: 0,
             fours: 0,
@@ -242,8 +259,8 @@ function calculateStatsFromScorecards(scorecards) {
   
   scorecards.forEach(scorecard => {
     const matchInfo = scorecard.matchInfo || {};
-    const team1Name = matchInfo.team1?.name || matchInfo.team1?.shortName || 'Team 1';
-    const team2Name = matchInfo.team2?.name || matchInfo.team2?.shortName || 'Team 2';
+    const team1Name = normalizeTeamName(matchInfo.team1?.name || matchInfo.team1?.shortName || 'Team 1');
+    const team2Name = normalizeTeamName(matchInfo.team2?.name || matchInfo.team2?.shortName || 'Team 2');
     
     // Handle both old format (innings1, innings2) and new format (innings array)
     const innings = scorecard.innings || [scorecard.innings1, scorecard.innings2].filter(Boolean);
@@ -263,7 +280,7 @@ function calculateStatsFromScorecards(scorecards) {
           bowlingMap[playerId] = {
             playerId,
             playerName: bowler.name || 'Unknown',
-            teamName: bowler.teamName || inning.bowlingTeam || bowlingTeamName,
+            teamName: normalizeTeamName(bowler.teamName || inning.bowlingTeam || bowlingTeamName),
             wickets: 0,
             runs: 0,
             overs: 0,
