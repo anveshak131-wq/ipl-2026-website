@@ -378,19 +378,19 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
       {/* Scorecard Modal */}
       {showScorecardModal && (
         <div 
-          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm"
+          className="fixed inset-0 z-50"
           onClick={() => setShowScorecardModal(false)}
         >
           <div 
-            className="relative w-full h-full overflow-y-auto bg-gradient-to-br from-gray-900 to-gray-800"
+            className="w-screen h-screen overflow-y-auto bg-gradient-to-br from-gray-900 to-gray-800"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
             <button
               onClick={() => setShowScorecardModal(false)}
-              className="absolute top-4 right-4 p-2 rounded-full bg-red-500/20 hover:bg-red-500/40 text-white transition-colors z-10"
+              className="fixed top-6 right-6 p-3 rounded-full bg-red-500/20 hover:bg-red-500/40 text-white transition-colors z-50 backdrop-blur-sm"
             >
-              <X size={24} />
+              <X size={28} />
             </button>
 
             {/* Modal Content */}
@@ -453,19 +453,19 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
       {/* Playing 11 Modal */}
       {showPlaying11Modal && match.playing11 && players && (
         <div 
-          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm"
+          className="fixed inset-0 z-50"
           onClick={() => setShowPlaying11Modal(false)}
         >
           <div 
-            className="relative w-full h-full overflow-y-auto bg-gradient-to-br from-gray-900 to-gray-800"
+            className="w-screen h-screen overflow-y-auto bg-gradient-to-br from-gray-900 to-gray-800"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
             <button
               onClick={() => setShowPlaying11Modal(false)}
-              className="absolute top-4 right-4 p-2 rounded-full bg-red-500/20 hover:bg-red-500/40 text-white transition-colors z-10"
+              className="fixed top-6 right-6 p-3 rounded-full bg-red-500/20 hover:bg-red-500/40 text-white transition-colors z-50 backdrop-blur-sm"
             >
-              <X size={24} />
+              <X size={28} />
             </button>
 
             {/* Modal Content */}
