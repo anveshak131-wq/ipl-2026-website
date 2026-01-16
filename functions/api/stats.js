@@ -22,14 +22,22 @@ export async function onRequest(context) {
     const listResult = await kvNamespace.list({ prefix: 'scorecard_' });
     const keys = listResult.keys.map(k => k.name);
 
+    console.log(`[DEBUG] Found ${keys.length} scorecard keys in KV`);
+
     // Fetch all scorecards and filter by league
     const scorecardPromises = keys.map(key => kvNamespace.get(key, 'json'));
     const allScorecards = (await Promise.all(scorecardPromises)).filter(Boolean);
+    
+    console.log(`[DEBUG] Total scorecards fetched: ${allScorecards.length}`);
+    console.log(`[DEBUG] Looking for league: ${league}`);
+    console.log(`[DEBUG] All scorecard leagues:`, allScorecards.map(s => ({ id: s.id, league: s.league, draft: s.draft })));
     
     // Filter by league and only get published (non-draft) scorecards
     const scorecards = allScorecards.filter(s => 
       s.league === league && s.draft === false
     );
+
+    console.log(`[DEBUG] Filtered scorecards for ${league} (draft=false): ${scorecards.length}`);
 
     if (scorecards.length === 0) {
       return new Response(JSON.stringify({ 
@@ -47,6 +55,11 @@ export async function onRequest(context) {
 
     // Calculate statistics inline (since we can't import the class easily)
     const stats = calculateStatsFromScorecards(scorecards);
+
+    console.log(`[DEBUG] Calculated stats - Batting: ${stats.battingStats.length}, Bowling: ${stats.bowlingStats.length}`);
+    if (stats.battingStats.length > 0) {
+      console.log(`[DEBUG] Top batter:`, stats.battingStats[0]);
+    }
 
     // Calculate requested statistics
     let response = {};
