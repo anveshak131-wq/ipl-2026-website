@@ -536,6 +536,7 @@ export default function WPLAdminPointsTablePage() {
                             value={editData.matchesPlayed}
                             onChange={(e) => setEditData({...editData, matchesPlayed: parseInt(e.target.value) || 0})}
                             className="w-16 px-2 py-1 bg-slate-700 border border-pink-500 rounded text-center"
+                            placeholder="0"
                             min="0"
                           />
                         ) : (
@@ -551,6 +552,7 @@ export default function WPLAdminPointsTablePage() {
                             value={editData.wins}
                             onChange={(e) => setEditData({...editData, wins: parseInt(e.target.value) || 0})}
                             className="w-16 px-2 py-1 bg-slate-700 border border-green-500 rounded text-center"
+                            placeholder="0"
                             min="0"
                           />
                         ) : (
@@ -569,6 +571,7 @@ export default function WPLAdminPointsTablePage() {
                             value={editData.losses}
                             onChange={(e) => setEditData({...editData, losses: parseInt(e.target.value) || 0})}
                             className="w-16 px-2 py-1 bg-slate-700 border border-red-500 rounded text-center"
+                            placeholder="0"
                             min="0"
                           />
                         ) : (
@@ -587,6 +590,7 @@ export default function WPLAdminPointsTablePage() {
                             value={editData.points}
                             onChange={(e) => setEditData({...editData, points: parseInt(e.target.value) || 0})}
                             className="w-20 px-2 py-1 bg-slate-700 border border-pink-500 rounded text-center font-black"
+                            placeholder="0"
                             min="0"
                           />
                         ) : (
@@ -605,6 +609,7 @@ export default function WPLAdminPointsTablePage() {
                             value={editData.netRunRate}
                             onChange={(e) => setEditData({...editData, netRunRate: parseFloat(e.target.value) || 0})}
                             className="w-20 px-2 py-1 bg-slate-700 border border-white rounded text-center"
+                            placeholder="0.00"
                           />
                         ) : (
                           team.matchesPlayed > 0 ? team.netRunRate.toFixed(2) : <span className="text-gray-500">N/A</span>
