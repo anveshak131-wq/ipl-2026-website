@@ -512,7 +512,7 @@ export default function WPLLeaderboardPage() {
                                   </td>
                                   <td className="py-5 px-4 text-center text-sm text-gray-300 hidden sm:table-cell">{stat.average.toFixed(2)}</td>
                                   <td className="py-5 px-4 text-center text-sm text-gray-300 hidden sm:table-cell">{stat.strikeRate.toFixed(2)}</td>
-                                  <td className="py-5 px-4 text-center text-sm text-gray-400 hidden xl:table-cell">{stat.highScore}</td>
+                                  <td className="py-5 px-4 text-center text-sm text-gray-400 hidden xl:table-cell">{stat.highestScore || stat.highScore}</td>
                                   <td className="py-5 px-4 text-center text-sm text-gray-400 hidden lg:table-cell">
                                     <span className="text-amber-400 font-semibold">{stat.hundreds}</span> / <span className="text-green-400 font-semibold">{stat.fifties}</span>
                                   </td>
