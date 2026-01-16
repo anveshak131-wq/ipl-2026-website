@@ -57,8 +57,20 @@ export default function WPLStatsPage() {
       <WPLAdminSidebarNew />
       <div className="lg:ml-64 p-6">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">WPL Statistics Dashboard</h1>
-          <p className="text-gray-300">Auto-calculated from published scorecards</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-white mb-2">WPL Statistics Dashboard</h1>
+              <p className="text-gray-300">Auto-calculated from published scorecards</p>
+            </div>
+            <button
+              onClick={fetchStats}
+              disabled={loading}
+              className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              <BarChart3 size={20} />
+              {loading ? 'Refreshing...' : 'Refresh Stats'}
+            </button>
+          </div>
         </div>
 
         {/* Overview Cards */}
@@ -195,8 +207,15 @@ export default function WPLStatsPage() {
                   </h3>
                   {battingStats.length === 0 ? (
                     <div className="text-center py-8 text-gray-400">
-                      <p>No batting stats available yet.</p>
-                      <p className="text-sm mt-2">Stats will appear once scorecards are published.</p>
+                      <TrendingUp className="mx-auto mb-3 text-gray-600" size={48} />
+                      <p className="font-semibold">No batting stats available yet.</p>
+                      <p className="text-sm mt-2">Publish scorecards from the Scorecard Admin page to see stats.</p>
+                      <a
+                        href="/wpl-admin-2026/scorecard"
+                        className="inline-block mt-4 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm rounded-lg transition"
+                      >
+                        Go to Scorecard Admin
+                      </a>
                     </div>
                   ) : (
                     <div className="space-y-3">
@@ -227,8 +246,15 @@ export default function WPLStatsPage() {
                 </div>
 
                 {/* Top 5 Bowlers */}
-                <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-6">
-                  <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                <div clTarget className="mx-auto mb-3 text-gray-600" size={48} />
+                      <p className="font-semibold">No bowling stats available yet.</p>
+                      <p className="text-sm mt-2">Publish scorecards from the Scorecard Admin page to see stats.</p>
+                      <a
+                        href="/wpl-admin-2026/scorecard"
+                        className="inline-block mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-lg transition"
+                      >
+                        Go to Scorecard Admin
+                      </a
                     <Target className="text-purple-400" />
                     Top 5 Wicket Takers
                   </h3>
