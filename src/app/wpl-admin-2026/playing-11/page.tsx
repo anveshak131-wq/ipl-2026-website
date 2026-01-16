@@ -393,9 +393,7 @@ export default function WPLPlaying11Page() {
                       {selectedMatch.team1.shortName || selectedMatch.team1.name}
                     </h2>
                     <p className="text-sm" style={{ color: WPLColors.textMuted }}>
-                      {selectedMatch.status === 'completed' 
-                        ? '🔒 Match completed - Playing 11 locked'
-                        : `Select 11 players from squad (${team1Players.length} available)`}
+                      Select 11 players from squad ({team1Players.length} available)
                     </p>
                   </div>
                   <div className="flex items-center gap-2 px-4 py-2 rounded-lg" style={{
@@ -438,11 +436,8 @@ export default function WPLPlaying11Page() {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            if (selectedMatch.status !== 'completed') {
-                              togglePlayer('team1', player.id);
-                            }
+                            togglePlayer('team1', player.id);
                           }}
-                          disabled={selectedMatch.status === 'completed'}
                           type="button"
                           className={`
                             p-4 rounded-xl border-2 transition-all text-left cursor-pointer
@@ -484,9 +479,7 @@ export default function WPLPlaying11Page() {
                       {selectedMatch.team2.shortName || selectedMatch.team2.name}
                     </h2>
                     <p className="text-sm" style={{ color: WPLColors.textMuted }}>
-                      {selectedMatch.status === 'completed' 
-                        ? '🔒 Match completed - Playing 11 locked'
-                        : `Select 11 players from squad (${team2Players.length} available)`}
+                      Select 11 players from squad ({team2Players.length} available)
                     </p>
                   </div>
                   <div className="flex items-center gap-2 px-4 py-2 rounded-lg" style={{
@@ -529,11 +522,8 @@ export default function WPLPlaying11Page() {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            if (selectedMatch.status !== 'completed') {
-                              togglePlayer('team2', player.id);
-                            }
+                            togglePlayer('team2', player.id);
                           }}
-                          disabled={selectedMatch.status === 'completed'}
                           type="button"
                           className={`
                             p-4 rounded-xl border-2 transition-all text-left cursor-pointer
@@ -565,10 +555,10 @@ export default function WPLPlaying11Page() {
               <div className="flex justify-end">
                 <button
                   onClick={handleSave}
-                  disabled={team1Playing11.length !== 11 || team2Playing11.length !== 11 || saveStatus === 'saving' || selectedMatch.status === 'completed'}
+                  disabled={team1Playing11.length !== 11 || team2Playing11.length !== 11 || saveStatus === 'saving'}
                   className={`
                     px-8 py-4 rounded-xl font-bold flex items-center gap-2 transition-all
-                    ${team1Playing11.length === 11 && team2Playing11.length === 11 && selectedMatch.status !== 'completed'
+                    ${team1Playing11.length === 11 && team2Playing11.length === 11
                       ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl'
                       : 'bg-slate-700 text-gray-400 cursor-not-allowed'
                     }
@@ -576,7 +566,7 @@ export default function WPLPlaying11Page() {
                   `}
                 >
                   <Save className="w-5 h-5" />
-                  {selectedMatch.status === 'completed' ? '🔒 Match Completed' : (saveStatus === 'saving' ? 'Saving...' : 'Save Playing 11')}
+                  {saveStatus === 'saving' ? 'Saving...' : 'Save Playing 11'}
                 </button>
               </div>
             </div>
