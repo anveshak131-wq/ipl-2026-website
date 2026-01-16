@@ -592,32 +592,36 @@ export default function ScorecardAdminPage() {
                                 <td className="p-2">
                                   <input
                                     type="number"
-                                    value={batter.runs}
-                                    onChange={(e) => updateBatter(idx, 'runs', parseInt(e.target.value) || 0)}
+                                    value={batter.runs || ''}
+                                    onChange={(e) => updateBatter(idx, 'runs', e.target.value ? parseInt(e.target.value) : '')}
+                                    placeholder="0"
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
                                 </td>
                                 <td className="p-2">
                                   <input
                                     type="number"
-                                    value={batter.balls}
-                                    onChange={(e) => updateBatter(idx, 'balls', parseInt(e.target.value) || 0)}
+                                    value={batter.balls || ''}
+                                    onChange={(e) => updateBatter(idx, 'balls', e.target.value ? parseInt(e.target.value) : '')}
+                                    placeholder="0"
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
                                 </td>
                                 <td className="p-2">
                                   <input
                                     type="number"
-                                    value={batter.fours}
-                                    onChange={(e) => updateBatter(idx, 'fours', parseInt(e.target.value) || 0)}
+                                    value={batter.fours || ''}
+                                    onChange={(e) => updateBatter(idx, 'fours', e.target.value ? parseInt(e.target.value) : '')}
+                                    placeholder="0"
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
                                 </td>
                                 <td className="p-2">
                                   <input
                                     type="number"
-                                    value={batter.sixes}
-                                    onChange={(e) => updateBatter(idx, 'sixes', parseInt(e.target.value) || 0)}
+                                    value={batter.sixes || ''}
+                                    onChange={(e) => updateBatter(idx, 'sixes', e.target.value ? parseInt(e.target.value) : '')}
+                                    placeholder="0"
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
                                 </td>
@@ -680,12 +684,13 @@ export default function ScorecardAdminPage() {
                       <label className="block text-sm text-gray-400 mb-2">Wides</label>
                       <input
                         type="number"
-                        value={scorecard.innings[activeInnings].extras.wides}
+                        value={scorecard.innings[activeInnings].extras.wides || ''}
                         onChange={(e) => {
                           const updated = { ...scorecard };
-                          updated.innings[activeInnings].extras.wides = parseInt(e.target.value) || 0;
+                          updated.innings[activeInnings].extras.wides = e.target.value ? parseInt(e.target.value) : '';
                           setScorecard(updated);
                         }}
+                        placeholder="0"
                         className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
                       />
                     </div>
@@ -693,12 +698,13 @@ export default function ScorecardAdminPage() {
                       <label className="block text-sm text-gray-400 mb-2">No Balls</label>
                       <input
                         type="number"
-                        value={scorecard.innings[activeInnings].extras.noBalls}
+                        value={scorecard.innings[activeInnings].extras.noBalls || ''}
                         onChange={(e) => {
                           const updated = { ...scorecard };
-                          updated.innings[activeInnings].extras.noBalls = parseInt(e.target.value) || 0;
+                          updated.innings[activeInnings].extras.noBalls = e.target.value ? parseInt(e.target.value) : '';
                           setScorecard(updated);
                         }}
+                        placeholder="0"
                         className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
                       />
                     </div>
@@ -706,12 +712,13 @@ export default function ScorecardAdminPage() {
                       <label className="block text-sm text-gray-400 mb-2">Byes</label>
                       <input
                         type="number"
-                        value={scorecard.innings[activeInnings].extras.byes}
+                        value={scorecard.innings[activeInnings].extras.byes || ''}
                         onChange={(e) => {
                           const updated = { ...scorecard };
-                          updated.innings[activeInnings].extras.byes = parseInt(e.target.value) || 0;
+                          updated.innings[activeInnings].extras.byes = e.target.value ? parseInt(e.target.value) : '';
                           setScorecard(updated);
                         }}
+                        placeholder="0"
                         className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
                       />
                     </div>
@@ -719,12 +726,13 @@ export default function ScorecardAdminPage() {
                       <label className="block text-sm text-gray-400 mb-2">Leg Byes</label>
                       <input
                         type="number"
-                        value={scorecard.innings[activeInnings].extras.legByes}
+                        value={scorecard.innings[activeInnings].extras.legByes || ''}
                         onChange={(e) => {
                           const updated = { ...scorecard };
-                          updated.innings[activeInnings].extras.legByes = parseInt(e.target.value) || 0;
+                          updated.innings[activeInnings].extras.legByes = e.target.value ? parseInt(e.target.value) : '';
                           setScorecard(updated);
                         }}
+                        placeholder="0"
                         className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
                       />
                     </div>
@@ -783,15 +791,15 @@ export default function ScorecardAdminPage() {
                                   <div className="flex gap-1">
                                     <input
                                       type="number"
-                                      value={bowler.overs}
-                                      onChange={(e) => updateBowler(idx, 'overs', parseInt(e.target.value) || 0)}
+                                      value={bowler.overs || ''}
+                                      onChange={(e) => updateBowler(idx, 'overs', e.target.value ? parseInt(e.target.value) : '')}
                                       placeholder="O"
                                       className="w-1/2 bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                     />
                                     <input
                                       type="number"
-                                      value={bowler.balls}
-                                      onChange={(e) => updateBowler(idx, 'balls', parseInt(e.target.value) || 0)}
+                                      value={bowler.balls || ''}
+                                      onChange={(e) => updateBowler(idx, 'balls', e.target.value ? parseInt(e.target.value) : '')}
                                       placeholder="B"
                                       min="0"
                                       max="5"
@@ -802,16 +810,18 @@ export default function ScorecardAdminPage() {
                                 <td className="p-2">
                                   <input
                                     type="number"
-                                    value={bowler.runs}
-                                    onChange={(e) => updateBowler(idx, 'runs', parseInt(e.target.value) || 0)}
+                                    value={bowler.runs || ''}
+                                    onChange={(e) => updateBowler(idx, 'runs', e.target.value ? parseInt(e.target.value) : '')}
+                                    placeholder="0"
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
                                 </td>
                                 <td className="p-2">
                                   <input
                                     type="number"
-                                    value={bowler.wickets}
-                                    onChange={(e) => updateBowler(idx, 'wickets', parseInt(e.target.value) || 0)}
+                                    value={bowler.wickets || ''}
+                                    onChange={(e) => updateBowler(idx, 'wickets', e.target.value ? parseInt(e.target.value) : '')}
+                                    placeholder="0"
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
                                   />
                                 </td>
