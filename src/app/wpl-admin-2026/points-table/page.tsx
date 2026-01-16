@@ -236,15 +236,64 @@ export default function WPLAdminPointsTablePage() {
   };
 
   const handleSave = async (teamId: string) => {
-    // Convert netRunRate from string to number
-    const dataToSave = {
-      ...editData,
-      netRunRate: parseFloat(editData.netRunRate) || 0
-    };
-    // Here you would typically save to your backend
-    console.log('Saving team data:', teamId, dataToSave);
-    setEditingTeam(null);
-    setEditData({});
+    try {
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        alert('Authentication token not found');
+        return;
+      }
+
+      // Convert netRunRate from string to number
+      const dataToSave = {
+        ...editData,
+        netRunRate: parseFloat(editData.netRunRate) || 0
+      };
+
+      // Find the team to update
+      const teamToUpdate = teams.find(t => t.id === teamId);
+      if (!teamToUpdate) {
+        alert('Team not found');
+        return;
+      }
+
+      // Update team stats
+      const response = await fetch('/api/teams', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          id: teamId,
+          ...teamToUpdate,
+          stats: {
+            matchesPlayed: dataToSave.matchesPlayed,
+            wins: dataToSave.wins,
+            losses: dataToSave.losses,
+            points: dataToSave.points,
+            netRunRate: dataToSave.netRunRate
+          }
+        })
+      });
+
+      if (response.ok) {
+        // Update local state
+        const updatedTeam = await response.json();
+        setTeams(teams.map(t => t.id === teamId ? updatedTeam : t));
+        setEditingTeam(null);
+        setEditData({});
+        alert('Team stats updated successfully!');
+        
+        // Refresh data
+        refreshData();
+      } else {
+        const error = await response.json();
+        alert(`Failed to save: ${error.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error saving team data:', error);
+      alert('Error saving team data');
+    }
   };
 
   const handleCancel = () => {
