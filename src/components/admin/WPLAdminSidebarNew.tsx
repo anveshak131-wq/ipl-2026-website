@@ -56,13 +56,14 @@ export default function WPLAdminSidebarNew() {
         className={`
           fixed top-0 left-0 h-screen bg-gradient-to-b from-purple-900 to-purple-800 
           border-r border-purple-700 shadow-2xl z-50 transition-all duration-300 ease-in-out
+          flex flex-col
           ${collapsed ? 'w-20' : 'w-64'}
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:translate-x-0
         `}
       >
         {/* Header */}
-        <div className="p-6 border-b border-purple-700">
+        <div className="p-6 border-b border-purple-700 flex-shrink-0">
           <div className="flex items-center justify-between">
             {!collapsed && (
               <div>
@@ -84,7 +85,7 @@ export default function WPLAdminSidebarNew() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto p-4">
+        <nav className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-purple-600 scrollbar-track-purple-900">
           <div className="space-y-2">
             {menuItems.map((item) => {
               const Icon = item.icon;
@@ -117,7 +118,7 @@ export default function WPLAdminSidebarNew() {
 
         {/* Footer */}
         {!collapsed && (
-          <div className="p-4 border-t border-purple-700">
+          <div className="p-4 border-t border-purple-700 flex-shrink-0">
             <div className="text-center text-purple-300 text-sm">
               <p>Women's Premier League</p>
               <p className="text-xs mt-1">Admin Panel v1.0</p>
