@@ -907,11 +907,11 @@ export default function ScorecardAdminPage() {
                     </div>
                     <div className="mt-4 text-center text-gray-300">
                       <span className="font-semibold text-lg">
-                        {scorecard.innings[activeInnings].totalRuns || 0}/{scorecard.innings[activeInnings].totalWickets || 0}
+                        {scorecard.innings[activeInnings].totalRuns || 0}/{Number(scorecard.innings[activeInnings].totalWickets) || 0}{' '}
+                        {scorecard.innings[activeInnings].totalOvers && (
+                          <span className="text-sm">({scorecard.innings[activeInnings].totalOvers} overs)</span>
+                        )}
                       </span>
-                      {scorecard.innings[activeInnings].totalOvers && (
-                        <span className="ml-2">({scorecard.innings[activeInnings].totalOvers} overs)</span>
-                      )}
                     </div>
                   </div>
                 )}
