@@ -471,14 +471,6 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
                 </div>
               </div>
 
-              {/* Result */}
-              {match.result && (
-                <div className="p-4 bg-gradient-to-r from-green-500/20 to-green-600/20 border border-green-500/30 rounded-xl mb-6">
-                  <div className="text-green-400 text-sm font-semibold mb-1">Match Result</div>
-                  <div className="text-white font-bold text-lg">{match.result}</div>
-                </div>
-              )}
-
               {/* Scorecard Content */}
               {loadingScorecard ? (
                 <div className="p-8 bg-gradient-to-br from-white/10 to-white/5 rounded-2xl text-center border-2 border-white/20">
