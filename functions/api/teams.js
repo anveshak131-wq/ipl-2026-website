@@ -380,7 +380,7 @@ async function handlePutRequest(context) {
   
   try {
     const body = await request.json();
-    const { id, name, shortName, logo, description, colors, trophies, homeGrounds, league } = body;
+    const { id, name, shortName, logo, description, colors, trophies, homeGrounds, league, stats } = body;
     
     if (!id) {
       return new Response(JSON.stringify({ error: 'Team ID is required' }), {
@@ -411,7 +411,8 @@ async function handlePutRequest(context) {
       ...(colors && { colors }),
       ...(trophies !== undefined && { trophies }),
       ...(homeGrounds !== undefined && { homeGrounds }),
-      ...(league && { league }) // Update league if provided
+      ...(league && { league }), // Update league if provided
+      ...(stats !== undefined && { stats }) // Update stats if provided
     };
     
     // Ensure league property exists (default to existing or 'ipl')

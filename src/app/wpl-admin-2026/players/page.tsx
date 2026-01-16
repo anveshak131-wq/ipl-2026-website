@@ -8,7 +8,7 @@ import { api } from '@/lib/data';
 import { WPLColors } from '@/lib/wplColors';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import { LoadingSpinner } from '@/components/admin/animations';
-import { Edit2, Save, X, Users } from 'lucide-react';
+import { Edit2, Save, X, Users, Trash2 } from 'lucide-react';
 
 export default function WPLPlayersManagementPage() {
   const router = useRouter();
@@ -20,6 +20,7 @@ export default function WPLPlayersManagementPage() {
   const [selectedTeam, setSelectedTeam] = useState<string>('all');
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [editedTeamId, setEditedTeamId] = useState('');
+  const [editedIsCaptain, setEditedIsCaptain] = useState(false);
 
   // Check authentication
   useEffect(() => {
@@ -56,6 +57,7 @@ export default function WPLPlayersManagementPage() {
   const handleEdit = (player: Player) => {
     setEditingPlayer(player);
     setEditedTeamId(player.teamId || '');
+    setEditedIsCaptain(player.isCaptain || false);
   };
 
   const handleSave = async () => {
@@ -66,7 +68,7 @@ export default function WPLPlayersManagementPage() {
       const updatedPlayerData = {
         ...editingPlayer,
         teamId: editedTeamId,
-        isCaptain: editingPlayer.isCaptain || false,
+        isCaptain: editedIsCaptain,
       };
 
       const response = await fetch('/api/players', {
@@ -95,6 +97,33 @@ export default function WPLPlayersManagementPage() {
 
   const handleCancel = () => {
     setEditingPlayer(null);
+  };
+
+  const handleDelete = async (player: Player) => {
+    if (!confirm(`Are you sure you want to delete ${player.name}?`)) return;
+
+    try {
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch('/api/players', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ id: player.id }),
+      });
+
+      if (response.ok) {
+        setPlayers(players.filter(p => p.id !== player.id));
+        alert('Player deleted successfully!');
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.error || 'Failed to delete player'}`);
+      }
+    } catch (error) {
+      console.error('Error deleting player:', error);
+      alert('Error deleting player');
+    }
   };
 
   const filteredPlayers = players.filter(p => {
@@ -231,8 +260,22 @@ export default function WPLPlayersManagementPage() {
                             </span>
                           )}
                         </td>
-                        <td className="px-6 py-4" style={{ color: WPLColors.textSecondary }}>
-                          {player.isCaptain ? '👑 Yes' : 'No'}
+                        <td className="px-6 py-4">
+                          {isEditing ? (
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={editedIsCaptain}
+                                onChange={(e) => setEditedIsCaptain(e.target.checked)}
+                                className="w-4 h-4 cursor-pointer"
+                              />
+                              <span style={{ color: WPLColors.textSecondary }}>Captain</span>
+                            </label>
+                          ) : (
+                            <span style={{ color: WPLColors.textSecondary }}>
+                              {player.isCaptain ? '👑 Yes' : 'No'}
+                            </span>
+                          )}
                         </td>
                         <td className="px-6 py-4 text-center">
                           {isEditing ? (
@@ -253,13 +296,22 @@ export default function WPLPlayersManagementPage() {
                               </button>
                             </div>
                           ) : (
-                            <button
-                              onClick={() => handleEdit(player)}
-                              className="p-2 rounded hover:opacity-80 transition-opacity"
-                              style={{ background: WPLColors.purple }}
-                            >
-                              <Edit2 className="w-4 h-4 text-white" />
-                            </button>
+                            <div className="flex gap-2 justify-center">
+                              <button
+                                onClick={() => handleEdit(player)}
+                                className="p-2 rounded hover:opacity-80 transition-opacity"
+                                style={{ background: WPLColors.purple }}
+                              >
+                                <Edit2 className="w-4 h-4 text-white" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(player)}
+                                className="p-2 rounded hover:opacity-80 transition-opacity"
+                                style={{ background: '#ef4444' }}
+                              >
+                                <Trash2 className="w-4 h-4 text-white" />
+                              </button>
+                            </div>
                           )}
                         </td>
                       </tr>
