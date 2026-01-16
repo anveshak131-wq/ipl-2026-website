@@ -43,11 +43,17 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
       const response = await fetch(`/api/scorecards?matchId=${match.id}`);
       if (response.ok) {
         const data = await response.json();
-        // Find published scorecard for this match
-        const published = data.scorecards?.find((s: any) => 
-          s.matchId === match.id && s.draft === false
+        console.log('Scorecard API response:', data);
+        // API returns array directly when querying by matchId
+        const scorecards = Array.isArray(data) ? data : [];
+        // Find published scorecard (draft = false or undefined means published)
+        const published = scorecards.find((s: any) => 
+          s.draft === false
         );
+        console.log('Published scorecard found:', published);
         setScorecard(published || null);
+      } else {
+        console.error('Failed to fetch scorecard:', response.status);
       }
     } catch (error) {
       console.error('Error fetching scorecard:', error);
