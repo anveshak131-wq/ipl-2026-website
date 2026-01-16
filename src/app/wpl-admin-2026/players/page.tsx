@@ -17,6 +17,7 @@ export default function WPLPlayersManagementPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTeam, setSelectedTeam] = useState<string>('all');
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [editedTeamId, setEditedTeamId] = useState('');
 
@@ -96,9 +97,11 @@ export default function WPLPlayersManagementPage() {
     setEditingPlayer(null);
   };
 
-  const filteredPlayers = players.filter(p =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredPlayers = players.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesTeam = selectedTeam === 'all' || p.teamId === selectedTeam;
+    return matchesSearch && matchesTeam;
+  });
 
   const bgStyle = {
     background: `linear-gradient(to bottom, ${WPLColors.base}, ${WPLColors.gradientStart}66, ${WPLColors.gradientMid}33, ${WPLColors.base})`
@@ -147,8 +150,8 @@ export default function WPLPlayersManagementPage() {
             </p>
           </div>
 
-          {/* Search */}
-          <div className="mb-6">
+          {/* Search and Filter */}
+          <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
               type="text"
               placeholder="Search players..."
@@ -160,6 +163,20 @@ export default function WPLPlayersManagementPage() {
                 border: `1px solid ${WPLColors.purpleRGBA[30]}`,
               }}
             />
+            <select
+              value={selectedTeam}
+              onChange={(e) => setSelectedTeam(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg text-white text-sm focus:outline-none"
+              style={{
+                background: WPLColors.purpleRGBA[20],
+                border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+              }}
+            >
+              <option value="all">All Teams</option>
+              {teams.map(team => (
+                <option key={team.id} value={team.id}>{team.name}</option>
+              ))}
+            </select>
           </div>
 
           {/* Players Table */}
