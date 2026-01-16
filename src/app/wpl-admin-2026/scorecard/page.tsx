@@ -902,11 +902,7 @@ export default function ScorecardAdminPage() {
                                     onChange={(e) => updateBowler(idx, 'overs', e.target.value)}
                                     placeholder="3.5"
                                     className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
-                                      min="0"
-                                      max="5"
-                                      className="w-1/2 bg-gray-700 p-2 rounded border border-gray-600 text-white text-center text-sm"
-                                    />
-                                  </div>
+                                  />
                                 </td>
                                 <td className="p-2">
                                   <input
