@@ -150,7 +150,12 @@ export default function WPLAdminPointsTablePage() {
     // Sort by selected criteria
     result.sort((a, b) => {
       if (sortBy === 'points') {
-        return b.points - a.points;
+        // First sort by points (highest first)
+        if (b.points !== a.points) {
+          return b.points - a.points;
+        }
+        // If points are equal, sort by NRR (highest first)
+        return b.netRunRate - a.netRunRate;
       } else if (sortBy === 'wins') {
         return b.wins - a.wins;
       } else if (sortBy === 'losses') {
