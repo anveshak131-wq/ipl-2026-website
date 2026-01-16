@@ -385,13 +385,17 @@ export default function ScorecardAdminPage() {
     const updated = { ...scorecard };
     const inning = updated.innings[activeInnings];
 
-    // Calculate total runs
-    inning.totalRuns = inning.batting.reduce((sum, b) => sum + b.runs, 0) + 
-                       (inning.extras.wides + inning.extras.noBalls + inning.extras.byes + inning.extras.legByes);
+    // Calculate total runs (handle empty strings by treating them as 0)
+    const batterRuns = inning.batting.reduce((sum, b) => sum + (Number(b.runs) || 0), 0);
+    const extrasTotal = (Number(inning.extras.wides) || 0) + 
+                       (Number(inning.extras.noBalls) || 0) + 
+                       (Number(inning.extras.byes) || 0) + 
+                       (Number(inning.extras.legByes) || 0);
+    inning.totalRuns = batterRuns + extrasTotal;
 
     // Calculate total wickets
     inning.totalWickets = inning.batting.filter(
-      (b) => !b.dismissal || b.dismissal.type !== 'not-out'
+      (b) => b.dismissal && b.dismissal.type !== 'not-out'
     ).length;
 
     setScorecard(updated);
