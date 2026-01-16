@@ -79,6 +79,41 @@ const WPLBowlingStatsPage = () => {
       try {
         setLoading(true);
 
+        // Try to load stats from statistics API first
+        try {
+          const statsResponse = await fetch('/api/stats?league=wpl&type=bowling');
+          if (statsResponse.ok) {
+            const statsData = await statsResponse.json();
+            if (statsData.bowlingStats && statsData.bowlingStats.length > 0) {
+              console.log('Loaded stats from statistics API');
+              // Convert stats to player format
+              setPlayers(statsData.bowlingStats.map((stat: any) => ({
+                id: stat.playerId,
+                name: stat.playerName,
+                stats: {
+                  matches: stat.matches,
+                  runs: 0,
+                  wickets: stat.wickets,
+                  economy: stat.economy,
+                  average: stat.average,
+                  strikeRate: stat.strikeRate,
+                  bestBowling: stat.bestBowling,
+                  highest: 0,
+                  fours: 0,
+                  sixes: 0,
+                  fifties: 0,
+                  hundreds: 0,
+                }
+              })));
+              setLoading(false);
+              return;
+            }
+          }
+        } catch (err) {
+          console.log('Statistics API not available, falling back to live scores');
+        }
+
+        // Fallback to old method
         // Load WPL players and matches
         const [playersData, matchesData] = await Promise.all([
           api.getPlayers(undefined, 'wpl').catch(() => []),

@@ -31,6 +31,28 @@ export default function WPLAdminPointsTablePage() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
+        // Try to fetch from statistics API first
+        try {
+          const statsResponse = await fetch('/api/stats?league=wpl&type=teams');
+          if (statsResponse.ok) {
+            const statsData = await statsResponse.json();
+            if (statsData.teamStats && statsData.teamStats.length > 0) {
+              console.log('Loaded points table from statistics API');
+              // We still need teams data for full info
+              const teamsData = await api.getTeams('wpl');
+              setTeams(teamsData);
+              
+              // Store the calculated stats for use
+              (window as any).calculatedTeamStats = statsData.teamStats;
+              setIsLoading(false);
+              return;
+            }
+          }
+        } catch (err) {
+          console.log('Statistics API not available, falling back to matches');
+        }
+
+        // Fallback to old method
         const [teamsData, matchesData] = await Promise.all([
           api.getTeams('wpl'),
           api.getMatches('wpl')
@@ -60,6 +82,32 @@ export default function WPLAdminPointsTablePage() {
 
   // Calculate points table data
   const pointsTable = useMemo(() => {
+    // Check if we have calculated stats from the API
+    const calculatedStats = (window as any).calculatedTeamStats;
+    if (calculatedStats && calculatedStats.length > 0) {
+      return teams.map(team => {
+        const teamStat = calculatedStats.find((s: any) => s.teamId === parseInt(team.id) || s.teamName === team.name);
+        if (teamStat) {
+          // Add shortName display
+          const displayShortName = team.shortName || team.name.split(' ').map(w => w[0]).join('');
+          const displayName = team.name && team.name.includes('(WPL)') ? team.name : `${team.name || ''} (WPL)`;
+          
+          return {
+            ...team,
+            shortName: displayShortName,
+            name: displayName,
+            matchesPlayed: teamStat.matches,
+            wins: teamStat.wins,
+            losses: teamStat.losses,
+            points: teamStat.points,
+            netRunRate: teamStat.netRunRate
+          };
+        }
+        return null;
+      }).filter(Boolean);
+    }
+
+    // Fallback to calculating from matches
     return teams.map(team => {
       const teamMatches = matches.filter(m =>
         (m.team1.id === team.id || m.team2.id === team.id) &&
