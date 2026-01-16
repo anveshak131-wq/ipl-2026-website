@@ -422,8 +422,8 @@ export default function WPLAdminSidebar({ currentPage = '' }: WPLAdminSidebarPro
       >
         {/* Header */}
         <div className="p-4 border-b border-purple-400/20">
-          <div className="flex items-center justify-between">
-            {!collapsed && (
+          {!collapsed ? (
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <WPLLogo size={32} />
                 <div>
@@ -431,24 +431,26 @@ export default function WPLAdminSidebar({ currentPage = '' }: WPLAdminSidebarPro
                   <p className="text-xs text-purple-300">2024</p>
                 </div>
               </div>
-            )}
-            {collapsed && (
-              <div className="mx-auto">
-                <WPLLogo size={32} />
-              </div>
-            )}
-            <button
-              onClick={() => setCollapsed(!collapsed)}
-              className="p-2 rounded-lg hover:bg-purple-800/50 text-white transition-colors"
-              title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            >
-              {collapsed ? (
-                <ChevronRight className="w-4 h-4" />
-              ) : (
+              <button
+                onClick={() => setCollapsed(!collapsed)}
+                className="p-2 rounded-lg hover:bg-purple-800/50 text-white transition-colors"
+                title="Collapse sidebar"
+              >
                 <ChevronDown className="w-4 h-4" />
-              )}
-            </button>
-          </div>
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-2">
+              <WPLLogo size={32} />
+              <button
+                onClick={() => setCollapsed(!collapsed)}
+                className="p-2 rounded-lg hover:bg-purple-800/50 text-white transition-colors w-full"
+                title="Expand sidebar"
+              >
+                <ChevronRight className="w-4 h-4 mx-auto" />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Search */}
