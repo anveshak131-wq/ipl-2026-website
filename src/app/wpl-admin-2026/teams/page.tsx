@@ -29,33 +29,15 @@ export default function WPLTeamsPage() {
   const fetchTeams = async () => {
     setLoading(true);
     try {
-      // Mock data for WPL teams
-      const mockTeams: Team[] = [
-        {
-          id: '1',
-          name: 'Mumbai Indians',
-          shortName: 'MI',
-          logo: '/logos/mi.png',
-          city: 'Mumbai',
-          captain: 'Harmanpreet Kaur',
-          coach: 'Charlotte Edwards',
-          founded: 2018,
-          homeGround: 'Wankhede Stadium, Mumbai'
-        },
-        {
-          id: '2',
-          name: 'Delhi Capitals',
-          shortName: 'DC',
-          logo: '/logos/dc.png',
-          city: 'Delhi',
-          captain: 'Meg Lanning',
-          coach: 'Jonathan Batty',
-          founded: 2018,
-          homeGround: 'Arun Jaitley Stadium, Delhi'
-        }
-      ];
-      setTeams(mockTeams);
+      // Fetch WPL teams from API
+      const response = await fetch('/api/teams?league=wpl');
+      if (!response.ok) {
+        throw new Error('Failed to fetch teams');
+      }
+      const data = await response.json();
+      setTeams(data);
     } catch (error) {
+      console.error('Error fetching teams:', error);
       setMessage('Failed to fetch teams');
     } finally {
       setLoading(false);
