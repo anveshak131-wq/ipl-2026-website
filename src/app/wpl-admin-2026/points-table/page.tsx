@@ -236,8 +236,13 @@ export default function WPLAdminPointsTablePage() {
   };
 
   const handleSave = async (teamId: string) => {
+    // Convert netRunRate from string to number
+    const dataToSave = {
+      ...editData,
+      netRunRate: parseFloat(editData.netRunRate) || 0
+    };
     // Here you would typically save to your backend
-    console.log('Saving team data:', teamId, editData);
+    console.log('Saving team data:', teamId, dataToSave);
     setEditingTeam(null);
     setEditData({});
   };
@@ -604,10 +609,9 @@ export default function WPLAdminPointsTablePage() {
                       }`}>
                         {isCurrentlyEditing ? (
                           <input
-                            type="number"
-                            step="0.01"
+                            type="text"
                             value={editData.netRunRate}
-                            onChange={(e) => setEditData({...editData, netRunRate: parseFloat(e.target.value) || 0})}
+                            onChange={(e) => setEditData({...editData, netRunRate: e.target.value})}
                             className="w-20 px-2 py-1 bg-slate-700 border border-white rounded text-center"
                             placeholder="0.00"
                           />
