@@ -94,11 +94,13 @@ export default function Navbar() {
 
   const getNavBadgeLabel = (href: string): string | null => {
     if (href === '/stats') return 'Numbers';
+    if (href === '/wpl/leaderboard') return 'Stats';
     return null;
   };
 
   const getNavTooltip = (href: string): string | null => {
     if (href === '/stats') return 'Leaderboards, records, and team comparisons';
+    if (href === '/wpl/leaderboard') return 'Player stats and points table';
     return null;
   };
 

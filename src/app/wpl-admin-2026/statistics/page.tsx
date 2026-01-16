@@ -14,7 +14,7 @@ import type {
 export default function WPLStatsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'overview' | 'batting' | 'bowling' | 'teams'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'batting' | 'bowling'>('overview');
   const [battingStats, setBattingStats] = useState<PlayerBattingStats[]>([]);
   const [bowlingStats, setBowlingStats] = useState<PlayerBowlingStats[]>([]);
   const [teamStats, setTeamStats] = useState<TeamStats[]>([]);
@@ -138,7 +138,6 @@ export default function WPLStatsPage() {
             { key: 'overview', label: 'Overview', icon: BarChart3 },
             { key: 'batting', label: 'Batting Stats', icon: TrendingUp },
             { key: 'bowling', label: 'Bowling Stats', icon: Target },
-            { key: 'teams', label: 'Points Table', icon: Users },
           ].map(tab => (
             <button
               key={tab.key}
@@ -326,49 +325,18 @@ export default function WPLStatsPage() {
               </div>
             )}
 
-            {/* Teams/Points Table Tab */}
-            {activeTab === 'teams' && (
-              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-6 overflow-x-auto">
-                <h3 className="text-xl font-bold text-white mb-4">Points Table (Auto-calculated)</h3>
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-white/20 text-gray-300">
-                      <th className="text-left p-3">Pos</th>
-                      <th className="text-left p-3">Team</th>
-                      <th className="text-center p-3">Mat</th>
-                      <th className="text-center p-3">Won</th>
-                      <th className="text-center p-3">Lost</th>
-                      <th className="text-center p-3">Pts</th>
-                      <th className="text-center p-3">NRR</th>
-                      <th className="text-center p-3">Runs For</th>
-                      <th className="text-center p-3">Runs Against</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {teamStats.map((team, idx) => (
-                      <tr key={team.teamId} className="border-b border-white/10 hover:bg-white/5">
-                        <td className="p-3 font-bold text-yellow-400">#{idx + 1}</td>
-                        <td className="p-3 font-semibold text-white">{team.teamName}</td>
-                        <td className="p-3 text-center text-gray-300">{team.matches}</td>
-                        <td className="p-3 text-center text-green-400 font-bold">{team.wins}</td>
-                        <td className="p-3 text-center text-red-400 font-bold">{team.losses}</td>
-                        <td className="p-3 text-center text-yellow-400 font-bold text-lg">{team.points}</td>
-                        <td className={`p-3 text-center font-bold ${
-                          team.netRunRate > 0 ? 'text-green-400' : team.netRunRate < 0 ? 'text-red-400' : 'text-gray-300'
-                        }`}>
-                          {team.netRunRate > 0 ? '+' : ''}{team.netRunRate}
-                        </td>
-                        <td className="p-3 text-center text-gray-300">{team.runsScored}</td>
-                        <td className="p-3 text-center text-gray-300">{team.runsConceded}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
           </>
         )}
-      </div>
+
+        {/* Note about Points Table */}
+        <div className="mt-6 bg-blue-500/20 border border-blue-500/40 rounded-lg p-4">
+          <p className="text-blue-200 text-sm">
+            💡 <strong>Points Table:</strong> For the editable points table, please visit the{' '}
+            <a href="/wpl-admin-2026/points-table" className="underline hover:text-blue-100">
+              Points Table Admin page
+            </a>
+          </p>
+        </div>v>
     </div>
   );
 }
