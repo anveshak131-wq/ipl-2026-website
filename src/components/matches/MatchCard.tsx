@@ -46,8 +46,8 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
         console.log('Scorecard API response:', data);
         // API returns array directly when querying by matchId
         const scorecards = Array.isArray(data) ? data : [];
-        // Find published scorecard (draft = false) OR any scorecard if none published
-        const published = scorecards.find((s: any) => s.draft === false) || scorecards[0];
+        // Find published scorecard only (draft = false)
+        const published = scorecards.find((s: any) => s.draft === false);
         console.log('Published scorecard found:', published);
         setScorecard(published || null);
       } else {
