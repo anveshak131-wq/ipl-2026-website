@@ -163,6 +163,8 @@ function calculateStatsFromScorecards(scorecards) {
     const matchInfo = scorecard.matchInfo || {};
     const team1Name = normalizeTeamName(matchInfo.team1?.name || matchInfo.team1?.shortName || 'Team 1');
     const team2Name = normalizeTeamName(matchInfo.team2?.name || matchInfo.team2?.shortName || 'Team 2');
+    const team1Id = matchInfo.team1?.id;
+    const team2Id = matchInfo.team2?.id;
     
     // Handle both old format (innings1, innings2) and new format (innings array)
     const innings = scorecard.innings || [scorecard.innings1, scorecard.innings2].filter(Boolean);
@@ -171,8 +173,16 @@ function calculateStatsFromScorecards(scorecards) {
       if (!inning?.batting) return;
       
       // Determine which team is batting in this inning
-      // Innings 0 (or innings1) = team1 batting, Innings 1 (or innings2) = team2 batting
-      const battingTeamName = inningIndex === 0 ? team1Name : team2Name;
+      // First check if innings has battingTeamId, then check battingTeam name, otherwise fall back to index
+      let battingTeamName;
+      if (inning.battingTeamId) {
+        battingTeamName = inning.battingTeamId === team1Id ? team1Name : team2Name;
+      } else if (inning.battingTeam) {
+        battingTeamName = normalizeTeamName(inning.battingTeam);
+      } else {
+        // Fallback: assume innings order (may be incorrect)
+        battingTeamName = inningIndex === 0 ? team1Name : team2Name;
+      }
       
       inning.batting.forEach(batsman => {
         if (!batsman.playerId) return;
@@ -261,6 +271,8 @@ function calculateStatsFromScorecards(scorecards) {
     const matchInfo = scorecard.matchInfo || {};
     const team1Name = normalizeTeamName(matchInfo.team1?.name || matchInfo.team1?.shortName || 'Team 1');
     const team2Name = normalizeTeamName(matchInfo.team2?.name || matchInfo.team2?.shortName || 'Team 2');
+    const team1Id = matchInfo.team1?.id;
+    const team2Id = matchInfo.team2?.id;
     
     // Handle both old format (innings1, innings2) and new format (innings array)
     const innings = scorecard.innings || [scorecard.innings1, scorecard.innings2].filter(Boolean);
@@ -269,8 +281,23 @@ function calculateStatsFromScorecards(scorecards) {
       if (!inning?.bowling) return;
       
       // Determine which team is bowling in this inning
-      // Innings 0 (or innings1) = team2 bowling (team1 batting), Innings 1 (or innings2) = team1 bowling (team2 batting)
-      const bowlingTeamName = inningIndex === 0 ? team2Name : team1Name;
+      // First check if innings has bowlingTeamId or battingTeamId, then check team names, otherwise fall back to index
+      let bowlingTeamName;
+      if (inning.bowlingTeamId) {
+        bowlingTeamName = inning.bowlingTeamId === team1Id ? team1Name : team2Name;
+      } else if (inning.battingTeamId) {
+        // Bowling team is opposite of batting team
+        bowlingTeamName = inning.battingTeamId === team1Id ? team2Name : team1Name;
+      } else if (inning.bowlingTeam) {
+        bowlingTeamName = normalizeTeamName(inning.bowlingTeam);
+      } else if (inning.battingTeam) {
+        // Bowling team is opposite of batting team
+        const battingTeamName = normalizeTeamName(inning.battingTeam);
+        bowlingTeamName = battingTeamName === team1Name ? team2Name : team1Name;
+      } else {
+        // Fallback: opposite of batting team by index
+        bowlingTeamName = inningIndex === 0 ? team2Name : team1Name;
+      }
       
       inning.bowling.forEach(bowler => {
         if (!bowler.playerId) return;
