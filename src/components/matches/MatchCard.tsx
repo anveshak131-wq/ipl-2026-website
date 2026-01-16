@@ -46,10 +46,8 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
         console.log('Scorecard API response:', data);
         // API returns array directly when querying by matchId
         const scorecards = Array.isArray(data) ? data : [];
-        // Find published scorecard (draft = false or undefined means published)
-        const published = scorecards.find((s: any) => 
-          s.draft === false
-        );
+        // Find published scorecard (draft = false) OR any scorecard if none published
+        const published = scorecards.find((s: any) => s.draft === false) || scorecards[0];
         console.log('Published scorecard found:', published);
         setScorecard(published || null);
       } else {
@@ -340,7 +338,8 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
           {/* Main Action Button */}
           <button
             onClick={() => {
-              if (match.status === 'completed') {
+              // Show scorecard if it exists (for any match status)
+              if (match.scorecard || match.status === 'completed' || match.status === 'live') {
                 setShowScorecardModal(true);
               } else if (match.status === 'upcoming') {
                 alert('Reminder set!');
@@ -403,7 +402,7 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
             
             <span className="relative z-10 flex items-center justify-center gap-2 font-black tracking-tight">
               {match.status === 'upcoming' && 'Set Reminder'}
-              {match.status === 'live' && 'Watch Live'}
+              {match.status === 'live' && 'View Details'}
               {match.status === 'completed' && 'Show Scorecard'}
               <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
