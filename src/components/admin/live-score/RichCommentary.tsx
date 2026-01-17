@@ -69,8 +69,11 @@ export default function RichCommentary({
     if (ballHistory && Array.isArray(ballHistory)) {
       ballHistory.forEach((event, index) => {
         ballCount++;
-        const over = Math.floor(ballCount / 6);
-        const ballInOver = (ballCount % 6) || 6;
+        // Calculate over and ball correctly:
+        // Ball 1-6 = Over 0 (0.1, 0.2, 0.3, 0.4, 0.5, 0.6)
+        // Ball 7-12 = Over 1 (1.1, 1.2, 1.3, 1.4, 1.5, 1.6)
+        const over = Math.floor((ballCount - 1) / 6);
+        const ballInOver = ((ballCount - 1) % 6) + 1;
         const ballString = `${over}.${ballInOver}`;
 
         // Determine event type
