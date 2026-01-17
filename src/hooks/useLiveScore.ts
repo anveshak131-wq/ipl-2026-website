@@ -448,13 +448,42 @@ export function useLiveScore({
     stateRef.current = state;
   }, [state]);
 
-  // Sync matchState into state
+  // Sync matchState into state and update battingTeam from matchState
   useEffect(() => {
-    setState((prev) => ({
-      ...prev,
-      matchState,
-    }));
-  }, [matchState]);
+    setState((prev) => {
+      // Determine batting team from matchState
+      let battingTeam = prev.battingTeam;
+      
+      // For innings 1, use innings1.battingTeam from matchState
+      if (matchState?.innings1?.battingTeam && prev.innings === 1) {
+        battingTeam = matchState.innings1.battingTeam;
+      }
+      // For innings 2, use innings2.battingTeam from matchState
+      else if (matchState?.innings2?.battingTeam && prev.innings === 2) {
+        battingTeam = matchState.innings2.battingTeam;
+      }
+      // Fallback: calculate from toss if available
+      else if (matchState?.toss?.winner && matchState?.toss?.decision) {
+        const tossWinner = matchState.toss.winner;
+        const tossDecision = matchState.toss.decision;
+        if (prev.innings === 1) {
+          battingTeam = tossDecision === 'bat' ? tossWinner : (tossWinner === 'team1' ? 'team2' : 'team1');
+        } else {
+          // Innings 2 - opposite team bats
+          const innings1BattingTeam = tossDecision === 'bat' ? tossWinner : (tossWinner === 'team1' ? 'team2' : 'team1');
+          battingTeam = innings1BattingTeam === 'team1' ? 'team2' : 'team1';
+        }
+      }
+      
+      console.log('[useLiveScore] Syncing matchState, battingTeam:', battingTeam, 'innings:', prev.innings);
+      
+      return {
+        ...prev,
+        matchState,
+        battingTeam,
+      };
+    });
+  }, [matchState, matchState?.innings1?.battingTeam, matchState?.innings2?.battingTeam, matchState?.toss?.winner, matchState?.toss?.decision]);
   
   // Track free hit - check last ball in history
   const isFreeHit = useMemo(() => {
