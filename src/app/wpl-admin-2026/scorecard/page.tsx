@@ -160,7 +160,12 @@ export default function ScorecardAdminPage() {
       if (response.ok) {
         const data = await response.json();
         if (data && data.length > 0) {
-          setScorecard(data[0]);
+          // Ensure matchId is in matchInfo for existing scorecards
+          const loadedScorecard = data[0];
+          if (!loadedScorecard.matchInfo.matchId) {
+            loadedScorecard.matchInfo.matchId = match.id;
+          }
+          setScorecard(loadedScorecard);
         } else {
           setScorecard(initializeScorecard(match));
         }
@@ -179,6 +184,7 @@ export default function ScorecardAdminPage() {
       matchId: match.id,
       league: 'wpl',
       matchInfo: {
+        matchId: match.id,
         team1: match.team1,
         team2: match.team2,
         venue: match.venue,
