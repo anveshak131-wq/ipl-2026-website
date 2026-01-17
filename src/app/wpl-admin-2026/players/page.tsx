@@ -55,7 +55,16 @@ export default function WPLPlayersManagementPage() {
           api.getTeams('wpl'),
         ]);
         setPlayers(playersData || []);
-        setTeams(teamsData || []);
+        
+        // Deduplicate teams by ID
+        const uniqueTeams = teamsData?.reduce((acc: Team[], team: Team) => {
+          if (!acc.find(t => t.id === team.id)) {
+            acc.push(team);
+          }
+          return acc;
+        }, []) || [];
+        
+        setTeams(uniqueTeams);
         setIsLoading(false);
       } catch (error) {
         console.error('Error loading data:', error);
