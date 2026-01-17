@@ -287,6 +287,117 @@ export default function WPLLiveScorePage() {
             </select>
           </div>
 
+          {/* Toss Info */}
+          {selectedMatch && (
+            <div 
+              className="rounded-2xl p-6 md:p-8 backdrop-blur-xl border mb-6"
+              style={{
+                background: WPLColors.purpleRGBA[10],
+                borderColor: WPLColors.purpleRGBA[30],
+              }}
+            >
+              <h2 className="text-xl font-bold mb-4" style={{ color: WPLColors.textPrimary }}>
+                Toss Information
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2" style={{ color: WPLColors.textSecondary }}>
+                    Toss Winner
+                  </label>
+                  <select
+                    value={selectedMatch.matchState?.toss?.winner === 'team1' ? selectedMatch.team1?.name : selectedMatch.matchState?.toss?.winner === 'team2' ? selectedMatch.team2?.name : ''}
+                    onChange={async (e) => {
+                      const winner = e.target.value === selectedMatch.team1?.name ? 'team1' : 'team2';
+                      try {
+                        const token = localStorage.getItem('adminToken');
+                        await fetch('/api/matches', {
+                          method: 'PUT',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                          },
+                          body: JSON.stringify({
+                            ...selectedMatch,
+                            matchState: {
+                              ...selectedMatch.matchState,
+                              toss: {
+                                ...selectedMatch.matchState?.toss,
+                                winner,
+                                timestamp: Date.now(),
+                              },
+                            },
+                          }),
+                        });
+                        
+                        // Refresh matches
+                        const updatedMatches = await api.getMatches('wpl');
+                        setMatches(updatedMatches || []);
+                      } catch (err) {
+                        console.error('Failed to update toss winner:', err);
+                      }
+                    }}
+                    className="w-full px-4 py-3 rounded-lg text-white text-sm focus:outline-none transition-colors"
+                    style={{
+                      background: WPLColors.purpleRGBA[20],
+                      border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                    }}
+                  >
+                    <option value="">Select winner...</option>
+                    <option value={selectedMatch.team1?.name}>{selectedMatch.team1?.name}</option>
+                    <option value={selectedMatch.team2?.name}>{selectedMatch.team2?.name}</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2" style={{ color: WPLColors.textSecondary }}>
+                    Toss Decision
+                  </label>
+                  <select
+                    value={selectedMatch.matchState?.toss?.decision || ''}
+                    onChange={async (e) => {
+                      const decision = e.target.value as 'bat' | 'bowl';
+                      try {
+                        const token = localStorage.getItem('adminToken');
+                        await fetch('/api/matches', {
+                          method: 'PUT',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`,
+                          },
+                          body: JSON.stringify({
+                            ...selectedMatch,
+                            matchState: {
+                              ...selectedMatch.matchState,
+                              toss: {
+                                ...selectedMatch.matchState?.toss,
+                                decision,
+                                timestamp: selectedMatch.matchState?.toss?.timestamp || Date.now(),
+                              },
+                            },
+                          }),
+                        });
+                        
+                        // Refresh matches
+                        const updatedMatches = await api.getMatches('wpl');
+                        setMatches(updatedMatches || []);
+                      } catch (err) {
+                        console.error('Failed to update toss decision:', err);
+                      }
+                    }}
+                    className="w-full px-4 py-3 rounded-lg text-white text-sm focus:outline-none transition-colors"
+                    style={{
+                      background: WPLColors.purpleRGBA[20],
+                      border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                    }}
+                  >
+                    <option value="">Select decision...</option>
+                    <option value="bat">Bat</option>
+                    <option value="bowl">Bowl</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Live Score Panel */}
           {selectedMatch && (
             <div 
