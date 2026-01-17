@@ -323,16 +323,19 @@ export function useLiveScore({
 
   // Determine initial batting team based on toss
   const getInitialBattingTeam = (): 'team1' | 'team2' => {
-    if (initialState) return initialState.battingTeam;
-    
-    const toss = initialMatchState?.toss;
-    if (toss) {
+    // First priority: check toss data (most reliable source)
+    const toss = initialState?.toss || initialMatchState?.toss;
+    if (toss && toss.winner && toss.decision) {
       if (toss.winner === 'team1') {
         return toss.decision === 'bat' ? 'team1' : 'team2';
       } else {
         return toss.decision === 'bat' ? 'team2' : 'team1';
       }
     }
+    
+    // Fallback: use stored battingTeam if available
+    if (initialState?.battingTeam) return initialState.battingTeam;
+    
     return 'team1'; // Default
   };
 

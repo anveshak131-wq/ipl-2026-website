@@ -260,15 +260,30 @@ export default function BallEntryPanel({
 
   // Immediate save to localStorage on any ball change for persistence across refreshes
   useEffect(() => {
-    if (!matchId || state.ballHistory.length === 0) return;
+    if (!matchId) return;
+    
+    // Save if there's ball history OR if toss has been set (important for pre-match state)
+    const hasToss = matchState?.toss?.winner && matchState?.toss?.decision;
+    if (state.ballHistory.length === 0 && !hasToss) return;
     
     const localKey = `liveScore_${league}_${matchId}`;
+    
+    // Calculate correct battingTeam based on toss
+    let battingTeam = state.battingTeam;
+    if (hasToss) {
+      battingTeam = matchState.toss.decision === 'bat' 
+        ? matchState.toss.winner 
+        : (matchState.toss.winner === 'team1' ? 'team2' : 'team1');
+    }
+    
     const extendedState = {
       ...state,
+      battingTeam, // Use calculated battingTeam
       toss: matchState?.toss ? {
         winner: matchState.toss.winner,
         decision: matchState.toss.decision,
       } : undefined,
+      matchState: matchState, // Save matchState for restoring current state
       strategicTimeout: timeoutState,
       drsReviews: drsState,
       impactPlayer: impactPlayerState,
@@ -281,11 +296,11 @@ export default function BallEntryPanel({
     
     try {
       localStorage.setItem(localKey, JSON.stringify(extendedState));
-      console.log('[BallEntryPanel] Saved to localStorage, balls:', state.ballHistory.length);
+      console.log('[BallEntryPanel] Saved to localStorage, balls:', state.ballHistory.length, 'toss:', hasToss ? 'yes' : 'no', 'battingTeam:', battingTeam);
     } catch (e) {
       console.warn('[BallEntryPanel] Failed to save to localStorage:', e);
     }
-  }, [state.ballHistory, state.team1.runs, state.team1.wickets, state.team2.runs, state.team2.wickets, matchId, league]);
+  }, [state.ballHistory, state.team1.runs, state.team1.wickets, state.team2.runs, state.team2.wickets, matchId, league, matchState?.toss?.winner, matchState?.toss?.decision, matchState?.currentState]);
 
   // Initialize previous state ref
   useEffect(() => {
