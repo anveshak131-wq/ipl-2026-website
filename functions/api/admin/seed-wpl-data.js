@@ -144,11 +144,11 @@ const wplPlayers = [
   { id: 'wpl9', league: 'wpl', name: 'Ashleigh Gardner', role: 'All-rounder', teamId: 14, age: 26, nationality: 'Australia', jerseyNumber: 8, isCaptain: true, bowlingStyle: 'Right-arm off-break', battingStyle: 'Right-handed bat', stats: { matches: 35, runs: 680, wickets: 48, average: 24.5, strikeRate: 128, economy: 6.8, highest: 66, fours: 52, sixes: 18, fifties: 4, hundreds: 0, bestBowling: '4/12', bowlingAverage: 0 } },
   { id: 'wpl10', league: 'wpl', name: 'Beth Mooney', role: 'Wicket-keeper Batter', teamId: 14, age: 30, nationality: 'Australia', jerseyNumber: 5, isCaptain: false, bowlingStyle: 'N/A', battingStyle: 'Left-handed bat', stats: { matches: 40, runs: 920, wickets: 0, average: 28, strikeRate: 132, economy: 0, highest: 82, fours: 68, sixes: 28, fifties: 8, hundreds: 0, bestBowling: '-' } },
   
-  // UP Warriorz (Team 13)
-  { id: 'wpl11', league: 'wpl', name: 'Meg Lanning', role: 'Batter', teamId: 13, age: 31, nationality: 'Australia', jerseyNumber: 1, isCaptain: true, bowlingStyle: 'Right-arm leg-break', battingStyle: 'Right-handed bat', stats: { matches: 36, runs: 840, wickets: 15, average: 26.5, strikeRate: 125, economy: 7.5, highest: 78, fours: 62, sixes: 24, fifties: 7, hundreds: 0, bestBowling: '2/28', bowlingAverage: 0 } },
+  // Delhi Capitals (Team 13)
+  { id: 'wpl12', league: 'wpl', name: 'Jemimah Rodrigues', role: 'Batter', teamId: 13, age: 24, nationality: 'India', jerseyNumber: 21, isCaptain: true, bowlingStyle: 'N/A', battingStyle: 'Right-handed bat', stats: { matches: 32, runs: 580, wickets: 0, average: 22, strikeRate: 118, economy: 0, highest: 69, fours: 42, sixes: 15, fifties: 4, hundreds: 0, bestBowling: '-' } },
   
-  // Delhi Capitals (Team 15)
-  { id: 'wpl12', league: 'wpl', name: 'Jemimah Rodrigues', role: 'Batter', teamId: 15, age: 24, nationality: 'India', jerseyNumber: 21, isCaptain: true, bowlingStyle: 'N/A', battingStyle: 'Right-handed bat', stats: { matches: 32, runs: 580, wickets: 0, average: 22, strikeRate: 118, economy: 0, highest: 69, fours: 42, sixes: 15, fifties: 4, hundreds: 0, bestBowling: '-' } }
+  // UP Warriorz (Team 15)
+  { id: 'wpl11', league: 'wpl', name: 'Meg Lanning', role: 'Batter', teamId: 15, age: 31, nationality: 'Australia', jerseyNumber: 1, isCaptain: true, bowlingStyle: 'Right-arm leg-break', battingStyle: 'Right-handed bat', stats: { matches: 36, runs: 840, wickets: 15, average: 26.5, strikeRate: 125, economy: 7.5, highest: 78, fours: 62, sixes: 24, fifties: 7, hundreds: 0, bestBowling: '2/28', bowlingAverage: 0 } }
 ];
 
 export const onRequest = async (context) => {

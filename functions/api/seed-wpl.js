@@ -349,13 +349,13 @@ export const onRequest = async (context) => {
           bestBowling: '-'
         }
       },
-      // UP Warriorz Players
+      // UP Warriorz Players (Team 15)
       {
         id: 'wpl11',
         league: 'wpl',
         name: 'Meg Lanning',
         role: 'Batter',
-        teamId: '13',
+        teamId: '15',
         age: 31,
         nationality: 'Australia',
         jerseyNumber: 1,
@@ -377,12 +377,13 @@ export const onRequest = async (context) => {
           bestBowling: '2/28'
         }
       },
+      // DC-W Players (Team 13)
       {
         id: 'wpl12',
         league: 'wpl',
         name: 'Jemimah Rodrigues',
         role: 'Batter',
-        teamId: '15',
+        teamId: '13',
         age: 24,
         nationality: 'India',
         jerseyNumber: 21,

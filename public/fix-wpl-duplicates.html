@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix WPL Players - Remove Duplicates</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        button.danger {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+            max-height: 400px;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #f5f5f5;
+            font-weight: 600;
+        }
+        .duplicate {
+            background: #fff3cd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Fix WPL Players Database</h1>
+        
+        <div class="warning">
+            <strong>⚠️ This tool will:</strong>
+            <ul>
+                <li>Find and display duplicate players</li>
+                <li>Remove duplicate Meg Lanning entries</li>
+                <li>Keep only ONE Meg Lanning in UP Warriorz (Team 13) as Captain</li>
+                <li>Ensure Jemimah Rodrigues is in DC-W (Team 15) as Captain</li>
+            </ul>
+        </div>
+
+        <div style="margin: 20px 0;">
+            <input 
+                type="text" 
+                id="adminToken" 
+                placeholder="Paste admin token (from localStorage.getItem('adminToken'))"
+                style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px;"
+            />
+        </div>
+
+        <div style="margin: 20px 0;">
+            <button onclick="analyzePlayers()">1. Analyze Current Players</button>
+            <button onclick="fixDuplicates()" class="danger">2. Fix Duplicates</button>
+            <button onclick="verifyFix()">3. Verify Fix</button>
+        </div>
+
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        async function analyzePlayers() {
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.className = 'result info';
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<strong>Analyzing players...</strong>';
+
+            try {
+                const response = await fetch('https://ipl-2026-website.pages.dev/api/players?league=wpl');
+                const players = await response.json();
+
+                // Find duplicates by name
+                const nameCount = {};
+                players.forEach(p => {
+                    nameCount[p.name] = (nameCount[p.name] || []);
+                    nameCount[p.name].push(p);
+                });
+
+                const duplicates = Object.entries(nameCount).filter(([name, list]) => list.length > 1);
+                
+                let html = `<strong>Found ${players.length} WPL players</strong><br><br>`;
+                
+                if (duplicates.length > 0) {
+                    html += `<strong style="color: #dc2626;">⚠️ ${duplicates.length} duplicate player(s) found:</strong><br>`;
+                    html += '<table><tr><th>Name</th><th>ID</th><th>Team ID</th><th>Captain</th></tr>';
+                    
+                    duplicates.forEach(([name, list]) => {
+                        list.forEach(p => {
+                            html += `<tr class="duplicate">
+                                <td>${p.name}</td>
+                                <td>${p.id}</td>
+                                <td>${p.teamId}</td>
+                                <td>${p.isCaptain ? '👑 Yes' : 'No'}</td>
+                            </tr>`;
+                        });
+                    });
+                    html += '</table>';
+                } else {
+                    html += '<strong style="color: #22c55e;">✅ No duplicates found</strong>';
+                }
+
+                // Show key players
+                const megLanning = players.filter(p => p.name === 'Meg Lanning');
+                const jemimah = players.filter(p => p.name === 'Jemimah Rodrigues');
+                
+                html += '<br><br><strong>Key Players:</strong><br>';
+                html += `<strong>Meg Lanning:</strong> ${megLanning.length} entries<br>`;
+                megLanning.forEach(p => {
+                    html += `&nbsp;&nbsp;- ID: ${p.id}, Team: ${p.teamId}, Captain: ${p.isCaptain}<br>`;
+                });
+                
+                html += `<strong>Jemimah Rodrigues:</strong> ${jemimah.length} entries<br>`;
+                jemimah.forEach(p => {
+                    html += `&nbsp;&nbsp;- ID: ${p.id}, Team: ${p.teamId}, Captain: ${p.isCaptain}<br>`;
+                });
+
+                resultDiv.className = 'result info';
+                resultDiv.innerHTML = html;
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<strong>❌ Error:</strong> ${error.message}`;
+            }
+        }
+
+        async function fixDuplicates() {
+            const token = document.getElementById('adminToken').value.trim();
+            const resultDiv = document.getElementById('result');
+            
+            if (!token) {
+                resultDiv.className = 'result error';
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = '<strong>Error:</strong> Please enter admin token';
+                return;
+            }
+
+            if (!confirm('This will delete all WPL players and reseed them. Continue?')) {
+                return;
+            }
+
+            resultDiv.className = 'result info';
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<strong>Step 1: Deleting all WPL players...</strong>';
+
+            try {
+                // Delete all WPL players
+                const deleteResponse = await fetch('https://ipl-2026-website.pages.dev/api/players?deleteAllWPL=true', {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!deleteResponse.ok) {
+                    throw new Error('Failed to delete WPL players');
+                }
+
+                resultDiv.innerHTML = '<strong>Step 2: Reseeding WPL data...</strong>';
+
+                // Reseed WPL data
+                const seedResponse = await fetch('https://ipl-2026-website.pages.dev/api/admin/seed-wpl-data', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const seedData = await seedResponse.json();
+
+                if (seedResponse.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <strong>✅ Success!</strong><br><br>
+                        <p>All WPL players have been reset with correct team assignments:</p>
+                        <ul>
+                            <li><strong>Meg Lanning</strong> → UP Warriorz (Team 13) as Captain</li>
+                            <li><strong>Jemimah Rodrigues</strong> → DC-W (Team 15) as Captain</li>
+                        </ul>
+                        <p>Wait 30 seconds for KV propagation, then refresh your players page.</p>
+                        <details>
+                            <summary>View response</summary>
+                            <pre>${JSON.stringify(seedData, null, 2)}</pre>
+                        </details>
+                    `;
+                } else {
+                    throw new Error(seedData.error || 'Failed to seed data');
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<strong>❌ Error:</strong> ${error.message}`;
+            }
+        }
+
+        async function verifyFix() {
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.className = 'result info';
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<strong>Verifying fix...</strong>';
+
+            try {
+                const response = await fetch('https://ipl-2026-website.pages.dev/api/players?league=wpl&forceRefresh=true');
+                const players = await response.json();
+
+                const megLanning = players.filter(p => p.name === 'Meg Lanning');
+                const jemimah = players.filter(p => p.name === 'Jemimah Rodrigues');
+                
+                let success = true;
+                let issues = [];
+
+                if (megLanning.length !== 1) {
+                    success = false;
+                    issues.push(`Meg Lanning: Expected 1, found ${megLanning.length}`);
+                } else if (megLanning[0].teamId !== '13' && megLanning[0].teamId !== 13) {
+                    success = false;
+                    issues.push(`Meg Lanning: Wrong team (${megLanning[0].teamId}, expected 13)`);
+                } else if (!megLanning[0].isCaptain) {
+                    success = false;
+                    issues.push(`Meg Lanning: Not marked as captain`);
+                }
+
+                if (jemimah.length !== 1) {
+                    success = false;
+                    issues.push(`Jemimah Rodrigues: Expected 1, found ${jemimah.length}`);
+                } else if (jemimah[0].teamId !== '15' && jemimah[0].teamId !== 15) {
+                    success = false;
+                    issues.push(`Jemimah Rodrigues: Wrong team (${jemimah[0].teamId}, expected 15)`);
+                } else if (!jemimah[0].isCaptain) {
+                    success = false;
+                    issues.push(`Jemimah Rodrigues: Not marked as captain`);
+                }
+
+                if (success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        <strong>✅ All checks passed!</strong><br><br>
+                        <strong>Meg Lanning:</strong> UP Warriorz (Team ${megLanning[0].teamId}), Captain: ${megLanning[0].isCaptain}<br>
+                        <strong>Jemimah Rodrigues:</strong> DC-W (Team ${jemimah[0].teamId}), Captain: ${jemimah[0].isCaptain}<br><br>
+                        <strong>Total WPL Players:</strong> ${players.length}<br><br>
+                        <p style="color: #22c55e;">Database is now clean and correct! ✨</p>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        <strong>❌ Issues found:</strong><br>
+                        <ul>${issues.map(i => `<li>${i}</li>`).join('')}</ul>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<strong>❌ Error:</strong> ${error.message}`;
+            }
+        }
+
+        // Auto-load token if available
+        window.addEventListener('load', () => {
+            const savedToken = localStorage.getItem('adminToken');
+            if (savedToken) {
+                document.getElementById('adminToken').value = savedToken;
+            }
+        });
+    </script>
+</body>
+</html>
