@@ -140,9 +140,7 @@ export default function AdminSettings() {
                 </div>
               </div>
             </div>
-          </div>
         </div>
-      </div>
 
       {/* Success/Error Messages */}
       {success && (
@@ -455,8 +453,6 @@ export default function AdminSettings() {
               </button>
             </div>
           </form>
-        </div>
-      </div>
     </div>
   );
 }
