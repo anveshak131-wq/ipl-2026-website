@@ -327,25 +327,38 @@ export function useLiveScore({
     }
   }, [initialState?.matchState?.currentState, initialState?.toss]);
 
-  // Determine initial batting team based on toss
+  // Determine initial batting team based on toss/matchState (ALWAYS calculate, don't trust stored battingTeam)
   const getInitialBattingTeam = (): 'team1' | 'team2' => {
-    // First priority: check toss data (most reliable source)
-    const toss = initialState?.toss || initialMatchState?.toss;
-    if (toss && toss.winner && toss.decision) {
-      if (toss.winner === 'team1') {
-        return toss.decision === 'bat' ? 'team1' : 'team2';
-      } else {
-        return toss.decision === 'bat' ? 'team2' : 'team1';
-      }
+    // Priority 1: Check matchState.innings1.battingTeam (most authoritative for innings 1)
+    if (initialState?.matchState?.innings1?.battingTeam) {
+      console.log('[getInitialBattingTeam] Using matchState.innings1.battingTeam:', initialState.matchState.innings1.battingTeam);
+      return initialState.matchState.innings1.battingTeam;
     }
     
-    // Fallback: use stored battingTeam if available
-    if (initialState?.battingTeam) return initialState.battingTeam;
+    // Priority 2: Calculate from toss data
+    const toss = initialState?.toss || initialState?.matchState?.toss || initialMatchState?.toss;
+    if (toss && toss.winner && toss.decision) {
+      const calculated = toss.winner === 'team1'
+        ? (toss.decision === 'bat' ? 'team1' : 'team2')
+        : (toss.decision === 'bat' ? 'team2' : 'team1');
+      console.log('[getInitialBattingTeam] Calculated from toss:', calculated, 'winner:', toss.winner, 'decision:', toss.decision);
+      return calculated;
+    }
     
+    // Priority 3: Fallback to stored battingTeam
+    if (initialState?.battingTeam) {
+      console.log('[getInitialBattingTeam] Fallback to stored battingTeam:', initialState.battingTeam);
+      return initialState.battingTeam;
+    }
+    
+    console.log('[getInitialBattingTeam] Using default: team1');
     return 'team1'; // Default
   };
 
   const [state, setState] = useState<LiveScoreState>(() => {
+    // Calculate correct batting team FIRST
+    const correctBattingTeam = getInitialBattingTeam();
+    
     // Create initial batters and bowlers
     const initialStriker = initialBatter 
       ? createEmptyBatter(initialBatter.id, initialBatter.name, true)
@@ -362,7 +375,7 @@ export function useLiveScore({
     // Create default state
     const defaultState: LiveScoreState = {
       innings: 1,
-      battingTeam: getInitialBattingTeam(),
+      battingTeam: correctBattingTeam,
       currentOver: 0.0,
       team1: {
         name: initialTeam1Name,
@@ -412,9 +425,11 @@ export function useLiveScore({
 
     // If initialState is provided, merge it with defaults
     if (initialState) {
-      return {
+      // IMPORTANT: Always use calculated battingTeam, not the stored one
+      const mergedState = {
         ...defaultState,
         ...initialState,
+        battingTeam: correctBattingTeam, // Override with calculated value
         team1: {
           ...defaultState.team1,
           ...(initialState.team1 || {}),
@@ -435,6 +450,9 @@ export function useLiveScore({
         allBowlers: initialState.allBowlers || [],
         ballHistory: initialState.ballHistory || [],
       };
+      
+      console.log('[useLiveScore] Initial state created, battingTeam:', mergedState.battingTeam, 'team1:', mergedState.team1?.name, 'team2:', mergedState.team2?.name);
+      return mergedState;
     }
 
     return defaultState;
