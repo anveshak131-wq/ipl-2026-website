@@ -240,6 +240,43 @@ export default function ScorecardAdminPage() {
 
       const saved = await response.json();
       setScorecard(saved);
+      
+      // Also update match with toss info if available
+      if (scorecard.matchInfo.toss?.winner && scorecard.matchInfo.toss?.decision && scorecard.matchInfo.matchId) {
+        try {
+          const matchesResponse = await fetch(`/api/matches?id=${scorecard.matchInfo.matchId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          
+          if (matchesResponse.ok) {
+            const match = await matchesResponse.json();
+            const tossWinner = scorecard.matchInfo.toss.winner === scorecard.matchInfo.team1.name ? 'team1' : 'team2';
+            
+            await fetch('/api/matches', {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                ...match,
+                matchState: {
+                  ...match.matchState,
+                  toss: {
+                    winner: tossWinner,
+                    decision: scorecard.matchInfo.toss.decision,
+                    timestamp: Date.now(),
+                  },
+                },
+              }),
+            });
+          }
+        } catch (matchErr) {
+          console.error('Error updating match with toss info:', matchErr);
+          // Don't fail the scorecard save if match update fails
+        }
+      }
+      
       setMessage('✓ Scorecard saved successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {

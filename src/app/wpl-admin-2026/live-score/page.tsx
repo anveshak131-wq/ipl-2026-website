@@ -87,6 +87,22 @@ export default function WPLLiveScorePage() {
     loadData();
   }, [isAuthenticated]);
 
+  // Refresh match data when selected match changes (to get latest toss info from scorecard)
+  useEffect(() => {
+    if (!selectedMatchId || !isAuthenticated) return;
+
+    const refreshMatchData = async () => {
+      try {
+        const updatedMatches = await api.getMatches('wpl');
+        setMatches(updatedMatches || []);
+      } catch (err) {
+        console.error('[WPLLiveScore] Error refreshing match data:', err);
+      }
+    };
+
+    refreshMatchData();
+  }, [selectedMatchId, isAuthenticated]);
+
   const selectedMatch = matches.find(m => m.id === selectedMatchId);
 
   const handleSaveLiveScore = async (state: LiveScoreState) => {
@@ -287,112 +303,33 @@ export default function WPLLiveScorePage() {
             </select>
           </div>
 
-          {/* Toss Info */}
-          {selectedMatch && (
+          {/* Toss Info - Display Only (Managed from Scorecard Page) */}
+          {selectedMatch && selectedMatch.matchState?.toss && (
             <div 
-              className="rounded-2xl p-6 md:p-8 backdrop-blur-xl border mb-6"
+              className="rounded-2xl p-4 md:p-6 backdrop-blur-xl border mb-6"
               style={{
                 background: WPLColors.purpleRGBA[10],
                 borderColor: WPLColors.purpleRGBA[30],
               }}
             >
-              <h2 className="text-xl font-bold mb-4" style={{ color: WPLColors.textPrimary }}>
-                Toss Information
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: WPLColors.textSecondary }}>
-                    Toss Winner
-                  </label>
-                  <select
-                    value={selectedMatch.matchState?.toss?.winner === 'team1' ? selectedMatch.team1?.name : selectedMatch.matchState?.toss?.winner === 'team2' ? selectedMatch.team2?.name : ''}
-                    onChange={async (e) => {
-                      const winner = e.target.value === selectedMatch.team1?.name ? 'team1' : 'team2';
-                      try {
-                        const token = localStorage.getItem('adminToken');
-                        await fetch('/api/matches', {
-                          method: 'PUT',
-                          headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`,
-                          },
-                          body: JSON.stringify({
-                            ...selectedMatch,
-                            matchState: {
-                              ...selectedMatch.matchState,
-                              toss: {
-                                ...selectedMatch.matchState?.toss,
-                                winner,
-                                timestamp: Date.now(),
-                              },
-                            },
-                          }),
-                        });
-                        
-                        // Refresh matches
-                        const updatedMatches = await api.getMatches('wpl');
-                        setMatches(updatedMatches || []);
-                      } catch (err) {
-                        console.error('Failed to update toss winner:', err);
-                      }
-                    }}
-                    className="w-full px-4 py-3 rounded-lg text-white text-sm focus:outline-none transition-colors"
-                    style={{
-                      background: WPLColors.purpleRGBA[20],
-                      border: `1px solid ${WPLColors.purpleRGBA[30]}`,
-                    }}
-                  >
-                    <option value="">Select winner...</option>
-                    <option value={selectedMatch.team1?.name}>{selectedMatch.team1?.name}</option>
-                    <option value={selectedMatch.team2?.name}>{selectedMatch.team2?.name}</option>
-                  </select>
+              <div className="flex items-center gap-3">
+                <div className="text-sm" style={{ color: WPLColors.textSecondary }}>
+                  Toss:
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: WPLColors.textSecondary }}>
-                    Toss Decision
-                  </label>
-                  <select
-                    value={selectedMatch.matchState?.toss?.decision || ''}
-                    onChange={async (e) => {
-                      const decision = e.target.value as 'bat' | 'bowl';
-                      try {
-                        const token = localStorage.getItem('adminToken');
-                        await fetch('/api/matches', {
-                          method: 'PUT',
-                          headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`,
-                          },
-                          body: JSON.stringify({
-                            ...selectedMatch,
-                            matchState: {
-                              ...selectedMatch.matchState,
-                              toss: {
-                                ...selectedMatch.matchState?.toss,
-                                decision,
-                                timestamp: selectedMatch.matchState?.toss?.timestamp || Date.now(),
-                              },
-                            },
-                          }),
-                        });
-                        
-                        // Refresh matches
-                        const updatedMatches = await api.getMatches('wpl');
-                        setMatches(updatedMatches || []);
-                      } catch (err) {
-                        console.error('Failed to update toss decision:', err);
-                      }
-                    }}
-                    className="w-full px-4 py-3 rounded-lg text-white text-sm focus:outline-none transition-colors"
-                    style={{
-                      background: WPLColors.purpleRGBA[20],
-                      border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                <div className="font-semibold" style={{ color: WPLColors.textPrimary }}>
+                  {selectedMatch.matchState.toss.winner === 'team1' ? selectedMatch.team1?.name : selectedMatch.team2?.name} won and elected to {selectedMatch.matchState.toss.decision}
+                </div>
+                <div className="ml-auto">
+                  <a 
+                    href="/wpl-admin-2026/scorecard" 
+                    className="text-xs px-3 py-1.5 rounded-lg transition-colors hover:opacity-80"
+                    style={{ 
+                      background: WPLColors.pink, 
+                      color: '#fff' 
                     }}
                   >
-                    <option value="">Select decision...</option>
-                    <option value="bat">Bat</option>
-                    <option value="bowl">Bowl</option>
-                  </select>
+                    Edit in Scorecard
+                  </a>
                 </div>
               </div>
             </div>
