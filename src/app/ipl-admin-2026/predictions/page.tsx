@@ -5,7 +5,6 @@ import { api } from '@/lib/data';
 import { useLeague } from '@/contexts/LeagueContext';
 import type { Match, Poll } from '@/types';
 import { Target, Trophy, BarChart3, Users, MessageSquare } from 'lucide-react';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import GlobalSearch from '@/components/admin/GlobalSearch';
 
 export default function AdminPredictionsPage() {
@@ -127,8 +126,7 @@ export default function AdminPredictionsPage() {
 
   // Always render the page structure, even if not mounted yet
   return (
-    <div className="flex min-h-screen bg-ipl-dark">
-      <AdminSidebar currentPage="/ipl-admin-2026/predictions" />
+    <>
       <div className="flex-1 ml-80">
         <GlobalSearch />
         <div className="p-6">
@@ -375,6 +373,6 @@ export default function AdminPredictionsPage() {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

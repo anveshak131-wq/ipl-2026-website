@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import ModernDialog from '@/components/admin/ModernDialog';
 
 type ModerationStatus = 'idle' | 'loading' | 'ok' | 'error';
@@ -204,9 +203,7 @@ export default function AdminModerationPage() {
   const hasMessages = messages.length > 0;
 
   return (
-    <div className="flex min-h-screen bg-slate-900">
-      <AdminSidebar />
-
+    <>
       <main className="flex-grow">
         <div className="max-w-6xl mx-auto px-6 py-8">
           <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -458,6 +455,6 @@ export default function AdminModerationPage() {
           </div>
         </ModernDialog>
       </main>
-    </div>
+    </>
   );
 }

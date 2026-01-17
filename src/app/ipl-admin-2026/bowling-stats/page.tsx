@@ -4,8 +4,6 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAdminData } from '@/contexts/AdminDataContext';
 import { useLeague } from '@/contexts/LeagueContext';
-import AdminSidebar from '@/components/admin/AdminSidebar';
-import PlayersAdminSidebar from '@/components/admin/PlayersAdminSidebar';
 import { Search, Filter, Edit2, X, TrendingDown, Award, Target, Zap, ChevronDown, ChevronUp, SortAsc, SortDesc, User, Shirt, Calendar, BarChart3, Target as TargetIcon, Award as AwardIcon, Zap as ZapIcon, Hash, Activity, Gauge, LayoutGrid, Table2 } from 'lucide-react';
 
 const BowlingStatsPage = () => {
@@ -522,35 +520,23 @@ const BowlingStatsPage = () => {
   // Hide bowling stats page for WPL (stats not needed)
   if (currentLeague === 'wpl') {
     return (
-      <div className="flex min-h-screen bg-gray-950">
-        {userRole === 'players_admin' ? (
-          <PlayersAdminSidebar currentPage="/ipl-admin-2026/bowling-stats" />
-        ) : (
-          <AdminSidebar currentPage="/ipl-admin-2026/bowling-stats" />
-        )}
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center p-8">
-            <div className="text-6xl mb-4">🎯</div>
-            <h1 className="text-3xl font-bold text-white mb-4">Bowling Statistics Not Available</h1>
-            <p className="text-gray-400 text-lg mb-6">
-              Bowling statistics are not required for WPL players.
-            </p>
-            <p className="text-gray-500 text-sm">
-              Switch to IPL league to view bowling statistics.
-            </p>
-          </div>
+      <div className="flex-1 flex items-center justify-center">
+        <div className="text-center p-8">
+          <div className="text-6xl mb-4">🎯</div>
+          <h1 className="text-3xl font-bold text-white mb-4">Bowling Statistics Not Available</h1>
+          <p className="text-gray-400 text-lg mb-6">
+            Bowling statistics are not required for WPL players.
+          </p>
+          <p className="text-gray-500 text-sm">
+            Switch to IPL league to view bowling statistics.
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-950">
-      {userRole === 'players_admin' ? (
-      <PlayersAdminSidebar currentPage="/ipl-admin-2026/bowling-stats" />
-      ) : (
-        <AdminSidebar currentPage="/ipl-admin-2026/bowling-stats" />
-      )}
+    <>
       <div className="flex-1 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 min-h-screen overflow-x-hidden">
         {/* Hero Header */}
         <div className="bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 p-8 shadow-2xl">
@@ -1329,7 +1315,7 @@ const BowlingStatsPage = () => {
           </div>
         )}
         </div>
-    </div>
+    </>
   );
 };
 

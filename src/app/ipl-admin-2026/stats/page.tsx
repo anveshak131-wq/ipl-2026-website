@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import { api } from '@/lib/data';
 import type { Player, Team } from '@/types';
 import { getQualificationCriteria, qualifiesForStat, getQualificationDescription } from '@/lib/statsQualifications';
@@ -758,19 +757,14 @@ export default function AdminStatsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen bg-ipl-dark">
-        <AdminSidebar currentPage="/ipl-admin-2026/stats" />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-white">Loading stats overview...</div>
-        </div>
+      <div className="flex items-center justify-center min-h-screen bg-ipl-dark">
+        <div className="text-white">Loading stats overview...</div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-ipl-dark">
-      <AdminSidebar currentPage="/ipl-admin-2026/stats" />
-
+    <>
       <div className="flex-1 p-8 space-y-6 overflow-y-auto">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
@@ -1547,6 +1541,6 @@ function LeaderboardEditor({
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 }

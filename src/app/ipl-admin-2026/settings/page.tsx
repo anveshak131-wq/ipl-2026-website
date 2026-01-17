@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import AdminSidebar from '@/components/admin/AdminSidebar';
 import { api } from '@/lib/data';
 
 // Mark this page as dynamic to prevent pre-rendering
@@ -108,7 +107,6 @@ export default function AdminSettings() {
   if (isLoading) {
     return (
       <div className="flex min-h-screen bg-ipl-dark">
-        <AdminSidebar currentPage="/ipl-admin-2026/settings" />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-white">Loading settings...</div>
         </div>
@@ -117,11 +115,8 @@ export default function AdminSettings() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      <AdminSidebar currentPage="/ipl-admin-2026/settings" />
-
-      <div className="flex-1 relative z-10">
-        <div className="max-w-6xl mx-auto p-8">
+    <>
+      <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between">
@@ -461,6 +456,6 @@ export default function AdminSettings() {
           </form>
         </div>
       </div>
-    </div>
+    </>
   );
 }
