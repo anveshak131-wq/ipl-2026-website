@@ -156,28 +156,47 @@ export default function MatchStateManager({
       return;
     }
 
-    try {
-      const newState = transitionState(matchState, 'toss', {
-        toss: {
-          winner: tossWinner,
-          decision: tossDecision,
-        },
-      });
+    // Direct state update - bypasses transition validation for admin flexibility
+    const battingTeam = tossDecision === 'bat' ? tossWinner : (tossWinner === 'team1' ? 'team2' : 'team1');
+    
+    const updatedState: MatchState = {
+      ...matchState,
+      currentState: 'toss',
+      toss: {
+        winner: tossWinner,
+        decision: tossDecision,
+        timestamp: new Date().toISOString(),
+      },
+      // Remove toss from locked states if going back
+      lockedStates: matchState.lockedStates.filter(s => s !== 'toss' && s !== 'innings-1' && s !== 'break' && s !== 'innings-2' && s !== 'complete'),
+    };
 
-      // Auto-determine batting team for innings 1
-      const battingTeam = tossDecision === 'bat' ? tossWinner : (tossWinner === 'team1' ? 'team2' : 'team1');
-      
-      const innings1State = transitionState(newState, 'innings-1', {
+    // If editing toss, just update toss and stay at current state
+    if (isEditingToss) {
+      updatedState.currentState = matchState.currentState;
+      updatedState.lockedStates = matchState.lockedStates;
+      // Update batting team if in innings
+      if (matchState.innings1) {
+        updatedState.innings1 = {
+          ...matchState.innings1,
+          battingTeam,
+        };
+      }
+    } else {
+      // New toss - move to innings 1
+      updatedState.currentState = 'innings-1';
+      updatedState.lockedStates = ['pre-match', 'toss'];
+      updatedState.innings1 = {
         battingTeam,
-      });
-
-      onStateChange(innings1State);
-      setShowTossModal(false);
-      setTossWinner(null);
-      setTossDecision(null);
-    } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to record toss');
+        startTime: new Date().toISOString(),
+      };
     }
+
+    onStateChange(updatedState);
+    setShowTossModal(false);
+    setIsEditingToss(false);
+    setTossWinner(null);
+    setTossDecision(null);
   };
 
   const handleConfirmTransition = () => {
@@ -248,35 +267,6 @@ export default function MatchStateManager({
     }
     setIsEditingToss(true);
     setShowTossModal(true);
-  };
-
-  // Handle toss update (for editing existing toss)
-  const handleTossUpdate = () => {
-    if (!tossWinner || !tossDecision) {
-      alert('Please select toss winner and decision');
-      return;
-    }
-
-    const updatedState: MatchState = {
-      ...matchState,
-      toss: {
-        winner: tossWinner,
-        decision: tossDecision,
-        timestamp: new Date().toISOString(),
-      },
-    };
-
-    // Update batting team based on new toss decision
-    const battingTeam = tossDecision === 'bat' ? tossWinner : (tossWinner === 'team1' ? 'team2' : 'team1');
-    if (updatedState.innings1) {
-      updatedState.innings1.battingTeam = battingTeam;
-    }
-
-    onStateChange(updatedState);
-    setShowTossModal(false);
-    setIsEditingToss(false);
-    setTossWinner(null);
-    setTossDecision(null);
   };
 
   return (
@@ -355,7 +345,12 @@ export default function MatchStateManager({
                 <button
                   onClick={() => {
                     if (state === 'toss') {
-                      // Open toss modal
+                      // Open toss modal - pre-fill if toss already exists
+                      if (matchState.toss) {
+                        setTossWinner(matchState.toss.winner);
+                        setTossDecision(matchState.toss.decision);
+                        setIsEditingToss(true);
+                      }
                       setShowTossModal(true);
                     } else if (state !== matchState.currentState) {
                       // Direct state change for admin flexibility
@@ -483,7 +478,7 @@ export default function MatchStateManager({
                   Cancel
                 </button>
                 <button
-                  onClick={isEditingToss ? handleTossUpdate : handleTossComplete}
+                  onClick={handleTossComplete}
                   disabled={!tossWinner || !tossDecision}
                   className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white font-semibold transition-all"
                 >
