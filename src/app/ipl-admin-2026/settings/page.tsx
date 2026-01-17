@@ -116,8 +116,8 @@ export default function AdminSettings() {
 
   return (
     <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
+      {/* Header */}
+      <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent mb-2">
@@ -453,7 +453,7 @@ export default function AdminSettings() {
               </button>
             </div>
           </form>
-        </div>
+      </div>
     </div>
   );
 }

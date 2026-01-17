@@ -765,7 +765,7 @@ export default function AdminStatsPage() {
 
   return (
     <div className="flex-1 p-8 space-y-6 overflow-y-auto">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <div className="mb-2 text-xs text-gray-400 flex items-center gap-1">
               <button
