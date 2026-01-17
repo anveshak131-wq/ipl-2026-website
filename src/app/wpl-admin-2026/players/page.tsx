@@ -8,7 +8,7 @@ import { api } from '@/lib/data';
 import { WPLColors } from '@/lib/wplColors';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import { LoadingSpinner } from '@/components/admin/animations';
-import { Edit2, Save, X, Users, Trash2 } from 'lucide-react';
+import { Edit2, Save, X, Users, Trash2, Plus } from 'lucide-react';
 
 export default function WPLPlayersManagementPage() {
   const router = useRouter();
@@ -21,6 +21,18 @@ export default function WPLPlayersManagementPage() {
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [editedTeamId, setEditedTeamId] = useState('');
   const [editedIsCaptain, setEditedIsCaptain] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newPlayer, setNewPlayer] = useState({
+    name: '',
+    role: 'Batter',
+    teamId: '',
+    age: '',
+    nationality: '',
+    jerseyNumber: '',
+    isCaptain: false,
+    bowlingStyle: 'N/A',
+    battingStyle: 'Right-handed bat',
+  });
 
   // Check authentication
   useEffect(() => {
@@ -97,6 +109,70 @@ export default function WPLPlayersManagementPage() {
 
   const handleCancel = () => {
     setEditingPlayer(null);
+  };
+
+  const handleAddPlayer = async () => {
+    if (!newPlayer.name || !newPlayer.teamId) {
+      alert('Please fill in player name and team');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('adminToken');
+      const playerData = {
+        ...newPlayer,
+        league: 'wpl',
+        age: parseInt(newPlayer.age) || 0,
+        jerseyNumber: parseInt(newPlayer.jerseyNumber) || 0,
+        stats: {
+          matches: 0,
+          runs: 0,
+          wickets: 0,
+          average: 0,
+          strikeRate: 0,
+          economy: 0,
+          highest: 0,
+          fours: 0,
+          sixes: 0,
+          fifties: 0,
+          hundreds: 0,
+          bestBowling: '-',
+        },
+      };
+
+      const response = await fetch('/api/players', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(playerData),
+      });
+
+      if (response.ok) {
+        const createdPlayer = await response.json();
+        setPlayers([...players, createdPlayer]);
+        setShowAddForm(false);
+        setNewPlayer({
+          name: '',
+          role: 'Batter',
+          teamId: '',
+          age: '',
+          nationality: '',
+          jerseyNumber: '',
+          isCaptain: false,
+          bowlingStyle: 'N/A',
+          battingStyle: 'Right-handed bat',
+        });
+        alert('Player added successfully!');
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.error || 'Failed to add player'}`);
+      }
+    } catch (error) {
+      console.error('Error adding player:', error);
+      alert('Error adding player');
+    }
   };
 
   const handleDelete = async (player: Player) => {
@@ -179,7 +255,7 @@ export default function WPLPlayersManagementPage() {
           </div>
 
           {/* Search and Filter */}
-          <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
             <input
               type="text"
               placeholder="Search players..."
@@ -205,7 +281,175 @@ export default function WPLPlayersManagementPage() {
                 <option key={team.id} value={team.id}>{team.name}</option>
               ))}
             </select>
+            <button
+              onClick={() => setShowAddForm(!showAddForm)}
+              className="px-6 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
+              style={{
+                background: `linear-gradient(135deg, ${WPLColors.purple}, ${WPLColors.pink})`,
+                color: 'white',
+              }}
+            >
+              <Plus className="w-5 h-5" />
+              Add Player
+            </button>
           </div>
+
+          {/* Add Player Form */}
+          {showAddForm && (
+            <div 
+              className="mb-6 rounded-2xl p-6 backdrop-blur-xl border"
+              style={{
+                background: WPLColors.purpleRGBA[10],
+                borderColor: WPLColors.pink,
+              }}
+            >
+              <h3 className="text-xl font-bold text-white mb-4">Add New Player</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <input
+                  type="text"
+                  placeholder="Player Name *"
+                  value={newPlayer.name}
+                  onChange={(e) => setNewPlayer({...newPlayer, name: e.target.value})}
+                  className="px-4 py-2 rounded-lg text-white text-sm focus:outline-none"
+                  style={{
+                    background: WPLColors.purpleRGBA[20],
+                    border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                  }}
+                />
+                <select
+                  value={newPlayer.role}
+                  onChange={(e) => setNewPlayer({...newPlayer, role: e.target.value})}
+                  className="px-4 py-2 rounded-lg text-white text-sm focus:outline-none"
+                  style={{
+                    background: WPLColors.purpleRGBA[20],
+                    border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                  }}
+                >
+                  <option value="Batter">Batter</option>
+                  <option value="Bowler">Bowler</option>
+                  <option value="All-rounder">All-rounder</option>
+                  <option value="Wicket-keeper">Wicket-keeper</option>
+                </select>
+                <select
+                  value={newPlayer.teamId}
+                  onChange={(e) => setNewPlayer({...newPlayer, teamId: e.target.value})}
+                  className="px-4 py-2 rounded-lg text-white text-sm focus:outline-none"
+                  style={{
+                    background: WPLColors.purpleRGBA[20],
+                    border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                  }}
+                >
+                  <option value="">Select Team *</option>
+                  {teams.map((team) => (
+                    <option key={team.id} value={team.id}>{team.name}</option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  placeholder="Age"
+                  value={newPlayer.age}
+                  onChange={(e) => setNewPlayer({...newPlayer, age: e.target.value})}
+                  className="px-4 py-2 rounded-lg text-white text-sm focus:outline-none"
+                  style={{
+                    background: WPLColors.purpleRGBA[20],
+                    border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                  }}
+                />
+                <input
+                  type="text"
+                  placeholder="Nationality"
+                  value={newPlayer.nationality}
+                  onChange={(e) => setNewPlayer({...newPlayer, nationality: e.target.value})}
+                  className="px-4 py-2 rounded-lg text-white text-sm focus:outline-none"
+                  style={{
+                    background: WPLColors.purpleRGBA[20],
+                    border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                  }}
+                />
+                <input
+                  type="number"
+                  placeholder="Jersey Number"
+                  value={newPlayer.jerseyNumber}
+                  onChange={(e) => setNewPlayer({...newPlayer, jerseyNumber: e.target.value})}
+                  className="px-4 py-2 rounded-lg text-white text-sm focus:outline-none"
+                  style={{
+                    background: WPLColors.purpleRGBA[20],
+                    border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                  }}
+                />
+                <select
+                  value={newPlayer.battingStyle}
+                  onChange={(e) => setNewPlayer({...newPlayer, battingStyle: e.target.value})}
+                  className="px-4 py-2 rounded-lg text-white text-sm focus:outline-none"
+                  style={{
+                    background: WPLColors.purpleRGBA[20],
+                    border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                  }}
+                >
+                  <option value="Right-handed bat">Right-handed bat</option>
+                  <option value="Left-handed bat">Left-handed bat</option>
+                </select>
+                <select
+                  value={newPlayer.bowlingStyle}
+                  onChange={(e) => setNewPlayer({...newPlayer, bowlingStyle: e.target.value})}
+                  className="px-4 py-2 rounded-lg text-white text-sm focus:outline-none"
+                  style={{
+                    background: WPLColors.purpleRGBA[20],
+                    border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                  }}
+                >
+                  <option value="N/A">N/A</option>
+                  <option value="Right-arm fast">Right-arm fast</option>
+                  <option value="Right-arm medium">Right-arm medium</option>
+                  <option value="Right-arm off-break">Right-arm off-break</option>
+                  <option value="Right-arm leg-break">Right-arm leg-break</option>
+                  <option value="Left-arm fast">Left-arm fast</option>
+                  <option value="Left-arm medium">Left-arm medium</option>
+                  <option value="Left-arm orthodox">Left-arm orthodox</option>
+                  <option value="Left-arm chinaman">Left-arm chinaman</option>
+                </select>
+                <label className="flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer"
+                  style={{
+                    background: WPLColors.purpleRGBA[20],
+                    border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={newPlayer.isCaptain}
+                    onChange={(e) => setNewPlayer({...newPlayer, isCaptain: e.target.checked})}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-white text-sm">Captain</span>
+                </label>
+              </div>
+              <div className="flex gap-3 mt-4">
+                <button
+                  onClick={handleAddPlayer}
+                  className="px-6 py-2 rounded-lg font-semibold transition-all flex items-center gap-2"
+                  style={{
+                    background: `linear-gradient(135deg, ${WPLColors.purple}, ${WPLColors.pink})`,
+                    color: 'white',
+                  }}
+                >
+                  <Save className="w-4 h-4" />
+                  Add Player
+                </button>
+                <button
+                  onClick={() => setShowAddForm(false)}
+                  className="px-6 py-2 rounded-lg font-semibold transition-all"
+                  style={{
+                    background: WPLColors.purpleRGBA[20],
+                    border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                    color: WPLColors.textSecondary,
+                  }}
+                >
+                  <X className="w-4 h-4 inline mr-2" />
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Players Table */}
           <div 
