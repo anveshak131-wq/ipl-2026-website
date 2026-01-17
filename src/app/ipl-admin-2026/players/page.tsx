@@ -209,6 +209,9 @@ export default function AdminPlayers() {
   const [contextMenu, setContextMenu] = useState<{ visible: boolean; x: number; y: number; player: Player | null }>({ visible: false, x: 0, y: 0, player: null });
   const [showExportModal, setShowExportModal] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Virtual scrolling state - temporarily disabled for stability
   const [virtualScrollEnabled, setVirtualScrollEnabled] = useState(false);
@@ -941,10 +944,6 @@ export default function AdminPlayers() {
       const teamsData = await api.getTeams(currentLeague);
       setPlayers(playersData);
       setTeams(teamsData);
-    } catch (error) {
-      console.error('Failed to fetch data:', error);
-    } finally {
-      setIsLoading(false);
       
       // Data Integrity Checks
       if (playersData && playersData.length > 0) {
@@ -959,6 +958,10 @@ export default function AdminPlayers() {
           console.warn('Data inconsistencies found:', inconsistencies);
         }
       }
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
