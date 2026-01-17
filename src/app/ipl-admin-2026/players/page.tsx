@@ -3,6 +3,8 @@
 import { useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLeague } from '@/contexts/LeagueContext';
+import AdminSidebar from '@/components/admin/AdminSidebar';
+import PlayersAdminSidebar from '@/components/admin/PlayersAdminSidebar';
 import ModernDialog from '@/components/admin/ModernDialog';
 import LeagueSwitch from '@/components/admin/LeagueSwitch';
 import WPLTeamsManager from '@/components/admin/WPLTeamsManager';
@@ -1853,10 +1855,18 @@ export default function AdminPlayers() {
     );
   }
 
-  return (<div className="relative">
-      {/* Enhanced Modern Header */}
-      <div className="mb-8">
-        <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900/30 to-purple-900/30 rounded-3xl p-8 mb-8 border border-white/10 backdrop-blur-xl shadow-2xl">
+  return (
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
+      {userRole === 'players_admin' ? (
+        <PlayersAdminSidebar currentPage="/ipl-admin-2026/players" />
+      ) : (
+      <AdminSidebar currentPage="/ipl-admin-2026/players" />
+      )}
+      <div className="flex-1 relative">
+        <div className="p-6 lg:p-8 relative">
+          {/* Enhanced Modern Header */}
+          <div className="mb-8">
+            <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900/30 to-purple-900/30 rounded-3xl p-8 mb-8 border border-white/10 backdrop-blur-xl shadow-2xl">
               {/* Animated background pattern */}
               <div className="absolute inset-0 opacity-10 overflow-hidden">
                 <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,.1)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px]"></div>
@@ -4867,10 +4877,8 @@ export default function AdminPlayers() {
           </button>
         </div>
       )}
-      </div>
     </div>
   );
 }
-
 
 
