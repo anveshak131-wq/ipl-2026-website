@@ -33,12 +33,92 @@ export interface BallEvent {
   timestamp: number;
   dismissalType?: DismissalType;
   fielderName?: string;
+  bowledBy?: string;
+  strikerId?: string;
+  nonStrikerId?: string;
+}
+
+// Enhanced Batter State
+export interface BatterState {
+  id: string;
+  name: string;
+  runs: number;
+  balls: number;
+  fours: number;
+  sixes: number;
+  strikeRate: number;
+  isOnStrike: boolean;
+  howOut?: string;
+  bowlerName?: string;
+  fielderName?: string;
+}
+
+// Enhanced Bowler State
+export interface BowlerState {
+  id: string;
+  name: string;
+  overs: number;
+  balls: number;  // balls in current over (0-5)
+  totalBalls: number;
+  maidens: number;
+  runs: number;
+  wickets: number;
+  wides: number;
+  noBalls: number;
+  economyRate: number;
+  dotBalls: number;
+}
+
+// Extras breakdown
+export interface ExtrasState {
+  wides: number;
+  noBalls: number;
+  byes: number;
+  legByes: number;
+  penalties: number;
+  total: number;
+}
+
+// Partnership tracking
+export interface Partnership {
+  batter1: { id: string; name: string; runs: number; balls: number };
+  batter2: { id: string; name: string; runs: number; balls: number };
+  totalRuns: number;
+  totalBalls: number;
+  runRate: number;
+  isCurrentPartnership: boolean;
+}
+
+// Fall of wickets
+export interface FallOfWicket {
+  wicketNumber: number;
+  runs: number;
+  overs: number;
+  batterName: string;
+  batterId: string;
+  howOut: string;
+  bowlerName?: string;
+  partnershipRuns: number;
+  partnershipBalls: number;
+}
+
+// Over summary
+export interface OverSummary {
+  overNumber: number;
+  bowlerId: string;
+  bowlerName: string;
+  balls: string[];
+  runs: number;
+  wickets: number;
+  isMaiden: boolean;
 }
 
 export interface LiveScoreState {
   innings: 1 | 2;
   battingTeam: 'team1' | 'team2';
   currentOver: number;
+  
+  // Team Scores
   team1: { 
     name: string;
     runs: number; 
@@ -51,20 +131,48 @@ export interface LiveScoreState {
     wickets: number; 
     balls: number;
   };
+  
+  // Dual Batter System
+  striker: BatterState;
+  nonStriker: BatterState;
+  yetToBat: string[];
+  outBatters: BatterState[];
+  
+  // Backward compatibility - maps to striker
   currentBatter: { 
     id: string; 
     name: string; 
     runs: number; 
     balls: number;
   };
-  currentBowler: { 
-    id: string; 
-    name: string; 
-    runs: number; 
-    balls: number;
-  };
+  
+  // Bowling
+  currentBowler: BowlerState;
+  previousBowler: BowlerState | null;
+  allBowlers: BowlerState[];
+  
+  // Over tracking
+  currentOverBalls: string[];
+  overHistory: OverSummary[];
+  
+  // Extras
+  extras: ExtrasState;
+  
+  // Partnerships
+  currentPartnership: Partnership;
+  partnerships: Partnership[];
+  
+  // Fall of wickets
+  fallOfWickets: FallOfWicket[];
+  
+  // Run rates
+  runRate: number;
+  requiredRunRate: number | null;
+  projectedScore: number;
+  
+  // Ball history
   ballHistory: BallEvent[];
-  matchState?: MatchState; // Match state machine
+  matchState?: MatchState;
   toss?: {
     winner: 'team1' | 'team2';
     decision: 'bat' | 'bowl';
@@ -76,11 +184,13 @@ interface UseLiveScoreProps {
   initialTeam2Name: string;
   initialBatter?: { id: string; name: string };
   initialBowler?: { id: string; name: string };
+  initialNonStriker?: { id: string; name: string };
   initialMatchState?: MatchState;
   initialState?: LiveScoreState;
   maxOvers?: number;
   onMatchStateChange?: (matchState: MatchState) => void;
   isTestPage?: boolean; // For test pages, skip match state restrictions
+  target?: number; // Target for 2nd innings
 }
 
 // Helper functions
@@ -96,16 +206,77 @@ const oversToBalls = (overs: number): number => {
   return whole * 6 + fraction;
 };
 
+const calculateStrikeRate = (runs: number, balls: number): number => {
+  if (balls === 0) return 0;
+  return Math.round((runs / balls) * 100 * 100) / 100;
+};
+
+const calculateEconomyRate = (runs: number, balls: number): number => {
+  if (balls === 0) return 0;
+  return Math.round((runs / (balls / 6)) * 100) / 100;
+};
+
+const createEmptyBatter = (id = '', name = 'Select Batter', isOnStrike = false): BatterState => ({
+  id,
+  name,
+  runs: 0,
+  balls: 0,
+  fours: 0,
+  sixes: 0,
+  strikeRate: 0,
+  isOnStrike,
+});
+
+const createEmptyBowler = (id = '', name = 'Select Bowler'): BowlerState => ({
+  id,
+  name,
+  overs: 0,
+  balls: 0,
+  totalBalls: 0,
+  maidens: 0,
+  runs: 0,
+  wickets: 0,
+  wides: 0,
+  noBalls: 0,
+  economyRate: 0,
+  dotBalls: 0,
+});
+
+const createEmptyExtras = (): ExtrasState => ({
+  wides: 0,
+  noBalls: 0,
+  byes: 0,
+  legByes: 0,
+  penalties: 0,
+  total: 0,
+});
+
+const createEmptyPartnership = (batter1: BatterState, batter2: BatterState): Partnership => ({
+  batter1: { id: batter1.id, name: batter1.name, runs: 0, balls: 0 },
+  batter2: { id: batter2.id, name: batter2.name, runs: 0, balls: 0 },
+  totalRuns: 0,
+  totalBalls: 0,
+  runRate: 0,
+  isCurrentPartnership: true,
+});
+
+// Check if runs require strike rotation (1, 3, 5 = swap)
+const shouldSwapStrike = (runs: number): boolean => {
+  return runs === 1 || runs === 3 || runs === 5;
+};
+
 export function useLiveScore({
   initialTeam1Name = '',
   initialTeam2Name = '',
   initialBatter,
   initialBowler,
+  initialNonStriker,
   initialMatchState,
   initialState,
   maxOvers = 20,
   onMatchStateChange,
   isTestPage = false,
+  target,
 }: UseLiveScoreProps) {
   // For test pages, initialize directly to innings-1 state
   const getInitialMatchState = (): MatchState => {
@@ -164,6 +335,19 @@ export function useLiveScore({
   };
 
   const [state, setState] = useState<LiveScoreState>(() => {
+    // Create initial batters and bowlers
+    const initialStriker = initialBatter 
+      ? createEmptyBatter(initialBatter.id, initialBatter.name, true)
+      : createEmptyBatter('', 'Select Striker', true);
+    
+    const initialNonStrikerBatter = initialNonStriker
+      ? createEmptyBatter(initialNonStriker.id, initialNonStriker.name, false)
+      : createEmptyBatter('', 'Select Non-Striker', false);
+    
+    const initialBowlerState = initialBowler
+      ? createEmptyBowler(initialBowler.id, initialBowler.name)
+      : createEmptyBowler();
+
     // Create default state
     const defaultState: LiveScoreState = {
       innings: 1,
@@ -181,18 +365,45 @@ export function useLiveScore({
         wickets: 0,
         balls: 0,
       },
-      currentBatter: initialBatter ? { ...initialBatter, runs: 0, balls: 0 } : { id: '', name: 'Select Batter', runs: 0, balls: 0 },
-      currentBowler: initialBowler ? { ...initialBowler, runs: 0, balls: 0 } : { id: '', name: 'Select Bowler', runs: 0, balls: 0 },
+      // Dual batter system
+      striker: initialStriker,
+      nonStriker: initialNonStrikerBatter,
+      yetToBat: [],
+      outBatters: [],
+      // Backward compatibility
+      currentBatter: { 
+        id: initialStriker.id, 
+        name: initialStriker.name, 
+        runs: 0, 
+        balls: 0 
+      },
+      // Bowling
+      currentBowler: initialBowlerState,
+      previousBowler: null,
+      allBowlers: initialBowler ? [initialBowlerState] : [],
+      // Over tracking
+      currentOverBalls: [],
+      overHistory: [],
+      // Extras
+      extras: createEmptyExtras(),
+      // Partnerships
+      currentPartnership: createEmptyPartnership(initialStriker, initialNonStrikerBatter),
+      partnerships: [],
+      // FOW
+      fallOfWickets: [],
+      // Run rates
+      runRate: 0,
+      requiredRunRate: null,
+      projectedScore: 0,
+      // History
       ballHistory: [],
-      // Don't include matchState here - it will be set in a useEffect
     };
 
-    // If initialState is provided, merge it with defaults (defaults fill in missing properties)
+    // If initialState is provided, merge it with defaults
     if (initialState) {
       return {
         ...defaultState,
         ...initialState,
-        // Ensure team1 and team2 have all required properties
         team1: {
           ...defaultState.team1,
           ...(initialState.team1 || {}),
@@ -201,16 +412,16 @@ export function useLiveScore({
           ...defaultState.team2,
           ...(initialState.team2 || {}),
         },
-        currentBatter: initialState.currentBatter ? { 
-          ...initialState.currentBatter, 
-          runs: initialState.currentBatter.runs ?? 0, 
-          balls: initialState.currentBatter.balls ?? 0 
-        } : defaultState.currentBatter,
-        currentBowler: initialState.currentBowler ? { 
-          ...initialState.currentBowler, 
-          runs: initialState.currentBowler.runs ?? 0, 
-          balls: initialState.currentBowler.balls ?? 0 
-        } : defaultState.currentBowler,
+        striker: initialState.striker || defaultState.striker,
+        nonStriker: initialState.nonStriker || defaultState.nonStriker,
+        currentBatter: initialState.currentBatter || defaultState.currentBatter,
+        currentBowler: initialState.currentBowler || defaultState.currentBowler,
+        extras: initialState.extras || defaultState.extras,
+        currentPartnership: initialState.currentPartnership || defaultState.currentPartnership,
+        fallOfWickets: initialState.fallOfWickets || [],
+        partnerships: initialState.partnerships || [],
+        overHistory: initialState.overHistory || [],
+        allBowlers: initialState.allBowlers || [],
         ballHistory: initialState.ballHistory || [],
       };
     }
@@ -240,6 +451,35 @@ export function useLiveScore({
     const lastBall = state.ballHistory[state.ballHistory.length - 1];
     return lastBall.type === 'NB' || (typeof lastBall.type === 'string' && lastBall.type.startsWith('NB'));
   }, [state?.ballHistory]);
+
+  // Calculate run rates
+  useEffect(() => {
+    const battingTeam = state.battingTeam;
+    const currentTeam = state[battingTeam];
+    const balls = currentTeam?.balls || 0;
+    const runs = currentTeam?.runs || 0;
+    
+    if (balls > 0) {
+      const rr = calculateEconomyRate(runs, balls);
+      const projected = Math.round(rr * maxOvers);
+      
+      let rrr: number | null = null;
+      if (state.innings === 2 && target) {
+        const remainingRuns = target - runs;
+        const remainingBalls = (maxOvers * 6) - balls;
+        if (remainingBalls > 0) {
+          rrr = calculateEconomyRate(remainingRuns, remainingBalls);
+        }
+      }
+      
+      setState(prev => ({
+        ...prev,
+        runRate: rr,
+        requiredRunRate: rrr,
+        projectedScore: projected,
+      }));
+    }
+  }, [state.battingTeam, state.team1?.balls, state.team2?.balls, state.team1?.runs, state.team2?.runs, state.innings, target, maxOvers]);
 
   // Auto-detect innings transitions
   useEffect(() => {
@@ -287,7 +527,6 @@ export function useLiveScore({
   const recordBall = useCallback((ball: BallEvent) => {
     console.log('[useLiveScore.recordBall] Called with:', ball);
     setState((prev) => {
-      console.log('[useLiveScore.recordBall] Previous state:', prev);
       // ===== VALIDATION =====
       if (!prev || !prev.team1 || !prev.team2) {
         console.error('[recordBall] Invalid state:', prev);
@@ -312,77 +551,257 @@ export function useLiveScore({
       let bowlerRunDelta = 0;
       let ballCountDelta = 0;
       let wicketDelta = 0;
+      let isFour = false;
+      let isSix = false;
+      let isWide = false;
+      let isNoBall = false;
+      let isBye = false;
+      let isLegBye = false;
+      let isDotBall = false;
 
       // Determine if legal delivery
       const illegalDeliveries = ['WD', 'NB', 'NB+1', 'NB+2', 'NB+3', 'NB+4', 'NB+6', 'WD+1', 'WD+2', 'WD+3', 'WD+4'];
       const isLegalDelivery = !illegalDeliveries.includes(ball.type as string);
       
-      // Calculate runs
+      // Calculate runs based on ball type
       if (typeof ball.type === 'number') {
         teamRunDelta = ball.type;
         batterRunDelta = ball.type;
         bowlerRunDelta = ball.type;
         ballCountDelta = 1;
+        isFour = ball.type === 4;
+        isSix = ball.type === 6;
+        isDotBall = ball.type === 0;
       } else if (ball.type === 'W') {
         teamRunDelta = 0;
         batterRunDelta = 0;
         bowlerRunDelta = 0;
         ballCountDelta = 1;
         wicketDelta = 1;
-      } else if (ball.type === 'WD' || ball.type === 'NB') {
+      } else if (ball.type === 'WD') {
         teamRunDelta = 1;
         batterRunDelta = 0;
         bowlerRunDelta = 1;
-        ballCountDelta = 0; // Illegal delivery
-      } else if (ball.type === 'B' || ball.type === 'LB') {
+        ballCountDelta = 0;
+        isWide = true;
+      } else if (ball.type === 'NB') {
+        teamRunDelta = 1;
+        batterRunDelta = 0;
+        bowlerRunDelta = 1;
+        ballCountDelta = 0;
+        isNoBall = true;
+      } else if (ball.type === 'B') {
         teamRunDelta = 1;
         batterRunDelta = 0;
         bowlerRunDelta = 0;
         ballCountDelta = 1;
-      } else if (ball.type.startsWith('NB+')) {
+        isBye = true;
+      } else if (ball.type === 'LB') {
+        teamRunDelta = 1;
+        batterRunDelta = 0;
+        bowlerRunDelta = 0;
+        ballCountDelta = 1;
+        isLegBye = true;
+      } else if (typeof ball.type === 'string' && ball.type.startsWith('NB+')) {
         const runs = parseInt(ball.type.substring(3));
         teamRunDelta = 1 + runs;
         batterRunDelta = runs;
         bowlerRunDelta = 1 + runs;
         ballCountDelta = 0;
-      } else if (ball.type.startsWith('WD+')) {
+        isNoBall = true;
+        isFour = runs === 4;
+        isSix = runs === 6;
+      } else if (typeof ball.type === 'string' && ball.type.startsWith('WD+')) {
         const runs = parseInt(ball.type.substring(3));
         teamRunDelta = 1 + runs;
         batterRunDelta = runs;
         bowlerRunDelta = 1 + runs;
         ballCountDelta = 0;
-      } else if (ball.type.match(/^[0-9]B$/)) {
+        isWide = true;
+      } else if (typeof ball.type === 'string' && ball.type.match(/^[0-9]B$/)) {
         const runs = parseInt(ball.type.substring(0, 1));
         teamRunDelta = runs;
         batterRunDelta = 0;
         bowlerRunDelta = 0;
         ballCountDelta = 1;
-      } else if (ball.type.match(/^[0-9]LB$/)) {
+        isBye = true;
+      } else if (typeof ball.type === 'string' && ball.type.match(/^[0-9]LB$/)) {
         const runs = parseInt(ball.type.substring(0, 1));
         teamRunDelta = runs;
         batterRunDelta = 0;
         bowlerRunDelta = 0;
         ballCountDelta = 1;
+        isLegBye = true;
       }
 
-      // ===== UPDATE STATE =====
+      // ===== UPDATE TEAM STATE =====
       const newBalls = currentTeam.balls + ballCountDelta;
       const newRuns = Math.max(0, currentTeam.runs + teamRunDelta);
       const newWickets = Math.min(currentTeam.wickets + wicketDelta, 10);
       const newOvers = ballsToOvers(newBalls);
 
-      console.log('[recordBall] Updating:', {
-        ballType: ball.type,
-        team: battingTeam,
-        oldBalls: currentTeam.balls,
-        newBalls: newBalls,
-        oldRuns: currentTeam.runs,
-        newRuns: newRuns,
-        runsDelta: teamRunDelta,
-      });
+      // ===== UPDATE STRIKER STATS =====
+      let newStriker = { ...prev.striker };
+      let newNonStriker = { ...prev.nonStriker };
+      
+      newStriker.runs += batterRunDelta;
+      newStriker.balls += ballCountDelta;
+      if (isFour) newStriker.fours += 1;
+      if (isSix) newStriker.sixes += 1;
+      newStriker.strikeRate = calculateStrikeRate(newStriker.runs, newStriker.balls);
 
-      // Create new state
-      const newState = {
+      // ===== UPDATE BOWLER STATS =====
+      let newBowler: BowlerState = { 
+        ...prev.currentBowler,
+        runs: (prev.currentBowler.runs || 0) + bowlerRunDelta,
+        totalBalls: (prev.currentBowler.totalBalls || 0) + ballCountDelta,
+        balls: ((prev.currentBowler.balls || 0) + ballCountDelta) % 6,
+        overs: prev.currentBowler.overs || 0,
+        maidens: prev.currentBowler.maidens || 0,
+        wides: prev.currentBowler.wides || 0,
+        noBalls: prev.currentBowler.noBalls || 0,
+        dotBalls: prev.currentBowler.dotBalls || 0,
+        wickets: prev.currentBowler.wickets || 0,
+        economyRate: prev.currentBowler.economyRate || 0,
+      };
+      
+      if (ballCountDelta > 0 && newBowler.balls === 0 && newBowler.totalBalls > 0) {
+        newBowler.overs += 1;
+      }
+      if (isWide) newBowler.wides += 1;
+      if (isNoBall) newBowler.noBalls += 1;
+      if (isDotBall) newBowler.dotBalls += 1;
+      if (wicketDelta > 0) newBowler.wickets += 1;
+      newBowler.economyRate = calculateEconomyRate(newBowler.runs, newBowler.totalBalls);
+
+      // ===== UPDATE EXTRAS =====
+      let newExtras = { ...(prev.extras || createEmptyExtras()) };
+      if (isWide) newExtras.wides += teamRunDelta;
+      if (isNoBall) newExtras.noBalls += 1;
+      if (isBye) newExtras.byes += teamRunDelta;
+      if (isLegBye) newExtras.legByes += teamRunDelta;
+      newExtras.total = newExtras.wides + newExtras.noBalls + newExtras.byes + newExtras.legByes + newExtras.penalties;
+
+      // ===== UPDATE CURRENT OVER BALLS DISPLAY =====
+      let ballDisplay = '';
+      if (wicketDelta > 0) ballDisplay = 'W';
+      else if (isWide) ballDisplay = `WD${teamRunDelta > 1 ? '+' + (teamRunDelta - 1) : ''}`;
+      else if (isNoBall) ballDisplay = `NB${teamRunDelta > 1 ? '+' + (teamRunDelta - 1) : ''}`;
+      else if (isBye) ballDisplay = `${teamRunDelta}B`;
+      else if (isLegBye) ballDisplay = `${teamRunDelta}LB`;
+      else if (isFour) ballDisplay = '4';
+      else if (isSix) ballDisplay = '6';
+      else ballDisplay = String(batterRunDelta);
+
+      let newCurrentOverBalls = [...(prev.currentOverBalls || []), ballDisplay];
+      let newOverHistory = [...(prev.overHistory || [])];
+
+      // ===== CHECK FOR END OF OVER =====
+      const totalLegalBalls = newBalls;
+      const isEndOfOver = isLegalDelivery && totalLegalBalls > 0 && totalLegalBalls % 6 === 0;
+      
+      if (isEndOfOver) {
+        // Record over summary
+        const overRuns = newCurrentOverBalls.reduce((sum, b) => {
+          const num = parseInt(b.replace(/[^0-9]/g, '') || '0');
+          return sum + (isNaN(num) ? 0 : num);
+        }, 0);
+        const overWickets = newCurrentOverBalls.filter(b => b === 'W').length;
+        const isMaiden = overRuns === 0 && overWickets === 0;
+        
+        if (isMaiden) {
+          newBowler.maidens += 1;
+        }
+        
+        newOverHistory.push({
+          overNumber: Math.floor(totalLegalBalls / 6),
+          bowlerId: newBowler.id,
+          bowlerName: newBowler.name,
+          balls: newCurrentOverBalls,
+          runs: overRuns,
+          wickets: overWickets,
+          isMaiden,
+        });
+        
+        newCurrentOverBalls = [];
+        
+        // Swap batters at end of over (unless wicket fell on last ball)
+        if (wicketDelta === 0) {
+          const temp = newStriker;
+          newStriker = { ...newNonStriker, isOnStrike: true };
+          newNonStriker = { ...temp, isOnStrike: false };
+        }
+      }
+
+      // ===== STRIKE ROTATION FOR ODD RUNS (1, 3, 5) =====
+      if (wicketDelta === 0 && shouldSwapStrike(batterRunDelta) && !isEndOfOver) {
+        const temp = newStriker;
+        newStriker = { ...newNonStriker, isOnStrike: true };
+        newNonStriker = { ...temp, isOnStrike: false };
+      }
+
+      // ===== UPDATE PARTNERSHIP =====
+      let newPartnership = { ...(prev.currentPartnership || createEmptyPartnership(newStriker, newNonStriker)) };
+      if (newStriker.id === newPartnership.batter1.id) {
+        newPartnership.batter1.runs += batterRunDelta;
+        newPartnership.batter1.balls += ballCountDelta;
+      } else if (newStriker.id === newPartnership.batter2.id) {
+        newPartnership.batter2.runs += batterRunDelta;
+        newPartnership.batter2.balls += ballCountDelta;
+      }
+      newPartnership.totalRuns += teamRunDelta;
+      newPartnership.totalBalls += ballCountDelta;
+      newPartnership.runRate = calculateEconomyRate(newPartnership.totalRuns, newPartnership.totalBalls);
+
+      // ===== HANDLE WICKET - RECORD FOW =====
+      let newFOW = [...(prev.fallOfWickets || [])];
+      let newOutBatters = [...(prev.outBatters || [])];
+      let newPartnerships = [...(prev.partnerships || [])];
+      
+      if (wicketDelta > 0) {
+        // Record fall of wicket
+        newFOW.push({
+          wicketNumber: newWickets,
+          runs: newRuns,
+          overs: newOvers,
+          batterName: newStriker.name,
+          batterId: newStriker.id,
+          howOut: ball.dismissalType || 'unknown',
+          bowlerName: prev.currentBowler.name,
+          partnershipRuns: newPartnership.totalRuns,
+          partnershipBalls: newPartnership.totalBalls,
+        });
+        
+        // Save completed partnership
+        newPartnership.isCurrentPartnership = false;
+        newPartnerships.push(newPartnership);
+        
+        // Move striker to out batters
+        newOutBatters.push({
+          ...newStriker,
+          howOut: ball.dismissalType,
+          bowlerName: prev.currentBowler.name,
+          fielderName: ball.fielderName,
+        });
+        
+        // Reset striker for new batter selection
+        newStriker = createEmptyBatter('', 'Select Batter', true);
+        
+        // Create new partnership (will be set when new batter is selected)
+        newPartnership = createEmptyPartnership(newStriker, newNonStriker);
+      }
+
+      // ===== UPDATE ALL BOWLERS LIST =====
+      let newAllBowlers = [...(prev.allBowlers || [])];
+      const existingBowlerIndex = newAllBowlers.findIndex(b => b.id === newBowler.id);
+      if (existingBowlerIndex >= 0) {
+        newAllBowlers[existingBowlerIndex] = newBowler;
+      } else if (newBowler.id) {
+        newAllBowlers.push(newBowler);
+      }
+
+      // ===== CREATE NEW STATE =====
+      const newState: LiveScoreState = {
         ...prev,
         [battingTeam]: {
           ...currentTeam,
@@ -391,24 +810,36 @@ export function useLiveScore({
           balls: newBalls,
         },
         currentOver: newOvers,
+        striker: newStriker,
+        nonStriker: newNonStriker,
+        outBatters: newOutBatters,
+        // Backward compatibility
         currentBatter: {
-          ...prev.currentBatter,
-          runs: Math.max(0, prev.currentBatter.runs + batterRunDelta),
-          balls: prev.currentBatter.balls + ballCountDelta,
+          id: newStriker.id,
+          name: newStriker.name,
+          runs: newStriker.runs,
+          balls: newStriker.balls,
         },
-        currentBowler: {
-          ...prev.currentBowler,
-          runs: Math.max(0, prev.currentBowler.runs + bowlerRunDelta),
-          balls: prev.currentBowler.balls + ballCountDelta,
-        },
-        ballHistory: [...(Array.isArray(prev.ballHistory) ? prev.ballHistory : []), ball],
+        currentBowler: newBowler,
+        allBowlers: newAllBowlers,
+        currentOverBalls: newCurrentOverBalls,
+        overHistory: newOverHistory,
+        extras: newExtras,
+        currentPartnership: newPartnership,
+        partnerships: newPartnerships,
+        fallOfWickets: newFOW,
+        ballHistory: [...(Array.isArray(prev.ballHistory) ? prev.ballHistory : []), {
+          ...ball,
+          strikerId: prev.striker?.id,
+          nonStrikerId: prev.nonStriker?.id,
+          bowledBy: prev.currentBowler?.id,
+        }],
       };
 
       // Save to undo stack
-      setUndoStack((stack) => [...stack, { ...prev }].slice(-5));
+      setUndoStack((stack) => [...stack, { ...prev }].slice(-10));
 
-      console.log('[useLiveScore.recordBall] New state created:', newState);
-      console.log('[useLiveScore.recordBall] State changed:', newState.team1.runs, 'runs for batting team');
+      console.log('[useLiveScore.recordBall] New state created');
       return newState;
     });
   }, []);
@@ -431,20 +862,36 @@ export function useLiveScore({
     return true;
   }, [undoStack]);
 
-  const changeBatter = useCallback((batter: { id: string; name: string }) => {
+  const changeBatter = useCallback((batter: { id: string; name: string }, position: 'striker' | 'nonStriker' = 'striker') => {
     // Validate input
     if (!batter || !batter.id || !batter.name) {
       console.warn('Invalid batter data');
       return;
     }
-    setState((prev) => ({
-      ...prev,
-      currentBatter: {
-        ...batter,
-        runs: 0,
-        balls: 0,
-      },
-    }));
+    
+    setState((prev) => {
+      const newBatter = createEmptyBatter(batter.id, batter.name, position === 'striker');
+      
+      if (position === 'striker') {
+        // Update partnership with new batter
+        const newPartnership = createEmptyPartnership(newBatter, prev.nonStriker);
+        return {
+          ...prev,
+          striker: newBatter,
+          currentBatter: { id: batter.id, name: batter.name, runs: 0, balls: 0 },
+          currentPartnership: newPartnership,
+          yetToBat: prev.yetToBat.filter(id => id !== batter.id),
+        };
+      } else {
+        const newPartnership = createEmptyPartnership(prev.striker, newBatter);
+        return {
+          ...prev,
+          nonStriker: newBatter,
+          currentPartnership: newPartnership,
+          yetToBat: prev.yetToBat.filter(id => id !== batter.id),
+        };
+      }
+    });
   }, []);
 
   const changeBowler = useCallback((bowler: { id: string; name: string }) => {
@@ -453,32 +900,63 @@ export function useLiveScore({
       console.warn('Invalid bowler data');
       return;
     }
+    
+    setState((prev) => {
+      // Check if bowler already exists in allBowlers
+      const existingBowler = (prev.allBowlers || []).find(b => b.id === bowler.id);
+      const newBowler = existingBowler || createEmptyBowler(bowler.id, bowler.name);
+      
+      return {
+        ...prev,
+        previousBowler: prev.currentBowler?.id ? prev.currentBowler : null,
+        currentBowler: newBowler,
+        currentOverBalls: [], // Reset current over display for new bowler
+      };
+    });
+  }, []);
+
+  const swapBatters = useCallback(() => {
     setState((prev) => ({
       ...prev,
-      currentBowler: {
-        ...bowler,
-        runs: 0,
-        balls: 0,
+      striker: { ...prev.nonStriker, isOnStrike: true },
+      nonStriker: { ...prev.striker, isOnStrike: false },
+      currentBatter: {
+        id: prev.nonStriker.id,
+        name: prev.nonStriker.name,
+        runs: prev.nonStriker.runs,
+        balls: prev.nonStriker.balls,
       },
     }));
   }, []);
 
   const switchInnings = useCallback(() => {
-    setState((prev) => ({
-      ...prev,
-      innings: (prev.innings === 1 ? 2 : 1) as 1 | 2,
-      battingTeam: prev.battingTeam === 'team1' ? 'team2' : 'team1',
-      currentBatter: {
-        ...prev.currentBatter,
-        runs: 0,
-        balls: 0,
-      },
-      currentBowler: {
-        ...prev.currentBowler,
-        runs: 0,
-        balls: 0,
-      },
-    }));
+    setState((prev) => {
+      const newStriker = createEmptyBatter('', 'Select Striker', true);
+      const newNonStriker = createEmptyBatter('', 'Select Non-Striker', false);
+      
+      return {
+        ...prev,
+        innings: (prev.innings === 1 ? 2 : 1) as 1 | 2,
+        battingTeam: prev.battingTeam === 'team1' ? 'team2' : 'team1',
+        striker: newStriker,
+        nonStriker: newNonStriker,
+        outBatters: [],
+        yetToBat: [],
+        currentBatter: { id: '', name: 'Select Striker', runs: 0, balls: 0 },
+        currentBowler: createEmptyBowler(),
+        previousBowler: null,
+        allBowlers: [],
+        currentOverBalls: [],
+        overHistory: [],
+        extras: createEmptyExtras(),
+        currentPartnership: createEmptyPartnership(newStriker, newNonStriker),
+        partnerships: [],
+        fallOfWickets: [],
+        runRate: 0,
+        requiredRunRate: null,
+        projectedScore: 0,
+      };
+    });
   }, []);
 
   const canUndo = useMemo(() => (undoStack?.length || 0) > 0, [undoStack?.length]);
@@ -520,6 +998,7 @@ export function useLiveScore({
     canUndo,
     changeBatter,
     changeBowler,
+    swapBatters,
     switchInnings,
     updateMatchState,
     isFreeHit,

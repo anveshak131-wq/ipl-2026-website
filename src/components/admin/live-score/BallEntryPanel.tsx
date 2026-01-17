@@ -101,7 +101,7 @@ export default function BallEntryPanel({
   });
 
   const [showWicketModal, setShowWicketModal] = useState(false);
-  const [showPlayerSelector, setShowPlayerSelector] = useState<'batter' | 'bowler' | null>(null);
+  const [showPlayerSelector, setShowPlayerSelector] = useState<'striker' | 'nonStriker' | 'bowler' | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   
   // Animation states
@@ -182,6 +182,7 @@ export default function BallEntryPanel({
     canUndo,
     changeBatter,
     changeBowler,
+    swapBatters,
     updateMatchState,
     isFreeHit,
   } = useLiveScore({
@@ -373,7 +374,7 @@ export default function BallEntryPanel({
         e.target instanceof HTMLTextAreaElement ||
         e.target instanceof HTMLSelectElement ||
         showWicketModal ||
-        showPlayerSelector
+        showPlayerSelector !== null
       ) {
         return;
       }
@@ -805,29 +806,189 @@ export default function BallEntryPanel({
       {/* Partnership Info */}
       <PartnershipInfo state={state} league={league} />
 
-      {/* Current Players - Enhanced */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <EnhancedPlayerStats
-          player={{
-            name: state.currentBatter.name,
-            runs: state.currentBatter.runs,
-            balls: state.currentBatter.balls,
-            isBatter: true,
-          }}
-          ballHistory={state.ballHistory}
-          league={league}
-        />
-        <EnhancedPlayerStats
-          player={{
-            name: state.currentBowler.name,
-            runs: state.currentBowler.runs,
-            balls: state.currentBowler.balls,
-            isBatter: false,
-          }}
-          ballHistory={state.ballHistory}
-          league={league}
-        />
+      {/* Current Players - Dual Batter Display + Bowler */}
+      <div className="space-y-4">
+        {/* Batters Section */}
+        <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-400 flex items-center gap-2">
+              <span className="text-lg">🏏</span> At Crease
+            </h3>
+            <button
+              onClick={swapBatters}
+              className="flex items-center gap-1 px-2 py-1 text-xs bg-slate-700 hover:bg-slate-600 rounded-lg text-gray-300 transition-colors"
+            >
+              <RotateCcw className="w-3 h-3" />
+              Swap
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {/* Striker */}
+            <div 
+              className="relative cursor-pointer"
+              onClick={() => setShowPlayerSelector('striker')}
+            >
+              <div className="absolute -top-1 -left-1 bg-green-500 text-white text-[10px] px-1.5 py-0.5 rounded font-bold z-10">
+                STRIKER
+              </div>
+              <EnhancedPlayerStats
+                player={{
+                  name: state.striker?.name || state.currentBatter.name,
+                  runs: state.striker?.runs ?? state.currentBatter.runs,
+                  balls: state.striker?.balls ?? state.currentBatter.balls,
+                  isBatter: true,
+                  fours: state.striker?.fours,
+                  sixes: state.striker?.sixes,
+                  strikeRate: state.striker?.strikeRate,
+                }}
+                ballHistory={state.ballHistory}
+                league={league}
+              />
+            </div>
+            {/* Non-Striker */}
+            <div 
+              className="relative cursor-pointer opacity-75 hover:opacity-100 transition-opacity"
+              onClick={() => setShowPlayerSelector('nonStriker')}
+            >
+              <div className="absolute -top-1 -left-1 bg-gray-500 text-white text-[10px] px-1.5 py-0.5 rounded font-bold z-10">
+                NON-STRIKER
+              </div>
+              <EnhancedPlayerStats
+                player={{
+                  name: state.nonStriker?.name || 'Select Non-Striker',
+                  runs: state.nonStriker?.runs ?? 0,
+                  balls: state.nonStriker?.balls ?? 0,
+                  isBatter: true,
+                  fours: state.nonStriker?.fours,
+                  sixes: state.nonStriker?.sixes,
+                  strikeRate: state.nonStriker?.strikeRate,
+                }}
+                ballHistory={state.ballHistory}
+                league={league}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Bowler Section */}
+        <div 
+          className="cursor-pointer"
+          onClick={() => setShowPlayerSelector('bowler')}
+        >
+          <EnhancedPlayerStats
+            player={{
+              name: state.currentBowler.name,
+              runs: state.currentBowler.runs,
+              balls: state.currentBowler.totalBalls || state.currentBowler.balls,
+              isBatter: false,
+              overs: state.currentBowler.overs,
+              maidens: state.currentBowler.maidens,
+              wickets: state.currentBowler.wickets,
+              economy: state.currentBowler.economyRate,
+              wides: state.currentBowler.wides,
+              noBalls: state.currentBowler.noBalls,
+            }}
+            ballHistory={state.ballHistory}
+            league={league}
+          />
+        </div>
       </div>
+
+      {/* Current Over Display */}
+      {state.currentOverBalls && state.currentOverBalls.length > 0 && (
+        <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+          <h3 className="text-sm font-semibold text-gray-400 mb-2">This Over</h3>
+          <div className="flex flex-wrap gap-2">
+            {state.currentOverBalls.map((ball, idx) => (
+              <span 
+                key={idx}
+                className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold
+                  ${ball === 'W' ? 'bg-red-500/30 text-red-400 border border-red-500/50' :
+                    ball.includes('4') || ball === '4' ? 'bg-green-500/30 text-green-400 border border-green-500/50' :
+                    ball.includes('6') || ball === '6' ? 'bg-purple-500/30 text-purple-400 border border-purple-500/50' :
+                    ball.includes('WD') || ball.includes('NB') ? 'bg-yellow-500/30 text-yellow-400 border border-yellow-500/50' :
+                    'bg-slate-700/50 text-gray-300 border border-slate-600/50'
+                  }`}
+              >
+                {ball}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Run Rates Display */}
+      {(state.runRate > 0 || state.requiredRunRate) && (
+        <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div>
+              <div className="text-xs text-gray-500 uppercase">Current RR</div>
+              <div className="text-lg font-bold text-white">{state.runRate?.toFixed(2) || '0.00'}</div>
+            </div>
+            {state.requiredRunRate !== null && (
+              <div>
+                <div className="text-xs text-gray-500 uppercase">Required RR</div>
+                <div className={`text-lg font-bold ${state.requiredRunRate > state.runRate ? 'text-red-400' : 'text-green-400'}`}>
+                  {state.requiredRunRate.toFixed(2)}
+                </div>
+              </div>
+            )}
+            <div>
+              <div className="text-xs text-gray-500 uppercase">Projected</div>
+              <div className="text-lg font-bold text-white">{state.projectedScore || '-'}</div>
+            </div>
+            {state.extras && (
+              <div>
+                <div className="text-xs text-gray-500 uppercase">Extras</div>
+                <div className="text-lg font-bold text-yellow-400">{state.extras.total || 0}</div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Extras Breakdown */}
+      {state.extras && state.extras.total > 0 && (
+        <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+          <h3 className="text-sm font-semibold text-gray-400 mb-2">Extras Breakdown</h3>
+          <div className="flex flex-wrap gap-3 text-sm">
+            {state.extras.wides > 0 && (
+              <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded">
+                Wides: {state.extras.wides}
+              </span>
+            )}
+            {state.extras.noBalls > 0 && (
+              <span className="px-2 py-1 bg-orange-500/20 text-orange-400 rounded">
+                No Balls: {state.extras.noBalls}
+              </span>
+            )}
+            {state.extras.byes > 0 && (
+              <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded">
+                Byes: {state.extras.byes}
+              </span>
+            )}
+            {state.extras.legByes > 0 && (
+              <span className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded">
+                Leg Byes: {state.extras.legByes}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Fall of Wickets */}
+      {state.fallOfWickets && state.fallOfWickets.length > 0 && (
+        <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+          <h3 className="text-sm font-semibold text-gray-400 mb-2">Fall of Wickets</h3>
+          <div className="flex flex-wrap gap-2">
+            {state.fallOfWickets.map((fow, idx) => (
+              <span key={idx} className="px-2 py-1 bg-red-500/20 text-red-400 rounded text-sm">
+                {fow.wicketNumber}-{fow.runs} ({fow.batterName}, {fow.overs} ov)
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Over-by-Over Analysis */}
       <OverByOverAnalysis state={state} league={league} />
@@ -935,7 +1096,7 @@ export default function BallEntryPanel({
 
       {/* Quick Actions Bar */}
       <QuickActionsBar
-        onChangeBatter={() => setShowPlayerSelector('batter')}
+        onChangeBatter={() => setShowPlayerSelector('striker')}
         onChangeBowler={() => setShowPlayerSelector('bowler')}
         onUndo={undo}
         onSave={handleSave}
@@ -950,31 +1111,57 @@ export default function BallEntryPanel({
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-slate-800 rounded-2xl p-6 max-w-md w-full border-2 border-slate-700">
             <h3 className="text-xl font-bold text-white mb-2">
-              Select {showPlayerSelector === 'batter' ? 'Batter' : 'Bowler'}
+              Select {showPlayerSelector === 'striker' ? 'Striker' : showPlayerSelector === 'nonStriker' ? 'Non-Striker' : 'Bowler'}
             </h3>
             <p className="text-sm text-gray-400 mb-4">
-              {showPlayerSelector === 'batter' 
-                ? `${battingTeam.name} - Playing 11` 
-                : `${bowlingTeam.name} - Playing 11`}
+              {showPlayerSelector === 'bowler' 
+                ? `${bowlingTeam.name} - Playing 11` 
+                : `${battingTeam.name} - Playing 11`}
             </p>
             <div className="max-h-96 overflow-y-auto space-y-2">
-              {(showPlayerSelector === 'batter' ? battingTeamPlayers : bowlingTeamPlayers).length > 0 ? (
-                (showPlayerSelector === 'batter' ? battingTeamPlayers : bowlingTeamPlayers).map((player) => (
+              {(showPlayerSelector === 'bowler' ? bowlingTeamPlayers : battingTeamPlayers).length > 0 ? (
+                (showPlayerSelector === 'bowler' ? bowlingTeamPlayers : battingTeamPlayers).map((player) => {
+                  // Disable already selected batters
+                  const isStriker = player.id === state.striker?.id;
+                  const isNonStriker = player.id === state.nonStriker?.id;
+                  const isDisabled = showPlayerSelector !== 'bowler' && (
+                    (showPlayerSelector === 'striker' && isNonStriker) ||
+                    (showPlayerSelector === 'nonStriker' && isStriker)
+                  );
+                  const isAlreadyOut = state.outBatters?.some(b => b.id === player.id);
+                  
+                  return (
                   <button
                     key={player.id}
                     onClick={() => {
-                      if (showPlayerSelector === 'batter') {
-                        changeBatter({ id: player.id, name: player.name });
+                        if (isDisabled || isAlreadyOut) return;
+                      if (showPlayerSelector === 'striker') {
+                        changeBatter({ id: player.id, name: player.name }, 'striker');
+                      } else if (showPlayerSelector === 'nonStriker') {
+                        changeBatter({ id: player.id, name: player.name }, 'nonStriker');
                       } else {
                         changeBowler({ id: player.id, name: player.name });
                       }
                       setShowPlayerSelector(null);
                     }}
-                    className="w-full px-4 py-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-white text-left transition-colors flex items-center justify-between"
+                      disabled={isDisabled || isAlreadyOut}
+                      className={`w-full px-4 py-3 rounded-lg text-left transition-colors flex items-center justify-between
+                        ${isDisabled || isAlreadyOut 
+                          ? 'bg-slate-900/50 text-gray-500 cursor-not-allowed' 
+                          : 'bg-slate-700 hover:bg-slate-600 text-white'
+                        }
+                        ${isStriker && showPlayerSelector === 'striker' ? 'ring-2 ring-green-500' : ''}
+                        ${isNonStriker && showPlayerSelector === 'nonStriker' ? 'ring-2 ring-green-500' : ''}
+                      `}
                   >
                     <div>
                       <div className="font-semibold">{player.name}</div>
-                      <div className="text-xs text-gray-400">{player.role} • #{player.jerseyNumber}</div>
+                        <div className="text-xs text-gray-400">
+                          {player.role} • #{player.jerseyNumber}
+                          {isAlreadyOut && <span className="text-red-400 ml-2">OUT</span>}
+                          {isStriker && <span className="text-green-400 ml-2">STRIKER</span>}
+                          {isNonStriker && <span className="text-gray-400 ml-2">NON-STRIKER</span>}
+                        </div>
                     </div>
                     {player.isCaptain && (
                       <span className="px-2 py-1 text-xs bg-yellow-500/20 text-yellow-400 rounded">
@@ -982,10 +1169,11 @@ export default function BallEntryPanel({
                       </span>
                     )}
                   </button>
-                ))
+                  );
+                })
               ) : (
                 <div className="text-center py-8 text-gray-400">
-                  <p>No players found for {showPlayerSelector === 'batter' ? battingTeam.name : bowlingTeam.name}</p>
+                  <p>No players found for {showPlayerSelector === 'bowler' ? bowlingTeam.name : battingTeam.name}</p>
                   <p className="text-xs mt-2">Please ensure players are assigned to this team</p>
                 </div>
               )}

@@ -10,6 +10,17 @@ interface EnhancedPlayerStatsProps {
     runs: number;
     balls: number;
     isBatter: boolean;
+    // Enhanced batter stats
+    fours?: number;
+    sixes?: number;
+    strikeRate?: number;
+    // Enhanced bowler stats
+    overs?: number;
+    maidens?: number;
+    wickets?: number;
+    economy?: number;
+    wides?: number;
+    noBalls?: number;
   };
   ballHistory: BallEvent[];
   league?: 'ipl' | 'wpl';
@@ -35,18 +46,29 @@ export default function EnhancedPlayerStats({
     return pattern;
   }, [ballHistory]);
 
-  // Calculate statistics
-  const strikeRate = player.balls > 0 
-    ? ((player.runs * 100) / player.balls).toFixed(1)
-    : '0.0';
+  // Calculate statistics - use passed values if available
+  const strikeRate = player.strikeRate !== undefined 
+    ? player.strikeRate.toFixed(1) 
+    : player.balls > 0 
+      ? ((player.runs * 100) / player.balls).toFixed(1)
+      : '0.0';
   
-  const economy = player.balls > 0 && !player.isBatter
-    ? ((player.runs * 6) / player.balls).toFixed(2)
-    : null;
+  const economy = player.economy !== undefined 
+    ? player.economy.toFixed(2)
+    : player.balls > 0 && !player.isBatter
+      ? ((player.runs * 6) / player.balls).toFixed(2)
+      : null;
 
   const boundaries = useMemo(() => {
+    // Use passed fours/sixes if available
+    if (player.fours !== undefined && player.sixes !== undefined) {
+      return player.fours + player.sixes;
+    }
     return ballHistory && Array.isArray(ballHistory) ? ballHistory.filter(ball => ball.type === 4 || ball.type === 6).length : 0;
-  }, [ballHistory]);
+  }, [ballHistory, player.fours, player.sixes]);
+
+  const fours = player.fours ?? 0;
+  const sixes = player.sixes ?? 0;
 
   const dotBalls = useMemo(() => {
     return ballHistory && Array.isArray(ballHistory) ? ballHistory.filter(ball => ball.type === 0).length : 0;
@@ -119,23 +141,47 @@ export default function EnhancedPlayerStats({
 
       {/* Additional Stats */}
       <div className="grid grid-cols-2 gap-3 mb-4 pt-4 border-t border-white/10">
-        <div>
-          <div className="text-gray-400 text-xs mb-1">Runs/Ball</div>
-          <div className="text-white font-bold">{runsPerBall}</div>
-        </div>
         {player.isBatter ? (
-          <div>
-            <div className="text-gray-400 text-xs mb-1">Boundaries</div>
-            <div className="text-green-400 font-bold flex items-center gap-1">
-              <Zap className="w-3 h-3" />
-              {boundaries}
+          <>
+            <div>
+              <div className="text-gray-400 text-xs mb-1">4s / 6s</div>
+              <div className="text-white font-bold flex items-center gap-2">
+                <span className="text-green-400">{fours}</span>
+                <span className="text-gray-500">/</span>
+                <span className="text-purple-400">{sixes}</span>
+              </div>
             </div>
-          </div>
+            <div>
+              <div className="text-gray-400 text-xs mb-1">Boundaries</div>
+              <div className="text-green-400 font-bold flex items-center gap-1">
+                <Zap className="w-3 h-3" />
+                {boundaries}
+              </div>
+            </div>
+          </>
         ) : (
-          <div>
-            <div className="text-gray-400 text-xs mb-1">Dot Balls</div>
-            <div className="text-gray-400 font-bold">{dotBalls}</div>
-          </div>
+          <>
+            <div>
+              <div className="text-gray-400 text-xs mb-1">Overs</div>
+              <div className="text-white font-bold">
+                {player.overs !== undefined ? `${player.overs}.${player.balls % 6}` : `${Math.floor(player.balls / 6)}.${player.balls % 6}`}
+              </div>
+            </div>
+            <div>
+              <div className="text-gray-400 text-xs mb-1">Wickets</div>
+              <div className="text-red-400 font-bold">{player.wickets ?? 0}</div>
+            </div>
+            <div>
+              <div className="text-gray-400 text-xs mb-1">Maidens</div>
+              <div className="text-green-400 font-bold">{player.maidens ?? 0}</div>
+            </div>
+            <div>
+              <div className="text-gray-400 text-xs mb-1">Extras</div>
+              <div className="text-yellow-400 font-bold text-xs">
+                WD: {player.wides ?? 0} | NB: {player.noBalls ?? 0}
+              </div>
+            </div>
+          </>
         )}
       </div>
 

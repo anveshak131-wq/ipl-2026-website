@@ -10,25 +10,75 @@ interface PartnershipInfoProps {
 }
 
 export default function PartnershipInfo({ state, league = 'ipl' }: PartnershipInfoProps) {
-  // Calculate partnership stats
+  // Calculate partnership stats - use new partnership tracking if available
   const partnership = useMemo(() => {
-    const battingTeam = state.battingTeam === 'team1' ? state.team1 : state.team2;
-    const currentBatter = state.currentBatter;
+    // Use the new currentPartnership if available
+    if (state.currentPartnership) {
+      const cp = state.currentPartnership;
+      return {
+        runs: cp.totalRuns,
+        balls: cp.totalBalls,
+        strikeRate: cp.runRate || (cp.totalBalls > 0 ? ((cp.totalRuns / cp.totalBalls) * 100) : 0),
+        batter1: {
+          name: cp.batter1.name,
+          runs: cp.batter1.runs,
+          balls: cp.batter1.balls,
+        },
+        batter2: {
+          name: cp.batter2.name,
+          runs: cp.batter2.runs,
+          balls: cp.batter2.balls,
+        },
+      };
+    }
     
-    // For simplicity, we'll use current batter's stats as partnership
-    // In a real scenario, you'd track both batters separately
+    // Fallback to old method using striker/nonStriker
+    if (state.striker && state.nonStriker) {
+      const partnershipRuns = state.striker.runs + state.nonStriker.runs;
+      const partnershipBalls = state.striker.balls + state.nonStriker.balls;
+      const strikeRate = partnershipBalls > 0 
+        ? ((partnershipRuns * 100) / partnershipBalls)
+        : 0;
+      
+      return {
+        runs: partnershipRuns,
+        balls: partnershipBalls,
+        strikeRate: strikeRate,
+        batter1: {
+          name: state.striker.name,
+          runs: state.striker.runs,
+          balls: state.striker.balls,
+        },
+        batter2: {
+          name: state.nonStriker.name,
+          runs: state.nonStriker.runs,
+          balls: state.nonStriker.balls,
+        },
+      };
+    }
+    
+    // Legacy fallback
+    const currentBatter = state.currentBatter;
     const partnershipRuns = currentBatter.runs;
     const partnershipBalls = currentBatter.balls;
     const strikeRate = partnershipBalls > 0 
-      ? ((partnershipRuns * 100) / partnershipBalls).toFixed(1)
-      : '0.0';
+      ? ((partnershipRuns * 100) / partnershipBalls)
+      : 0;
     
     return {
       runs: partnershipRuns,
       balls: partnershipBalls,
-      strikeRate: parseFloat(strikeRate),
-      batter1: currentBatter.name,
-      batter2: 'Partner', // Would be tracked separately in real implementation
+      strikeRate: strikeRate,
+      batter1: {
+        name: currentBatter.name,
+        runs: currentBatter.runs,
+        balls: currentBatter.balls,
+      },
+      batter2: {
+        name: 'Partner',
+        runs: 0,
+        balls: 0,
+      },
     };
   }, [state]);
 
@@ -56,6 +106,7 @@ export default function PartnershipInfo({ state, league = 'ipl' }: PartnershipIn
         <h3 className="text-lg font-bold text-white">Current Partnership</h3>
       </div>
       
+      {/* Main Partnership Stats */}
       <div className="grid grid-cols-3 gap-4 mb-4">
         <div>
           <div className="text-gray-400 text-xs mb-1">Runs</div>
@@ -70,14 +121,30 @@ export default function PartnershipInfo({ state, league = 'ipl' }: PartnershipIn
           </div>
         </div>
         <div>
-          <div className="text-gray-400 text-xs mb-1">Strike Rate</div>
+          <div className="text-gray-400 text-xs mb-1">Run Rate</div>
           <div className={`text-3xl font-black ${colors.accent}`}>
-            {partnership.strikeRate}
+            {partnership.balls > 0 ? (partnership.runs / (partnership.balls / 6)).toFixed(2) : '0.00'}
           </div>
         </div>
       </div>
 
-      <div className="pt-4 border-t border-white/10">
+      {/* Individual Batter Contributions */}
+      <div className="grid grid-cols-2 gap-3 pt-4 border-t border-white/10">
+        <div className="bg-black/20 rounded-lg p-3">
+          <div className="text-xs text-gray-400 mb-1 truncate">{partnership.batter1.name}</div>
+          <div className="text-white font-bold">
+            {partnership.batter1.runs}<span className="text-gray-400 text-sm">({partnership.batter1.balls})</span>
+          </div>
+        </div>
+        <div className="bg-black/20 rounded-lg p-3">
+          <div className="text-xs text-gray-400 mb-1 truncate">{partnership.batter2.name}</div>
+          <div className="text-white font-bold">
+            {partnership.batter2.runs}<span className="text-gray-400 text-sm">({partnership.batter2.balls})</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="pt-4 mt-4 border-t border-white/10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-gray-400" />
