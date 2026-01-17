@@ -485,7 +485,27 @@ export function useLiveScore({
 
   const updateMatchState = useCallback((newMatchState: MatchState) => {
     setMatchState(newMatchState);
-    setState((prev) => ({ ...prev, matchState: newMatchState }));
+    
+    // Sync battingTeam from matchState to live score state
+    let newBattingTeam: 'team1' | 'team2' | undefined;
+    if (newMatchState.currentState === 'innings-1' && newMatchState.innings1?.battingTeam) {
+      newBattingTeam = newMatchState.innings1.battingTeam;
+    } else if (newMatchState.currentState === 'innings-2' && newMatchState.innings2?.battingTeam) {
+      newBattingTeam = newMatchState.innings2.battingTeam;
+    } else if (newMatchState.toss) {
+      // Derive from toss if innings not set
+      newBattingTeam = newMatchState.toss.decision === 'bat' 
+        ? newMatchState.toss.winner 
+        : (newMatchState.toss.winner === 'team1' ? 'team2' : 'team1');
+    }
+    
+    setState((prev) => ({ 
+      ...prev, 
+      matchState: newMatchState,
+      // Update battingTeam if derived from matchState
+      ...(newBattingTeam ? { battingTeam: newBattingTeam } : {}),
+    }));
+    
     if (onMatchStateChange) {
       onMatchStateChange(newMatchState);
     }
