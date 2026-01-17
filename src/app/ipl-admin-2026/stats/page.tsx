@@ -1539,6 +1539,6 @@ function LeaderboardEditor({
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }

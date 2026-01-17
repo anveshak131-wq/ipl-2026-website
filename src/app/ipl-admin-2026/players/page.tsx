@@ -4868,8 +4868,10 @@ export default function AdminPlayers() {
           </button>
         </div>
       )}
+      </div>
     </div>
   );
 }
+
 
 
