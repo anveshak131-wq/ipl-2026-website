@@ -43,6 +43,7 @@ export default function MatchStateManager({
   maxOvers = 20,
 }: MatchStateManagerProps) {
   const [showTossModal, setShowTossModal] = useState(false);
+  const [isEditingToss, setIsEditingToss] = useState(false);
   const [tossWinner, setTossWinner] = useState<'team1' | 'team2' | null>(null);
   const [tossDecision, setTossDecision] = useState<'bat' | 'bowl' | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -188,6 +189,46 @@ export default function MatchStateManager({
 
   const canEdit = !isStateLocked(matchState.currentState, matchState);
 
+  // Handle edit toss button click
+  const handleEditToss = () => {
+    // Pre-fill with current toss values
+    if (matchState.toss) {
+      setTossWinner(matchState.toss.winner);
+      setTossDecision(matchState.toss.decision);
+    }
+    setIsEditingToss(true);
+    setShowTossModal(true);
+  };
+
+  // Handle toss update (for editing existing toss)
+  const handleTossUpdate = () => {
+    if (!tossWinner || !tossDecision) {
+      alert('Please select toss winner and decision');
+      return;
+    }
+
+    const updatedState: MatchState = {
+      ...matchState,
+      toss: {
+        winner: tossWinner,
+        decision: tossDecision,
+        timestamp: new Date().toISOString(),
+      },
+    };
+
+    // Update batting team based on new toss decision
+    const battingTeam = tossDecision === 'bat' ? tossWinner : (tossWinner === 'team1' ? 'team2' : 'team1');
+    if (updatedState.innings1) {
+      updatedState.innings1.battingTeam = battingTeam;
+    }
+
+    onStateChange(updatedState);
+    setShowTossModal(false);
+    setIsEditingToss(false);
+    setTossWinner(null);
+    setTossDecision(null);
+  };
+
   return (
     <div className="space-y-4">
       {/* Current State Display */}
@@ -224,6 +265,33 @@ export default function MatchStateManager({
             </div>
           )}
         </div>
+
+        {/* Toss Info Display with Edit Button */}
+        {matchState.toss && (
+          <div className="mt-4 pt-4 border-t border-gray-700">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="text-xl">🪙</span>
+                <div>
+                  <span className="text-sm text-gray-400">Toss: </span>
+                  <span className="font-semibold" style={{ color: colors.text }}>
+                    {matchState.toss.winner === 'team1' ? team1Name : team2Name} won and elected to {matchState.toss.decision}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={handleEditToss}
+                className="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all hover:opacity-80"
+                style={{
+                  background: colors.primary,
+                  color: '#fff',
+                }}
+              >
+                ✏️ Edit Toss
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* State Timeline */}
         <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-2">
@@ -281,7 +349,9 @@ export default function MatchStateManager({
               exit={{ opacity: 0, scale: 0.9 }}
               className="bg-slate-800 rounded-2xl p-6 max-w-md w-full border-2 border-slate-700"
             >
-              <h3 className="text-xl font-bold text-white mb-4">Record Toss</h3>
+              <h3 className="text-xl font-bold text-white mb-4">
+                {isEditingToss ? '✏️ Edit Toss' : '🪙 Record Toss'}
+              </h3>
               
               <div className="space-y-4">
                 <div>
@@ -345,6 +415,7 @@ export default function MatchStateManager({
                 <button
                   onClick={() => {
                     setShowTossModal(false);
+                    setIsEditingToss(false);
                     setTossWinner(null);
                     setTossDecision(null);
                   }}
@@ -353,11 +424,11 @@ export default function MatchStateManager({
                   Cancel
                 </button>
                 <button
-                  onClick={handleTossComplete}
+                  onClick={isEditingToss ? handleTossUpdate : handleTossComplete}
                   disabled={!tossWinner || !tossDecision}
                   className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-white font-semibold transition-all"
                 >
-                  Confirm Toss
+                  {isEditingToss ? 'Update Toss' : 'Confirm Toss'}
                 </button>
               </div>
             </motion.div>

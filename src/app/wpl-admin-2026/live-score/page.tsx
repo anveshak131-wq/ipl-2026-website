@@ -309,67 +309,6 @@ export default function WPLLiveScorePage() {
             </select>
           </div>
 
-          {/* Toss Info - Display Only (Managed from Scorecard Page) */}
-          {selectedMatch && selectedMatch.matchState?.toss && (
-            <div 
-              className="rounded-2xl p-4 md:p-6 backdrop-blur-xl border mb-6"
-              style={{
-                background: WPLColors.purpleRGBA[10],
-                borderColor: WPLColors.purpleRGBA[30],
-              }}
-            >
-              <div className="flex items-center gap-3">
-                <div className="text-sm" style={{ color: WPLColors.textSecondary }}>
-                  🪙 Toss:
-                </div>
-                <div className="font-semibold" style={{ color: WPLColors.textPrimary }}>
-                  {selectedMatch.matchState.toss.winner === 'team1' ? selectedMatch.team1?.name : selectedMatch.team2?.name} won and elected to {selectedMatch.matchState.toss.decision}
-                </div>
-                <div className="ml-auto">
-                  <a 
-                    href="/wpl-admin-2026/scorecard" 
-                    className="text-xs px-3 py-1.5 rounded-lg transition-colors hover:opacity-80"
-                    style={{ 
-                      background: WPLColors.pink, 
-                      color: '#fff' 
-                    }}
-                  >
-                    Edit in Scorecard
-                  </a>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Toss Not Set Warning */}
-          {selectedMatch && !selectedMatch.matchState?.toss && (
-            <div 
-              className="rounded-2xl p-4 md:p-6 backdrop-blur-xl border mb-6"
-              style={{
-                background: 'rgba(234, 179, 8, 0.1)',
-                borderColor: 'rgba(234, 179, 8, 0.3)',
-              }}
-            >
-              <div className="flex items-center gap-3">
-                <div className="text-sm" style={{ color: '#eab308' }}>
-                  ⚠️ Toss not recorded yet
-                </div>
-                <div className="ml-auto">
-                  <a 
-                    href="/wpl-admin-2026/scorecard" 
-                    className="text-xs px-3 py-1.5 rounded-lg transition-colors hover:opacity-80"
-                    style={{ 
-                      background: WPLColors.pink, 
-                      color: '#fff' 
-                    }}
-                  >
-                    Set Toss in Scorecard
-                  </a>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Live Score Panel */}
           {selectedMatch && (
             <div 
