@@ -250,6 +250,17 @@ async function handleGetRequest(context) {
       league: team.league || 'ipl' // Default to 'ipl' if missing
     }));
     
+    // Deduplicate teams by ID (in case of corrupted data)
+    const uniqueTeams = [];
+    const seenIds = new Set();
+    for (const team of teams) {
+      if (!seenIds.has(team.id)) {
+        seenIds.add(team.id);
+        uniqueTeams.push(team);
+      }
+    }
+    teams = uniqueTeams;
+    
     return new Response(JSON.stringify(teams), {
       status: 200,
       headers: {
