@@ -78,7 +78,10 @@ export default function AdminLiveScorePage() {
     [matches, selectedMatchId]
   );
 
-  // Fetch live score when match is selected
+  // Helper to get localStorage key for a match
+  const getLocalStorageKey = (matchId: string) => `liveScore_${currentLeague}_${matchId}`;
+
+  // Fetch live score when match is selected - prioritize localStorage
   useEffect(() => {
     if (!selectedMatchId) {
       setLiveScoreState(undefined);
@@ -88,6 +91,33 @@ export default function AdminLiveScorePage() {
     const fetchLiveScore = async () => {
       setIsScoreLoading(true);
       try {
+        // First, try to load from localStorage (has full state including ballHistory)
+        const localKey = getLocalStorageKey(selectedMatchId);
+        const localData = localStorage.getItem(localKey);
+        
+        if (localData) {
+          try {
+            const parsedLocal = JSON.parse(localData);
+            console.log('[LiveScore] Loaded from localStorage:', parsedLocal);
+            setLiveScoreState(parsedLocal);
+            setIsScoreLoading(false);
+            
+            // Also fetch from API to check if there's newer data
+            const response = await fetch(`/api/live-score?matchId=${selectedMatchId}`);
+            if (response.ok) {
+              const apiData = await response.json();
+              // Only use API data if localStorage is empty/incomplete
+              if (!parsedLocal.ballHistory || parsedLocal.ballHistory.length === 0) {
+                setLiveScoreState(apiData);
+              }
+            }
+            return;
+          } catch (e) {
+            console.error('Error parsing localStorage data:', e);
+          }
+        }
+        
+        // Fallback: fetch from API
         const response = await fetch(`/api/live-score?matchId=${selectedMatchId}`);
         if (response.ok) {
           const data = await response.json();
@@ -101,13 +131,23 @@ export default function AdminLiveScorePage() {
     };
 
     fetchLiveScore();
-  }, [selectedMatchId]);
+  }, [selectedMatchId, currentLeague]);
 
   const handleSave = async (state: LiveScoreState) => {
     if (!selectedMatch) return;
 
     setSaveStatus('saving');
     try {
+      // First, save the full state to localStorage for persistence across refreshes
+      const localKey = getLocalStorageKey(selectedMatch.id);
+      const fullStateToSave = {
+        ...state,
+        lastUpdated: new Date().toISOString(),
+        matchId: selectedMatch.id,
+      };
+      localStorage.setItem(localKey, JSON.stringify(fullStateToSave));
+      console.log('[LiveScore] Saved full state to localStorage');
+
       const token = localStorage.getItem('adminToken');
 
       // Convert state to API format

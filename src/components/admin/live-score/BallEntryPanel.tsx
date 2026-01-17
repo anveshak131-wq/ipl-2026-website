@@ -258,6 +258,35 @@ export default function BallEntryPanel({
     return () => clearInterval(saveInterval);
   }, [state, matchState, timeoutState, drsState, impactPlayerState, superOverState, ballChanged, isEveningMatch, onSave, isSaving]);
 
+  // Immediate save to localStorage on any ball change for persistence across refreshes
+  useEffect(() => {
+    if (!matchId || state.ballHistory.length === 0) return;
+    
+    const localKey = `liveScore_${league}_${matchId}`;
+    const extendedState = {
+      ...state,
+      toss: matchState?.toss ? {
+        winner: matchState.toss.winner,
+        decision: matchState.toss.decision,
+      } : undefined,
+      strategicTimeout: timeoutState,
+      drsReviews: drsState,
+      impactPlayer: impactPlayerState,
+      superOver: superOverState,
+      ballChanged,
+      isEveningMatch,
+      lastUpdated: new Date().toISOString(),
+      matchId,
+    };
+    
+    try {
+      localStorage.setItem(localKey, JSON.stringify(extendedState));
+      console.log('[BallEntryPanel] Saved to localStorage, balls:', state.ballHistory.length);
+    } catch (e) {
+      console.warn('[BallEntryPanel] Failed to save to localStorage:', e);
+    }
+  }, [state.ballHistory, state.team1.runs, state.team1.wickets, state.team2.runs, state.team2.wickets, matchId, league]);
+
   // Initialize previous state ref
   useEffect(() => {
     if (!previousStateRef.current) {

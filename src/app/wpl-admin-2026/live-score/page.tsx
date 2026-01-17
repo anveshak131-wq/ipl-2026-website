@@ -27,6 +27,10 @@ export default function WPLLiveScorePage() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [selectedMatchId, setSelectedMatchId] = useState<string>('');
+  const [initialLiveState, setInitialLiveState] = useState<LiveScoreState | undefined>(undefined);
+
+  // Helper to get localStorage key for a match
+  const getLocalStorageKeyForMatch = (matchId: string) => `liveScore_wpl_${matchId}`;
 
   // Step 1: Check authentication
   useEffect(() => {
@@ -87,6 +91,30 @@ export default function WPLLiveScorePage() {
     loadData();
   }, [isAuthenticated]);
 
+  // Load initial state from localStorage when match is selected
+  useEffect(() => {
+    if (!selectedMatchId) {
+      setInitialLiveState(undefined);
+      return;
+    }
+
+    const localKey = getLocalStorageKeyForMatch(selectedMatchId);
+    const localData = localStorage.getItem(localKey);
+    
+    if (localData) {
+      try {
+        const parsedLocal = JSON.parse(localData);
+        console.log('[WPLLiveScore] Loaded from localStorage:', parsedLocal);
+        setInitialLiveState(parsedLocal);
+      } catch (e) {
+        console.error('[WPLLiveScore] Error parsing localStorage data:', e);
+        setInitialLiveState(undefined);
+      }
+    } else {
+      setInitialLiveState(undefined);
+    }
+  }, [selectedMatchId]);
+
   // Refresh match data when selected match changes (to get latest toss info from scorecard)
   // Also refresh periodically every 10 seconds to catch updates
   useEffect(() => {
@@ -111,10 +139,23 @@ export default function WPLLiveScorePage() {
 
   const selectedMatch = matches.find(m => m.id === selectedMatchId);
 
+  // Helper to get localStorage key for a match
+  const getLocalStorageKey = (matchId: string) => `liveScore_wpl_${matchId}`;
+
   const handleSaveLiveScore = async (state: LiveScoreState) => {
     if (!selectedMatch) return;
 
     try {
+      // First, save the full state to localStorage for persistence across refreshes
+      const localKey = getLocalStorageKey(selectedMatch.id);
+      const fullStateToSave = {
+        ...state,
+        lastUpdated: new Date().toISOString(),
+        matchId: selectedMatch.id,
+      };
+      localStorage.setItem(localKey, JSON.stringify(fullStateToSave));
+      console.log('[WPLLiveScore] Saved full state to localStorage');
+
       const token = localStorage.getItem('adminToken');
       const response = await fetch('/api/live-score', {
         method: 'POST',
@@ -414,6 +455,7 @@ export default function WPLLiveScorePage() {
                 weather={selectedMatch.weather}
                 pitchReport={selectedMatch.pitchReport || ''}
                 headToHead={selectedMatch.headToHead}
+                initialState={initialLiveState}
               />
             </div>
           )}
