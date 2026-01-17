@@ -185,6 +185,9 @@ export default function BallEntryPanel({
     swapBatters,
     updateMatchState,
     isFreeHit,
+    deleteBall,
+    editBallCommentary,
+    clearAllBalls,
   } = useLiveScore({
     initialTeam1Name: team1Name,
     initialTeam2Name: team2Name,
@@ -1001,6 +1004,9 @@ export default function BallEntryPanel({
         currentBowler={state.currentBowler}
         league={league}
         maxVisible={10}
+        onDeleteBall={deleteBall}
+        onEditBallCommentary={editBallCommentary}
+        onClearAllBalls={clearAllBalls}
       />
 
       {/* Ball Entry Buttons */}

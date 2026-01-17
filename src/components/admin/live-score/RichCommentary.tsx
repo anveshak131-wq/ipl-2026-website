@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Zap, 
@@ -11,6 +11,12 @@ import {
   Circle,
   Star,
   AlertCircle,
+  Edit2,
+  Trash2,
+  Sparkles,
+  Save,
+  XCircle,
+  Trash,
 } from 'lucide-react';
 import { BallEvent } from '@/hooks/useLiveScore';
 
@@ -22,6 +28,7 @@ interface CommentaryEntry {
   bowlerName?: string;
   isKeyMoment: boolean;
   eventType: 'boundary' | 'wicket' | 'milestone' | 'dot' | 'runs' | 'extras';
+  originalIndex: number; // Track original index for edit/delete
 }
 
 interface RichCommentaryProps {
@@ -31,6 +38,9 @@ interface RichCommentaryProps {
   currentBowler?: { name: string };
   league?: 'ipl' | 'wpl';
   maxVisible?: number;
+  onDeleteBall?: (index: number) => void;
+  onEditBallCommentary?: (index: number, commentary: string) => void;
+  onClearAllBalls?: () => void;
 }
 
 export default function RichCommentary({
@@ -40,9 +50,16 @@ export default function RichCommentary({
   currentBowler,
   league = 'ipl',
   maxVisible = 10,
+  onDeleteBall,
+  onEditBallCommentary,
+  onClearAllBalls,
 }: RichCommentaryProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState<number | null>(null);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editCommentary, setEditCommentary] = useState('');
+  const [isGeneratingAI, setIsGeneratingAI] = useState<number | null>(null);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   // Convert ball history to commentary entries
   const commentaryEntries = useMemo(() => {
@@ -101,12 +118,88 @@ export default function RichCommentary({
         bowlerName: currentBowler?.name,
         isKeyMoment,
         eventType,
+        originalIndex: index,
       });
     });
     }
 
     return entries.reverse(); // Most recent first
   }, [ballHistory, currentBatter, currentBowler]);
+
+  // Generate AI-enhanced commentary
+  const generateAICommentary = useCallback(async (entry: CommentaryEntry) => {
+    setIsGeneratingAI(entry.originalIndex);
+    
+    // Simulate AI generation with cricket-specific commentary
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const { event, batterName, bowlerName, eventType } = entry;
+    let aiCommentary = '';
+    
+    if (event.type === 'W') {
+      const dismissal = event.dismissalType || 'out';
+      const fielder = event.fielderName ? ` Brilliant effort by ${event.fielderName}!` : '';
+      aiCommentary = `💥 WICKET! ${batterName || 'The batter'} is ${dismissal}! ${bowlerName || 'The bowler'} strikes!${fielder} The crowd erupts as another one bites the dust!`;
+    } else if (event.type === 6) {
+      aiCommentary = `🚀 MASSIVE SIX! ${batterName || 'The batter'} launches it into the stands! ${bowlerName || 'The bowler'} can only watch as the ball disappears into the night sky. What a shot!`;
+    } else if (event.type === 4) {
+      const shots = ['elegant cover drive', 'fierce pull shot', 'delicate late cut', 'powerful straight drive', 'crisp square cut'];
+      const randomShot = shots[Math.floor(Math.random() * shots.length)];
+      aiCommentary = `🔥 FOUR! A ${randomShot} from ${batterName || 'the batter'}! The ball races to the boundary. ${bowlerName || 'The bowler'} is left searching for answers.`;
+    } else if (event.type === 0) {
+      const dotComments = [
+        `Excellent delivery! ${bowlerName || 'The bowler'} beats the bat.`,
+        `Dot ball! Good pressure from ${bowlerName || 'the bowler'}.`,
+        `No run there. ${batterName || 'The batter'} defends solidly.`,
+        `Tight bowling! Building pressure here.`,
+      ];
+      aiCommentary = `⚪ ${dotComments[Math.floor(Math.random() * dotComments.length)]}`;
+    } else if (typeof event.type === 'number' && event.type > 0) {
+      const runComments = event.type === 1 
+        ? ['Quick single taken!', 'Sharp running between the wickets.', 'They sneak a quick single.']
+        : event.type === 2 
+          ? ['Excellent running! Two runs taken.', 'Good placement and they come back for two.']
+          : ['Three runs! Outstanding running between the wickets.'];
+      aiCommentary = `🏃 ${runComments[Math.floor(Math.random() * runComments.length)]}`;
+    } else if (String(event.type).includes('NB')) {
+      aiCommentary = `⚠️ NO BALL! ${bowlerName || 'The bowler'} oversteps. Free hit coming up! The batting team gets a bonus run.`;
+    } else if (String(event.type).includes('WD')) {
+      aiCommentary = `⚠️ WIDE! ${bowlerName || 'The bowler'} strays down leg side. An extra run added to the total.`;
+    } else {
+      aiCommentary = `Ball bowled by ${bowlerName || 'the bowler'} to ${batterName || 'the batter'}.`;
+    }
+    
+    if (onEditBallCommentary) {
+      onEditBallCommentary(entry.originalIndex, aiCommentary);
+    }
+    
+    setIsGeneratingAI(null);
+  }, [onEditBallCommentary]);
+
+  // Handle delete ball
+  const handleDeleteBall = useCallback((index: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onDeleteBall) {
+      onDeleteBall(index);
+    }
+  }, [onDeleteBall]);
+
+  // Handle edit save
+  const handleSaveEdit = useCallback((originalIndex: number) => {
+    if (onEditBallCommentary && editCommentary.trim()) {
+      onEditBallCommentary(originalIndex, editCommentary.trim());
+    }
+    setEditingIndex(null);
+    setEditCommentary('');
+  }, [onEditBallCommentary, editCommentary]);
+
+  // Handle clear all
+  const handleClearAll = useCallback(() => {
+    if (onClearAllBalls) {
+      onClearAllBalls();
+    }
+    setShowClearConfirm(false);
+  }, [onClearAllBalls]);
 
   const visibleEntries = isExpanded 
     ? commentaryEntries 
@@ -283,24 +376,57 @@ export default function RichCommentary({
             ({commentaryEntries.length} {commentaryEntries.length === 1 ? 'ball' : 'balls'})
           </span>
         </div>
-        {commentaryEntries.length > maxVisible && (
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors"
-          >
-            {isExpanded ? (
-              <>
-                <ChevronUp className="w-4 h-4" />
-                Show Less
-              </>
-            ) : (
-              <>
-                <ChevronDown className="w-4 h-4" />
-                Show More ({commentaryEntries.length - maxVisible} more)
-              </>
-            )}
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {/* Clear All Button */}
+          {onClearAllBalls && commentaryEntries.length > 0 && (
+            <>
+              {showClearConfirm ? (
+                <div className="flex items-center gap-2 bg-red-500/20 px-3 py-1 rounded-lg">
+                  <span className="text-xs text-red-400">Clear all?</span>
+                  <button
+                    onClick={handleClearAll}
+                    className="text-xs text-red-400 hover:text-red-300 font-bold"
+                  >
+                    Yes
+                  </button>
+                  <button
+                    onClick={() => setShowClearConfirm(false)}
+                    className="text-xs text-gray-400 hover:text-gray-300"
+                  >
+                    No
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowClearConfirm(true)}
+                  className="flex items-center gap-1 text-xs text-red-400 hover:text-red-300 px-2 py-1 rounded hover:bg-red-500/10 transition-colors"
+                  title="Clear all balls"
+                >
+                  <Trash className="w-3 h-3" />
+                  Clear All
+                </button>
+              )}
+            </>
+          )}
+          {commentaryEntries.length > maxVisible && (
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              {isExpanded ? (
+                <>
+                  <ChevronUp className="w-4 h-4" />
+                  Show Less
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="w-4 h-4" />
+                  Show More ({commentaryEntries.length - maxVisible} more)
+                </>
+              )}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Commentary List */}
@@ -311,6 +437,7 @@ export default function RichCommentary({
             const colorClass = getEventColor(entry.eventType, entry.event);
             const textColorClass = getEventTextColor(entry.eventType, entry.event);
             const description = getEventDescription(entry);
+            const isEditing = editingIndex === entry.originalIndex;
 
             return (
               <motion.div
@@ -323,8 +450,9 @@ export default function RichCommentary({
                   border-l-4 ${colorClass} p-4 hover:bg-white/5 transition-all cursor-pointer
                   ${entry.isKeyMoment ? 'ring-2 ring-yellow-500/30' : ''}
                   ${isSelected ? 'bg-white/10' : ''}
+                  ${isEditing ? 'bg-blue-500/10' : ''}
                 `}
-                onClick={() => setSelectedEntry(isSelected ? null : index)}
+                onClick={() => !isEditing && setSelectedEntry(isSelected ? null : index)}
               >
                 <div className="flex items-start gap-3">
                   {/* Event Icon */}
@@ -352,16 +480,96 @@ export default function RichCommentary({
                           Key Moment
                         </motion.span>
                       )}
+                      {entry.event.isEdited && (
+                        <span className="text-xs text-blue-400 italic">(edited)</span>
+                      )}
                     </div>
 
-                    {/* Event Description */}
-                    <p className={`text-sm font-semibold ${textColorClass} mb-1`}>
-                      {description}
-                    </p>
+                    {/* Event Description or Edit Mode */}
+                    {isEditing ? (
+                      <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
+                        <textarea
+                          value={editCommentary}
+                          onChange={(e) => setEditCommentary(e.target.value)}
+                          className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          rows={3}
+                          placeholder="Enter custom commentary..."
+                        />
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleSaveEdit(entry.originalIndex)}
+                            className="flex items-center gap-1 px-3 py-1 bg-green-600 hover:bg-green-500 text-white text-xs rounded-lg transition-colors"
+                          >
+                            <Save className="w-3 h-3" />
+                            Save
+                          </button>
+                          <button
+                            onClick={() => {
+                              setEditingIndex(null);
+                              setEditCommentary('');
+                            }}
+                            className="flex items-center gap-1 px-3 py-1 bg-gray-600 hover:bg-gray-500 text-white text-xs rounded-lg transition-colors"
+                          >
+                            <XCircle className="w-3 h-3" />
+                            Cancel
+                          </button>
+                          <button
+                            onClick={async () => {
+                              setIsGeneratingAI(entry.originalIndex);
+                              // Generate AI commentary inline
+                              await new Promise(resolve => setTimeout(resolve, 500));
+                              const { event, batterName, bowlerName } = entry;
+                              let aiCommentary = '';
+                              
+                              if (event.type === 'W') {
+                                const dismissal = event.dismissalType || 'out';
+                                const fielder = event.fielderName ? ` Brilliant effort by ${event.fielderName}!` : '';
+                                aiCommentary = `💥 WICKET! ${batterName || 'The batter'} is ${dismissal}!${fielder}`;
+                              } else if (event.type === 6) {
+                                aiCommentary = `🚀 MASSIVE SIX! ${batterName || 'The batter'} launches it into the stands!`;
+                              } else if (event.type === 4) {
+                                const shots = ['elegant cover drive', 'fierce pull shot', 'delicate late cut'];
+                                aiCommentary = `🔥 FOUR! A ${shots[Math.floor(Math.random() * shots.length)]} from ${batterName || 'the batter'}!`;
+                              } else if (event.type === 0) {
+                                aiCommentary = `⚪ Excellent delivery! ${bowlerName || 'The bowler'} beats the bat.`;
+                              } else if (typeof event.type === 'number' && event.type > 0) {
+                                aiCommentary = `🏃 ${event.type === 1 ? 'Quick single!' : event.type === 2 ? 'Two runs!' : 'Three runs!'} Good running.`;
+                              } else if (String(event.type).includes('NB')) {
+                                aiCommentary = `⚠️ NO BALL! Free hit coming up!`;
+                              } else if (String(event.type).includes('WD')) {
+                                aiCommentary = `⚠️ WIDE! Extra run to the batting team.`;
+                              } else {
+                                aiCommentary = `Ball delivered by ${bowlerName || 'the bowler'}.`;
+                              }
+                              
+                              setEditCommentary(aiCommentary);
+                              setIsGeneratingAI(null);
+                            }}
+                            disabled={isGeneratingAI === entry.originalIndex}
+                            className="flex items-center gap-1 px-3 py-1 bg-purple-600 hover:bg-purple-500 text-white text-xs rounded-lg transition-colors disabled:opacity-50"
+                          >
+                            <Sparkles className={`w-3 h-3 ${isGeneratingAI === entry.originalIndex ? 'animate-spin' : ''}`} />
+                            {isGeneratingAI === entry.originalIndex ? 'Generating...' : 'AI Enhance'}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <p className={`text-sm font-semibold ${textColorClass} mb-1`}>
+                          {description}
+                        </p>
+                        {/* Custom Commentary Display */}
+                        {entry.event.commentary && (
+                          <p className="text-xs text-purple-300 italic mt-1 bg-purple-500/10 px-2 py-1 rounded">
+                            {entry.event.commentary}
+                          </p>
+                        )}
+                      </>
+                    )}
 
                     {/* Expanded Details */}
                     <AnimatePresence>
-                      {isSelected && (
+                      {isSelected && !isEditing && (
                         <motion.div
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: 'auto', opacity: 1 }}
@@ -398,6 +606,33 @@ export default function RichCommentary({
                       )}
                     </AnimatePresence>
                   </div>
+
+                  {/* Action Buttons */}
+                  {!isEditing && (onDeleteBall || onEditBallCommentary) && (
+                    <div className="flex-shrink-0 flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                      {onEditBallCommentary && (
+                        <button
+                          onClick={() => {
+                            setEditingIndex(entry.originalIndex);
+                            setEditCommentary(entry.event.commentary || '');
+                          }}
+                          className="p-1.5 text-gray-400 hover:text-blue-400 hover:bg-blue-500/10 rounded transition-colors"
+                          title="Edit commentary"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                      {onDeleteBall && (
+                        <button
+                          onClick={(e) => handleDeleteBall(entry.originalIndex, e)}
+                          className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded transition-colors"
+                          title="Delete this ball"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </motion.div>
             );

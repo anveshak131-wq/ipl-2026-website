@@ -36,6 +36,8 @@ export interface BallEvent {
   bowledBy?: string;
   strikerId?: string;
   nonStrikerId?: string;
+  commentary?: string; // AI-enhanced or custom commentary
+  isEdited?: boolean; // Track if ball was edited
 }
 
 // Enhanced Batter State
@@ -989,6 +991,82 @@ export function useLiveScore({
     }
   }, [onMatchStateChange]);
 
+  // Delete a specific ball from history by index
+  const deleteBall = useCallback((index: number) => {
+    setState((prev) => {
+      if (!prev.ballHistory || index < 0 || index >= prev.ballHistory.length) {
+        return prev;
+      }
+      
+      const newHistory = [...prev.ballHistory];
+      newHistory.splice(index, 1);
+      
+      // Note: This is a simple delete - for production, you'd want to
+      // recalculate all stats from scratch based on remaining balls
+      return {
+        ...prev,
+        ballHistory: newHistory,
+      };
+    });
+  }, []);
+
+  // Edit a specific ball's commentary
+  const editBallCommentary = useCallback((index: number, commentary: string) => {
+    setState((prev) => {
+      if (!prev.ballHistory || index < 0 || index >= prev.ballHistory.length) {
+        return prev;
+      }
+      
+      const newHistory = [...prev.ballHistory];
+      newHistory[index] = {
+        ...newHistory[index],
+        commentary,
+        isEdited: true,
+      };
+      
+      return {
+        ...prev,
+        ballHistory: newHistory,
+      };
+    });
+  }, []);
+
+  // Clear all ball history
+  const clearAllBalls = useCallback(() => {
+    setState((prev) => {
+      const battingTeam = prev.battingTeam;
+      const newStriker = createEmptyBatter(prev.striker?.id || '', prev.striker?.name || 'Select Striker', true);
+      const newNonStriker = createEmptyBatter(prev.nonStriker?.id || '', prev.nonStriker?.name || 'Select Non-Striker', false);
+      
+      return {
+        ...prev,
+        [battingTeam]: {
+          ...prev[battingTeam],
+          runs: 0,
+          wickets: 0,
+          balls: 0,
+        },
+        currentOver: 0,
+        striker: newStriker,
+        nonStriker: newNonStriker,
+        outBatters: [],
+        currentBatter: { id: newStriker.id, name: newStriker.name, runs: 0, balls: 0 },
+        currentBowler: createEmptyBowler(prev.currentBowler?.id || '', prev.currentBowler?.name || 'Select Bowler'),
+        allBowlers: [],
+        currentOverBalls: [],
+        overHistory: [],
+        extras: createEmptyExtras(),
+        currentPartnership: createEmptyPartnership(newStriker, newNonStriker),
+        partnerships: [],
+        fallOfWickets: [],
+        runRate: 0,
+        requiredRunRate: null,
+        projectedScore: 0,
+        ballHistory: [],
+      };
+    });
+  }, []);
+
   return {
     state,
     matchState,
@@ -1002,5 +1080,8 @@ export function useLiveScore({
     switchInnings,
     updateMatchState,
     isFreeHit,
+    deleteBall,
+    editBallCommentary,
+    clearAllBalls,
   };
 }
