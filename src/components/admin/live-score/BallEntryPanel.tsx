@@ -258,13 +258,14 @@ export default function BallEntryPanel({
     return () => clearInterval(saveInterval);
   }, [state, matchState, timeoutState, drsState, impactPlayerState, superOverState, ballChanged, isEveningMatch, onSave, isSaving]);
 
-  // Immediate save to localStorage on any ball change for persistence across refreshes
+  // Immediate save to localStorage on any state change for persistence across refreshes
   useEffect(() => {
     if (!matchId) return;
     
-    // Save if there's ball history OR if toss has been set (important for pre-match state)
+    // Save if there's ball history OR if any match state has been set (toss, innings transitions, etc.)
     const hasToss = matchState?.toss?.winner && matchState?.toss?.decision;
-    if (state.ballHistory.length === 0 && !hasToss) return;
+    const hasMatchStateProgress = matchState?.currentState && matchState.currentState !== 'pre-match';
+    if (state.ballHistory.length === 0 && !hasToss && !hasMatchStateProgress) return;
     
     const localKey = `liveScore_${league}_${matchId}`;
     
@@ -279,11 +280,12 @@ export default function BallEntryPanel({
     const extendedState = {
       ...state,
       battingTeam, // Use calculated battingTeam
+      innings: state.innings, // Ensure innings is saved
       toss: matchState?.toss ? {
         winner: matchState.toss.winner,
         decision: matchState.toss.decision,
       } : undefined,
-      matchState: matchState, // Save matchState for restoring current state
+      matchState: matchState, // Save full matchState for restoring current state
       strategicTimeout: timeoutState,
       drsReviews: drsState,
       impactPlayer: impactPlayerState,
@@ -296,11 +298,30 @@ export default function BallEntryPanel({
     
     try {
       localStorage.setItem(localKey, JSON.stringify(extendedState));
-      console.log('[BallEntryPanel] Saved to localStorage, balls:', state.ballHistory.length, 'toss:', hasToss ? 'yes' : 'no', 'battingTeam:', battingTeam);
+      console.log('[BallEntryPanel] Saved to localStorage, currentState:', matchState?.currentState, 'innings:', state.innings, 'balls:', state.ballHistory.length);
     } catch (e) {
       console.warn('[BallEntryPanel] Failed to save to localStorage:', e);
     }
-  }, [state.ballHistory, state.team1.runs, state.team1.wickets, state.team2.runs, state.team2.wickets, matchId, league, matchState?.toss?.winner, matchState?.toss?.decision, matchState?.currentState]);
+  }, [
+    state.ballHistory.length, 
+    state.team1.runs, 
+    state.team1.wickets, 
+    state.team1.balls,
+    state.team2.runs, 
+    state.team2.wickets, 
+    state.team2.balls,
+    state.innings,
+    state.battingTeam,
+    state.currentBatter?.runs,
+    state.currentBowler?.wickets,
+    matchId, 
+    league, 
+    matchState?.toss?.winner, 
+    matchState?.toss?.decision, 
+    matchState?.currentState,
+    matchState?.innings1?.completed,
+    matchState?.innings2?.completed,
+  ]);
 
   // Initialize previous state ref
   useEffect(() => {

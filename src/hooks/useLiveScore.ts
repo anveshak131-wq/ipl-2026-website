@@ -282,6 +282,12 @@ export function useLiveScore({
 }: UseLiveScoreProps) {
   // For test pages, initialize directly to innings-1 state
   const getInitialMatchState = (): MatchState => {
+    // First priority: restore from persisted state (localStorage)
+    if (initialState?.matchState) {
+      console.log('[useLiveScore] Restoring matchState from initialState:', initialState.matchState.currentState);
+      return initialState.matchState;
+    }
+    
     if (isTestPage) {
       return {
         currentState: 'innings-1',
