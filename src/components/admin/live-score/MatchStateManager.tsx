@@ -70,6 +70,56 @@ export default function MatchStateManager({
         text: '#FFFFFF',
       };
 
+  // Direct state change - allows admin to jump to any state
+  const handleDirectStateChange = (targetState: MatchStateType) => {
+    // Create updated match state directly
+    const updatedState: MatchState = {
+      ...matchState,
+      currentState: targetState,
+      // Update locked states based on state order
+      lockedStates: getLockedStatesUpTo(targetState, matchState),
+    };
+
+    // Handle specific state requirements
+    if (targetState === 'innings-1' && !matchState.innings1?.battingTeam) {
+      // Default to team1 batting if toss not set
+      const battingTeam = matchState.toss?.decision === 'bat' 
+        ? matchState.toss.winner 
+        : (matchState.toss?.winner === 'team1' ? 'team2' : 'team1') || 'team1';
+      updatedState.innings1 = {
+        battingTeam,
+        startTime: new Date().toISOString(),
+      };
+    }
+
+    if (targetState === 'innings-2' && !matchState.innings2?.battingTeam) {
+      // Opposite team bats in 2nd innings
+      const innings1Batting = matchState.innings1?.battingTeam || 'team1';
+      updatedState.innings2 = {
+        battingTeam: innings1Batting === 'team1' ? 'team2' : 'team1',
+        startTime: new Date().toISOString(),
+      };
+    }
+
+    if (targetState === 'complete') {
+      updatedState.endTime = new Date().toISOString();
+    }
+
+    onStateChange(updatedState);
+  };
+
+  // Helper to get locked states up to a given state
+  const getLockedStatesUpTo = (targetState: MatchStateType, currentMatchState: MatchState): MatchStateType[] => {
+    const stateOrder: MatchStateType[] = ['pre-match', 'toss', 'innings-1', 'break', 'innings-2', 'complete'];
+    const targetIndex = stateOrder.indexOf(targetState);
+    // Keep existing locked states and add any states before the target
+    const locked = new Set(currentMatchState.lockedStates);
+    for (let i = 0; i < targetIndex; i++) {
+      locked.add(stateOrder[i]);
+    }
+    return Array.from(locked);
+  };
+
   const handleStateTransition = (targetState: MatchStateType) => {
     const transition = canTransition(matchState.currentState, targetState, matchState);
     
@@ -293,7 +343,7 @@ export default function MatchStateManager({
           </div>
         )}
 
-        {/* State Timeline */}
+        {/* State Timeline - Clickable Buttons */}
         <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-2">
           {(['pre-match', 'toss', 'innings-1', 'break', 'innings-2', 'complete'] as MatchStateType[]).map((state, index) => {
             const display = getStateDisplay(state);
@@ -302,17 +352,26 @@ export default function MatchStateManager({
 
             return (
               <div key={state} className="flex items-center gap-2 flex-shrink-0">
-                <div
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                <button
+                  onClick={() => {
+                    if (state === 'toss') {
+                      // Open toss modal
+                      setShowTossModal(true);
+                    } else if (state !== matchState.currentState) {
+                      // Direct state change for admin flexibility
+                      handleDirectStateChange(state);
+                    }
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer hover:scale-105 ${
                     isCurrent
-                      ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg'
+                      ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg ring-2 ring-blue-400'
                       : isCompleted
-                      ? 'bg-gray-700 text-gray-300'
-                      : 'bg-gray-800 text-gray-500'
+                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      : 'bg-gray-800 text-gray-500 hover:bg-gray-700 hover:text-gray-300'
                   }`}
                 >
                   {display.icon} {display.label}
-                </div>
+                </button>
                 {index < 5 && (
                   <ChevronRight className="w-4 h-4 text-gray-600 flex-shrink-0" />
                 )}
