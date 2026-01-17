@@ -259,7 +259,15 @@ async function handleGetRequest(context) {
         uniqueTeams.push(team);
       }
     }
-    teams = uniqueTeams;
+    
+    // If duplicates were found, update KV storage with clean data
+    if (uniqueTeams.length < teams.length) {
+      console.log(`Found ${teams.length - uniqueTeams.length} duplicate teams, cleaning up...`);
+      await env.IPL_CACHE.put('teams', JSON.stringify(uniqueTeams));
+      teams = uniqueTeams;
+    } else {
+      teams = uniqueTeams;
+    }
     
     return new Response(JSON.stringify(teams), {
       status: 200,
