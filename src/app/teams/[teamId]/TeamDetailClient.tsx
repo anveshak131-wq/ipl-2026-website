@@ -151,6 +151,28 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
   const [coachingStaff, setCoachingStaff] = useState<CoachingStaff | null>(null);
   const [keyPlayers, setKeyPlayers] = useState<KeyPlayers | null>(null);
   const [showPlayerComparison, setShowPlayerComparison] = useState(false);
+  const [showScorecardModal, setShowScorecardModal] = useState(false);
+  const [scorecard, setScorecard] = useState<any>(null);
+  const [loadingScorecard, setLoadingScorecard] = useState(false);
+
+  const fetchScorecard = async (matchId: string) => {
+    setLoadingScorecard(true);
+    try {
+      const response = await fetch(`/api/scorecards?matchId=${matchId}`);
+      if (response.ok) {
+        const data = await response.json();
+        const scorecards = Array.isArray(data) ? data : [];
+        // Find published scorecard only (draft = false)
+        const published = scorecards.find((s: any) => s.draft === false);
+        setScorecard(published || null);
+        setShowScorecardModal(true);
+      }
+    } catch (error) {
+      console.error('Error fetching scorecard:', error);
+    } finally {
+      setLoadingScorecard(false);
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -719,7 +741,16 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                         {lastMatch.team1.shortName} vs {lastMatch.team2.shortName}
                       </p>
                       <p className="text-sm text-gray-300 mb-3">{lastMatch.result || 'Result not available'}</p>
-                      <p className="text-xs text-gray-500">Status: {lastMatch.status}</p>
+                      <p className="text-xs text-gray-500 mb-3">Status: {lastMatch.status}</p>
+                      {lastMatch.status === 'completed' && (
+                        <button
+                          onClick={() => fetchScorecard(lastMatch.id)}
+                          disabled={loadingScorecard}
+                          className="mt-auto px-4 py-2 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold hover:from-green-700 hover:to-emerald-700 transition-all disabled:opacity-50 text-sm"
+                        >
+                          {loadingScorecard ? 'Loading...' : '📊 View Scorecard'}
+                        </button>
+                      )}
                     </>
                   ) : (
                     <p className="text-sm text-gray-400">No completed matches yet this season.</p>
@@ -1239,6 +1270,154 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
           primaryColor={primaryColor.solid}
           onClose={() => setShowPlayerComparison(false)}
         />
+      )}
+
+      {/* Scorecard Modal */}
+      {showScorecardModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0, 0, 0, 0.85)' }}>
+          <div className="relative w-full max-w-6xl max-h-[90vh] overflow-y-auto bg-gray-900 rounded-2xl border border-gray-700 shadow-2xl">
+            <button
+              onClick={() => {
+                setShowScorecardModal(false);
+                setScorecard(null);
+              }}
+              className="sticky top-4 right-4 float-right z-10 p-2 bg-gray-800 hover:bg-gray-700 rounded-full transition-colors"
+              aria-label="Close scorecard"
+            >
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {loadingScorecard ? (
+              <div className="p-20 text-center">
+                <div className="text-gray-300 mb-3 text-lg font-semibold">Loading scorecard...</div>
+              </div>
+            ) : scorecard ? (
+              <div className="space-y-8 p-6">
+                {/* Toss Info */}
+                {scorecard.matchInfo?.toss?.winner && (
+                  <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl">
+                    <div className="text-blue-400 text-sm font-semibold">Toss</div>
+                    <div className="text-white">
+                      {scorecard.matchInfo.toss.winner} won the toss and chose to {scorecard.matchInfo.toss.decision}
+                    </div>
+                  </div>
+                )}
+
+                {/* Match Result */}
+                {scorecard.result && scorecard.result.winner && (
+                  <div className="p-6 bg-gradient-to-r from-green-500/20 to-emerald-600/20 border-2 border-green-500/40 rounded-2xl">
+                    <div className="text-green-400 text-sm font-semibold mb-2">Match Result</div>
+                    <div className="text-white font-bold text-xl">
+                      {scorecard.result.winner}
+                      {scorecard.result.margin && ` won by ${scorecard.result.margin}`}
+                    </div>
+                    {scorecard.result.manOfTheMatch && (
+                      <div className="text-yellow-400 mt-2">Player of the Match: {scorecard.result.manOfTheMatch}</div>
+                    )}
+                  </div>
+                )}
+
+                {/* Innings */}
+                {scorecard.innings
+                  ?.sort((a: any, b: any) => (a.inningsNumber || 1) - (b.inningsNumber || 1))
+                  .map((inning: any, idx: number) => {
+                    const battingTeamName = inning.battingTeamId === scorecard.matchInfo.team1.id 
+                      ? scorecard.matchInfo.team1.name 
+                      : scorecard.matchInfo.team2.name;
+
+                    return (
+                      <div key={idx} className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                        <h3 className="text-xl font-bold text-white mb-4">
+                          {battingTeamName} - Innings {inning.inningsNumber || idx + 1}
+                        </h3>
+                        <div className="text-2xl font-bold text-green-400 mb-4">
+                          {inning.totalRuns}/{inning.totalWickets} ({inning.totalOvers} overs)
+                        </div>
+
+                        {/* Batting */}
+                        {inning.batting && inning.batting.length > 0 && (
+                          <div className="mb-6">
+                            <h4 className="text-lg font-semibold text-white mb-3">Batting</h4>
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-sm">
+                                <thead className="bg-gray-700/50">
+                                  <tr className="text-left text-gray-300">
+                                    <th className="p-2">Batter</th>
+                                    <th className="p-2 text-center">R</th>
+                                    <th className="p-2 text-center">B</th>
+                                    <th className="p-2 text-center">4s</th>
+                                    <th className="p-2 text-center">6s</th>
+                                    <th className="p-2 text-center">SR</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="text-gray-200">
+                                  {inning.batting.map((batter: any, i: number) => (
+                                    <tr key={i} className="border-t border-gray-700">
+                                      <td className="p-2">
+                                        <div className="font-semibold">{batter.name}</div>
+                                        {batter.dismissal?.details && (
+                                          <div className="text-xs text-gray-400">{batter.dismissal.details}</div>
+                                        )}
+                                      </td>
+                                      <td className="p-2 text-center font-bold">{batter.runs}</td>
+                                      <td className="p-2 text-center">{batter.balls}</td>
+                                      <td className="p-2 text-center">{batter.fours}</td>
+                                      <td className="p-2 text-center">{batter.sixes}</td>
+                                      <td className="p-2 text-center">{batter.strikeRate?.toFixed(2) || '-'}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Bowling */}
+                        {inning.bowling && inning.bowling.length > 0 && (
+                          <div>
+                            <h4 className="text-lg font-semibold text-white mb-3">Bowling</h4>
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-sm">
+                                <thead className="bg-gray-700/50">
+                                  <tr className="text-left text-gray-300">
+                                    <th className="p-2">Bowler</th>
+                                    <th className="p-2 text-center">O</th>
+                                    <th className="p-2 text-center">M</th>
+                                    <th className="p-2 text-center">R</th>
+                                    <th className="p-2 text-center">W</th>
+                                    <th className="p-2 text-center">Econ</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="text-gray-200">
+                                  {inning.bowling.map((bowler: any, i: number) => (
+                                    <tr key={i} className="border-t border-gray-700">
+                                      <td className="p-2 font-semibold">{bowler.name}</td>
+                                      <td className="p-2 text-center">{bowler.overs}</td>
+                                      <td className="p-2 text-center">{bowler.maidens || 0}</td>
+                                      <td className="p-2 text-center">{bowler.runs}</td>
+                                      <td className="p-2 text-center font-bold text-red-400">{bowler.wickets}</td>
+                                      <td className="p-2 text-center">{bowler.economyRate?.toFixed(2) || '-'}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+              </div>
+            ) : (
+              <div className="p-20 text-center">
+                <div className="text-gray-400 mb-3 text-lg">No published scorecard available</div>
+                <div className="text-gray-500 text-sm">The scorecard for this match hasn't been published yet.</div>
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
