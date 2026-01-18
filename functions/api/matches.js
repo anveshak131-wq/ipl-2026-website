@@ -422,16 +422,11 @@ async function handlePutRequest(context) {
       });
     }
     
+    // Update match with all fields from body, preserving existing values
     const updatedMatch = {
       ...matches[matchIndex],
-      ...(date && { date }),
-      ...(time && { time }),
-      ...(venue && { venue }),
-      ...(team1Id && { team1Id }),
-      ...(team2Id && { team2Id }),
-      ...(status && { status }),
-      ...(league && { league }), // Update league if provided
-      ...(playing11 !== undefined && { playing11 }) // Update playing11 if provided
+      ...body, // Spread all fields from body
+      id // Ensure ID doesn't change
     };
     
     // Ensure league property exists (default to existing or 'ipl')
