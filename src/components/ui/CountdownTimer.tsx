@@ -70,9 +70,23 @@ export default function CountdownTimer({ targetDate, onComplete, className = '',
 
   if (isExpired) {
     return (
-      <div className={`flex items-center justify-center gap-2 text-red-400 font-bold text-sm ${className}`}>
-        <span>Match Started!</span>
-      </div>
+      <motion.div 
+        className={`inline-flex items-center justify-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-red-600 to-rose-600 shadow-xl ${className}`}
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 200 }}
+      >
+        <motion.div
+          animate={{ 
+            scale: [1, 1.2, 1],
+            rotate: [0, 10, -10, 0]
+          }}
+          transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 1 }}
+        >
+          <span className="text-2xl">🏏</span>
+        </motion.div>
+        <span className="text-white font-black text-lg tracking-wide drop-shadow-lg">Match Started!</span>
+      </motion.div>
     );
   }
 
@@ -90,49 +104,139 @@ export default function CountdownTimer({ targetDate, onComplete, className = '',
     }, [value, isSeconds]);
 
     return (
-      <div className="flex flex-col items-center justify-center">
-        <div className="relative">
+      <motion.div 
+        className="flex flex-col items-center justify-center gap-2"
+        whileHover={{ scale: 1.05, y: -2 }}
+        transition={{ duration: 0.2 }}
+      >
+        <div className="relative group">
+          {/* Glow effect */}
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-500 rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity" />
+          
+          {/* Main card */}
           <motion.div
-            className="rounded-lg px-3 py-2 bg-gradient-to-br from-purple-900/80 to-purple-950/90 border border-purple-700/30 shadow-lg"
+            className="relative rounded-2xl overflow-hidden shadow-2xl"
             style={{
-              minWidth: '48px',
-              textAlign: 'center',
+              minWidth: '64px',
+              minHeight: '72px',
             }}
             animate={isFlipping && isSeconds ? {
-              opacity: [1, 0.5, 1],
-              scale: [1, 0.95, 1],
+              rotateX: [0, 90, 0],
             } : {}}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.6, ease: "easeInOut" }}
           >
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={`${label}-${value}-${flipKey}`}
-                className="text-xl font-bold text-white tabular-nums block"
-                initial={{ y: -10, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 10, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                {displayValue}
-              </motion.span>
-            </AnimatePresence>
+            {/* Gradient background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-900 to-black" />
+            
+            {/* Top shine */}
+            <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/10 to-transparent" />
+            
+            {/* Border glow */}
+            <motion.div 
+              className="absolute inset-0 rounded-2xl"
+              style={{
+                border: '2px solid transparent',
+                backgroundImage: 'linear-gradient(135deg, rgba(59, 130, 246, 0.5), rgba(147, 51, 234, 0.5))',
+                backgroundOrigin: 'border-box',
+                backgroundClip: 'border-box',
+                WebkitMask: 'linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0)',
+                WebkitMaskComposite: 'xor',
+                maskComposite: 'exclude',
+              }}
+              animate={{
+                opacity: [0.3, 0.6, 0.3],
+              }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            
+            {/* Center divider line */}
+            <div className="absolute left-0 right-0 top-1/2 h-[1px] bg-gradient-to-r from-transparent via-slate-700 to-transparent" />
+            
+            {/* Number display */}
+            <div className="relative flex items-center justify-center h-full">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`${label}-${value}-${flipKey}`}
+                  className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-blue-400 via-purple-400 to-pink-400 tabular-nums drop-shadow-2xl"
+                  initial={{ 
+                    y: isSeconds ? -20 : 0, 
+                    opacity: 0,
+                    rotateX: isSeconds ? 90 : 0,
+                  }}
+                  animate={{ 
+                    y: 0, 
+                    opacity: 1,
+                    rotateX: 0,
+                  }}
+                  exit={{ 
+                    y: isSeconds ? 20 : 0, 
+                    opacity: 0,
+                    rotateX: isSeconds ? -90 : 0,
+                  }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {displayValue}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+            
+            {/* Bottom reflection */}
+            <div className="absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/40 to-transparent" />
           </motion.div>
         </div>
-        <span className="text-[10px] text-gray-400 uppercase tracking-wider mt-1.5 font-semibold">
+        
+        {/* Label */}
+        <motion.span 
+          className="text-[11px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 uppercase tracking-[0.2em]"
+          animate={{
+            opacity: [0.7, 1, 0.7],
+          }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
           {label}
-        </span>
-      </div>
+        </motion.span>
+      </motion.div>
     );
   };
 
   return (
-    <div className={`flex items-center justify-center gap-1.5 ${className}`}>
+    <div className={`relative inline-flex items-center justify-center gap-3 ${className}`}>
+      {/* Background glow */}
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 rounded-3xl blur-2xl -z-10" />
+      
       <TimeUnit value={timeLeft.days} label="DAYS" />
-      <span className="text-lg font-bold text-white/40 pb-4">:</span>
+      
+      <motion.div
+        className="flex flex-col items-center gap-1 pb-8"
+        animate={{ opacity: [0.3, 1, 0.3] }}
+        transition={{ duration: 1.5, repeat: Infinity }}
+      >
+        <div className="w-2 h-2 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 shadow-lg" />
+        <div className="w-2 h-2 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 shadow-lg" />
+      </motion.div>
+      
       <TimeUnit value={timeLeft.hours} label="HOURS" />
-      <span className="text-lg font-bold text-white/40 pb-4">:</span>
+      
+      <motion.div
+        className="flex flex-col items-center gap-1 pb-8"
+        animate={{ opacity: [0.3, 1, 0.3] }}
+        transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
+      >
+        <div className="w-2 h-2 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 shadow-lg" />
+        <div className="w-2 h-2 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 shadow-lg" />
+      </motion.div>
+      
       <TimeUnit value={timeLeft.minutes} label="MIN" />
-      <span className="text-lg font-bold text-white/40 pb-4">:</span>
+      
+      <motion.div
+        className="flex flex-col items-center gap-1 pb-8"
+        animate={{ opacity: [0.3, 1, 0.3] }}
+        transition={{ duration: 1.5, repeat: Infinity, delay: 1 }}
+      >
+        <div className="w-2 h-2 rounded-full bg-gradient-to-br from-pink-400 to-rose-400 shadow-lg" />
+        <div className="w-2 h-2 rounded-full bg-gradient-to-br from-pink-400 to-rose-400 shadow-lg" />
+      </motion.div>
+      
       <TimeUnit value={timeLeft.seconds} label="SEC" isSeconds={true} />
     </div>
   );
