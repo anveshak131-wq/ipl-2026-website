@@ -207,7 +207,7 @@ export default function UpcomingFixturesWidget({ team, matches: providedMatches,
                       onClick={() => onViewScorecard(match.id)}
                       className="w-full py-2 px-4 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold transition-all text-sm flex items-center justify-center gap-2"
                     >
-                      <span>📊</span>
+                      <CustomEmoji type="chart" size={16} />
                       View Scorecard
                     </button>
                   )}
