@@ -652,9 +652,9 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                    }}>
                 <h3 className="text-2xl font-black mb-6 flex items-center gap-3" style={{ color: primaryColor.textOnLight }}>
                   <CricketBatIcon className="w-8 h-8" color={primaryColor.solid} />
-                  Upcoming Fixtures
+                  Fixtures
                 </h3>
-                <UpcomingFixturesWidget team={teamData} matches={allMatches} />
+                <UpcomingFixturesWidget team={teamData} matches={allMatches} onViewScorecard={fetchScorecard} />
               </div>
             )}
 
