@@ -164,7 +164,13 @@ const defaultTeams = [
     logo: '/logos/wpl_rcb_logo_animated.svg',
     description: 'The women\'s franchise of RCB with explosive talent',
     colors: { primary: '#C8102E', secondary: '#FFD700' },
-    trophies: [],
+    trophies: [
+      {
+        year: 2024,
+        title: 'WPL Champions',
+        season: 'WPL 2024'
+      }
+    ],
     homeGrounds: ['M. Chinnaswamy Stadium, Bengaluru']
   },
   {
