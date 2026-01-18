@@ -274,181 +274,99 @@ export default function UpcomingFixturesWidget({ team, matches: providedMatches,
         )}
       </div>
 
-      {/* Finished Matches */}
+      {/* Finished Matches (compact horizontal cards) */}
       {completedMatches.length > 0 && (
         <div>
-          <h4 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
-              <CustomEmoji type="checkmark" size={22} />
+          <h4 className="text-2xl font-bold text-white mb-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-md">
+              <CustomEmoji type="checkmark" size={18} />
             </div>
             <span className="bg-gradient-to-r from-emerald-400 to-green-400 bg-clip-text text-transparent">
               Finished Matches
             </span>
           </h4>
-          <div className="space-y-4">
-            {completedMatches.map((match, index) => {
-              const opponent = match.team1.id === team.id ? match.team2 : match.team1;
-              const isHome = match.venue && team.homeGrounds?.some(ground => match.venue.includes(ground));
 
-              return (
-                <motion.div
-                  key={match.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ scale: 1.02, y: -4 }}
-                  className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-800/90 via-slate-800/80 to-slate-900/90 backdrop-blur-xl border border-slate-700/50 hover:border-emerald-500/50 transition-all duration-500 group shadow-xl hover:shadow-emerald-500/20"
-                >
-                  {/* Success gradient bar on left */}
-                  <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-emerald-400 via-green-500 to-emerald-600"></div>
-                  
-                  <div className="p-6">
-                    {/* Match Header */}
-                    <div className="flex items-center justify-between mb-5">
-                      <div className="flex items-center gap-3">
-                        <div className="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                          <span className="text-xs font-semibold text-emerald-400 tracking-wide uppercase">Completed</span>
+          <div className="-mx-4 px-4 overflow-x-auto">
+            <div className="flex gap-4 pb-4">
+              {completedMatches.map((match, index) => {
+                const opponent = match.team1.id === team.id ? match.team2 : match.team1;
+                const isHome = match.venue && team.homeGrounds?.some(ground => match.venue.includes(ground));
+
+                return (
+                  <motion.div
+                    key={match.id}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.08 }}
+                    whileHover={{ translateY: -6 }}
+                    className="min-w-[300px] max-w-xs bg-gradient-to-br from-slate-900/80 to-slate-800/80 border border-slate-700/40 rounded-2xl p-4 shadow-lg"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="text-xs font-semibold px-2 py-1 rounded-md bg-slate-800/50 text-slate-300">COMPLETED</div>
+                        <div className="text-xs text-gray-400">{new Date(match.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
+                      </div>
+                      <div className="text-xs text-gray-400">{isHome ? 'Home' : 'Away'}</div>
+                    </div>
+
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          {match.team1.logo ? (
+                            <img src={match.team1.logo} alt={match.team1.shortName} className="w-10 h-10 rounded-md object-contain" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-md bg-slate-700" />
+                          )}
+                          <div>
+                            <div className={`text-sm font-bold ${match.team1.id === team.id ? 'text-emerald-300' : 'text-gray-200'}`}>{match.team1.shortName || match.team1.name}</div>
+                            <div className="text-xs text-gray-400">{match.team1Score || '—'}</div>
+                          </div>
                         </div>
-                        <div className="text-sm font-medium text-slate-400">
-                          {new Date(match.date).toLocaleDateString('en-US', { 
-                            month: 'short', 
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
+                      </div>
+
+                      <div className="text-center text-sm text-gray-300 font-bold">VS</div>
+
+                      <div className="flex-1 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <div>
+                            <div className={`text-sm font-bold ${match.team2.id === team.id ? 'text-emerald-300' : 'text-gray-200'}`}>{match.team2.shortName || match.team2.name}</div>
+                            <div className="text-xs text-gray-400">{match.team2Score || '—'}</div>
+                          </div>
+                          {match.team2.logo ? (
+                            <img src={match.team2.logo} alt={match.team2.shortName} className="w-10 h-10 rounded-md object-contain" />
+                          ) : (
+                            <div className="w-10 h-10 rounded-md bg-slate-700" />
+                          )}
                         </div>
                       </div>
                     </div>
 
-                    {/* Score Display - Side by Side */}
-                    <div className="mb-5 p-5 bg-slate-900/50 rounded-xl border border-slate-700/30">
-                      <div className="grid grid-cols-3 gap-4 items-center">
-                        {/* Team 1 */}
-                        <div className="text-center">
-                          <div className={`text-lg font-bold mb-2 ${match.team1.id === team.id ? 'text-emerald-400' : 'text-slate-300'}`}>
-                            {match.team1.shortName || match.team1.name}
-                          </div>
-                          <div className="text-3xl font-black text-white tracking-tight">
-                            {match.team1Score || 'N/A'}
-                          </div>
-                        </div>
-                        
-                        {/* VS Divider */}
-                        <div className="flex items-center justify-center">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 border-2 border-slate-600 flex items-center justify-center">
-                            <span className="text-xs font-bold text-slate-400">VS</span>
-                          </div>
-                        </div>
-                        
-                        {/* Team 2 */}
-                        <div className="text-center">
-                          <div className={`text-lg font-bold mb-2 ${match.team2.id === team.id ? 'text-emerald-400' : 'text-slate-300'}`}>
-                            {match.team2.shortName || match.team2.name}
-                          </div>
-                          <div className="text-3xl font-black text-white tracking-tight">
-                            {match.team2Score || 'N/A'}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Match Result */}
                     {match.result && (
-                      <div className="mb-4 p-4 rounded-xl bg-gradient-to-r from-emerald-500/15 via-green-500/15 to-emerald-500/15 border border-emerald-500/30 backdrop-blur-sm">
-                        <div className="flex items-start gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <CustomEmoji type="trophy" size={18} />
-                          </div>
-                          <div className="flex-1">
-                            <div className="text-xs font-semibold text-emerald-400 uppercase tracking-wide mb-1">Result</div>
-                            <div className="text-base font-bold text-white leading-relaxed">
-                              {match.result}
-                            </div>
-                          </div>
+                      <div className="mb-3">
+                        <div className="inline-flex items-center gap-2 px-3 py-2 rounded-full bg-slate-800/50 border border-slate-700 text-sm">
+                          <CustomEmoji type="trophy" size={14} />
+                          <span className="font-semibold text-white truncate">{match.result}</span>
                         </div>
                       </div>
                     )}
 
-                    {/* Venue */}
-                    {match.venue && (
-                      <div className="flex items-center gap-2 text-sm text-slate-400 mb-4 px-3 py-2 bg-slate-800/50 rounded-lg">
-                        <MapPin className="w-4 h-4 text-slate-500" />
-                        <span className="font-medium">{match.venue}</span>
-                      </div>
-                    )}
-
-                    {/* View Scorecard Button */}
-                    {onViewScorecard && (
-                      <motion.button
-                        onClick={() => onViewScorecard(match.id)}
-                        whileHover={{ scale: 1.03, y: -2 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="relative w-full py-3.5 px-6 rounded-2xl overflow-hidden group"
-                      >
-                        {/* Animated gradient background */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 group-hover:from-blue-500 group-hover:via-indigo-500 group-hover:to-purple-500 transition-all duration-500"></div>
-                        
-                        {/* Shine effect */}
-                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                        </div>
-                        
-                        {/* Button content */}
-                        <div className="relative flex items-center justify-center gap-2.5">
-                          {/* Icon container with rotation animation */}
-                          <motion.div
-                            animate={{ rotate: [0, 5, -5, 0] }}
-                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                            className="w-6 h-6 flex items-center justify-center"
-                          >
-                            <svg 
-                              className="w-6 h-6 text-white drop-shadow-lg" 
-                              fill="none" 
-                              stroke="currentColor" 
-                              viewBox="0 0 24 24"
-                            >
-                              <path 
-                                strokeLinecap="round" 
-                                strokeLinejoin="round" 
-                                strokeWidth={2.5} 
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" 
-                              />
-                            </svg>
-                          </motion.div>
-                          
-                          {/* Text with letter spacing */}
-                          <span className="text-base font-bold text-white tracking-wide drop-shadow-lg">
-                            View Scorecard
-                          </span>
-                          
-                          {/* Arrow with slide animation */}
-                          <motion.div
-                            animate={{ x: [0, 4, 0] }}
-                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                          >
-                            <svg 
-                              className="w-5 h-5 text-white drop-shadow-lg" 
-                              fill="none" 
-                              stroke="currentColor" 
-                              viewBox="0 0 24 24"
-                            >
-                              <path 
-                                strokeLinecap="round" 
-                                strokeLinejoin="round" 
-                                strokeWidth={2.5} 
-                                d="M13 7l5 5m0 0l-5 5m5-5H6" 
-                              />
-                            </svg>
-                          </motion.div>
-                        </div>
-                        
-                        {/* Bottom glow */}
-                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-blue-400/50 blur-lg group-hover:h-2 group-hover:bg-blue-300/70 transition-all duration-300"></div>
-                      </motion.button>
-                    )}
-                  </div>
-                </motion.div>
-              );
-            })}
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="text-xs text-gray-400 truncate">{match.venue}</div>
+                      {onViewScorecard ? (
+                        <button
+                          onClick={() => onViewScorecard(match.id)}
+                          className="px-3 py-1.5 rounded-md bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold hover:opacity-90 transition"
+                        >
+                          Scorecard
+                        </button>
+                      ) : (
+                        <a href={`/matches#${match.id}`} className="px-3 py-1.5 rounded-md bg-white/5 text-white text-sm font-semibold">Details</a>
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
