@@ -65,7 +65,20 @@ export default function RecentResultsTimeline({ team, matches: providedMatches, 
       <div className="space-y-6">
         {matches.map((match, index) => {
           const opponent = match.team1.id === team.id ? match.team2 : match.team1;
-          const isWin = match.result?.includes(team.shortName) || match.result?.includes(team.name);
+          
+          // Check if team won - match against various name formats
+          const teamNameVariations = [
+            team.name,
+            team.shortName,
+            team.name?.replace(' (WPL)', '').replace(' (IPL)', ''),
+            team.name?.replace('Bengaluru', 'Bangalore'), // Handle RCB name variation
+            team.name?.replace('Bangalore', 'Bengaluru')
+          ].filter(Boolean);
+          
+          const isWin = match.result && teamNameVariations.some(name => 
+            match.result?.toLowerCase().includes(name?.toLowerCase())
+          );
+          
           const isLoss = match.result && !isWin && !match.result.toLowerCase().includes('no result');
 
           return (
