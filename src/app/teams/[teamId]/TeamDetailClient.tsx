@@ -154,6 +154,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
   const [showScorecardModal, setShowScorecardModal] = useState(false);
   const [scorecard, setScorecard] = useState<any>(null);
   const [loadingScorecard, setLoadingScorecard] = useState(false);
+  const [showPlayerCards, setShowPlayerCards] = useState(false);
 
   const fetchScorecard = async (matchId: string) => {
     setLoadingScorecard(true);
@@ -811,13 +812,14 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                     players={teamData.players}
                     primaryColor={primaryColor.solid}
                     secondaryColor={secondaryColor.solid}
+                    league={league}
                   />
                 </div>
               )}
 
               {/* Player Comparison Button */}
               {teamData && teamData.players && teamData.players.length > 1 && (
-                <div className="flex justify-center">
+                <div className="flex justify-center gap-4">
                   <motion.button
                     onClick={() => setShowPlayerComparison(true)}
                     whileHover={{ scale: 1.05 }}
@@ -831,8 +833,27 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                   >
                     Compare Players
                   </motion.button>
+                  
+                  <motion.button
+                    onClick={() => setShowPlayerCards(!showPlayerCards)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-8 py-4 rounded-xl font-bold text-lg flex items-center gap-2"
+                    style={{
+                      background: showPlayerCards 
+                        ? `linear-gradient(135deg, ${secondaryColor.solid}, ${primaryColor.solid})`
+                        : `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
+                      color: '#FFFFFF',
+                      boxShadow: `0 10px 30px ${primaryColor.glow}40`,
+                    }}
+                  >
+                    {showPlayerCards ? '👤 Hide' : '👥 Show'} Player Cards
+                  </motion.button>
                 </div>
               )}
+              
+              {showPlayerCards && (
+              <>
               {/* Squad Filters */}
               <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4 rounded-lg border border-gray-800 bg-gray-900/50">
                 <div className="flex items-center gap-2">
@@ -990,6 +1011,8 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                   </AnimatedSection>
                 )
               ))}
+              </>
+              )}
               </motion.div>
             )}
 

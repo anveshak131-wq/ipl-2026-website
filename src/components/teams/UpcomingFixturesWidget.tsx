@@ -252,13 +252,72 @@ export default function UpcomingFixturesWidget({ team, matches: providedMatches,
 
                     {/* View Scorecard Button */}
                     {onViewScorecard && (
-                      <button
+                      <motion.button
                         onClick={() => onViewScorecard(match.id)}
-                        className="w-full py-3 px-5 rounded-xl bg-gradient-to-r from-emerald-600 via-green-600 to-emerald-600 hover:from-emerald-500 hover:via-green-500 hover:to-emerald-500 text-white font-bold transition-all duration-300 text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 hover:shadow-emerald-500/40 hover:scale-[1.02] group-hover:shadow-2xl"
+                        whileHover={{ scale: 1.03, y: -2 }}
+                        whileTap={{ scale: 0.98 }}
+                        className="relative w-full py-3.5 px-6 rounded-2xl overflow-hidden group"
                       >
-                        <CustomEmoji type="chart" size={18} />
-                        <span className="tracking-wide">View Full Scorecard</span>
-                      </button>
+                        {/* Animated gradient background */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 group-hover:from-blue-500 group-hover:via-indigo-500 group-hover:to-purple-500 transition-all duration-500"></div>
+                        
+                        {/* Shine effect */}
+                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                        </div>
+                        
+                        {/* Button content */}
+                        <div className="relative flex items-center justify-center gap-2.5">
+                          {/* Icon container with rotation animation */}
+                          <motion.div
+                            animate={{ rotate: [0, 5, -5, 0] }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                            className="w-6 h-6 flex items-center justify-center"
+                          >
+                            <svg 
+                              className="w-6 h-6 text-white drop-shadow-lg" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                            >
+                              <path 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round" 
+                                strokeWidth={2.5} 
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" 
+                              />
+                            </svg>
+                          </motion.div>
+                          
+                          {/* Text with letter spacing */}
+                          <span className="text-base font-bold text-white tracking-wide drop-shadow-lg">
+                            View Scorecard
+                          </span>
+                          
+                          {/* Arrow with slide animation */}
+                          <motion.div
+                            animate={{ x: [0, 4, 0] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                          >
+                            <svg 
+                              className="w-5 h-5 text-white drop-shadow-lg" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                            >
+                              <path 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round" 
+                                strokeWidth={2.5} 
+                                d="M13 7l5 5m0 0l-5 5m5-5H6" 
+                              />
+                            </svg>
+                          </motion.div>
+                        </div>
+                        
+                        {/* Bottom glow */}
+                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3/4 h-1 bg-blue-400/50 blur-lg group-hover:h-2 group-hover:bg-blue-300/70 transition-all duration-300"></div>
+                      </motion.button>
                     )}
                   </div>
                 </motion.div>

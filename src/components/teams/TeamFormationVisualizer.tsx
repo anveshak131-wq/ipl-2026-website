@@ -9,6 +9,7 @@ interface TeamFormationVisualizerProps {
   players: Player[];
   primaryColor: string;
   secondaryColor: string;
+  league?: 'ipl' | 'wpl';
 }
 
 type FormationType = 'balanced' | 'batting-heavy' | 'bowling-heavy' | 'aggressive';
@@ -17,6 +18,7 @@ export default function TeamFormationVisualizer({
   players,
   primaryColor,
   secondaryColor,
+  league = 'ipl',
 }: TeamFormationVisualizerProps) {
   const [formationType, setFormationType] = useState<FormationType>('balanced');
   const [impactPlayer, setImpactPlayer] = useState<string | null>(null);
@@ -199,7 +201,8 @@ export default function TeamFormationVisualizer({
             ))}
           </div>
 
-          {/* Impact Player Selection */}
+          {/* Impact Player Selection - IPL Only */}
+          {league === 'ipl' && (
           <div className="mt-6 pt-6 border-t border-white/10">
             <h4 className="text-md font-bold text-white mb-4 flex items-center gap-2">
               <Shuffle className="w-4 h-4" style={{ color: secondaryColor }} />
@@ -244,6 +247,7 @@ export default function TeamFormationVisualizer({
               </div>
             )}
           </div>
+          )}
         </div>
 
         {/* Formation Stats */}
