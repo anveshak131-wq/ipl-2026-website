@@ -169,39 +169,69 @@ export default function UpcomingFixturesWidget({ team, matches: providedMatches,
                   whileHover={{ scale: 1.02, y: -2 }}
                   className="relative p-4 rounded-xl bg-gradient-to-br from-green-900/20 to-emerald-900/10 backdrop-blur-md border border-green-500/30 hover:border-green-500/50 transition-all duration-300 group"
                 >
+                  {/* Match Header */}
                   <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3 flex-1">
+                    <div className="flex items-center gap-3">
                       <div className="p-2 rounded-lg bg-green-500/20">
                         <CustomEmoji type="checkmark" size={16} />
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-white">{team.shortName}</span>
-                          <span className="text-gray-400">vs</span>
-                          <span className="font-bold text-white">{opponent.shortName}</span>
-                        </div>
-                        {match.result && (
-                          <div className="text-xs text-green-400 mt-1 line-clamp-1">
-                            {match.result}
-                          </div>
+                      <div className="text-sm text-gray-400">
+                        {new Date(match.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Score Display */}
+                  <div className="mb-3 space-y-2">
+                    {/* Team 1 */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className={`font-bold ${match.team1.id === team.id ? 'text-white' : 'text-gray-300'}`}>
+                          {match.team1.shortName}
+                        </span>
+                        {isHome && match.team1.id === team.id && (
+                          <span className="text-xs text-green-400">●</span>
                         )}
                       </div>
+                      <span className="text-lg font-bold text-white">
+                        {match.team1Score || '-'}
+                      </span>
                     </div>
-                  </div>
-
-                  <div className="flex items-center gap-4 text-sm text-gray-300 mb-3">
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-4 h-4" />
-                      <span>{new Date(match.date).toLocaleDateString()}</span>
-                    </div>
-                    {match.venue && (
-                      <div className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4" />
-                        <span className="truncate max-w-[150px]">{match.venue}</span>
+                    
+                    {/* Team 2 */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className={`font-bold ${match.team2.id === team.id ? 'text-white' : 'text-gray-300'}`}>
+                          {match.team2.shortName}
+                        </span>
+                        {isHome && match.team2.id === team.id && (
+                          <span className="text-xs text-green-400">●</span>
+                        )}
                       </div>
-                    )}
+                      <span className="text-lg font-bold text-white">
+                        {match.team2Score || '-'}
+                      </span>
+                    </div>
                   </div>
 
+                  {/* Match Result */}
+                  {match.result && (
+                    <div className="mb-3 p-2 rounded-lg bg-green-500/10 border border-green-500/20">
+                      <div className="text-xs text-green-400 font-semibold line-clamp-2">
+                        {match.result}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Venue */}
+                  {match.venue && (
+                    <div className="flex items-center gap-1 text-xs text-gray-400 mb-3">
+                      <MapPin className="w-3 h-3" />
+                      <span className="truncate">{match.venue}</span>
+                    </div>
+                  )}
+
+                  {/* View Scorecard Button */}
                   {onViewScorecard && (
                     <button
                       onClick={() => onViewScorecard(match.id)}
