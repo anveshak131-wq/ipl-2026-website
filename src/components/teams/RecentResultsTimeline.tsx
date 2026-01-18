@@ -72,14 +72,22 @@ export default function RecentResultsTimeline({ team, matches: providedMatches, 
             team.shortName,
             team.name?.replace(' (WPL)', '').replace(' (IPL)', ''),
             team.name?.replace('Bengaluru', 'Bangalore'), // Handle RCB name variation
-            team.name?.replace('Bangalore', 'Bengaluru')
+            team.name?.replace('Bangalore', 'Bengaluru'),
+            // Add Women's team variations
+            team.name?.replace(' Women', ''),
+            team.shortName?.replace('-W', '')
           ].filter(Boolean);
           
-          const isWin = match.result && teamNameVariations.some(name => 
-            match.result?.toLowerCase().includes(name?.toLowerCase())
-          );
+          // Check if result contains "won" or "Win" with team name
+          const resultLower = match.result?.toLowerCase() || '';
+          const isWin = match.result && teamNameVariations.some(name => {
+            const nameLower = name?.toLowerCase() || '';
+            // Check if result mentions team name followed by "won"
+            return resultLower.includes(nameLower + ' won') || 
+                   resultLower.includes(nameLower + ' win');
+          });
           
-          const isLoss = match.result && !isWin && !match.result.toLowerCase().includes('no result');
+          const isLoss = match.result && !isWin && !resultLower.includes('no result') && !resultLower.includes('abandoned');
 
           return (
             <motion.div

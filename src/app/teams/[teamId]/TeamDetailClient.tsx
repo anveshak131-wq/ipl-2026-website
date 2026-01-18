@@ -50,6 +50,10 @@ import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { getOptimalTextColor } from '@/lib/colorUtils';
 import FlagImage from '@/components/ui/FlagImage';
 import { usePlayerUpdates } from '@/hooks/usePlayerUpdates';
+import ParticleBackground from '@/components/ui/ParticleBackground';
+import FormGuide from '@/components/teams/FormGuide';
+import QuickActionsBar from '@/components/teams/QuickActionsBar';
+import TrophyCounter from '@/components/teams/TrophyCounter';
 
 interface TeamDetailClientProps {
   teamId: string;
@@ -549,75 +553,161 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
       <Navbar />
       
       <main className="relative">
-        {/* Clean Hero Section */}
-        <section className="relative py-16 border-b border-gray-800">
-          {/* Simple subtle background */}
-          <div className="absolute inset-0 bg-gradient-to-b from-gray-950 to-gray-900 opacity-50" />
-          <div 
-            className="absolute inset-0 opacity-5"
-              style={{
-              background: `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
+        {/* Enhanced Hero Section */}
+        <section className="relative py-20 border-b border-gray-800 overflow-hidden">
+          {/* Animated Background Layers */}
+          <div className="absolute inset-0 bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950" />
+          <motion.div 
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(135deg, ${primaryColor.solid}15, ${secondaryColor.solid}15)`,
             }}
+            animate={{
+              backgroundPosition: ['0% 0%', '100% 100%', '0% 0%'],
+            }}
+            transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+          />
+          
+          {/* Particle System */}
+          <ParticleBackground 
+            primaryColor={primaryColor.solid}
+            secondaryColor={secondaryColor.solid}
+            particleCount={40}
           />
 
           <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Simple Back Button */}
-            <button 
-                onClick={() => router.push(isWPL ? '/wpl/teams' : '/teams')}
+            {/* Back Button */}
+            <motion.button 
+              onClick={() => router.push(isWPL ? '/wpl/teams' : '/teams')}
               className="mb-8 flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm"
-              >
+              whileHover={{ x: -4 }}
+              whileTap={{ scale: 0.95 }}
+            >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                  </svg>
+              </svg>
               Back to Teams
-            </button>
+            </motion.button>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
               {/* Left: Team Info */}
-              <div className="space-y-6">
+              <div className="space-y-8">
                 {/* Team Badge */}
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md border border-gray-700 bg-gray-900/50">
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-gray-700 bg-gray-900/70 backdrop-blur-sm"
+                  style={{
+                    boxShadow: `0 4px 20px ${primaryColor.solid}20`,
+                  }}
+                >
                   {!isWPL && <IPLLogo size="sm" />}
-                  {isWPL && <span className="text-xs font-semibold text-purple-400">WPL</span>}
-                  <span className="text-sm font-semibold text-gray-300">{teamData.shortName}</span>
-                </div>
+                  {isWPL && <span className="text-sm font-bold text-purple-400">WPL</span>}
+                  <span className="text-sm font-bold text-white">{teamData.shortName}</span>
+                </motion.div>
 
-                {/* Team Name */}
-                <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight">
-                    {teamData.name}
-                </h1>
+                {/* Team Name with Animation */}
+                <motion.h1 
+                  className="text-5xl md:text-6xl font-black text-white leading-tight"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  style={{
+                    textShadow: `0 4px 30px ${primaryColor.solid}40`,
+                  }}
+                >
+                  {teamData.name}
+                </motion.h1>
                 
                 {/* Description */}
-                <p className="text-base text-gray-400 leading-relaxed max-w-xl">
+                <motion.p 
+                  className="text-lg text-gray-300 leading-relaxed max-w-xl"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                >
                   {teamData.description}
-                </p>
-                    </div>
+                </motion.p>
+
+                {/* Form Guide */}
+                {allMatches.length > 0 && (
+                  <FormGuide 
+                    matches={allMatches}
+                    teamId={teamData.id}
+                    primaryColor={primaryColor.solid}
+                  />
+                )}
+
+                {/* Trophy Showcase */}
+                {teamData.trophies && teamData.trophies > 0 && (
+                  <TrophyCounter
+                    trophyCount={teamData.trophies}
+                    trophyYears={teamData.trophyYears}
+                    primaryColor={primaryColor.solid}
+                    teamName={teamData.shortName}
+                  />
+                )}
+
+                {/* Quick Actions Bar */}
+                <QuickActionsBar
+                  primaryColor={primaryColor.solid}
+                  onSquadClick={() => setActiveTab('squad')}
+                  onFixturesClick={() => {
+                    const fixturesSection = document.querySelector('[data-section="fixtures"]');
+                    fixturesSection?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  onNewsClick={() => router.push(isWPL ? '/wpl/news' : '/news')}
+                  league={teamLeague}
+                />
+              </div>
 
               {/* Right: Team Logo */}
-              <div className="relative flex items-center justify-center">
-                <div className="relative w-64 h-64 md:w-80 md:h-80 flex items-center justify-center">
-                    {teamLogoPath.endsWith('.json') ? (
-                    <div className="w-full h-full">
-                        <RCBLottie className="w-full h-full" />
-                      </div>
-                    ) : teamLogoPath.endsWith('rcb_logo_premium.svg') ? (
-                    <div className="w-full h-full flex items-center justify-center">
-                        <RCBLionLogo className="w-full h-full" />
-                      </div>
-                    ) : (
-                      <img 
-                        src={teamLogoPath}
-                        alt={`${teamData.shortName} logo`}
-                      className="w-full h-full object-contain"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = fallbackLogoPath;
-                        }}
-                      />
-                    )}
-                        </div>
-                      </div>
-                      </div>
-                  </div>
+              <motion.div 
+                className="relative flex items-center justify-center"
+                initial={{ opacity: 0, scale: 0.8, rotateY: 90 }}
+                animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+              >
+                <motion.div 
+                  className="relative w-80 h-80 md:w-96 md:h-96 flex items-center justify-center"
+                  whileHover={{ scale: 1.05, rotate: 5 }}
+                  transition={{ type: 'spring', stiffness: 300 }}
+                >
+                  {/* Glow effect behind logo */}
+                  <motion.div
+                    className="absolute inset-0 rounded-full blur-3xl"
+                    style={{
+                      background: `radial-gradient(circle, ${primaryColor.solid}40, transparent)`,
+                    }}
+                    animate={{
+                      scale: [1, 1.2, 1],
+                      opacity: [0.3, 0.6, 0.3],
+                    }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  />
+                  
+                  {teamLogoPath.endsWith('.json') ? (
+                    <div className="w-full h-full relative z-10">
+                      <RCBLottie className="w-full h-full" />
+                    </div>
+                  ) : teamLogoPath.endsWith('rcb_logo_premium.svg') ? (
+                    <div className="w-full h-full flex items-center justify-center relative z-10">
+                      <RCBLionLogo className="w-full h-full" />
+                    </div>
+                  ) : (
+                    <img 
+                      src={teamLogoPath}
+                      alt={`${teamData.shortName} logo`}
+                      className="w-full h-full object-contain relative z-10 drop-shadow-2xl"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = fallbackLogoPath;
+                      }}
+                    />
+                  )}
+                </motion.div>
+              </motion.div>
+            </div>
+          </div>
         </section>
 
         {/* Stats Section */}
@@ -645,7 +735,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
 
             {/* Upcoming Fixtures Widget */}
             {teamData && (
-              <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl animate-fade-in mb-6"
+              <div className="rounded-3xl backdrop-blur-xl p-8 border shadow-xl animate-fade-in mb-6" data-section="fixtures"
                    style={{
                      background: `linear-gradient(135deg, ${primaryColor.light}, ${secondaryColor.light})`,
                      borderColor: primaryColor.medium,
