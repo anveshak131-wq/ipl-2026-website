@@ -493,6 +493,7 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
                       <div className="text-green-400 text-sm font-semibold mb-2">Match Result</div>
                       <div className="text-white font-bold text-xl">
                         {scorecard.result.winner}
+                        {scorecard.result.margin && ` won by ${scorecard.result.margin}`}
                       </div>
                       {scorecard.result.manOfTheMatch && (
                         <div className="text-yellow-400 mt-2">Player of the Match: {scorecard.result.manOfTheMatch}</div>
