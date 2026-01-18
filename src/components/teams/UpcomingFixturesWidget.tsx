@@ -182,42 +182,33 @@ export default function UpcomingFixturesWidget({ team, matches: providedMatches,
                   </div>
 
                   {/* Score Display */}
-                  <div className="mb-3 space-y-2">
+                  <div className="mb-3 space-y-2 bg-black/20 rounded-lg p-3">
                     {/* Team 1 */}
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className={`font-bold ${match.team1.id === team.id ? 'text-white' : 'text-gray-300'}`}>
-                          {match.team1.shortName}
-                        </span>
-                        {isHome && match.team1.id === team.id && (
-                          <span className="text-xs text-green-400">●</span>
-                        )}
-                      </div>
-                      <span className="text-lg font-bold text-white">
-                        {match.team1Score || '-'}
+                      <span className={`font-semibold ${match.team1.id === team.id ? 'text-white' : 'text-gray-300'}`}>
+                        {match.team1.name || match.team1.shortName}
                       </span>
+                    </div>
+                    <div className="text-2xl font-bold text-white mb-2">
+                      {match.team1Score || 'N/A'}
                     </div>
                     
                     {/* Team 2 */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className={`font-bold ${match.team2.id === team.id ? 'text-white' : 'text-gray-300'}`}>
-                          {match.team2.shortName}
-                        </span>
-                        {isHome && match.team2.id === team.id && (
-                          <span className="text-xs text-green-400">●</span>
-                        )}
-                      </div>
-                      <span className="text-lg font-bold text-white">
-                        {match.team2Score || '-'}
+                    <div className="flex items-center justify-between pt-2 border-t border-white/10">
+                      <span className={`font-semibold ${match.team2.id === team.id ? 'text-white' : 'text-gray-300'}`}>
+                        {match.team2.name || match.team2.shortName}
                       </span>
+                    </div>
+                    <div className="text-2xl font-bold text-white">
+                      {match.team2Score || 'N/A'}
                     </div>
                   </div>
 
                   {/* Match Result */}
                   {match.result && (
-                    <div className="mb-3 p-2 rounded-lg bg-green-500/10 border border-green-500/20">
-                      <div className="text-xs text-green-400 font-semibold line-clamp-2">
+                    <div className="mb-3 p-3 rounded-lg bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30">
+                      <div className="text-xs text-gray-400 font-semibold uppercase mb-1">Match Result</div>
+                      <div className="text-sm text-white font-bold">
                         {match.result}
                       </div>
                     </div>
