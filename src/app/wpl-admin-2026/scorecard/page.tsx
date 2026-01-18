@@ -247,16 +247,28 @@ export default function ScorecardAdminPage() {
       const saved = await response.json();
       setScorecard(saved);
       
-      // Also update match with toss info if available
-      if (scorecard.matchInfo.toss?.winner && scorecard.matchInfo.toss?.decision && scorecard.matchInfo.matchId) {
+      // Also update match with scores, result, and toss info if available
+      if (scorecard.matchId) {
         try {
-          const matchesResponse = await fetch(`/api/matches?id=${scorecard.matchInfo.matchId}`, {
+          const matchesResponse = await fetch(`/api/matches?id=${scorecard.matchId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           
           if (matchesResponse.ok) {
             const match = await matchesResponse.json();
-            const tossWinner = scorecard.matchInfo.toss.winner === scorecard.matchInfo.team1.name ? 'team1' : 'team2';
+            
+            // Calculate scores from innings
+            const team1Score = scorecard.innings.find(inn => inn.battingTeamId === scorecard.matchInfo.team1.id);
+            const team2Score = scorecard.innings.find(inn => inn.battingTeamId === scorecard.matchInfo.team2.id);
+            
+            const team1ScoreStr = team1Score 
+              ? `${team1Score.totalRuns || 0}/${team1Score.totalWickets || 0} (${team1Score.totalOvers || 0} overs)`
+              : undefined;
+            const team2ScoreStr = team2Score 
+              ? `${team2Score.totalRuns || 0}/${team2Score.totalWickets || 0} (${team2Score.totalOvers || 0} overs)`
+              : undefined;
+            
+            const tossWinner = scorecard.matchInfo.toss?.winner === scorecard.matchInfo.team1.name ? 'team1' : 'team2';
             
             await fetch('/api/matches', {
               method: 'PUT',
@@ -266,19 +278,23 @@ export default function ScorecardAdminPage() {
               },
               body: JSON.stringify({
                 ...match,
+                team1Score: team1ScoreStr,
+                team2Score: team2ScoreStr,
+                result: scorecard.result?.winner ? `${scorecard.result.winner} won by ${scorecard.result.margin}` : match.result,
+                status: scorecard.result?.winner ? 'completed' : match.status,
                 matchState: {
                   ...match.matchState,
-                  toss: {
+                  toss: scorecard.matchInfo.toss?.winner ? {
                     winner: tossWinner,
                     decision: scorecard.matchInfo.toss.decision,
                     timestamp: Date.now(),
-                  },
+                  } : match.matchState?.toss,
                 },
               }),
             });
           }
         } catch (matchErr) {
-          console.error('Error updating match with toss info:', matchErr);
+          console.error('Error updating match with scorecard data:', matchErr);
           // Don't fail the scorecard save if match update fails
         }
       }
