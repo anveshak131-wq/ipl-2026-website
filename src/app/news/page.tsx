@@ -21,10 +21,14 @@ export default function NewsPage() {
   const { currentLeague, setCurrentLeague } = useLeague();
   const [news, setNews] = useState<News[]>([]);
 
-  // Default to IPL for news page
+  // Set league based on URL path
   useEffect(() => {
-    if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/wpl/')) {
-      setCurrentLeague('ipl');
+    if (typeof window !== 'undefined') {
+      if (window.location.pathname.startsWith('/wpl/')) {
+        setCurrentLeague('wpl');
+      } else {
+        setCurrentLeague('ipl');
+      }
     }
   }, [setCurrentLeague]);
   const [filteredNews, setFilteredNews] = useState<News[]>([]);
