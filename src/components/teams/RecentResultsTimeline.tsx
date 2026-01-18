@@ -75,7 +75,14 @@ export default function RecentResultsTimeline({ team, matches: providedMatches, 
             team.name?.replace('Bangalore', 'Bengaluru'),
             // Add Women's team variations
             team.name?.replace(' Women', ''),
-            team.shortName?.replace('-W', '')
+            team.shortName?.replace('-W', ''),
+            // Additional variations for RCB
+            'Royal Challengers Bangalore',
+            'Royal Challengers Bengaluru',
+            'RCB',
+            // Handle combined variations (e.g., "Royal Challengers Bangalore Women" -> "Royal Challengers Bangalore")
+            team.name?.replace(' Women', '').replace('Bengaluru', 'Bangalore'),
+            team.name?.replace(' Women', '').replace('Bangalore', 'Bengaluru'),
           ].filter(Boolean);
           
           // Check if result contains "won" or "Win" with team name

@@ -35,7 +35,14 @@ export default function FormGuide({ matches, teamId, primaryColor }: FormGuidePr
       team.name?.replace('Bengaluru', 'Bangalore'),
       team.name?.replace('Bangalore', 'Bengaluru'),
       team.name?.replace(' Women', ''),
-      team.shortName?.replace('-W', '')
+      team.shortName?.replace('-W', ''),
+      // Additional variations for RCB
+      'Royal Challengers Bangalore',
+      'Royal Challengers Bengaluru',
+      'RCB',
+      // Handle combined variations
+      team.name?.replace(' Women', '').replace('Bengaluru', 'Bangalore'),
+      team.name?.replace(' Women', '').replace('Bangalore', 'Bengaluru'),
     ].filter(Boolean);
     
     const isWin = teamNameVariations.some(name => {
@@ -54,11 +61,39 @@ export default function FormGuide({ matches, teamId, primaryColor }: FormGuidePr
   const wins = recentMatches.filter((m) => getMatchResult(m) === 'win').length;
   const winPercentage = (wins / recentMatches.length) * 100;
 
+  // Calculate win/loss streak
+  const calculateStreak = () => {
+    const allMatches = matches
+      .filter((m) => m.status === 'completed')
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    if (allMatches.length === 0) return { type: 'none', count: 0 };
+
+    const firstResult = getMatchResult(allMatches[0]);
+    if (firstResult === 'nr' || firstResult === 'unknown') return { type: 'none', count: 0 };
+
+    let streak = 1;
+    for (let i = 1; i < allMatches.length; i++) {
+      const result = getMatchResult(allMatches[i]);
+      if (result === firstResult) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+
+    return { type: firstResult, count: streak };
+  };
+
+  const streak = calculateStreak();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex items-center gap-4"
+      className="space-y-4"
+    >
+      <div className="flex items-center gap-4 flex-wrap"
     >
       <div className="flex items-center gap-2">
         <span className="text-sm font-semibold text-gray-400">Form:</span>
@@ -133,6 +168,103 @@ export default function FormGuide({ matches, teamId, primaryColor }: FormGuidePr
       >
         {winPercentage.toFixed(0)}% Win Rate
       </motion.div>
+      </div>
+
+      {/* Win/Loss Streak Badge */}
+      {streak.count >= 2 && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.6, type: 'spring', stiffness: 200 }}
+          className={`relative overflow-hidden rounded-xl px-5 py-3 ${
+            streak.type === 'win'
+              ? 'bg-gradient-to-r from-green-500/20 via-green-500/10 to-green-500/20 border-2 border-green-500/40'
+              : 'bg-gradient-to-r from-red-500/20 via-red-500/10 to-red-500/20 border-2 border-red-500/40'
+          }`}
+          style={{
+            boxShadow: streak.type === 'win'
+              ? '0 8px 32px rgba(34, 197, 94, 0.3)'
+              : '0 8px 32px rgba(239, 68, 68, 0.3)',
+          }}
+        >
+          {/* Animated shine effect */}
+          <motion.div
+            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+            animate={{
+              x: ['-100%', '100%'],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              repeatDelay: 1,
+            }}
+          />
+
+          {/* Content */}
+          <div className="relative flex items-center gap-3">
+            {streak.type === 'win' && (
+              <motion.span
+                className="text-2xl"
+                animate={{
+                  scale: [1, 1.2, 1],
+                  rotate: [0, 10, -10, 0],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  repeatDelay: 1,
+                }}
+              >
+                🔥
+              </motion.span>
+            )}
+            <div className="flex items-baseline gap-2">
+              <span
+                className={`text-2xl font-black ${
+                  streak.type === 'win' ? 'text-green-400' : 'text-red-400'
+                }`}
+              >
+                {streak.count}
+              </span>
+              <span
+                className={`text-sm font-bold uppercase tracking-wide ${
+                  streak.type === 'win' ? 'text-green-500' : 'text-red-500'
+                }`}
+              >
+                Match {streak.type === 'win' ? 'Win' : 'Loss'} Streak
+              </span>
+            </div>
+            {streak.type === 'loss' && (
+              <motion.span
+                className="text-xl"
+                animate={{
+                  y: [0, -4, 0],
+                }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                }}
+              >
+                📉
+              </motion.span>
+            )}
+          </div>
+
+          {/* Pulsing background effect for win streaks */}
+          {streak.type === 'win' && (
+            <motion.div
+              className="absolute inset-0 bg-green-500/10"
+              animate={{
+                opacity: [0, 0.3, 0],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+              }}
+            />
+          )}
+        </motion.div>
+      )}
     </motion.div>
   );
 }
