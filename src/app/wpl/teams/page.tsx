@@ -106,8 +106,16 @@ function WPLTeamsPageContent() {
                 
                 console.log('WPL Teams page: Fetched players:', playersData?.length || 0);
                 
-                const teamsWithPlayers = teamsData
-                    .filter(team => !isPlaceholderTeam(team)) // Filter out placeholder teams
+                // Deduplicate teams by ID first (in case API returns duplicates)
+                const uniqueTeamsMap = new Map();
+                teamsData.forEach(team => {
+                    if (!isPlaceholderTeam(team) && !uniqueTeamsMap.has(team.id)) {
+                        uniqueTeamsMap.set(team.id, team);
+                    }
+                });
+                const uniqueTeamsData = Array.from(uniqueTeamsMap.values());
+                
+                const teamsWithPlayers = uniqueTeamsData
                     .map(team => {
                         const normalizedTeamId = normalizeId(team.id);
                         const teamIdVariations = [
