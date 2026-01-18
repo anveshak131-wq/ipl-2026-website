@@ -20,11 +20,7 @@ export default function FormGuide({ matches, teamId }: FormGuideProps) {
 
   const getMatchResult = (match: Match) => {
     if (!match.result) return 'unknown';
-    const resultLower = match.result.toLowerCase();
     const team = match.team1.id === teamId ? match.team1 : match.team2;
-
-    // quick NR checks
-    if (resultLower.includes('no result') || resultLower.includes('abandoned')) return 'nr';
 
     // build name variants to match against result strings
     const normalize = (s?: string) =>
@@ -36,6 +32,12 @@ export default function FormGuide({ matches, teamId }: FormGuideProps) {
         .trim()
         .toLowerCase();
 
+    // normalize the result text as well so variants like 'Bengaluru' -> 'Bangalore' match
+    const normalizedResult = normalize(String(match.result));
+
+    // quick NR checks
+    if (normalizedResult.includes('no result') || normalizedResult.includes('abandoned')) return 'nr';
+
     const variants = Array.from(new Set([
       normalize(team.name),
       normalize(team.shortName),
@@ -44,7 +46,7 @@ export default function FormGuide({ matches, teamId }: FormGuideProps) {
     ].filter(Boolean) as string[]));
 
     // verbs indicating a win (or defeat)
-    const winWords = [' won ', ' win ', ' beat ', ' defeated ', 'defeat', 'defeated', 'beat'];
+    const winWords = [' won ', ' won by ', ' win ', ' beat ', ' defeated ', 'defeat', 'defeated', 'beat'];
     const lossWords = [' lost ', ' lost to ', ' lost by '];
 
     // helper to find earliest index of any word
@@ -58,14 +60,13 @@ export default function FormGuide({ matches, teamId }: FormGuideProps) {
     };
 
     for (const v of variants) {
-      const vi = resultLower.indexOf(v);
+      const vi = normalizedResult.indexOf(v);
       if (vi === -1) continue;
+      const winIdx = earliestIndex(normalizedResult, winWords);
+      const lossIdx = earliestIndex(normalizedResult, lossWords.concat([' beat ', 'defeated', ' lost ']));
 
-      const winIdx = earliestIndex(resultLower, winWords);
-      const lossIdx = earliestIndex(resultLower, lossWords.concat([' beat ', 'defeated', ' lost ']));
-
-      // If result contains explicit 'lost' mentioning this team after the verb, it's a loss
-      if (resultLower.includes('lost') && resultLower.indexOf('lost') < vi) return 'loss';
+      // If result contains explicit 'lost' mentioning this team before the name, it's a loss
+      if (normalizedResult.includes('lost') && normalizedResult.indexOf('lost') < vi) return 'loss';
 
       // If a win-word exists and the team appears before the verb, it's a win
       if (winIdx !== -1 && vi < winIdx) return 'win';
@@ -74,7 +75,7 @@ export default function FormGuide({ matches, teamId }: FormGuideProps) {
       if (lossIdx !== -1 && vi > lossIdx) return 'loss';
 
       // fallback: if any win-verb appears anywhere and variant present, assume winner if variant near start
-      if (winIdx !== -1) return vi <= winIdx + 30 ? 'win' : 'loss';
+      if (winIdx !== -1) return vi <= winIdx + 40 ? 'win' : 'loss';
 
       // default: if variant present but no verbs, assume loss is safer to avoid false positives
       return 'loss';
