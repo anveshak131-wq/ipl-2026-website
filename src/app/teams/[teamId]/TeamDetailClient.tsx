@@ -832,7 +832,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                       <p className="text-lg font-semibold text-white mb-1">
                         {lastMatch.team1.shortName} vs {lastMatch.team2.shortName}
                       </p>
-                      <p className="text-sm text-gray-300 mb-3">{lastMatch.result || 'Result not available'}</p>
+                      <p className="text-sm text-gray-300 mb-3 max-w-full overflow-hidden truncate whitespace-nowrap">{lastMatch.result || 'Result not available'}</p>
                       <p className="text-xs text-gray-500 mb-3">Status: {lastMatch.status}</p>
                       {lastMatch.status === 'completed' && (
                         <button

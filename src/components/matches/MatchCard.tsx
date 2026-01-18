@@ -301,7 +301,9 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
         {/* Result */}
         {match.result && (
           <div className="text-xs text-ipl-gold font-semibold pt-2 border-t border-white/10">
-            {match.result}
+            <div className="max-w-full overflow-hidden">
+              <span className="block truncate whitespace-nowrap">{match.result}</span>
+            </div>
           </div>
         )}
 

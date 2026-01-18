@@ -186,7 +186,7 @@ export default function RecentResultsTimeline({ team, matches: providedMatches, 
                   </div>
 
                   {match.result && (
-                    <p className="text-sm text-gray-300 mt-2">{match.result}</p>
+                    <p className="text-sm text-gray-300 mt-2 max-w-full overflow-hidden truncate whitespace-nowrap">{match.result}</p>
                   )}
                 </div>
               </Link>

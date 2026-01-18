@@ -140,8 +140,8 @@ export default function FormGuide({ matches, teamId, primaryColor }: FormGuidePr
                     <div className="text-xs text-gray-400">
                       {new Date(match.date).toLocaleDateString()}
                     </div>
-                    <div className="text-xs text-gray-300 mt-1 max-w-48">
-                      {match.result}
+                    <div className="text-xs text-gray-300 mt-1 max-w-[220px] overflow-hidden">
+                      <span className="block truncate whitespace-nowrap">{match.result}</span>
                     </div>
                     <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px">
                       <div className="border-4 border-transparent border-t-gray-900" />
