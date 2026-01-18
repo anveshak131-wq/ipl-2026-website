@@ -186,7 +186,7 @@ export default function UpcomingFixturesWidget({ team, matches: providedMatches,
                     {/* Team 1 */}
                     <div className="flex items-center justify-between">
                       <span className={`font-semibold ${match.team1.id === team.id ? 'text-white' : 'text-gray-300'}`}>
-                        {match.team1.name || match.team1.shortName}
+                        {match.team1.shortName || match.team1.name}
                       </span>
                     </div>
                     <div className="text-2xl font-bold text-white mb-2">
@@ -196,7 +196,7 @@ export default function UpcomingFixturesWidget({ team, matches: providedMatches,
                     {/* Team 2 */}
                     <div className="flex items-center justify-between pt-2 border-t border-white/10">
                       <span className={`font-semibold ${match.team2.id === team.id ? 'text-white' : 'text-gray-300'}`}>
-                        {match.team2.name || match.team2.shortName}
+                        {match.team2.shortName || match.team2.name}
                       </span>
                     </div>
                     <div className="text-2xl font-bold text-white">
