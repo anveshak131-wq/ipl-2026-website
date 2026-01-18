@@ -651,13 +651,14 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                 {/* Quick Actions Bar */}
                 <QuickActionsBar
                   primaryColor={primaryColor.solid}
-                  onSquadClick={() => setActiveTab('squad')}
+                  onSquadClick={() => setShowPlayerCards(!showPlayerCards)}
                   onFixturesClick={() => {
                     const fixturesSection = document.querySelector('[data-section="fixtures"]');
                     fixturesSection?.scrollIntoView({ behavior: 'smooth' });
                   }}
                   onNewsClick={() => router.push(isWPL ? '/wpl/news' : '/news')}
                   league={teamLeague}
+                  showPlayerCards={showPlayerCards}
                 />
               </div>
 
@@ -922,22 +923,6 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                     }}
                   >
                     Compare Players
-                  </motion.button>
-                  
-                  <motion.button
-                    onClick={() => setShowPlayerCards(!showPlayerCards)}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="px-8 py-4 rounded-xl font-bold text-lg flex items-center gap-2"
-                    style={{
-                      background: showPlayerCards 
-                        ? `linear-gradient(135deg, ${secondaryColor.solid}, ${primaryColor.solid})`
-                        : `linear-gradient(135deg, ${primaryColor.solid}, ${secondaryColor.solid})`,
-                      color: '#FFFFFF',
-                      boxShadow: `0 10px 30px ${primaryColor.glow}40`,
-                    }}
-                  >
-                    {showPlayerCards ? '👤 Hide' : '👥 Show'} Player Cards
                   </motion.button>
                 </div>
               )}

@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Users, Calendar, Newspaper, ShoppingBag } from 'lucide-react';
+import { Users, Calendar, Newspaper, ShoppingBag, X } from 'lucide-react';
 
 interface QuickActionsBarProps {
   primaryColor: string;
@@ -9,6 +9,7 @@ interface QuickActionsBarProps {
   onFixturesClick: () => void;
   onNewsClick: () => void;
   league?: 'ipl' | 'wpl';
+  showPlayerCards?: boolean;
 }
 
 export default function QuickActionsBar({
@@ -17,13 +18,15 @@ export default function QuickActionsBar({
   onFixturesClick,
   onNewsClick,
   league = 'ipl',
+  showPlayerCards = false,
 }: QuickActionsBarProps) {
   const actions = [
     {
-      icon: Users,
-      label: 'View Squad',
+      icon: showPlayerCards ? X : Users,
+      label: showPlayerCards ? 'Hide Squad' : 'View Squad',
       onClick: onSquadClick,
-      gradient: 'from-blue-500 to-cyan-500',
+      gradient: showPlayerCards ? 'from-red-500 to-orange-500' : 'from-blue-500 to-cyan-500',
+      isActive: showPlayerCards,
     },
     {
       icon: Calendar,
@@ -54,20 +57,25 @@ export default function QuickActionsBar({
     >
       {actions.map((action, index) => {
         const Icon = action.icon;
+        const isActive = 'isActive' in action && action.isActive;
         return (
           <motion.button
-            key={action.label}
+            key={index}
             onClick={action.onClick}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4 + index * 0.1 }}
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
-            className="group relative overflow-hidden rounded-xl bg-gray-900/50 border border-gray-700/50 backdrop-blur-sm px-6 py-3 transition-all hover:border-gray-600"
+            className={`group relative overflow-hidden rounded-xl backdrop-blur-sm px-6 py-3 transition-all ${
+              isActive 
+                ? 'bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border-2 border-blue-500/50' 
+                : 'bg-gray-900/50 border border-gray-700/50 hover:border-gray-600'
+            }`}
           >
             {/* Gradient overlay on hover */}
             <div
-              className={`absolute inset-0 bg-gradient-to-r ${action.gradient} opacity-0 group-hover:opacity-10 transition-opacity`}
+              className={`absolute inset-0 bg-gradient-to-r ${action.gradient} ${isActive ? 'opacity-10' : 'opacity-0 group-hover:opacity-10'} transition-opacity`}
             />
             
             {/* Content */}
