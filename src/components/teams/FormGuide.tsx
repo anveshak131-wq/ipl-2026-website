@@ -22,14 +22,65 @@ export default function FormGuide({ matches, teamId }: FormGuideProps) {
     if (!match.result) return 'unknown';
     const resultLower = match.result.toLowerCase();
     const team = match.team1.id === teamId ? match.team1 : match.team2;
-    const nameVariants = [team.name, team.shortName]
-      .filter(Boolean)
-      .map((n) => n!.toLowerCase());
 
+    // quick NR checks
     if (resultLower.includes('no result') || resultLower.includes('abandoned')) return 'nr';
 
-    const isWin = nameVariants.some((name) => resultLower.includes(name + ' won') || resultLower.includes(name + ' win'));
-    return isWin ? 'win' : 'loss';
+    // build name variants to match against result strings
+    const normalize = (s?: string) =>
+      (s || '')
+        .replace(/\s+\(wpl\)|\s+\(ipl\)/gi, '')
+        .replace(/\s+women/gi, '')
+        .replace(/bengaluru/gi, 'bangalore')
+        .replace(/\W+/g, ' ')
+        .trim()
+        .toLowerCase();
+
+    const variants = Array.from(new Set([
+      normalize(team.name),
+      normalize(team.shortName),
+      normalize(team.name?.replace(/-W$/i, '')),
+      normalize(team.shortName?.replace(/-W$/i, '')),
+    ].filter(Boolean) as string[]));
+
+    // verbs indicating a win (or defeat)
+    const winWords = [' won ', ' win ', ' beat ', ' defeated ', 'defeat', 'defeated', 'beat'];
+    const lossWords = [' lost ', ' lost to ', ' lost by '];
+
+    // helper to find earliest index of any word
+    const earliestIndex = (text: string, words: string[]) => {
+      let idx = -1;
+      for (const w of words) {
+        const i = text.indexOf(w);
+        if (i !== -1 && (idx === -1 || i < idx)) idx = i;
+      }
+      return idx;
+    };
+
+    for (const v of variants) {
+      const vi = resultLower.indexOf(v);
+      if (vi === -1) continue;
+
+      const winIdx = earliestIndex(resultLower, winWords);
+      const lossIdx = earliestIndex(resultLower, lossWords.concat([' beat ', 'defeated', ' lost ']));
+
+      // If result contains explicit 'lost' mentioning this team after the verb, it's a loss
+      if (resultLower.includes('lost') && resultLower.indexOf('lost') < vi) return 'loss';
+
+      // If a win-word exists and the team appears before the verb, it's a win
+      if (winIdx !== -1 && vi < winIdx) return 'win';
+
+      // If a beat/defeated appears and the team appears after the verb, it's a loss (e.g., "Team B beat Team A")
+      if (lossIdx !== -1 && vi > lossIdx) return 'loss';
+
+      // fallback: if any win-verb appears anywhere and variant present, assume winner if variant near start
+      if (winIdx !== -1) return vi <= winIdx + 30 ? 'win' : 'loss';
+
+      // default: if variant present but no verbs, assume loss is safer to avoid false positives
+      return 'loss';
+    }
+
+    return 'loss';
   };
 
   const wins = recentMatches.filter((m) => getMatchResult(m) === 'win').length;
