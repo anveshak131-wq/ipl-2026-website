@@ -106,16 +106,13 @@ function WPLTeamsPageContent() {
                 
                 console.log('WPL Teams page: Fetched players:', playersData?.length || 0);
                 
-                // Deduplicate teams by both ID and shortName (in case API returns duplicates)
+                // Deduplicate teams by shortName (API returns duplicates with string/number IDs)
                 const uniqueTeamsMap = new Map();
-                const seenShortNames = new Set();
                 teamsData.forEach(team => {
                     if (!isPlaceholderTeam(team)) {
-                        const key = `${team.id}-${team.shortName}`;
-                        // Only add if we haven't seen this ID or this shortName before
-                        if (!uniqueTeamsMap.has(team.id) && !seenShortNames.has(team.shortName)) {
-                            uniqueTeamsMap.set(team.id, team);
-                            seenShortNames.add(team.shortName);
+                        // Use shortName as key since some teams have duplicate IDs (as string vs number)
+                        if (!uniqueTeamsMap.has(team.shortName)) {
+                            uniqueTeamsMap.set(team.shortName, team);
                         }
                     }
                 });

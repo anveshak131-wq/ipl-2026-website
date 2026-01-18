@@ -247,18 +247,19 @@ async function handleGetRequest(context) {
     // Ensure all teams have league property (migration for existing data)
     teams = teams.map(team => ({
       ...team,
-      league: team.league || 'ipl' // Default to 'ipl' if missing
+      league: team.league || 'ipl', // Default to 'ipl' if missing
+      id: String(team.id) // Normalize IDs to strings
     }));
     
-    // Deduplicate teams by ID (in case of corrupted data)
-    const uniqueTeams = [];
-    const seenIds = new Set();
+    // Deduplicate teams by shortName (handles both string/number ID duplicates)
+    const uniqueTeamsMap = new Map();
     for (const team of teams) {
-      if (!seenIds.has(team.id)) {
-        seenIds.add(team.id);
-        uniqueTeams.push(team);
+      // Use shortName as key to deduplicate (some teams have both "11" and 11 as IDs)
+      if (!uniqueTeamsMap.has(team.shortName)) {
+        uniqueTeamsMap.set(team.shortName, team);
       }
     }
+    const uniqueTeams = Array.from(uniqueTeamsMap.values());
     
     // If duplicates were found, update KV storage with clean data
     if (uniqueTeams.length < teams.length) {
