@@ -75,19 +75,85 @@ export default function UpcomingFixturesWidget({ team, matches: providedMatches,
 
   return (
     <div className="space-y-8">
-      {/* Upcoming Fixtures */}
-      <div>
-        <h4 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-          <Calendar className="w-5 h-5" />
-          Upcoming Fixtures
-        </h4>
-        {upcomingMatches.length === 0 ? (
-          <div className="text-center py-8 text-gray-400 bg-white/5 rounded-xl">
-            <Calendar className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p className="text-sm">No upcoming fixtures scheduled</p>
+      {/* Upcoming Fixtures - Premium Design */}
+      <div className="relative">
+        {/* Animated background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5 rounded-3xl blur-3xl -z-10" />
+        
+        {/* Section Header */}
+        <motion.div 
+          className="mb-6 relative"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              {/* Icon with gradient background */}
+              <motion.div
+                className="relative p-4 rounded-2xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 shadow-2xl"
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Calendar className="w-7 h-7 text-white drop-shadow-lg" />
+                {/* Glow effect */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-400 to-purple-400 opacity-50 blur-xl -z-10" />
+              </motion.div>
+              
+              {/* Title with gradient */}
+              <div>
+                <h4 className="text-3xl font-black bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent tracking-tight">
+                  Upcoming Fixtures
+                </h4>
+                <p className="text-sm text-gray-400 font-medium mt-1">Next matches on schedule</p>
+              </div>
+            </div>
+            
+            {/* Match count badge */}
+            {upcomingMatches.length > 0 && (
+              <motion.div
+                className="px-4 py-2 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg"
+                whileHover={{ scale: 1.05 }}
+                animate={{ 
+                  boxShadow: ['0 10px 30px rgba(59, 130, 246, 0.3)', '0 10px 40px rgba(99, 102, 241, 0.5)', '0 10px 30px rgba(59, 130, 246, 0.3)']
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <span className="text-white font-bold text-lg">{upcomingMatches.length}</span>
+              </motion.div>
+            )}
           </div>
+          
+          {/* Decorative line */}
+          <motion.div 
+            className="h-1 w-32 rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 mt-4 shadow-lg"
+            animate={{ 
+              width: ['128px', '160px', '128px'],
+              opacity: [0.7, 1, 0.7]
+            }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </motion.div>
+
+        {upcomingMatches.length === 0 ? (
+          <motion.div 
+            className="text-center py-16 bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-3xl border border-slate-700/50 backdrop-blur-xl"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+          >
+            <motion.div
+              animate={{ 
+                y: [0, -10, 0],
+                rotate: [0, 5, -5, 0]
+              }}
+              transition={{ duration: 3, repeat: Infinity }}
+            >
+              <Calendar className="w-16 h-16 mx-auto mb-4 text-gray-600" />
+            </motion.div>
+            <p className="text-xl font-bold text-gray-400">No upcoming fixtures scheduled</p>
+            <p className="text-sm text-gray-500 mt-2">Check back soon for new matches</p>
+          </motion.div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {upcomingMatches.map((match, index) => {
               const opponent = match.team1.id === team.id ? match.team2 : match.team1;
               const isHome = match.venue && team.homeGrounds?.some(ground => match.venue.includes(ground));
@@ -95,50 +161,110 @@ export default function UpcomingFixturesWidget({ team, matches: providedMatches,
               return (
                 <motion.div
                   key={match.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  className="relative p-4 rounded-xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md border border-white/20 hover:border-white/40 transition-all duration-300 group"
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.15, type: "spring", stiffness: 100 }}
+                  whileHover={{ scale: 1.02, y: -4 }}
+                  className="group relative"
                 >
                   <Link href={`/matches#${match.id}`} className="block">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-blue-500/20">
-                          <Calendar className="w-4 h-4 text-blue-400" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-white">{team.shortName}</span>
-                            <span className="text-gray-400">vs</span>
-                            <span className="font-bold text-white">{opponent.shortName}</span>
+                    {/* Card with gradient border */}
+                    <div className="relative p-6 rounded-2xl bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl border-2 border-slate-700/50 hover:border-blue-500/50 transition-all duration-500 overflow-hidden">
+                      
+                      {/* Animated background on hover */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/0 via-indigo-600/10 to-purple-600/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      
+                      {/* Shimmer effect on hover */}
+                      <motion.div 
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"
+                        style={{ skewX: '-20deg' }}
+                      />
+                      
+                      <div className="relative z-10">
+                        {/* Match header */}
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex-1">
+                            {/* Teams */}
+                            <div className="flex items-center gap-3 mb-3">
+                              <motion.div 
+                                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600/20 to-blue-700/20 border border-blue-500/30"
+                                whileHover={{ scale: 1.05 }}
+                              >
+                                <span className="font-black text-xl text-white tracking-tight">{team.shortName}</span>
+                              </motion.div>
+                              
+                              <motion.div
+                                className="px-3 py-1.5 rounded-full bg-gradient-to-r from-gray-700 to-gray-800 border border-gray-600"
+                                animate={{ 
+                                  scale: [1, 1.1, 1],
+                                }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                              >
+                                <span className="font-bold text-sm text-gray-300">VS</span>
+                              </motion.div>
+                              
+                              <motion.div 
+                                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600/20 to-purple-700/20 border border-purple-500/30"
+                                whileHover={{ scale: 1.05 }}
+                              >
+                                <span className="font-black text-xl text-white tracking-tight">{opponent.shortName}</span>
+                              </motion.div>
+                            </div>
+                            
+                            {/* Home badge */}
+                            {isHome && (
+                              <motion.div 
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-green-600 to-emerald-600 shadow-lg"
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ delay: index * 0.15 + 0.3, type: "spring" }}
+                              >
+                                <MapPin className="w-3.5 h-3.5 text-white" />
+                                <span className="text-xs font-bold text-white tracking-wide">HOME</span>
+                              </motion.div>
+                            )}
                           </div>
-                          {isHome && (
-                            <span className="text-xs text-green-400 flex items-center gap-1 mt-1">
-                              <MapPin className="w-3 h-3" />
-                              Home Match
+                          
+                          {/* Arrow icon */}
+                          <motion.div
+                            className="p-3 rounded-xl bg-gradient-to-br from-blue-600/20 to-indigo-600/20 border border-blue-500/30"
+                            whileHover={{ x: 5, scale: 1.1 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <ArrowRight className="w-5 h-5 text-blue-400" />
+                          </motion.div>
+                        </div>
+
+                        {/* Match details */}
+                        <div className="flex flex-wrap items-center gap-4 mb-4">
+                          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-700/50 border border-slate-600/50">
+                            <Clock className="w-4 h-4 text-blue-400" />
+                            <span className="text-sm font-semibold text-gray-200">
+                              {new Date(match.date).toLocaleDateString('en-US', { 
+                                weekday: 'short', 
+                                month: 'short', 
+                                day: 'numeric' 
+                              })}
                             </span>
+                          </div>
+                          
+                          {match.venue && (
+                            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-700/50 border border-slate-600/50 flex-1 min-w-0">
+                              <MapPin className="w-4 h-4 text-purple-400 flex-shrink-0" />
+                              <span className="text-sm font-medium text-gray-300 truncate">{match.venue}</span>
+                            </div>
                           )}
                         </div>
-                      </div>
-                      <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-white group-hover:translate-x-1 transition-all" />
-                    </div>
 
-                    <div className="flex items-center gap-4 text-sm text-gray-300">
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-4 h-4" />
-                        <span>{new Date(match.date).toLocaleDateString()}</span>
-                      </div>
-                      {match.venue && (
-                        <div className="flex items-center gap-1">
-                          <MapPin className="w-4 h-4" />
-                          <span className="truncate max-w-[150px]">{match.venue}</span>
+                        {/* Countdown timer */}
+                        <div className="pt-4 border-t border-slate-700/50">
+                          <CountdownTimer 
+                            targetDate={match.date} 
+                            matchTime={match.time} 
+                            className="text-sm font-bold text-transparent bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text" 
+                          />
                         </div>
-                      )}
-                    </div>
-
-                    <div className="mt-3 pt-3 border-t border-white/10">
-                      <CountdownTimer targetDate={match.date} matchTime={match.time} className="text-xs" />
+                      </div>
                     </div>
                   </Link>
                 </motion.div>
