@@ -106,14 +106,21 @@ function WPLTeamsPageContent() {
                 
                 console.log('WPL Teams page: Fetched players:', playersData?.length || 0);
                 
-                // Deduplicate teams by ID first (in case API returns duplicates)
+                // Deduplicate teams by both ID and shortName (in case API returns duplicates)
                 const uniqueTeamsMap = new Map();
+                const seenShortNames = new Set();
                 teamsData.forEach(team => {
-                    if (!isPlaceholderTeam(team) && !uniqueTeamsMap.has(team.id)) {
-                        uniqueTeamsMap.set(team.id, team);
+                    if (!isPlaceholderTeam(team)) {
+                        const key = `${team.id}-${team.shortName}`;
+                        // Only add if we haven't seen this ID or this shortName before
+                        if (!uniqueTeamsMap.has(team.id) && !seenShortNames.has(team.shortName)) {
+                            uniqueTeamsMap.set(team.id, team);
+                            seenShortNames.add(team.shortName);
+                        }
                     }
                 });
                 const uniqueTeamsData = Array.from(uniqueTeamsMap.values());
+                console.log(`WPL Teams: Original count: ${teamsData.length}, After deduplication: ${uniqueTeamsData.length}`);
                 
                 const teamsWithPlayers = uniqueTeamsData
                     .map(team => {
