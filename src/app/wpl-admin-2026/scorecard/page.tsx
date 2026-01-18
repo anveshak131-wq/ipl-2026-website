@@ -792,6 +792,7 @@ export default function ScorecardAdminPage() {
                                     <option value="run-out">Run Out</option>
                                     <option value="stumped">Stumped</option>
                                     <option value="hit-wicket">Hit Wicket</option>
+                                    <option value="retd-out">Retd Out</option>
                                   </select>
                                 </td>
                                 <td className="p-2">
