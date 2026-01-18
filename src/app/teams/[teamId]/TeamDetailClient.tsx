@@ -756,35 +756,6 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                     <p className="text-sm text-gray-400">No completed matches yet this season.</p>
                   )}
                 </div>
-
-                {/* Next match */}
-                <div
-                  className="rounded-3xl backdrop-blur-xl p-6 border shadow-xl flex flex-col"
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(15,23,42,0.9), rgba(15,23,42,0.98))',
-                    borderColor: 'rgba(59,130,246,0.6)',
-                  }}
-                >
-                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-400 mb-2">Next match</p>
-                  {nextMatch ? (
-                    <>
-                      <p className="text-sm text-gray-400 mb-1">
-                        {new Date(nextMatch.date).toLocaleDateString('en-IN', {
-                          day: 'numeric',
-                          month: 'short',
-                        })}{' '}
-                        · {nextMatch.venue}
-                      </p>
-                      <p className="text-lg font-semibold text-white mb-1">
-                        {nextMatch.team1.shortName} vs {nextMatch.team2.shortName}
-                      </p>
-                      <p className="text-sm text-gray-300 mb-3">Starts at {nextMatch.time}</p>
-                      <p className="text-xs text-blue-400 font-semibold">Tap to view in schedule</p>
-                    </>
-                  ) : (
-                    <p className="text-sm text-gray-400">No upcoming matches scheduled yet.</p>
-                  )}
-                </div>
               </div>
             )}
           </div>
