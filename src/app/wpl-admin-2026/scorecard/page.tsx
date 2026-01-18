@@ -1058,19 +1058,37 @@ export default function ScorecardAdminPage() {
                 <h3 className="text-xl font-bold mb-6">Match Result</h3>
                 <div className="grid grid-cols-1 gap-6">
                   <div>
-                    <label className="block text-sm text-gray-400 mb-2">Match Result (Full Text)</label>
-                    <input
-                      type="text"
+                    <label className="block text-sm text-gray-400 mb-2">Winning Team</label>
+                    <select
                       value={scorecard.result?.winner || ''}
                       onChange={(e) => {
                         const updated = { ...scorecard };
-                        updated.result = { ...updated.result, winner: e.target.value, margin: '' };
+                        updated.result = { ...updated.result, winner: e.target.value };
                         setScorecard(updated);
                       }}
-                      placeholder="e.g., Royal Challengers Bengaluru Women won by 3 wkts"
+                      className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white"
+                    >
+                      <option value="">Select Winning Team</option>
+                      <option value={scorecard.matchInfo.team1.name}>{scorecard.matchInfo.team1.name}</option>
+                      <option value={scorecard.matchInfo.team2.name}>{scorecard.matchInfo.team2.name}</option>
+                      <option value="No Result">No Result</option>
+                      <option value="Match Tied">Match Tied</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-2">Margin</label>
+                    <input
+                      type="text"
+                      value={scorecard.result?.margin || ''}
+                      onChange={(e) => {
+                        const updated = { ...scorecard };
+                        updated.result = { ...updated.result, margin: e.target.value };
+                        setScorecard(updated);
+                      }}
+                      placeholder="e.g., 3 wickets, 25 runs, Super Over"
                       className="w-full bg-gray-700 p-3 rounded border border-gray-600 text-white placeholder-gray-500"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Enter the complete match result as you want it to appear</p>
+                    <p className="text-xs text-gray-500 mt-1">Enter the margin of victory (e.g., 3 wickets, 25 runs)</p>
                   </div>
                   <div>
                     <label className="block text-sm text-gray-400 mb-2">Man of the Match</label>
