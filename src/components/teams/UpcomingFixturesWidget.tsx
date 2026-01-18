@@ -151,11 +151,15 @@ export default function UpcomingFixturesWidget({ team, matches: providedMatches,
       {/* Finished Matches */}
       {completedMatches.length > 0 && (
         <div>
-          <h4 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-            <CustomEmoji type="checkmark" size={20} />
-            Finished Matches
+          <h4 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
+              <CustomEmoji type="checkmark" size={22} />
+            </div>
+            <span className="bg-gradient-to-r from-emerald-400 to-green-400 bg-clip-text text-transparent">
+              Finished Matches
+            </span>
           </h4>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {completedMatches.map((match, index) => {
               const opponent = match.team1.id === team.id ? match.team2 : match.team1;
               const isHome = match.venue && team.homeGrounds?.some(ground => match.venue.includes(ground));
@@ -166,72 +170,97 @@ export default function UpcomingFixturesWidget({ team, matches: providedMatches,
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  className="relative p-4 rounded-xl bg-gradient-to-br from-green-900/20 to-emerald-900/10 backdrop-blur-md border border-green-500/30 hover:border-green-500/50 transition-all duration-300 group"
+                  whileHover={{ scale: 1.02, y: -4 }}
+                  className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-800/90 via-slate-800/80 to-slate-900/90 backdrop-blur-xl border border-slate-700/50 hover:border-emerald-500/50 transition-all duration-500 group shadow-xl hover:shadow-emerald-500/20"
                 >
-                  {/* Match Header */}
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-green-500/20">
-                        <CustomEmoji type="checkmark" size={16} />
-                      </div>
-                      <div className="text-sm text-gray-400">
-                        {new Date(match.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  {/* Success gradient bar on left */}
+                  <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-emerald-400 via-green-500 to-emerald-600"></div>
+                  
+                  <div className="p-6">
+                    {/* Match Header */}
+                    <div className="flex items-center justify-between mb-5">
+                      <div className="flex items-center gap-3">
+                        <div className="px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                          <span className="text-xs font-semibold text-emerald-400 tracking-wide uppercase">Completed</span>
+                        </div>
+                        <div className="text-sm font-medium text-slate-400">
+                          {new Date(match.date).toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric',
+                            year: 'numeric'
+                          })}
+                        </div>
                       </div>
                     </div>
+
+                    {/* Score Display - Side by Side */}
+                    <div className="mb-5 p-5 bg-slate-900/50 rounded-xl border border-slate-700/30">
+                      <div className="grid grid-cols-3 gap-4 items-center">
+                        {/* Team 1 */}
+                        <div className="text-center">
+                          <div className={`text-lg font-bold mb-2 ${match.team1.id === team.id ? 'text-emerald-400' : 'text-slate-300'}`}>
+                            {match.team1.shortName || match.team1.name}
+                          </div>
+                          <div className="text-3xl font-black text-white tracking-tight">
+                            {match.team1Score || 'N/A'}
+                          </div>
+                        </div>
+                        
+                        {/* VS Divider */}
+                        <div className="flex items-center justify-center">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 border-2 border-slate-600 flex items-center justify-center">
+                            <span className="text-xs font-bold text-slate-400">VS</span>
+                          </div>
+                        </div>
+                        
+                        {/* Team 2 */}
+                        <div className="text-center">
+                          <div className={`text-lg font-bold mb-2 ${match.team2.id === team.id ? 'text-emerald-400' : 'text-slate-300'}`}>
+                            {match.team2.shortName || match.team2.name}
+                          </div>
+                          <div className="text-3xl font-black text-white tracking-tight">
+                            {match.team2Score || 'N/A'}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Match Result */}
+                    {match.result && (
+                      <div className="mb-4 p-4 rounded-xl bg-gradient-to-r from-emerald-500/15 via-green-500/15 to-emerald-500/15 border border-emerald-500/30 backdrop-blur-sm">
+                        <div className="flex items-start gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <CustomEmoji type="trophy" size={18} />
+                          </div>
+                          <div className="flex-1">
+                            <div className="text-xs font-semibold text-emerald-400 uppercase tracking-wide mb-1">Result</div>
+                            <div className="text-base font-bold text-white leading-relaxed">
+                              {match.result}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Venue */}
+                    {match.venue && (
+                      <div className="flex items-center gap-2 text-sm text-slate-400 mb-4 px-3 py-2 bg-slate-800/50 rounded-lg">
+                        <MapPin className="w-4 h-4 text-slate-500" />
+                        <span className="font-medium">{match.venue}</span>
+                      </div>
+                    )}
+
+                    {/* View Scorecard Button */}
+                    {onViewScorecard && (
+                      <button
+                        onClick={() => onViewScorecard(match.id)}
+                        className="w-full py-3 px-5 rounded-xl bg-gradient-to-r from-emerald-600 via-green-600 to-emerald-600 hover:from-emerald-500 hover:via-green-500 hover:to-emerald-500 text-white font-bold transition-all duration-300 text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 hover:shadow-emerald-500/40 hover:scale-[1.02] group-hover:shadow-2xl"
+                      >
+                        <CustomEmoji type="chart" size={18} />
+                        <span className="tracking-wide">View Full Scorecard</span>
+                      </button>
+                    )}
                   </div>
-
-                  {/* Score Display */}
-                  <div className="mb-3 space-y-2 bg-black/20 rounded-lg p-3">
-                    {/* Team 1 */}
-                    <div className="flex items-center justify-between">
-                      <span className={`font-semibold ${match.team1.id === team.id ? 'text-white' : 'text-gray-300'}`}>
-                        {match.team1.shortName || match.team1.name}
-                      </span>
-                    </div>
-                    <div className="text-2xl font-bold text-white mb-2">
-                      {match.team1Score || 'N/A'}
-                    </div>
-                    
-                    {/* Team 2 */}
-                    <div className="flex items-center justify-between pt-2 border-t border-white/10">
-                      <span className={`font-semibold ${match.team2.id === team.id ? 'text-white' : 'text-gray-300'}`}>
-                        {match.team2.shortName || match.team2.name}
-                      </span>
-                    </div>
-                    <div className="text-2xl font-bold text-white">
-                      {match.team2Score || 'N/A'}
-                    </div>
-                  </div>
-
-                  {/* Match Result */}
-                  {match.result && (
-                    <div className="mb-3 p-3 rounded-lg bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30">
-                      <div className="text-xs text-gray-400 font-semibold uppercase mb-1">Match Result</div>
-                      <div className="text-sm text-white font-bold">
-                        {match.result}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Venue */}
-                  {match.venue && (
-                    <div className="flex items-center gap-1 text-xs text-gray-400 mb-3">
-                      <MapPin className="w-3 h-3" />
-                      <span className="truncate">{match.venue}</span>
-                    </div>
-                  )}
-
-                  {/* View Scorecard Button */}
-                  {onViewScorecard && (
-                    <button
-                      onClick={() => onViewScorecard(match.id)}
-                      className="w-full py-2 px-4 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold transition-all text-sm flex items-center justify-center gap-2"
-                    >
-                      <CustomEmoji type="chart" size={16} />
-                      View Scorecard
-                    </button>
-                  )}
                 </motion.div>
               );
             })}
