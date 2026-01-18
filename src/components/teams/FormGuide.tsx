@@ -11,12 +11,66 @@ interface FormGuideProps {
 
 export default function FormGuide({ matches, teamId, primaryColor }: FormGuideProps) {
   // Get last 5 completed matches
+  const recentMatches = matches
+    .filter((m) => m.status === 'completed')
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 5)
+    .reverse();
+
+  if (recentMatches.length === 0) return null;
+
+  const getMatchResult = (match: Match) => {
+    const team = match.team1.id === teamId ? match.team1 : match.team2;
+    if (!match.result) return 'unknown';
+    const resultLower = match.result.toLowerCase();
+    const teamNameVariations = [
+      team.name,
+      team.shortName,
+      team.name?.replace(' (WPL)', '').replace(' (IPL)', ''),
+      team.name?.replace('Bengaluru', 'Bangalore'),
+      team.name?.replace('Bangalore', 'Bengaluru'),
+      team.name?.replace(' Women', ''),
+      team.shortName?.replace('-W', ''),
+      'Royal Challengers Bangalore',
+      'Royal Challengers Bengaluru',
+      'RCB',
+    ].filter(Boolean as any);
+
+    const isWin = teamNameVariations.some((name) => {
+      const nameLower = (name || '').toLowerCase();
+      return resultLower.includes(nameLower + ' won') || resultLower.includes(nameLower + ' win');
+    });
+
+    if (resultLower.includes('no result') || resultLower.includes('abandoned')) return 'nr';
+    return isWin ? 'win' : 'loss';
+  };
+
+  const wins = recentMatches.filter((m) => getMatchResult(m) === 'win').length;
+  const winPercentage = (wins / recentMatches.length) * 100;
+
+  const calculateStreak = () => {
+    const allMatches = matches
+      .filter((m) => m.status === 'completed')
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    if (allMatches.length === 0) return { type: 'none', count: 0 };
+
+    const firstResult = getMatchResult(allMatches[0]);
+    if (firstResult === 'nr' || firstResult === 'unknown') return { type: 'none', count: 0 };
+
+    let streak = 1;
+    for (let i = 1; i < allMatches.length; i++) {
+      const result = getMatchResult(allMatches[i]);
+      if (result === firstResult) streak++; else break;
+    }
+
+    return { type: firstResult, count: streak };
+  };
+
+  const streak = calculateStreak();
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-4 font-sans"
-    >
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 font-sans">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
         {/* Form column */}
         <div className="rounded-2xl p-4 bg-white/3 backdrop-blur-sm border border-white/10">
@@ -29,7 +83,7 @@ export default function FormGuide({ matches, teamId, primaryColor }: FormGuidePr
           </div>
 
           <div className="flex items-center gap-3">
-            {recentMatches.map((match, index) => {
+            {recentMatches.map((match) => {
               const result = getMatchResult(match);
               const opponent = match.team1.id === teamId ? match.team2 : match.team1;
               return (
@@ -104,10 +158,9 @@ export default function FormGuide({ matches, teamId, primaryColor }: FormGuidePr
           </div>
         </div>
       </div>
-
     </motion.div>
   );
-            }}
+}
             transition={{
               duration: 2,
               repeat: Infinity,
