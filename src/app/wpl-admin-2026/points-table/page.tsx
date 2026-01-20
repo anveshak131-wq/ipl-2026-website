@@ -526,7 +526,7 @@ export default function WPLAdminPointsTablePage() {
               }}
             >
               {/* Table Header */}
-              <div className="grid grid-cols-[40px_200px_1fr_100px_100px_100px_100px_100px_100px_120px] gap-4 px-6 py-4 rounded-3xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 text-sm font-bold uppercase tracking-wider text-gray-300">
+              <div className="grid grid-cols-[40px_200px_1fr_100px_100px_100px_100px_100px_120px_140px] gap-4 px-6 py-4 rounded-3xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 text-sm font-bold uppercase tracking-wider text-gray-300">
                 <div className="flex items-center justify-center">Rank</div>
                 <div className="flex items-center gap-2">Team <Info className="w-4 h-4 text-gray-500" /></div>
                 <div className="flex items-center gap-2">Name</div>
@@ -564,7 +564,7 @@ export default function WPLAdminPointsTablePage() {
                         scale: 1.02,
                         transition: { duration: 0.3 }
                       }}
-                      className={`relative group grid grid-cols-[40px_200px_1fr_100px_100px_100px_100px_100px_120px] gap-4 items-center px-6 py-5 rounded-3xl backdrop-blur-2xl border-2 border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/80 transition-all duration-300 cursor-pointer ${
+                      className={`relative group grid grid-cols-[40px_200px_1fr_100px_100px_100px_100px_100px_120px_140px] gap-4 items-center px-6 py-5 rounded-3xl backdrop-blur-2xl border-2 border-white/10 bg-gradient-to-br from-slate-900/80 via-slate-800/70 to-slate-900/80 transition-all duration-300 cursor-pointer ${
                         isTop3 ? 'border-pink-500/50 bg-gradient-to-br from-pink-900/30 via-purple-800/20 to-pink-900/30' :
                         isBottom2 ? 'border-purple-500/50 bg-gradient-to-br from-purple-900/30 via-pink-800/20 to-purple-900/30' :
                         'hover:border-pink-500/50 hover:bg-gradient-to-br from-pink-900/20 via-purple-800/10 to-pink-900/20'
