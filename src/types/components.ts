@@ -39,6 +39,7 @@ export interface StatsTabProps {
   bowlers: Player[];
   allRounders: Player[];
   wicketkeepers: Player[];
+  playerStats?: any[];
 }
 
 // About Tab Props

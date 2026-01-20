@@ -154,6 +154,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
   const [lastMatch, setLastMatch] = useState<Match | null>(null);
   const [nextMatch, setNextMatch] = useState<Match | null>(null);
   const [allMatches, setAllMatches] = useState<Match[]>([]);
+  const [playerStats, setPlayerStats] = useState<any[]>([]);
   const [coachingStaff, setCoachingStaff] = useState<CoachingStaff | null>(null);
   const [keyPlayers, setKeyPlayers] = useState<KeyPlayers | null>(null);
   const [showPlayerComparison, setShowPlayerComparison] = useState(false);
@@ -161,6 +162,53 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
   const [scorecard, setScorecard] = useState<any>(null);
   const [loadingScorecard, setLoadingScorecard] = useState(false);
   const [showPlayerCards, setShowPlayerCards] = useState(false);
+
+  const fetchPlayerStats = async () => {
+    if (!teamData || !league) return;
+    
+    try {
+      const response = await fetch(`/api/stats?league=${league}&type=batting`);
+      if (response.ok) {
+        const data = await response.json();
+        setPlayerStats(data.battingStats || []);
+      }
+    } catch (error) {
+      console.error('Error fetching player stats:', error);
+    }
+  };
+
+  // Function to get real player stats from scorecards
+  const getPlayerRealStats = (player: any) => {
+    const playerStat = playerStats.find(stat => 
+      stat.playerId === player.id || 
+      stat.playerName === player.name ||
+      stat.playerName === player.playerName
+    );
+    
+    if (playerStat) {
+      return {
+        ...player,
+        stats: {
+          matches: playerStat.matches || 0,
+          runs: playerStat.runs || 0,
+          wickets: playerStat.wickets || 0,
+          average: playerStat.average || 0,
+          strikeRate: playerStat.strikeRate || 0,
+          highestScore: playerStat.highestScore || 0,
+          fifties: playerStat.fifties || 0,
+          hundreds: playerStat.hundreds || 0,
+          fours: playerStat.fours || 0,
+          sixes: playerStat.sixes || 0,
+          bowlingAverage: playerStat.bowlingAverage || 0,
+          economy: playerStat.economy || 0,
+          bestBowling: playerStat.bestBowling || '0/0'
+        }
+      };
+    }
+    
+    // Fallback to original stats if no real stats found
+    return player;
+  };
 
   const fetchScorecard = async (matchId: string) => {
     setLoadingScorecard(true);
@@ -474,6 +522,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
     };
 
     loadMatches();
+    fetchPlayerStats();
   }, [teamData, league]);
 
   if (isLoading) {
@@ -1055,13 +1104,14 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                     
                     {/* Premium Player Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                      {section.players.map((player, playerIndex) => (
-                        isWPL ? (
+                      {section.players.map((player, playerIndex) => {
+                        const playerWithRealStats = getPlayerRealStats(player);
+                        return isWPL ? (
                           <WPLPlayerCard
                             key={player.id}
-                            player={player}
+                            player={playerWithRealStats}
                             onClick={() => {
-                              setSelectedPlayer(player);
+                              setSelectedPlayer(playerWithRealStats);
                               setIsModalOpen(true);
                             }}
                             index={playerIndex}
@@ -1069,18 +1119,18 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                         ) : (
                           <PlayerCard 
                             key={player.id} 
-                            player={player} 
+                            player={playerWithRealStats} 
                             primaryColor={primaryColor} 
                             secondaryColor={secondaryColor}
                             onClick={() => {
-                              setSelectedPlayer(player);
+                              setSelectedPlayer(playerWithRealStats);
                               setIsModalOpen(true);
                             }}
                             index={playerIndex}
                             keyPlayers={keyPlayers}
                           />
                         )
-                      ))}
+                      })}
                     </div>
                   </AnimatedSection>
                 )
@@ -1137,6 +1187,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                 bowlers={bowlers}
                 allRounders={allRounders}
                 wicketkeepers={wicketkeepers}
+                playerStats={playerStats}
               />
               
               {/* Player Performance Charts */}
@@ -2127,13 +2178,42 @@ function KeyPlayersSection({ teamData, keyPlayers, primaryColor, secondaryColor 
 }
 
 // Stats Tab
-function StatsTab({ teamData, primaryColor, secondaryColor, batsmen, bowlers, allRounders, wicketkeepers }: StatsTabProps) {
+function StatsTab({ teamData, primaryColor, secondaryColor, batsmen, bowlers, allRounders, wicketkeepers, playerStats = [] }: StatsTabProps) {
   if (!teamData) return null;
   const squad: Player[] = (teamData.players || []) as Player[];
 
+  // Function to get real stats for a player
+  const getPlayerRealStats = (player: Player) => {
+    const playerStat = playerStats.find(stat => 
+      stat.playerId === player.id || 
+      stat.playerName === player.name
+    );
+    
+    if (playerStat) {
+      return {
+        matches: playerStat.matches || 0,
+        runs: playerStat.runs || 0,
+        wickets: playerStat.wickets || 0,
+        average: playerStat.average || 0,
+        strikeRate: playerStat.strikeRate || 0,
+        highestScore: playerStat.highestScore || 0,
+        fifties: playerStat.fifties || 0,
+        hundreds: playerStat.hundreds || 0,
+        fours: playerStat.fours || 0,
+        sixes: playerStat.sixes || 0,
+        bowlingAverage: playerStat.bowlingAverage || 0,
+        economy: playerStat.economy || 0,
+        bestBowling: playerStat.bestBowling || '0/0'
+      };
+    }
+    
+    // Fallback to original stats
+    return player.stats || {};
+  };
+
   const totals = squad.reduce(
     (acc, p) => {
-      const s = p.stats || {};
+      const s = getPlayerRealStats(p);
       acc.matches += s.matches || 0;
       acc.runs += s.runs || 0;
       acc.wickets += s.wickets || 0;
@@ -2149,14 +2229,14 @@ function StatsTab({ teamData, primaryColor, secondaryColor, batsmen, bowlers, al
   const totalFiftyPlus = totals.fifties + totals.hundreds;
 
   const topRunScorer = squad.reduce<Player | null>((best, p) => {
-    const currentRuns = p.stats?.runs || 0;
-    const bestRuns = best?.stats?.runs || 0;
+    const currentRuns = getPlayerRealStats(p).runs || 0;
+    const bestRuns = best ? getPlayerRealStats(best).runs || 0 : 0;
     return currentRuns > bestRuns ? p : best;
   }, null);
 
   const topWicketTaker = squad.reduce<Player | null>((best, p) => {
-    const currentWkts = p.stats?.wickets || 0;
-    const bestWkts = best?.stats?.wickets || 0;
+    const currentWkts = getPlayerRealStats(p).wickets || 0;
+    const bestWkts = best ? getPlayerRealStats(best).wickets || 0 : 0;
     return currentWkts > bestWkts ? p : best;
   }, null);
 
@@ -2302,8 +2382,8 @@ function StatsTab({ teamData, primaryColor, secondaryColor, batsmen, bowlers, al
                 <p className="text-xs uppercase text-gray-300">Top run-scorer in squad</p>
                 <p className="text-base font-semibold text-white">{topRunScorer.name}</p>
                 <p className="text-xs text-gray-300">
-                  Runs: <span className="font-semibold text-white">{topRunScorer.stats.runs}</span> ·
-                  Matches: <span className="font-semibold text-white">{topRunScorer.stats.matches}</span>
+                  Runs: <span className="font-semibold text-white">{getPlayerRealStats(topRunScorer).runs}</span> ·
+                  Matches: <span className="font-semibold text-white">{getPlayerRealStats(topRunScorer).matches}</span>
                 </p>
               </div>
             )}
@@ -2312,8 +2392,8 @@ function StatsTab({ teamData, primaryColor, secondaryColor, batsmen, bowlers, al
                 <p className="text-xs uppercase text-gray-300">Top wicket-taker in squad</p>
                 <p className="text-base font-semibold text-white">{topWicketTaker.name}</p>
                 <p className="text-xs text-gray-300">
-                  Wickets: <span className="font-semibold text-white">{topWicketTaker.stats.wickets}</span> ·
-                  Matches: <span className="font-semibold text-white">{topWicketTaker.stats.matches}</span>
+                  Wickets: <span className="font-semibold text-white">{getPlayerRealStats(topWicketTaker).wickets}</span> ·
+                  Matches: <span className="font-semibold text-white">{getPlayerRealStats(topWicketTaker).matches}</span>
                 </p>
               </div>
             )}
