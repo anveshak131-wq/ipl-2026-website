@@ -12,7 +12,7 @@ interface FormGuideProps {
 
 export default function FormGuide({ matches, teamId }: FormGuideProps) {
   const recentMatches = matches
-    .filter((m) => m.status === 'completed')
+    .filter((m) => m.status === 'completed' && m.result) // Only matches with actual results
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 5)
     .reverse();
@@ -24,7 +24,7 @@ export default function FormGuide({ matches, teamId }: FormGuideProps) {
 
   const calculateStreak = () => {
     const all = matches
-      .filter((m) => m.status === 'completed')
+      .filter((m) => m.status === 'completed' && m.result) // Only matches with actual results
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     if (all.length === 0) return { type: 'none', count: 0 } as const;
     const first = getMatchResult(all[0], teamId);
@@ -42,7 +42,7 @@ export default function FormGuide({ matches, teamId }: FormGuideProps) {
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 font-sans">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
-        <div className="rounded-2xl p-4 bg-white/3 backdrop-blur-sm border border-white/10">
+        <div className="rounded-2xl p-4 bg-white/3 backdrop-blur-sm border border-white/10 overflow-hidden">
           <div className="flex items-center justify-between mb-3">
             <div>
               <div className="text-sm text-gray-300 font-semibold">Form</div>
@@ -51,14 +51,14 @@ export default function FormGuide({ matches, teamId }: FormGuideProps) {
             <div className="text-xs text-gray-400">{recentMatches.length}</div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 overflow-x-auto">
             {recentMatches.map((match) => {
               const result = getMatchResult(match, teamId);
               const opponent = match.team1.id === teamId ? match.team2 : match.team1;
               return (
-                <div key={match.id} className="relative">
+                <div key={match.id} className="relative flex-shrink-0">
                   <div
-                    className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                    className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold transition-all flex-shrink-0 ${
                       result === 'win' ? 'bg-green-500 text-white' : result === 'loss' ? 'bg-red-500 text-white' : 'bg-gray-500 text-white'
                     }`}
                     title={`${new Date(match.date).toLocaleDateString()} • vs ${opponent.shortName}`}
