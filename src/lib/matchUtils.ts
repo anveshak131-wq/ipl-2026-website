@@ -5,6 +5,7 @@ const normalize = (s?: string) =>
     .replace(/\s+\(wpl\)|\s+\(ipl\)/gi, '')
     .replace(/\s+women/gi, '')
     .replace(/bengaluru/gi, 'bangalore')
+    .replace(/bangalo re/gi, 'bangalore') // Fix typo in results
     .replace(/\W+/g, ' ')
     .trim()
     .toLowerCase();
@@ -26,33 +27,30 @@ export function getMatchResult(match: Match, teamId: string) {
 
   if (normalizedResult.includes('no result') || normalizedResult.includes('abandoned')) return 'nr';
 
-  const variants = Array.from(
-    new Set([
-      normalize(team.name),
-      normalize(team.shortName),
-      normalize(team.name?.replace(/-W$/i, '')),
-      normalize(team.shortName?.replace(/-W$/i, '')),
-    ].filter(Boolean) as string[])
+  // Create team name variants for matching
+  const teamVariants = [
+    normalize(team.name),
+    normalize(team.shortName),
+    normalize(team.name?.replace(/-W$/i, '')),
+    normalize(team.shortName?.replace(/-W$/i, '')),
+  ].filter(Boolean);
+
+  // Check if any team variant appears in the result
+  const teamAppearsInResult = teamVariants.some(variant => 
+    normalizedResult.includes(variant)
   );
 
-  const winWords = [' won ', ' won by ', ' win ', ' beat ', ' defeated ', 'defeat', 'defeated', 'beat'];
-  const lossWords = [' lost ', ' lost to ', ' lost by '];
-
-  for (const v of variants) {
-    const vi = normalizedResult.indexOf(v);
-    if (vi === -1) continue;
-
-    const winIdx = earliestIndex(normalizedResult, winWords);
-    const lossIdx = earliestIndex(normalizedResult, lossWords.concat([' beat ', 'defeated', ' lost ']));
-
-    if (normalizedResult.includes('lost') && normalizedResult.indexOf('lost') < vi) return 'loss';
-    if (winIdx !== -1 && vi < winIdx) return 'win';
-    if (lossIdx !== -1 && vi > lossIdx) return 'loss';
-    if (winIdx !== -1) return vi <= winIdx + 40 ? 'win' : 'loss';
-
-    return 'loss';
+  if (teamAppearsInResult) {
+    // Check for win indicators
+    if (normalizedResult.includes(' won by') || 
+        normalizedResult.includes(' won ') || 
+        normalizedResult.includes(' beat ') ||
+        normalizedResult.includes(' defeated ')) {
+      return 'win';
+    }
   }
 
+  // If team doesn't appear in result or no win indicator, it's a loss
   return 'loss';
 }
 
