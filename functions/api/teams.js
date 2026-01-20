@@ -208,6 +208,17 @@ const defaultTeams = [
   }
 ];
 
+// GET - Debug endpoint to check deployment
+if (url.pathname === '/api/teams/debug') {
+  return new Response(JSON.stringify({ 
+    message: 'Debug endpoint working',
+    timestamp: new Date().toISOString(),
+    version: '2026-01-20-fix'
+  }), {
+    headers: { 'Content-Type': 'application/json' }
+  });
+}
+
 // GET - Retrieve all teams
 async function handleGetRequest(context) {
   const { env, request } = context;
@@ -393,6 +404,7 @@ async function handlePostRequest(context) {
 }
 
 // PUT - Update an existing team
+// Teams API - Updated with Bangalore naming - Deployed at 2026-01-20 team
 async function handlePutRequest(context) {
   const { env, request } = context;
   
