@@ -285,6 +285,37 @@ async function handleGetRequest(context) {
     // Format matches with team objects
     const formattedMatches = matches.map(match => formatMatch(match, allTeams));
     
+    // Sync results from scorecards for completed matches with missing results
+    try {
+      const scorecardsResponse = await fetch(`${request.url.replace('/api/matches', '/api/scorecards')}&league=${league || 'ipl'}`);
+      if (scorecardsResponse.ok) {
+        const scorecards = await scorecardsResponse.json();
+        if (Array.isArray(scorecards)) {
+          // Update matches with scorecard results
+          formattedMatches.forEach(match => {
+            if (match.status === 'completed' && !match.result) {
+              const scorecard = scorecards.find(sc => sc.matchId === match.id);
+              if (scorecard && scorecard.result && scorecard.result.winner) {
+                // Create result text from scorecard
+                const winnerTeam = allTeams.find(t => t.name === scorecard.result.winner);
+                const isTeam1Winner = winnerTeam && winnerTeam.id === match.team1?.id;
+                
+                if (isTeam1Winner) {
+                  match.result = `${match.team1?.shortName || match.team1?.name} won by ${scorecard.result.margin}`;
+                } else {
+                  match.result = `${match.team2?.shortName || match.team2?.name} won by ${scorecard.result.margin}`;
+                }
+                
+                console.log(`Updated match ${match.id} result from scorecard:`, match.result);
+              }
+            }
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error syncing scorecard results:', error);
+    }
+    
     return new Response(JSON.stringify(formattedMatches), {
       status: 200,
       headers: {
