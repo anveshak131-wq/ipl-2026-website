@@ -8,6 +8,7 @@ import RCBLionLogo from '@/components/RCBLion/RCBLionLogo';
 import { getOptimalTextColorForGradient } from '@/lib/colorUtils';
 import { motion } from 'framer-motion';
 import { CustomEmoji } from '@/components/emoji/Emoji';
+import QualifiedBadge from '@/components/ui/QualifiedBadge';
 
 interface TeamCardProps {
   team: Team;
@@ -105,6 +106,9 @@ export default function TeamCard({ team, onPlayerClick }: TeamCardProps) {
           }}>
             {team.name}
           </p>
+          <div className="mt-2 flex items-center justify-center">
+            <QualifiedBadge qualified={Boolean(team.stats?.qualified)} />
+          </div>
         </div>
 
         {/* Team Colors with enhanced animations */}

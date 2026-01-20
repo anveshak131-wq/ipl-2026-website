@@ -54,6 +54,7 @@ import ParticleBackground from '@/components/ui/ParticleBackground';
 import FormGuide from '@/components/teams/FormGuide';
 import QuickActionsBar from '@/components/teams/QuickActionsBar';
 import TrophyCounter from '@/components/teams/TrophyCounter';
+import QualifiedBadge from '@/components/ui/QualifiedBadge';
 
 interface TeamDetailClientProps {
   teamId: string;
@@ -604,6 +605,9 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                   {!isWPL && <IPLLogo size="sm" />}
                   {isWPL && <span className="text-sm font-bold text-purple-400">WPL</span>}
                   <span className="text-sm font-bold text-white">{teamData.shortName}</span>
+                  <div className="ml-2">
+                    <QualifiedBadge qualified={Boolean(teamData.stats?.qualified)} />
+                  </div>
                 </motion.div>
 
                 {/* Team Name with Animation */}

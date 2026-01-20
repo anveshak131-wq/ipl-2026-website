@@ -9,6 +9,7 @@ import { getOptimalTextColorForGradient } from '@/lib/colorUtils';
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { useState } from 'react';
 import { CustomEmoji } from '@/components/emoji/Emoji';
+import QualifiedBadge from '@/components/ui/QualifiedBadge';
 
 interface AnimatedTeamCardProps {
   team: Team;
@@ -246,6 +247,9 @@ export default function AnimatedTeamCard({ team, onPlayerClick, isFavorite = fal
               >
                 {team.shortName}
               </motion.h3>
+              <div>
+                <QualifiedBadge qualified={Boolean(team.stats?.qualified)} />
+              </div>
               {trophyCount > 0 && (
                 <motion.span 
                   className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/50 text-xs font-bold text-amber-300"
