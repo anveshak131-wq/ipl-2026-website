@@ -56,6 +56,7 @@ interface TeamStats {
   losses: number;
   points: number;
   netRunRate: number;
+  qualified: boolean;
 }
 
 export default function WPLLeaderboardPage() {
@@ -96,7 +97,8 @@ export default function WPLLeaderboardPage() {
               wins: team.stats?.wins || 0,
               losses: team.stats?.losses || 0,
               points: team.stats?.points || 0,
-              netRunRate: team.stats?.netRunRate || 0.00
+              netRunRate: team.stats?.netRunRate || 0.00,
+              qualified: team.stats?.qualified || false // Include qualification status
             }));
           
           if (pointsTableStats.length > 0) {
@@ -643,7 +645,7 @@ export default function WPLLeaderboardPage() {
                 ) : (
                   <div className="space-y-3">
                     {sortedTeamStats.map((stat, index) => {
-                      const isQualifyingPosition = index < 3;
+                      const isQualifyingPosition = stat.qualified; // Use actual qualified status
                       const isChampion = index === 0;
                       
                       return (
