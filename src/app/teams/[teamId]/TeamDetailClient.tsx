@@ -55,6 +55,7 @@ import FormGuide from '@/components/teams/FormGuide';
 import QuickActionsBar from '@/components/teams/QuickActionsBar';
 import TrophyCounter from '@/components/teams/TrophyCounter';
 import QualifiedBadge from '@/components/ui/QualifiedBadge';
+import { getMatchResult } from '@/lib/matchUtils';
 
 interface TeamDetailClientProps {
   teamId: string;
@@ -432,27 +433,21 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
         const teamMatches = matches.filter((m: Match) => m.team1?.id === teamData.id || m.team2?.id === teamData.id);
         setAllMatches(teamMatches);
 
-        const completed = teamMatches.filter((m: Match) => m.status === 'completed');
+        const completed = teamMatches.filter((m: Match) => m.status === 'completed' && m.result);
         const upcoming = teamMatches.filter((m: Match) => m.status === 'upcoming');
 
+        // Use getMatchResult function for consistency with FormGuide
         let wins = 0;
         let losses = 0;
         let noResult = 0;
 
         completed.forEach((m: Match) => {
-          if (!m.result) {
-            noResult += 1;
-            return;
-          }
-          const resultText = (m.result as string).toLowerCase();
-          const isThisTeam = m.team1?.id === teamData.id ? m.team1 : m.team2;
-          const oppTeam = m.team1?.id === teamData.id ? m.team2 : m.team1;
-
-          if (resultText.includes(isThisTeam.shortName.toLowerCase()) || resultText.includes(isThisTeam.name.toLowerCase())) {
+          const result = getMatchResult(m, teamData.id);
+          if (result === 'win') {
             wins += 1;
-          } else if (oppTeam && (resultText.includes(oppTeam.shortName.toLowerCase()) || resultText.includes(oppTeam.name.toLowerCase()))) {
+          } else if (result === 'loss') {
             losses += 1;
-          } else if (resultText.includes('no result') || resultText.includes('abandoned')) {
+          } else {
             noResult += 1;
           }
         });
