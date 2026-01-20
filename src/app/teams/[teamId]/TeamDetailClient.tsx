@@ -167,10 +167,33 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
     if (!teamData || !league) return;
     
     try {
-      const response = await fetch(`/api/stats?league=${league}&type=batting`);
-      if (response.ok) {
-        const data = await response.json();
-        setPlayerStats(data.battingStats || []);
+      // Fetch both batting and bowling stats
+      const [battingResponse, bowlingResponse] = await Promise.all([
+        fetch(`/api/stats?league=${league}&type=batting`),
+        fetch(`/api/stats?league=${league}&type=bowling`)
+      ]);
+      
+      if (battingResponse.ok && bowlingResponse.ok) {
+        const battingData = await battingResponse.json();
+        const bowlingData = await bowlingResponse.json();
+        
+        const battingStats = battingData.battingStats || [];
+        const bowlingStats = bowlingData.bowlingStats || [];
+        
+        // Merge batting and bowling stats by playerId
+        const mergedStats = battingStats.map(battingStat => {
+          const bowlingStat = bowlingStats.find(b => b.playerId === battingStat.playerId);
+          return {
+            ...battingStat,
+            wickets: bowlingStat?.wickets || 0,
+            bowlingAverage: bowlingStat?.average || 0,
+            economy: bowlingStat?.economy || 0,
+            bestBowling: bowlingStat?.bestBowling || '0/0'
+          };
+        });
+        
+        setPlayerStats(mergedStats);
+        console.log('Merged player stats:', mergedStats.length, 'players');
       }
     } catch (error) {
       console.error('Error fetching player stats:', error);
