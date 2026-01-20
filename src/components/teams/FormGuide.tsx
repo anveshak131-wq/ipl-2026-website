@@ -1,9 +1,5 @@
-"use client";
 
-import { motion } from 'framer-motion';
-import { Match } from '@/types';
 "use client";
-
 import { motion } from 'framer-motion';
 import { Match } from '@/types';
 import { getMatchResult } from '@/lib/matchUtils';
