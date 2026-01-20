@@ -944,7 +944,7 @@ export default function AdminTeams() {
                                                 value={formData.name}
                                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                                 className="admin-input w-full"
-                                                placeholder="Royal Challengers Bengaluru"
+                                                placeholder="Royal Challengers Bangalore"
                                                 required
                                             />
                                         </div>

@@ -8,7 +8,7 @@ export const mockTeams: Team[] = [
   {
     id: '1',
     league: 'ipl',
-    name: 'Royal Challengers Bengaluru',
+    name: 'Royal Challengers Bangalore',
     shortName: 'RCB',
     logo: '/logos/rcb_logo_premium.svg',
     description: 'One of the most popular IPL teams known for their aggressive batting',
@@ -248,7 +248,7 @@ export const mockNews: News[] = [
   {
     id: '2',
     title: 'RCB Retains Core Squad for 2026',
-    summary: 'Royal Challengers Bengaluru have retained their key players ahead of the auction.',
+    summary: 'Royal Challengers Bangalore have retained their key players ahead of the auction.',
     content: 'RCB management has decided to retain their core group including Virat Kohli, Faf du Plessis...',
     image: '/news/rcb-retains.jpg',
     publishedAt: '2026-02-10T14:30:00Z',

@@ -213,7 +213,7 @@ export default function AdminMatchdayNew() {
           elevation: 920,
           avgFirstInnings: 180,
           avgChasing: 172,
-          homeTeam: 'Royal Challengers Bengaluru',
+          homeTeam: 'Royal Challengers Bangalore',
           lastUpdated: new Date().toISOString()
         },
         {

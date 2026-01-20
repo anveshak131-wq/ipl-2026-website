@@ -1,7 +1,7 @@
 // Helper function to get animated logo path for teams
 // Team ID mapping:
 // IPL Teams:
-// '1' = RCB (Royal Challengers Bengaluru)
+// '1' = RCB (Royal Challengers Bangalore)
 // '2' = MI (Mumbai Indians)
 // '3' = SRH (Sunrisers Hyderabad)
 // '4' = GT (Gujarat Titans)
@@ -13,7 +13,7 @@
 // '10' = CSK (Chennai Super Kings)
 // WPL Teams (by shortName or team ID):
 // 'MI-W' or ID '11' = Mumbai Indians (WPL)
-// 'RCB-W' or ID '12' = Royal Challengers Bengaluru (WPL)
+// 'RCB-W' or ID '12' = Royal Challengers Bangalore (WPL)
 // 'DC-W' or ID '13' = Delhi Capitals (WPL)
 // 'GG' or ID '14' = Gujarat Giants (WPL)
 // 'UPW' or ID '15' = UP Warriorz (WPL)

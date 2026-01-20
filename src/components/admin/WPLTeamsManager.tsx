@@ -24,7 +24,7 @@ const WPL_TEAMS_CONFIG = [
   },
   {
     id: '12',
-    name: 'Royal Challengers Bengaluru (WPL)',
+    name: 'Royal Challengers Bangalore (WPL)',
     shortName: 'RCB-W',
     abbreviation: 'RCB-W',
     colors: { primary: '#C8102E', secondary: '#FFD700' },

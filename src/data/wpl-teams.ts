@@ -17,10 +17,10 @@ export const wplTeams: Omit<Team, 'id' | 'players'>[] = [
   },
   {
     league: 'wpl',
-    name: 'Royal Challengers Bengaluru (WPL)',
+    name: 'Royal Challengers Bangalore (WPL)',
     shortName: 'RCB-W',
     logo: '/logos/wpl_rcb_logo_animated.svg',
-    description: 'Breaking barriers and setting new standards, Royal Challengers Bengaluru WPL embodies boldness and determination. The team represents the spirit of Bengaluru - innovative, dynamic, and unafraid to challenge conventions. With their iconic red and gold colors adapted for WPL, they bring the same passion and fire to women\'s cricket, inspiring a new generation of female cricketers.',
+    description: 'Breaking barriers and setting new standards, Royal Challengers Bangalore WPL embodies boldness and determination. The team represents the spirit of Bengaluru - innovative, dynamic, and unafraid to challenge conventions. With their iconic red and gold colors adapted for WPL, they bring the same passion and fire to women\'s cricket, inspiring a new generation of female cricketers.',
     colors: {
       primary: '#C8102E', // Red (RCB)
       secondary: '#FFD700' // Gold

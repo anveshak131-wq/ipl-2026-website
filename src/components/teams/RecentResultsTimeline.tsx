@@ -78,7 +78,7 @@ export default function RecentResultsTimeline({ team, matches: providedMatches, 
             team.shortName?.replace('-W', ''),
             // Additional variations for RCB
             'Royal Challengers Bangalore',
-            'Royal Challengers Bengaluru',
+            'Royal Challengers Bangalore',
             'RCB',
             // Handle combined variations (e.g., "Royal Challengers Bangalore Women" -> "Royal Challengers Bangalore")
             team.name?.replace(' Women', '').replace('Bengaluru', 'Bangalore'),

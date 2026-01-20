@@ -12,7 +12,7 @@ export default function RCBLionLogo({ className }: Props) {
     <div className={`rcb-logo-shell ${className ?? ''}`}>
       <img
         src="/logos/rcb_logo_premium.svg"
-        alt="Royal Challengers Bengaluru premium logo"
+        alt="Royal Challengers Bangalore premium logo"
         className="w-full h-full object-contain"
       />
     </div>
