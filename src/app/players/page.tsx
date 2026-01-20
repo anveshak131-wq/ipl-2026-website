@@ -29,6 +29,7 @@ export default function PlayersPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [filteredPlayers, setFilteredPlayers] = useState<Player[]>([]);
+  const [playerStats, setPlayerStats] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTeam, setSelectedTeam] = useState<string>('all');
   const [selectedRole, setSelectedRole] = useState<string>('all');
@@ -36,6 +37,83 @@ export default function PlayersPage() {
   const [expandedPlayer, setExpandedPlayer] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'name' | 'runs' | 'wickets' | 'matches'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+
+  // Fetch player stats from scorecards
+  const fetchPlayerStats = async () => {
+    try {
+      // Fetch both batting and bowling stats for all leagues
+      const [iplBatting, iplBowling, wplBatting, wplBowling] = await Promise.all([
+        fetch('/api/stats?league=ipl&type=batting'),
+        fetch('/api/stats?league=ipl&type=bowling'),
+        fetch('/api/stats?league=wpl&type=batting'),
+        fetch('/api/stats?league=wpl&type=bowling')
+      ]);
+      
+      const [iplBattingData, iplBowlingData, wplBattingData, wplBowlingData] = await Promise.all([
+        iplBatting.json(),
+        iplBowling.json(),
+        wplBatting.json(),
+        wplBowling.json()
+      ]);
+      
+      const allBattingStats = [
+        ...(iplBattingData.battingStats || []),
+        ...(wplBattingData.battingStats || [])
+      ];
+      
+      const allBowlingStats = [
+        ...(iplBowlingData.bowlingStats || []),
+        ...(wplBowlingData.bowlingStats || [])
+      ];
+      
+      // Merge batting and bowling stats by playerId
+      const mergedStats = allBattingStats.map(battingStat => {
+        const bowlingStat = allBowlingStats.find(b => b.playerId === battingStat.playerId);
+        return {
+          ...battingStat,
+          wickets: bowlingStat?.wickets || 0,
+          bowlingAverage: bowlingStat?.average || 0,
+          economy: bowlingStat?.economy || 0,
+          bestBowling: bowlingStat?.bestBowling || '0/0'
+        };
+      });
+      
+      setPlayerStats(mergedStats);
+      console.log('Fetched player stats:', mergedStats.length);
+    } catch (error) {
+      console.error('Error fetching player stats:', error);
+    }
+  };
+
+  // Function to get real player stats
+  const getPlayerRealStats = (player: Player) => {
+    const playerStat = playerStats.find(stat => 
+      stat.playerId === player.id || 
+      stat.playerId === String(player.id) ||
+      stat.playerName === player.name
+    );
+    
+    if (playerStat) {
+      return {
+        ...player,
+        matches: playerStat.matches || 0,
+        runs: playerStat.runs || 0,
+        wickets: playerStat.wickets || 0,
+        average: playerStat.average || 0,
+        strikeRate: playerStat.strikeRate || 0,
+        highestScore: playerStat.highestScore || 0,
+        fifties: playerStat.fifties || 0,
+        hundreds: playerStat.hundreds || 0,
+        fours: playerStat.fours || 0,
+        sixes: playerStat.sixes || 0,
+        bowlingAverage: playerStat.bowlingAverage || 0,
+        economy: playerStat.economy || 0,
+        bestBowling: playerStat.bestBowling || '0/0'
+      } as any;
+    }
+    
+    return player as any;
+  };
 
   // Fetch players and teams
   useEffect(() => {
@@ -48,6 +126,9 @@ export default function PlayersPage() {
         setPlayers(playersData);
         setFilteredPlayers(playersData);
         setTeams(teamsData);
+        
+        // Fetch player stats after getting players
+        await fetchPlayerStats();
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -358,15 +439,15 @@ export default function PlayersPage() {
                         <div className="grid grid-cols-3 gap-2 mt-3 text-center">
                           <div>
                             <p className="text-xs text-gray-400">Matches</p>
-                            <p className="text-sm font-semibold">{player.matches || 0}</p>
+                            <p className="text-sm font-semibold">{getPlayerRealStats(player).matches || 0}</p>
                           </div>
                           <div>
                             <p className="text-xs text-gray-400">Runs</p>
-                            <p className="text-sm font-semibold">{player.runs || 0}</p>
+                            <p className="text-sm font-semibold">{getPlayerRealStats(player).runs || 0}</p>
                           </div>
                           <div>
                             <p className="text-xs text-gray-400">Wickets</p>
-                            <p className="text-sm font-semibold">{player.wickets || 0}</p>
+                            <p className="text-sm font-semibold">{getPlayerRealStats(player).wickets || 0}</p>
                           </div>
                         </div>
                       </div>
