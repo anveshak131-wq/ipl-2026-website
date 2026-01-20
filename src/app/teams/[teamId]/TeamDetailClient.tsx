@@ -166,6 +166,8 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
   const fetchPlayerStats = async () => {
     if (!teamData || !league) return;
     
+    console.log('Starting fetchPlayerStats for league:', league);
+    
     try {
       // Fetch both batting and bowling stats
       const [battingResponse, bowlingResponse] = await Promise.all([
@@ -179,6 +181,9 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
         
         const battingStats = battingData.battingStats || [];
         const bowlingStats = bowlingData.bowlingStats || [];
+        
+        console.log('Fetched batting stats:', battingStats.length);
+        console.log('Fetched bowling stats:', bowlingStats.length);
         
         // Merge batting and bowling stats by playerId
         const mergedStats = battingStats.map(battingStat => {
@@ -194,6 +199,9 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
         
         setPlayerStats(mergedStats);
         console.log('Merged player stats:', mergedStats.length, 'players');
+        console.log('Sample merged stat:', mergedStats[0]);
+      } else {
+        console.error('Failed to fetch stats:', battingResponse.status, bowlingResponse.status);
       }
     } catch (error) {
       console.error('Error fetching player stats:', error);
