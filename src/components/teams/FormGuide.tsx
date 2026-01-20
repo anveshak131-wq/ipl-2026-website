@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { Match } from '@/types';
+import { getMatchResult } from '@/lib/matchUtils';
 
 interface FormGuideProps {
   matches: Match[];
@@ -46,70 +47,7 @@ export default function FormGuide({ matches, teamId }: FormGuideProps) {
     ].filter(Boolean) as string[]));
 
     // verbs indicating a win (or defeat)
-    const winWords = [' won ', ' won by ', ' win ', ' beat ', ' defeated ', 'defeat', 'defeated', 'beat'];
-    const lossWords = [' lost ', ' lost to ', ' lost by '];
-
-    // helper to find earliest index of any word
-    const earliestIndex = (text: string, words: string[]) => {
-      let idx = -1;
-      for (const w of words) {
-        const i = text.indexOf(w);
-        if (i !== -1 && (idx === -1 || i < idx)) idx = i;
-      }
-      return idx;
-    };
-
-    for (const v of variants) {
-      const vi = normalizedResult.indexOf(v);
-      if (vi === -1) continue;
-      const winIdx = earliestIndex(normalizedResult, winWords);
-      const lossIdx = earliestIndex(normalizedResult, lossWords.concat([' beat ', 'defeated', ' lost ']));
-
-      // If result contains explicit 'lost' mentioning this team before the name, it's a loss
-      if (normalizedResult.includes('lost') && normalizedResult.indexOf('lost') < vi) return 'loss';
-
-      // If a win-word exists and the team appears before the verb, it's a win
-      if (winIdx !== -1 && vi < winIdx) return 'win';
-
-      // If a beat/defeated appears and the team appears after the verb, it's a loss (e.g., "Team B beat Team A")
-      if (lossIdx !== -1 && vi > lossIdx) return 'loss';
-
-      // fallback: if any win-verb appears anywhere and variant present, assume winner if variant near start
-      if (winIdx !== -1) return vi <= winIdx + 40 ? 'win' : 'loss';
-
-      // default: if variant present but no verbs, assume loss is safer to avoid false positives
-      return 'loss';
-    }
-
-    return 'loss';
-  };
-
-  const wins = recentMatches.filter((m) => getMatchResult(m) === 'win').length;
-  const winPercentage = (wins / recentMatches.length) * 100;
-
-  const calculateStreak = () => {
-    const all = matches
-      .filter((m) => m.status === 'completed')
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    if (all.length === 0) return { type: 'none', count: 0 } as const;
-    const first = getMatchResult(all[0]);
-    if (first === 'nr' || first === 'unknown') return { type: 'none', count: 0 } as const;
-    let streak = 1;
-    for (let i = 1; i < all.length; i++) {
-      const r = getMatchResult(all[i]);
-      if (r === first) streak++; else break;
-    }
-    return { type: first, count: streak } as const;
-  };
-
-  const streak = calculateStreak();
-
-  return (
-    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 font-sans">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
-        {/* Form column */}
-        <div className="rounded-2xl p-4 bg-white/3 backdrop-blur-sm border border-white/10">
-          <div className="flex items-center justify-between mb-3">
+    // Replaced by shared `getMatchResult` in src/lib/matchUtils.ts
             <div>
               <div className="text-sm text-gray-300 font-semibold">Form</div>
               <div className="text-xs text-gray-400">Last {recentMatches.length} matches</div>
