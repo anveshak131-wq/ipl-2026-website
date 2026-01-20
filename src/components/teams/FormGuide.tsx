@@ -131,4 +131,3 @@ export default function FormGuide({ matches, teamId }: FormGuideProps) {
     </motion.div>
   );
 }
-  );
