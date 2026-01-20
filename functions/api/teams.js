@@ -159,7 +159,7 @@ const defaultTeams = [
   {
     id: '12',
     league: 'wpl',
-    name: 'Royal Challengers Bengaluru (WPL)',
+    name: 'Royal Challengers Bangalore (WPL)',
     shortName: 'RCB-W',
     logo: '/logos/wpl_rcb_logo_animated.svg',
     description: 'The women\'s franchise of RCB with explosive talent',
