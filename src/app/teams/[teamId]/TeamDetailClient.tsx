@@ -181,9 +181,16 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
   const getPlayerRealStats = (player: any) => {
     const playerStat = playerStats.find(stat => 
       stat.playerId === player.id || 
-      stat.playerName === player.name ||
-      stat.playerName === player.playerName
+      stat.playerId === String(player.id) ||
+      stat.playerName === player.name
     );
+    
+    // Debug logging for first few players
+    if (player.name === 'Gautami Naik' || player.name === 'Smriti Mandhana') {
+      console.log('Debug - Player:', player.name, 'ID:', player.id);
+      console.log('Debug - Available stats:', playerStats.slice(0, 3).map(s => ({ id: s.playerId, name: s.playerName })));
+      console.log('Debug - Found stat:', playerStat ? 'YES' : 'NO');
+    }
     
     if (playerStat) {
       return {
