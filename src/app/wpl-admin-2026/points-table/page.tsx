@@ -198,6 +198,47 @@ export default function WPLAdminPointsTablePage() {
     }
   };
 
+  const handleToggleQualified = async (teamId: string, qualified: boolean) => {
+    try {
+      const token = localStorage.getItem('adminToken');
+      if (!token) {
+        alert('Authentication token not found');
+        return;
+      }
+
+      const teamToUpdate = teams.find(t => t.id === teamId);
+      if (!teamToUpdate) return;
+
+      const updated = {
+        ...teamToUpdate,
+        stats: {
+          ...(teamToUpdate.stats || {}),
+          qualified: qualified
+        }
+      };
+
+      const res = await fetch('/api/teams', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(updated)
+      });
+
+      if (res.ok) {
+        const updatedTeam = await res.json();
+        setTeams(teams.map(t => t.id === teamId ? updatedTeam : t));
+      } else {
+        const err = await res.json();
+        alert(`Failed to update qualification: ${err.error || 'Unknown error'}`);
+      }
+    } catch (err) {
+      console.error('Error toggling qualified:', err);
+      alert('Error updating qualification');
+    }
+  };
+
   const handleSave = async (teamId: string) => {
     try {
       const token = localStorage.getItem('adminToken');
@@ -234,7 +275,8 @@ export default function WPLAdminPointsTablePage() {
             wins: dataToSave.wins,
             losses: dataToSave.losses,
             points: dataToSave.points,
-            netRunRate: dataToSave.netRunRate
+            netRunRate: dataToSave.netRunRate,
+            qualified: Boolean(dataToSave.qualified)
           }
         })
       });
@@ -484,7 +526,7 @@ export default function WPLAdminPointsTablePage() {
               }}
             >
               {/* Table Header */}
-              <div className="grid grid-cols-[40px_200px_1fr_100px_100px_100px_100px_100px_120px] gap-4 px-6 py-4 rounded-3xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 text-sm font-bold uppercase tracking-wider text-gray-300">
+              <div className="grid grid-cols-[40px_200px_1fr_100px_100px_100px_100px_100px_100px_120px] gap-4 px-6 py-4 rounded-3xl backdrop-blur-2xl border-2 border-white/20 bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 text-sm font-bold uppercase tracking-wider text-gray-300">
                 <div className="flex items-center justify-center">Rank</div>
                 <div className="flex items-center gap-2">Team <Info className="w-4 h-4 text-gray-500" /></div>
                 <div className="flex items-center gap-2">Name</div>
@@ -493,6 +535,7 @@ export default function WPLAdminPointsTablePage() {
                 <div className="flex items-center gap-2">Losses</div>
                 <div className="flex items-center gap-2">Points</div>
                 <div className="flex items-center gap-2">NRR</div>
+                <div className="flex items-center justify-center">Qualified</div>
                 <div className="flex items-center justify-center">Actions</div>
               </div>
 
@@ -631,6 +674,30 @@ export default function WPLAdminPointsTablePage() {
                           team.matchesPlayed > 0 ? (
                             team.netRunRate > 0 ? `+${team.netRunRate.toFixed(2)}` : team.netRunRate.toFixed(2)
                           ) : <span className="text-gray-500">N/A</span>
+                        )}
+                      </div>
+
+                      {/* Qualified */}
+                      <div className="flex items-center justify-center">
+                        {isCurrentlyEditing ? (
+                          <label className="inline-flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={Boolean((editData?.qualified))}
+                              onChange={(e) => setEditData({...editData, qualified: e.target.checked})}
+                              className="w-5 h-5 rounded text-pink-500"
+                            />
+                            <span className="text-sm text-gray-300">Qualified</span>
+                          </label>
+                        ) : (
+                          <label className="inline-flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={Boolean(team.stats?.qualified)}
+                              onChange={(e) => handleToggleQualified(team.id, e.target.checked)}
+                              className="w-5 h-5 rounded text-pink-500"
+                            />
+                          </label>
                         )}
                       </div>
 
