@@ -2,6 +2,10 @@
 
 import { motion } from 'framer-motion';
 import { Match } from '@/types';
+"use client";
+
+import { motion } from 'framer-motion';
+import { Match } from '@/types';
 import { getMatchResult } from '@/lib/matchUtils';
 
 interface FormGuideProps {
@@ -19,35 +23,31 @@ export default function FormGuide({ matches, teamId }: FormGuideProps) {
 
   if (recentMatches.length === 0) return null;
 
-  const getMatchResult = (match: Match) => {
-    if (!match.result) return 'unknown';
-    const team = match.team1.id === teamId ? match.team1 : match.team2;
+  const wins = recentMatches.filter((m) => getMatchResult(m, teamId) === 'win').length;
+  const winPercentage = (wins / recentMatches.length) * 100;
 
-    // build name variants to match against result strings
-    const normalize = (s?: string) =>
-      (s || '')
-        .replace(/\s+\(wpl\)|\s+\(ipl\)/gi, '')
-        .replace(/\s+women/gi, '')
-        .replace(/bengaluru/gi, 'bangalore')
-        .replace(/\W+/g, ' ')
-        .trim()
-        .toLowerCase();
+  const calculateStreak = () => {
+    const all = matches
+      .filter((m) => m.status === 'completed')
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    if (all.length === 0) return { type: 'none', count: 0 } as const;
+    const first = getMatchResult(all[0], teamId);
+    if (first === 'nr' || first === 'unknown') return { type: 'none', count: 0 } as const;
+    let streak = 1;
+    for (let i = 1; i < all.length; i++) {
+      const r = getMatchResult(all[i], teamId);
+      if (r === first) streak++; else break;
+    }
+    return { type: first, count: streak } as const;
+  };
 
-    // normalize the result text as well so variants like 'Bengaluru' -> 'Bangalore' match
-    const normalizedResult = normalize(String(match.result));
+  const streak = calculateStreak();
 
-    // quick NR checks
-    if (normalizedResult.includes('no result') || normalizedResult.includes('abandoned')) return 'nr';
-
-    const variants = Array.from(new Set([
-      normalize(team.name),
-      normalize(team.shortName),
-      normalize(team.name?.replace(/-W$/i, '')),
-      normalize(team.shortName?.replace(/-W$/i, '')),
-    ].filter(Boolean) as string[]));
-
-    // verbs indicating a win (or defeat)
-    // Replaced by shared `getMatchResult` in src/lib/matchUtils.ts
+  return (
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4 font-sans">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+        <div className="rounded-2xl p-4 bg-white/3 backdrop-blur-sm border border-white/10">
+          <div className="flex items-center justify-between mb-3">
             <div>
               <div className="text-sm text-gray-300 font-semibold">Form</div>
               <div className="text-xs text-gray-400">Last {recentMatches.length} matches</div>
@@ -57,7 +57,7 @@ export default function FormGuide({ matches, teamId }: FormGuideProps) {
 
           <div className="flex items-center gap-3">
             {recentMatches.map((match) => {
-              const result = getMatchResult(match);
+              const result = getMatchResult(match, teamId);
               const opponent = match.team1.id === teamId ? match.team2 : match.team1;
               return (
                 <div key={match.id} className="relative">
@@ -76,7 +76,6 @@ export default function FormGuide({ matches, teamId }: FormGuideProps) {
           </div>
         </div>
 
-        {/* Win rate column (circular) */}
         <div className="rounded-2xl p-4 bg-white/3 backdrop-blur-sm border border-white/10 flex items-center gap-4">
           <div className="w-20 h-20 flex items-center justify-center relative">
             <svg className="w-20 h-20 -rotate-90" viewBox="0 0 36 36">
@@ -87,7 +86,7 @@ export default function FormGuide({ matches, teamId }: FormGuideProps) {
                 strokeWidth="2.8"
                 strokeLinecap="round"
                 stroke="url(#gradWin)"
-                strokeDasharray={`${Math.min(Math.max(winPercentage, 0), 100)} 100`}
+                strokeDasharray={`${Math.min(Math.max(winPercentage, 0), 100)} 100`} 
               />
               <defs>
                 <linearGradient id="gradWin" x1="0%" x2="100%">
@@ -107,7 +106,6 @@ export default function FormGuide({ matches, teamId }: FormGuideProps) {
           </div>
         </div>
 
-        {/* Streak column */}
         <div className="rounded-2xl p-4 bg-white/3 backdrop-blur-sm border border-white/10">
           <div className="flex items-center justify-between mb-2">
             <div>
@@ -133,3 +131,4 @@ export default function FormGuide({ matches, teamId }: FormGuideProps) {
     </motion.div>
   );
 }
+  );
