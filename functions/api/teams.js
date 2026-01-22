@@ -208,29 +208,16 @@ const defaultTeams = [
   }
 ];
 
-// GET - Debug endpoint to check deployment
-if (url.pathname === '/api/teams/debug') {
-  return new Response(JSON.stringify({ 
-    message: 'Debug endpoint working',
-    timestamp: new Date().toISOString(),
-    version: '2026-01-20-fix'
-  }), {
-    headers: { 'Content-Type': 'application/json' }
-  });
-}
-
-// GET - Retrieve all teams
-async function handleGetRequest(context) {
-  const { env, request } = context;
+// Main request handler
+export async function onRequest(context) {
+  const { request, env } = context;
+  const method = request.method;
+  const url = new URL(request.url);
   
-  try {
-    // Get league query parameter
-    const url = new URL(request.url);
-    const league = url.searchParams.get('league');
-    
-    // Try to get teams from KV storage
-    let teams = await env.IPL_CACHE.get('teams', 'json');
-    
+  // Enable CORS
+  if (method === 'OPTIONS') {
+    return new Response(null, {
+      status: 204,
     // Force refresh from default teams if:
     // 1. CSK has old color
     // 2. WPL teams are missing
