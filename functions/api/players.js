@@ -450,14 +450,14 @@ export const onRequest = async (context) => {
           });
         }
       } else if (playerLeague === 'wpl') {
-        // WPL teams: maximum 18 players
+        // WPL teams: maximum 19 players
         const existingTeamPlayers = players.filter(p => 
           (p.league || 'ipl') === 'wpl' && p.teamId === newPlayer.teamId
         );
         
-        if (existingTeamPlayers.length >= 18) {
+        if (existingTeamPlayers.length >= 19) {
           return new Response(JSON.stringify({ 
-            error: 'WPL teams cannot have more than 18 players. This team already has ' + existingTeamPlayers.length + ' players.' 
+            error: 'WPL teams cannot have more than 19 players. This team already has ' + existingTeamPlayers.length + ' players.' 
           }), {
             status: 400,
             headers: { 'Content-Type': 'application/json', ...corsHeaders },
