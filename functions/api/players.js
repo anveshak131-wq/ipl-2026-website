@@ -700,24 +700,6 @@ export const onRequest = async (context) => {
             // Fallback to existing value
             return players[index].stats?.bowlingAverage || 0;
           })(),
-          // Calculate economy - use provided value, or calculate from base stats, or use existing
-          economy: (() => {
-            // If explicitly provided, use it
-            if (updatedPlayer.stats?.economy !== undefined && updatedPlayer.stats?.economy !== null && updatedPlayer.stats?.economy !== '') {
-              const provided = typeof updatedPlayer.stats.economy === 'number' ? updatedPlayer.stats.economy : parseFloat(updatedPlayer.stats.economy);
-              if (!isNaN(provided) && provided > 0) {
-                return provided;
-              }
-            }
-            // Otherwise, calculate from base stats
-            const balls = updatedPlayer.stats?.balls !== undefined ? (parseInt(updatedPlayer.stats.balls) || 0) : (players[index].stats?.balls || 0);
-            const runsConceded = updatedPlayer.stats?.runsConceded !== undefined ? (parseInt(updatedPlayer.stats.runsConceded) || 0) : (players[index].stats?.runsConceded || 0);
-            if (balls > 0 && runsConceded >= 0) {
-              return (runsConceded * 6) / balls;
-            }
-            // Fallback to existing value
-            return players[index].stats?.economy || 0;
-          })(),
           bowlingStrikeRate: updatedPlayer.stats?.bowlingStrikeRate !== undefined ? (updatedPlayer.stats.bowlingStrikeRate || '') : (players[index].stats?.bowlingStrikeRate || ''),
           fiveWickets: updatedPlayer.stats?.fiveWickets !== undefined ? (parseInt(updatedPlayer.stats.fiveWickets) || 0) : (players[index].stats?.fiveWickets || 0),
         },

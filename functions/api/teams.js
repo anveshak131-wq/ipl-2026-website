@@ -218,16 +218,55 @@ export async function onRequest(context) {
   if (method === 'OPTIONS') {
     return new Response(null, {
       status: 204,
-    // Force refresh from default teams if:
-    // 1. CSK has old color
-    // 2. WPL teams are missing
-    // 3. WPL teams have wrong shortName format (should be MI-W, RCB-W, DC-W not MI, RCB, DC)
-    const hasCSKColorIssue = teams && teams.find(t => t.shortName === 'CSK' && t.colors.primary === '#FFFF00');
-    const hasWPLTeams = teams && teams.find(t => t.league === 'wpl');
-    const hasWPLShortNameIssue = teams && teams.find(t => t.league === 'wpl' && t.name.includes('Mumbai Indians') && t.shortName === 'MI');
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      }
+    });
+  }
+
+  // GET - Debug endpoint to check deployment
+  if (url.pathname === '/api/teams/debug') {
+    return new Response(JSON.stringify({ 
+      message: 'Debug endpoint working',
+      timestamp: new Date().toISOString(),
+      version: '2026-01-20-fix'
+    }), {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // GET - Retrieve all teams
+  async function handleGetRequest(context) {
+    const { env, request } = context;
     
-    if (hasCSKColorIssue || !hasWPLTeams || hasWPLShortNameIssue) {
-      console.log('Clearing KV cache and using default teams (CSK color fix:', !!hasCSKColorIssue, ', WPL teams missing:', !hasWPLTeams, ', WPL shortName issue:', !!hasWPLShortNameIssue, ')');
+    try {
+      // Get league query parameter
+      const url = new URL(request.url);
+      const league = url.searchParams.get('league');
+      
+      // Try to get teams from KV storage
+      let teams = [];
+      try {
+        const cachedTeams = await env.IPL_CACHE.get('teams');
+        if (cachedTeams) {
+          teams = JSON.parse(cachedTeams);
+        }
+      } catch (error) {
+        console.error('Error reading teams from KV:', error);
+      }
+      
+      // Force refresh from default teams if:
+      // 1. CSK has old color
+      // 2. WPL teams are missing
+      // 3. WPL teams have wrong shortName format (should be MI-W, RCB-W, DC-W not MI, RCB, DC)
+      const hasCSKColorIssue = teams && teams.find(t => t.shortName === 'CSK' && t.colors.primary === '#FFFF00');
+      const hasWPLTeams = teams && teams.find(t => t.league === 'wpl');
+      const hasWPLShortNameIssue = teams && teams.find(t => t.league === 'wpl' && t.name.includes('Mumbai Indians') && t.shortName === 'MI');
+      
+      if (hasCSKColorIssue || !hasWPLTeams || hasWPLShortNameIssue) {
+        console.log('Clearing KV cache and using default teams (CSK color fix:', !!hasCSKColorIssue, ', WPL teams missing:', !hasWPLTeams, ', WPL shortName issue:', !!hasWPLShortNameIssue, ')');
       teams = defaultTeams;
       // Update KV storage with fresh data
       await env.IPL_CACHE.put('teams', JSON.stringify(teams));
