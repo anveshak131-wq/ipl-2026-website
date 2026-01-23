@@ -35,6 +35,14 @@ export default function WPLPlayersManagementPage() {
     battingStyle: "Right-handed bat",
   });
 
+  // Normalize team ID helper (same as playing-11 page)
+  const normalizeTeamId = (id: string | number | undefined) => {
+    let str = String(id || '').trim();
+    if (str.startsWith('Team ')) str = str.replace('Team ', '');
+    if (str.toLowerCase().startsWith('team')) str = str.replace(/^team/i, '');
+    return str;
+  };
+
   // Check authentication
   useEffect(() => {
     const token = localStorage.getItem("adminToken");
@@ -58,7 +66,7 @@ export default function WPLPlayersManagementPage() {
         // Normalize players so teamId is always a string and names exist
         const normalizedPlayers = (playersData || []).map((p: Player) => ({
           ...p,
-          teamId: String(p.teamId || ""),
+          teamId: normalizeTeamId(p.teamId),
           name: p.name || "Unknown",
         }));
         setPlayers(normalizedPlayers);
@@ -66,7 +74,7 @@ export default function WPLPlayersManagementPage() {
         // Deduplicate teams by ID and normalize ids to strings
         const uniqueTeams =
           teamsData?.reduce((acc: Team[], team: Team) => {
-            const teamIdStr = String(team.id || "");
+            const teamIdStr = normalizeTeamId(team.id as any);
             if (!acc.find((t) => String(t.id) === teamIdStr)) {
               acc.push({ ...team, id: teamIdStr });
             }
