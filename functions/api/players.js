@@ -287,7 +287,7 @@ export const onRequest = async (context) => {
           needsUpdate = true;
           return {
             ...player,
-            teamId: normalizedTeamId,
+            ...(normalizedTeamId ? { teamId: normalizedTeamId } : {}),
             league: 'ipl'
           };
         }
@@ -310,13 +310,14 @@ export const onRequest = async (context) => {
           needsUpdate = true;
           return {
             ...player,
-            teamId: normalizedTeamId,
+            ...(normalizedTeamId ? { teamId: normalizedTeamId } : {}),
             league: 'wpl'
           };
         }
         
         // Also normalize teamId for all players
-        if (String(player.teamId) !== normalizedTeamId) {
+        // Only normalize teamId if normalization produced a non-empty value
+        if (normalizedTeamId && String(player.teamId) !== normalizedTeamId) {
           console.log(`[NORMALIZE] Player "${player.name}": teamId '${player.teamId}' -> '${normalizedTeamId}'`);
           needsUpdate = true;
           return {
