@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import WPLAdminSidebarNew from "@/components/admin/WPLAdminSidebarNew";
 import { Player, Team } from "@/types";
+import { wplTeams } from '@/data/wpl-teams';
 import { api } from "@/lib/data";
 import { WPLColors } from "@/lib/wplColors";
 import AuroraBackground from "@/components/ui/AuroraBackground";
@@ -81,7 +82,15 @@ export default function WPLPlayersManagementPage() {
             return acc;
           }, []) || [];
 
-        setTeams(uniqueTeams);
+        // If teams API returned no WPL teams, fallback to local `wplTeams` data with IDs 11-15
+        let finalTeams = uniqueTeams;
+        const hasWPL = finalTeams.some(t => t.league === 'wpl');
+        if (!hasWPL || finalTeams.length === 0) {
+          console.warn('WPL teams missing from API, using local fallback wplTeams');
+          finalTeams = wplTeams.map((t, i) => ({ ...t, id: String(11 + i) } as Team));
+        }
+
+        setTeams(finalTeams);
         setIsLoading(false);
       } catch (error) {
         console.error("Error loading data:", error);
