@@ -1,83 +1,206 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 import BallEntryPanel from '@/components/admin/live-score/BallEntryPanel';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import { LiveScoreState } from '@/hooks/useLiveScore';
 import { LoadingSpinner } from '@/components/admin/animations';
+import { Activity } from 'lucide-react';
 import { useLeague } from '@/contexts/LeagueContext';
 import { WPLColors } from '@/lib/wplColors';
 import { Player, Match } from '@/types';
 import { api } from '@/lib/data';
 
 export default function WPLLiveScorePage() {
+  // Immediate console log on render
+  if (typeof window !== 'undefined') {
+    console.log('[WPLLiveScore] Page rendering', new Date().toISOString());
+  }
+
   const router = useRouter();
   const { currentLeague } = useLeague();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [matches, setMatches] = useState<Match[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [selectedMatchId, setSelectedMatchId] = useState<string>('');
+  const [initialLiveState, setInitialLiveState] = useState<LiveScoreState | undefined>(undefined);
 
+  // Helper to get localStorage key for a match
+  const getLocalStorageKeyForMatch = (matchId: string) => `liveScore_wpl_${matchId}`;
+
+  // Step 1: Check authentication
   useEffect(() => {
     if (typeof window === 'undefined') return;
+
+    console.log('[WPLLiveScore] Checking authentication...');
     const token = localStorage.getItem('adminToken');
+    
     if (!token) {
+      console.log('[WPLLiveScore] No token found, redirecting...');
       router.push('/wpl-admin-2026');
       return;
     }
+
+    console.log('[WPLLiveScore] Token found, authenticated');
     setIsAuthenticated(true);
   }, [router]);
 
+  // Step 2: Load data after authentication confirmed
   useEffect(() => {
     if (!isAuthenticated) return;
-    let mounted = true;
-    (async () => {
-      setIsLoading(true);
+
+    const loadData = async () => {
       try {
-        const [m, p] = await Promise.all([api.getMatches('wpl'), api.getPlayers(undefined, 'wpl')]);
-        if (!mounted) return;
-        setMatches(m || []);
-        setPlayers(p || []);
-        const saved = localStorage.getItem('wpl-live-score-matchId');
-        if (saved && m?.length) setSelectedMatchId(saved);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        if (mounted) setIsLoading(false);
+        console.log('[WPLLiveScore] Loading matches and players...');
+        
+        const [matchesData, playersData] = await Promise.all([
+          api.getMatches('wpl'),
+          api.getPlayers(undefined, 'wpl'),
+        ]);
+
+        console.log('[WPLLiveScore] Data loaded successfully', {
+          matches: matchesData?.length || 0,
+          players: playersData?.length || 0,
+        });
+
+        setMatches(matchesData || []);
+        setPlayers(playersData || []);
+
+        // Select first match or saved match
+        const savedMatchId = localStorage.getItem('wpl-live-score-matchId');
+        const defaultMatch = (matchesData && matchesData.length > 0) 
+          ? matchesData.find(m => m.id === savedMatchId) || matchesData[0]
+          : null;
+
+        if (defaultMatch) {
+          setSelectedMatchId(defaultMatch.id);
+        }
+
+        setIsLoading(false);
+      } catch (err) {
+        console.error('[WPLLiveScore] Error loading data:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load data');
+        setIsLoading(false);
       }
-    })();
-    return () => {
-      mounted = false;
     };
+
+    loadData();
   }, [isAuthenticated]);
 
-  const selectedMatch = matches.find((x) => x.id === selectedMatchId) || null;
+  // Load initial state from localStorage when match is selected
+  useEffect(() => {
+    if (!selectedMatchId) {
+      setInitialLiveState(undefined);
+      return;
+    }
 
-  const getLocalKey = (matchId: string) => `liveScore_wpl_${matchId}`;
+    const localKey = getLocalStorageKeyForMatch(selectedMatchId);
+    const localData = localStorage.getItem(localKey);
+    
+    if (localData) {
+      try {
+        const parsedLocal = JSON.parse(localData);
+        console.log('[WPLLiveScore] Loaded from localStorage:', parsedLocal);
+        setInitialLiveState(parsedLocal);
+      } catch (e) {
+        console.error('[WPLLiveScore] Error parsing localStorage data:', e);
+        setInitialLiveState(undefined);
+      }
+    } else {
+      setInitialLiveState(undefined);
+    }
+  }, [selectedMatchId]);
+
+  // Refresh match data when selected match changes (to get latest toss info from scorecard)
+  // Also refresh periodically every 10 seconds to catch updates
+  useEffect(() => {
+    if (!selectedMatchId || !isAuthenticated) return;
+
+    const refreshMatchData = async () => {
+      try {
+        const updatedMatches = await api.getMatches('wpl');
+        setMatches(updatedMatches || []);
+      } catch (err) {
+        console.error('[WPLLiveScore] Error refreshing match data:', err);
+      }
+    };
+
+    // Refresh immediately when match selected
+    refreshMatchData();
+
+    // Then refresh every 10 seconds to catch toss updates from scorecard
+    const interval = setInterval(refreshMatchData, 10000);
+    return () => clearInterval(interval);
+  }, [selectedMatchId, isAuthenticated]);
+
+  const selectedMatch = matches.find(m => m.id === selectedMatchId);
+
+  // Helper to get localStorage key for a match
+  const getLocalStorageKey = (matchId: string) => `liveScore_wpl_${matchId}`;
 
   const handleSaveLiveScore = async (state: LiveScoreState) => {
     if (!selectedMatch) return;
+
     try {
-      const key = getLocalKey(selectedMatch.id);
-      localStorage.setItem(key, JSON.stringify({ ...state, lastUpdated: new Date().toISOString() }));
+      // First, save the full state to localStorage for persistence across refreshes
+      const localKey = getLocalStorageKey(selectedMatch.id);
+      const fullStateToSave = {
+        ...state,
+        lastUpdated: new Date().toISOString(),
+        matchId: selectedMatch.id,
+      };
+      localStorage.setItem(localKey, JSON.stringify(fullStateToSave));
+      console.log('[WPLLiveScore] Saved full state to localStorage');
+
       const token = localStorage.getItem('adminToken');
-      await fetch('/api/live-score', {
+      const response = await fetch('/api/live-score', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ matchId: selectedMatch.id, scoreUpdate: state }),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          matchId: selectedMatch.id,
+          scoreUpdate: {
+            team1: {
+              name: selectedMatch.team1?.shortName || selectedMatch.team1?.name || 'Team 1',
+              runs: state.team1?.runs || 0,
+              wickets: state.team1?.wickets || 0,
+              overs: Math.floor((state.team1?.balls || 0) / 6) + '.' + ((state.team1?.balls || 0) % 6),
+            },
+            team2: {
+              name: selectedMatch.team2?.shortName || selectedMatch.team2?.name || 'Team 2',
+              runs: state.team2?.runs || 0,
+              wickets: state.team2?.wickets || 0,
+              overs: Math.floor((state.team2?.balls || 0) / 6) + '.' + ((state.team2?.balls || 0) % 6),
+            },
+            currentBatter: state.currentBatter,
+            currentBowler: state.currentBowler,
+            status: 'Live',
+            innings: state.innings,
+            battingTeam: state.battingTeam,
+          },
+        }),
       });
+
+      if (!response.ok) {
+        throw new Error('Failed to save score');
+      }
     } catch (err) {
-      console.error('Failed to save live score', err);
+      console.error('[WPLLiveScore] Error saving score:', err);
     }
   };
 
-  const bgStyle = { background: `linear-gradient(to bottom, ${WPLColors.base}, ${WPLColors.gradientStart}66)` };
+  // Styles
+  const bgStyle = {
+    background: `linear-gradient(to bottom, ${WPLColors.base}, ${WPLColors.gradientStart}66, ${WPLColors.gradientMid}33, ${WPLColors.base})`
+  };
 
-  if (!isAuthenticated) return null;
-
+  // Loading state
   if (isLoading) {
     return (
       <div className="flex min-h-screen" style={bgStyle}>
@@ -89,39 +212,216 @@ export default function WPLLiveScorePage() {
     );
   }
 
+  // Error state
+  if (error) {
+    return (
+      <div className="flex min-h-screen" style={bgStyle}>
+        <AuroraBackground />
+        <WPLAdminSidebarNew />
+        <main className="flex-1 relative z-20 p-8 flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-2" style={{ color: WPLColors.textPrimary }}>Error</h2>
+            <p style={{ color: WPLColors.textSecondary }}>{error}</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Not authenticated
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  // No matches - render an empty state with counts and actions
+  if (matches.length === 0) {
+    return (
+      <div className="flex min-h-screen" style={bgStyle}>
+        <AuroraBackground />
+        <WPLAdminSidebarNew />
+
+        <main className="flex-1 relative z-20 p-4 md:p-8 overflow-y-auto">
+          <div className="max-w-7xl mx-auto">
+            {/* Header */}
+            <div className="mb-6">
+              <div className="flex items-center gap-3 mb-2">
+                <Activity className="w-8 h-8" style={{ color: WPLColors.pink }} />
+                <h1 
+                  className="text-4xl font-bold"
+                  style={{
+                    background: `linear-gradient(to right, ${WPLColors.textPrimary}, ${WPLColors.purple}, ${WPLColors.pink})`,
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}
+                >
+                  Live Score
+                </h1>
+              </div>
+              <p style={{ color: WPLColors.textSecondary }}>Create and manage WPL match scorecards</p>
+            </div>
+
+            {/* Counts + actions */}
+            <div className="rounded-2xl p-6 md:p-8 backdrop-blur-xl border flex flex-col items-center gap-4"
+              style={{ background: WPLColors.purpleRGBA[10], borderColor: WPLColors.purpleRGBA[30] }}>
+              <div className="text-lg font-medium" style={{ color: WPLColors.textPrimary }}>
+                {matches.length} WPL matches available • {players.length} WPL players loaded
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => router.push('/wpl-admin-2026/matchday')}
+                  className="px-4 py-2 rounded-lg font-semibold"
+                  style={{ background: WPLColors.pink, color: '#fff' }}
+                >
+                  Create Match
+                </button>
+
+                <button
+                  onClick={() => router.push('/wpl-admin-2026/players')}
+                  className="px-4 py-2 rounded-lg font-semibold"
+                  style={{ background: WPLColors.purple, color: '#fff' }}
+                >
+                  Import Players
+                </button>
+              </div>
+
+              <p className="text-sm mt-2" style={{ color: WPLColors.textSecondary }}>
+                You can create a match or import players to get started with live scoring.
+              </p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // Main render
   return (
     <div className="flex min-h-screen" style={bgStyle}>
       <AuroraBackground />
       <WPLAdminSidebarNew />
-      <main className="flex-1 p-6 md:p-10">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold mb-4" style={{ color: WPLColors.textPrimary }}>
-            Live Score — Admin (WPL)
-          </h1>
-
+      
+      <main className="flex-1 relative z-20 p-4 md:p-8 overflow-y-auto">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
           <div className="mb-6">
-            <label className="block text-sm mb-2">Select Match</label>
+            <div className="flex items-center gap-3 mb-2">
+              <Activity className="w-8 h-8" style={{ color: WPLColors.pink }} />
+              <h1 
+                className="text-4xl font-bold"
+                style={{
+                  background: `linear-gradient(to right, ${WPLColors.textPrimary}, ${WPLColors.purple}, ${WPLColors.pink})`,
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}
+              >
+                Live Score
+              </h1>
+            </div>
+            <p style={{ color: WPLColors.textSecondary }}>
+              Record ball-by-ball live cricket scores
+            </p>
+          </div>
+
+          {/* Match Selector */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-2" style={{ color: WPLColors.textPrimary }}>
+              Select Match
+            </label>
             <select
-              className="w-full px-3 py-2 rounded"
               value={selectedMatchId}
               onChange={(e) => {
                 setSelectedMatchId(e.target.value);
                 localStorage.setItem('wpl-live-score-matchId', e.target.value);
               }}
+              className="w-full md:w-96 px-4 py-3 rounded-lg text-white text-sm focus:outline-none transition-colors"
+              style={{
+                background: WPLColors.purpleRGBA[20],
+                border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+              }}
             >
-              <option value="">Select a match...</option>
-              {matches.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.team1?.shortName} vs {m.team2?.shortName} · {new Date(m.date).toLocaleDateString()}
+              {matches.map((match) => (
+                <option key={match.id} value={match.id}>
+                  {match.team1?.shortName || match.team1?.name || 'Team 1'} vs {match.team2?.shortName || match.team2?.name || 'Team 2'}
                 </option>
               ))}
             </select>
           </div>
 
+          {/* Toss Info from Scorecard - Display Only */}
+          {selectedMatch && selectedMatch.matchState?.toss && (
+            <div 
+              className="rounded-2xl p-4 md:p-6 backdrop-blur-xl border mb-6"
+              style={{
+                background: WPLColors.purpleRGBA[10],
+                borderColor: WPLColors.purpleRGBA[30],
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="text-sm" style={{ color: WPLColors.textSecondary }}>
+                  🪙 Toss (from Scorecard):
+                </div>
+                <div className="font-semibold" style={{ color: WPLColors.textPrimary }}>
+                  {selectedMatch.matchState.toss.winner === 'team1' ? selectedMatch.team1?.name : selectedMatch.team2?.name} won and elected to {selectedMatch.matchState.toss.decision}
+                </div>
+                <div className="ml-auto">
+                  <a 
+                    href="/wpl-admin-2026/scorecard" 
+                    className="text-xs px-3 py-1.5 rounded-lg transition-colors hover:opacity-80"
+                    style={{ 
+                      background: WPLColors.pink, 
+                      color: '#fff' 
+                    }}
+                  >
+                    Edit in Scorecard
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Toss Not Set Warning */}
+          {selectedMatch && !selectedMatch.matchState?.toss && (
+            <div 
+              className="rounded-2xl p-4 md:p-6 backdrop-blur-xl border mb-6"
+              style={{
+                background: 'rgba(234, 179, 8, 0.1)',
+                borderColor: 'rgba(234, 179, 8, 0.3)',
+              }}
+            >
+              <div className="flex items-center gap-3">
+                <div className="text-sm" style={{ color: '#eab308' }}>
+                  ⚠️ Toss not set yet - Set it below in Pre-Match or in Scorecard page
+                </div>
+                <div className="ml-auto">
+                  <a 
+                    href="/wpl-admin-2026/scorecard" 
+                    className="text-xs px-3 py-1.5 rounded-lg transition-colors hover:opacity-80"
+                    style={{ 
+                      background: WPLColors.pink, 
+                      color: '#fff' 
+                    }}
+                  >
+                    Set in Scorecard
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Live Score Panel */}
           {selectedMatch && (
-            <div className="rounded-2xl p-6 md:p-8 backdrop-blur-xl border" style={{ background: WPLColors.purpleRGBA[10], borderColor: WPLColors.purpleRGBA[30] }}>
+            <div 
+              className="rounded-2xl p-6 md:p-8 backdrop-blur-xl border"
+              style={{
+                background: WPLColors.purpleRGBA[10],
+                borderColor: WPLColors.purpleRGBA[30],
+              }}
+            >
               <BallEntryPanel
-                matchId={selectedMatch.id}
+                matchId={selectedMatch.id || ''}
                 team1Name={selectedMatch.team1?.shortName || selectedMatch.team1?.name || 'Team 1'}
                 team2Name={selectedMatch.team2?.shortName || selectedMatch.team2?.name || 'Team 2'}
                 team1Id={selectedMatch.team1?.id || ''}
@@ -129,7 +429,33 @@ export default function WPLLiveScorePage() {
                 onSave={handleSaveLiveScore}
                 players={players}
                 league={currentLeague}
-                initialState={undefined}
+                initialBatter={
+                  selectedMatch.playing11?.team1?.[0]
+                    ? {
+                        id: selectedMatch.playing11.team1[0],
+                        name: players.find(p => p.id === selectedMatch.playing11?.team1?.[0])?.name || 'Batter',
+                      }
+                    : { id: '', name: 'Select Batter' }
+                }
+                initialBowler={
+                  selectedMatch.playing11?.team2?.[0]
+                    ? {
+                        id: selectedMatch.playing11.team2[0],
+                        name: players.find(p => p.id === selectedMatch.playing11?.team2?.[0])?.name || 'Bowler',
+                      }
+                    : { id: '', name: 'Select Bowler' }
+                }
+                playing11={selectedMatch.playing11}
+                isTestPage={true}
+                venue={selectedMatch.venue || ''}
+                date={selectedMatch.date?.split('T')[0] || new Date().toISOString().split('T')[0]}
+                time={selectedMatch.time || '19:30'}
+                isEveningMatch={selectedMatch.isEveningMatch !== false}
+                toss={selectedMatch.toss}
+                weather={selectedMatch.weather}
+                pitchReport={selectedMatch.pitchReport || ''}
+                headToHead={selectedMatch.headToHead}
+                initialState={initialLiveState}
               />
             </div>
           )}
