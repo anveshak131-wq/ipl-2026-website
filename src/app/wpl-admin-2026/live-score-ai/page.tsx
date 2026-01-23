@@ -31,6 +31,24 @@ export default function WPLLiveScoreAI() {
   const [tossWinner, setTossWinner] = useState<'team1' | 'team2' | ''>('');
   const [tossDecision, setTossDecision] = useState<'bat' | 'bowl' | ''>('');
 
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [m, p] = await Promise.all([api.getMatches('wpl'), api.getPlayers(undefined, 'wpl')]);
+        setMatches(m);
+        setPlayers(p);
+        if (m.length > 0) setSelectedMatchId(m[0].id);
+      } catch (e) {
+        console.error('Failed to load matches/players', e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  const selectedMatch = matches.find((m) => m.id === selectedMatchId) || null;
+
   // Initialize toss from selectedMatch if present
   useEffect(() => {
     if (selectedMatch && (selectedMatch.toss || selectedMatch.matchState?.toss)) {
@@ -54,25 +72,6 @@ export default function WPLLiveScoreAI() {
 
     return inning === '1' ? inning1Batting : inning2Batting;
   };
-
-
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const [m, p] = await Promise.all([api.getMatches('wpl'), api.getPlayers(undefined, 'wpl')]);
-        setMatches(m);
-        setPlayers(p);
-        if (m.length > 0) setSelectedMatchId(m[0].id);
-      } catch (e) {
-        console.error('Failed to load matches/players', e);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    load();
-  }, []);
-
-  const selectedMatch = matches.find((m) => m.id === selectedMatchId) || null;
 
   const generateSuggestion = async () => {
     try {
