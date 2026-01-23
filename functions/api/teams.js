@@ -561,5 +561,36 @@ async function handleDeleteRequest(context) {
       headers: { 'Content-Type': 'application/json' }
     });
   }
-}
+
+  // Route dispatch for main handler
+  // Determine base path for teams
+  const pathname = url.pathname;
+
+  if (method === 'GET') {
+    // If not debug path, handle teams listing
+    if (pathname === '/api/teams' || pathname === '/api/teams/') {
+      return await handleGetRequest(context);
+    }
+  }
+
+  if (method === 'POST' && (pathname === '/api/teams' || pathname === '/api/teams/')) {
+    return await handlePostRequest(context);
+  }
+
+  if (method === 'PUT' && (pathname === '/api/teams' || pathname === '/api/teams/')) {
+    return await handlePutRequest(context);
+  }
+
+  if (method === 'DELETE' && (pathname === '/api/teams' || pathname === '/api/teams/')) {
+    return await handleDeleteRequest(context);
+  }
+
+  // Method not allowed or route not found
+  return new Response(JSON.stringify({ error: 'Not found' }), {
+    status: 404,
+    headers: { 'Content-Type': 'application/json' }
+  });
+
+} // end onRequest
+
 // Force redeploy
