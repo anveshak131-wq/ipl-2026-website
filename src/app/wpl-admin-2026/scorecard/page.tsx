@@ -523,6 +523,180 @@ export default function ScorecardAdminPage() {
     setScorecard(updated);
   };
 
+  // Helper: build CSV string for a scorecard (simple, human-readable)
+  const buildScorecardCSV = (sc: Scorecard): string => {
+    const lines: string[] = [];
+
+    // Match info
+    lines.push('Match Info');
+    lines.push(`Match ID,${sc.matchId}`);
+    lines.push(`Teams,${sc.matchInfo.team1.name} vs ${sc.matchInfo.team2.name}`);
+    lines.push(`Venue,${sc.matchInfo.venue || ''}`);
+    lines.push(`Date,${sc.matchInfo.date || ''}`);
+    lines.push(`Time,${sc.matchInfo.time || ''}`);
+    lines.push(`Toss Winner,${sc.matchInfo.toss?.winner || ''}`);
+    lines.push(`Toss Decision,${sc.matchInfo.toss?.decision || ''}`);
+    lines.push('');
+
+    // Innings
+    sc.innings.forEach((inn) => {
+      const battingTeamName = inn.battingTeamId === sc.matchInfo.team1.id ? sc.matchInfo.team1.name : sc.matchInfo.team2.name;
+      lines.push(`Innings ${inn.inningsNumber} - ${battingTeamName}`);
+      lines.push('Batting');
+      lines.push('Player,Runs,Balls,4s,6s,SR,Dismissal');
+      inn.batting.forEach((b) => {
+        lines.push(`${escapeCsv(b.name || b.playerId || '')},${b.runs || 0},${b.balls || 0},${b.fours || 0},${b.sixes || 0},${b.strikeRate || ''},${escapeCsv(b.dismissal?.details || b.dismissal?.type || '')}`);
+      });
+      lines.push('');
+
+      lines.push('Bowling');
+      lines.push('Bowler,Overs,Balls,Runs,Wickets,Maidens,Wides,NoBalls,Econ');
+      inn.bowling.forEach((bw) => {
+        lines.push(`${escapeCsv(bw.name || bw.playerId || '')},${bw.overs || ''},${bw.balls || ''},${bw.runs || 0},${bw.wickets || 0},${bw.maidens || 0},${bw.wides || 0},${bw.noBalls || 0},${bw.economyRate || ''}`);
+      });
+      lines.push('');
+      lines.push(`Extras,${(inn.extras.wides || 0) + (inn.extras.noBalls || 0) + (inn.extras.byes || 0) + (inn.extras.legByes || 0)}`);
+      lines.push(`Total,${inn.totalRuns || 0}/${inn.totalWickets || 0} (${inn.totalOvers || ''})`);
+      lines.push('');
+    });
+
+    // Result
+    lines.push('Result');
+    lines.push(`Winner,${sc.result?.winner || ''}`);
+    lines.push(`Margin,${sc.result?.margin || ''}`);
+    lines.push(`ManOfTheMatch,${sc.result?.manOfTheMatch || ''}`);
+
+    return lines.join('\n');
+  };
+
+  const escapeCsv = (value: any) => {
+    if (value === null || value === undefined) return '';
+    const str = String(value);
+    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+      return '"' + str.replace(/"/g, '""') + '"';
+    }
+    return str;
+  };
+
+  const downloadFile = (content: string, filename: string, mime: string) => {
+    const blob = new Blob([content], { type: mime + ';charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  // Load jsPDF from CDN if not already present
+  const loadJSPDF = (): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      if (typeof window === 'undefined') return reject(new Error('window is undefined'));
+      if ((window as any).jspdf) return resolve();
+      const existing = document.querySelector('script[data-src="jspdf-cdn"]');
+      if (existing) {
+        existing.addEventListener('load', () => resolve());
+        existing.addEventListener('error', () => reject(new Error('Failed to load jsPDF')));
+        return;
+      }
+      const script = document.createElement('script');
+      script.setAttribute('data-src', 'jspdf-cdn');
+      script.src = 'https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js';
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('Failed to load jsPDF'));
+      document.head.appendChild(script);
+    });
+  };
+
+  // Export scorecard to a simple PDF using jsPDF
+  const exportScorecardPDF = async (sc: Scorecard) => {
+    const jspdfAny = (window as any).jspdf || (window as any).jsPDF || null;
+    const jsPDFCtor = jspdfAny && jspdfAny.jsPDF ? jspdfAny.jsPDF : (window as any).jsPDF;
+    if (!jsPDFCtor) throw new Error('jsPDF not available');
+
+    const doc = new jsPDFCtor({ unit: 'pt', format: 'a4' });
+    const left = 40;
+    let y = 40;
+    const lineHeight = 14;
+
+    doc.setFontSize(14);
+    doc.text(`${sc.matchInfo.team1.name} vs ${sc.matchInfo.team2.name}`, left, y);
+    y += lineHeight * 1.5;
+
+    doc.setFontSize(10);
+    doc.text(`Venue: ${sc.matchInfo.venue || ''}`, left, y); y += lineHeight;
+    doc.text(`Date: ${sc.matchInfo.date || ''}  Time: ${sc.matchInfo.time || ''}`, left, y); y += lineHeight;
+    doc.text(`Toss: ${sc.matchInfo.toss?.winner || ''} (${sc.matchInfo.toss?.decision || ''})`, left, y); y += lineHeight * 1.5;
+
+    sc.innings.forEach((inn) => {
+      const battingTeamName = inn.battingTeamId === sc.matchInfo.team1.id ? sc.matchInfo.team1.name : sc.matchInfo.team2.name;
+      doc.setFontSize(12);
+      doc.text(`Innings ${inn.inningsNumber} - ${battingTeamName}`, left, y);
+      y += lineHeight;
+
+      // Batting header
+      doc.setFontSize(10);
+      doc.text('Batter', left, y);
+      doc.text('R', left + 200, y);
+      doc.text('B', left + 240, y);
+      doc.text('4s', left + 280, y);
+      doc.text('6s', left + 320, y);
+      doc.text('SR', left + 360, y);
+      y += lineHeight;
+
+      inn.batting.forEach((b) => {
+        if (y > 760) { doc.addPage(); y = 40; }
+        doc.text(`${b.name || b.playerId || ''}`, left, y);
+        doc.text(String(b.runs || 0), left + 200, y);
+        doc.text(String(b.balls || 0), left + 240, y);
+        doc.text(String(b.fours || 0), left + 280, y);
+        doc.text(String(b.sixes || 0), left + 320, y);
+        doc.text(String(b.strikeRate || ''), left + 360, y);
+        y += lineHeight;
+      });
+
+      y += lineHeight * 0.5;
+      // Bowling
+      doc.setFontSize(10);
+      doc.text('Bowler', left, y);
+      doc.text('O', left + 200, y);
+      doc.text('R', left + 240, y);
+      doc.text('W', left + 280, y);
+      doc.text('Econ', left + 320, y);
+      y += lineHeight;
+
+      inn.bowling.forEach((bw) => {
+        if (y > 760) { doc.addPage(); y = 40; }
+        doc.text(`${bw.name || bw.playerId || ''}`, left, y);
+        doc.text(String(bw.overs || ''), left + 200, y);
+        doc.text(String(bw.runs || 0), left + 240, y);
+        doc.text(String(bw.wickets || 0), left + 280, y);
+        doc.text(String(bw.economyRate || ''), left + 320, y);
+        y += lineHeight;
+      });
+
+      y += lineHeight;
+      doc.text(`Extras: ${(inn.extras.wides || 0) + (inn.extras.noBalls || 0) + (inn.extras.byes || 0) + (inn.extras.legByes || 0)}`, left, y);
+      y += lineHeight;
+      doc.text(`Total: ${inn.totalRuns || 0}/${inn.totalWickets || 0} (${inn.totalOvers || ''})`, left, y);
+      y += lineHeight * 1.2;
+    });
+
+    // Result
+    y += lineHeight * 0.5;
+    doc.setFontSize(12);
+    doc.text('Result', left, y); y += lineHeight;
+    doc.setFontSize(10);
+    doc.text(`Winner: ${sc.result?.winner || ''}`, left, y); y += lineHeight;
+    doc.text(`Margin: ${sc.result?.margin || ''}`, left, y); y += lineHeight;
+    doc.text(`MoM: ${sc.result?.manOfTheMatch || ''}`, left, y); y += lineHeight;
+
+    const filename = `scorecard_${sc.matchId || 'unknown'}.pdf`;
+    doc.save(filename);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white flex items-center justify-center">
@@ -1163,6 +1337,56 @@ export default function ScorecardAdminPage() {
                   {saving ? 'Publishing...' : '🚀 Publish Scorecard'}
                 </button>
               )}
+              {/* Export Buttons (client-side CSV/JSON) */}
+              <button
+                onClick={async () => {
+                  if (!scorecard) return;
+                  try {
+                    const csv = buildScorecardCSV(scorecard);
+                    downloadFile(csv, `scorecard_${scorecard.matchId || 'unknown'}.csv`, 'text/csv');
+                  } catch (e) {
+                    console.error('Export CSV error', e);
+                    setMessage('✗ Error exporting CSV');
+                    setTimeout(() => setMessage(''), 3000);
+                  }
+                }}
+                className="px-6 py-3 bg-gray-600 hover:bg-gray-500 rounded font-bold transition"
+              >
+                📥 Export CSV
+              </button>
+              <button
+                onClick={async () => {
+                  if (!scorecard) return;
+                  try {
+                    const json = JSON.stringify(scorecard, null, 2);
+                    downloadFile(json, `scorecard_${scorecard.matchId || 'unknown'}.json`, 'application/json');
+                  } catch (e) {
+                    console.error('Export JSON error', e);
+                    setMessage('✗ Error exporting JSON');
+                    setTimeout(() => setMessage(''), 3000);
+                  }
+                }}
+                className="px-6 py-3 bg-gray-600 hover:bg-gray-500 rounded font-bold transition"
+              >
+                📥 Export JSON
+              </button>
+              <button
+                onClick={async () => {
+                  if (!scorecard) return;
+                  setMessage('');
+                  try {
+                    await loadJSPDF();
+                    await exportScorecardPDF(scorecard);
+                  } catch (e) {
+                    console.error('Export PDF error', e);
+                    setMessage('✗ Error exporting PDF');
+                    setTimeout(() => setMessage(''), 3000);
+                  }
+                }}
+                className="px-6 py-3 bg-gray-600 hover:bg-gray-500 rounded font-bold transition"
+              >
+                📥 Export PDF
+              </button>
             </div>
           </div>
         )}
