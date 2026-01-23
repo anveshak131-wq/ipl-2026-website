@@ -41,13 +41,33 @@ export async function onRequest(context) {
     let bowler = 'the bowler';
     try {
       const playersData = await env.IPL_CACHE.get('players', 'json') || [];
+      const findPlayer = (id, teamId) => {
+        const matches = (playersData || []).filter(pl => String(pl.id) === String(id));
+        if (matches.length === 0) return null;
+        if (matches.length === 1) return matches[0];
+        // Prefer a player who matches the batting team when possible
+        if (teamId) {
+          const byTeam = matches.find(pl => String(pl.teamId) === String(teamId));
+          if (byTeam) return byTeam;
+        }
+        return matches[0];
+      };
+
       if (batterId) {
-        const p = (playersData || []).find(pl => String(pl.id) === String(batterId));
+        const p = findPlayer(batterId, body.battingTeamId);
         batter = p ? `${p.name}` : `Batter ${batterId}`;
       }
       if (bowlerId) {
-        const b = (playersData || []).find(pl => String(pl.id) === String(bowlerId));
-        bowler = b ? `${b.name}` : `Bowler ${bowlerId}`;
+        // If multiple players have same id, prefer a bowler who is NOT in the batting team (if provided)
+        const matchesForBowler = (playersData || []).filter(pl => String(pl.id) === String(bowlerId));
+        let chosenBowler = null;
+        if (matchesForBowler.length === 1) chosenBowler = matchesForBowler[0];
+        else if (body.battingTeamId) {
+          chosenBowler = matchesForBowler.find(pl => String(pl.teamId) !== String(body.battingTeamId)) || matchesForBowler[0];
+        } else {
+          chosenBowler = matchesForBowler[0];
+        }
+        bowler = chosenBowler ? `${chosenBowler.name}` : `Bowler ${bowlerId}`;
       }
     } catch (err) {
       // If KV lookup fails, fall back to IDs
