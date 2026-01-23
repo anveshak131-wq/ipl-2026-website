@@ -36,9 +36,24 @@ export async function onRequest(context) {
     if (tone === 'excited') prefix = 'WOW — ';
     if (tone === 'analytical') prefix = 'STAT: ';
 
-    // Use batter/bowler IDs if provided for clarity
-    const batter = batterId ? `Batter ${batterId}` : 'the batter';
-    const bowler = bowlerId ? `Bowler ${bowlerId}` : 'the bowler';
+    // Use batter/bowler IDs if provided -- try to resolve to real player names from KV
+    let batter = 'the batter';
+    let bowler = 'the bowler';
+    try {
+      const playersData = await env.IPL_CACHE.get('players', 'json') || [];
+      if (batterId) {
+        const p = (playersData || []).find(pl => String(pl.id) === String(batterId));
+        batter = p ? `${p.name}` : `Batter ${batterId}`;
+      }
+      if (bowlerId) {
+        const b = (playersData || []).find(pl => String(pl.id) === String(bowlerId));
+        bowler = b ? `${b.name}` : `Bowler ${bowlerId}`;
+      }
+    } catch (err) {
+      // If KV lookup fails, fall back to IDs
+      if (batterId) batter = `Batter ${batterId}`;
+      if (bowlerId) bowler = `Bowler ${bowlerId}`;
+    }
 
     // Include batting team if provided
     const battingInfo = body.battingTeamName ? ` Batting: ${body.battingTeamName}.` : '';
