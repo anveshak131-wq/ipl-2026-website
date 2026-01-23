@@ -47,6 +47,8 @@ export default function WPLLiveScoreAI() {
     load();
   }, []);
 
+  const selectedMatch = matches.find((m) => m.id === selectedMatchId) || null;
+
   // Default toss if none exists: set to team1 + bowl to match requested example
   useEffect(() => {
     if (!selectedMatch) return;
@@ -56,8 +58,6 @@ export default function WPLLiveScoreAI() {
       setTossDecision('bowl');
     }
   }, [selectedMatch, tossWinner, tossDecision]);
-
-  const selectedMatch = matches.find((m) => m.id === selectedMatchId) || null;
 
   // Initialize toss from selectedMatch if present
   useEffect(() => {
@@ -86,6 +86,20 @@ export default function WPLLiveScoreAI() {
   const generateSuggestion = async () => {
     try {
       const battingTeam = computeBattingTeamForInning(event.inning);
+
+      // If a batter/bowler is selected, ensure they belong to the respective team
+      const battingTeamId = battingTeam ? String(battingTeam.id) : null;
+      const bowlingTeamId = battingTeam && selectedMatch ? (String(battingTeam.id) === String(selectedMatch.team1?.id) ? String(selectedMatch.team2?.id) : String(selectedMatch.team1?.id)) : null;
+
+      if (event.batterId && battingTeamId && !players.find(p => p.id === event.batterId && String(p.teamId) === battingTeamId)) {
+        console.warn('Selected batter does not belong to batting team, clearing selection');
+        setEvent({ ...event, batterId: '' });
+      }
+      if (event.bowlerId && bowlingTeamId && !players.find(p => p.id === event.bowlerId && String(p.teamId) === bowlingTeamId)) {
+        console.warn('Selected bowler does not belong to bowling team, clearing selection');
+        setEvent({ ...event, bowlerId: '' });
+      }
+
       const payload = {
         matchId: selectedMatchId,
         event,
@@ -134,6 +148,9 @@ export default function WPLLiveScoreAI() {
       if (!res.ok) throw new Error('Failed to save');
       alert('Saved commentary to match');
       setCommentaryDrafts([]);
+
+      // Also clear selected batter/bowler to avoid stale selections
+      setEvent({ ...event, batterId: '', bowlerId: '' });
     } catch (err) {
       console.error(err);
       alert('Failed to save commentary');
@@ -292,14 +309,35 @@ export default function WPLLiveScoreAI() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
+              {/* Batter dropdown - only players from batting team */}
               <select value={event.batterId} onChange={(e) => setEvent({ ...event, batterId: e.target.value })} className="px-3 py-2 rounded text-sm text-white" style={{ background: WPLColors.purpleRGBA[20] }}>
-                <option value="">Select Batter</option>
-                {players.map(p => (<option key={p.id} value={p.id}>{p.name} ({p.teamId})</option>))}
+                <option value="">{computeBattingTeamForInning(event.inning) ? `Select Batter (${computeBattingTeamForInning(event.inning)?.shortName})` : 'Select Batter'}</option>
+                {(() => {
+                  const battingTeam = computeBattingTeamForInning(event.inning);
+                  const battingTeamId = battingTeam ? String(battingTeam.id) : null;
+                  const battingPlayers = battingTeamId ? players.filter(p => String(p.teamId) === battingTeamId) : players;
+                  if (battingPlayers.length === 0) {
+                    return (<option value="" disabled>No players available</option>);
+                  }
+                  return battingPlayers.map(p => (<option key={p.id} value={p.id}>{p.name} ({p.teamId})</option>));
+                })()}
               </select>
 
+              {/* Bowler dropdown - only players from bowling/opposition team */}
               <select value={event.bowlerId} onChange={(e) => setEvent({ ...event, bowlerId: e.target.value })} className="px-3 py-2 rounded text-sm text-white" style={{ background: WPLColors.purpleRGBA[20] }}>
-                <option value="">Select Bowler</option>
-                {players.map(p => (<option key={p.id} value={p.id}>{p.name} ({p.teamId})</option>))}
+                <option value="">{computeBattingTeamForInning(event.inning) ? `Select Bowler (${(computeBattingTeamForInning(event.inning)?.id === selectedMatch?.team1?.id ? selectedMatch.team2.shortName : selectedMatch?.team1?.shortName) || 'Opposition'})` : 'Select Bowler'}</option>
+                {(() => {
+                  const battingTeam = computeBattingTeamForInning(event.inning);
+                  let bowlingTeamId = null;
+                  if (battingTeam && selectedMatch) {
+                    bowlingTeamId = battingTeam.id === selectedMatch.team1?.id ? String(selectedMatch.team2?.id) : String(selectedMatch.team1?.id);
+                  }
+                  const bowlingPlayers = bowlingTeamId ? players.filter(p => String(p.teamId) === bowlingTeamId) : players;
+                  if (bowlingPlayers.length === 0) {
+                    return (<option value="" disabled>No players available</option>);
+                  }
+                  return bowlingPlayers.map(p => (<option key={p.id} value={p.id}>{p.name} ({p.teamId})</option>));
+                })()}
               </select>
 
               <select value={event.tone} onChange={(e) => setEvent({ ...event, tone: e.target.value })} className="px-3 py-2 rounded text-sm text-white" style={{ background: WPLColors.purpleRGBA[20] }}>
