@@ -17,7 +17,8 @@ export default function WPLPlayersManagementPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedTeam, setSelectedTeam] = useState<string>("all");
+  // Use an empty string to represent "All Teams" for easier falsy checks and consistent comparisons
+  const [selectedTeam, setSelectedTeam] = useState<string>("");
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [editedTeamId, setEditedTeamId] = useState("");
   const [editedIsCaptain, setEditedIsCaptain] = useState(false);
@@ -225,8 +226,8 @@ export default function WPLPlayersManagementPage() {
       .toLowerCase()
       .includes((searchTerm || "").toLowerCase());
     const matchesTeam =
-      selectedTeam === "all" ||
-      String(p.teamId || "") === String(selectedTeam || "");
+      !selectedTeam ||
+      String(p.teamId || "").trim() === String(selectedTeam || "").trim();
     return matchesSearch && matchesTeam;
   });
 
@@ -299,7 +300,8 @@ export default function WPLPlayersManagementPage() {
                 border: `1px solid ${WPLColors.purpleRGBA[30]}`,
               }}
             >
-              <option value="all">All Teams</option>
+              {/* Empty value means 'all teams' */}
+              <option value="">All Teams</option>
               {teams.map((team) => (
                 <option key={team.id} value={team.id}>
                   {team.name}
