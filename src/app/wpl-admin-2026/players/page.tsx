@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
-import { Player, Team } from '@/types';
-import { api } from '@/lib/data';
-import { WPLColors } from '@/lib/wplColors';
-import AuroraBackground from '@/components/ui/AuroraBackground';
-import { LoadingSpinner } from '@/components/admin/animations';
-import { Edit2, Save, X, Users, Trash2, Plus } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import WPLAdminSidebarNew from "@/components/admin/WPLAdminSidebarNew";
+import { Player, Team } from "@/types";
+import { api } from "@/lib/data";
+import { WPLColors } from "@/lib/wplColors";
+import AuroraBackground from "@/components/ui/AuroraBackground";
+import { LoadingSpinner } from "@/components/admin/animations";
+import { Edit2, Save, X, Users, Trash2, Plus } from "lucide-react";
 
 export default function WPLPlayersManagementPage() {
   const router = useRouter();
@@ -16,29 +16,29 @@ export default function WPLPlayersManagementPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [players, setPlayers] = useState<Player[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTeam, setSelectedTeam] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTeam, setSelectedTeam] = useState<string>("all");
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
-  const [editedTeamId, setEditedTeamId] = useState('');
+  const [editedTeamId, setEditedTeamId] = useState("");
   const [editedIsCaptain, setEditedIsCaptain] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newPlayer, setNewPlayer] = useState({
-    name: '',
-    role: 'Batter',
-    teamId: '',
-    age: '',
-    nationality: '',
-    jerseyNumber: '',
+    name: "",
+    role: "Batter",
+    teamId: "",
+    age: "",
+    nationality: "",
+    jerseyNumber: "",
     isCaptain: false,
-    bowlingStyle: 'N/A',
-    battingStyle: 'Right-handed bat',
+    bowlingStyle: "N/A",
+    battingStyle: "Right-handed bat",
   });
 
   // Check authentication
   useEffect(() => {
-    const token = localStorage.getItem('adminToken');
+    const token = localStorage.getItem("adminToken");
     if (!token) {
-      router.push('/wpl-admin-2026');
+      router.push("/wpl-admin-2026");
       return;
     }
     setIsAuthenticated(true);
@@ -51,23 +51,31 @@ export default function WPLPlayersManagementPage() {
     const loadData = async () => {
       try {
         const [playersData, teamsData] = await Promise.all([
-          api.getPlayers(undefined, 'wpl'),
-          api.getTeams('wpl'),
+          api.getPlayers(undefined, "wpl"),
+          api.getTeams("wpl"),
         ]);
-        setPlayers(playersData || []);
-        
-        // Deduplicate teams by ID
-        const uniqueTeams = teamsData?.reduce((acc: Team[], team: Team) => {
-          if (!acc.find(t => t.id === team.id)) {
-            acc.push(team);
-          }
-          return acc;
-        }, []) || [];
-        
+        // Normalize players so teamId is always a string and names exist
+        const normalizedPlayers = (playersData || []).map((p: Player) => ({
+          ...p,
+          teamId: String(p.teamId || ""),
+          name: p.name || "Unknown",
+        }));
+        setPlayers(normalizedPlayers);
+
+        // Deduplicate teams by ID and normalize ids to strings
+        const uniqueTeams =
+          teamsData?.reduce((acc: Team[], team: Team) => {
+            const teamIdStr = String(team.id || "");
+            if (!acc.find((t) => String(t.id) === teamIdStr)) {
+              acc.push({ ...team, id: teamIdStr });
+            }
+            return acc;
+          }, []) || [];
+
         setTeams(uniqueTeams);
         setIsLoading(false);
       } catch (error) {
-        console.error('Error loading data:', error);
+        console.error("Error loading data:", error);
         setIsLoading(false);
       }
     };
@@ -77,7 +85,7 @@ export default function WPLPlayersManagementPage() {
 
   const handleEdit = (player: Player) => {
     setEditingPlayer(player);
-    setEditedTeamId(player.teamId || '');
+    setEditedTeamId(player.teamId || "");
     setEditedIsCaptain(player.isCaptain || false);
   };
 
@@ -85,17 +93,17 @@ export default function WPLPlayersManagementPage() {
     if (!editingPlayer || !editedTeamId) return;
 
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = localStorage.getItem("adminToken");
       const updatedPlayerData = {
         ...editingPlayer,
         teamId: editedTeamId,
         isCaptain: editedIsCaptain,
       };
 
-      const response = await fetch('/api/players', {
-        method: 'PUT',
+      const response = await fetch("/api/players", {
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(updatedPlayerData),
@@ -103,16 +111,18 @@ export default function WPLPlayersManagementPage() {
 
       if (response.ok) {
         const updatedPlayer = await response.json();
-        setPlayers(players.map(p => p.id === editingPlayer.id ? updatedPlayer : p));
+        setPlayers(
+          players.map((p) => (p.id === editingPlayer.id ? updatedPlayer : p)),
+        );
         setEditingPlayer(null);
-        alert('Player updated successfully!');
+        alert("Player updated successfully!");
       } else {
         const error = await response.json();
-        alert(`Error: ${error.error || 'Failed to save player'}`);
+        alert(`Error: ${error.error || "Failed to save player"}`);
       }
     } catch (error) {
-      console.error('Error saving player:', error);
-      alert('Error saving player');
+      console.error("Error saving player:", error);
+      alert("Error saving player");
     }
   };
 
@@ -122,15 +132,15 @@ export default function WPLPlayersManagementPage() {
 
   const handleAddPlayer = async () => {
     if (!newPlayer.name || !newPlayer.teamId) {
-      alert('Please fill in player name and team');
+      alert("Please fill in player name and team");
       return;
     }
 
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = localStorage.getItem("adminToken");
       const playerData = {
         ...newPlayer,
-        league: 'wpl',
+        league: "wpl",
         age: parseInt(newPlayer.age) || 0,
         jerseyNumber: parseInt(newPlayer.jerseyNumber) || 0,
         stats: {
@@ -145,14 +155,14 @@ export default function WPLPlayersManagementPage() {
           sixes: 0,
           fifties: 0,
           hundreds: 0,
-          bestBowling: '-',
+          bestBowling: "-",
         },
       };
 
-      const response = await fetch('/api/players', {
-        method: 'POST',
+      const response = await fetch("/api/players", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(playerData),
@@ -163,24 +173,24 @@ export default function WPLPlayersManagementPage() {
         setPlayers([...players, createdPlayer]);
         setShowAddForm(false);
         setNewPlayer({
-          name: '',
-          role: 'Batter',
-          teamId: '',
-          age: '',
-          nationality: '',
-          jerseyNumber: '',
+          name: "",
+          role: "Batter",
+          teamId: "",
+          age: "",
+          nationality: "",
+          jerseyNumber: "",
           isCaptain: false,
-          bowlingStyle: 'N/A',
-          battingStyle: 'Right-handed bat',
+          bowlingStyle: "N/A",
+          battingStyle: "Right-handed bat",
         });
-        alert('Player added successfully!');
+        alert("Player added successfully!");
       } else {
         const error = await response.json();
-        alert(`Error: ${error.error || 'Failed to add player'}`);
+        alert(`Error: ${error.error || "Failed to add player"}`);
       }
     } catch (error) {
-      console.error('Error adding player:', error);
-      alert('Error adding player');
+      console.error("Error adding player:", error);
+      alert("Error adding player");
     }
   };
 
@@ -188,36 +198,40 @@ export default function WPLPlayersManagementPage() {
     if (!confirm(`Are you sure you want to delete ${player.name}?`)) return;
 
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = localStorage.getItem("adminToken");
       const response = await fetch(`/api/players?id=${player.id}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
 
       if (response.ok) {
-        setPlayers(players.filter(p => p.id !== player.id));
-        alert('Player deleted successfully!');
+        setPlayers(players.filter((p) => p.id !== player.id));
+        alert("Player deleted successfully!");
       } else {
         const error = await response.json();
-        alert(`Error: ${error.error || 'Failed to delete player'}`);
+        alert(`Error: ${error.error || "Failed to delete player"}`);
       }
     } catch (error) {
-      console.error('Error deleting player:', error);
-      alert('Error deleting player');
+      console.error("Error deleting player:", error);
+      alert("Error deleting player");
     }
   };
 
-  const filteredPlayers = players.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTeam = selectedTeam === 'all' || p.teamId === selectedTeam;
+  const filteredPlayers = players.filter((p) => {
+    const matchesSearch = (p.name || "")
+      .toLowerCase()
+      .includes((searchTerm || "").toLowerCase());
+    const matchesTeam =
+      selectedTeam === "all" ||
+      String(p.teamId || "") === String(selectedTeam || "");
     return matchesSearch && matchesTeam;
   });
 
   const bgStyle = {
-    background: `linear-gradient(to bottom, ${WPLColors.base}, ${WPLColors.gradientStart}66, ${WPLColors.gradientMid}33, ${WPLColors.base})`
+    background: `linear-gradient(to bottom, ${WPLColors.base}, ${WPLColors.gradientStart}66, ${WPLColors.gradientMid}33, ${WPLColors.base})`,
   };
 
   if (isLoading) {
@@ -239,20 +253,20 @@ export default function WPLPlayersManagementPage() {
     <div className="flex min-h-screen" style={bgStyle}>
       <AuroraBackground />
       <WPLAdminSidebarNew />
-      
+
       <main className="flex-1 relative z-20 p-4 md:p-8 overflow-y-auto">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-6">
             <div className="flex items-center gap-3 mb-2">
               <Users className="w-8 h-8" style={{ color: WPLColors.pink }} />
-              <h1 
+              <h1
                 className="text-4xl font-bold"
                 style={{
                   background: `linear-gradient(to right, ${WPLColors.textPrimary}, ${WPLColors.purple}, ${WPLColors.pink})`,
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
                 }}
               >
                 Players Management
@@ -286,8 +300,10 @@ export default function WPLPlayersManagementPage() {
               }}
             >
               <option value="all">All Teams</option>
-              {teams.map(team => (
-                <option key={team.id} value={team.id}>{team.name}</option>
+              {teams.map((team) => (
+                <option key={team.id} value={team.id}>
+                  {team.name}
+                </option>
               ))}
             </select>
             <button
@@ -295,7 +311,7 @@ export default function WPLPlayersManagementPage() {
               className="px-6 py-3 rounded-lg font-semibold transition-all flex items-center justify-center gap-2"
               style={{
                 background: `linear-gradient(135deg, ${WPLColors.purple}, ${WPLColors.pink})`,
-                color: 'white',
+                color: "white",
               }}
             >
               <Plus className="w-5 h-5" />
@@ -305,20 +321,24 @@ export default function WPLPlayersManagementPage() {
 
           {/* Add Player Form */}
           {showAddForm && (
-            <div 
+            <div
               className="mb-6 rounded-2xl p-6 backdrop-blur-xl border"
               style={{
                 background: WPLColors.purpleRGBA[10],
                 borderColor: WPLColors.pink,
               }}
             >
-              <h3 className="text-xl font-bold text-white mb-4">Add New Player</h3>
+              <h3 className="text-xl font-bold text-white mb-4">
+                Add New Player
+              </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <input
                   type="text"
                   placeholder="Player Name *"
                   value={newPlayer.name}
-                  onChange={(e) => setNewPlayer({...newPlayer, name: e.target.value})}
+                  onChange={(e) =>
+                    setNewPlayer({ ...newPlayer, name: e.target.value })
+                  }
                   className="px-4 py-2 rounded-lg text-white text-sm focus:outline-none"
                   style={{
                     background: WPLColors.purpleRGBA[20],
@@ -327,7 +347,9 @@ export default function WPLPlayersManagementPage() {
                 />
                 <select
                   value={newPlayer.role}
-                  onChange={(e) => setNewPlayer({...newPlayer, role: e.target.value})}
+                  onChange={(e) =>
+                    setNewPlayer({ ...newPlayer, role: e.target.value })
+                  }
                   className="px-4 py-2 rounded-lg text-white text-sm focus:outline-none"
                   style={{
                     background: WPLColors.purpleRGBA[20],
@@ -341,7 +363,9 @@ export default function WPLPlayersManagementPage() {
                 </select>
                 <select
                   value={newPlayer.teamId}
-                  onChange={(e) => setNewPlayer({...newPlayer, teamId: e.target.value})}
+                  onChange={(e) =>
+                    setNewPlayer({ ...newPlayer, teamId: e.target.value })
+                  }
                   className="px-4 py-2 rounded-lg text-white text-sm focus:outline-none"
                   style={{
                     background: WPLColors.purpleRGBA[20],
@@ -350,14 +374,18 @@ export default function WPLPlayersManagementPage() {
                 >
                   <option value="">Select Team *</option>
                   {teams.map((team) => (
-                    <option key={team.id} value={team.id}>{team.name}</option>
+                    <option key={team.id} value={team.id}>
+                      {team.name}
+                    </option>
                   ))}
                 </select>
                 <input
                   type="number"
                   placeholder="Age"
                   value={newPlayer.age}
-                  onChange={(e) => setNewPlayer({...newPlayer, age: e.target.value})}
+                  onChange={(e) =>
+                    setNewPlayer({ ...newPlayer, age: e.target.value })
+                  }
                   className="px-4 py-2 rounded-lg text-white text-sm focus:outline-none"
                   style={{
                     background: WPLColors.purpleRGBA[20],
@@ -368,7 +396,9 @@ export default function WPLPlayersManagementPage() {
                   type="text"
                   placeholder="Nationality"
                   value={newPlayer.nationality}
-                  onChange={(e) => setNewPlayer({...newPlayer, nationality: e.target.value})}
+                  onChange={(e) =>
+                    setNewPlayer({ ...newPlayer, nationality: e.target.value })
+                  }
                   className="px-4 py-2 rounded-lg text-white text-sm focus:outline-none"
                   style={{
                     background: WPLColors.purpleRGBA[20],
@@ -379,7 +409,9 @@ export default function WPLPlayersManagementPage() {
                   type="number"
                   placeholder="Jersey Number"
                   value={newPlayer.jerseyNumber}
-                  onChange={(e) => setNewPlayer({...newPlayer, jerseyNumber: e.target.value})}
+                  onChange={(e) =>
+                    setNewPlayer({ ...newPlayer, jerseyNumber: e.target.value })
+                  }
                   className="px-4 py-2 rounded-lg text-white text-sm focus:outline-none"
                   style={{
                     background: WPLColors.purpleRGBA[20],
@@ -388,7 +420,9 @@ export default function WPLPlayersManagementPage() {
                 />
                 <select
                   value={newPlayer.battingStyle}
-                  onChange={(e) => setNewPlayer({...newPlayer, battingStyle: e.target.value})}
+                  onChange={(e) =>
+                    setNewPlayer({ ...newPlayer, battingStyle: e.target.value })
+                  }
                   className="px-4 py-2 rounded-lg text-white text-sm focus:outline-none"
                   style={{
                     background: WPLColors.purpleRGBA[20],
@@ -400,7 +434,9 @@ export default function WPLPlayersManagementPage() {
                 </select>
                 <select
                   value={newPlayer.bowlingStyle}
-                  onChange={(e) => setNewPlayer({...newPlayer, bowlingStyle: e.target.value})}
+                  onChange={(e) =>
+                    setNewPlayer({ ...newPlayer, bowlingStyle: e.target.value })
+                  }
                   className="px-4 py-2 rounded-lg text-white text-sm focus:outline-none"
                   style={{
                     background: WPLColors.purpleRGBA[20],
@@ -410,14 +446,19 @@ export default function WPLPlayersManagementPage() {
                   <option value="N/A">N/A</option>
                   <option value="Right-arm fast">Right-arm fast</option>
                   <option value="Right-arm medium">Right-arm medium</option>
-                  <option value="Right-arm off-break">Right-arm off-break</option>
-                  <option value="Right-arm leg-break">Right-arm leg-break</option>
+                  <option value="Right-arm off-break">
+                    Right-arm off-break
+                  </option>
+                  <option value="Right-arm leg-break">
+                    Right-arm leg-break
+                  </option>
                   <option value="Left-arm fast">Left-arm fast</option>
                   <option value="Left-arm medium">Left-arm medium</option>
                   <option value="Left-arm orthodox">Left-arm orthodox</option>
                   <option value="Left-arm chinaman">Left-arm chinaman</option>
                 </select>
-                <label className="flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer"
+                <label
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer"
                   style={{
                     background: WPLColors.purpleRGBA[20],
                     border: `1px solid ${WPLColors.purpleRGBA[30]}`,
@@ -426,7 +467,12 @@ export default function WPLPlayersManagementPage() {
                   <input
                     type="checkbox"
                     checked={newPlayer.isCaptain}
-                    onChange={(e) => setNewPlayer({...newPlayer, isCaptain: e.target.checked})}
+                    onChange={(e) =>
+                      setNewPlayer({
+                        ...newPlayer,
+                        isCaptain: e.target.checked,
+                      })
+                    }
                     className="w-4 h-4"
                   />
                   <span className="text-white text-sm">Captain</span>
@@ -438,7 +484,7 @@ export default function WPLPlayersManagementPage() {
                   className="px-6 py-2 rounded-lg font-semibold transition-all flex items-center gap-2"
                   style={{
                     background: `linear-gradient(135deg, ${WPLColors.purple}, ${WPLColors.pink})`,
-                    color: 'white',
+                    color: "white",
                   }}
                 >
                   <Save className="w-4 h-4" />
@@ -461,7 +507,7 @@ export default function WPLPlayersManagementPage() {
           )}
 
           {/* Players Table */}
-          <div 
+          <div
             className="rounded-2xl overflow-hidden backdrop-blur-xl border"
             style={{
               background: WPLColors.purpleRGBA[10],
@@ -471,23 +517,69 @@ export default function WPLPlayersManagementPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr style={{ borderBottom: `1px solid ${WPLColors.purpleRGBA[30]}` }}>
-                    <th className="px-6 py-3 text-left font-semibold" style={{ color: WPLColors.textPrimary }}>Player Name</th>
-                    <th className="px-6 py-3 text-left font-semibold" style={{ color: WPLColors.textPrimary }}>Role</th>
-                    <th className="px-6 py-3 text-left font-semibold" style={{ color: WPLColors.textPrimary }}>Current Team</th>
-                    <th className="px-6 py-3 text-left font-semibold" style={{ color: WPLColors.textPrimary }}>Captain</th>
-                    <th className="px-6 py-3 text-center font-semibold" style={{ color: WPLColors.textPrimary }}>Action</th>
+                  <tr
+                    style={{
+                      borderBottom: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                    }}
+                  >
+                    <th
+                      className="px-6 py-3 text-left font-semibold"
+                      style={{ color: WPLColors.textPrimary }}
+                    >
+                      Player Name
+                    </th>
+                    <th
+                      className="px-6 py-3 text-left font-semibold"
+                      style={{ color: WPLColors.textPrimary }}
+                    >
+                      Role
+                    </th>
+                    <th
+                      className="px-6 py-3 text-left font-semibold"
+                      style={{ color: WPLColors.textPrimary }}
+                    >
+                      Current Team
+                    </th>
+                    <th
+                      className="px-6 py-3 text-left font-semibold"
+                      style={{ color: WPLColors.textPrimary }}
+                    >
+                      Captain
+                    </th>
+                    <th
+                      className="px-6 py-3 text-center font-semibold"
+                      style={{ color: WPLColors.textPrimary }}
+                    >
+                      Action
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredPlayers.map((player) => {
-                    const currentTeam = teams.find(t => t.id === player.teamId);
+                    const currentTeam = teams.find(
+                      (t) => t.id === player.teamId,
+                    );
                     const isEditing = editingPlayer?.id === player.id;
 
                     return (
-                      <tr key={player.id} style={{ borderBottom: `1px solid ${WPLColors.purpleRGBA[30]}` }}>
-                        <td className="px-6 py-4" style={{ color: WPLColors.textSecondary }}>{player.name}</td>
-                        <td className="px-6 py-4" style={{ color: WPLColors.textSecondary }}>{player.role}</td>
+                      <tr
+                        key={player.id}
+                        style={{
+                          borderBottom: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                        }}
+                      >
+                        <td
+                          className="px-6 py-4"
+                          style={{ color: WPLColors.textSecondary }}
+                        >
+                          {player.name}
+                        </td>
+                        <td
+                          className="px-6 py-4"
+                          style={{ color: WPLColors.textSecondary }}
+                        >
+                          {player.role}
+                        </td>
                         <td className="px-6 py-4">
                           {isEditing ? (
                             <select
@@ -508,7 +600,7 @@ export default function WPLPlayersManagementPage() {
                             </select>
                           ) : (
                             <span style={{ color: WPLColors.pink }}>
-                              {currentTeam?.name || 'Unassigned'}
+                              {currentTeam?.name || "Unassigned"}
                             </span>
                           )}
                         </td>
@@ -518,14 +610,18 @@ export default function WPLPlayersManagementPage() {
                               <input
                                 type="checkbox"
                                 checked={editedIsCaptain}
-                                onChange={(e) => setEditedIsCaptain(e.target.checked)}
+                                onChange={(e) =>
+                                  setEditedIsCaptain(e.target.checked)
+                                }
                                 className="w-4 h-4 cursor-pointer"
                               />
-                              <span style={{ color: WPLColors.textSecondary }}>Captain</span>
+                              <span style={{ color: WPLColors.textSecondary }}>
+                                Captain
+                              </span>
                             </label>
                           ) : (
                             <span style={{ color: WPLColors.textSecondary }}>
-                              {player.isCaptain ? '👑 Yes' : 'No'}
+                              {player.isCaptain ? "👑 Yes" : "No"}
                             </span>
                           )}
                         </td>
@@ -559,7 +655,7 @@ export default function WPLPlayersManagementPage() {
                               <button
                                 onClick={() => handleDelete(player)}
                                 className="p-2 rounded hover:opacity-80 transition-opacity"
-                                style={{ background: '#ef4444' }}
+                                style={{ background: "#ef4444" }}
                               >
                                 <Trash2 className="w-4 h-4 text-white" />
                               </button>
