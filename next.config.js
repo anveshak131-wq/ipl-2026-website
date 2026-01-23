@@ -40,6 +40,15 @@ const nextConfig = {
         (m) => m.constructor.name !== 'CssMinimizerPlugin'
       );
     }
+    // Ensure path alias '@' resolves to ./src for environments that don't pick up tsconfig paths
+    try {
+      const path = require('path');
+      if (!config.resolve) config.resolve = {};
+      if (!config.resolve.alias) config.resolve.alias = {};
+      config.resolve.alias['@'] = path.resolve(__dirname, 'src');
+    } catch (e) {
+      // ignore
+    }
     return config;
   },
   // Skip type checking for faster builds

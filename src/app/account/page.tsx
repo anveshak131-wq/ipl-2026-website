@@ -2,12 +2,12 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Script from 'next/script';
-import Navbar from '@/components/layout/Navbar';
-import Footer from '@/components/layout/Footer';
+import Navbar from '../../components/layout/Navbar';
+import Footer from '../../components/layout/Footer';
 import { Team } from '@/types';
-import { api } from '@/lib/data';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import Icon from '@/components/ui/Icon';
+import { api } from '../../lib/data';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import Icon from '../../components/ui/Icon';
 
 interface ProfileResponse {
   profile?: {

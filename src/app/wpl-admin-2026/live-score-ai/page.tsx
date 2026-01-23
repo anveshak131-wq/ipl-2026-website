@@ -83,6 +83,13 @@ export default function WPLLiveScoreAI() {
     return inning === '1' ? inning1Batting : inning2Batting;
   };
 
+  // Determine if inning 1 has a score or has completed (used to hide toss save after match starts)
+  const inning1HasScore = Boolean(
+    selectedMatch?.score?.team1?.runs ||
+    selectedMatch?.score?.team2?.runs ||
+    selectedMatch?.matchState?.innings1?.completed
+  );
+
   const generateSuggestion = async () => {
     try {
       const battingTeam = computeBattingTeamForInning(event.inning);
@@ -189,13 +196,23 @@ export default function WPLLiveScoreAI() {
               {matches.map((m) => (<option key={m.id} value={m.id}>{m.team1.shortName} vs {m.team2.shortName} · {new Date(m.date).toLocaleDateString()}</option>))}
             </select>
 
-            {/* Toss summary - appears after match selection and before innings controls */}
-            {selectedMatch && (
-              <div className="mt-4 rounded-lg p-3 bg-purple-900 text-white flex items-center gap-3">
-                <div className="font-semibold">{selectedMatch.team1?.shortName} (team1)</div>
-                <div className="px-2 py-1 rounded bg-purple-700 text-sm">{tossDecision ? tossDecision.charAt(0).toUpperCase() + tossDecision.slice(1) : 'No decision'}</div>
-                <button
-                  onClick={async () => {
+            {/* Top toss bar: editable dropdowns + save (replaces lower toss controls) */}
+            <div className="flex items-center justify-between gap-4 p-4 rounded-lg mb-4" style={{ background: WPLColors.purpleRGBA[30], border: `1px solid ${WPLColors.purpleRGBA[40]}` }}>
+              <div className="flex items-center gap-3">
+                <select value={tossWinner} onChange={(e) => setTossWinner(e.target.value as any)} className="px-3 py-2 rounded text-sm text-white" style={{ background: WPLColors.purpleRGBA[20] }}>
+                  <option value="">Toss winner</option>
+                  <option value="team1">{selectedMatch ? `${selectedMatch.team1.shortName} (team1)` : 'Team 1'}</option>
+                  <option value="team2">{selectedMatch ? `${selectedMatch.team2.shortName} (team2)` : 'Team 2'}</option>
+                </select>
+
+                <select value={tossDecision} onChange={(e) => setTossDecision(e.target.value as any)} className="px-3 py-2 rounded text-sm text-white" style={{ background: WPLColors.purpleRGBA[20] }}>
+                  <option value="">Decision</option>
+                  <option value="bat">Bat</option>
+                  <option value="bowl">Bowl</option>
+                </select>
+
+                {!inning1HasScore && (
+                  <button onClick={async () => {
                     // Save toss to match via API
                     if (!selectedMatch || !tossWinner || !tossDecision) {
                       alert('Select toss winner and decision first');
@@ -217,24 +234,18 @@ export default function WPLLiveScoreAI() {
                       console.error(err);
                       alert('Failed to save toss: ' + (err.message || err));
                     }
-                  }}
-                  className="px-3 py-1 rounded-lg font-semibold"
-                  style={{ background: WPLColors.pink, color: '#fff' }}
-                >
-                  Save Toss
-                </button>
-
-                <div className="ml-auto text-sm">
-                  {computeBattingTeamForInning('1') ? (
-                    <span>Batting (Inning 1): <strong>{computeBattingTeamForInning('1')?.shortName}</strong></span>
-                  ) : (
-                    <span>Set toss to compute batting team</span>
-                  )}
-                </div>
+                  }} className="px-4 py-2 rounded-lg font-semibold" style={{ background: WPLColors.pink, color: '#fff' }}>
+                    Save Toss
+                  </button>
+                )}
               </div>
-            )}
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mt-4">
+              <div style={{ color: WPLColors.textSecondary }}>
+                {event.inning && (computeBattingTeamForInning(event.inning) ? `Batting (Inning ${event.inning}): ${computeBattingTeamForInning(event.inning).shortName}` : 'Set toss to compute batting team')}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mt-0">
               <select value={event.inning} onChange={(e) => setEvent({ ...event, inning: e.target.value })} className="px-3 py-2 rounded text-sm text-white" style={{ background: WPLColors.purpleRGBA[20] }}>
                 <option value="1">Inning 1</option>
                 <option value="2">Inning 2</option>
@@ -259,54 +270,7 @@ export default function WPLLiveScoreAI() {
               </select>
             </div>
 
-            {/* Toss controls */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
-              <select value={tossWinner} onChange={(e) => setTossWinner(e.target.value as any)} className="px-3 py-2 rounded text-sm text-white" style={{ background: WPLColors.purpleRGBA[20] }}>
-                <option value="">Toss winner</option>
-                <option value="team1">{selectedMatch ? `${selectedMatch.team1.shortName} (team1)` : 'Team 1'}</option>
-                <option value="team2">{selectedMatch ? `${selectedMatch.team2.shortName} (team2)` : 'Team 2'}</option>
-              </select>
-
-              <select value={tossDecision} onChange={(e) => setTossDecision(e.target.value as any)} className="px-3 py-2 rounded text-sm text-white" style={{ background: WPLColors.purpleRGBA[20] }}>
-                <option value="">Decision</option>
-                <option value="bat">Bat</option>
-                <option value="bowl">Bowl</option>
-              </select>
-
-              <div className="flex items-center gap-2">
-                <button onClick={async () => {
-                  // Save toss to match via API
-                  if (!selectedMatch || !tossWinner || !tossDecision) {
-                    alert('Select toss winner and decision first');
-                    return;
-                  }
-                  try {
-                    const token = localStorage.getItem('adminToken');
-                    const res = await fetch('/api/matches', {
-                      method: 'PUT',
-                      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                      body: JSON.stringify({ id: selectedMatch.id, toss: { winner: tossWinner, decision: tossDecision } })
-                    });
-                    if (!res.ok) throw new Error('Failed to save toss');
-                    const updated = await res.json();
-                    alert('Toss saved');
-                    // Update local selectedMatch copy
-                    // Note: page will not re-fetch matches automatically here; we keep UI in sync
-                    setTossWinner(updated.toss?.winner || tossWinner);
-                    setTossDecision(updated.toss?.decision || tossDecision);
-                  } catch (err) {
-                    console.error(err);
-                    alert('Failed to save toss: ' + (err.message || err));
-                  }
-                }} className="px-4 py-2 rounded-lg font-semibold" style={{ background: WPLColors.pink, color: '#fff' }}>
-                  Save Toss
-                </button>
-
-                <div style={{ color: WPLColors.textSecondary }} className="ml-3">
-                  {event.inning && (computeBattingTeamForInning(event.inning) ? `Batting (Inning ${event.inning}): ${computeBattingTeamForInning(event.inning).shortName}` : 'Set toss to compute batting team')}
-                </div>
-              </div>
-            </div>
+            
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
               {/* Batter dropdown - only players from batting team */}
