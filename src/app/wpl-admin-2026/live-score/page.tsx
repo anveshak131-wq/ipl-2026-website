@@ -1,3 +1,256 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import WPLAdminSidebarNew from "@/components/admin/WPLAdminSidebarNew";
+import AuroraBackground from "@/components/ui/AuroraBackground";
+import { api } from "@/lib/data";
+import { WPLColors } from "@/lib/wplColors";
+import { Player, Team, Match } from "@/types";
+
+const EVENT_TYPES = [
+  "Dot",
+  "Single",
+  "Two",
+  "Three",
+  "Four",
+  "Six",
+  "Wicket",
+  "No-ball",
+  "Wide",
+  "Bye",
+  "Leg-bye",
+];
+
+function simpleTemplateCommentary({ eventType, batsman, bowler, runs, extras }: any) {
+  // Lightweight rule-based commentary generator. Replaceable with AI backend.
+  const r = runs || 0;
+  switch (eventType) {
+    case "Dot":
+      return `${bowler} beats ${batsman} — no run.`;
+    case "Single":
+      return `${batsman} picks up a quick single off ${bowler}.`;
+    case "Two":
+      return `${batsman} nudges it into the gap — two runs.`;
+    case "Three":
+      return `${batsman} runs hard for three as the field hesitates.`;
+    case "Four":
+      return `${batsman} drives it beautifully — FOUR!`;
+    case "Six":
+      return `${batsman} sends that into the crowd — SIX!`;
+    case "Wicket":
+      return `OUT! ${batsman} is gone, ${bowler} with the breakthrough.`;
+    case "No-ball":
+      return `No-ball by ${bowler}${extras ? ` — ${extras}` : ""}. Free hit to follow.`;
+    case "Wide":
+      return `Wide down the leg side from ${bowler}.`;
+    case "Bye":
+      return `Byes — the ball sneaks past the keeper.`;
+    case "Leg-bye":
+      return `Leg-bye taken; the batsmen get through for a quick run.`;
+    default:
+      return `${batsman} - ${eventType}`;
+  }
+}
+
+export default function WPLLiveScoreAdminPage() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
+
+  const [selectedMatchId, setSelectedMatchId] = useState<string>("");
+  const [inning, setInning] = useState<1 | 2>(1);
+  const [over, setOver] = useState<number>(0);
+
+  const [selectedBowler, setSelectedBowler] = useState<string>("");
+  const [selectedBatsman, setSelectedBatsman] = useState<string>("");
+  const [eventType, setEventType] = useState<string>(EVENT_TYPES[0]);
+  const [runs, setRuns] = useState<number | "">("");
+  const [extras, setExtras] = useState<string>("");
+  const [useAI, setUseAI] = useState<boolean>(false);
+
+  const [commentary, setCommentary] = useState<string[]>([]);
+
+  useEffect(() => {
+    const load = async () => {
+      setIsLoading(true);
+      try {
+        const [m, p, t] = await Promise.all([
+          api.getMatches("wpl"),
+          api.getPlayers(undefined, "wpl"),
+          api.getTeams("wpl"),
+        ]);
+        setMatches(m || []);
+        setPlayers(p || []);
+        setTeams(t || []);
+      } catch (err) {
+        console.error("Failed to load live-score assets:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  const selectedMatch = useMemo(() => matches.find((x) => x.id === selectedMatchId) || null, [matches, selectedMatchId]);
+
+  const team1Players = useMemo(() => {
+    if (!selectedMatch) return [];
+    return players.filter(p => String(p.teamId) === String(selectedMatch.team1.id) && (p.league || 'wpl') === (selectedMatch.league || 'wpl'));
+  }, [players, selectedMatch]);
+
+  const team2Players = useMemo(() => {
+    if (!selectedMatch) return [];
+    return players.filter(p => String(p.teamId) === String(selectedMatch.team2.id) && (p.league || 'wpl') === (selectedMatch.league || 'wpl'));
+  }, [players, selectedMatch]);
+
+  const allBowlers = useMemo(() => [...team1Players, ...team2Players].filter(p => p.role && p.role.toLowerCase().includes('bowler') || true), [team1Players, team2Players]);
+
+  async function generateCommentaryText(payload: any) {
+    // If admin chooses AI mode and server API exists, send to backend AI endpoint.
+    if (useAI) {
+      try {
+        const res = await fetch('/api/ai/commentary', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if (res.ok) {
+          const json = await res.json();
+          return json.text || simpleTemplateCommentary(payload);
+        }
+        console.warn('AI endpoint returned non-OK, falling back to template');
+      } catch (err) {
+        console.warn('AI call failed, falling back to template', err);
+      }
+    }
+    return simpleTemplateCommentary(payload);
+  }
+
+  const onAddEvent = async () => {
+    if (!selectedMatch) {
+      alert('Select a match first');
+      return;
+    }
+
+    const batsmanName = players.find(p => p.id === selectedBatsman)?.name || selectedBatsman || 'Batsman';
+    const bowlerName = players.find(p => p.id === selectedBowler)?.name || selectedBowler || 'Bowler';
+
+    const payload = {
+      eventType,
+      batsman: batsmanName,
+      bowler: bowlerName,
+      runs: runs === '' ? 0 : Number(runs),
+      extras,
+      inning,
+      over,
+      match: selectedMatch ? { id: selectedMatch.id, teams: [selectedMatch.team1.shortName, selectedMatch.team2.shortName] } : null,
+    };
+
+    const text = await generateCommentaryText(payload);
+    setCommentary(prev => [`${over}.0 — ${text}`, ...prev]);
+  };
+
+  const bgStyle = { background: `linear-gradient(to bottom, ${WPLColors.base}, ${WPLColors.gradientStart}66)` };
+
+  return (
+    <div className="flex min-h-screen" style={bgStyle}>
+      <AuroraBackground />
+      <WPLAdminSidebarNew />
+      <main className="flex-1 p-6 md:p-10">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-3xl font-bold mb-4" style={{ color: WPLColors.textPrimary }}>Live Score — Admin (WPL)</h1>
+
+          {isLoading ? (
+            <div>Loading...</div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <section className="rounded-lg p-4 bg-white/5 border" style={{ borderColor: WPLColors.purpleRGBA[30] }}>
+                <label className="block text-sm mb-2">Select Match</label>
+                <select className="w-full px-3 py-2 rounded" value={selectedMatchId} onChange={(e) => setSelectedMatchId(e.target.value)}>
+                  <option value="">Select a match...</option>
+                  {matches.map(m => (
+                    <option key={m.id} value={m.id}>{m.team1.shortName} vs {m.team2.shortName} · {new Date(m.date).toLocaleDateString()}</option>
+                  ))}
+                </select>
+
+                <div className="mt-4">
+                  <label className="block text-sm mb-2">Inning</label>
+                  <select className="w-full px-3 py-2 rounded" value={inning} onChange={(e) => setInning(Number(e.target.value) as 1 | 2)}>
+                    <option value={1}>1</option>
+                    <option value={2}>2</option>
+                  </select>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm mb-2">Over</label>
+                    <input type="number" className="w-full px-3 py-2 rounded" value={over} onChange={(e) => setOver(Number(e.target.value))} min={0} />
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-2">Bowler</label>
+                    <select className="w-full px-3 py-2 rounded" value={selectedBowler} onChange={(e) => setSelectedBowler(e.target.value)}>
+                      <option value="">Select bowler</option>
+                      {allBowlers.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <label className="block text-sm mb-2">Batsman</label>
+                  <select className="w-full px-3 py-2 rounded" value={selectedBatsman} onChange={(e) => setSelectedBatsman(e.target.value)}>
+                    <option value="">Select batsman</option>
+                    {team1Players.concat(team2Players).map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
+                </div>
+
+                <div className="mt-4 grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-sm mb-2">Event</label>
+                    <select className="w-full px-3 py-2 rounded" value={eventType} onChange={(e) => setEventType(e.target.value)}>
+                      {EVENT_TYPES.map(ev => <option key={ev} value={ev}>{ev}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-2">Runs</label>
+                    <input type="number" className="w-full px-3 py-2 rounded" value={runs as any} onChange={(e) => setRuns(e.target.value === "" ? "" : Number(e.target.value))} min={0} />
+                  </div>
+                  <div>
+                    <label className="block text-sm mb-2">Extras</label>
+                    <input className="w-full px-3 py-2 rounded" value={extras} onChange={(e) => setExtras(e.target.value)} placeholder="n/a" />
+                  </div>
+                </div>
+
+                <div className="mt-4 flex items-center gap-3">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" checked={useAI} onChange={(e) => setUseAI(e.target.checked)} />
+                    <span className="text-sm">Use AI-enhanced commentary</span>
+                  </label>
+                  <button onClick={onAddEvent} className="ml-auto px-4 py-2 rounded bg-purple-600 text-white">Add Event</button>
+                </div>
+              </section>
+
+              <section className="col-span-2 rounded-lg p-4 bg-white/5 border" style={{ borderColor: WPLColors.purpleRGBA[30] }}>
+                <h2 className="text-xl font-semibold mb-3">Live Commentary</h2>
+                <div className="flex gap-2 mb-4">
+                  <button onClick={() => setCommentary([])} className="px-3 py-1 rounded bg-red-600/60">Clear</button>
+                </div>
+
+                <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+                  {commentary.length === 0 ? (
+                    <div className="text-sm text-gray-300">No events yet. Use the controls to add ball-by-ball events (dropdowns instead of buttons).</div>
+                  ) : (
+                    commentary.map((c, i) => (
+                      <div key={i} className="p-3 bg-black/20 rounded">
+                        <div className="text-sm text-white">{c}</div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </section>
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}
 'use client';
 
 import { useState, useEffect } from 'react';
