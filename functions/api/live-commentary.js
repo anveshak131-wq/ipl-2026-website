@@ -40,7 +40,10 @@ export async function onRequest(context) {
     const batter = batterId ? `Batter ${batterId}` : 'the batter';
     const bowler = bowlerId ? `Bowler ${bowlerId}` : 'the bowler';
 
-    let suggestion = `${prefix}${delivered} — ${batter} vs ${bowler}.`;
+    // Include batting team if provided
+    const battingInfo = body.battingTeamName ? ` Batting: ${body.battingTeamName}.` : '';
+
+    let suggestion = `${prefix}${delivered} — ${batter} vs ${bowler}.${battingInfo}`;
 
     // Add some extra text for big events
     if (String(type) === '6') {
