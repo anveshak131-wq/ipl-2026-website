@@ -155,12 +155,26 @@ export default function WPLLiveScoreAI() {
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error('Failed to save');
+
       const updated = await res.json();
       alert('Saved commentary to match');
       setCommentaryDrafts([]);
 
-      // Store the updated match so we can display the saved score below
-      setSavedMatch(updated || null);
+      // After saving commentary, fetch the latest match object from the server
+      // to ensure any score changes (done by other endpoints) are reflected.
+      try {
+        const matchesRes = await fetch('/api/matches');
+        if (matchesRes.ok) {
+          const allMatches = await matchesRes.json();
+          const fresh = allMatches.find((m: any) => m.id === updated.id) || updated;
+          setSavedMatch(fresh || null);
+        } else {
+          setSavedMatch(updated || null);
+        }
+      } catch (err) {
+        console.warn('Failed to fetch fresh match after save, using PUT response', err);
+        setSavedMatch(updated || null);
+      }
 
       // Also clear selected batter/bowler to avoid stale selections
       setEvent({ ...event, batterId: '', bowlerId: '' });
