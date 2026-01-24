@@ -133,6 +133,43 @@ export async function onRequest(context) {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 
+    // --- ALSO update the match record in KV so match-level score is kept in sync ---
+    try {
+      // Read existing matches
+      let matches = await env.IPL_CACHE.get('matches', 'json');
+      const kvExists = await env.IPL_CACHE.get('matches');
+      if (kvExists === null) matches = [];
+      matches = matches || [];
+
+      const matchIndex = matches.findIndex(m => String(m.id) === String(matchId));
+      if (matchIndex !== -1) {
+        const match = { ...matches[matchIndex] };
+
+        // Prepare structured score object under `score`
+        const teamKey = inningsNumber === 1 ? 'team1' : 'team2';
+        match.score = match.score || { team1: {}, team2: {} };
+        match.score[teamKey] = {
+          runs: totalRuns,
+          wickets: totalWickets,
+          overs: totalOversStr
+        };
+
+        // Also update legacy summary strings `team1Score`/`team2Score` for compatibility
+        const team1ScoreStr = match.score.team1 ? `${match.score.team1.runs || 0}/${match.score.team1.wickets || 0} (${match.score.team1.overs || '0.0'} overs)` : undefined;
+        const team2ScoreStr = match.score.team2 ? `${match.score.team2.runs || 0}/${match.score.team2.wickets || 0} (${match.score.team2.overs || '0.0'} overs)` : undefined;
+
+        if (team1ScoreStr) match.team1Score = team1ScoreStr;
+        if (team2ScoreStr) match.team2Score = team2ScoreStr;
+
+        // Persist updated match back into matches array and KV
+        matches[matchIndex] = match;
+        await env.IPL_CACHE.put('matches', JSON.stringify(matches));
+      }
+    } catch (err) {
+      // Log but do not fail the event call
+      console.error('Failed to sync match score after event:', err);
+    }
+
   } catch (error) {
     console.error('events API error:', error);
     return new Response(JSON.stringify({ error: 'Internal server error', details: error.message }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
