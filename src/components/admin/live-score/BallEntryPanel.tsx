@@ -53,17 +53,6 @@ interface BallEntryPanelProps {
   toss?: {
     winner: 'team1' | 'team2';
     decision: 'bat' | 'bowl';
-
-  // Keep selectedOver/selectedBall in sync with next expected legal ball
-  useEffect(() => {
-    const batting = state.battingTeam === 'team1' ? state.team1 : state.team2;
-    const legalBalls = batting.balls || 0;
-    const nextLegalBallNumber = legalBalls + 1; // 1-based
-    const nextOver = Math.floor((nextLegalBallNumber - 1) / 6) + 1;
-    const nextBall = ((nextLegalBallNumber - 1) % 6) + 1;
-    setSelectedOver(Math.min(Math.max(1, nextOver), 20));
-    setSelectedBall(Math.min(Math.max(1, nextBall), 6));
-  }, [state.team1.balls, state.team2.balls, state.battingTeam]);
   };
   weather?: {
     temperature: number;
