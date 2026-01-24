@@ -356,24 +356,38 @@ export default function WPLLiveScoreAI() {
             </div>
 
             {/* Saved match score display (shows after Save to Match) */}
-            {savedMatch?.score && (
+            {savedMatch && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }} className="mt-6 p-4 rounded-2xl border" style={{ background: WPLColors.purpleRGBA[8], borderColor: WPLColors.purpleRGBA[30], color: WPLColors.textPrimary }}>
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-semibold">Saved Match Score</h4>
                   <div className="text-sm text-purple-200">Match ID: {savedMatch.id}</div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <div className="text-sm text-purple-200">{savedMatch.team1.shortName || savedMatch.team1.name}</div>
-                    <div className="text-2xl font-bold">{savedMatch.score.team1.runs}/{savedMatch.score.team1.wickets}</div>
-                    <div className="text-xs text-purple-300">{savedMatch.score.team1.overs} ov</div>
+                {/* Prefer structured score if available, otherwise fall back to legacy team1Score/team2Score strings */}
+                {savedMatch.score ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <div className="text-sm text-purple-200">{savedMatch.team1?.shortName || savedMatch.team1?.name}</div>
+                      <div className="text-2xl font-bold">{savedMatch.score.team1?.runs ?? '0'}/{savedMatch.score.team1?.wickets ?? '0'}</div>
+                      <div className="text-xs text-purple-300">{savedMatch.score.team1?.overs ?? '--'} ov</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-purple-200">{savedMatch.team2?.shortName || savedMatch.team2?.name}</div>
+                      <div className="text-2xl font-bold">{savedMatch.score.team2?.runs ?? '0'}/{savedMatch.score.team2?.wickets ?? '0'}</div>
+                      <div className="text-xs text-purple-300">{savedMatch.score.team2?.overs ?? '--'} ov</div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="text-sm text-purple-200">{savedMatch.team2.shortName || savedMatch.team2.name}</div>
-                    <div className="text-2xl font-bold">{savedMatch.score.team2.runs}/{savedMatch.score.team2.wickets}</div>
-                    <div className="text-xs text-purple-300">{savedMatch.score.team2.overs} ov</div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <div className="text-sm text-purple-200">{savedMatch.team1?.shortName || savedMatch.team1?.name}</div>
+                      <div className="text-2xl font-bold">{savedMatch.team1Score || '—'}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-purple-200">{savedMatch.team2?.shortName || savedMatch.team2?.name}</div>
+                      <div className="text-2xl font-bold">{savedMatch.team2Score || '—'}</div>
+                    </div>
                   </div>
-                </div>
+                )}
               </motion.div>
             )}
           </motion.div>
