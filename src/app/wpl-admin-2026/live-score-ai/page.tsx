@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 import AuroraBackground from '@/components/ui/AuroraBackground';
 import { api } from '@/lib/data';
@@ -183,14 +184,14 @@ export default function WPLLiveScoreAI() {
 
       <main className="flex-1 relative z-20 p-4 md:p-8 overflow-y-auto">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-6">
+          <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="mb-6">
             <h1 className="text-4xl font-bold" style={{ background: `linear-gradient(to right, ${WPLColors.textPrimary}, ${WPLColors.purple})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               Live Score (AI Assistant)
             </h1>
             <p style={{ color: WPLColors.textSecondary }}>Dropdown-driven live event entry with AI-generated commentary suggestions.</p>
-          </div>
+          </motion.div>
 
-          <div className="rounded-2xl p-6 md:p-8 backdrop-blur-xl border mb-6" style={{ background: WPLColors.purpleRGBA[10], borderColor: WPLColors.purpleRGBA[30] }}>
+          <motion.div initial={{ scale: 0.995, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.35 }} className="rounded-2xl p-6 md:p-8 backdrop-blur-xl border mb-6" style={{ background: WPLColors.purpleRGBA[10], borderColor: WPLColors.purpleRGBA[30] }}>
             <label className="block text-sm font-medium mb-2" style={{ color: WPLColors.textPrimary }}>Select Match</label>
             <select value={selectedMatchId} onChange={(e) => setSelectedMatchId(e.target.value)} className="w-full md:w-96 px-4 py-3 rounded-lg text-white text-sm" style={{ background: WPLColors.purpleRGBA[20], border: `1px solid ${WPLColors.purpleRGBA[30]}` }}>
               {matches.map((m) => (<option key={m.id} value={m.id}>{m.team1.shortName} vs {m.team2.shortName} · {new Date(m.date).toLocaleDateString()}</option>))}
@@ -320,27 +321,35 @@ export default function WPLLiveScoreAI() {
               </select>
             </div>
 
-            <div className="mt-4 flex gap-3">
-              <button onClick={generateSuggestion} className="px-4 py-2 rounded-lg font-semibold" style={{ background: WPLColors.pink, color: '#fff' }}>Generate Suggestion</button>
-              <button onClick={addSuggestion} className="px-4 py-2 rounded-lg font-semibold" style={{ background: WPLColors.purple, color: '#fff' }} disabled={!suggestion}>Add Suggestion</button>
-              <button onClick={saveCommentaryToMatch} className="px-4 py-2 rounded-lg font-semibold ml-auto" style={{ background: '#10B981', color: '#fff' }} disabled={commentaryDrafts.length === 0}>Save to Match</button>
+            <div className="mt-4 flex gap-3 items-center">
+              <motion.button whileTap={{ scale: 0.98 }} onClick={generateSuggestion} className="px-4 py-2 rounded-lg font-semibold" style={{ background: WPLColors.pink, color: '#fff' }}>Generate Suggestion</motion.button>
+              <motion.button whileTap={{ scale: 0.98 }} onClick={addSuggestion} className="px-4 py-2 rounded-lg font-semibold" style={{ background: WPLColors.purple, color: '#fff' }} disabled={!suggestion}>Add Suggestion</motion.button>
+              <motion.button whileTap={{ scale: 0.98 }} onClick={saveCommentaryToMatch} className="px-4 py-2 rounded-lg font-semibold ml-auto" style={{ background: '#10B981', color: '#fff' }} disabled={commentaryDrafts.length === 0}>Save to Match</motion.button>
             </div>
 
-            {suggestion && (
-              <div className="mt-3 p-3 rounded bg-purple-900 text-white">Suggestion: {suggestion}</div>
-            )}
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              {suggestion && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }} className="p-3 rounded bg-gradient-to-r from-purple-900 to-purple-800 text-white">
+                  <div className="text-sm font-semibold mb-2">AI Suggestion</div>
+                  <div className="text-sm">{suggestion}</div>
+                </motion.div>
+              )}
 
-            {commentaryDrafts.length > 0 && (
-              <div className="mt-4">
-                <h3 className="font-semibold text-white mb-2">Commentary Drafts</h3>
-                <ul className="space-y-2">
-                  {commentaryDrafts.map((c, idx) => (
-                    <li key={idx} className="p-3 rounded bg-purple-900 text-white">{c}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
+              {commentaryDrafts.length > 0 && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }} className="p-3 rounded bg-purple-900 text-white">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-semibold">Commentary Drafts</h3>
+                    <button onClick={() => setCommentaryDrafts([])} className="text-xs text-purple-200">Clear</button>
+                  </div>
+                  <ul className="space-y-2">
+                    {commentaryDrafts.map((c, idx) => (
+                      <li key={idx} className="p-3 rounded bg-purple-800/60">{c}</li>
+                    ))}
+                  </ul>
+                </motion.div>
+              )}
+            </div>
+          </motion.div>
 
         </div>
       </main>
