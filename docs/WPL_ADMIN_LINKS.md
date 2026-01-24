@@ -12,7 +12,8 @@ Base site URL: https://ipl-2026-website.pages.dev
 - https://ipl-2026-website.pages.dev/wpl-admin-2026/matches — src/app/wpl-admin-2026/matches/page.tsx
 - https://ipl-2026-website.pages.dev/wpl-admin-2026/matchday — src/app/wpl-admin-2026/matchday/page.tsx
 - https://ipl-2026-website.pages.dev/wpl-admin-2026/live-score — src/app/wpl-admin-2026/live-score/page.tsx
-- https://ipl-2026-website.pages.dev/wpl-admin-2026/live-score-test — src/app/wpl-admin-2026/live-score-test/page.tsx
+ - https://ipl-2026-website.pages.dev/wpl-admin-2026/live-score-ai — src/app/wpl-admin-2026/live-score-ai/page.tsx
+ - https://ipl-2026-website.pages.dev/wpl-admin-2026/live-score-test — src/app/wpl-admin-2026/live-score-test/page.tsx
 - https://ipl-2026-website.pages.dev/wpl-admin-2026/playing-11 — src/app/wpl-admin-2026/playing-11/page.tsx
 - https://ipl-2026-website.pages.dev/wpl-admin-2026/teams — src/app/wpl-admin-2026/teams/page.tsx
 - https://ipl-2026-website.pages.dev/wpl-admin-2026/players — src/app/wpl-admin-2026/players/page.tsx
