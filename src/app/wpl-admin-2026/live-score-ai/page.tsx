@@ -250,10 +250,19 @@ export default function WPLLiveScoreAI() {
                 <option value="1">Inning 1</option>
                 <option value="2">Inning 2</option>
               </select>
+              <select value={event.over} onChange={(e) => setEvent({ ...event, over: e.target.value })} className="px-3 py-2 rounded text-sm text-white" style={{ background: WPLColors.purpleRGBA[20] }}>
+                <option value="">Over</option>
+                {Array.from({ length: 20 }).map((_, i) => (
+                  <option key={i+1} value={String(i+1)}>{i+1}</option>
+                ))}
+              </select>
 
-              <input value={event.over} onChange={(e) => setEvent({ ...event, over: e.target.value })} className="px-3 py-2 rounded text-sm text-white" placeholder="Over" style={{ background: WPLColors.purpleRGBA[20] }} />
-
-              <input value={event.ball} onChange={(e) => setEvent({ ...event, ball: e.target.value })} className="px-3 py-2 rounded text-sm text-white" placeholder="Ball" style={{ background: WPLColors.purpleRGBA[20] }} />
+              <select value={event.ball} onChange={(e) => setEvent({ ...event, ball: e.target.value })} className="px-3 py-2 rounded text-sm text-white" style={{ background: WPLColors.purpleRGBA[20] }}>
+                <option value="">Ball</option>
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <option key={i+1} value={String(i+1)}>{i+1}</option>
+                ))}
+              </select>
 
               <select value={event.type} onChange={(e) => setEvent({ ...event, type: e.target.value })} className="px-3 py-2 rounded text-sm text-white" style={{ background: WPLColors.purpleRGBA[20] }}>
                 <option value="0">0</option>
