@@ -15,6 +15,7 @@ export default function WPLLiveScoreAI() {
   const [isLoading, setIsLoading] = useState(true);
   const [commentaryDrafts, setCommentaryDrafts] = useState<string[]>([]);
   const [suggestion, setSuggestion] = useState<string>('');
+  const [savedMatch, setSavedMatch] = useState<Match | null>(null);
   const [event, setEvent] = useState({
     inning: '1',
     over: '0',
@@ -154,8 +155,12 @@ export default function WPLLiveScoreAI() {
         body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error('Failed to save');
+      const updated = await res.json();
       alert('Saved commentary to match');
       setCommentaryDrafts([]);
+
+      // Store the updated match so we can display the saved score below
+      setSavedMatch(updated || null);
 
       // Also clear selected batter/bowler to avoid stale selections
       setEvent({ ...event, batterId: '', bowlerId: '' });
@@ -349,6 +354,28 @@ export default function WPLLiveScoreAI() {
                 </motion.div>
               )}
             </div>
+
+            {/* Saved match score display (shows after Save to Match) */}
+            {savedMatch?.score && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }} className="mt-6 p-4 rounded-2xl border" style={{ background: WPLColors.purpleRGBA[8], borderColor: WPLColors.purpleRGBA[30], color: WPLColors.textPrimary }}>
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-semibold">Saved Match Score</h4>
+                  <div className="text-sm text-purple-200">Match ID: {savedMatch.id}</div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <div className="text-sm text-purple-200">{savedMatch.team1.shortName || savedMatch.team1.name}</div>
+                    <div className="text-2xl font-bold">{savedMatch.score.team1.runs}/{savedMatch.score.team1.wickets}</div>
+                    <div className="text-xs text-purple-300">{savedMatch.score.team1.overs} ov</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-purple-200">{savedMatch.team2.shortName || savedMatch.team2.name}</div>
+                    <div className="text-2xl font-bold">{savedMatch.score.team2.runs}/{savedMatch.score.team2.wickets}</div>
+                    <div className="text-xs text-purple-300">{savedMatch.score.team2.overs} ov</div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
           </motion.div>
 
         </div>
