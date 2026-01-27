@@ -75,10 +75,16 @@ export default function LiveScoreCSVPage() {
         const matchResp = await fetch(`/api/matches?id=${encodeURIComponent(selectedMatch)}`);
         if (matchResp.ok) {
           const matchData = await matchResp.json();
-          console.log('Match data:', matchData);
+          console.log('=== MATCH DATA DEBUG ===');
+          console.log('Full match data:', matchData);
+          console.log('Match name:', matchData.name);
+          console.log('Playing11 data:', matchData.playing11);
           if (matchData && matchData.playing11) {
             const p11 = matchData.playing11;
-            console.log('Playing 11 data:', p11);
+            console.log('Team1 players:', p11.team1);
+            console.log('Team2 players:', p11.team2);
+            console.log('Match team1 name:', matchData.team1?.name);
+            console.log('Match team2 name:', matchData.team2?.name);
             setPlaying11(p11);
           } else {
             console.log('No playing11 found in match data');
@@ -204,18 +210,24 @@ export default function LiveScoreCSVPage() {
 
   // Helper to map batting team name to playing11 key (team1/team2)
   const getPlaying11Key = (battingTeamShortName: string) => {
+    console.log('=== MAPPING DEBUG ===');
     const { team1, team2 } = getSelectedMatchTeams();
     const team1Short = getScorecardShortName(team1);
     const team2Short = getScorecardShortName(team2);
     
-    if (battingTeamShortName === team1Short) return 'team1';
-    if (battingTeamShortName === team2Short) return 'team2';
+    console.log('Input batting team:', battingTeamShortName);
+    console.log('Match teams:', { team1, team2 });
+    console.log('Short names:', { team1Short, team2Short });
     
-    // Fallback: try direct comparison
-    if (battingTeamShortName === team1) return 'team1';
-    if (battingTeamShortName === team2) return 'team2';
+    let result = '';
+    if (battingTeamShortName === team1Short) result = 'team1';
+    else if (battingTeamShortName === team2Short) result = 'team2';
+    else if (battingTeamShortName === team1) result = 'team1';
+    else if (battingTeamShortName === team2) result = 'team2';
     
-    return '';
+    console.log('Mapping result:', result);
+    console.log('==================');
+    return result;
   };
 
   // Get all players for a team short name (from comprehensive-players.json)
@@ -403,12 +415,21 @@ export default function LiveScoreCSVPage() {
                             >
                               <option value="">{c === 3 ? 'Striker' : 'Non-Striker'}</option>
                               {(() => {
+                                console.log('=== DROPDOWN DEBUG ===');
+                                console.log('Row data:', row);
+                                console.log('Innings value:', row[2]);
                                 console.log('Batting team:', battingTeam);
                                 console.log('Playing11 state:', playing11);
+                                console.log('Selected match teams:', getSelectedMatchTeams());
+                                console.log('Scorecard short names:', {
+                                  team1: getScorecardShortName(getSelectedMatchTeams().team1),
+                                  team2: getScorecardShortName(getSelectedMatchTeams().team2)
+                                });
                                 const playing11Key = getPlaying11Key(battingTeam);
                                 console.log('Playing11 key:', playing11Key);
                                 const players = playing11[playing11Key] || [];
                                 console.log('Players for team:', players);
+                                console.log('==================');
                                 return players.map((p: string) => (
                                   <option key={p} value={p}>{p}</option>
                                 ));
