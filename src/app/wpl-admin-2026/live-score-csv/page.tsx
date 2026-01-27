@@ -194,17 +194,34 @@ export default function LiveScoreCSVPage() {
   // Helper to determine which team bats first based on tossInfo
   const getBattingFirstTeam = () => {
     const { team1, team2 } = getSelectedMatchTeams();
+    console.log('=== TOSS DEBUG ===');
+    console.log('Toss info:', tossInfo);
+    console.log('Team1:', team1);
+    console.log('Team2:', team2);
+    
     if (!tossInfo) return '';
     const winnerMatch = tossInfo.match(/Winner: ([^;]+)/);
     const decisionMatch = tossInfo.match(/Decision: ([^;]+)/);
     const winner = winnerMatch ? winnerMatch[1].trim() : '';
     const decision = decisionMatch ? decisionMatch[1].trim().toLowerCase() : '';
+    
+    console.log('Parsed winner:', winner);
+    console.log('Parsed decision:', decision);
+    
     if (!winner || !decision) return '';
     if (decision === 'bowl') {
-      if (winner === team1) return team2;
-      if (winner === team2) return team1;
+      console.log('Decision is bowl - other team bats first');
+      if (winner === team1) {
+        console.log('Winner is team1, so team2 bats:', team2);
+        return team2;
+      }
+      if (winner === team2) {
+        console.log('Winner is team2, so team1 bats:', team1);
+        return team1;
+      }
     }
     if (decision === 'bat') {
+      console.log('Decision is bat - winner bats first:', winner);
       return winner;
     }
     return '';
