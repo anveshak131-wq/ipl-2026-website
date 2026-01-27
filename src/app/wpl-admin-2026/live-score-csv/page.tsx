@@ -59,7 +59,14 @@ export default function LiveScoreCSVPage() {
             if (sc.matchInfo && sc.matchInfo.toss) toss = sc.matchInfo.toss;
             else if (sc.toss) toss = sc.toss;
             else if (sc.matchInfo && sc.matchInfo.tossWinner) toss = sc.matchInfo.tossWinner;
-            setTossInfo(toss || '');
+            // If toss is an object, format as string
+            if (toss && typeof toss === 'object') {
+              const winner = toss.winner || toss.team || '';
+              const decision = toss.decision || '';
+              setTossInfo(`Winner: ${winner}${decision ? '; Decision: ' + decision : ''}`);
+            } else {
+              setTossInfo(toss || '');
+            }
           } else {
             setTossInfo('');
           }
