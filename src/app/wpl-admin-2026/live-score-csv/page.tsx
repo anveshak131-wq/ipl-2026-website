@@ -46,6 +46,14 @@ export default function LiveScoreCSVPage() {
     wicketTaker: string; 
   } }>({});
 
+  // Current striker and non-striker state for each innings
+  const [currentBatsmen, setCurrentBatsmen] = useState<{ 
+    [innings: string]: { 
+      striker: string; 
+      nonStriker: string; 
+    } 
+  }>({});
+
   // Extras data state
   const [extrasData, setExtrasData] = useState<{ [rowIndex: number]: { 
     hasWide: boolean; 
@@ -214,7 +222,8 @@ export default function LiveScoreCSVPage() {
   };
 
   const addRowToInnings = (innings: number) => {
-    const newRow = ['', '', String(innings), '', '', '', '', '', '', '', '', '', ''];
+    const currentBatsmenForInnings = currentBatsmen[String(innings)] || { striker: '', nonStriker: '' };
+    const newRow = ['', '', String(innings), currentBatsmenForInnings.striker, currentBatsmenForInnings.nonStriker, '', '', '', '', '', '', '', ''];
     setRows(prev => [...prev, newRow]);
   };
 
@@ -227,6 +236,31 @@ export default function LiveScoreCSVPage() {
         [field]: value
       }
     }));
+
+    // When a wicket is confirmed, clear the striker/non-striker for that innings
+    if (field === 'hasWicket' && value === true) {
+      const currentInnings = rows[rowIndex][2];
+      const striker = rows[rowIndex][3]; // Striker is in column 3
+      const nonStriker = rows[rowIndex][4]; // Non-Striker is in column 4
+      
+      setCurrentBatsmen(prev => {
+        const currentBatsmen = prev[currentInnings] || { striker: '', nonStriker: '' };
+        const updatedBatsmen = { ...currentBatsmen };
+        
+        // Clear the batsman who got out
+        if (striker === currentBatsmen.striker) {
+          updatedBatsmen.striker = '';
+        }
+        if (nonStriker === currentBatsmen.nonStriker) {
+          updatedBatsmen.nonStriker = '';
+        }
+        
+        return {
+          ...prev,
+          [currentInnings]: updatedBatsmen
+        };
+      });
+    }
   };
 
   // Extras handling functions
@@ -329,8 +363,26 @@ export default function LiveScoreCSVPage() {
       case 4: // Non-Striker
         return (
           <select
-            value={cell}
-            onChange={e => updateCell(rowIndex, c, e.target.value)}
+            value={cell || (() => {
+              // Use persistent value if current cell is empty
+              const currentInnings = rows[rowIndex][2];
+              const batsmen = currentBatsmen[currentInnings] || { striker: '', nonStriker: '' };
+              return c === 3 ? batsmen.striker : batsmen.nonStriker;
+            })()}
+            onChange={e => {
+              const newValue = e.target.value;
+              updateCell(rowIndex, c, newValue);
+              
+              // Update persistent batsmen state
+              const currentInnings = rows[rowIndex][2];
+              setCurrentBatsmen(prev => ({
+                ...prev,
+                [currentInnings]: {
+                  ...prev[currentInnings],
+                  [c === 3 ? 'striker' : 'nonStriker']: newValue
+                }
+              }));
+            }}
             className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
           >
             <option value="">{c === 3 ? 'Striker' : 'Non-Striker'}</option>
