@@ -379,9 +379,17 @@ export default function LiveScoreCSVPage() {
                               className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
                             >
                               <option value="">{c === 3 ? 'Striker' : 'Non-Striker'}</option>
-                              {(HARDCODED_PLAYERS[battingTeam] || []).map((p: string) => (
+                              {(HARDCODED_PLAYERS[normalizeTeamKey(battingTeam)] || []).map((p: string) => (
                                 <option key={p} value={p}>{p}</option>
                               ))}
+                            // Normalize team key for hardcoded player lookup
+                            function normalizeTeamKey(team: string) {
+                              if (!team) return '';
+                              if (team === 'MI-W') return 'MI';
+                              if (team === 'RCB-W') return 'RCB';
+                              // Add more mappings as needed
+                              return team;
+                            }
                             </select>
                           ) : (
                             <input
