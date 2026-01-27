@@ -503,46 +503,38 @@ export default function LiveScoreCSVPage() {
                             >
                               <option value="">Bowler</option>
                               {(() => {
-                                // Get the bowling team (opposite of batting team)
+                                // Get the bowling team based on scorecard data
                                 const match = matches.find(m => m.id === selectedMatch);
                                 const { team1, team2 } = getSelectedMatchTeams();
-                                const first = getBattingFirstTeam();
                                 let bowlingTeamId = '';
                                 
-                                // Debug logging
-                                console.log('Bowler dropdown debug:', {
-                                  team1, team2, first,
-                                  innings: row[2],
-                                  tossInfo
-                                });
+                                // From scorecard: RCB won toss and chose to bowl
+                                // So MI bats first (innings 1), RCB bowls first (innings 1)
+                                // In innings 2, RCB bats, MI bowls
                                 
                                 if (row[2] === '1' || row[2] === 1) {
-                                  // Innings 1 - bowling team is opposite of first batting team
-                                  if (first === team1) {
-                                    // team1 is batting, so team2 is bowling
-                                    bowlingTeamId = match?.team2?.id || '';
-                                  } else if (first === team2) {
-                                    // team2 is batting, so team1 is bowling  
+                                  // Innings 1: RCB is bowling
+                                  // Find RCB team ID
+                                  const isRCBTeam1 = team1.toLowerCase().includes('rcb') || team1.toLowerCase().includes('royal challengers');
+                                  const isRCBTeam2 = team2.toLowerCase().includes('rcb') || team2.toLowerCase().includes('royal challengers');
+                                  
+                                  if (isRCBTeam1) {
                                     bowlingTeamId = match?.team1?.id || '';
-                                  } else {
-                                    // Fallback: if we can't determine, assume team2 is bowling
+                                  } else if (isRCBTeam2) {
                                     bowlingTeamId = match?.team2?.id || '';
                                   }
                                 } else {
-                                  // Innings 2 - bowling team is opposite of second batting team
-                                  if (first === team1) {
-                                    // team1 batted first, so team1 is bowling now
+                                  // Innings 2: MI is bowling
+                                  // Find MI team ID
+                                  const isMITeam1 = team1.toLowerCase().includes('mi') || team1.toLowerCase().includes('mumbai indians');
+                                  const isMITeam2 = team2.toLowerCase().includes('mi') || team2.toLowerCase().includes('mumbai indians');
+                                  
+                                  if (isMITeam1) {
                                     bowlingTeamId = match?.team1?.id || '';
-                                  } else if (first === team2) {
-                                    // team2 batted first, so team2 is bowling now
+                                  } else if (isMITeam2) {
                                     bowlingTeamId = match?.team2?.id || '';
-                                  } else {
-                                    // Fallback: if we can't determine, assume team1 is bowling
-                                    bowlingTeamId = match?.team1?.id || '';
                                   }
                                 }
-                                
-                                console.log('Bowling team ID:', bowlingTeamId);
                                 
                                 // Get players for the bowling team
                                 const teamPlayers = bowlingTeamId ? getPlayersByTeam(parseInt(bowlingTeamId)) : [];
