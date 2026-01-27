@@ -43,12 +43,23 @@ export default function LiveScoreCSVPage() {
         const resp = await fetch('/api/wpl-live-score/matches');
         if (resp.ok) {
           const data = await resp.json();
+          console.log('=== MATCHES LIST DEBUG ===');
+          console.log('Available matches:', data);
           if (Array.isArray(data)) {
             setMatches(data);
             if (data.length > 0) setSelectedMatch(data[0].id);
+            
+            // Check if any matches have playing 11
+            const matchesWithPlaying11 = data.filter(m => m.playing11);
+            console.log('Matches with playing 11:', matchesWithPlaying11.length);
+            if (matchesWithPlaying11.length > 0) {
+              console.log('First match with playing 11:', matchesWithPlaying11[0]);
+            }
           }
         }
-      } catch {}
+      } catch (error) {
+        console.error('Error fetching matches:', error);
+      }
     })();
   }, []);
 
