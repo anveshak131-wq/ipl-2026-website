@@ -191,18 +191,33 @@ export default function LiveScoreCSVPage() {
     return teamNameMap[matchTeam] || matchTeam;
   };
 
+  // Helper to normalize team names for comparison
+  const normalizeTeamName = (teamName: string) => {
+    if (!teamName) return '';
+    
+    // Convert to lowercase and remove common variations
+    const normalized = teamName.toLowerCase().trim();
+    
+    // Handle common team name variations
+    if (normalized.includes('royal challengers') || normalized.includes('rcb')) {
+      return 'RCB';
+    }
+    if (normalized.includes('mumbai indians') || normalized.includes('mumbai') || normalized.includes('mi')) {
+      return 'MI';
+    }
+    if (normalized.includes('chennai super') || normalized.includes('csk')) {
+      return 'CSK';
+    }
+    if (normalized.includes('kolkata knight') || normalized.includes('kkr')) {
+      return 'KKR';
+    }
+    
+    return teamName;
+  };
+
   // Helper to determine which team bats first based on tossInfo
   const getBattingFirstTeam = () => {
     const { team1, team2 } = getSelectedMatchTeams();
-    console.log('=== TOSS DEBUG ===');
-    console.log('Toss info:', tossInfo);
-    console.log('Team1:', team1);
-    console.log('Team2:', team2);
-    console.log('TeamNameMap:', teamNameMap);
-    console.log('Scorecard names:', {
-      team1: getScorecardShortName(team1),
-      team2: getScorecardShortName(team2)
-    });
     
     if (!tossInfo) return '';
     const winnerMatch = tossInfo.match(/Winner: ([^;]+)/);
@@ -210,40 +225,22 @@ export default function LiveScoreCSVPage() {
     const winner = winnerMatch ? winnerMatch[1].trim() : '';
     const decision = decisionMatch ? decisionMatch[1].trim().toLowerCase() : '';
     
-    console.log('Parsed winner:', winner);
-    console.log('Parsed decision:', decision);
-    
-    // Try multiple winner comparisons
-    console.log('Winner comparisons:');
-    console.log('  winner === team1:', winner === team1);
-    console.log('  winner === team2:', winner === team2);
-    console.log('  winner === getScorecardShortName(team1):', winner === getScorecardShortName(team1));
-    console.log('  winner === getScorecardShortName(team2):', winner === getScorecardShortName(team2));
-    
     if (!winner || !decision) return '';
+    
+    // Normalize team names for comparison
+    const normalizedWinner = normalizeTeamName(winner);
+    const normalizedTeam1 = normalizeTeamName(team1);
+    const normalizedTeam2 = normalizeTeamName(team2);
+    
     if (decision === 'bowl') {
-      console.log('Decision is bowl - other team bats first');
-      if (winner === team1) {
-        console.log('Winner is team1, so team2 bats:', team2);
-        return team2;
-      }
-      if (winner === team2) {
-        console.log('Winner is team2, so team1 bats:', team1);
-        return team1;
-      }
-      // Try with scorecard names
-      if (winner === getScorecardShortName(team1)) {
-        console.log('Winner matches team1 scorecard name, so team2 bats:', team2);
-        return team2;
-      }
-      if (winner === getScorecardShortName(team2)) {
-        console.log('Winner matches team2 scorecard name, so team1 bats:', team1);
-        return team1;
-      }
+      // If winner chose to bowl, the other team bats first
+      if (normalizedWinner === normalizedTeam1) return team2;
+      if (normalizedWinner === normalizedTeam2) return team1;
     }
     if (decision === 'bat') {
-      console.log('Decision is bat - winner bats first:', winner);
-      return winner;
+      // If winner chose to bat, they bat first
+      if (normalizedWinner === normalizedTeam1) return team1;
+      if (normalizedWinner === normalizedTeam2) return team2;
     }
     return '';
   };
@@ -472,17 +469,6 @@ export default function LiveScoreCSVPage() {
                             >
                               <option value="">{c === 3 ? 'Striker' : 'Non-Striker'}</option>
                               {(() => {
-                                console.log('=== DROPDOWN DEBUG ===');
-                                console.log('Row data:', row);
-                                console.log('Innings value:', row[2]);
-                                console.log('Batting team:', battingTeam);
-                                console.log('All players count:', allPlayers.length);
-                                console.log('Toss info:', tossInfo);
-                                
-                                // Call getBattingFirstTeam to trigger debugging
-                                const firstBattingTeam = getBattingFirstTeam();
-                                console.log('First batting team result:', firstBattingTeam);
-                                
                                 // Get the batting team ID from match data
                                 const match = matches.find(m => m.id === selectedMatch);
                                 const { team1, team2 } = getSelectedMatchTeams();
@@ -501,14 +487,9 @@ export default function LiveScoreCSVPage() {
                                     (match?.team1?.id || '');
                                 }
                                 
-                                console.log('Batting team ID:', battingTeamId);
-                                console.log('Match data:', match);
-                                
                                 // Get players for the batting team (like scorecard page)
                                 const teamPlayers = battingTeamId ? getPlayersByTeam(parseInt(battingTeamId)) : [];
-                                console.log('Team players:', teamPlayers);
                                 
-                                console.log('==================');
                                 return teamPlayers.map((player: any) => (
                                   <option key={player.id} value={player.name}>{player.name}</option>
                                 ));
