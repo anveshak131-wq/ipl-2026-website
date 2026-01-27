@@ -55,7 +55,8 @@ export default function LiveScoreCSVPage() {
     byesRuns: number;
     lbRuns: number;
     wideRuns: number; // Additional runs from wide (boundary or batsmen running)
-    noBallRuns: number; // Additional runs from no ball (batsmen hitting)
+    noBallRuns: number; // Additional runs from no ball
+    noBallType: 'bat' | 'bye'; // Whether no ball runs go to batsman or byes
   } }>({});
 
   // Common cricket wicket types
@@ -224,7 +225,7 @@ export default function LiveScoreCSVPage() {
   };
 
   // Extras handling functions
-  const updateExtrasData = (rowIndex: number, field: 'hasWide' | 'hasNoBall' | 'hasByes' | 'hasLB' | 'byesRuns' | 'lbRuns' | 'wideRuns' | 'noBallRuns', value: boolean | number) => {
+  const updateExtrasData = (rowIndex: number, field: 'hasWide' | 'hasNoBall' | 'hasByes' | 'hasLB' | 'byesRuns' | 'lbRuns' | 'wideRuns' | 'noBallRuns' | 'noBallType', value: boolean | number | string) => {
     setExtrasData(prev => ({
       ...prev,
       [rowIndex]: {
@@ -245,10 +246,11 @@ export default function LiveScoreCSVPage() {
     }
     if (extrasData[rowIndex]?.hasNoBall || (field === 'hasNoBall' && value)) {
       const runs = field === 'noBallRuns' ? (value as number) : (extrasData[rowIndex]?.noBallRuns || 0);
+      const type = field === 'noBallType' ? (value as string) : (extrasData[rowIndex]?.noBallType || 'bat');
       if (runs > 0) {
-        extras.push(`No Ball: ${runs + 1}`); // +1 for the no ball penalty
+        extras.push(`No Ball (${type}): ${runs + 1}`); // +1 for the no ball penalty
       } else {
-        extras.push('No Ball: 1');
+        extras.push(`No Ball (${type}): 1`);
       }
     }
     if (extrasData[rowIndex]?.hasByes || (field === 'hasByes' && value)) {
@@ -262,13 +264,13 @@ export default function LiveScoreCSVPage() {
     
     // Store extras info in the appropriate cell for data persistence
     let cellIndex = 7; // Wide column
-    if (field === 'hasNoBall' || field === 'noBallRuns') cellIndex = 8; // No Ball column
+    if (field === 'hasNoBall' || field === 'noBallRuns' || field === 'noBallType') cellIndex = 8; // No Ball column
     if (field === 'hasByes' || field === 'byesRuns') cellIndex = 9; // Byes column
     if (field === 'hasLB' || field === 'lbRuns') cellIndex = 10; // LB column
     
     const relevantExtras = extras.filter(e => 
       (field === 'hasWide' || field === 'wideRuns') && e.includes('Wide') ||
-      (field === 'hasNoBall' || field === 'noBallRuns') && e.includes('No Ball') ||
+      (field === 'hasNoBall' || field === 'noBallRuns' || field === 'noBallType') && e.includes('No Ball') ||
       (field === 'hasByes' || field === 'byesRuns') && e.includes('Byes') ||
       (field === 'hasLB' || field === 'lbRuns') && e.includes('LB')
     );
@@ -303,9 +305,20 @@ export default function LiveScoreCSVPage() {
       
       // Add extras
       if (extras.hasWide) totalExtras += 1 + (extras.wideRuns || 0); // 1 penalty + additional runs
-      if (extras.hasNoBall) totalExtras += 1 + (extras.noBallRuns || 0); // 1 penalty + additional runs
+      if (extras.hasNoBall) {
+        totalExtras += 1 + (extras.noBallRuns || 0); // 1 penalty + additional runs
+        // If no ball type is 'bye', runs go to byes, not extras
+        if (extras.noBallType === 'bye') {
+          totalExtras -= (extras.noBallRuns || 0); // Remove from extras, will be counted in byes
+        }
+      }
       if (extras.hasByes) totalExtras += extras.byesRuns || 0;
       if (extras.hasLB) totalExtras += extras.lbRuns || 0;
+      
+      // Add no ball byes to byes total if applicable
+      if (extras.hasNoBall && extras.noBallType === 'bye') {
+        totalExtras += extras.noBallRuns || 0;
+      }
     });
     
     return {
@@ -320,7 +333,12 @@ export default function LiveScoreCSVPage() {
       }, 0)),
       byes: (filteredRows.reduce((sum, row) => {
         const originalIndex = rows.indexOf(row);
-        return sum + (extrasData[originalIndex]?.byesRuns || 0);
+        let byeRuns = (extrasData[originalIndex]?.byesRuns || 0);
+        // Add no ball byes if type is 'bye'
+        if (extrasData[originalIndex]?.hasNoBall && extrasData[originalIndex]?.noBallType === 'bye') {
+          byeRuns += (extrasData[originalIndex]?.noBallRuns || 0);
+        }
+        return sum + byeRuns;
       }, 0)),
       legByes: (filteredRows.reduce((sum, row) => {
         const originalIndex = rows.indexOf(row);
@@ -750,18 +768,28 @@ export default function LiveScoreCSVPage() {
                                 <label className="text-xs text-gray-400">No Ball?</label>
                               </div>
                               {extrasData[r]?.hasNoBall && (
-                                <select
-                                  value={extrasData[r]?.noBallRuns || 0}
-                                  onChange={(e) => updateExtrasData(r, 'noBallRuns', parseInt(e.target.value))}
-                                  className="w-full border border-gray-700 focus:border-purple-500 rounded px-1 py-1 bg-gray-900 text-gray-100 text-xs"
-                                >
-                                  <option value={0}>No Ball only (1 run)</option>
-                                  <option value={1}>+1 run (2 total)</option>
-                                  <option value={2}>+2 runs (3 total)</option>
-                                  <option value={3}>+3 runs (4 total)</option>
-                                  <option value={4}>+4 runs (5 total)</option>
-                                  <option value={6}>+6 runs (7 total)</option>
-                                </select>
+                                <>
+                                  <select
+                                    value={extrasData[r]?.noBallType || 'bat'}
+                                    onChange={(e) => updateExtrasData(r, 'noBallType', e.target.value)}
+                                    className="w-full border border-gray-700 focus:border-purple-500 rounded px-1 py-1 bg-gray-900 text-gray-100 text-xs mb-1"
+                                  >
+                                    <option value="bat">Bat hit (runs to batsman)</option>
+                                    <option value="bye">No bat hit (runs to byes)</option>
+                                  </select>
+                                  <select
+                                    value={extrasData[r]?.noBallRuns || 0}
+                                    onChange={(e) => updateExtrasData(r, 'noBallRuns', parseInt(e.target.value))}
+                                    className="w-full border border-gray-700 focus:border-purple-500 rounded px-1 py-1 bg-gray-900 text-gray-100 text-xs"
+                                  >
+                                    <option value={0}>No Ball only (1 run)</option>
+                                    <option value={1}>+1 run (2 total)</option>
+                                    <option value={2}>+2 runs (3 total)</option>
+                                    <option value={3}>+3 runs (4 total)</option>
+                                    <option value={4}>+4 runs (5 total)</option>
+                                    <option value={6}>+6 runs (7 total)</option>
+                                  </select>
+                                </>
                               )}
                             </div>
                           ) : c === 9 ? (
