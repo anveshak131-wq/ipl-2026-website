@@ -158,8 +158,9 @@ export default function LiveScoreCSVPage() {
               team2Short = sc.matchInfo.team2.shortName || sc.matchInfo.team2.name || 'team2';
               // Map matches list names to scorecard short names
               const match = matches.find(m => m.id === selectedMatch);
-              if (match && match.name) {
-                const [matchTeam1, matchTeam2] = match.name.split(' vs ');
+              if (match && match.team1 && match.team2) {
+                const matchTeam1 = match.team1.name;
+                const matchTeam2 = match.team2.name;
                 if (matchTeam1 && team1Short) nameMap[matchTeam1.trim()] = team1Short;
                 if (matchTeam2 && team2Short) nameMap[matchTeam2.trim()] = team2Short;
               }
@@ -169,10 +170,9 @@ export default function LiveScoreCSVPage() {
             } else {
               // fallback to matches list
               const match = matches.find(m => m.id === selectedMatch);
-              if (match && match.name) {
-                const [team1, team2] = match.name.split(' vs ');
-                team1Short = team1?.trim() || 'team1';
-                team2Short = team2?.trim() || 'team2';
+              if (match && match.team1 && match.team2) {
+                team1Short = match.team1.name || 'team1';
+                team2Short = match.team2.name || 'team2';
               }
             }
             setTeamNameMap(nameMap);
@@ -225,9 +225,8 @@ export default function LiveScoreCSVPage() {
   // Helper to get team short names from matches list for selected match
   const getSelectedMatchTeams = () => {
     const match = matches.find(m => m.id === selectedMatch);
-    if (!match || !match.name) return { team1: '', team2: '' };
-    const [team1, team2] = match.name.split(' vs ');
-    return { team1: team1?.trim() || '', team2: team2?.trim() || '' };
+    if (!match || !match.team1 || !match.team2) return { team1: '', team2: '' };
+    return { team1: match.team1.name, team2: match.team2.name };
   };
 
   // Helper to get scorecard short name for a match team name
@@ -434,7 +433,7 @@ export default function LiveScoreCSVPage() {
               disabled={matches.length === 0}
             >
               {matches.map(m => (
-                <option key={m.id} value={m.id}>{m.name}</option>
+                <option key={m.id} value={m.id}>{m.team1.name} vs {m.team2.name}</option>
               ))}
             </select>
           </div>
