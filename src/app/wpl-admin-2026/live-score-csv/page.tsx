@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { SaveStatus } from './saveStatus';
 import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 
@@ -12,6 +12,7 @@ export default function LiveScoreCSVPage() {
   const [selectedMatch, setSelectedMatch] = useState<string>('');
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [tossInfo, setTossInfo] = useState<string>('');
+  const [playing11, setPlaying11] = useState<{ [team: string]: string[] }>({});
 
   // Fetch matches list on mount
   useEffect(() => {
@@ -53,7 +54,6 @@ export default function LiveScoreCSVPage() {
         if (tossResp.ok) {
           const scorecards = await tossResp.json();
           if (Array.isArray(scorecards) && scorecards.length > 0) {
-            // Try to find toss info in matchInfo.toss or tossWinner
             const sc = scorecards[0];
             let toss = '';
             if (sc.matchInfo && sc.matchInfo.toss) toss = sc.matchInfo.toss;
@@ -67,14 +67,31 @@ export default function LiveScoreCSVPage() {
             } else {
               setTossInfo(toss || '');
             }
+            // Extract playing11 for both teams
+            let p11: { [team: string]: string[] } = {};
+            if (sc.playing11 && typeof sc.playing11 === 'object') {
+              // { 'MI-W': [...], 'RCB-W': [...] }
+              p11 = { ...sc.playing11 };
+            } else if (Array.isArray(sc.innings)) {
+              // Try to extract from innings
+              sc.innings.forEach((inn: any) => {
+                if (inn.team && Array.isArray(inn.playing11)) {
+                  p11[inn.team] = inn.playing11;
+                }
+              });
+            }
+            setPlaying11(p11);
           } else {
             setTossInfo('');
+            setPlaying11({});
           }
         } else {
           setTossInfo('');
+          setPlaying11({});
         }
       } catch {
         setTossInfo('');
+        setPlaying11({});
       }
     })();
   }, [selectedMatch]);
@@ -100,20 +117,29 @@ export default function LiveScoreCSVPage() {
   const getBattingFirstTeam = () => {
     const { team1, team2 } = getSelectedMatchTeams();
     if (!tossInfo) return '';
-    // Toss: Winner: RCB-W; Decision: bowl
     const winnerMatch = tossInfo.match(/Winner: ([^;]+)/);
     const decisionMatch = tossInfo.match(/Decision: ([^;]+)/);
     const winner = winnerMatch ? winnerMatch[1].trim() : '';
     const decision = decisionMatch ? decisionMatch[1].trim().toLowerCase() : '';
     if (!winner || !decision) return '';
-    // If winner chooses bowl, the other team bats first
     if (decision === 'bowl') {
       if (winner === team1) return team2;
       if (winner === team2) return team1;
     }
-    // If winner chooses bat, they bat first
     if (decision === 'bat') {
       return winner;
+    }
+    return '';
+  };
+
+  // Helper to get batting team for a given innings (1 or 2)
+  const getBattingTeamForInnings = (innings: string | number) => {
+    const { team1, team2 } = getSelectedMatchTeams();
+    const first = getBattingFirstTeam();
+    if (innings === '1' || innings === 1) return first;
+    if (innings === '2' || innings === 2) {
+      if (first === team1) return team2;
+      if (first === team2) return team1;
     }
     return '';
   };
@@ -237,50 +263,69 @@ export default function LiveScoreCSVPage() {
               <tbody>
                 {rows.map((row, r) => (
                   <tr key={r} className={`transition-colors ${r % 2 === 0 ? 'bg-gray-900' : 'bg-gray-800'} hover:bg-gray-700`}>
-                    {row.map((cell, c) => (
-                      <td key={c} className="px-3 py-2 align-top border-b border-gray-800">
-                        {c === 0 ? (
-                          <select
-                            value={cell}
-                            onChange={e => updateCell(r, c, e.target.value)}
-                            className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
-                          >
-                            <option value="">Overs</option>
-                            {Array.from({ length: 21 }, (_, i) => (
-                              <option key={i} value={String(i)}>{i}</option>
-                            ))}
-                          </select>
-                        ) : c === 1 ? (
-                          <select
-                            value={cell}
-                            onChange={e => updateCell(r, c, e.target.value)}
-                            className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
-                          >
-                            <option value="">Ball</option>
-                            {Array.from({ length: 7 }, (_, i) => (
-                              <option key={i} value={String(i)}>{i}</option>
-                            ))}
-                          </select>
-                        ) : c === 2 ? (
-                          <select
-                            value={cell}
-                            onChange={e => updateCell(r, c, e.target.value)}
-                            className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
-                          >
-                            <option value="">Innings</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                          </select>
-                        ) : (
-                          <input
-                            value={cell}
-                            onChange={(e) => updateCell(r, c, e.target.value)}
-                            placeholder={HEADERS[c]}
-                            className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100 placeholder-gray-400"
-                          />
-                        )}
-                      </td>
-                    ))}
+                    {row.map((cell, c) => {
+                      // Determine batting team for this row
+                      let battingTeam = '';
+                      if (c === 3 || c === 4) {
+                        // Striker/Non-Striker: use row[2] (Innings) to determine
+                        battingTeam = getBattingTeamForInnings(row[2]);
+                      }
+                      return (
+                        <td key={c} className="px-3 py-2 align-top border-b border-gray-800">
+                          {c === 0 ? (
+                            <select
+                              value={cell}
+                              onChange={e => updateCell(r, c, e.target.value)}
+                              className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
+                            >
+                              <option value="">Overs</option>
+                              {Array.from({ length: 21 }, (_, i) => (
+                                <option key={i} value={String(i)}>{i}</option>
+                              ))}
+                            </select>
+                          ) : c === 1 ? (
+                            <select
+                              value={cell}
+                              onChange={e => updateCell(r, c, e.target.value)}
+                              className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
+                            >
+                              <option value="">Ball</option>
+                              {Array.from({ length: 7 }, (_, i) => (
+                                <option key={i} value={String(i)}>{i}</option>
+                              ))}
+                            </select>
+                          ) : c === 2 ? (
+                            <select
+                              value={cell}
+                              onChange={e => updateCell(r, c, e.target.value)}
+                              className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
+                            >
+                              <option value="">Innings</option>
+                              <option value="1">1</option>
+                              <option value="2">2</option>
+                            </select>
+                          ) : c === 3 || c === 4 ? (
+                            <select
+                              value={cell}
+                              onChange={e => updateCell(r, c, e.target.value)}
+                              className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
+                            >
+                              <option value="">{c === 3 ? 'Striker' : 'Non-Striker'}</option>
+                              {(playing11[battingTeam] || []).map((p: string) => (
+                                <option key={p} value={p}>{p}</option>
+                              ))}
+                            </select>
+                          ) : (
+                            <input
+                              value={cell}
+                              onChange={(e) => updateCell(r, c, e.target.value)}
+                              placeholder={HEADERS[c]}
+                              className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100 placeholder-gray-400"
+                            />
+                          )}
+                        </td>
+                      );
+                    })}
                     <td className="px-3 py-2 align-top border-b border-gray-800 text-right">
                       <button onClick={() => removeRow(r)} title="Remove row" className="text-red-400 hover:text-red-200">Remove</button>
                     </td>
