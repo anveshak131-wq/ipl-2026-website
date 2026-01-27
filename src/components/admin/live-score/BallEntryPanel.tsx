@@ -1001,9 +1001,12 @@ export default function BallEntryPanel({
 
         {/* Bowler Section */}
         <div 
-          className="cursor-pointer"
+          className="relative cursor-pointer"
           onClick={() => setShowPlayerSelector('bowler')}
         >
+          <div className="absolute -top-1 -left-1 bg-orange-500 text-white text-[10px] px-1.5 py-0.5 rounded font-bold z-10">
+            BOWLER
+          </div>
           <EnhancedPlayerStats
             player={{
               name: state.currentBowler.name,
