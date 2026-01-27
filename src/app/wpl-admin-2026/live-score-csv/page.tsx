@@ -476,29 +476,15 @@ export default function LiveScoreCSVPage() {
                                 
                                 // From scorecard: RCB won toss and chose to bowl
                                 // So MI bats first (innings 1), RCB bats second (innings 2)
+                                // Hardcoded team IDs based on scorecard data
+                                // MI has teamId "11", RCB has teamId "12"
                                 
                                 if (row[2] === '1' || row[2] === 1) {
-                                  // Innings 1: MI is batting
-                                  // Find MI team ID
-                                  const isMITeam1 = team1.toLowerCase().includes('mi') || team1.toLowerCase().includes('mumbai indians');
-                                  const isMITeam2 = team2.toLowerCase().includes('mi') || team2.toLowerCase().includes('mumbai indians');
-                                  
-                                  if (isMITeam1) {
-                                    battingTeamId = match?.team1?.id || '';
-                                  } else if (isMITeam2) {
-                                    battingTeamId = match?.team2?.id || '';
-                                  }
+                                  // Innings 1: MI is batting (teamId "11")
+                                  battingTeamId = "11";
                                 } else {
-                                  // Innings 2: RCB is batting
-                                  // Find RCB team ID
-                                  const isRCBTeam1 = team1.toLowerCase().includes('rcb') || team1.toLowerCase().includes('royal challengers');
-                                  const isRCBTeam2 = team2.toLowerCase().includes('rcb') || team2.toLowerCase().includes('royal challengers');
-                                  
-                                  if (isRCBTeam1) {
-                                    battingTeamId = match?.team1?.id || '';
-                                  } else if (isRCBTeam2) {
-                                    battingTeamId = match?.team2?.id || '';
-                                  }
+                                  // Innings 2: RCB is batting (teamId "12")
+                                  battingTeamId = "12";
                                 }
                                 
                                 // Get players for the batting team
@@ -525,29 +511,15 @@ export default function LiveScoreCSVPage() {
                                 // From scorecard: RCB won toss and chose to bowl
                                 // So MI bats first (innings 1), RCB bowls first (innings 1)
                                 // In innings 2, RCB bats, MI bowls
+                                // Hardcoded team IDs based on scorecard data
+                                // MI has teamId "11", RCB has teamId "12"
                                 
                                 if (row[2] === '1' || row[2] === 1) {
-                                  // Innings 1: RCB is bowling
-                                  // Find RCB team ID
-                                  const isRCBTeam1 = team1.toLowerCase().includes('rcb') || team1.toLowerCase().includes('royal challengers');
-                                  const isRCBTeam2 = team2.toLowerCase().includes('rcb') || team2.toLowerCase().includes('royal challengers');
-                                  
-                                  if (isRCBTeam1) {
-                                    bowlingTeamId = match?.team1?.id || '';
-                                  } else if (isRCBTeam2) {
-                                    bowlingTeamId = match?.team2?.id || '';
-                                  }
+                                  // Innings 1: RCB is bowling (teamId "12")
+                                  bowlingTeamId = "12";
                                 } else {
-                                  // Innings 2: MI is bowling
-                                  // Find MI team ID
-                                  const isMITeam1 = team1.toLowerCase().includes('mi') || team1.toLowerCase().includes('mumbai indians');
-                                  const isMITeam2 = team2.toLowerCase().includes('mi') || team2.toLowerCase().includes('mumbai indians');
-                                  
-                                  if (isMITeam1) {
-                                    bowlingTeamId = match?.team1?.id || '';
-                                  } else if (isMITeam2) {
-                                    bowlingTeamId = match?.team2?.id || '';
-                                  }
+                                  // Innings 2: MI is bowling (teamId "11")
+                                  bowlingTeamId = "11";
                                 }
                                 
                                 // Get players for the bowling team
