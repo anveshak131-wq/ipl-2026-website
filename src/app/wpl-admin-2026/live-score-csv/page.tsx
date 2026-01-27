@@ -213,6 +213,11 @@ export default function LiveScoreCSVPage() {
     });
   };
 
+  const addRowToInnings = (innings: number) => {
+    const newRow = ['', '', String(innings), '', '', '', '', '', '', '', '', '', ''];
+    setRows(prev => [...prev, newRow]);
+  };
+
   // Wicket handling functions
   const updateWicketData = (rowIndex: number, field: 'hasWicket' | 'wicketType' | 'wicketTaker', value: boolean | string) => {
     setWicketData(prev => ({
@@ -287,6 +292,301 @@ export default function LiveScoreCSVPage() {
       description += ` - ${data.wicketTaker}`;
     }
     return description;
+  };
+
+  // Helper function to render cell content
+  const renderCellContent = (cell: string, c: number, rowIndex: number, battingTeam: string) => {
+    switch (c) {
+      case 0: // Overs
+        return (
+          <select
+            value={cell}
+            onChange={e => updateCell(rowIndex, c, e.target.value)}
+            className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
+          >
+            <option value="">Overs</option>
+            {Array.from({ length: 21 }, (_, i) => (
+              <option key={i} value={String(i)}>{i}</option>
+            ))}
+          </select>
+        );
+      case 1: // Ball
+        return (
+          <select
+            value={cell}
+            onChange={e => updateCell(rowIndex, c, e.target.value)}
+            className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
+          >
+            <option value="">Ball</option>
+            {Array.from({ length: 7 }, (_, i) => (
+              <option key={i} value={String(i)}>{i}</option>
+            ))}
+          </select>
+        );
+      case 2: // Innings (hidden in separate tables)
+        return <span className="text-gray-500">{cell}</span>;
+      case 3: // Striker
+      case 4: // Non-Striker
+        return (
+          <select
+            value={cell}
+            onChange={e => updateCell(rowIndex, c, e.target.value)}
+            className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
+          >
+            <option value="">{c === 3 ? 'Striker' : 'Non-Striker'}</option>
+            {(() => {
+              // Get the batting team based on scorecard data
+              const match = matches.find(m => m.id === selectedMatch);
+              const { team1, team2 } = getSelectedMatchTeams();
+              let battingTeamId = '';
+              
+              // From scorecard: RCB won toss and chose to bowl
+              // So MI bats first (innings 1), RCB bats second (innings 2)
+              // Hardcoded team IDs based on scorecard data
+              // MI has teamId "11", RCB has teamId "12"
+              
+              const currentInnings = rows[rowIndex][2];
+              if (currentInnings === '1' || currentInnings === 1) {
+                // Innings 1: MI is batting (teamId "11")
+                battingTeamId = "11";
+              } else {
+                // Innings 2: RCB is batting (teamId "12")
+                battingTeamId = "12";
+              }
+              
+              // Get players for the batting team
+              const teamPlayers = battingTeamId ? getPlayersByTeam(parseInt(battingTeamId)) : [];
+              
+              return teamPlayers.map((player: any) => (
+                <option key={player.id} value={player.name}>{player.name}</option>
+              ));
+            })()}
+          </select>
+        );
+      case 5: // Bowler
+        return (
+          <select
+            value={cell}
+            onChange={e => updateCell(rowIndex, c, e.target.value)}
+            className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
+          >
+            <option value="">Bowler</option>
+            {(() => {
+              // Get the bowling team based on scorecard data
+              const match = matches.find(m => m.id === selectedMatch);
+              const { team1, team2 } = getSelectedMatchTeams();
+              let bowlingTeamId = '';
+              
+              // From scorecard: RCB won toss and chose to bowl
+              // So MI bats first (innings 1), RCB bowls first (innings 1)
+              // In innings 2, RCB bats, MI bowls
+              // Hardcoded team IDs based on scorecard data
+              // MI has teamId "11", RCB has teamId "12"
+              
+              const currentInnings = rows[rowIndex][2];
+              if (currentInnings === '1' || currentInnings === 1) {
+                // Innings 1: RCB is bowling (teamId "12")
+                bowlingTeamId = "12";
+              } else {
+                // Innings 2: MI is bowling (teamId "11")
+                bowlingTeamId = "11";
+              }
+              
+              // Get players for the bowling team
+              const teamPlayers = bowlingTeamId ? getPlayersByTeam(parseInt(bowlingTeamId)) : [];
+              
+              return teamPlayers.map((player: any) => (
+                <option key={player.id} value={player.name}>{player.name}</option>
+              ));
+            })()}
+          </select>
+        );
+      case 6: // Runs
+        return (
+          <select
+            value={cell}
+            onChange={e => updateCell(rowIndex, c, e.target.value)}
+            className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
+          >
+            <option value="">Runs</option>
+            {Array.from({ length: 7 }, (_, i) => (
+              <option key={i} value={String(i)}>{i}</option>
+            ))}
+          </select>
+        );
+      case 7: // Wide
+        return (
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={extrasData[rowIndex]?.hasWide || false}
+                onChange={(e) => updateExtrasData(rowIndex, 'hasWide', e.target.checked)}
+                className="rounded border-gray-600 bg-gray-900 text-purple-600 focus:ring-purple-500"
+              />
+              <label className="text-xs text-gray-400">Wide?</label>
+            </div>
+            {extrasData[rowIndex]?.hasWide && (
+              <select
+                value={extrasData[rowIndex]?.wideRuns || 0}
+                onChange={(e) => updateExtrasData(rowIndex, 'wideRuns', parseInt(e.target.value))}
+                className="w-full border border-gray-700 focus:border-purple-500 rounded px-1 py-1 bg-gray-900 text-gray-100 text-xs"
+              >
+                <option value={0}>Wide only (1 run)</option>
+                <option value={1}>+1 run (2 total)</option>
+                <option value={2}>+2 runs (3 total)</option>
+                <option value={3}>+3 runs (4 total)</option>
+                <option value={4}>Boundary 4 (5 total)</option>
+              </select>
+            )}
+          </div>
+        );
+      case 8: // No Ball
+        return (
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={extrasData[rowIndex]?.hasNoBall || false}
+                onChange={(e) => updateExtrasData(rowIndex, 'hasNoBall', e.target.checked)}
+                className="rounded border-gray-600 bg-gray-900 text-purple-600 focus:ring-purple-500"
+              />
+              <label className="text-xs text-gray-400">No Ball?</label>
+            </div>
+            {extrasData[rowIndex]?.hasNoBall && (
+              <>
+                <select
+                  value={extrasData[rowIndex]?.noBallType || 'bat'}
+                  onChange={(e) => updateExtrasData(rowIndex, 'noBallType', e.target.value)}
+                  className="w-full border border-gray-700 focus:border-purple-500 rounded px-1 py-1 bg-gray-900 text-gray-100 text-xs mb-1"
+                >
+                  <option value="bat">Bat hit (runs to batsman)</option>
+                  <option value="bye">No bat hit (runs to byes)</option>
+                </select>
+                <select
+                  value={extrasData[rowIndex]?.noBallRuns || 0}
+                  onChange={(e) => updateExtrasData(rowIndex, 'noBallRuns', parseInt(e.target.value))}
+                  className="w-full border border-gray-700 focus:border-purple-500 rounded px-1 py-1 bg-gray-900 text-gray-100 text-xs"
+                >
+                  <option value={0}>No Ball only (1 run)</option>
+                  <option value={1}>+1 run (2 total)</option>
+                  <option value={2}>+2 runs (3 total)</option>
+                  <option value={3}>+3 runs (4 total)</option>
+                  <option value={4}>+4 runs (5 total)</option>
+                  <option value={6}>+6 runs (7 total)</option>
+                </select>
+              </>
+            )}
+          </div>
+        );
+      case 9: // Byes
+        return (
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={extrasData[rowIndex]?.hasByes || false}
+                onChange={(e) => updateExtrasData(rowIndex, 'hasByes', e.target.checked)}
+                className="rounded border-gray-600 bg-gray-900 text-purple-600 focus:ring-purple-500"
+              />
+              <label className="text-xs text-gray-400">Byes?</label>
+            </div>
+            {extrasData[rowIndex]?.hasByes && (
+              <select
+                value={extrasData[rowIndex]?.byesRuns || 0}
+                onChange={(e) => updateExtrasData(rowIndex, 'byesRuns', parseInt(e.target.value))}
+                className="w-full border border-gray-700 focus:border-purple-500 rounded px-1 py-1 bg-gray-900 text-gray-100 text-xs"
+              >
+                {Array.from({ length: 7 }, (_, i) => (
+                  <option key={i} value={i}>{i} run{i !== 1 ? 's' : ''}</option>
+                ))}
+              </select>
+            )}
+          </div>
+        );
+      case 10: // LB (Leg Byes)
+        return (
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={extrasData[rowIndex]?.hasLB || false}
+                onChange={(e) => updateExtrasData(rowIndex, 'hasLB', e.target.checked)}
+                className="rounded border-gray-600 bg-gray-900 text-purple-600 focus:ring-purple-500"
+              />
+              <label className="text-xs text-gray-400">LB?</label>
+            </div>
+            {extrasData[rowIndex]?.hasLB && (
+              <select
+                value={extrasData[rowIndex]?.lbRuns || 0}
+                onChange={(e) => updateExtrasData(rowIndex, 'lbRuns', parseInt(e.target.value))}
+                className="w-full border border-gray-700 focus:border-purple-500 rounded px-1 py-1 bg-gray-900 text-gray-100 text-xs"
+              >
+                {Array.from({ length: 7 }, (_, i) => (
+                  <option key={i} value={i}>{i} run{i !== 1 ? 's' : ''}</option>
+                ))}
+              </select>
+            )}
+          </div>
+        );
+      case 11: // Wicket
+        return (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={wicketData[rowIndex]?.hasWicket || false}
+                onChange={(e) => updateWicketData(rowIndex, 'hasWicket', e.target.checked)}
+                className="rounded border-gray-600 bg-gray-900 text-purple-600 focus:ring-purple-500"
+              />
+              <label className="text-xs text-gray-400">Wicket?</label>
+            </div>
+            
+            {wicketData[rowIndex]?.hasWicket && (
+              <>
+                <select
+                  value={wicketData[rowIndex]?.wicketType || ''}
+                  onChange={(e) => updateWicketData(rowIndex, 'wicketType', e.target.value)}
+                  className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100 text-sm"
+                >
+                  <option value="">Select type...</option>
+                  {WICKET_TYPES.map(type => (
+                    <option key={type} value={type}>{type}</option>
+                  ))}
+                </select>
+               
+                {wicketData[rowIndex]?.wicketType && wicketData[rowIndex]?.wicketType !== 'Bowled' && wicketData[rowIndex]?.wicketType !== 'LBW' && wicketData[rowIndex]?.wicketType !== 'Hit Wicket' && (
+                  <input
+                    type="text"
+                    value={wicketData[rowIndex]?.wicketTaker || ''}
+                    onChange={(e) => updateWicketData(rowIndex, 'wicketTaker', e.target.value)}
+                    placeholder="Who took wicket?"
+                    className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100 text-sm placeholder-gray-400"
+                  />
+                )}
+               
+                {/* Update the cell value with the wicket description */}
+                {(() => {
+                  const description = generateWicketDescription(rowIndex);
+                  if (description !== cell) {
+                    updateCell(rowIndex, c, description);
+                  }
+                  return null;
+                })()}
+              </>
+            )}
+          </div>
+        );
+      default: // Notes
+        return (
+          <input
+            value={cell}
+            onChange={(e) => updateCell(rowIndex, c, e.target.value)}
+            placeholder={HEADERS[c]}
+            className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100 placeholder-gray-400"
+          />
+        );
+    }
   };
 
   // Calculate team total for a specific innings
@@ -556,45 +856,27 @@ export default function LiveScoreCSVPage() {
 
       <div className="relative z-10">
         <WPLAdminSidebarNew />
-        <main className="flex-1 p-6">
-          <div className="max-w-7xl mx-auto">
-            {/* Enhanced Header */}
-            <div className="mb-8 text-center">
-              <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
-                Live Score Management
-              </h1>
-              <p className="text-gray-300 text-lg">Professional Cricket Scoring Dashboard</p>
+        <main className="p-8 lg:ml-64">
+        <div className="max-w-6xl">
+          <h1 className="text-3xl font-bold mb-4">Live Score CSV — Editable Table</h1>
+          <div className="mb-6">
+            <label className="block text-gray-200 font-semibold mb-2">Matches:</label>
+            <select
+              className="w-full max-w-xs border border-gray-700 rounded px-2 py-2 bg-gray-900 text-gray-100"
+              value={selectedMatch}
+              onChange={e => setSelectedMatch(e.target.value)}
+              disabled={matches.length === 0}
+            >
+              {matches.map(m => (
+                <option key={m.id} value={m.id}>{m.team1.name} vs {m.team2.name}</option>
+              ))}
+            </select>
+          </div>
+          {tossInfo && (
+            <div className="mb-4 p-3 rounded bg-blue-900 text-blue-100 font-semibold shadow">
+              Toss: {tossInfo}
             </div>
-
-            {/* Enhanced Match Selection */}
-            <div className="mb-8">
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-2xl">
-                <label className="block text-white font-semibold mb-3 text-lg">Select Match</label>
-                <select
-                  className="w-full max-w-md border border-white/20 rounded-xl px-4 py-3 bg-white/10 text-white backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition-all duration-200 text-lg"
-                  value={selectedMatch}
-                  onChange={e => setSelectedMatch(e.target.value)}
-                  disabled={matches.length === 0}
-                >
-                  <option value="" className="bg-gray-800">Choose a match...</option>
-                  {matches.map(m => (
-                    <option key={m.id} value={m.id} className="bg-gray-800">{m.team1.name} vs {m.team2.name}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Enhanced Toss Info */}
-            {tossInfo && (
-              <div className="mb-8">
-                <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-lg rounded-2xl p-4 border border-white/20 shadow-2xl">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
-                    <p className="text-blue-100 font-semibold text-lg">{tossInfo}</p>
-                  </div>
-                </div>
-              </div>
-            )}
+          )}
           <p className="text-sm text-gray-500 mb-4">Edit rows inline for testing. Use the + button to add rows and the trash button to remove.</p>
           <div className="mb-4 flex gap-3 items-center">
             <button onClick={addRow} className="px-3 py-2 bg-purple-600 text-white rounded-md">+ Add Row</button>
@@ -632,320 +914,82 @@ export default function LiveScoreCSVPage() {
             </div>
           </div>
           
-          <div className="shadow-lg overflow-hidden rounded-lg border border-gray-300 bg-gray-900">
-            <table className="min-w-full text-sm table-fixed bg-gray-900">
-              <thead className="bg-gray-800">
-                <tr>
-                  {HEADERS.map((h) => (
-                    <th key={h} className="px-3 py-3 text-left font-semibold text-gray-100 sticky top-0 z-10 border-b border-gray-700 uppercase tracking-wide bg-gray-800">{h}</th>
-                  ))}
-                  <th className="px-3 py-3 sticky top-0 z-10 border-b border-gray-700 bg-gray-800 text-gray-100">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row, r) => (
-                  <tr key={r} className={`transition-colors ${r % 2 === 0 ? 'bg-gray-900' : 'bg-gray-800'} hover:bg-gray-700`}>
-                    {row.map((cell, c) => {
-                      // Determine batting team for this row
-                      let battingTeam = '';
-                      if (c === 3 || c === 4) {
-                        // Striker/Non-Striker: use row[2] (Innings) to determine
-                        battingTeam = getBattingTeamForInnings(row[2]);
-                      }
-                      return (
-                        <td key={c} className="px-3 py-2 align-top border-b border-gray-800">
-                          {c === 0 ? (
-                            <select
-                              value={cell}
-                              onChange={e => updateCell(r, c, e.target.value)}
-                              className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
-                            >
-                              <option value="">Overs</option>
-                              {Array.from({ length: 21 }, (_, i) => (
-                                <option key={i} value={String(i)}>{i}</option>
-                              ))}
-                            </select>
-                          ) : c === 1 ? (
-                            <select
-                              value={cell}
-                              onChange={e => updateCell(r, c, e.target.value)}
-                              className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
-                            >
-                              <option value="">Ball</option>
-                              {Array.from({ length: 7 }, (_, i) => (
-                                <option key={i} value={String(i)}>{i}</option>
-                              ))}
-                            </select>
-                          ) : c === 2 ? (
-                            <select
-                              value={cell}
-                              onChange={e => updateCell(r, c, e.target.value)}
-                              className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
-                            >
-                              <option value="">Innings</option>
-                              <option value="1">1</option>
-                              <option value="2">2</option>
-                            </select>
-                          ) : c === 3 || c === 4 ? (
-                            <select
-                              value={cell}
-                              onChange={e => updateCell(r, c, e.target.value)}
-                              className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
-                            >
-                              <option value="">{c === 3 ? 'Striker' : 'Non-Striker'}</option>
-                              {(() => {
-                                // Get the batting team based on scorecard data
-                                const match = matches.find(m => m.id === selectedMatch);
-                                const { team1, team2 } = getSelectedMatchTeams();
-                                let battingTeamId = '';
-                                
-                                // From scorecard: RCB won toss and chose to bowl
-                                // So MI bats first (innings 1), RCB bats second (innings 2)
-                                // Hardcoded team IDs based on scorecard data
-                                // MI has teamId "11", RCB has teamId "12"
-                                
-                                if (row[2] === '1' || row[2] === 1) {
-                                  // Innings 1: MI is batting (teamId "11")
-                                  battingTeamId = "11";
-                                } else {
-                                  // Innings 2: RCB is batting (teamId "12")
-                                  battingTeamId = "12";
-                                }
-                                
-                                // Get players for the batting team
-                                const teamPlayers = battingTeamId ? getPlayersByTeam(parseInt(battingTeamId)) : [];
-                                
-                                return teamPlayers.map((player: any) => (
-                                  <option key={player.id} value={player.name}>{player.name}</option>
-                                ));
-                              })()}
-                            </select>
-                          ) : c === 5 ? (
-                            <select
-                              value={cell}
-                              onChange={e => updateCell(r, c, e.target.value)}
-                              className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
-                            >
-                              <option value="">Bowler</option>
-                              {(() => {
-                                // Get the bowling team based on scorecard data
-                                const match = matches.find(m => m.id === selectedMatch);
-                                const { team1, team2 } = getSelectedMatchTeams();
-                                let bowlingTeamId = '';
-                                
-                                // From scorecard: RCB won toss and chose to bowl
-                                // So MI bats first (innings 1), RCB bowls first (innings 1)
-                                // In innings 2, RCB bats, MI bowls
-                                // Hardcoded team IDs based on scorecard data
-                                // MI has teamId "11", RCB has teamId "12"
-                                
-                                if (row[2] === '1' || row[2] === 1) {
-                                  // Innings 1: RCB is bowling (teamId "12")
-                                  bowlingTeamId = "12";
-                                } else {
-                                  // Innings 2: MI is bowling (teamId "11")
-                                  bowlingTeamId = "11";
-                                }
-                                
-                                // Get players for the bowling team
-                                const teamPlayers = bowlingTeamId ? getPlayersByTeam(parseInt(bowlingTeamId)) : [];
-                                
-                                return teamPlayers.map((player: any) => (
-                                  <option key={player.id} value={player.name}>{player.name}</option>
-                                ));
-                              })()}
-                            </select>
-                          ) : c === 7 ? (
-                            // Wide checkbox + dropdown for additional runs
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  checked={extrasData[r]?.hasWide || false}
-                                  onChange={(e) => updateExtrasData(r, 'hasWide', e.target.checked)}
-                                  className="rounded border-gray-600 bg-gray-900 text-purple-600 focus:ring-purple-500"
-                                />
-                                <label className="text-xs text-gray-400">Wide?</label>
-                              </div>
-                              {extrasData[r]?.hasWide && (
-                                <select
-                                  value={extrasData[r]?.wideRuns || 0}
-                                  onChange={(e) => updateExtrasData(r, 'wideRuns', parseInt(e.target.value))}
-                                  className="w-full border border-gray-700 focus:border-purple-500 rounded px-1 py-1 bg-gray-900 text-gray-100 text-xs"
-                                >
-                                  <option value={0}>Wide only (1 run)</option>
-                                  <option value={1}>+1 run (2 total)</option>
-                                  <option value={2}>+2 runs (3 total)</option>
-                                  <option value={3}>+3 runs (4 total)</option>
-                                  <option value={4}>Boundary 4 (5 total)</option>
-                                </select>
-                              )}
-                            </div>
-                          ) : c === 8 ? (
-                            // No Ball checkbox + dropdown for additional runs
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  checked={extrasData[r]?.hasNoBall || false}
-                                  onChange={(e) => updateExtrasData(r, 'hasNoBall', e.target.checked)}
-                                  className="rounded border-gray-600 bg-gray-900 text-purple-600 focus:ring-purple-500"
-                                />
-                                <label className="text-xs text-gray-400">No Ball?</label>
-                              </div>
-                              {extrasData[r]?.hasNoBall && (
-                                <>
-                                  <select
-                                    value={extrasData[r]?.noBallType || 'bat'}
-                                    onChange={(e) => updateExtrasData(r, 'noBallType', e.target.value)}
-                                    className="w-full border border-gray-700 focus:border-purple-500 rounded px-1 py-1 bg-gray-900 text-gray-100 text-xs mb-1"
-                                  >
-                                    <option value="bat">Bat hit (runs to batsman)</option>
-                                    <option value="bye">No bat hit (runs to byes)</option>
-                                  </select>
-                                  <select
-                                    value={extrasData[r]?.noBallRuns || 0}
-                                    onChange={(e) => updateExtrasData(r, 'noBallRuns', parseInt(e.target.value))}
-                                    className="w-full border border-gray-700 focus:border-purple-500 rounded px-1 py-1 bg-gray-900 text-gray-100 text-xs"
-                                  >
-                                    <option value={0}>No Ball only (1 run)</option>
-                                    <option value={1}>+1 run (2 total)</option>
-                                    <option value={2}>+2 runs (3 total)</option>
-                                    <option value={3}>+3 runs (4 total)</option>
-                                    <option value={4}>+4 runs (5 total)</option>
-                                    <option value={6}>+6 runs (7 total)</option>
-                                  </select>
-                                </>
-                              )}
-                            </div>
-                          ) : c === 9 ? (
-                            // Byes checkbox + dropdown
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  checked={extrasData[r]?.hasByes || false}
-                                  onChange={(e) => updateExtrasData(r, 'hasByes', e.target.checked)}
-                                  className="rounded border-gray-600 bg-gray-900 text-purple-600 focus:ring-purple-500"
-                                />
-                                <label className="text-xs text-gray-400">Byes?</label>
-                              </div>
-                              {extrasData[r]?.hasByes && (
-                                <select
-                                  value={extrasData[r]?.byesRuns || 0}
-                                  onChange={(e) => updateExtrasData(r, 'byesRuns', parseInt(e.target.value))}
-                                  className="w-full border border-gray-700 focus:border-purple-500 rounded px-1 py-1 bg-gray-900 text-gray-100 text-xs"
-                                >
-                                  {Array.from({ length: 7 }, (_, i) => (
-                                    <option key={i} value={i}>{i} run{i !== 1 ? 's' : ''}</option>
-                                  ))}
-                                </select>
-                              )}
-                            </div>
-                          ) : c === 10 ? (
-                            // LB (Leg Byes) checkbox + dropdown
-                            <div className="space-y-1">
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  checked={extrasData[r]?.hasLB || false}
-                                  onChange={(e) => updateExtrasData(r, 'hasLB', e.target.checked)}
-                                  className="rounded border-gray-600 bg-gray-900 text-purple-600 focus:ring-purple-500"
-                                />
-                                <label className="text-xs text-gray-400">LB?</label>
-                              </div>
-                              {extrasData[r]?.hasLB && (
-                                <select
-                                  value={extrasData[r]?.lbRuns || 0}
-                                  onChange={(e) => updateExtrasData(r, 'lbRuns', parseInt(e.target.value))}
-                                  className="w-full border border-gray-700 focus:border-purple-500 rounded px-1 py-1 bg-gray-900 text-gray-100 text-xs"
-                                >
-                                  {Array.from({ length: 7 }, (_, i) => (
-                                    <option key={i} value={i}>{i} run{i !== 1 ? 's' : ''}</option>
-                                  ))}
-                                </select>
-                              )}
-                            </div>
-                          ) : c === 11 ? (
-                            // Wicket column with checkbox, dropdown, and text input
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2">
-                                <input
-                                  type="checkbox"
-                                  checked={wicketData[r]?.hasWicket || false}
-                                  onChange={(e) => updateWicketData(r, 'hasWicket', e.target.checked)}
-                                  className="rounded border-gray-600 bg-gray-900 text-purple-600 focus:ring-purple-500"
-                                />
-                                <label className="text-xs text-gray-400">Wicket?</label>
-                              </div>
-                              
-                              {wicketData[r]?.hasWicket && (
-                                <>
-                                  <select
-                                    value={wicketData[r]?.wicketType || ''}
-                                    onChange={(e) => updateWicketData(r, 'wicketType', e.target.value)}
-                                    className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100 text-sm"
-                                  >
-                                    <option value="">Select type...</option>
-                                    {WICKET_TYPES.map(type => (
-                                      <option key={type} value={type}>{type}</option>
-                                    ))}
-                                  </select>
-                                  
-                                  {wicketData[r]?.wicketType && wicketData[r]?.wicketType !== 'Bowled' && wicketData[r]?.wicketType !== 'LBW' && wicketData[r]?.wicketType !== 'Hit Wicket' && (
-                                    <input
-                                      type="text"
-                                      value={wicketData[r]?.wicketTaker || ''}
-                                      onChange={(e) => updateWicketData(r, 'wicketTaker', e.target.value)}
-                                      placeholder="Who took wicket?"
-                                      className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100 text-sm placeholder-gray-400"
-                                    />
-                                  )}
-                                  
-                                  {/* Update the cell value with the wicket description */}
-                                  {(() => {
-                                    const description = generateWicketDescription(r);
-                                    if (description !== cell) {
-                                      updateCell(r, c, description);
-                                    }
-                                    return null;
-                                  })()}
-                                </>
-                              )}
-                            </div>
-                          ) : c === 6 ? (
-                            // Runs dropdown with values 0-6
-                            <select
-                              value={cell}
-                              onChange={e => updateCell(r, c, e.target.value)}
-                              className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
-                            >
-                              <option value="">Runs</option>
-                              {Array.from({ length: 7 }, (_, i) => (
-                                <option key={i} value={String(i)}>{i}</option>
-                              ))}
-                            </select>
-                          ) : (
-                            <input
-                              value={cell}
-                              onChange={(e) => updateCell(r, c, e.target.value)}
-                              placeholder={HEADERS[c]}
-                              className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100 placeholder-gray-400"
-                            />
-                          )}
-                        </td>
-                      );
-                    })}
-                    <td className="px-3 py-2 align-top border-b border-gray-800 text-right">
-                      <button onClick={() => removeRow(r)} title="Remove row" className="text-red-400 hover:text-red-200">Remove</button>
-                    </td>
+          {/* Innings 1 Table */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-white mb-4">Innings 1</h2>
+            <div className="mb-4">
+              <button onClick={() => addRowToInnings(1)} className="px-3 py-2 bg-purple-600 text-white rounded-md">+ Add Row to Innings 1</button>
+            </div>
+            <div className="shadow-lg overflow-hidden rounded-lg border border-gray-300 bg-gray-900">
+              <table className="min-w-full text-sm table-fixed bg-gray-900">
+                <thead className="bg-gray-800">
+                  <tr>
+                    {HEADERS.map((h) => (
+                      <th key={h} className="px-3 py-3 text-left font-semibold text-gray-100 sticky top-0 z-10 border-b border-gray-700 uppercase tracking-wide bg-gray-800">{h}</th>
+                    ))}
+                    <th className="px-3 py-3 sticky top-0 z-10 border-b border-gray-700 bg-gray-800 text-gray-100">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {rows.filter(row => row[2] === '1' || row[2] === 1).map((row, r) => {
+                    const originalIndex = rows.indexOf(row);
+                    return (
+                      <tr key={r} className={`transition-colors ${r % 2 === 0 ? 'bg-gray-900' : 'bg-gray-800'} hover:bg-gray-700`}>
+                        {row.map((cell, c) => (
+                          <td key={c} className="px-3 py-2 align-top border-b border-gray-800">
+                            {renderCellContent(cell, c, originalIndex, '')}
+                          </td>
+                        ))}
+                        <td className="px-3 py-2 align-top border-b border-gray-800 text-right">
+                          <button onClick={() => removeRow(originalIndex)} title="Remove row" className="text-red-400 hover:text-red-200">Remove</button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Innings 2 Table */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-white mb-4">Innings 2</h2>
+            <div className="mb-4">
+              <button onClick={() => addRowToInnings(2)} className="px-3 py-2 bg-purple-600 text-white rounded-md">+ Add Row to Innings 2</button>
+            </div>
+            <div className="shadow-lg overflow-hidden rounded-lg border border-gray-300 bg-gray-900">
+              <table className="min-w-full text-sm table-fixed bg-gray-900">
+                <thead className="bg-gray-800">
+                  <tr>
+                    {HEADERS.map((h) => (
+                      <th key={h} className="px-3 py-3 text-left font-semibold text-gray-100 sticky top-0 z-10 border-b border-gray-700 uppercase tracking-wide bg-gray-800">{h}</th>
+                    ))}
+                    <th className="px-3 py-3 sticky top-0 z-10 border-b border-gray-700 bg-gray-800 text-gray-100">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.filter(row => row[2] === '2' || row[2] === 2).map((row, r) => {
+                    const originalIndex = rows.indexOf(row);
+                    return (
+                      <tr key={r} className={`transition-colors ${r % 2 === 0 ? 'bg-gray-900' : 'bg-gray-800'} hover:bg-gray-700`}>
+                        {row.map((cell, c) => (
+                          <td key={c} className="px-3 py-2 align-top border-b border-gray-800">
+                            {renderCellContent(cell, c, originalIndex, '')}
+                          </td>
+                        ))}
+                        <td className="px-3 py-2 align-top border-b border-gray-800 text-right">
+                          <button onClick={() => removeRow(originalIndex)} title="Remove row" className="text-red-400 hover:text-red-200">Remove</button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </main>
+      </div>
     </div>
   );
 }
