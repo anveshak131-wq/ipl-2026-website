@@ -477,6 +477,11 @@ export default function LiveScoreCSVPage() {
                                 console.log('Innings value:', row[2]);
                                 console.log('Batting team:', battingTeam);
                                 console.log('All players count:', allPlayers.length);
+                                console.log('Toss info:', tossInfo);
+                                
+                                // Call getBattingFirstTeam to trigger debugging
+                                const firstBattingTeam = getBattingFirstTeam();
+                                console.log('First batting team result:', firstBattingTeam);
                                 
                                 // Get the batting team ID from match data
                                 const match = matches.find(m => m.id === selectedMatch);
@@ -497,6 +502,7 @@ export default function LiveScoreCSVPage() {
                                 }
                                 
                                 console.log('Batting team ID:', battingTeamId);
+                                console.log('Match data:', match);
                                 
                                 // Get players for the batting team (like scorecard page)
                                 const teamPlayers = battingTeamId ? getPlayersByTeam(parseInt(battingTeamId)) : [];
