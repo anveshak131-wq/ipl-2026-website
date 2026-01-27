@@ -1,3 +1,6 @@
+export async function GET() {
+  return NextResponse.json({ error: 'Use POST to save data.' }, { status: 405 });
+}
 import { NextRequest, NextResponse } from 'next/server';
 
 // Cloudflare KV REST API endpoint and token must be set in env
