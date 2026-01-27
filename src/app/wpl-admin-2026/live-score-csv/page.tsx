@@ -294,113 +294,6 @@ export default function LiveScoreCSVPage() {
     return description;
   };
 
-  // Helper to get team short names from matches list for selected match
-  const getSelectedMatchTeams = () => {
-    const match = matches.find(m => m.id === selectedMatch);
-    if (!match || !match.team1 || !match.team2) return { team1: '', team2: '' };
-    return { team1: match.team1.name, team2: match.team2.name };
-  };
-
-  // Helper to get scorecard short name for a match team name
-  const getScorecardShortName = (matchTeam: string) => {
-    return teamNameMap[matchTeam] || matchTeam;
-  };
-
-  // Helper to normalize team names for comparison
-  const normalizeTeamName = (teamName: string) => {
-    if (!teamName) return '';
-    
-    // Convert to lowercase and remove common variations
-    const normalized = teamName.toLowerCase().trim();
-    
-    // Handle common team name variations
-    if (normalized.includes('royal challengers') || normalized.includes('rcb')) {
-      return 'RCB';
-    }
-    if (normalized.includes('mumbai indians') || normalized.includes('mumbai') || normalized.includes('mi')) {
-      return 'MI';
-    }
-    if (normalized.includes('chennai super') || normalized.includes('csk')) {
-      return 'CSK';
-    }
-    if (normalized.includes('kolkata knight') || normalized.includes('kkr')) {
-      return 'KKR';
-    }
-    
-    return teamName;
-  };
-
-  // Helper to determine which team bats first based on tossInfo
-  const getBattingFirstTeam = () => {
-    const { team1, team2 } = getSelectedMatchTeams();
-    
-    if (!tossInfo) return '';
-    const winnerMatch = tossInfo.match(/Winner: ([^;]+)/);
-    const decisionMatch = tossInfo.match(/Decision: ([^;]+)/);
-    const winner = winnerMatch ? winnerMatch[1].trim() : '';
-    const decision = decisionMatch ? decisionMatch[1].trim().toLowerCase() : '';
-    
-    if (!winner || !decision) return '';
-    
-    // Normalize team names for comparison
-    const normalizedWinner = normalizeTeamName(winner);
-    const normalizedTeam1 = normalizeTeamName(team1);
-    const normalizedTeam2 = normalizeTeamName(team2);
-    
-    if (decision === 'bowl') {
-      // If winner chose to bowl, the other team bats first
-      if (normalizedWinner === normalizedTeam1) return team2;
-      if (normalizedWinner === normalizedTeam2) return team1;
-    }
-    if (decision === 'bat') {
-      // If winner chose to bat, they bat first
-      if (normalizedWinner === normalizedTeam1) return team1;
-      if (normalizedWinner === normalizedTeam2) return team2;
-    }
-    return '';
-  };
-
-  // Helper to get players by team (like scorecard page)
-  const getPlayersByTeam = (teamId: number): any[] => {
-    return allPlayers.filter(player => player.teamId === teamId.toString());
-  };
-
-  // Helper to get batting team for a given innings (1 or 2)
-  const getBattingTeamForInnings = (innings: string | number) => {
-    const { team1, team2 } = getSelectedMatchTeams();
-    const first = getBattingFirstTeam();
-    if (innings === '1' || innings === 1) return getScorecardShortName(first);
-    if (innings === '2' || innings === 2) {
-      if (first === team1) return getScorecardShortName(team2);
-      if (first === team2) return getScorecardShortName(team1);
-    }
-    return '';
-  };
-
-  // Helper to map batting team name to playing11 key (team1/team2)
-  const getPlaying11Key = (battingTeamShortName: string) => {
-    console.log('=== MAPPING DEBUG ===');
-    const { team1, team2 } = getSelectedMatchTeams();
-    const team1Short = getScorecardShortName(team1);
-    const team2Short = getScorecardShortName(team2);
-    
-    console.log('Batting team short name:', battingTeamShortName);
-    console.log('Team1 full:', team1, 'short:', team1Short);
-    console.log('Team2 full:', team2, 'short:', team2Short);
-    
-    if (battingTeamShortName === team1Short) {
-      console.log('Mapped to team1');
-      return 'team1';
-    }
-    if (battingTeamShortName === team2Short) {
-      console.log('Mapped to team2');
-      return 'team2';
-    }
-    
-    console.log('No mapping found, defaulting to team1');
-    return 'team1';
-  };
-
   // Helper function to render cell content
   const renderCellContent = (cell: string, c: number, rowIndex: number, battingTeam: string) => {
     switch (c) {
@@ -682,20 +575,38 @@ export default function LiveScoreCSVPage() {
                 })()}
               </>
             )}
-          </div>
-        );
-      default: // Notes
-        return (
           <input
             type="text"
-            value={cell}
-            onChange={e => updateCell(rowIndex, c, e.target.value)}
-            placeholder="Add notes..."
-            className="w-full border border-white/20 rounded-lg px-3 py-2 bg-white/10 text-white backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition-all duration-200 text-sm placeholder-gray-400"
+            value={wicketData[rowIndex]?.wicketTaker || ''}
+            onChange={(e) => updateWicketData(rowIndex, 'wicketTaker', e.target.value)}
+            placeholder="Who took wicket?"
+            className="w-full border border-white/20 rounded-lg px-2 py-1 bg-white/10 text-white backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition-all duration-200 text-xs placeholder-gray-400"
           />
-        );
-    }
-  };
+        )}
+       
+        {/* Update the cell value with the wicket description */}
+        {(() => {
+          const description = generateWicketDescription(rowIndex);
+          if (description !== cell) {
+            updateCell(rowIndex, c, description);
+          }
+          return null;
+        })()}
+      </>
+    )}
+  </div>
+);
+default: // Notes
+return (
+  <input
+    type="text"
+    value={cell}
+    onChange={e => updateCell(rowIndex, c, e.target.value)}
+    placeholder="Add notes..."
+    className="w-full border border-white/20 rounded-lg px-3 py-2 bg-white/10 text-white backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition-all duration-200 text-sm placeholder-gray-400"
+  />
+);
+}
 
 // Calculate team total for a specific innings
 const calculateTeamTotal = (innings: string | number) => {
