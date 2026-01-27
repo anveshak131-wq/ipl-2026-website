@@ -90,12 +90,14 @@ export default function LiveScoreCSVPage() {
           console.log('Full match data:', matchData);
           console.log('Match name:', matchData.name);
           console.log('Playing11 data:', matchData.playing11);
+          console.log('Match team1:', matchData.team1);
+          console.log('Match team2:', matchData.team2);
           if (matchData && matchData.playing11) {
             const p11 = matchData.playing11;
+            console.log('Playing11 keys:', Object.keys(p11));
             console.log('Team1 players:', p11.team1);
             console.log('Team2 players:', p11.team2);
-            console.log('Match team1 name:', matchData.team1?.name);
-            console.log('Match team2 name:', matchData.team2?.name);
+            console.log('Playing11 structure:', JSON.stringify(p11, null, 2));
             setPlaying11(p11);
           } else {
             console.log('No playing11 found in match data');
@@ -431,15 +433,34 @@ export default function LiveScoreCSVPage() {
                                 console.log('Innings value:', row[2]);
                                 console.log('Batting team:', battingTeam);
                                 console.log('Playing11 state:', playing11);
-                                console.log('Selected match teams:', getSelectedMatchTeams());
-                                console.log('Scorecard short names:', {
-                                  team1: getScorecardShortName(getSelectedMatchTeams().team1),
-                                  team2: getScorecardShortName(getSelectedMatchTeams().team2)
-                                });
+                                console.log('Playing11 keys:', Object.keys(playing11));
+                                
+                                // Try multiple approaches to get players
+                                let players: string[] = [];
                                 const playing11Key = getPlaying11Key(battingTeam);
-                                console.log('Playing11 key:', playing11Key);
-                                const players = playing11[playing11Key] || [];
-                                console.log('Players for team:', players);
+                                console.log('Playing11 key from mapping:', playing11Key);
+                                
+                                // Try mapped key first
+                                if (playing11Key && playing11[playing11Key]) {
+                                  players = playing11[playing11Key] as string[];
+                                  console.log('Players from mapped key:', players);
+                                }
+                                // Try direct batting team name
+                                else if (playing11[battingTeam]) {
+                                  players = playing11[battingTeam] as string[];
+                                  console.log('Players from direct team name:', players);
+                                }
+                                // Try team1/team2 as fallback
+                                else if (playing11.team1 && (battingTeam.includes('MI') || battingTeam.includes('Mumbai'))) {
+                                  players = playing11.team1 as string[];
+                                  console.log('Players from team1 (MI fallback):', players);
+                                }
+                                else if (playing11.team2 && (battingTeam.includes('RCB') || battingTeam.includes('Bangalore'))) {
+                                  players = playing11.team2 as string[];
+                                  console.log('Players from team2 (RCB fallback):', players);
+                                }
+                                
+                                console.log('Final players array:', players);
                                 console.log('==================');
                                 return players.map((p: string) => (
                                   <option key={p} value={p}>{p}</option>
