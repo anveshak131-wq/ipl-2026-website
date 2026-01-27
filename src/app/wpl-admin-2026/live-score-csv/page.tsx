@@ -11,6 +11,7 @@ export default function LiveScoreCSVPage() {
   const [matches, setMatches] = useState<{ id: string, name: string }[]>([]);
   const [selectedMatch, setSelectedMatch] = useState<string>('');
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
+  const [tossInfo, setTossInfo] = useState<string>('');
 
   // Fetch matches list on mount
   useEffect(() => {
@@ -28,11 +29,12 @@ export default function LiveScoreCSVPage() {
     })();
   }, []);
 
-  // Load table data for selected match
+  // Load table data and toss info for selected match
   useEffect(() => {
     if (!selectedMatch) return;
     (async () => {
       try {
+        // Table data
         const resp = await fetch(`/api/wpl-live-score/save?matchId=${encodeURIComponent(selectedMatch)}`);
         if (resp.ok) {
           const data = await resp.json();
@@ -45,6 +47,28 @@ export default function LiveScoreCSVPage() {
           }
         }
       } catch {}
+      // Toss info from scorecard
+      try {
+        const tossResp = await fetch(`/api/scorecards?matchId=${encodeURIComponent(selectedMatch)}`);
+        if (tossResp.ok) {
+          const scorecards = await tossResp.json();
+          if (Array.isArray(scorecards) && scorecards.length > 0) {
+            // Try to find toss info in matchInfo.toss or tossWinner
+            const sc = scorecards[0];
+            let toss = '';
+            if (sc.matchInfo && sc.matchInfo.toss) toss = sc.matchInfo.toss;
+            else if (sc.toss) toss = sc.toss;
+            else if (sc.matchInfo && sc.matchInfo.tossWinner) toss = sc.matchInfo.tossWinner;
+            setTossInfo(toss || '');
+          } else {
+            setTossInfo('');
+          }
+        } else {
+          setTossInfo('');
+        }
+      } catch {
+        setTossInfo('');
+      }
     })();
   }, [selectedMatch]);
 
@@ -135,6 +159,11 @@ export default function LiveScoreCSVPage() {
               ))}
             </select>
           </div>
+          {tossInfo && (
+            <div className="mb-4 p-3 rounded bg-blue-900 text-blue-100 font-semibold shadow">
+              Toss: {tossInfo}
+            </div>
+          )}
           <p className="text-sm text-gray-500 mb-4">Edit rows inline for testing. Use the + button to add rows and the trash button to remove.</p>
           <div className="mb-4 flex gap-3 items-center">
             <button onClick={addRow} className="px-3 py-2 bg-purple-600 text-white rounded-md">+ Add Row</button>
