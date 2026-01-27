@@ -1,13 +1,24 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { SaveStatus } from './saveStatus';
 import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 
 const HEADERS = ['@Over','Ball','Innings','Striker','Non-Striker','Bowler','Runs','Extras','Wicket','Notes'];
 
-export default function LiveScoreCSVPage() {
   const [rows, setRows] = useState<string[][]>([]);
+    // Load saved rows from KV on mount
+    useEffect(() => {
+      (async () => {
+        try {
+          const resp = await fetch('/api/wpl-live-score/save');
+          if (resp.ok) {
+            const data = await resp.json();
+            if (Array.isArray(data.rows)) setRows(data.rows);
+          }
+        } catch {}
+      })();
+    }, []);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
 
   const updateCell = (rIdx: number, cIdx: number, value: string) => {

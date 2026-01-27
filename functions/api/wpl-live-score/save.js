@@ -13,6 +13,18 @@ export const onRequestPost = async ({ request, env }) => {
   }
 };
 
-export const onRequestGet = async () => {
-  return new Response(JSON.stringify({ error: 'Use POST to save data.' }), { status: 405 });
+export const onRequestGet = async ({ env }) => {
+  const KV = env.SPORTS_KV;
+  if (!KV) {
+    return new Response(JSON.stringify({ error: 'SPORTS_KV binding missing in env' }), { status: 500 });
+  }
+  try {
+    const value = await KV.get('wpl-live-score');
+    if (!value) {
+      return new Response(JSON.stringify({ rows: [] }), { status: 200 });
+    }
+    return new Response(value, { status: 200, headers: { 'Content-Type': 'application/json' } });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: e.message }), { status: 500 });
+  }
 };
