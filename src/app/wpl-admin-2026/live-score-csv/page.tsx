@@ -14,9 +14,24 @@ const HEADERS = ['@Over','Ball','Innings','Striker','Non-Striker','Bowler','Runs
           const resp = await fetch('/api/wpl-live-score/save');
           if (resp.ok) {
             const data = await resp.json();
-            if (Array.isArray(data.rows)) setRows(data.rows);
+            // Accept both {rows: [...]} and [...] (raw array)
+            if (Array.isArray(data.rows)) {
+              setRows(data.rows);
+            } else if (Array.isArray(data)) {
+              setRows(data);
+            } else {
+              // For debugging: log unexpected data
+              // eslint-disable-next-line no-console
+              console.log('Unexpected data from KV:', data);
+            }
+          } else {
+            // eslint-disable-next-line no-console
+            console.log('Failed to fetch saved rows:', resp.status);
           }
-        } catch {}
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.log('Error loading saved rows:', e);
+        }
       })();
     }, []);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
