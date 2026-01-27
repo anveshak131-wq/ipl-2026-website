@@ -70,6 +70,17 @@ export default function LiveScoreCSVPage() {
           }
         }
       } catch {}
+      // Get playing 11 from match data
+      try {
+        const matchResp = await fetch(`/api/matches?id=${encodeURIComponent(selectedMatch)}`);
+        if (matchResp.ok) {
+          const matchData = await matchResp.json();
+          if (matchData && matchData.playing11) {
+            const p11 = matchData.playing11;
+            setPlaying11(p11);
+          }
+        }
+      } catch {}
       // Toss info from scorecard
       try {
         const tossResp = await fetch(`/api/scorecards?matchId=${encodeURIComponent(selectedMatch)}`);
@@ -90,52 +101,32 @@ export default function LiveScoreCSVPage() {
             } else {
               setTossInfo(toss || '');
             }
-            // Extract playing11 for both teams, support both formats
-            let p11: { [team: string]: string[] } = {};
+            // Extract team name mappings from scorecard (but not playing11)
             let nameMap: { [matchTeam: string]: string } = {};
             let idMap: { [shortName: string]: string } = {};
-            if (sc.playing11 && typeof sc.playing11 === 'object') {
-              // If keys are team names (MI-W, RCB-W, etc)
-              const keys = Object.keys(sc.playing11);
-              if (keys.some(k => Array.isArray(sc.playing11[k]))) {
-                p11 = { ...sc.playing11 };
-              } else if (sc.playing11.team1 && sc.playing11.team2) {
-                // Map to short names from scorecard's matchInfo if available
-                let team1Short = '', team2Short = '';
-                if (sc.matchInfo && sc.matchInfo.team1 && sc.matchInfo.team2) {
-                  team1Short = sc.matchInfo.team1.shortName || sc.matchInfo.team1.name || 'team1';
-                  team2Short = sc.matchInfo.team2.shortName || sc.matchInfo.team2.name || 'team2';
-                  // Map matches list names to scorecard short names
-                  const match = matches.find(m => m.id === selectedMatch);
-                  if (match && match.name) {
-                    const [matchTeam1, matchTeam2] = match.name.split(' vs ');
-                    if (matchTeam1 && team1Short) nameMap[matchTeam1.trim()] = team1Short;
-                    if (matchTeam2 && team2Short) nameMap[matchTeam2.trim()] = team2Short;
-                  }
-                  // Map shortName to teamId from matchInfo
-                  if (sc.matchInfo.team1.shortName && sc.matchInfo.team1.id) idMap[sc.matchInfo.team1.shortName] = sc.matchInfo.team1.id;
-                  if (sc.matchInfo.team2.shortName && sc.matchInfo.team2.id) idMap[sc.matchInfo.team2.shortName] = sc.matchInfo.team2.id;
-                } else {
-                  // fallback to matches list
-                  const match = matches.find(m => m.id === selectedMatch);
-                  if (match && match.name) {
-                    const [team1, team2] = match.name.split(' vs ');
-                    team1Short = team1?.trim() || 'team1';
-                    team2Short = team2?.trim() || 'team2';
-                  }
-                }
-                if (team1Short && Array.isArray(sc.playing11.team1)) p11[team1Short] = sc.playing11.team1;
-                if (team2Short && Array.isArray(sc.playing11.team2)) p11[team2Short] = sc.playing11.team2;
+            let team1Short = '', team2Short = '';
+            if (sc.matchInfo && sc.matchInfo.team1 && sc.matchInfo.team2) {
+              team1Short = sc.matchInfo.team1.shortName || sc.matchInfo.team1.name || 'team1';
+              team2Short = sc.matchInfo.team2.shortName || sc.matchInfo.team2.name || 'team2';
+              // Map matches list names to scorecard short names
+              const match = matches.find(m => m.id === selectedMatch);
+              if (match && match.name) {
+                const [matchTeam1, matchTeam2] = match.name.split(' vs ');
+                if (matchTeam1 && team1Short) nameMap[matchTeam1.trim()] = team1Short;
+                if (matchTeam2 && team2Short) nameMap[matchTeam2.trim()] = team2Short;
               }
-            } else if (Array.isArray(sc.innings)) {
-              // Try to extract from innings
-              sc.innings.forEach((inn: any) => {
-                if (inn.team && Array.isArray(inn.playing11)) {
-                  p11[inn.team] = inn.playing11;
-                }
-              });
+              // Map shortName to teamId from matchInfo
+              if (sc.matchInfo.team1.shortName && sc.matchInfo.team1.id) idMap[sc.matchInfo.team1.shortName] = sc.matchInfo.team1.id;
+              if (sc.matchInfo.team2.shortName && sc.matchInfo.team2.id) idMap[sc.matchInfo.team2.shortName] = sc.matchInfo.team2.id;
+            } else {
+              // fallback to matches list
+              const match = matches.find(m => m.id === selectedMatch);
+              if (match && match.name) {
+                const [team1, team2] = match.name.split(' vs ');
+                team1Short = team1?.trim() || 'team1';
+                team2Short = team2?.trim() || 'team2';
+              }
             }
-            setPlaying11(p11);
             setTeamNameMap(nameMap);
             setTeamIdMap(idMap);
           } else {
