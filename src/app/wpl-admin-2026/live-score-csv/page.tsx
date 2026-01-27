@@ -75,12 +75,18 @@ export default function LiveScoreCSVPage() {
         const matchResp = await fetch(`/api/matches?id=${encodeURIComponent(selectedMatch)}`);
         if (matchResp.ok) {
           const matchData = await matchResp.json();
+          console.log('Match data:', matchData);
           if (matchData && matchData.playing11) {
             const p11 = matchData.playing11;
+            console.log('Playing 11 data:', p11);
             setPlaying11(p11);
+          } else {
+            console.log('No playing11 found in match data');
           }
         }
-      } catch {}
+      } catch (error) {
+        console.error('Error fetching match data:', error);
+      }
       // Toss info from scorecard
       try {
         const tossResp = await fetch(`/api/scorecards?matchId=${encodeURIComponent(selectedMatch)}`);
@@ -380,9 +386,14 @@ export default function LiveScoreCSVPage() {
                               className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
                             >
                               <option value="">{c === 3 ? 'Striker' : 'Non-Striker'}</option>
-                              {(playing11[battingTeam] || []).map((p: string) => (
-                                <option key={p} value={p}>{p}</option>
-                              ))}
+                              {(() => {
+                                console.log('Batting team:', battingTeam);
+                                console.log('Playing11 state:', playing11);
+                                console.log('Players for team:', playing11[battingTeam]);
+                                return (playing11[battingTeam] || []).map((p: string) => (
+                                  <option key={p} value={p}>{p}</option>
+                                ));
+                              })()}
                             </select>
                           ) : (
                             <input
