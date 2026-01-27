@@ -24,7 +24,7 @@ import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 import { api as dataApi } from '@/lib/data';
 import { Match } from '@/types';
 
-const HEADERS = ['Overs','Ball','Innings','Striker','Non-Striker','Bowler','Runs','Extras','Wicket','Notes'];
+const HEADERS = ['Overs','Ball','Innings','Striker','Non-Striker','Bowler','Runs','Wide','No Ball','Wicket','Notes'];
 
 export default function LiveScoreCSVPage() {
   const [rows, setRows] = useState<string[][]>([]);
@@ -44,6 +44,12 @@ export default function LiveScoreCSVPage() {
     hasWicket: boolean; 
     wicketType: string; 
     wicketTaker: string; 
+  } }>({});
+
+  // Extras data state
+  const [extrasData, setExtrasData] = useState<{ [rowIndex: number]: { 
+    hasWide: boolean; 
+    hasNoBall: boolean; 
   } }>({});
 
   // Common cricket wicket types
@@ -209,6 +215,27 @@ export default function LiveScoreCSVPage() {
         [field]: value
       }
     }));
+  };
+
+  // Extras handling functions
+  const updateExtrasData = (rowIndex: number, field: 'hasWide' | 'hasNoBall', value: boolean) => {
+    setExtrasData(prev => ({
+      ...prev,
+      [rowIndex]: {
+        ...prev[rowIndex],
+        [field]: value
+      }
+    }));
+
+    // Automatically add 1 run to the Runs column when Wide or No Ball is checked
+    if (value) {
+      const currentRuns = parseInt(rows[rowIndex][6]) || 0;
+      updateCell(rowIndex, 6, String(currentRuns + 1));
+    } else {
+      // Subtract 1 run when unchecked (but don't go below 0)
+      const currentRuns = parseInt(rows[rowIndex][6]) || 0;
+      updateCell(rowIndex, 6, String(Math.max(0, currentRuns - 1)));
+    }
   };
 
   const generateWicketDescription = (rowIndex: number) => {
@@ -573,7 +600,27 @@ export default function LiveScoreCSVPage() {
                                 ));
                               })()}
                             </select>
+                          ) : c === 7 ? (
+                            // Wide checkbox
+                            <div className="flex items-center justify-center h-full">
+                              <input
+                                type="checkbox"
+                                checked={extrasData[r]?.hasWide || false}
+                                onChange={(e) => updateExtrasData(r, 'hasWide', e.target.checked)}
+                                className="rounded border-gray-600 bg-gray-900 text-purple-600 focus:ring-purple-500"
+                              />
+                            </div>
                           ) : c === 8 ? (
+                            // No Ball checkbox
+                            <div className="flex items-center justify-center h-full">
+                              <input
+                                type="checkbox"
+                                checked={extrasData[r]?.hasNoBall || false}
+                                onChange={(e) => updateExtrasData(r, 'hasNoBall', e.target.checked)}
+                                className="rounded border-gray-600 bg-gray-900 text-purple-600 focus:ring-purple-500"
+                              />
+                            </div>
+                          ) : c === 9 ? (
                             // Wicket column with checkbox, dropdown, and text input
                             <div className="space-y-2">
                               <div className="flex items-center gap-2">
