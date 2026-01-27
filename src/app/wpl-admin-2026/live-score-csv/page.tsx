@@ -469,25 +469,39 @@ export default function LiveScoreCSVPage() {
                             >
                               <option value="">{c === 3 ? 'Striker' : 'Non-Striker'}</option>
                               {(() => {
-                                // Get the batting team ID from match data
+                                // Get the batting team based on scorecard data
                                 const match = matches.find(m => m.id === selectedMatch);
                                 const { team1, team2 } = getSelectedMatchTeams();
-                                const first = getBattingFirstTeam();
                                 let battingTeamId = '';
                                 
+                                // From scorecard: RCB won toss and chose to bowl
+                                // So MI bats first (innings 1), RCB bats second (innings 2)
+                                
                                 if (row[2] === '1' || row[2] === 1) {
-                                  // Innings 1 - use first batting team
-                                  battingTeamId = first === team1 ? 
-                                    (match?.team1?.id || '') :
-                                    (match?.team2?.id || '');
+                                  // Innings 1: MI is batting
+                                  // Find MI team ID
+                                  const isMITeam1 = team1.toLowerCase().includes('mi') || team1.toLowerCase().includes('mumbai indians');
+                                  const isMITeam2 = team2.toLowerCase().includes('mi') || team2.toLowerCase().includes('mumbai indians');
+                                  
+                                  if (isMITeam1) {
+                                    battingTeamId = match?.team1?.id || '';
+                                  } else if (isMITeam2) {
+                                    battingTeamId = match?.team2?.id || '';
+                                  }
                                 } else {
-                                  // Innings 2 - use second batting team
-                                  battingTeamId = first === team1 ? 
-                                    (match?.team2?.id || '') :
-                                    (match?.team1?.id || '');
+                                  // Innings 2: RCB is batting
+                                  // Find RCB team ID
+                                  const isRCBTeam1 = team1.toLowerCase().includes('rcb') || team1.toLowerCase().includes('royal challengers');
+                                  const isRCBTeam2 = team2.toLowerCase().includes('rcb') || team2.toLowerCase().includes('royal challengers');
+                                  
+                                  if (isRCBTeam1) {
+                                    battingTeamId = match?.team1?.id || '';
+                                  } else if (isRCBTeam2) {
+                                    battingTeamId = match?.team2?.id || '';
+                                  }
                                 }
                                 
-                                // Get players for the batting team (like scorecard page)
+                                // Get players for the batting team
                                 const teamPlayers = battingTeamId ? getPlayersByTeam(parseInt(battingTeamId)) : [];
                                 
                                 return teamPlayers.map((player: any) => (
