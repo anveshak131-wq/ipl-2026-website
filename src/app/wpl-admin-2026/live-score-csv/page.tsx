@@ -1,3 +1,19 @@
+// Hardcoded player lists for each team
+const HARDCODED_PLAYERS: { [team: string]: string[] } = {
+  'MI': [
+    'Harmanpreet Kaur', 'Yastika Bhatia', 'Hayley Matthews', 'Nat Sciver-Brunt',
+    'Amelia Kerr', 'Pooja Vastrakar', 'Issy Wong', 'Amanjot Kaur',
+    'Saika Ishaque', 'Jintimani Kalita', 'Humaira Kazi', 'Chloe Tryon',
+    'Priyanka Bala', 'Neelam Bisht', 'Sonam Yadav', 'Dhara Gujjar', 'Sabbhineni Meghana'
+  ],
+  'RCB': [
+    'Smriti Mandhana', 'Sophie Devine', 'Ellyse Perry', 'Richa Ghosh',
+    'Heather Knight', 'Renuka Singh', 'Shreyanka Patil', 'Kanika Ahuja',
+    'Asha Sobhana', 'Disha Kasat', 'Erin Burns', 'Poonam Khemnar',
+    'Sahana Pawar', 'Preeti Bose', 'Megan Schutt', 'Komal Zanzad', 'Simran Bahadur'
+  ],
+  // Add more teams as needed
+};
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
@@ -362,13 +378,9 @@ export default function LiveScoreCSVPage() {
                               className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
                             >
                               <option value="">{c === 3 ? 'Striker' : 'Non-Striker'}</option>
-                              {getAllPlayersForTeam(battingTeam).length > 0
-                                ? getAllPlayersForTeam(battingTeam).map((p: string) => (
-                                    <option key={p} value={p}>{p}</option>
-                                  ))
-                                : (playing11[battingTeam] || []).map((p: string) => (
-                                    <option key={p} value={p}>{p}</option>
-                                  ))}
+                              {(HARDCODED_PLAYERS[battingTeam] || []).map((p: string) => (
+                                <option key={p} value={p}>{p}</option>
+                              ))}
                             </select>
                           ) : (
                             <input
