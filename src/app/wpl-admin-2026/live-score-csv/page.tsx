@@ -285,7 +285,6 @@ export default function LiveScoreCSVPage() {
       setSaveStatus('error');
     }
   };
-
   return (
     <div className="min-h-screen">
       <WPLAdminSidebarNew />
