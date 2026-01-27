@@ -509,17 +509,40 @@ export default function LiveScoreCSVPage() {
                                 const first = getBattingFirstTeam();
                                 let bowlingTeamId = '';
                                 
+                                // Debug logging
+                                console.log('Bowler dropdown debug:', {
+                                  team1, team2, first,
+                                  innings: row[2],
+                                  tossInfo
+                                });
+                                
                                 if (row[2] === '1' || row[2] === 1) {
                                   // Innings 1 - bowling team is opposite of first batting team
-                                  bowlingTeamId = first === team1 ? 
-                                    (match?.team2?.id || '') :
-                                    (match?.team1?.id || '');
+                                  if (first === team1) {
+                                    // team1 is batting, so team2 is bowling
+                                    bowlingTeamId = match?.team2?.id || '';
+                                  } else if (first === team2) {
+                                    // team2 is batting, so team1 is bowling  
+                                    bowlingTeamId = match?.team1?.id || '';
+                                  } else {
+                                    // Fallback: if we can't determine, assume team2 is bowling
+                                    bowlingTeamId = match?.team2?.id || '';
+                                  }
                                 } else {
                                   // Innings 2 - bowling team is opposite of second batting team
-                                  bowlingTeamId = first === team1 ? 
-                                    (match?.team1?.id || '') :
-                                    (match?.team2?.id || '');
+                                  if (first === team1) {
+                                    // team1 batted first, so team1 is bowling now
+                                    bowlingTeamId = match?.team1?.id || '';
+                                  } else if (first === team2) {
+                                    // team2 batted first, so team2 is bowling now
+                                    bowlingTeamId = match?.team2?.id || '';
+                                  } else {
+                                    // Fallback: if we can't determine, assume team1 is bowling
+                                    bowlingTeamId = match?.team1?.id || '';
+                                  }
                                 }
+                                
+                                console.log('Bowling team ID:', bowlingTeamId);
                                 
                                 // Get players for the bowling team
                                 const teamPlayers = bowlingTeamId ? getPlayersByTeam(parseInt(bowlingTeamId)) : [];
