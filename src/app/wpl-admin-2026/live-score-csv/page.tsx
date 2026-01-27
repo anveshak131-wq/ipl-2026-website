@@ -647,10 +647,23 @@ export default function LiveScoreCSVPage() {
     
     let totalRuns = 0;
     let totalExtras = 0;
+    let totalBalls = 0;
+    let totalWickets = 0;
     
     filteredRows.forEach((row, index) => {
       const originalIndex = rows.indexOf(row);
       const extras = extrasData[originalIndex] || {};
+      const wicket = wicketData[originalIndex] || {};
+      
+      // Count balls (exclude wides and no balls from ball count)
+      if (!extras.hasWide && !extras.hasNoBall) {
+        totalBalls += 1;
+      }
+      
+      // Count wickets
+      if (wicket.hasWicket) {
+        totalWickets += 1;
+      }
       
       // Add batsman's runs
       totalRuns += parseInt(row[6]) || 0;
@@ -672,6 +685,11 @@ export default function LiveScoreCSVPage() {
         totalExtras += extras.noBallRuns || 0;
       }
     });
+    
+    // Calculate overs from balls
+    const overs = Math.floor(totalBalls / 6);
+    const ballsInOver = totalBalls % 6;
+    const oversDisplay = `${overs}.${ballsInOver}`;
     
     return {
       batsmanRuns: totalRuns,
@@ -696,6 +714,9 @@ export default function LiveScoreCSVPage() {
         const originalIndex = rows.indexOf(row);
         return sum + (extrasData[originalIndex]?.lbRuns || 0);
       }, 0)),
+      overs: oversDisplay,
+      balls: totalBalls,
+      wickets: totalWickets,
       extras: totalExtras,
       teamTotal: totalRuns + totalExtras
     };
@@ -1028,6 +1049,18 @@ export default function LiveScoreCSVPage() {
                 </div>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                    <span className="text-blue-200 font-medium">Overs</span>
+                    <span className="font-mono text-white font-bold text-lg">{calculateTeamTotal(1).overs}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                    <span className="text-blue-200 font-medium">Balls</span>
+                    <span className="font-mono text-white font-bold text-lg">{calculateTeamTotal(1).balls}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                    <span className="text-red-300 font-medium">Wickets</span>
+                    <span className="font-mono text-red-400 font-bold">{calculateTeamTotal(1).wickets}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
                     <span className="text-blue-200 font-medium">Batsman Runs</span>
                     <span className="font-mono text-white font-bold text-lg">{calculateTeamTotal(1).batsmanRuns}</span>
                   </div>
@@ -1056,7 +1089,7 @@ export default function LiveScoreCSVPage() {
                   <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-lg p-4 border border-green-400/30">
                     <div className="flex justify-between items-center">
                       <span className="text-green-100 font-bold text-lg">Team Total</span>
-                      <span className="font-mono text-green-100 font-bold text-2xl">{calculateTeamTotal(1).teamTotal}</span>
+                      <span className="font-mono text-green-100 font-bold text-2xl">{calculateTeamTotal(1).teamTotal}/{calculateTeamTotal(1).wickets}</span>
                     </div>
                   </div>
                 </div>
@@ -1072,6 +1105,18 @@ export default function LiveScoreCSVPage() {
                   <h3 className="text-xl font-bold text-purple-100">Innings 2 Total</h3>
                 </div>
                 <div className="space-y-3">
+                  <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                    <span className="text-purple-200 font-medium">Overs</span>
+                    <span className="font-mono text-white font-bold text-lg">{calculateTeamTotal(2).overs}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                    <span className="text-purple-200 font-medium">Balls</span>
+                    <span className="font-mono text-white font-bold text-lg">{calculateTeamTotal(2).balls}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                    <span className="text-red-300 font-medium">Wickets</span>
+                    <span className="font-mono text-red-400 font-bold">{calculateTeamTotal(2).wickets}</span>
+                  </div>
                   <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
                     <span className="text-purple-200 font-medium">Batsman Runs</span>
                     <span className="font-mono text-white font-bold text-lg">{calculateTeamTotal(2).batsmanRuns}</span>
@@ -1101,7 +1146,7 @@ export default function LiveScoreCSVPage() {
                   <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-lg p-4 border border-green-400/30">
                     <div className="flex justify-between items-center">
                       <span className="text-green-100 font-bold text-lg">Team Total</span>
-                      <span className="font-mono text-green-100 font-bold text-2xl">{calculateTeamTotal(2).teamTotal}</span>
+                      <span className="font-mono text-green-100 font-bold text-2xl">{calculateTeamTotal(2).teamTotal}/{calculateTeamTotal(2).wickets}</span>
                     </div>
                   </div>
                 </div>
