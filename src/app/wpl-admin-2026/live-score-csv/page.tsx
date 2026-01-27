@@ -857,136 +857,346 @@ export default function LiveScoreCSVPage() {
       <div className="relative z-10">
         <WPLAdminSidebarNew />
         <main className="p-8 lg:ml-64">
-        <div className="max-w-6xl">
-          <h1 className="text-3xl font-bold mb-4">Live Score CSV — Editable Table</h1>
-          <div className="mb-6">
-            <label className="block text-gray-200 font-semibold mb-2">Matches:</label>
-            <select
-              className="w-full max-w-xs border border-gray-700 rounded px-2 py-2 bg-gray-900 text-gray-100"
-              value={selectedMatch}
-              onChange={e => setSelectedMatch(e.target.value)}
-              disabled={matches.length === 0}
-            >
-              {matches.map(m => (
-                <option key={m.id} value={m.id}>{m.team1.name} vs {m.team2.name}</option>
-              ))}
-            </select>
-          </div>
-          {tossInfo && (
-            <div className="mb-4 p-3 rounded bg-blue-900 text-blue-100 font-semibold shadow">
-              Toss: {tossInfo}
+          <div className="max-w-7xl mx-auto">
+            {/* Enhanced Header */}
+            <div className="mb-8 text-center">
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
+                Live Score Management
+              </h1>
+              <p className="text-gray-300 text-lg">Professional Cricket Scoring Dashboard</p>
             </div>
-          )}
-          <p className="text-sm text-gray-500 mb-4">Edit rows inline for testing. Use the + button to add rows and the trash button to remove.</p>
-          <div className="mb-4 flex gap-3 items-center">
-            <button onClick={addRow} className="px-3 py-2 bg-purple-600 text-white rounded-md">+ Add Row</button>
-            <button onClick={exportCSV} className="px-3 py-2 bg-white border border-gray-200 rounded-md text-gray-700 shadow-sm hover:bg-gray-50">Export CSV</button>
-            <button onClick={saveRows} className="px-3 py-2 bg-green-600 text-white rounded-md disabled:opacity-60" disabled={saveStatus==='saving'}>
-              {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'success' ? 'Saved!' : saveStatus === 'error' ? 'Error!' : 'Save'}
-            </button>
-          </div>
-          
-          {/* Team Totals Display */}
-          <div className="mb-6 grid grid-cols-2 gap-4">
-            <div className="bg-gray-800 p-4 rounded-lg">
-              <h3 className="text-lg font-bold text-blue-400 mb-2">Innings 1 Total</h3>
-              <div className="text-sm space-y-1">
-                <div>Batsman Runs: <span className="font-mono text-white">{calculateTeamTotal(1).batsmanRuns}</span></div>
-                <div>Wides: <span className="font-mono text-orange-400">{calculateTeamTotal(1).wides}</span></div>
-                <div>No Balls: <span className="font-mono text-yellow-400">{calculateTeamTotal(1).noBalls}</span></div>
-                <div>Byes: <span className="font-mono text-purple-400">{calculateTeamTotal(1).byes}</span></div>
-                <div>Leg Byes: <span className="font-mono text-pink-400">{calculateTeamTotal(1).legByes}</span></div>
-                <div className="text-xs text-gray-500 mt-2">Extras: {calculateTeamTotal(1).extras}</div>
-                <div className="text-lg font-bold text-green-400 border-t border-gray-700 pt-2">Team Total: <span className="font-mono">{calculateTeamTotal(1).teamTotal}</span></div>
-              </div>
-            </div>
-            <div className="bg-gray-800 p-4 rounded-lg">
-              <h3 className="text-lg font-bold text-blue-400 mb-2">Innings 2 Total</h3>
-              <div className="text-sm space-y-1">
-                <div>Batsman Runs: <span className="font-mono text-white">{calculateTeamTotal(2).batsmanRuns}</span></div>
-                <div>Wides: <span className="font-mono text-orange-400">{calculateTeamTotal(2).wides}</span></div>
-                <div>No Balls: <span className="font-mono text-yellow-400">{calculateTeamTotal(2).noBalls}</span></div>
-                <div>Byes: <span className="font-mono text-purple-400">{calculateTeamTotal(2).byes}</span></div>
-                <div>Leg Byes: <span className="font-mono text-pink-400">{calculateTeamTotal(2).legByes}</span></div>
-                <div className="text-xs text-gray-500 mt-2">Extras: {calculateTeamTotal(2).extras}</div>
-                <div className="text-lg font-bold text-green-400 border-t border-gray-700 pt-2">Team Total: <span className="font-mono">{calculateTeamTotal(2).teamTotal}</span></div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Innings 1 Table */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-4">Innings 1</h2>
-            <div className="mb-4">
-              <button onClick={() => addRowToInnings(1)} className="px-3 py-2 bg-purple-600 text-white rounded-md">+ Add Row to Innings 1</button>
-            </div>
-            <div className="shadow-lg overflow-hidden rounded-lg border border-gray-300 bg-gray-900">
-              <table className="min-w-full text-sm table-fixed bg-gray-900">
-                <thead className="bg-gray-800">
-                  <tr>
-                    {HEADERS.map((h) => (
-                      <th key={h} className="px-3 py-3 text-left font-semibold text-gray-100 sticky top-0 z-10 border-b border-gray-700 uppercase tracking-wide bg-gray-800">{h}</th>
-                    ))}
-                    <th className="px-3 py-3 sticky top-0 z-10 border-b border-gray-700 bg-gray-800 text-gray-100">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.filter(row => row[2] === '1' || row[2] === 1).map((row, r) => {
-                    const originalIndex = rows.indexOf(row);
-                    return (
-                      <tr key={r} className={`transition-colors ${r % 2 === 0 ? 'bg-gray-900' : 'bg-gray-800'} hover:bg-gray-700`}>
-                        {row.map((cell, c) => (
-                          <td key={c} className="px-3 py-2 align-top border-b border-gray-800">
-                            {renderCellContent(cell, c, originalIndex, '')}
-                          </td>
-                        ))}
-                        <td className="px-3 py-2 align-top border-b border-gray-800 text-right">
-                          <button onClick={() => removeRow(originalIndex)} title="Remove row" className="text-red-400 hover:text-red-200">Remove</button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
 
-          {/* Innings 2 Table */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-4">Innings 2</h2>
-            <div className="mb-4">
-              <button onClick={() => addRowToInnings(2)} className="px-3 py-2 bg-purple-600 text-white rounded-md">+ Add Row to Innings 2</button>
+            {/* Enhanced Match Selection */}
+            <div className="mb-8">
+              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-2xl">
+                <label className="block text-white font-semibold mb-3 text-lg">Select Match</label>
+                <select
+                  className="w-full max-w-md border border-white/20 rounded-xl px-4 py-3 bg-white/10 text-white backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition-all duration-200 text-lg"
+                  value={selectedMatch}
+                  onChange={e => setSelectedMatch(e.target.value)}
+                  disabled={matches.length === 0}
+                >
+                  <option value="" className="bg-gray-800">Choose a match...</option>
+                  {matches.map(m => (
+                    <option key={m.id} value={m.id} className="bg-gray-800">{m.team1.name} vs {m.team2.name}</option>
+                  ))}
+                </select>
+              </div>
             </div>
-            <div className="shadow-lg overflow-hidden rounded-lg border border-gray-300 bg-gray-900">
-              <table className="min-w-full text-sm table-fixed bg-gray-900">
-                <thead className="bg-gray-800">
-                  <tr>
-                    {HEADERS.map((h) => (
-                      <th key={h} className="px-3 py-3 text-left font-semibold text-gray-100 sticky top-0 z-10 border-b border-gray-700 uppercase tracking-wide bg-gray-800">{h}</th>
-                    ))}
-                    <th className="px-3 py-3 sticky top-0 z-10 border-b border-gray-700 bg-gray-800 text-gray-100">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.filter(row => row[2] === '2' || row[2] === 2).map((row, r) => {
-                    const originalIndex = rows.indexOf(row);
-                    return (
-                      <tr key={r} className={`transition-colors ${r % 2 === 0 ? 'bg-gray-900' : 'bg-gray-800'} hover:bg-gray-700`}>
-                        {row.map((cell, c) => (
-                          <td key={c} className="px-3 py-2 align-top border-b border-gray-800">
-                            {renderCellContent(cell, c, originalIndex, '')}
-                          </td>
-                        ))}
-                        <td className="px-3 py-2 align-top border-b border-gray-800 text-right">
-                          <button onClick={() => removeRow(originalIndex)} title="Remove row" className="text-red-400 hover:text-red-200">Remove</button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+
+            {/* Enhanced Toss Info */}
+            {tossInfo && (
+              <div className="mb-8">
+                <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-lg rounded-2xl p-4 border border-white/20 shadow-2xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
+                    <p className="text-blue-100 font-semibold text-lg">{tossInfo}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Enhanced Action Buttons */}
+            <div className="mb-8">
+              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-2xl">
+                <div className="flex flex-wrap gap-4 items-center justify-center">
+                  <button 
+                    onClick={addRow} 
+                    className="px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-purple-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-purple-500/25"
+                  >
+                    <span className="flex items-center gap-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Add Row
+                    </span>
+                  </button>
+                  <button 
+                    onClick={exportCSV} 
+                    className="px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl font-semibold hover:from-gray-700 hover:to-gray-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-gray-500/25"
+                  >
+                    <span className="flex items-center gap-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Export CSV
+                    </span>
+                  </button>
+                  <button 
+                    onClick={saveRows} 
+                    className="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl font-semibold hover:from-green-700 hover:to-green-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-green-500/25 disabled:opacity-60 disabled:transform-none disabled:hover:scale-100" 
+                    disabled={saveStatus==='saving'}
+                  >
+                    <span className="flex items-center gap-2">
+                      {saveStatus === 'saving' ? (
+                        <>
+                          <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                          </svg>
+                          Saving...
+                        </>
+                      ) : saveStatus === 'success' ? (
+                        <>
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          Saved!
+                        </>
+                      ) : saveStatus === 'error' ? (
+                        <>
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                          Error!
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V2" />
+                          </svg>
+                          Save Data
+                        </>
+                      )}
+                    </span>
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
+          
+            {/* Enhanced Team Totals Display */}
+            <div className="mb-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-2xl">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 bg-blue-400 rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold text-blue-100">Innings 1 Total</h3>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                    <span className="text-blue-200 font-medium">Batsman Runs</span>
+                    <span className="font-mono text-white font-bold text-lg">{calculateTeamTotal(1).batsmanRuns}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                    <span className="text-orange-300 font-medium">Wides</span>
+                    <span className="font-mono text-orange-400 font-bold">{calculateTeamTotal(1).wides}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                    <span className="text-yellow-300 font-medium">No Balls</span>
+                    <span className="font-mono text-yellow-400 font-bold">{calculateTeamTotal(1).noBalls}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                    <span className="text-purple-300 font-medium">Byes</span>
+                    <span className="font-mono text-purple-400 font-bold">{calculateTeamTotal(1).byes}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                    <span className="text-pink-300 font-medium">Leg Byes</span>
+                    <span className="font-mono text-pink-400 font-bold">{calculateTeamTotal(1).legByes}</span>
+                  </div>
+                  <div className="border-t border-white/20 pt-3 mt-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-300 font-medium">Extras</span>
+                      <span className="font-mono text-gray-300 font-bold">{calculateTeamTotal(1).extras}</span>
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-lg p-4 border border-green-400/30">
+                    <div className="flex justify-between items-center">
+                      <span className="text-green-100 font-bold text-lg">Team Total</span>
+                      <span className="font-mono text-green-100 font-bold text-2xl">{calculateTeamTotal(1).teamTotal}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-2xl">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-8 h-8 bg-purple-400 rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold text-purple-100">Innings 2 Total</h3>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                    <span className="text-purple-200 font-medium">Batsman Runs</span>
+                    <span className="font-mono text-white font-bold text-lg">{calculateTeamTotal(2).batsmanRuns}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                    <span className="text-orange-300 font-medium">Wides</span>
+                    <span className="font-mono text-orange-400 font-bold">{calculateTeamTotal(2).wides}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                    <span className="text-yellow-300 font-medium">No Balls</span>
+                    <span className="font-mono text-yellow-400 font-bold">{calculateTeamTotal(2).noBalls}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                    <span className="text-purple-300 font-medium">Byes</span>
+                    <span className="font-mono text-purple-400 font-bold">{calculateTeamTotal(2).byes}</span>
+                  </div>
+                  <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                    <span className="text-pink-300 font-medium">Leg Byes</span>
+                    <span className="font-mono text-pink-400 font-bold">{calculateTeamTotal(2).legByes}</span>
+                  </div>
+                  <div className="border-t border-white/20 pt-3 mt-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-300 font-medium">Extras</span>
+                      <span className="font-mono text-gray-300 font-bold">{calculateTeamTotal(2).extras}</span>
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-lg p-4 border border-green-400/30">
+                    <div className="flex justify-between items-center">
+                      <span className="text-green-100 font-bold text-lg">Team Total</span>
+                      <span className="font-mono text-green-100 font-bold text-2xl">{calculateTeamTotal(2).teamTotal}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          
+            {/* Enhanced Innings 1 Table */}
+            <div className="mb-8">
+              <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-2xl">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-400 rounded-lg flex items-center justify-center">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <h2 className="text-2xl font-bold text-blue-100">Innings 1</h2>
+                  </div>
+                  <button 
+                    onClick={() => addRowToInnings(1)} 
+                    className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-blue-500/25"
+                  >
+                    <span className="flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Add Row
+                    </span>
+                  </button>
+                </div>
+                
+                <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full text-sm">
+                      <thead className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border-b border-white/10">
+                        <tr>
+                          {HEADERS.map((h) => (
+                            <th key={h} className="px-4 py-4 text-left font-semibold text-blue-100 sticky top-0 z-10 border-r border-white/10 uppercase tracking-wide text-xs">
+                              {h}
+                            </th>
+                          ))}
+                          <th className="px-4 py-4 sticky top-0 z-10 border-r border-white/10 text-blue-100 uppercase tracking-wide text-xs font-semibold">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        {rows.filter(row => row[2] === '1' || row[2] === 1).map((row, r) => {
+                          const originalIndex = rows.indexOf(row);
+                          return (
+                            <tr key={r} className={`transition-all duration-200 hover:bg-white/10 ${r % 2 === 0 ? 'bg-white/5' : 'bg-white/2'}`}>
+                              {row.map((cell, c) => (
+                                <td key={c} className="px-4 py-3 align-top border-r border-white/5">
+                                  {renderCellContent(cell, c, originalIndex, '')}
+                                </td>
+                              ))}
+                              <td className="px-4 py-3 align-top border-r border-white/5 text-right">
+                                <button 
+                                  onClick={() => removeRow(originalIndex)} 
+                                  title="Remove row" 
+                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/20 px-2 py-1 rounded-lg transition-all duration-200"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Enhanced Innings 2 Table */}
+            <div className="mb-8">
+              <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-2xl">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-purple-400 rounded-lg flex items-center justify-center">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <h2 className="text-2xl font-bold text-purple-100">Innings 2</h2>
+                  </div>
+                  <button 
+                    onClick={() => addRowToInnings(2)} 
+                    className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-purple-500/25"
+                  >
+                    <span className="flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Add Row
+                    </span>
+                  </button>
+                </div>
+                
+                <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm">
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full text-sm">
+                      <thead className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-sm border-b border-white/10">
+                        <tr>
+                          {HEADERS.map((h) => (
+                            <th key={h} className="px-4 py-4 text-left font-semibold text-purple-100 sticky top-0 z-10 border-r border-white/10 uppercase tracking-wide text-xs">
+                              {h}
+                            </th>
+                          ))}
+                          <th className="px-4 py-4 sticky top-0 z-10 border-r border-white/10 text-purple-100 uppercase tracking-wide text-xs font-semibold">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        {rows.filter(row => row[2] === '2' || row[2] === 2).map((row, r) => {
+                          const originalIndex = rows.indexOf(row);
+                          return (
+                            <tr key={r} className={`transition-all duration-200 hover:bg-white/10 ${r % 2 === 0 ? 'bg-white/5' : 'bg-white/2'}`}>
+                              {row.map((cell, c) => (
+                                <td key={c} className="px-4 py-3 align-top border-r border-white/5">
+                                  {renderCellContent(cell, c, originalIndex, '')}
+                                </td>
+                              ))}
+                              <td className="px-4 py-3 align-top border-r border-white/5 text-right">
+                                <button 
+                                  onClick={() => removeRow(originalIndex)} 
+                                  title="Remove row" 
+                                  className="text-red-400 hover:text-red-300 hover:bg-red-500/20 px-2 py-1 rounded-lg transition-all duration-200"
+                                >
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
         </div>
       </main>
       </div>
