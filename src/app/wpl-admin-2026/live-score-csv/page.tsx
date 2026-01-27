@@ -24,7 +24,7 @@ import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 import { api as dataApi } from '@/lib/data';
 import { Match } from '@/types';
 
-const HEADERS = ['Overs','Ball','Innings','Striker','Non-Striker','Bowler','Runs','Wide','No Ball','Wicket','Notes'];
+const HEADERS = ['Overs','Ball','Innings','Striker','Non-Striker','Bowler','Runs','Wide','No Ball','Byes','LB','Wicket','Notes'];
 
 export default function LiveScoreCSVPage() {
   const [rows, setRows] = useState<string[][]>([]);
@@ -50,6 +50,10 @@ export default function LiveScoreCSVPage() {
   const [extrasData, setExtrasData] = useState<{ [rowIndex: number]: { 
     hasWide: boolean; 
     hasNoBall: boolean; 
+    hasByes: boolean;
+    hasLB: boolean;
+    byesRuns: number;
+    lbRuns: number;
   } }>({});
 
   // Common cricket wicket types
@@ -218,7 +222,7 @@ export default function LiveScoreCSVPage() {
   };
 
   // Extras handling functions
-  const updateExtrasData = (rowIndex: number, field: 'hasWide' | 'hasNoBall', value: boolean) => {
+  const updateExtrasData = (rowIndex: number, field: 'hasWide' | 'hasNoBall' | 'hasByes' | 'hasLB' | 'byesRuns' | 'lbRuns', value: boolean | number) => {
     setExtrasData(prev => ({
       ...prev,
       [rowIndex]: {
@@ -235,9 +239,22 @@ export default function LiveScoreCSVPage() {
     if (extrasData[rowIndex]?.hasNoBall || (field === 'hasNoBall' && value)) {
       extras.push('No Ball');
     }
+    if (extrasData[rowIndex]?.hasByes || (field === 'hasByes' && value)) {
+      const runs = field === 'byesRuns' ? value : (extrasData[rowIndex]?.byesRuns || 0);
+      extras.push(`Byes: ${runs}`);
+    }
+    if (extrasData[rowIndex]?.hasLB || (field === 'hasLB' && value)) {
+      const runs = field === 'lbRuns' ? value : (extrasData[rowIndex]?.lbRuns || 0);
+      extras.push(`LB: ${runs}`);
+    }
     
-    // Store extras info in the cell for data persistence
-    updateCell(rowIndex, field === 'hasWide' ? 7 : 8, extras.join(', '));
+    // Store extras info in the appropriate cell for data persistence
+    let cellIndex = 7; // Wide column
+    if (field === 'hasNoBall' || field === 'hasLB') cellIndex = 8; // No Ball column
+    if (field === 'hasByes' || field === 'byesRuns') cellIndex = 9; // Byes column
+    if (field === 'hasLB' || field === 'lbRuns') cellIndex = 10; // LB column
+    
+    updateCell(rowIndex, cellIndex, extras.filter(e => e.includes(field === 'hasWide' ? 'Wide' : field === 'hasNoBall' ? 'No Ball' : field === 'hasByes' || field === 'byesRuns' ? 'Byes' : 'LB')).join(', ') || (value ? (field.includes('has') ? field.replace('has', '') : `${field}: ${value}`) : ''));
   };
 
   const generateWicketDescription = (rowIndex: number) => {
@@ -260,17 +277,36 @@ export default function LiveScoreCSVPage() {
     
     filteredRows.forEach((row, index) => {
       const originalIndex = rows.indexOf(row);
+      const extras = extrasData[originalIndex] || {};
       
       // Add batsman's runs
       totalRuns += parseInt(row[6]) || 0;
       
-      // Add extras (Wide and No Ball each add 1 run)
-      if (extrasData[originalIndex]?.hasWide) totalExtras += 1;
-      if (extrasData[originalIndex]?.hasNoBall) totalExtras += 1;
+      // Add extras
+      if (extras.hasWide) totalExtras += 1;
+      if (extras.hasNoBall) totalExtras += 1;
+      if (extras.hasByes) totalExtras += extras.byesRuns || 0;
+      if (extras.hasLB) totalExtras += extras.lbRuns || 0;
     });
     
     return {
       batsmanRuns: totalRuns,
+      wides: (filteredRows.reduce((sum, row) => {
+        const originalIndex = rows.indexOf(row);
+        return sum + (extrasData[originalIndex]?.hasWide ? 1 : 0);
+      }, 0)),
+      noBalls: (filteredRows.reduce((sum, row) => {
+        const originalIndex = rows.indexOf(row);
+        return sum + (extrasData[originalIndex]?.hasNoBall ? 1 : 0);
+      }, 0)),
+      byes: (filteredRows.reduce((sum, row) => {
+        const originalIndex = rows.indexOf(row);
+        return sum + (extrasData[originalIndex]?.byesRuns || 0);
+      }, 0)),
+      legByes: (filteredRows.reduce((sum, row) => {
+        const originalIndex = rows.indexOf(row);
+        return sum + (extrasData[originalIndex]?.lbRuns || 0);
+      }, 0)),
       extras: totalExtras,
       teamTotal: totalRuns + totalExtras
     };
@@ -511,16 +547,24 @@ export default function LiveScoreCSVPage() {
               <h3 className="text-lg font-bold text-blue-400 mb-2">Innings 1 Total</h3>
               <div className="text-sm space-y-1">
                 <div>Batsman Runs: <span className="font-mono text-white">{calculateTeamTotal(1).batsmanRuns}</span></div>
-                <div>Extras (Wide/No Ball): <span className="font-mono text-yellow-400">{calculateTeamTotal(1).extras}</span></div>
-                <div className="text-lg font-bold text-green-400">Team Total: <span className="font-mono">{calculateTeamTotal(1).teamTotal}</span></div>
+                <div>Wides: <span className="font-mono text-orange-400">{calculateTeamTotal(1).wides}</span></div>
+                <div>No Balls: <span className="font-mono text-yellow-400">{calculateTeamTotal(1).noBalls}</span></div>
+                <div>Byes: <span className="font-mono text-purple-400">{calculateTeamTotal(1).byes}</span></div>
+                <div>Leg Byes: <span className="font-mono text-pink-400">{calculateTeamTotal(1).legByes}</span></div>
+                <div className="text-xs text-gray-500 mt-2">Extras: {calculateTeamTotal(1).extras}</div>
+                <div className="text-lg font-bold text-green-400 border-t border-gray-700 pt-2">Team Total: <span className="font-mono">{calculateTeamTotal(1).teamTotal}</span></div>
               </div>
             </div>
             <div className="bg-gray-800 p-4 rounded-lg">
               <h3 className="text-lg font-bold text-blue-400 mb-2">Innings 2 Total</h3>
               <div className="text-sm space-y-1">
                 <div>Batsman Runs: <span className="font-mono text-white">{calculateTeamTotal(2).batsmanRuns}</span></div>
-                <div>Extras (Wide/No Ball): <span className="font-mono text-yellow-400">{calculateTeamTotal(2).extras}</span></div>
-                <div className="text-lg font-bold text-green-400">Team Total: <span className="font-mono">{calculateTeamTotal(2).teamTotal}</span></div>
+                <div>Wides: <span className="font-mono text-orange-400">{calculateTeamTotal(2).wides}</span></div>
+                <div>No Balls: <span className="font-mono text-yellow-400">{calculateTeamTotal(2).noBalls}</span></div>
+                <div>Byes: <span className="font-mono text-purple-400">{calculateTeamTotal(2).byes}</span></div>
+                <div>Leg Byes: <span className="font-mono text-pink-400">{calculateTeamTotal(2).legByes}</span></div>
+                <div className="text-xs text-gray-500 mt-2">Extras: {calculateTeamTotal(2).extras}</div>
+                <div className="text-lg font-bold text-green-400 border-t border-gray-700 pt-2">Team Total: <span className="font-mono">{calculateTeamTotal(2).teamTotal}</span></div>
               </div>
             </div>
           </div>
@@ -669,6 +713,54 @@ export default function LiveScoreCSVPage() {
                               />
                             </div>
                           ) : c === 9 ? (
+                            // Byes checkbox + dropdown
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={extrasData[r]?.hasByes || false}
+                                  onChange={(e) => updateExtrasData(r, 'hasByes', e.target.checked)}
+                                  className="rounded border-gray-600 bg-gray-900 text-purple-600 focus:ring-purple-500"
+                                />
+                                <label className="text-xs text-gray-400">Byes?</label>
+                              </div>
+                              {extrasData[r]?.hasByes && (
+                                <select
+                                  value={extrasData[r]?.byesRuns || 0}
+                                  onChange={(e) => updateExtrasData(r, 'byesRuns', parseInt(e.target.value))}
+                                  className="w-full border border-gray-700 focus:border-purple-500 rounded px-1 py-1 bg-gray-900 text-gray-100 text-xs"
+                                >
+                                  {Array.from({ length: 7 }, (_, i) => (
+                                    <option key={i} value={i}>{i} run{i !== 1 ? 's' : ''}</option>
+                                  ))}
+                                </select>
+                              )}
+                            </div>
+                          ) : c === 10 ? (
+                            // LB (Leg Byes) checkbox + dropdown
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={extrasData[r]?.hasLB || false}
+                                  onChange={(e) => updateExtrasData(r, 'hasLB', e.target.checked)}
+                                  className="rounded border-gray-600 bg-gray-900 text-purple-600 focus:ring-purple-500"
+                                />
+                                <label className="text-xs text-gray-400">LB?</label>
+                              </div>
+                              {extrasData[r]?.hasLB && (
+                                <select
+                                  value={extrasData[r]?.lbRuns || 0}
+                                  onChange={(e) => updateExtrasData(r, 'lbRuns', parseInt(e.target.value))}
+                                  className="w-full border border-gray-700 focus:border-purple-500 rounded px-1 py-1 bg-gray-900 text-gray-100 text-xs"
+                                >
+                                  {Array.from({ length: 7 }, (_, i) => (
+                                    <option key={i} value={i}>{i} run{i !== 1 ? 's' : ''}</option>
+                                  ))}
+                                </select>
+                              )}
+                            </div>
+                          ) : c === 11 ? (
                             // Wicket column with checkbox, dropdown, and text input
                             <div className="space-y-2">
                               <div className="flex items-center gap-2">
