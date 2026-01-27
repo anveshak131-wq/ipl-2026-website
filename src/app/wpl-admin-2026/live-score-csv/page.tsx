@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from 'react';
+import type { SaveStatus } from './saveStatus';
 import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 
 const HEADERS = ['@Over','Ball','Innings','Striker','Non-Striker','Bowler','Runs','Extras','Wicket','Notes'];
 
 export default function LiveScoreCSVPage() {
   const [rows, setRows] = useState<string[][]>([]);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
 
   const updateCell = (rIdx: number, cIdx: number, value: string) => {
     setRows((prev) => {
@@ -33,6 +35,25 @@ export default function LiveScoreCSVPage() {
     URL.revokeObjectURL(url);
   };
 
+  const saveRows = async () => {
+    setSaveStatus('saving');
+    try {
+      const resp = await fetch('/api/wpl-live-score/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rows }),
+      });
+      if (resp.ok) {
+        setSaveStatus('success');
+        setTimeout(() => setSaveStatus('idle'), 2000);
+      } else {
+        setSaveStatus('error');
+      }
+    } catch {
+      setSaveStatus('error');
+    }
+  };
+
   return (
     <div className="min-h-screen">
       <WPLAdminSidebarNew />
@@ -42,9 +63,13 @@ export default function LiveScoreCSVPage() {
           <h1 className="text-3xl font-bold mb-4">Live Score CSV — Editable Table</h1>
           <p className="text-sm text-gray-500 mb-4">Edit rows inline for testing. Use the + button to add rows and the trash button to remove.</p>
 
+
             <div className="mb-4 flex gap-3 items-center">
               <button onClick={addRow} className="px-3 py-2 bg-purple-600 text-white rounded-md">+ Add Row</button>
               <button onClick={exportCSV} className="px-3 py-2 bg-white border border-gray-200 rounded-md text-gray-700 shadow-sm hover:bg-gray-50">Export CSV</button>
+              <button onClick={saveRows} className="px-3 py-2 bg-green-600 text-white rounded-md disabled:opacity-60" disabled={saveStatus==='saving'}>
+                {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'success' ? 'Saved!' : saveStatus === 'error' ? 'Error!' : 'Save'}
+              </button>
             </div>
 
             <div className="shadow-lg overflow-hidden rounded-lg border border-gray-300 bg-gray-900">
