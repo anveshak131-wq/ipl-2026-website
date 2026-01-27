@@ -495,6 +495,40 @@ export default function LiveScoreCSVPage() {
                                 ));
                               })()}
                             </select>
+                          ) : c === 5 ? (
+                            <select
+                              value={cell}
+                              onChange={e => updateCell(r, c, e.target.value)}
+                              className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
+                            >
+                              <option value="">Bowler</option>
+                              {(() => {
+                                // Get the bowling team (opposite of batting team)
+                                const match = matches.find(m => m.id === selectedMatch);
+                                const { team1, team2 } = getSelectedMatchTeams();
+                                const first = getBattingFirstTeam();
+                                let bowlingTeamId = '';
+                                
+                                if (row[2] === '1' || row[2] === 1) {
+                                  // Innings 1 - bowling team is opposite of first batting team
+                                  bowlingTeamId = first === team1 ? 
+                                    (match?.team2?.id || '') :
+                                    (match?.team1?.id || '');
+                                } else {
+                                  // Innings 2 - bowling team is opposite of second batting team
+                                  bowlingTeamId = first === team1 ? 
+                                    (match?.team1?.id || '') :
+                                    (match?.team2?.id || '');
+                                }
+                                
+                                // Get players for the bowling team
+                                const teamPlayers = bowlingTeamId ? getPlayersByTeam(parseInt(bowlingTeamId)) : [];
+                                
+                                return teamPlayers.map((player: any) => (
+                                  <option key={player.id} value={player.name}>{player.name}</option>
+                                ));
+                              })()}
+                            </select>
                           ) : (
                             <input
                               value={cell}
