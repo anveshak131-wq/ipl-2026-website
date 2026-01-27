@@ -13,6 +13,8 @@ export default function LiveScoreCSVPage() {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [tossInfo, setTossInfo] = useState<string>('');
   const [playing11, setPlaying11] = useState<{ [team: string]: string[] }>({});
+  // Map matches list team names to scorecard short names
+  const [teamNameMap, setTeamNameMap] = useState<{ [matchTeam: string]: string }>({});
 
   // Fetch matches list on mount
   useEffect(() => {
@@ -69,6 +71,7 @@ export default function LiveScoreCSVPage() {
             }
             // Extract playing11 for both teams, support both formats
             let p11: { [team: string]: string[] } = {};
+            let nameMap: { [matchTeam: string]: string } = {};
             if (sc.playing11 && typeof sc.playing11 === 'object') {
               // If keys are team names (MI-W, RCB-W, etc)
               const keys = Object.keys(sc.playing11);
@@ -80,6 +83,13 @@ export default function LiveScoreCSVPage() {
                 if (sc.matchInfo && sc.matchInfo.team1 && sc.matchInfo.team2) {
                   team1Short = sc.matchInfo.team1.shortName || sc.matchInfo.team1.name || 'team1';
                   team2Short = sc.matchInfo.team2.shortName || sc.matchInfo.team2.name || 'team2';
+                  // Map matches list names to scorecard short names
+                  const match = matches.find(m => m.id === selectedMatch);
+                  if (match && match.name) {
+                    const [matchTeam1, matchTeam2] = match.name.split(' vs ');
+                    if (matchTeam1 && team1Short) nameMap[matchTeam1.trim()] = team1Short;
+                    if (matchTeam2 && team2Short) nameMap[matchTeam2.trim()] = team2Short;
+                  }
                 } else {
                   // fallback to matches list
                   const match = matches.find(m => m.id === selectedMatch);
@@ -101,6 +111,7 @@ export default function LiveScoreCSVPage() {
               });
             }
             setPlaying11(p11);
+            setTeamNameMap(nameMap);
           } else {
             setTossInfo('');
             setPlaying11({});
@@ -128,9 +139,13 @@ export default function LiveScoreCSVPage() {
   const getSelectedMatchTeams = () => {
     const match = matches.find(m => m.id === selectedMatch);
     if (!match || !match.name) return { team1: '', team2: '' };
-    // match.name is like 'RCB-W vs MI-W'
     const [team1, team2] = match.name.split(' vs ');
     return { team1: team1?.trim() || '', team2: team2?.trim() || '' };
+  };
+
+  // Helper to get scorecard short name for a match team name
+  const getScorecardShortName = (matchTeam: string) => {
+    return teamNameMap[matchTeam] || matchTeam;
   };
 
   // Helper to determine which team bats first based on tossInfo
@@ -156,10 +171,10 @@ export default function LiveScoreCSVPage() {
   const getBattingTeamForInnings = (innings: string | number) => {
     const { team1, team2 } = getSelectedMatchTeams();
     const first = getBattingFirstTeam();
-    if (innings === '1' || innings === 1) return first;
+    if (innings === '1' || innings === 1) return getScorecardShortName(first);
     if (innings === '2' || innings === 2) {
-      if (first === team1) return team2;
-      if (first === team2) return team1;
+      if (first === team1) return getScorecardShortName(team2);
+      if (first === team2) return getScorecardShortName(team1);
     }
     return '';
   };
