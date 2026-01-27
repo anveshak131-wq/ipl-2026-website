@@ -37,7 +37,7 @@ export default function LiveScoreCSVPage() {
               <thead className="bg-gray-50">
                 <tr>
                   {HEADERS.map((h) => (
-                    <th key={h} className="px-3 py-2 text-left font-medium">{h}</th>
+                    <th key={h} className="px-3 py-2 text-left font-medium text-gray-700">{h}</th>
                   ))}
                   <th className="px-3 py-2">Actions</th>
                 </tr>
@@ -50,7 +50,7 @@ export default function LiveScoreCSVPage() {
                         <input
                           value={cell}
                           onChange={(e) => updateCell(r, c, e.target.value)}
-                          className="w-full bg-transparent focus:outline-none"
+                          className="w-full bg-transparent focus:outline-none text-gray-800 placeholder-gray-400"
                         />
                       </td>
                     ))}
