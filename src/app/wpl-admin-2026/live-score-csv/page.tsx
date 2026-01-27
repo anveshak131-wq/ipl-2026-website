@@ -38,6 +38,28 @@ export default function LiveScoreCSVPage() {
   // Map team short name to teamId
   const [teamIdMap, setTeamIdMap] = useState<{ [shortName: string]: string }>({});
   const [allPlayers, setAllPlayers] = useState<any[]>([]);
+  
+  // Wicket data state
+  const [wicketData, setWicketData] = useState<{ [rowIndex: number]: { 
+    hasWicket: boolean; 
+    wicketType: string; 
+    wicketTaker: string; 
+  } }>({});
+
+  // Common cricket wicket types
+  const WICKET_TYPES = [
+    'Caught',
+    'Bowled', 
+    'LBW',
+    'Run Out',
+    'Stumped',
+    'Caught and Bowled',
+    'Hit Wicket',
+    'Obstructing the Field',
+    'Handled the Ball',
+    'Timed Out',
+    'Mankading (Run out at non-striker end)'
+  ];
 
   // Fetch matches list on mount
   useEffect(() => {
@@ -176,6 +198,28 @@ export default function LiveScoreCSVPage() {
       copy[rIdx][cIdx] = value;
       return copy;
     });
+  };
+
+  // Wicket handling functions
+  const updateWicketData = (rowIndex: number, field: 'hasWicket' | 'wicketType' | 'wicketTaker', value: boolean | string) => {
+    setWicketData(prev => ({
+      ...prev,
+      [rowIndex]: {
+        ...prev[rowIndex],
+        [field]: value
+      }
+    }));
+  };
+
+  const generateWicketDescription = (rowIndex: number) => {
+    const data = wicketData[rowIndex];
+    if (!data || !data.hasWicket) return '';
+    
+    let description = data.wicketType || '';
+    if (data.wicketTaker) {
+      description += ` - ${data.wicketTaker}`;
+    }
+    return description;
   };
 
   // Helper to get team short names from matches list for selected match
@@ -530,6 +574,53 @@ export default function LiveScoreCSVPage() {
                                 ));
                               })()}
                             </select>
+                          ) : c === 8 ? (
+                            // Wicket column with checkbox, dropdown, and text input
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={wicketData[r]?.hasWicket || false}
+                                  onChange={(e) => updateWicketData(r, 'hasWicket', e.target.checked)}
+                                  className="rounded border-gray-600 bg-gray-900 text-purple-600 focus:ring-purple-500"
+                                />
+                                <label className="text-xs text-gray-400">Wicket?</label>
+                              </div>
+                              
+                              {wicketData[r]?.hasWicket && (
+                                <>
+                                  <select
+                                    value={wicketData[r]?.wicketType || ''}
+                                    onChange={(e) => updateWicketData(r, 'wicketType', e.target.value)}
+                                    className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100 text-sm"
+                                  >
+                                    <option value="">Select type...</option>
+                                    {WICKET_TYPES.map(type => (
+                                      <option key={type} value={type}>{type}</option>
+                                    ))}
+                                  </select>
+                                  
+                                  {wicketData[r]?.wicketType && wicketData[r]?.wicketType !== 'Bowled' && wicketData[r]?.wicketType !== 'LBW' && wicketData[r]?.wicketType !== 'Hit Wicket' && (
+                                    <input
+                                      type="text"
+                                      value={wicketData[r]?.wicketTaker || ''}
+                                      onChange={(e) => updateWicketData(r, 'wicketTaker', e.target.value)}
+                                      placeholder="Who took wicket?"
+                                      className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100 text-sm placeholder-gray-400"
+                                    />
+                                  )}
+                                  
+                                  {/* Update the cell value with the wicket description */}
+                                  {(() => {
+                                    const description = generateWicketDescription(r);
+                                    if (description !== cell) {
+                                      updateCell(r, c, description);
+                                    }
+                                    return null;
+                                  })()}
+                                </>
+                              )}
+                            </div>
                           ) : (
                             <input
                               value={cell}
