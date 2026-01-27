@@ -286,7 +286,6 @@ export default function LiveScoreCSVPage() {
     }
   };
 
-  // ...existing code...
   return (
     <div className="min-h-screen">
       <WPLAdminSidebarNew />
