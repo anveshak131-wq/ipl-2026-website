@@ -389,7 +389,7 @@ export default function LiveScoreCSVPage() {
                               className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
                             >
                               <option value="">{c === 3 ? 'Striker' : 'Non-Striker'}</option>
-                              {(HARDCODED_PLAYERS[normalizeTeamKey(battingTeam)] || []).map((p: string) => (
+                              {(playing11[battingTeam] || []).map((p: string) => (
                                 <option key={p} value={p}>{p}</option>
                               ))}
                             </select>
