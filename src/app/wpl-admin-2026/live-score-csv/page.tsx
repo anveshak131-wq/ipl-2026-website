@@ -75,13 +75,22 @@ export default function LiveScoreCSVPage() {
               if (keys.some(k => Array.isArray(sc.playing11[k]))) {
                 p11 = { ...sc.playing11 };
               } else if (sc.playing11.team1 && sc.playing11.team2) {
-                // If keys are team1/team2, map to actual team names
-                const match = matches.find(m => m.id === selectedMatch);
-                if (match && match.name) {
-                  const [team1, team2] = match.name.split(' vs ');
-                  if (team1 && Array.isArray(sc.playing11.team1)) p11[team1.trim()] = sc.playing11.team1;
-                  if (team2 && Array.isArray(sc.playing11.team2)) p11[team2.trim()] = sc.playing11.team2;
+                // Map to short names from scorecard's matchInfo if available
+                let team1Short = '', team2Short = '';
+                if (sc.matchInfo && sc.matchInfo.team1 && sc.matchInfo.team2) {
+                  team1Short = sc.matchInfo.team1.shortName || sc.matchInfo.team1.name || 'team1';
+                  team2Short = sc.matchInfo.team2.shortName || sc.matchInfo.team2.name || 'team2';
+                } else {
+                  // fallback to matches list
+                  const match = matches.find(m => m.id === selectedMatch);
+                  if (match && match.name) {
+                    const [team1, team2] = match.name.split(' vs ');
+                    team1Short = team1?.trim() || 'team1';
+                    team2Short = team2?.trim() || 'team2';
+                  }
                 }
+                if (team1Short && Array.isArray(sc.playing11.team1)) p11[team1Short] = sc.playing11.team1;
+                if (team2Short && Array.isArray(sc.playing11.team2)) p11[team2Short] = sc.playing11.team2;
               }
             } else if (Array.isArray(sc.innings)) {
               // Try to extract from innings
