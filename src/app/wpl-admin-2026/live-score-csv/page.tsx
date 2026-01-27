@@ -67,11 +67,22 @@ export default function LiveScoreCSVPage() {
             } else {
               setTossInfo(toss || '');
             }
-            // Extract playing11 for both teams
+            // Extract playing11 for both teams, support both formats
             let p11: { [team: string]: string[] } = {};
             if (sc.playing11 && typeof sc.playing11 === 'object') {
-              // { 'MI-W': [...], 'RCB-W': [...] }
-              p11 = { ...sc.playing11 };
+              // If keys are team names (MI-W, RCB-W, etc)
+              const keys = Object.keys(sc.playing11);
+              if (keys.some(k => Array.isArray(sc.playing11[k]))) {
+                p11 = { ...sc.playing11 };
+              } else if (sc.playing11.team1 && sc.playing11.team2) {
+                // If keys are team1/team2, map to actual team names
+                const match = matches.find(m => m.id === selectedMatch);
+                if (match && match.name) {
+                  const [team1, team2] = match.name.split(' vs ');
+                  if (team1 && Array.isArray(sc.playing11.team1)) p11[team1.trim()] = sc.playing11.team1;
+                  if (team2 && Array.isArray(sc.playing11.team2)) p11[team2.trim()] = sc.playing11.team2;
+                }
+              }
             } else if (Array.isArray(sc.innings)) {
               // Try to extract from innings
               sc.innings.forEach((inn: any) => {
