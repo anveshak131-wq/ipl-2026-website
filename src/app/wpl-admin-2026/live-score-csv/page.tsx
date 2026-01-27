@@ -83,8 +83,9 @@ export default function LiveScoreCSVPage() {
             else if (sc.matchInfo && sc.matchInfo.tossWinner) toss = sc.matchInfo.tossWinner;
             // If toss is an object, format as string
             if (toss && typeof toss === 'object') {
-              const winner = toss.winner || toss.team || '';
-              const decision = toss.decision || '';
+              const tossObj = toss as any;
+              const winner = tossObj.winner || tossObj.team || '';
+              const decision = tossObj.decision || '';
               setTossInfo(`Winner: ${winner}${decision ? '; Decision: ' + decision : ''}`);
             } else {
               setTossInfo(toss || '');
@@ -92,6 +93,7 @@ export default function LiveScoreCSVPage() {
             // Extract playing11 for both teams, support both formats
             let p11: { [team: string]: string[] } = {};
             let nameMap: { [matchTeam: string]: string } = {};
+            let idMap: { [shortName: string]: string } = {};
             if (sc.playing11 && typeof sc.playing11 === 'object') {
               // If keys are team names (MI-W, RCB-W, etc)
               const keys = Object.keys(sc.playing11);
@@ -100,7 +102,6 @@ export default function LiveScoreCSVPage() {
               } else if (sc.playing11.team1 && sc.playing11.team2) {
                 // Map to short names from scorecard's matchInfo if available
                 let team1Short = '', team2Short = '';
-                let idMap: { [shortName: string]: string } = {};
                 if (sc.matchInfo && sc.matchInfo.team1 && sc.matchInfo.team2) {
                   team1Short = sc.matchInfo.team1.shortName || sc.matchInfo.team1.name || 'team1';
                   team2Short = sc.matchInfo.team2.shortName || sc.matchInfo.team2.name || 'team2';
@@ -286,6 +287,15 @@ export default function LiveScoreCSVPage() {
     }
   };
 
+  // Normalize team key for hardcoded player lookup
+  const normalizeTeamKey = (team: string) => {
+    if (!team) return '';
+    if (team === 'MI-W') return 'MI';
+    if (team === 'RCB-W') return 'RCB';
+    // Add more mappings as needed
+    return team;
+  };
+
   return (
     <div className="min-h-screen">
       <WPLAdminSidebarNew />
@@ -382,14 +392,6 @@ export default function LiveScoreCSVPage() {
                               {(HARDCODED_PLAYERS[normalizeTeamKey(battingTeam)] || []).map((p: string) => (
                                 <option key={p} value={p}>{p}</option>
                               ))}
-                            // Normalize team key for hardcoded player lookup
-                            function normalizeTeamKey(team: string) {
-                              if (!team) return '';
-                              if (team === 'MI-W') return 'MI';
-                              if (team === 'RCB-W') return 'RCB';
-                              // Add more mappings as needed
-                              return team;
-                            }
                             </select>
                           ) : (
                             <input
