@@ -47,30 +47,31 @@ export default function LiveScoreCSVPage() {
               <button onClick={exportCSV} className="px-3 py-2 bg-white border border-gray-200 rounded-md text-gray-700 shadow-sm hover:bg-gray-50">Export CSV</button>
             </div>
 
-            <div className="shadow-sm overflow-hidden rounded-lg border border-gray-200">
-              <table className="min-w-full text-sm table-fixed">
-                <thead className="bg-gray-50">
+            <div className="shadow-lg overflow-hidden rounded-lg border border-gray-300 bg-gray-900">
+              <table className="min-w-full text-sm table-fixed bg-gray-900">
+                <thead className="bg-gray-800">
                   <tr>
                     {HEADERS.map((h) => (
-                      <th key={h} className="px-3 py-3 text-left font-medium text-gray-700 sticky top-0 z-10 border-b border-gray-200">{h}</th>
+                      <th key={h} className="px-3 py-3 text-left font-semibold text-gray-100 sticky top-0 z-10 border-b border-gray-700 uppercase tracking-wide bg-gray-800">{h}</th>
                     ))}
-                    <th className="px-3 py-3 sticky top-0 z-10 border-b border-gray-200">Actions</th>
+                    <th className="px-3 py-3 sticky top-0 z-10 border-b border-gray-700 bg-gray-800 text-gray-100">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {rows.map((row, r) => (
-                    <tr key={r} className={`transition-colors ${r % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-gray-100`}>
+                    <tr key={r} className={`transition-colors ${r % 2 === 0 ? 'bg-gray-900' : 'bg-gray-800'} hover:bg-gray-700`}>
                       {row.map((cell, c) => (
-                        <td key={c} className="px-3 py-2 align-top border-b border-gray-100">
+                        <td key={c} className="px-3 py-2 align-top border-b border-gray-800">
                           <input
                             value={cell}
                             onChange={(e) => updateCell(r, c, e.target.value)}
-                            className="w-full border border-transparent focus:border-gray-300 rounded px-2 py-1 bg-white text-gray-900 placeholder-gray-400"
+                            placeholder={HEADERS[c]}
+                            className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100 placeholder-gray-400"
                           />
                         </td>
                       ))}
-                      <td className="px-3 py-2 align-top border-b border-gray-100 text-right">
-                        <button onClick={() => removeRow(r)} title="Remove row" className="text-red-600 hover:text-red-800">Remove</button>
+                      <td className="px-3 py-2 align-top border-b border-gray-800 text-right">
+                        <button onClick={() => removeRow(r)} title="Remove row" className="text-red-400 hover:text-red-200">Remove</button>
                       </td>
                     </tr>
                   ))}
