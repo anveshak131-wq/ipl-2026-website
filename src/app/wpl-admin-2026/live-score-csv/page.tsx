@@ -54,6 +54,8 @@ export default function LiveScoreCSVPage() {
     hasLB: boolean;
     byesRuns: number;
     lbRuns: number;
+    wideRuns: number; // Additional runs from wide (boundary or batsmen running)
+    noBallRuns: number; // Additional runs from no ball (batsmen hitting)
   } }>({});
 
   // Common cricket wicket types
@@ -222,7 +224,7 @@ export default function LiveScoreCSVPage() {
   };
 
   // Extras handling functions
-  const updateExtrasData = (rowIndex: number, field: 'hasWide' | 'hasNoBall' | 'hasByes' | 'hasLB' | 'byesRuns' | 'lbRuns', value: boolean | number) => {
+  const updateExtrasData = (rowIndex: number, field: 'hasWide' | 'hasNoBall' | 'hasByes' | 'hasLB' | 'byesRuns' | 'lbRuns' | 'wideRuns' | 'noBallRuns', value: boolean | number) => {
     setExtrasData(prev => ({
       ...prev,
       [rowIndex]: {
@@ -234,10 +236,20 @@ export default function LiveScoreCSVPage() {
     // Update the cell value to reflect the extras (for CSV export)
     const extras = [];
     if (extrasData[rowIndex]?.hasWide || (field === 'hasWide' && value)) {
-      extras.push('Wide');
+      const runs = field === 'wideRuns' ? (value as number) : (extrasData[rowIndex]?.wideRuns || 0);
+      if (runs > 0) {
+        extras.push(`Wide: ${runs + 1}`); // +1 for the wide penalty
+      } else {
+        extras.push('Wide: 1');
+      }
     }
     if (extrasData[rowIndex]?.hasNoBall || (field === 'hasNoBall' && value)) {
-      extras.push('No Ball');
+      const runs = field === 'noBallRuns' ? (value as number) : (extrasData[rowIndex]?.noBallRuns || 0);
+      if (runs > 0) {
+        extras.push(`No Ball: ${runs + 1}`); // +1 for the no ball penalty
+      } else {
+        extras.push('No Ball: 1');
+      }
     }
     if (extrasData[rowIndex]?.hasByes || (field === 'hasByes' && value)) {
       const runs = field === 'byesRuns' ? value : (extrasData[rowIndex]?.byesRuns || 0);
@@ -250,11 +262,18 @@ export default function LiveScoreCSVPage() {
     
     // Store extras info in the appropriate cell for data persistence
     let cellIndex = 7; // Wide column
-    if (field === 'hasNoBall' || field === 'hasLB') cellIndex = 8; // No Ball column
+    if (field === 'hasNoBall' || field === 'noBallRuns') cellIndex = 8; // No Ball column
     if (field === 'hasByes' || field === 'byesRuns') cellIndex = 9; // Byes column
     if (field === 'hasLB' || field === 'lbRuns') cellIndex = 10; // LB column
     
-    updateCell(rowIndex, cellIndex, extras.filter(e => e.includes(field === 'hasWide' ? 'Wide' : field === 'hasNoBall' ? 'No Ball' : field === 'hasByes' || field === 'byesRuns' ? 'Byes' : 'LB')).join(', ') || (value ? (field.includes('has') ? field.replace('has', '') : `${field}: ${value}`) : ''));
+    const relevantExtras = extras.filter(e => 
+      (field === 'hasWide' || field === 'wideRuns') && e.includes('Wide') ||
+      (field === 'hasNoBall' || field === 'noBallRuns') && e.includes('No Ball') ||
+      (field === 'hasByes' || field === 'byesRuns') && e.includes('Byes') ||
+      (field === 'hasLB' || field === 'lbRuns') && e.includes('LB')
+    );
+    
+    updateCell(rowIndex, cellIndex, relevantExtras.join(', ') || (value ? (field.includes('has') ? field.replace('has', '') : `${field}: ${value}`) : ''));
   };
 
   const generateWicketDescription = (rowIndex: number) => {
@@ -283,8 +302,8 @@ export default function LiveScoreCSVPage() {
       totalRuns += parseInt(row[6]) || 0;
       
       // Add extras
-      if (extras.hasWide) totalExtras += 1;
-      if (extras.hasNoBall) totalExtras += 1;
+      if (extras.hasWide) totalExtras += 1 + (extras.wideRuns || 0); // 1 penalty + additional runs
+      if (extras.hasNoBall) totalExtras += 1 + (extras.noBallRuns || 0); // 1 penalty + additional runs
       if (extras.hasByes) totalExtras += extras.byesRuns || 0;
       if (extras.hasLB) totalExtras += extras.lbRuns || 0;
     });
@@ -693,24 +712,57 @@ export default function LiveScoreCSVPage() {
                               })()}
                             </select>
                           ) : c === 7 ? (
-                            // Wide checkbox
-                            <div className="flex items-center justify-center h-full">
-                              <input
-                                type="checkbox"
-                                checked={extrasData[r]?.hasWide || false}
-                                onChange={(e) => updateExtrasData(r, 'hasWide', e.target.checked)}
-                                className="rounded border-gray-600 bg-gray-900 text-purple-600 focus:ring-purple-500"
-                              />
+                            // Wide checkbox + dropdown for additional runs
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={extrasData[r]?.hasWide || false}
+                                  onChange={(e) => updateExtrasData(r, 'hasWide', e.target.checked)}
+                                  className="rounded border-gray-600 bg-gray-900 text-purple-600 focus:ring-purple-500"
+                                />
+                                <label className="text-xs text-gray-400">Wide?</label>
+                              </div>
+                              {extrasData[r]?.hasWide && (
+                                <select
+                                  value={extrasData[r]?.wideRuns || 0}
+                                  onChange={(e) => updateExtrasData(r, 'wideRuns', parseInt(e.target.value))}
+                                  className="w-full border border-gray-700 focus:border-purple-500 rounded px-1 py-1 bg-gray-900 text-gray-100 text-xs"
+                                >
+                                  <option value={0}>Wide only (1 run)</option>
+                                  <option value={1}>+1 run (2 total)</option>
+                                  <option value={2}>+2 runs (3 total)</option>
+                                  <option value={3}>+3 runs (4 total)</option>
+                                  <option value={4}>Boundary 4 (5 total)</option>
+                                </select>
+                              )}
                             </div>
                           ) : c === 8 ? (
-                            // No Ball checkbox
-                            <div className="flex items-center justify-center h-full">
-                              <input
-                                type="checkbox"
-                                checked={extrasData[r]?.hasNoBall || false}
-                                onChange={(e) => updateExtrasData(r, 'hasNoBall', e.target.checked)}
-                                className="rounded border-gray-600 bg-gray-900 text-purple-600 focus:ring-purple-500"
-                              />
+                            // No Ball checkbox + dropdown for additional runs
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={extrasData[r]?.hasNoBall || false}
+                                  onChange={(e) => updateExtrasData(r, 'hasNoBall', e.target.checked)}
+                                  className="rounded border-gray-600 bg-gray-900 text-purple-600 focus:ring-purple-500"
+                                />
+                                <label className="text-xs text-gray-400">No Ball?</label>
+                              </div>
+                              {extrasData[r]?.hasNoBall && (
+                                <select
+                                  value={extrasData[r]?.noBallRuns || 0}
+                                  onChange={(e) => updateExtrasData(r, 'noBallRuns', parseInt(e.target.value))}
+                                  className="w-full border border-gray-700 focus:border-purple-500 rounded px-1 py-1 bg-gray-900 text-gray-100 text-xs"
+                                >
+                                  <option value={0}>No Ball only (1 run)</option>
+                                  <option value={1}>+1 run (2 total)</option>
+                                  <option value={2}>+2 runs (3 total)</option>
+                                  <option value={3}>+3 runs (4 total)</option>
+                                  <option value={4}>+4 runs (5 total)</option>
+                                  <option value={6}>+6 runs (7 total)</option>
+                                </select>
+                              )}
                             </div>
                           ) : c === 9 ? (
                             // Byes checkbox + dropdown
