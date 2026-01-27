@@ -227,15 +227,17 @@ export default function LiveScoreCSVPage() {
       }
     }));
 
-    // Automatically add 1 run to the Runs column when Wide or No Ball is checked
-    if (value) {
-      const currentRuns = parseInt(rows[rowIndex][6]) || 0;
-      updateCell(rowIndex, 6, String(currentRuns + 1));
-    } else {
-      // Subtract 1 run when unchecked (but don't go below 0)
-      const currentRuns = parseInt(rows[rowIndex][6]) || 0;
-      updateCell(rowIndex, 6, String(Math.max(0, currentRuns - 1)));
+    // Update the cell value to reflect the extras (for CSV export)
+    const extras = [];
+    if (extrasData[rowIndex]?.hasWide || (field === 'hasWide' && value)) {
+      extras.push('Wide');
     }
+    if (extrasData[rowIndex]?.hasNoBall || (field === 'hasNoBall' && value)) {
+      extras.push('No Ball');
+    }
+    
+    // Store extras info in the cell for data persistence
+    updateCell(rowIndex, field === 'hasWide' ? 7 : 8, extras.join(', '));
   };
 
   const generateWicketDescription = (rowIndex: number) => {
@@ -247,6 +249,31 @@ export default function LiveScoreCSVPage() {
       description += ` - ${data.wicketTaker}`;
     }
     return description;
+  };
+
+  // Calculate team total for a specific innings
+  const calculateTeamTotal = (innings: string | number) => {
+    const filteredRows = rows.filter(row => row[2] === String(innings));
+    
+    let totalRuns = 0;
+    let totalExtras = 0;
+    
+    filteredRows.forEach((row, index) => {
+      const originalIndex = rows.indexOf(row);
+      
+      // Add batsman's runs
+      totalRuns += parseInt(row[6]) || 0;
+      
+      // Add extras (Wide and No Ball each add 1 run)
+      if (extrasData[originalIndex]?.hasWide) totalExtras += 1;
+      if (extrasData[originalIndex]?.hasNoBall) totalExtras += 1;
+    });
+    
+    return {
+      batsmanRuns: totalRuns,
+      extras: totalExtras,
+      teamTotal: totalRuns + totalExtras
+    };
   };
 
   // Helper to get team short names from matches list for selected match
@@ -477,6 +504,27 @@ export default function LiveScoreCSVPage() {
               {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'success' ? 'Saved!' : saveStatus === 'error' ? 'Error!' : 'Save'}
             </button>
           </div>
+          
+          {/* Team Totals Display */}
+          <div className="mb-6 grid grid-cols-2 gap-4">
+            <div className="bg-gray-800 p-4 rounded-lg">
+              <h3 className="text-lg font-bold text-blue-400 mb-2">Innings 1 Total</h3>
+              <div className="text-sm space-y-1">
+                <div>Batsman Runs: <span className="font-mono text-white">{calculateTeamTotal(1).batsmanRuns}</span></div>
+                <div>Extras (Wide/No Ball): <span className="font-mono text-yellow-400">{calculateTeamTotal(1).extras}</span></div>
+                <div className="text-lg font-bold text-green-400">Team Total: <span className="font-mono">{calculateTeamTotal(1).teamTotal}</span></div>
+              </div>
+            </div>
+            <div className="bg-gray-800 p-4 rounded-lg">
+              <h3 className="text-lg font-bold text-blue-400 mb-2">Innings 2 Total</h3>
+              <div className="text-sm space-y-1">
+                <div>Batsman Runs: <span className="font-mono text-white">{calculateTeamTotal(2).batsmanRuns}</span></div>
+                <div>Extras (Wide/No Ball): <span className="font-mono text-yellow-400">{calculateTeamTotal(2).extras}</span></div>
+                <div className="text-lg font-bold text-green-400">Team Total: <span className="font-mono">{calculateTeamTotal(2).teamTotal}</span></div>
+              </div>
+            </div>
+          </div>
+          
           <div className="shadow-lg overflow-hidden rounded-lg border border-gray-300 bg-gray-900">
             <table className="min-w-full text-sm table-fixed bg-gray-900">
               <thead className="bg-gray-800">
