@@ -87,7 +87,52 @@ export default function LiveScoreCSVPage() {
     });
   };
 
-  const addRow = () => setRows((p) => [...p, Array(HEADERS.length).fill('')]);
+  // Helper to get team short names from matches list for selected match
+  const getSelectedMatchTeams = () => {
+    const match = matches.find(m => m.id === selectedMatch);
+    if (!match || !match.name) return { team1: '', team2: '' };
+    // match.name is like 'RCB-W vs MI-W'
+    const [team1, team2] = match.name.split(' vs ');
+    return { team1: team1?.trim() || '', team2: team2?.trim() || '' };
+  };
+
+  // Helper to determine which team bats first based on tossInfo
+  const getBattingFirstTeam = () => {
+    const { team1, team2 } = getSelectedMatchTeams();
+    if (!tossInfo) return '';
+    // Toss: Winner: RCB-W; Decision: bowl
+    const winnerMatch = tossInfo.match(/Winner: ([^;]+)/);
+    const decisionMatch = tossInfo.match(/Decision: ([^;]+)/);
+    const winner = winnerMatch ? winnerMatch[1].trim() : '';
+    const decision = decisionMatch ? decisionMatch[1].trim().toLowerCase() : '';
+    if (!winner || !decision) return '';
+    // If winner chooses bowl, the other team bats first
+    if (decision === 'bowl') {
+      if (winner === team1) return team2;
+      if (winner === team2) return team1;
+    }
+    // If winner chooses bat, they bat first
+    if (decision === 'bat') {
+      return winner;
+    }
+    return '';
+  };
+
+  const addRow = () => {
+    // Prefill for first innings, first over, first ball
+    const battingFirst = getBattingFirstTeam();
+    let newRow = Array(HEADERS.length).fill('');
+    // If table is empty or user is adding the first row for innings 1, over 0, ball 0
+    if (rows.length === 0 || (rows[0][0] === '0' && rows[0][1] === '0' && rows[0][2] === '1')) {
+      // Prefill Innings=1, Overs=0, Ball=0, Striker/Non-Striker with battingFirst
+      newRow[0] = '0'; // Overs
+      newRow[1] = '0'; // Ball
+      newRow[2] = '1'; // Innings
+      newRow[3] = battingFirst; // Striker
+      newRow[4] = battingFirst; // Non-Striker
+    }
+    setRows((p) => [...p, newRow]);
+  };
   const removeRow = async (idx: number) => {
     setRows((prev) => {
       const updated = prev.filter((_, i) => i !== idx);
