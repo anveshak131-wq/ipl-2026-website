@@ -6,9 +6,11 @@ import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 
 const HEADERS = ['Overs','Ball','Innings','Striker','Non-Striker','Bowler','Runs','Extras','Wicket','Notes'];
 
+export default function LiveScoreCSVPage() {
   const [rows, setRows] = useState<string[][]>([]);
   const [matches, setMatches] = useState<{ id: string, name: string }[]>([]);
   const [selectedMatch, setSelectedMatch] = useState<string>('');
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
 
   // Fetch matches list on mount
   useEffect(() => {
@@ -45,7 +47,6 @@ const HEADERS = ['Overs','Ball','Innings','Striker','Non-Striker','Bowler','Runs
       } catch {}
     })();
   }, [selectedMatch]);
-  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
 
   const updateCell = (rIdx: number, cIdx: number, value: string) => {
     setRows((prev) => {
@@ -80,6 +81,7 @@ const HEADERS = ['Overs','Ball','Innings','Striker','Non-Striker','Bowler','Runs
       return updated;
     });
   };
+
   const exportCSV = () => {
     const headerLine = HEADERS.join(',');
     const body = rows
