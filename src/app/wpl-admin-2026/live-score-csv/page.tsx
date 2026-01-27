@@ -6,35 +6,45 @@ import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 
 const HEADERS = ['Overs','Ball','Innings','Striker','Non-Striker','Bowler','Runs','Extras','Wicket','Notes'];
 
-export default function LiveScoreCSVPage() {
   const [rows, setRows] = useState<string[][]>([]);
-  // Load saved rows from KV on mount
+  const [matches, setMatches] = useState<{ id: string, name: string }[]>([]);
+  const [selectedMatch, setSelectedMatch] = useState<string>('');
+
+  // Fetch matches list on mount
   useEffect(() => {
     (async () => {
       try {
-        const resp = await fetch('/api/wpl-live-score/save');
+        const resp = await fetch('/api/wpl-live-score/matches');
         if (resp.ok) {
           const data = await resp.json();
-          // Accept both {rows: [...]} and [...] (raw array)
+          if (Array.isArray(data)) {
+            setMatches(data);
+            if (data.length > 0) setSelectedMatch(data[0].id);
+          }
+        }
+      } catch {}
+    })();
+  }, []);
+
+  // Load table data for selected match
+  useEffect(() => {
+    if (!selectedMatch) return;
+    (async () => {
+      try {
+        const resp = await fetch(`/api/wpl-live-score/save?matchId=${encodeURIComponent(selectedMatch)}`);
+        if (resp.ok) {
+          const data = await resp.json();
           if (Array.isArray(data.rows)) {
             setRows(data.rows);
           } else if (Array.isArray(data)) {
             setRows(data);
           } else {
-            // For debugging: log unexpected data
-            // eslint-disable-next-line no-console
             console.log('Unexpected data from KV:', data);
           }
-        } else {
-          // eslint-disable-next-line no-console
-          console.log('Failed to fetch saved rows:', resp.status);
         }
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.log('Error loading saved rows:', e);
-      }
+      } catch {}
     })();
-  }, []);
+  }, [selectedMatch]);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
 
   const updateCell = (rIdx: number, cIdx: number, value: string) => {
@@ -49,11 +59,10 @@ export default function LiveScoreCSVPage() {
   const removeRow = async (idx: number) => {
     setRows((prev) => {
       const updated = prev.filter((_, i) => i !== idx);
-      // Save immediately after removing
       (async () => {
         setSaveStatus('saving');
         try {
-          const resp = await fetch('/api/wpl-live-score/save', {
+          const resp = await fetch(`/api/wpl-live-score/save?matchId=${encodeURIComponent(selectedMatch)}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ rows: updated }),
@@ -89,7 +98,7 @@ export default function LiveScoreCSVPage() {
   const saveRows = async () => {
     setSaveStatus('saving');
     try {
-      const resp = await fetch('/api/wpl-live-score/save', {
+      const resp = await fetch(`/api/wpl-live-score/save?matchId=${encodeURIComponent(selectedMatch)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ rows }),
@@ -111,6 +120,19 @@ export default function LiveScoreCSVPage() {
       <main className="p-8 lg:ml-64">
         <div className="max-w-6xl">
           <h1 className="text-3xl font-bold mb-4">Live Score CSV — Editable Table</h1>
+          <div className="mb-6">
+            <label className="block text-gray-200 font-semibold mb-2">Matches:</label>
+            <select
+              className="w-full max-w-xs border border-gray-700 rounded px-2 py-2 bg-gray-900 text-gray-100"
+              value={selectedMatch}
+              onChange={e => setSelectedMatch(e.target.value)}
+              disabled={matches.length === 0}
+            >
+              {matches.map(m => (
+                <option key={m.id} value={m.id}>{m.name}</option>
+              ))}
+            </select>
+          </div>
           <p className="text-sm text-gray-500 mb-4">Edit rows inline for testing. Use the + button to add rows and the trash button to remove.</p>
           <div className="mb-4 flex gap-3 items-center">
             <button onClick={addRow} className="px-3 py-2 bg-purple-600 text-white rounded-md">+ Add Row</button>
