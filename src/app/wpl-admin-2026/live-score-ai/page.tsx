@@ -1,3 +1,90 @@
+"use client";
+
+import { useState } from 'react';
+import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
+
+export default function WPLLiveScoreAdminPage() {
+  const [preview, setPreview] = useState<string[][]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleFile = (file?: File) => {
+    setError(null);
+    setPreview([]);
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = String(e.target?.result || '');
+      try {
+        const rows = text
+          .trim()
+          .split(/\r?\n/)
+          .map((r) => r.split(','));
+        setPreview(rows.slice(0, 50));
+      } catch (err) {
+        setError('Failed to parse CSV');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  return (
+    <div className="min-h-screen">
+      <WPLAdminSidebarNew />
+
+      <main className="p-8 lg:ml-64">
+        <div className="max-w-6xl">
+          <h1 className="text-4xl font-bold mb-2">WPL Live Score — CSV Upload</h1>
+          <p className="text-sm text-gray-500 mb-6">Download the template, edit in Excel, then upload to preview.</p>
+
+          <div className="space-y-4 mb-6">
+            <a
+              href="/wpl-admin/live_score_template.csv"
+              className="inline-block px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+              download
+            >
+              Download CSV Template
+            </a>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Upload CSV</label>
+              <input
+                type="file"
+                accept=".csv,text/csv"
+                onChange={(e) => handleFile(e.target.files?.[0])}
+                className="mt-2"
+              />
+            </div>
+          </div>
+
+          {error && <div className="text-red-600">{error}</div>}
+
+          {preview.length > 0 && (
+            <div className="overflow-auto border rounded-md">
+              <table className="min-w-full text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    {preview[0].map((h, i) => (
+                      <th key={i} className="px-3 py-2 text-left font-medium">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {preview.slice(1).map((row, r) => (
+                    <tr key={r} className={r % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                      {row.map((cell, c) => (
+                        <td key={c} className="px-3 py-2 align-top">{cell}</td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}
 'use client';
 
 import { useEffect, useState } from 'react';
