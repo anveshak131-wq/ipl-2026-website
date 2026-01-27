@@ -18,6 +18,7 @@ const menuItems = [
   { href: '/wpl-admin-2026/stories', label: 'Stories', icon: FileText },
   { href: '/wpl-admin-2026/predictions', label: 'Predictions', icon: Target },
   { href: '/wpl-admin-2026/live-score-ai', label: 'Live Score', icon: Activity },
+  { href: '/wpl-admin-2026/live-score-csv', label: 'Live Score CSV', icon: FileText },
   { href: '/wpl-admin-2026/playing-11', label: 'Playing 11', icon: Users },
   { href: '/wpl-admin-2026/points-table', label: 'Points Table', icon: BarChart3 },
   { href: '/wpl-admin-2026/batting-stats', label: 'Batting Stats', icon: TrendingUp },
