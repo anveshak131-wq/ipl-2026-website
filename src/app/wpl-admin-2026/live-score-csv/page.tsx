@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from 'react';
+import comprehensivePlayers from '../../../../comprehensive-players.json';
 import type { SaveStatus } from './saveStatus';
 import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 
@@ -15,6 +16,8 @@ export default function LiveScoreCSVPage() {
   const [playing11, setPlaying11] = useState<{ [team: string]: string[] }>({});
   // Map matches list team names to scorecard short names
   const [teamNameMap, setTeamNameMap] = useState<{ [matchTeam: string]: string }>({});
+  // Map team short name to teamId
+  const [teamIdMap, setTeamIdMap] = useState<{ [shortName: string]: string }>({});
 
   // Fetch matches list on mount
   useEffect(() => {
@@ -80,6 +83,7 @@ export default function LiveScoreCSVPage() {
               } else if (sc.playing11.team1 && sc.playing11.team2) {
                 // Map to short names from scorecard's matchInfo if available
                 let team1Short = '', team2Short = '';
+                let idMap: { [shortName: string]: string } = {};
                 if (sc.matchInfo && sc.matchInfo.team1 && sc.matchInfo.team2) {
                   team1Short = sc.matchInfo.team1.shortName || sc.matchInfo.team1.name || 'team1';
                   team2Short = sc.matchInfo.team2.shortName || sc.matchInfo.team2.name || 'team2';
@@ -90,6 +94,9 @@ export default function LiveScoreCSVPage() {
                     if (matchTeam1 && team1Short) nameMap[matchTeam1.trim()] = team1Short;
                     if (matchTeam2 && team2Short) nameMap[matchTeam2.trim()] = team2Short;
                   }
+                  // Map shortName to teamId from matchInfo
+                  if (sc.matchInfo.team1.shortName && sc.matchInfo.team1.id) idMap[sc.matchInfo.team1.shortName] = sc.matchInfo.team1.id;
+                  if (sc.matchInfo.team2.shortName && sc.matchInfo.team2.id) idMap[sc.matchInfo.team2.shortName] = sc.matchInfo.team2.id;
                 } else {
                   // fallback to matches list
                   const match = matches.find(m => m.id === selectedMatch);
@@ -112,6 +119,7 @@ export default function LiveScoreCSVPage() {
             }
             setPlaying11(p11);
             setTeamNameMap(nameMap);
+            setTeamIdMap(idMap);
           } else {
             setTossInfo('');
             setPlaying11({});
@@ -177,6 +185,14 @@ export default function LiveScoreCSVPage() {
       if (first === team2) return getScorecardShortName(team1);
     }
     return '';
+  };
+
+  // Get all players for a team short name (from comprehensive-players.json)
+  const getAllPlayersForTeam = (shortName: string) => {
+    const teamId = teamIdMap[shortName];
+    if (!teamId) return [];
+    // @ts-ignore
+    return (comprehensivePlayers as any[]).filter(p => p.teamId === teamId).map(p => p.name);
   };
 
   const addRow = () => {
@@ -346,9 +362,13 @@ export default function LiveScoreCSVPage() {
                               className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
                             >
                               <option value="">{c === 3 ? 'Striker' : 'Non-Striker'}</option>
-                              {(playing11[battingTeam] || []).map((p: string) => (
-                                <option key={p} value={p}>{p}</option>
-                              ))}
+                              {getAllPlayersForTeam(battingTeam).length > 0
+                                ? getAllPlayersForTeam(battingTeam).map((p: string) => (
+                                    <option key={p} value={p}>{p}</option>
+                                  ))
+                                : (playing11[battingTeam] || []).map((p: string) => (
+                                    <option key={p} value={p}>{p}</option>
+                                  ))}
                             </select>
                           ) : (
                             <input
