@@ -202,6 +202,22 @@ export default function LiveScoreCSVPage() {
     return '';
   };
 
+  // Helper to map batting team name to playing11 key (team1/team2)
+  const getPlaying11Key = (battingTeamShortName: string) => {
+    const { team1, team2 } = getSelectedMatchTeams();
+    const team1Short = getScorecardShortName(team1);
+    const team2Short = getScorecardShortName(team2);
+    
+    if (battingTeamShortName === team1Short) return 'team1';
+    if (battingTeamShortName === team2Short) return 'team2';
+    
+    // Fallback: try direct comparison
+    if (battingTeamShortName === team1) return 'team1';
+    if (battingTeamShortName === team2) return 'team2';
+    
+    return '';
+  };
+
   // Get all players for a team short name (from comprehensive-players.json)
   const getAllPlayersForTeam = (shortName: string) => {
     const teamId = teamIdMap[shortName];
@@ -389,8 +405,11 @@ export default function LiveScoreCSVPage() {
                               {(() => {
                                 console.log('Batting team:', battingTeam);
                                 console.log('Playing11 state:', playing11);
-                                console.log('Players for team:', playing11[battingTeam]);
-                                return (playing11[battingTeam] || []).map((p: string) => (
+                                const playing11Key = getPlaying11Key(battingTeam);
+                                console.log('Playing11 key:', playing11Key);
+                                const players = playing11[playing11Key] || [];
+                                console.log('Players for team:', players);
+                                return players.map((p: string) => (
                                   <option key={p} value={p}>{p}</option>
                                 ));
                               })()}
