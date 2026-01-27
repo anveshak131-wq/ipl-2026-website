@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import type { SaveStatus } from './saveStatus';
 import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 
-const HEADERS = ['@Over','Ball','Innings','Striker','Non-Striker','Bowler','Runs','Extras','Wicket','Notes'];
+const HEADERS = ['Overs','Ball','Innings','Striker','Non-Striker','Bowler','Runs','Extras','Wicket','Notes'];
 
 export default function LiveScoreCSVPage() {
   const [rows, setRows] = useState<string[][]>([]);
@@ -134,12 +134,25 @@ export default function LiveScoreCSVPage() {
                   <tr key={r} className={`transition-colors ${r % 2 === 0 ? 'bg-gray-900' : 'bg-gray-800'} hover:bg-gray-700`}>
                     {row.map((cell, c) => (
                       <td key={c} className="px-3 py-2 align-top border-b border-gray-800">
-                        <input
-                          value={cell}
-                          onChange={(e) => updateCell(r, c, e.target.value)}
-                          placeholder={HEADERS[c]}
-                          className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100 placeholder-gray-400"
-                        />
+                        {c === 0 ? (
+                          <select
+                            value={cell}
+                            onChange={e => updateCell(r, c, e.target.value)}
+                            className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
+                          >
+                            <option value="">Overs</option>
+                            {Array.from({ length: 20 }, (_, i) => (
+                              <option key={i+1} value={String(i+1)}>{i+1}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            value={cell}
+                            onChange={(e) => updateCell(r, c, e.target.value)}
+                            placeholder={HEADERS[c]}
+                            className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100 placeholder-gray-400"
+                          />
+                        )}
                       </td>
                     ))}
                     <td className="px-3 py-2 align-top border-b border-gray-800 text-right">
