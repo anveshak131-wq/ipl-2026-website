@@ -1,3 +1,5 @@
+
+"use client";
 // Hardcoded player lists for each team
 const HARDCODED_PLAYERS: { [team: string]: string[] } = {
   'MI': [
@@ -14,7 +16,6 @@ const HARDCODED_PLAYERS: { [team: string]: string[] } = {
   ],
   // Add more teams as needed
 };
-"use client";
 
 import { useState, useEffect, useMemo } from 'react';
 import comprehensivePlayers from '../../../../comprehensive-players.json';
