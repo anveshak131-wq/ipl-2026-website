@@ -46,7 +46,31 @@ export default function LiveScoreCSVPage() {
   };
 
   const addRow = () => setRows((p) => [...p, Array(HEADERS.length).fill('')]);
-  const removeRow = (idx: number) => setRows((p) => p.filter((_, i) => i !== idx));
+  const removeRow = async (idx: number) => {
+    setRows((prev) => {
+      const updated = prev.filter((_, i) => i !== idx);
+      // Save immediately after removing
+      (async () => {
+        setSaveStatus('saving');
+        try {
+          const resp = await fetch('/api/wpl-live-score/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rows: updated }),
+          });
+          if (resp.ok) {
+            setSaveStatus('success');
+            setTimeout(() => setSaveStatus('idle'), 2000);
+          } else {
+            setSaveStatus('error');
+          }
+        } catch {
+          setSaveStatus('error');
+        }
+      })();
+      return updated;
+    });
+  };
   const exportCSV = () => {
     const headerLine = HEADERS.join(',');
     const body = rows
