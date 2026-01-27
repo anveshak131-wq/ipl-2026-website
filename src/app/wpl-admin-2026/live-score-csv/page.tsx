@@ -198,6 +198,11 @@ export default function LiveScoreCSVPage() {
     console.log('Toss info:', tossInfo);
     console.log('Team1:', team1);
     console.log('Team2:', team2);
+    console.log('TeamNameMap:', teamNameMap);
+    console.log('Scorecard names:', {
+      team1: getScorecardShortName(team1),
+      team2: getScorecardShortName(team2)
+    });
     
     if (!tossInfo) return '';
     const winnerMatch = tossInfo.match(/Winner: ([^;]+)/);
@@ -208,6 +213,13 @@ export default function LiveScoreCSVPage() {
     console.log('Parsed winner:', winner);
     console.log('Parsed decision:', decision);
     
+    // Try multiple winner comparisons
+    console.log('Winner comparisons:');
+    console.log('  winner === team1:', winner === team1);
+    console.log('  winner === team2:', winner === team2);
+    console.log('  winner === getScorecardShortName(team1):', winner === getScorecardShortName(team1));
+    console.log('  winner === getScorecardShortName(team2):', winner === getScorecardShortName(team2));
+    
     if (!winner || !decision) return '';
     if (decision === 'bowl') {
       console.log('Decision is bowl - other team bats first');
@@ -217,6 +229,15 @@ export default function LiveScoreCSVPage() {
       }
       if (winner === team2) {
         console.log('Winner is team2, so team1 bats:', team1);
+        return team1;
+      }
+      // Try with scorecard names
+      if (winner === getScorecardShortName(team1)) {
+        console.log('Winner matches team1 scorecard name, so team2 bats:', team2);
+        return team2;
+      }
+      if (winner === getScorecardShortName(team2)) {
+        console.log('Winner matches team2 scorecard name, so team1 bats:', team1);
         return team1;
       }
     }
