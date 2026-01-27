@@ -621,6 +621,18 @@ export default function LiveScoreCSVPage() {
                                 </>
                               )}
                             </div>
+                          ) : c === 6 ? (
+                            // Runs dropdown with values 0-6
+                            <select
+                              value={cell}
+                              onChange={e => updateCell(r, c, e.target.value)}
+                              className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
+                            >
+                              <option value="">Runs</option>
+                              {Array.from({ length: 7 }, (_, i) => (
+                                <option key={i} value={String(i)}>{i}</option>
+                              ))}
+                            </select>
                           ) : (
                             <input
                               value={cell}
