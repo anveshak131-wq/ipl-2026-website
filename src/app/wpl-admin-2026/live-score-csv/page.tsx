@@ -216,6 +216,16 @@ export default function LiveScoreCSVPage() {
                               <option key={i} value={String(i)}>{i}</option>
                             ))}
                           </select>
+                        ) : c === 2 ? (
+                          <select
+                            value={cell}
+                            onChange={e => updateCell(r, c, e.target.value)}
+                            className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
+                          >
+                            <option value="">Innings</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                          </select>
                         ) : (
                           <input
                             value={cell}
