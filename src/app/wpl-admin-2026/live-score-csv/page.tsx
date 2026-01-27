@@ -302,11 +302,11 @@ export default function LiveScoreCSVPage() {
           <select
             value={cell}
             onChange={e => updateCell(rowIndex, c, e.target.value)}
-            className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
+            className="w-full border border-white/20 rounded-lg px-3 py-2 bg-white/10 text-white backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition-all duration-200 text-sm"
           >
-            <option value="">Overs</option>
+            <option value="" className="bg-gray-800">Overs</option>
             {Array.from({ length: 21 }, (_, i) => (
-              <option key={i} value={String(i)}>{i}</option>
+              <option key={i} value={String(i)} className="bg-gray-800">{i}</option>
             ))}
           </select>
         );
@@ -315,11 +315,11 @@ export default function LiveScoreCSVPage() {
           <select
             value={cell}
             onChange={e => updateCell(rowIndex, c, e.target.value)}
-            className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
+            className="w-full border border-white/20 rounded-lg px-3 py-2 bg-white/10 text-white backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition-all duration-200 text-sm"
           >
-            <option value="">Ball</option>
+            <option value="" className="bg-gray-800">Ball</option>
             {Array.from({ length: 7 }, (_, i) => (
-              <option key={i} value={String(i)}>{i}</option>
+              <option key={i} value={String(i)} className="bg-gray-800">{i}</option>
             ))}
           </select>
         );
@@ -331,9 +331,9 @@ export default function LiveScoreCSVPage() {
           <select
             value={cell}
             onChange={e => updateCell(rowIndex, c, e.target.value)}
-            className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
+            className="w-full border border-white/20 rounded-lg px-3 py-2 bg-white/10 text-white backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition-all duration-200 text-sm"
           >
-            <option value="">{c === 3 ? 'Striker' : 'Non-Striker'}</option>
+            <option value="" className="bg-gray-800">{c === 3 ? 'Striker' : 'Non-Striker'}</option>
             {(() => {
               // Get the batting team based on scorecard data
               const match = matches.find(m => m.id === selectedMatch);
@@ -358,7 +358,7 @@ export default function LiveScoreCSVPage() {
               const teamPlayers = battingTeamId ? getPlayersByTeam(parseInt(battingTeamId)) : [];
               
               return teamPlayers.map((player: any) => (
-                <option key={player.id} value={player.name}>{player.name}</option>
+                <option key={player.id} value={player.name} className="bg-gray-800">{player.name}</option>
               ));
             })()}
           </select>
@@ -368,9 +368,9 @@ export default function LiveScoreCSVPage() {
           <select
             value={cell}
             onChange={e => updateCell(rowIndex, c, e.target.value)}
-            className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
+            className="w-full border border-white/20 rounded-lg px-3 py-2 bg-white/10 text-white backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition-all duration-200 text-sm"
           >
-            <option value="">Bowler</option>
+            <option value="" className="bg-gray-800">Bowler</option>
             {(() => {
               // Get the bowling team based on scorecard data
               const match = matches.find(m => m.id === selectedMatch);
@@ -396,7 +396,7 @@ export default function LiveScoreCSVPage() {
               const teamPlayers = bowlingTeamId ? getPlayersByTeam(parseInt(bowlingTeamId)) : [];
               
               return teamPlayers.map((player: any) => (
-                <option key={player.id} value={player.name}>{player.name}</option>
+                <option key={player.id} value={player.name} className="bg-gray-800">{player.name}</option>
               ));
             })()}
           </select>
@@ -406,74 +406,74 @@ export default function LiveScoreCSVPage() {
           <select
             value={cell}
             onChange={e => updateCell(rowIndex, c, e.target.value)}
-            className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
+            className="w-full border border-white/20 rounded-lg px-3 py-2 bg-white/10 text-white backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition-all duration-200 text-sm"
           >
-            <option value="">Runs</option>
+            <option value="" className="bg-gray-800">Runs</option>
             {Array.from({ length: 7 }, (_, i) => (
-              <option key={i} value={String(i)}>{i}</option>
+              <option key={i} value={String(i)} className="bg-gray-800">{i}</option>
             ))}
           </select>
         );
       case 7: // Wide
         return (
-          <div className="space-y-1">
+          <div className="space-y-2">
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"
                 checked={extrasData[rowIndex]?.hasWide || false}
                 onChange={(e) => updateExtrasData(rowIndex, 'hasWide', e.target.checked)}
-                className="rounded border-gray-600 bg-gray-900 text-purple-600 focus:ring-purple-500"
+                className="w-4 h-4 rounded border-white/30 bg-white/10 text-purple-600 focus:ring-purple-500 focus:ring-2"
               />
-              <label className="text-xs text-gray-400">Wide?</label>
+              <label className="text-xs text-gray-300 font-medium">Wide?</label>
             </div>
             {extrasData[rowIndex]?.hasWide && (
               <select
                 value={extrasData[rowIndex]?.wideRuns || 0}
                 onChange={(e) => updateExtrasData(rowIndex, 'wideRuns', parseInt(e.target.value))}
-                className="w-full border border-gray-700 focus:border-purple-500 rounded px-1 py-1 bg-gray-900 text-gray-100 text-xs"
+                className="w-full border border-white/20 rounded-lg px-2 py-1 bg-white/10 text-white backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition-all duration-200 text-xs"
               >
-                <option value={0}>Wide only (1 run)</option>
-                <option value={1}>+1 run (2 total)</option>
-                <option value={2}>+2 runs (3 total)</option>
-                <option value={3}>+3 runs (4 total)</option>
-                <option value={4}>Boundary 4 (5 total)</option>
+                <option value={0} className="bg-gray-800">Wide only (1 run)</option>
+                <option value={1} className="bg-gray-800">+1 run (2 total)</option>
+                <option value={2} className="bg-gray-800">+2 runs (3 total)</option>
+                <option value={3} className="bg-gray-800">+3 runs (4 total)</option>
+                <option value={4} className="bg-gray-800">Boundary 4 (5 total)</option>
               </select>
             )}
           </div>
         );
       case 8: // No Ball
         return (
-          <div className="space-y-1">
+          <div className="space-y-2">
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"
                 checked={extrasData[rowIndex]?.hasNoBall || false}
                 onChange={(e) => updateExtrasData(rowIndex, 'hasNoBall', e.target.checked)}
-                className="rounded border-gray-600 bg-gray-900 text-purple-600 focus:ring-purple-500"
+                className="w-4 h-4 rounded border-white/30 bg-white/10 text-purple-600 focus:ring-purple-500 focus:ring-2"
               />
-              <label className="text-xs text-gray-400">No Ball?</label>
+              <label className="text-xs text-gray-300 font-medium">No Ball?</label>
             </div>
             {extrasData[rowIndex]?.hasNoBall && (
               <>
                 <select
                   value={extrasData[rowIndex]?.noBallType || 'bat'}
                   onChange={(e) => updateExtrasData(rowIndex, 'noBallType', e.target.value)}
-                  className="w-full border border-gray-700 focus:border-purple-500 rounded px-1 py-1 bg-gray-900 text-gray-100 text-xs mb-1"
+                  className="w-full border border-white/20 rounded-lg px-2 py-1 bg-white/10 text-white backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition-all duration-200 text-xs mb-1"
                 >
-                  <option value="bat">Bat hit (runs to batsman)</option>
-                  <option value="bye">No bat hit (runs to byes)</option>
+                  <option value="bat" className="bg-gray-800">Bat hit (runs to batsman)</option>
+                  <option value="bye" className="bg-gray-800">No bat hit (runs to byes)</option>
                 </select>
                 <select
                   value={extrasData[rowIndex]?.noBallRuns || 0}
                   onChange={(e) => updateExtrasData(rowIndex, 'noBallRuns', parseInt(e.target.value))}
-                  className="w-full border border-gray-700 focus:border-purple-500 rounded px-1 py-1 bg-gray-900 text-gray-100 text-xs"
+                  className="w-full border border-white/20 rounded-lg px-2 py-1 bg-white/10 text-white backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition-all duration-200 text-xs"
                 >
-                  <option value={0}>No Ball only (1 run)</option>
-                  <option value={1}>+1 run (2 total)</option>
-                  <option value={2}>+2 runs (3 total)</option>
-                  <option value={3}>+3 runs (4 total)</option>
-                  <option value={4}>+4 runs (5 total)</option>
-                  <option value={6}>+6 runs (7 total)</option>
+                  <option value={0} className="bg-gray-800">No Ball only (1 run)</option>
+                  <option value={1} className="bg-gray-800">+1 run (2 total)</option>
+                  <option value={2} className="bg-gray-800">+2 runs (3 total)</option>
+                  <option value={3} className="bg-gray-800">+3 runs (4 total)</option>
+                  <option value={4} className="bg-gray-800">+4 runs (5 total)</option>
+                  <option value={6} className="bg-gray-800">+6 runs (7 total)</option>
                 </select>
               </>
             )}
@@ -481,24 +481,24 @@ export default function LiveScoreCSVPage() {
         );
       case 9: // Byes
         return (
-          <div className="space-y-1">
+          <div className="space-y-2">
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"
                 checked={extrasData[rowIndex]?.hasByes || false}
                 onChange={(e) => updateExtrasData(rowIndex, 'hasByes', e.target.checked)}
-                className="rounded border-gray-600 bg-gray-900 text-purple-600 focus:ring-purple-500"
+                className="w-4 h-4 rounded border-white/30 bg-white/10 text-purple-600 focus:ring-purple-500 focus:ring-2"
               />
-              <label className="text-xs text-gray-400">Byes?</label>
+              <label className="text-xs text-gray-300 font-medium">Byes?</label>
             </div>
             {extrasData[rowIndex]?.hasByes && (
               <select
                 value={extrasData[rowIndex]?.byesRuns || 0}
                 onChange={(e) => updateExtrasData(rowIndex, 'byesRuns', parseInt(e.target.value))}
-                className="w-full border border-gray-700 focus:border-purple-500 rounded px-1 py-1 bg-gray-900 text-gray-100 text-xs"
+                className="w-full border border-white/20 rounded-lg px-2 py-1 bg-white/10 text-white backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition-all duration-200 text-xs"
               >
                 {Array.from({ length: 7 }, (_, i) => (
-                  <option key={i} value={i}>{i} run{i !== 1 ? 's' : ''}</option>
+                  <option key={i} value={i} className="bg-gray-800">{i} run{i !== 1 ? 's' : ''}</option>
                 ))}
               </select>
             )}
@@ -506,24 +506,24 @@ export default function LiveScoreCSVPage() {
         );
       case 10: // LB (Leg Byes)
         return (
-          <div className="space-y-1">
+          <div className="space-y-2">
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"
                 checked={extrasData[rowIndex]?.hasLB || false}
                 onChange={(e) => updateExtrasData(rowIndex, 'hasLB', e.target.checked)}
-                className="rounded border-gray-600 bg-gray-900 text-purple-600 focus:ring-purple-500"
+                className="w-4 h-4 rounded border-white/30 bg-white/10 text-purple-600 focus:ring-purple-500 focus:ring-2"
               />
-              <label className="text-xs text-gray-400">LB?</label>
+              <label className="text-xs text-gray-300 font-medium">LB?</label>
             </div>
             {extrasData[rowIndex]?.hasLB && (
               <select
                 value={extrasData[rowIndex]?.lbRuns || 0}
                 onChange={(e) => updateExtrasData(rowIndex, 'lbRuns', parseInt(e.target.value))}
-                className="w-full border border-gray-700 focus:border-purple-500 rounded px-1 py-1 bg-gray-900 text-gray-100 text-xs"
+                className="w-full border border-white/20 rounded-lg px-2 py-1 bg-white/10 text-white backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition-all duration-200 text-xs"
               >
                 {Array.from({ length: 7 }, (_, i) => (
-                  <option key={i} value={i}>{i} run{i !== 1 ? 's' : ''}</option>
+                  <option key={i} value={i} className="bg-gray-800">{i} run{i !== 1 ? 's' : ''}</option>
                 ))}
               </select>
             )}
@@ -537,9 +537,9 @@ export default function LiveScoreCSVPage() {
                 type="checkbox"
                 checked={wicketData[rowIndex]?.hasWicket || false}
                 onChange={(e) => updateWicketData(rowIndex, 'hasWicket', e.target.checked)}
-                className="rounded border-gray-600 bg-gray-900 text-purple-600 focus:ring-purple-500"
+                className="w-4 h-4 rounded border-white/30 bg-white/10 text-purple-600 focus:ring-purple-500 focus:ring-2"
               />
-              <label className="text-xs text-gray-400">Wicket?</label>
+              <label className="text-xs text-gray-300 font-medium">Wicket?</label>
             </div>
             
             {wicketData[rowIndex]?.hasWicket && (
@@ -547,11 +547,11 @@ export default function LiveScoreCSVPage() {
                 <select
                   value={wicketData[rowIndex]?.wicketType || ''}
                   onChange={(e) => updateWicketData(rowIndex, 'wicketType', e.target.value)}
-                  className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100 text-sm"
+                  className="w-full border border-white/20 rounded-lg px-2 py-1 bg-white/10 text-white backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition-all duration-200 text-xs"
                 >
-                  <option value="">Select type...</option>
+                  <option value="" className="bg-gray-800">Select type...</option>
                   {WICKET_TYPES.map(type => (
-                    <option key={type} value={type}>{type}</option>
+                    <option key={type} value={type} className="bg-gray-800">{type}</option>
                   ))}
                 </select>
                
@@ -561,7 +561,7 @@ export default function LiveScoreCSVPage() {
                     value={wicketData[rowIndex]?.wicketTaker || ''}
                     onChange={(e) => updateWicketData(rowIndex, 'wicketTaker', e.target.value)}
                     placeholder="Who took wicket?"
-                    className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100 text-sm placeholder-gray-400"
+                    className="w-full border border-white/20 rounded-lg px-2 py-1 bg-white/10 text-white backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition-all duration-200 text-xs placeholder-gray-400"
                   />
                 )}
                
@@ -575,20 +575,60 @@ export default function LiveScoreCSVPage() {
                 })()}
               </>
             )}
-          </div>
-        );
-      default: // Notes
-        return (
           <input
-            value={cell}
-            onChange={(e) => updateCell(rowIndex, c, e.target.value)}
-            placeholder={HEADERS[c]}
-            className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100 placeholder-gray-400"
+            type="text"
+            value={wicketData[rowIndex]?.wicketTaker || ''}
+            onChange={(e) => updateWicketData(rowIndex, 'wicketTaker', e.target.value)}
+            placeholder="Who took wicket?"
+            className="w-full border border-white/20 rounded-lg px-2 py-1 bg-white/10 text-white backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition-all duration-200 text-xs placeholder-gray-400"
           />
-        );
-    }
-  };
+        )}
+       
+        {/* Update the cell value with the wicket description */}
+        {(() => {
+          const description = generateWicketDescription(rowIndex);
+          if (description !== cell) {
+            updateCell(rowIndex, c, description);
+          }
+          return null;
+        })()}
+      </>
+    )}
+  </div>
+);
+default: // Notes
+return (
+  <input
+    type="text"
+    value={cell}
+    onChange={e => updateCell(rowIndex, c, e.target.value)}
+    placeholder="Add notes..."
+    className="w-full border border-white/20 rounded-lg px-3 py-2 bg-white/10 text-white backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition-all duration-200 text-sm placeholder-gray-400"
+  />
+);
+}
 
+// Calculate team total for a specific innings
+const calculateTeamTotal = (innings: string | number) => {
+const filteredRows = rows.filter(row => row[2] === String(innings));
+  
+let totalRuns = 0;
+let totalExtras = 0;
+  
+filteredRows.forEach((row, index) => {
+  const originalIndex = rows.indexOf(row);
+  const extras = extrasData[originalIndex] || {};
+  
+  // Add batsman's runs
+  totalRuns += parseInt(row[6]) || 0;
+  
+  // Add extras
+  if (extras.hasWide) totalExtras += 1 + (extras.wideRuns || 0); // 1 penalty + additional runs
+  if (extras.hasNoBall) {
+    totalExtras += 1 + (extras.noBallRuns || 0); // 1 penalty + additional runs
+    // If no ball type is 'bye', runs go to byes, not extras
+    if (extras.noBallType === 'bye') {
+      totalExtras -= (extras.noBallRuns || 0); // Remove from extras, will be counted in byes
   // Calculate team total for a specific innings
   const calculateTeamTotal = (innings: string | number) => {
     const filteredRows = rows.filter(row => row[2] === String(innings));
@@ -846,139 +886,284 @@ export default function LiveScoreCSVPage() {
   };
 
   return (
-    <div className="min-h-screen">
-      <WPLAdminSidebarNew />
-      <main className="p-8 lg:ml-64">
-        <div className="max-w-6xl">
-          <h1 className="text-3xl font-bold mb-4">Live Score CSV — Editable Table</h1>
-          <div className="mb-6">
-            <label className="block text-gray-200 font-semibold mb-2">Matches:</label>
-            <select
-              className="w-full max-w-xs border border-gray-700 rounded px-2 py-2 bg-gray-900 text-gray-100"
-              value={selectedMatch}
-              onChange={e => setSelectedMatch(e.target.value)}
-              disabled={matches.length === 0}
-            >
-              {matches.map(m => (
-                <option key={m.id} value={m.id}>{m.team1.name} vs {m.team2.name}</option>
-              ))}
-            </select>
-          </div>
-          {tossInfo && (
-            <div className="mb-4 p-3 rounded bg-blue-900 text-blue-100 font-semibold shadow">
-              Toss: {tossInfo}
-            </div>
-          )}
-          <p className="text-sm text-gray-500 mb-4">Edit rows inline for testing. Use the + button to add rows and the trash button to remove.</p>
-          <div className="mb-4 flex gap-3 items-center">
-            <button onClick={addRow} className="px-3 py-2 bg-purple-600 text-white rounded-md">+ Add Row</button>
-            <button onClick={exportCSV} className="px-3 py-2 bg-white border border-gray-200 rounded-md text-gray-700 shadow-sm hover:bg-gray-50">Export CSV</button>
-            <button onClick={saveRows} className="px-3 py-2 bg-green-600 text-white rounded-md disabled:opacity-60" disabled={saveStatus==='saving'}>
-              {saveStatus === 'saving' ? 'Saving...' : saveStatus === 'success' ? 'Saved!' : saveStatus === 'error' ? 'Error!' : 'Save'}
-            </button>
-          </div>
-          
-          {/* Team Totals Display */}
-          <div className="mb-6 grid grid-cols-2 gap-4">
-            <div className="bg-gray-800 p-4 rounded-lg">
-              <h3 className="text-lg font-bold text-blue-400 mb-2">Innings 1 Total</h3>
-              <div className="text-sm space-y-1">
-                <div>Batsman Runs: <span className="font-mono text-white">{calculateTeamTotal(1).batsmanRuns}</span></div>
-                <div>Wides: <span className="font-mono text-orange-400">{calculateTeamTotal(1).wides}</span></div>
-                <div>No Balls: <span className="font-mono text-yellow-400">{calculateTeamTotal(1).noBalls}</span></div>
-                <div>Byes: <span className="font-mono text-purple-400">{calculateTeamTotal(1).byes}</span></div>
-                <div>Leg Byes: <span className="font-mono text-pink-400">{calculateTeamTotal(1).legByes}</span></div>
-                <div className="text-xs text-gray-500 mt-2">Extras: {calculateTeamTotal(1).extras}</div>
-                <div className="text-lg font-bold text-green-400 border-t border-gray-700 pt-2">Team Total: <span className="font-mono">{calculateTeamTotal(1).teamTotal}</span></div>
-              </div>
-            </div>
-            <div className="bg-gray-800 p-4 rounded-lg">
-              <h3 className="text-lg font-bold text-blue-400 mb-2">Innings 2 Total</h3>
-              <div className="text-sm space-y-1">
-                <div>Batsman Runs: <span className="font-mono text-white">{calculateTeamTotal(2).batsmanRuns}</span></div>
-                <div>Wides: <span className="font-mono text-orange-400">{calculateTeamTotal(2).wides}</span></div>
-                <div>No Balls: <span className="font-mono text-yellow-400">{calculateTeamTotal(2).noBalls}</span></div>
-                <div>Byes: <span className="font-mono text-purple-400">{calculateTeamTotal(2).byes}</span></div>
-                <div>Leg Byes: <span className="font-mono text-pink-400">{calculateTeamTotal(2).legByes}</span></div>
-                <div className="text-xs text-gray-500 mt-2">Extras: {calculateTeamTotal(2).extras}</div>
-                <div className="text-lg font-bold text-green-400 border-t border-gray-700 pt-2">Team Total: <span className="font-mono">{calculateTeamTotal(2).teamTotal}</span></div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Innings 1 Table */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-4">Innings 1</h2>
-            <div className="mb-4">
-              <button onClick={() => addRowToInnings(1)} className="px-3 py-2 bg-purple-600 text-white rounded-md">+ Add Row to Innings 1</button>
-            </div>
-            <div className="shadow-lg overflow-hidden rounded-lg border border-gray-300 bg-gray-900">
-              <table className="min-w-full text-sm table-fixed bg-gray-900">
-                <thead className="bg-gray-800">
-                  <tr>
-                    {HEADERS.map((h) => (
-                      <th key={h} className="px-3 py-3 text-left font-semibold text-gray-100 sticky top-0 z-10 border-b border-gray-700 uppercase tracking-wide bg-gray-800">{h}</th>
-                    ))}
-                    <th className="px-3 py-3 sticky top-0 z-10 border-b border-gray-700 bg-gray-800 text-gray-100">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.filter(row => row[2] === '1' || row[2] === 1).map((row, r) => {
-                    const originalIndex = rows.indexOf(row);
-                    return (
-                      <tr key={r} className={`transition-colors ${r % 2 === 0 ? 'bg-gray-900' : 'bg-gray-800'} hover:bg-gray-700`}>
-                        {row.map((cell, c) => (
-                          <td key={c} className="px-3 py-2 align-top border-b border-gray-800">
-                            {renderCellContent(cell, c, originalIndex, '')}
-                          </td>
-                        ))}
-                        <td className="px-3 py-2 align-top border-b border-gray-800 text-right">
-                          <button onClick={() => removeRow(originalIndex)} title="Remove row" className="text-red-400 hover:text-red-200">Remove</button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse animation-delay-2000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse animation-delay-4000"></div>
+      </div>
 
-          {/* Innings 2 Table */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-4">Innings 2</h2>
-            <div className="mb-4">
-              <button onClick={() => addRowToInnings(2)} className="px-3 py-2 bg-purple-600 text-white rounded-md">+ Add Row to Innings 2</button>
+      <div className="relative z-10">
+        <WPLAdminSidebarNew />
+        
+        <main className="flex-1 p-6">
+          <div className="max-w-7xl mx-auto">
+            {/* Enhanced Header */}
+            <div className="mb-8 text-center">
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-2">
+                Live Score Management
+              </h1>
+              <p className="text-gray-300 text-lg">Professional Cricket Scoring Dashboard</p>
             </div>
-            <div className="shadow-lg overflow-hidden rounded-lg border border-gray-300 bg-gray-900">
-              <table className="min-w-full text-sm table-fixed bg-gray-900">
-                <thead className="bg-gray-800">
-                  <tr>
-                    {HEADERS.map((h) => (
-                      <th key={h} className="px-3 py-3 text-left font-semibold text-gray-100 sticky top-0 z-10 border-b border-gray-700 uppercase tracking-wide bg-gray-800">{h}</th>
-                    ))}
-                    <th className="px-3 py-3 sticky top-0 z-10 border-b border-gray-700 bg-gray-800 text-gray-100">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.filter(row => row[2] === '2' || row[2] === 2).map((row, r) => {
-                    const originalIndex = rows.indexOf(row);
-                    return (
-                      <tr key={r} className={`transition-colors ${r % 2 === 0 ? 'bg-gray-900' : 'bg-gray-800'} hover:bg-gray-700`}>
-                        {row.map((cell, c) => (
-                          <td key={c} className="px-3 py-2 align-top border-b border-gray-800">
-                            {renderCellContent(cell, c, originalIndex, '')}
-                          </td>
+
+            {/* Enhanced Match Selection */}
+            <div className="mb-8">
+              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-2xl">
+                <label className="block text-white font-semibold mb-3 text-lg">Select Match</label>
+                <select
+                  className="w-full max-w-md border border-white/20 rounded-xl px-4 py-3 bg-white/10 text-white backdrop-blur-sm focus:border-purple-400 focus:ring-2 focus:ring-purple-400/50 transition-all duration-200 text-lg"
+                  value={selectedMatch}
+                  onChange={e => setSelectedMatch(e.target.value)}
+                  disabled={matches.length === 0}
+                >
+                  <option value="" className="bg-gray-800">Choose a match...</option>
+                  {matches.map(m => (
+                    <option key={m.id} value={m.id} className="bg-gray-800">{m.team1.name} vs {m.team2.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Enhanced Toss Info */}
+            {tossInfo && (
+              <div className="mb-8">
+                <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-lg rounded-2xl p-4 border border-white/20 shadow-2xl">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
+                    <p className="text-blue-100 font-semibold text-lg">{tossInfo}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Enhanced Action Buttons */}
+            <div className="mb-8 flex flex-wrap gap-4 justify-center">
+              <button
+                onClick={() => addRowToInnings(1)} 
+                className="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-purple-500/25 transition-all duration-200 hover:scale-105"
+              >
+                + Add to Innings 1
+              </button>
+              <button
+                onClick={() => addRowToInnings(2)} 
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-blue-500/25 transition-all duration-200 hover:scale-105"
+              >
+                + Add to Innings 2
+              </button>
+              <button
+                onClick={exportCSV} 
+                className="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-green-500/25 transition-all duration-200 hover:scale-105"
+              >
+                📊 Export CSV
+              </button>
+              <button
+                onClick={saveRows} 
+                className="px-6 py-3 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-orange-500/25 transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                disabled={saveStatus==='saving'}
+              >
+                {saveStatus === 'saving' ? '⏳ Saving...' : saveStatus === 'success' ? '✅ Saved!' : saveStatus === 'error' ? '❌ Error!' : '💾 Save Data'}
+              </button>
+            </div>
+          
+            {/* Enhanced Team Totals Display */}
+            <div className="mb-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-2xl hover:shadow-blue-500/20 transition-all duration-300">
+                <h3 className="text-xl font-bold text-blue-300 mb-4 flex items-center gap-2">
+                  <div className="w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
+                  Innings 1 Total
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300">Batsman Runs:</span>
+                    <span className="font-mono text-white text-lg font-bold">{calculateTeamTotal(1).batsmanRuns}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300">Wides:</span>
+                    <span className="font-mono text-orange-400 font-semibold">{calculateTeamTotal(1).wides}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300">No Balls:</span>
+                    <span className="font-mono text-yellow-400 font-semibold">{calculateTeamTotal(1).noBalls}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300">Byes:</span>
+                    <span className="font-mono text-purple-400 font-semibold">{calculateTeamTotal(1).byes}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300">Leg Byes:</span>
+                    <span className="font-mono text-pink-400 font-semibold">{calculateTeamTotal(1).legByes}</span>
+                  </div>
+                  <div className="border-t border-white/20 pt-3 mt-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400 text-sm">Extras:</span>
+                      <span className="font-mono text-gray-300">{calculateTeamTotal(1).extras}</span>
+                    </div>
+                    <div className="flex justify-between items-center mt-2">
+                      <span className="text-white font-semibold">Team Total:</span>
+                      <span className="font-mono text-green-400 text-xl font-bold">{calculateTeamTotal(1).teamTotal}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-2xl hover:shadow-purple-500/20 transition-all duration-300">
+                <h3 className="text-xl font-bold text-purple-300 mb-4 flex items-center gap-2">
+                  <div className="w-3 h-3 bg-purple-400 rounded-full animate-pulse"></div>
+                  Innings 2 Total
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300">Batsman Runs:</span>
+                    <span className="font-mono text-white text-lg font-bold">{calculateTeamTotal(2).batsmanRuns}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300">Wides:</span>
+                    <span className="font-mono text-orange-400 font-semibold">{calculateTeamTotal(2).wides}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300">No Balls:</span>
+                    <span className="font-mono text-yellow-400 font-semibold">{calculateTeamTotal(2).noBalls}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300">Byes:</span>
+                    <span className="font-mono text-purple-400 font-semibold">{calculateTeamTotal(2).byes}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-300">Leg Byes:</span>
+                    <span className="font-mono text-pink-400 font-semibold">{calculateTeamTotal(2).legByes}</span>
+                  </div>
+                  <div className="border-t border-white/20 pt-3 mt-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400 text-sm">Extras:</span>
+                      <span className="font-mono text-gray-300">{calculateTeamTotal(2).extras}</span>
+                    </div>
+                    <div className="flex justify-between items-center mt-2">
+                      <span className="text-white font-semibold">Team Total:</span>
+                      <span className="font-mono text-green-400 text-xl font-bold">{calculateTeamTotal(2).teamTotal}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          
+            {/* Enhanced Innings 1 Table */}
+            <div className="mb-8">
+              <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-2xl">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                    <div className="w-4 h-4 bg-blue-400 rounded-full animate-pulse"></div>
+                    Innings 1
+                  </h2>
+                  <button
+                    onClick={() => addRowToInnings(1)} 
+                    className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold shadow-lg transition-all duration-200 hover:scale-105"
+                  >
+                    + Add Ball
+                  </button>
+                </div>
+                
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-white/10">
+                        {HEADERS.map((h, index) => (
+                          <th key={h} className={`px-4 py-3 text-left font-semibold text-white/90 uppercase tracking-wide text-xs ${index === 0 ? 'rounded-tl-lg' : ''} ${index === HEADERS.length - 1 ? 'rounded-tr-lg' : ''}`}>
+                            {h}
+                          </th>
                         ))}
-                        <td className="px-3 py-2 align-top border-b border-gray-800 text-right">
-                          <button onClick={() => removeRow(originalIndex)} title="Remove row" className="text-red-400 hover:text-red-200">Remove</button>
-                        </td>
+                        <th className="px-4 py-3 text-right font-semibold text-white/90 uppercase tracking-wide text-xs rounded-tr-lg">Actions</th>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                    </thead>
+                    <tbody>
+                      {rows.filter(row => row[2] === '1' || row[2] === 1).map((row, r) => {
+                        const originalIndex = rows.indexOf(row);
+                        return (
+                          <tr 
+                            key={r}
+                            className={`border-b border-white/5 hover:bg-white/5 transition-all duration-200 ${r % 2 === 0 ? 'bg-white/5' : 'bg-transparent'}`}
+                          >
+                            {row.map((cell, c) => (
+                              <td key={c} className="px-4 py-3 align-top">
+                                {renderCellContent(cell, c, originalIndex, '')}
+                              </td>
+                            ))}
+                            <td className="px-4 py-3 align-top text-right">
+                              <button
+                                onClick={() => removeRow(originalIndex)} 
+                                className="text-red-400 hover:text-red-300 transition-colors duration-200 hover:scale-110 transform"
+                                title="Remove row"
+                              >
+                                🗑️
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
-          </div>
+
+            {/* Enhanced Innings 2 Table */}
+            <div className="mb-8">
+              <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-2xl">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                    <div className="w-4 h-4 bg-purple-400 rounded-full animate-pulse"></div>
+                    Innings 2
+                  </h2>
+                  <button
+                    onClick={() => addRowToInnings(2)} 
+                    className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold shadow-lg transition-all duration-200 hover:scale-105"
+                  >
+                    + Add Ball
+                  </button>
+                </div>
+                
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-white/10">
+                        {HEADERS.map((h, index) => (
+                          <th key={h} className={`px-4 py-3 text-left font-semibold text-white/90 uppercase tracking-wide text-xs ${index === 0 ? 'rounded-tl-lg' : ''} ${index === HEADERS.length - 1 ? 'rounded-tr-lg' : ''}`}>
+                            {h}
+                          </th>
+                        ))}
+                        <th className="px-4 py-3 text-right font-semibold text-white/90 uppercase tracking-wide text-xs rounded-tr-lg">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rows.filter(row => row[2] === '2' || row[2] === 2).map((row, r) => {
+                        const originalIndex = rows.indexOf(row);
+                        return (
+                          <tr 
+                            key={r}
+                            className={`border-b border-white/5 hover:bg-white/5 transition-all duration-200 ${r % 2 === 0 ? 'bg-white/5' : 'bg-transparent'}`}
+                          >
+                            {row.map((cell, c) => (
+                              <td key={c} className="px-4 py-3 align-top">
+                                {renderCellContent(cell, c, originalIndex, '')}
+                              </td>
+                            ))}
+                            <td className="px-4 py-3 align-top text-right">
+                              <button
+                                onClick={() => removeRow(originalIndex)} 
+                                className="text-red-400 hover:text-red-300 transition-colors duration-200 hover:scale-110 transform"
+                                title="Remove row"
+                              >
+                                🗑️
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
         </div>
       </main>
     </div>
