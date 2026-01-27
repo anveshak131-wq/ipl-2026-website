@@ -35,11 +35,13 @@ export default function LiveScoreCSVPage() {
   const [teamNameMap, setTeamNameMap] = useState<{ [matchTeam: string]: string }>({});
   // Map team short name to teamId
   const [teamIdMap, setTeamIdMap] = useState<{ [shortName: string]: string }>({});
+  const [allPlayers, setAllPlayers] = useState<any[]>([]);
 
   // Fetch matches list on mount
   useEffect(() => {
     (async () => {
       try {
+        // Fetch matches
         const resp = await fetch('/api/wpl-live-score/matches');
         if (resp.ok) {
           const data = await resp.json();
@@ -57,8 +59,16 @@ export default function LiveScoreCSVPage() {
             }
           }
         }
+        
+        // Fetch players (like scorecard page)
+        const playersResp = await fetch('/api/players?league=wpl');
+        if (playersResp.ok) {
+          const playersData = await playersResp.json();
+          console.log('Fetched WPL players:', playersData);
+          setAllPlayers(playersData || []);
+        }
       } catch (error) {
-        console.error('Error fetching matches:', error);
+        console.error('Error fetching data:', error);
       }
     })();
   }, []);
@@ -207,6 +217,11 @@ export default function LiveScoreCSVPage() {
       return winner;
     }
     return '';
+  };
+
+  // Helper to get players by team (like scorecard page)
+  const getPlayersByTeam = (teamId: number): any[] => {
+    return allPlayers.filter(player => player.teamId === teamId.toString());
   };
 
   // Helper to get batting team for a given innings (1 or 2)
@@ -432,38 +447,34 @@ export default function LiveScoreCSVPage() {
                                 console.log('Row data:', row);
                                 console.log('Innings value:', row[2]);
                                 console.log('Batting team:', battingTeam);
-                                console.log('Playing11 state:', playing11);
-                                console.log('Playing11 keys:', Object.keys(playing11));
+                                console.log('All players count:', allPlayers.length);
                                 
-                                // Try multiple approaches to get players
-                                let players: string[] = [];
-                                const playing11Key = getPlaying11Key(battingTeam);
-                                console.log('Playing11 key from mapping:', playing11Key);
+                                // Get the batting team ID from match data
+                                const { team1, team2 } = getSelectedMatchTeams();
+                                const first = getBattingFirstTeam();
+                                let battingTeamId = '';
                                 
-                                // Try mapped key first
-                                if (playing11Key && playing11[playing11Key]) {
-                                  players = playing11[playing11Key] as string[];
-                                  console.log('Players from mapped key:', players);
-                                }
-                                // Try direct batting team name
-                                else if (playing11[battingTeam]) {
-                                  players = playing11[battingTeam] as string[];
-                                  console.log('Players from direct team name:', players);
-                                }
-                                // Try team1/team2 as fallback
-                                else if (playing11.team1 && (battingTeam.includes('MI') || battingTeam.includes('Mumbai'))) {
-                                  players = playing11.team1 as string[];
-                                  console.log('Players from team1 (MI fallback):', players);
-                                }
-                                else if (playing11.team2 && (battingTeam.includes('RCB') || battingTeam.includes('Bangalore'))) {
-                                  players = playing11.team2 as string[];
-                                  console.log('Players from team2 (RCB fallback):', players);
+                                if (row[2] === '1' || row[2] === 1) {
+                                  // Innings 1 - use first batting team
+                                  battingTeamId = first === team1 ? 
+                                    (matches.find(m => m.id === selectedMatch)?.team1Id || '') :
+                                    (matches.find(m => m.id === selectedMatch)?.team2Id || '');
+                                } else {
+                                  // Innings 2 - use second batting team
+                                  battingTeamId = first === team1 ? 
+                                    (matches.find(m => m.id === selectedMatch)?.team2Id || '') :
+                                    (matches.find(m => m.id === selectedMatch)?.team1Id || '');
                                 }
                                 
-                                console.log('Final players array:', players);
+                                console.log('Batting team ID:', battingTeamId);
+                                
+                                // Get players for the batting team (like scorecard page)
+                                const teamPlayers = battingTeamId ? getPlayersByTeam(parseInt(battingTeamId)) : [];
+                                console.log('Team players:', teamPlayers);
+                                
                                 console.log('==================');
-                                return players.map((p: string) => (
-                                  <option key={p} value={p}>{p}</option>
+                                return teamPlayers.map((player: any) => (
+                                  <option key={player.id} value={player.name}>{player.name}</option>
                                 ));
                               })()}
                             </select>
