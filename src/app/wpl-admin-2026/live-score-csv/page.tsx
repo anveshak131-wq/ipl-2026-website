@@ -54,6 +54,15 @@ export default function LiveScoreCSVPage() {
     } 
   }>({});
 
+  // Current over and bowler state for each innings
+  const [currentOver, setCurrentOver] = useState<{ 
+    [innings: string]: { 
+      overNumber: string; 
+      bowler: string; 
+      ballsInOver: number;
+    } 
+  }>({});
+
   // Extras data state
   const [extrasData, setExtrasData] = useState<{ [rowIndex: number]: { 
     hasWide: boolean; 
@@ -223,7 +232,18 @@ export default function LiveScoreCSVPage() {
 
   const addRowToInnings = (innings: number) => {
     const currentBatsmenForInnings = currentBatsmen[String(innings)] || { striker: '', nonStriker: '' };
-    const newRow = ['', '', String(innings), currentBatsmenForInnings.striker, currentBatsmenForInnings.nonStriker, '', '', '', '', '', '', '', ''];
+    const currentOverForInnings = currentOver[String(innings)] || { overNumber: '', bowler: '', ballsInOver: 0 };
+    
+    const newRow = [
+      currentOverForInnings.overNumber, // Over
+      '', // Ball (will be calculated based on ballsInOver + 1)
+      String(innings), 
+      currentBatsmenForInnings.striker, 
+      currentBatsmenForInnings.nonStriker, 
+      currentOverForInnings.bowler, // Bowler
+      '', '', '', '', '', '', '', ''
+    ];
+    
     setRows(prev => [...prev, newRow]);
   };
 
@@ -334,8 +354,27 @@ export default function LiveScoreCSVPage() {
       case 0: // Overs
         return (
           <select
-            value={cell}
-            onChange={e => updateCell(rowIndex, c, e.target.value)}
+            value={cell || (() => {
+              // Use persistent value if current cell is empty
+              const currentInnings = rows[rowIndex][2];
+              const over = currentOver[currentInnings] || { overNumber: '', bowler: '', ballsInOver: 0 };
+              return over.overNumber;
+            })()}
+            onChange={e => {
+              const newValue = e.target.value;
+              updateCell(rowIndex, c, newValue);
+              
+              // Update persistent over state and reset balls count
+              const currentInnings = rows[rowIndex][2];
+              setCurrentOver(prev => ({
+                ...prev,
+                [currentInnings]: {
+                  ...prev[currentInnings],
+                  overNumber: newValue,
+                  ballsInOver: 0 // Reset balls count when over changes
+                }
+              }));
+            }}
             className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
           >
             <option value="">Overs</option>
@@ -347,8 +386,43 @@ export default function LiveScoreCSVPage() {
       case 1: // Ball
         return (
           <select
-            value={cell}
-            onChange={e => updateCell(rowIndex, c, e.target.value)}
+            value={cell || (() => {
+              // Calculate ball number based on balls in current over
+              const currentInnings = rows[rowIndex][2];
+              const over = currentOver[currentInnings] || { overNumber: '', bowler: '', ballsInOver: 0 };
+              return String(over.ballsInOver + 1);
+            })()}
+            onChange={e => {
+              const newValue = e.target.value;
+              updateCell(rowIndex, c, newValue);
+              
+              // Update balls in over count
+              const currentInnings = rows[rowIndex][2];
+              const ballNumber = parseInt(newValue) || 0;
+              
+              setCurrentOver(prev => {
+                const updated = {
+                  ...prev,
+                  [currentInnings]: {
+                    ...prev[currentInnings],
+                    ballsInOver: ballNumber
+                  }
+                };
+                
+                // If 6 balls are completed, prepare for next over
+                if (ballNumber >= 6) {
+                  const currentOverNumber = parseInt(prev[currentInnings]?.overNumber || '0') || 0;
+                  updated[currentInnings] = {
+                    ...updated[currentInnings],
+                    overNumber: String(currentOverNumber + 1),
+                    ballsInOver: 0,
+                    bowler: '' // Clear bowler for next over
+                  };
+                }
+                
+                return updated;
+              });
+            }}
             className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
           >
             <option value="">Ball</option>
@@ -418,8 +492,26 @@ export default function LiveScoreCSVPage() {
       case 5: // Bowler
         return (
           <select
-            value={cell}
-            onChange={e => updateCell(rowIndex, c, e.target.value)}
+            value={cell || (() => {
+              // Use persistent value if current cell is empty
+              const currentInnings = rows[rowIndex][2];
+              const over = currentOver[currentInnings] || { overNumber: '', bowler: '', ballsInOver: 0 };
+              return over.bowler;
+            })()}
+            onChange={e => {
+              const newValue = e.target.value;
+              updateCell(rowIndex, c, newValue);
+              
+              // Update persistent bowler state
+              const currentInnings = rows[rowIndex][2];
+              setCurrentOver(prev => ({
+                ...prev,
+                [currentInnings]: {
+                  ...prev[currentInnings],
+                  bowler: newValue
+                }
+              }));
+            }}
             className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
           >
             <option value="">Bowler</option>
