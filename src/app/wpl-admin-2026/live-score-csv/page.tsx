@@ -141,8 +141,19 @@ export default function LiveScoreCSVPage() {
                             className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
                           >
                             <option value="">Overs</option>
-                            {Array.from({ length: 20 }, (_, i) => (
-                              <option key={i+1} value={String(i+1)}>{i+1}</option>
+                            {Array.from({ length: 21 }, (_, i) => (
+                              <option key={i} value={String(i)}>{i}</option>
+                            ))}
+                          </select>
+                        ) : c === 1 ? (
+                          <select
+                            value={cell}
+                            onChange={e => updateCell(r, c, e.target.value)}
+                            className="w-full border border-gray-700 focus:border-purple-500 rounded px-2 py-1 bg-gray-900 text-gray-100"
+                          >
+                            <option value="">Ball</option>
+                            {Array.from({ length: 7 }, (_, i) => (
+                              <option key={i} value={String(i)}>{i}</option>
                             ))}
                           </select>
                         ) : (
