@@ -284,7 +284,8 @@ export default function LiveScoreCSVPage() {
     } catch {
       setSaveStatus('error');
     }
-  // No extra closing brace here
+  };
+
   return (
     <div className="min-h-screen">
       <WPLAdminSidebarNew />
