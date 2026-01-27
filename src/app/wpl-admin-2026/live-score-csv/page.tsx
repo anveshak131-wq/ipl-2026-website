@@ -21,12 +21,14 @@ import { useState, useEffect, useMemo } from 'react';
 import comprehensivePlayers from '../../../../comprehensive-players.json';
 import type { SaveStatus } from './saveStatus';
 import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
+import { api as dataApi } from '@/lib/data';
+import { Match } from '@/types';
 
 const HEADERS = ['Overs','Ball','Innings','Striker','Non-Striker','Bowler','Runs','Extras','Wicket','Notes'];
 
 export default function LiveScoreCSVPage() {
   const [rows, setRows] = useState<string[][]>([]);
-  const [matches, setMatches] = useState<{ id: string, name: string }[]>([]);
+  const [matches, setMatches] = useState<Match[]>([]);
   const [selectedMatch, setSelectedMatch] = useState<string>('');
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [tossInfo, setTossInfo] = useState<string>('');
@@ -41,32 +43,21 @@ export default function LiveScoreCSVPage() {
   useEffect(() => {
     (async () => {
       try {
-        // Fetch matches
-        const resp = await fetch('/api/wpl-live-score/matches');
-        if (resp.ok) {
-          const data = await resp.json();
-          console.log('=== MATCHES LIST DEBUG ===');
-          console.log('Available matches:', data);
-          if (Array.isArray(data)) {
-            setMatches(data);
-            if (data.length > 0) setSelectedMatch(data[0].id);
-            
-            // Check if any matches have playing 11
-            const matchesWithPlaying11 = data.filter(m => m.playing11);
-            console.log('Matches with playing 11:', matchesWithPlaying11.length);
-            if (matchesWithPlaying11.length > 0) {
-              console.log('First match with playing 11:', matchesWithPlaying11[0]);
-            }
-          }
+        // Fetch matches (like scorecard page)
+        const data = await dataApi.getMatches('wpl');
+        console.log('=== MATCHES LIST DEBUG ===');
+        console.log('Fetched WPL matches:', data);
+        if (data && data.length > 0) {
+          setMatches(data);
+          setSelectedMatch(data[0].id);
+        } else {
+          console.log('No WPL matches found');
         }
         
         // Fetch players (like scorecard page)
-        const playersResp = await fetch('/api/players?league=wpl');
-        if (playersResp.ok) {
-          const playersData = await playersResp.json();
-          console.log('Fetched WPL players:', playersData);
-          setAllPlayers(playersData || []);
-        }
+        const playersData = await dataApi.getPlayers(undefined, 'wpl');
+        console.log('Fetched WPL players:', playersData);
+        setAllPlayers(playersData || []);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -450,6 +441,7 @@ export default function LiveScoreCSVPage() {
                                 console.log('All players count:', allPlayers.length);
                                 
                                 // Get the batting team ID from match data
+                                const match = matches.find(m => m.id === selectedMatch);
                                 const { team1, team2 } = getSelectedMatchTeams();
                                 const first = getBattingFirstTeam();
                                 let battingTeamId = '';
@@ -457,13 +449,13 @@ export default function LiveScoreCSVPage() {
                                 if (row[2] === '1' || row[2] === 1) {
                                   // Innings 1 - use first batting team
                                   battingTeamId = first === team1 ? 
-                                    (matches.find(m => m.id === selectedMatch)?.team1Id || '') :
-                                    (matches.find(m => m.id === selectedMatch)?.team2Id || '');
+                                    (match?.team1?.id || '') :
+                                    (match?.team2?.id || '');
                                 } else {
                                   // Innings 2 - use second batting team
                                   battingTeamId = first === team1 ? 
-                                    (matches.find(m => m.id === selectedMatch)?.team2Id || '') :
-                                    (matches.find(m => m.id === selectedMatch)?.team1Id || '');
+                                    (match?.team2?.id || '') :
+                                    (match?.team1?.id || '');
                                 }
                                 
                                 console.log('Batting team ID:', battingTeamId);
