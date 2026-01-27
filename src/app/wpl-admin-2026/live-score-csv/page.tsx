@@ -6,34 +6,35 @@ import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 
 const HEADERS = ['@Over','Ball','Innings','Striker','Non-Striker','Bowler','Runs','Extras','Wicket','Notes'];
 
+export default function LiveScoreCSVPage() {
   const [rows, setRows] = useState<string[][]>([]);
-    // Load saved rows from KV on mount
-    useEffect(() => {
-      (async () => {
-        try {
-          const resp = await fetch('/api/wpl-live-score/save');
-          if (resp.ok) {
-            const data = await resp.json();
-            // Accept both {rows: [...]} and [...] (raw array)
-            if (Array.isArray(data.rows)) {
-              setRows(data.rows);
-            } else if (Array.isArray(data)) {
-              setRows(data);
-            } else {
-              // For debugging: log unexpected data
-              // eslint-disable-next-line no-console
-              console.log('Unexpected data from KV:', data);
-            }
+  // Load saved rows from KV on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const resp = await fetch('/api/wpl-live-score/save');
+        if (resp.ok) {
+          const data = await resp.json();
+          // Accept both {rows: [...]} and [...] (raw array)
+          if (Array.isArray(data.rows)) {
+            setRows(data.rows);
+          } else if (Array.isArray(data)) {
+            setRows(data);
           } else {
+            // For debugging: log unexpected data
             // eslint-disable-next-line no-console
-            console.log('Failed to fetch saved rows:', resp.status);
+            console.log('Unexpected data from KV:', data);
           }
-        } catch (e) {
+        } else {
           // eslint-disable-next-line no-console
-          console.log('Error loading saved rows:', e);
+          console.log('Failed to fetch saved rows:', resp.status);
         }
-      })();
-    }, []);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.log('Error loading saved rows:', e);
+      }
+    })();
+  }, []);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
 
   const updateCell = (rIdx: number, cIdx: number, value: string) => {
