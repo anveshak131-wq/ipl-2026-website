@@ -310,48 +310,48 @@ export default function LiveScoreWithAIPage() {
     }
   };
 
-  // Function to format wicket information like cricket notation
+  // Function to format wicket information like descriptive commentary
   const formatWicketInfo = (batsman: string, wicketType: string, wicketTaker: string, bowler: string, runs: number, balls: number) => {
     if (!wicketType) return `${batsman} vs ${bowler}`;
     
-    let wicketInfo = batsman;
+    let wicketInfo = '';
     
     switch (wicketType) {
       case 'Caught':
-        wicketInfo += ` c ${wicketTaker} b ${bowler}`;
+        wicketInfo = `Catch ${batsman} Caught by ${wicketTaker} b ${bowler}`;
         break;
       case 'Caught and Bowled':
-        wicketInfo += ` c & b ${bowler}`;
+        wicketInfo = `Catch ${batsman} Caught and Bowled by ${bowler}`;
         break;
       case 'Bowled':
-        wicketInfo += ` b ${bowler}`;
+        wicketInfo = `Bowled ${batsman} Bowled by ${bowler}`;
         break;
       case 'LBW':
-        wicketInfo += ` lbw ${bowler}`;
+        wicketInfo = `LBW ${batsman} LBW by ${bowler}`;
         break;
       case 'Stumped':
-        wicketInfo += ` st ${wicketTaker} b ${bowler}`;
+        wicketInfo = `Stumped ${batsman} Stumped by ${wicketTaker} b ${bowler}`;
         break;
       case 'Run Out':
-        wicketInfo += ` run out (${wicketTaker})`;
+        wicketInfo = `Run Out ${batsman} Run Out by ${wicketTaker}`;
         break;
       case 'Hit Wicket':
-        wicketInfo += ` hit wicket ${bowler}`;
+        wicketInfo = `Hit Wicket ${batsman} Hit Wicket by ${bowler}`;
         break;
       case 'Obstructing the Field':
-        wicketInfo += ` obstructing the field ${bowler}`;
+        wicketInfo = `Obstructing the Field ${batsman} Obstructing the Field by ${bowler}`;
         break;
       case 'Handled the Ball':
-        wicketInfo += ` handled the ball ${bowler}`;
+        wicketInfo = `Handled the Ball ${batsman} Handled the Ball by ${bowler}`;
         break;
       case 'Timed Out':
-        wicketInfo += ` timed out`;
+        wicketInfo = `Timed Out ${batsman} Timed Out`;
         break;
       case 'Mankading (Run out at non-striker end)':
-        wicketInfo += ` run out (mankading) ${bowler}`;
+        wicketInfo = `Mankading ${batsman} Mankaded by ${bowler}`;
         break;
       default:
-        wicketInfo += ` ${wicketType.toLowerCase()} ${bowler}`;
+        wicketInfo = `${wicketType} ${batsman} ${wicketType} by ${bowler}`;
         break;
     }
     
