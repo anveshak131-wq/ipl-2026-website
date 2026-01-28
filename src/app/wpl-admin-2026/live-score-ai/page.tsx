@@ -622,7 +622,6 @@ export default function LiveScoreWithAIPage() {
                           let eventColor = '';
                           
                           if (hasWicket) {
-                            eventType = 'Wicket';
                             eventIcon = '💥';
                             eventColor = 'text-red-400';
                             // Use the formatWicketInfo function to show complete wicket details
