@@ -1272,24 +1272,24 @@ export default function LiveScoreCSVPage() {
                 
                 <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm">
                   <div className="overflow-x-auto">
-                    <table className="w-full min-w-[1200px] text-sm">
+                    <table className="w-full min-w-[1600px] text-sm">
                       <thead className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border-b border-white/10">
                         <tr>
                           {HEADERS.map((h, index) => {
                             const columnWidths = [
-                              'w-20', // Over
-                              'w-16', // Ball  
+                              'w-24', // Over
+                              'w-20', // Ball  
                               'w-16', // Innings
-                              'w-32', // Striker
-                              'w-32', // Non-Striker
-                              'w-32', // Bowler
-                              'w-20', // Runs
-                              'w-32', // Wicket Description
-                              'w-24', // Wide
-                              'w-24', // No Ball
-                              'w-20', // Byes
-                              'w-20', // LB
-                              'w-32'  // Commentary
+                              'w-48', // Striker - much wider for player names
+                              'w-48', // Non-Striker - much wider for player names
+                              'w-48', // Bowler - much wider for player names
+                              'w-24', // Runs
+                              'w-64', // Wicket Description - much wider for text
+                              'w-36', // Wide - wider for extras info
+                              'w-36', // No Ball - wider for extras info
+                              'w-24', // Byes
+                              'w-24', // LB
+                              'w-64'  // Commentary - much wider for text
                             ];
                             return (
                               <th key={h} className={`px-4 py-4 text-left font-semibold text-blue-100 sticky top-0 z-10 border-r border-white/10 uppercase tracking-wide text-xs ${columnWidths[index] || 'w-24'}`}>
@@ -1309,19 +1309,19 @@ export default function LiveScoreCSVPage() {
                             <tr key={r} className={`transition-all duration-200 hover:bg-white/10 ${r % 2 === 0 ? 'bg-white/5' : 'bg-white/2'}`}>
                               {row.map((cell, c) => {
                                 const columnWidths = [
-                                  'w-20', // Over
-                                  'w-16', // Ball  
+                                  'w-24', // Over
+                                  'w-20', // Ball  
                                   'w-16', // Innings
-                                  'w-32', // Striker
-                                  'w-32', // Non-Striker
-                                  'w-32', // Bowler
-                                  'w-20', // Runs
-                                  'w-32', // Wicket Description
-                                  'w-24', // Wide
-                                  'w-24', // No Ball
-                                  'w-20', // Byes
-                                  'w-20', // LB
-                                  'w-32'  // Commentary
+                                  'w-48', // Striker - much wider for player names
+                                  'w-48', // Non-Striker - much wider for player names
+                                  'w-48', // Bowler - much wider for player names
+                                  'w-24', // Runs
+                                  'w-64', // Wicket Description - much wider for text
+                                  'w-36', // Wide - wider for extras info
+                                  'w-36', // No Ball - wider for extras info
+                                  'w-24', // Byes
+                                  'w-24', // LB
+                                  'w-64'  // Commentary - much wider for text
                                 ];
                                 return (
                                   <td key={c} className={`px-4 py-3 align-top border-r border-white/5 ${columnWidths[c] || 'w-24'}`}>
@@ -1377,24 +1377,24 @@ export default function LiveScoreCSVPage() {
                 
                 <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm">
                   <div className="overflow-x-auto">
-                    <table className="w-full min-w-[1200px] text-sm">
+                    <table className="w-full min-w-[1600px] text-sm">
                       <thead className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-sm border-b border-white/10">
                         <tr>
                           {HEADERS.map((h, index) => {
                             const columnWidths = [
-                              'w-20', // Over
-                              'w-16', // Ball  
+                              'w-24', // Over
+                              'w-20', // Ball  
                               'w-16', // Innings
-                              'w-32', // Striker
-                              'w-32', // Non-Striker
-                              'w-32', // Bowler
-                              'w-20', // Runs
-                              'w-32', // Wicket Description
-                              'w-24', // Wide
-                              'w-24', // No Ball
-                              'w-20', // Byes
-                              'w-20', // LB
-                              'w-32'  // Commentary
+                              'w-48', // Striker - much wider for player names
+                              'w-48', // Non-Striker - much wider for player names
+                              'w-48', // Bowler - much wider for player names
+                              'w-24', // Runs
+                              'w-64', // Wicket Description - much wider for text
+                              'w-36', // Wide - wider for extras info
+                              'w-36', // No Ball - wider for extras info
+                              'w-24', // Byes
+                              'w-24', // LB
+                              'w-64'  // Commentary - much wider for text
                             ];
                             return (
                               <th key={h} className={`px-4 py-4 text-left font-semibold text-purple-100 sticky top-0 z-10 border-r border-white/10 uppercase tracking-wide text-xs ${columnWidths[index] || 'w-24'}`}>
@@ -1414,19 +1414,19 @@ export default function LiveScoreCSVPage() {
                             <tr key={r} className={`transition-all duration-200 hover:bg-white/10 ${r % 2 === 0 ? 'bg-white/5' : 'bg-white/2'}`}>
                               {row.map((cell, c) => {
                                 const columnWidths = [
-                                  'w-20', // Over
-                                  'w-16', // Ball  
+                                  'w-24', // Over
+                                  'w-20', // Ball  
                                   'w-16', // Innings
-                                  'w-32', // Striker
-                                  'w-32', // Non-Striker
-                                  'w-32', // Bowler
-                                  'w-20', // Runs
-                                  'w-32', // Wicket Description
-                                  'w-24', // Wide
-                                  'w-24', // No Ball
-                                  'w-20', // Byes
-                                  'w-20', // LB
-                                  'w-32'  // Commentary
+                                  'w-48', // Striker - much wider for player names
+                                  'w-48', // Non-Striker - much wider for player names
+                                  'w-48', // Bowler - much wider for player names
+                                  'w-24', // Runs
+                                  'w-64', // Wicket Description - much wider for text
+                                  'w-36', // Wide - wider for extras info
+                                  'w-36', // No Ball - wider for extras info
+                                  'w-24', // Byes
+                                  'w-24', // LB
+                                  'w-64'  // Commentary - much wider for text
                                 ];
                                 return (
                                   <td key={c} className={`px-4 py-3 align-top border-r border-white/5 ${columnWidths[c] || 'w-24'}`}>
