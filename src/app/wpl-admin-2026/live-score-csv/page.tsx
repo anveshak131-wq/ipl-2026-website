@@ -39,6 +39,66 @@ export default function LiveScoreCSVPage() {
   const [teamIdMap, setTeamIdMap] = useState<{ [shortName: string]: string }>({});
   const [allPlayers, setAllPlayers] = useState<any[]>([]);
   
+  // Load data from localStorage on component mount
+  useEffect(() => {
+    const savedWicketData = localStorage.getItem('liveScoreWicketData');
+    const savedExtrasData = localStorage.getItem('liveScoreExtrasData');
+    const savedCurrentBatsmen = localStorage.getItem('liveScoreCurrentBatsmen');
+    const savedCurrentOver = localStorage.getItem('liveScoreCurrentOver');
+    
+    if (savedWicketData) {
+      try {
+        setWicketData(JSON.parse(savedWicketData));
+      } catch (e) {
+        console.error('Error loading wicket data:', e);
+      }
+    }
+    
+    if (savedExtrasData) {
+      try {
+        setExtrasData(JSON.parse(savedExtrasData));
+      } catch (e) {
+        console.error('Error loading extras data:', e);
+      }
+    }
+    
+    if (savedCurrentBatsmen) {
+      try {
+        setCurrentBatsmen(JSON.parse(savedCurrentBatsmen));
+      } catch (e) {
+        console.error('Error loading current batsmen:', e);
+      }
+    }
+    
+    if (savedCurrentOver) {
+      try {
+        setCurrentOver(JSON.parse(savedCurrentOver));
+      } catch (e) {
+        console.error('Error loading current over:', e);
+      }
+    }
+  }, []);
+
+  // Save wicket data to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('liveScoreWicketData', JSON.stringify(wicketData));
+  }, [wicketData]);
+
+  // Save extras data to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('liveScoreExtrasData', JSON.stringify(extrasData));
+  }, [extrasData]);
+
+  // Save current batsmen to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('liveScoreCurrentBatsmen', JSON.stringify(currentBatsmen));
+  }, [currentBatsmen]);
+
+  // Save current over to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('liveScoreCurrentOver', JSON.stringify(currentOver));
+  }, [currentOver]);
+
   // Wicket data state
   const [wicketData, setWicketData] = useState<{ [rowIndex: number]: { 
     hasWicket: boolean; 
