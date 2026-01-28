@@ -947,9 +947,6 @@ export default function LiveScoreWithAIPage() {
                                   ({totalRuns} total)
                                 </span>
                               )}
-                              <span className="text-gray-400 text-xs">
-                                {row[3]} vs {row[5]}
-                              </span>
                             </div>
                           );
                         })}
