@@ -47,10 +47,28 @@ export default function LiveScoreWithAIPage() {
         const resp = await fetch(`/api/wpl-live-score/save?matchId=${encodeURIComponent(selectedMatch)}`);
         if (resp.ok) {
           const data = await resp.json();
+          console.log('=== LIVE SCORE AI DEBUG ===');
+          console.log('Raw data from API:', data);
+          console.log('Data type:', typeof data);
+          console.log('Is array?', Array.isArray(data));
+          console.log('Has rows property?', data?.rows);
+          
           if (Array.isArray(data.rows)) {
+            console.log('Using data.rows, length:', data.rows.length);
+            if (data.rows.length > 0) {
+              console.log('Sample row:', data.rows[0]);
+              console.log('Row length:', data.rows[0].length);
+            }
             setLiveData(data.rows);
           } else if (Array.isArray(data)) {
+            console.log('Using data directly, length:', data.length);
+            if (data.length > 0) {
+              console.log('Sample row:', data[0]);
+              console.log('Row length:', data[0].length);
+            }
             setLiveData(data);
+          } else {
+            console.log('Unexpected data format:', data);
           }
         }
       } catch (error) {
@@ -440,6 +458,16 @@ export default function LiveScoreWithAIPage() {
                       </h4>
                       <div className="space-y-3">
                         {liveData.slice(-3).reverse().map((row, index) => {
+                          console.log(`=== BALL DEBUG ${index} ===`);
+                          console.log('Full row data:', row);
+                          console.log('Row length:', row.length);
+                          console.log('Runs (col 6):', row[6]);
+                          console.log('Wide (col 7):', row[7]);
+                          console.log('No Ball (col 8):', row[8]);
+                          console.log('Byes (col 9):', row[9]);
+                          console.log('LB (col 10):', row[10]);
+                          console.log('Wicket (col 11):', row[11]);
+                          
                           const runs = parseInt(row[6]) || 0;
                           const hasWicket = row[11] === 'true' || row[11] === true;
                           const hasWide = row[7] === 'true' || row[7] === true;
@@ -450,12 +478,21 @@ export default function LiveScoreWithAIPage() {
                           const isSix = runs === 6 && !hasWide && !hasNoBall;
                           const ballNumber = `${row[0]}.${row[1]}`;
                           
+                          console.log('Parsed values:', {
+                            runs, hasWicket, hasWide, hasNoBall, hasByes, hasLB,
+                            isBoundary, isSix, ballNumber
+                          });
+                          
                           // Calculate total runs for this ball
                           const wideRuns = hasWide ? (parseInt(row[7]) || 1) : 0;
                           const noBallRuns = hasNoBall ? (parseInt(row[8]) || 1) : 0;
                           const byeRuns = hasByes ? (parseInt(row[9]) || 0) : 0;
                           const lbRuns = hasLB ? (parseInt(row[10]) || 0) : 0;
                           const totalRuns = runs + wideRuns + noBallRuns + byeRuns + lbRuns;
+                          
+                          console.log('Runs calculation:', {
+                            wideRuns, noBallRuns, byeRuns, lbRuns, totalRuns
+                          });
                           
                           // Determine event type and icon
                           let eventType = '';
@@ -499,6 +536,8 @@ export default function LiveScoreWithAIPage() {
                             eventIcon = '🏃';
                             eventColor = 'text-blue-400';
                           }
+                          
+                          console.log('Event determination:', { eventType, eventIcon, eventColor });
                           
                           return (
                             <div key={index} className="bg-white/5 rounded-lg p-3 border border-white/10 hover:bg-white/10 transition-all duration-200">
