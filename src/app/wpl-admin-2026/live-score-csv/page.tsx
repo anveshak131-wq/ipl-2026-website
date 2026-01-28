@@ -1272,14 +1272,31 @@ export default function LiveScoreCSVPage() {
                 
                 <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm">
                   <div className="overflow-x-auto">
-                    <table className="min-w-full text-sm">
+                    <table className="w-full min-w-[1200px] text-sm">
                       <thead className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm border-b border-white/10">
                         <tr>
-                          {HEADERS.map((h) => (
-                            <th key={h} className="px-4 py-4 text-left font-semibold text-blue-100 sticky top-0 z-10 border-r border-white/10 uppercase tracking-wide text-xs">
-                              {h}
-                            </th>
-                          ))}
+                          {HEADERS.map((h, index) => {
+                            const columnWidths = [
+                              'w-20', // Over
+                              'w-16', // Ball  
+                              'w-16', // Innings
+                              'w-32', // Striker
+                              'w-32', // Non-Striker
+                              'w-32', // Bowler
+                              'w-20', // Runs
+                              'w-32', // Wicket Description
+                              'w-24', // Wide
+                              'w-24', // No Ball
+                              'w-20', // Byes
+                              'w-20', // LB
+                              'w-32'  // Commentary
+                            ];
+                            return (
+                              <th key={h} className={`px-4 py-4 text-left font-semibold text-blue-100 sticky top-0 z-10 border-r border-white/10 uppercase tracking-wide text-xs ${columnWidths[index] || 'w-24'}`}>
+                                {h}
+                              </th>
+                            );
+                          })}
                           <th className="px-4 py-4 sticky top-0 z-10 border-r border-white/10 text-blue-100 uppercase tracking-wide text-xs font-semibold">
                             Actions
                           </th>
@@ -1290,11 +1307,28 @@ export default function LiveScoreCSVPage() {
                           const originalIndex = rows.indexOf(row);
                           return (
                             <tr key={r} className={`transition-all duration-200 hover:bg-white/10 ${r % 2 === 0 ? 'bg-white/5' : 'bg-white/2'}`}>
-                              {row.map((cell, c) => (
-                                <td key={c} className="px-4 py-3 align-top border-r border-white/5">
-                                  {renderCellContent(cell, c, originalIndex, '')}
-                                </td>
-                              ))}
+                              {row.map((cell, c) => {
+                                const columnWidths = [
+                                  'w-20', // Over
+                                  'w-16', // Ball  
+                                  'w-16', // Innings
+                                  'w-32', // Striker
+                                  'w-32', // Non-Striker
+                                  'w-32', // Bowler
+                                  'w-20', // Runs
+                                  'w-32', // Wicket Description
+                                  'w-24', // Wide
+                                  'w-24', // No Ball
+                                  'w-20', // Byes
+                                  'w-20', // LB
+                                  'w-32'  // Commentary
+                                ];
+                                return (
+                                  <td key={c} className={`px-4 py-3 align-top border-r border-white/5 ${columnWidths[c] || 'w-24'}`}>
+                                    {renderCellContent(cell, c, originalIndex, '')}
+                                  </td>
+                                );
+                              })}
                               <td className="px-4 py-3 align-top border-r border-white/5 text-right">
                                 <button 
                                   onClick={() => removeRow(originalIndex)} 
@@ -1343,14 +1377,31 @@ export default function LiveScoreCSVPage() {
                 
                 <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm">
                   <div className="overflow-x-auto">
-                    <table className="min-w-full text-sm">
+                    <table className="w-full min-w-[1200px] text-sm">
                       <thead className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 backdrop-blur-sm border-b border-white/10">
                         <tr>
-                          {HEADERS.map((h) => (
-                            <th key={h} className="px-4 py-4 text-left font-semibold text-purple-100 sticky top-0 z-10 border-r border-white/10 uppercase tracking-wide text-xs">
-                              {h}
-                            </th>
-                          ))}
+                          {HEADERS.map((h, index) => {
+                            const columnWidths = [
+                              'w-20', // Over
+                              'w-16', // Ball  
+                              'w-16', // Innings
+                              'w-32', // Striker
+                              'w-32', // Non-Striker
+                              'w-32', // Bowler
+                              'w-20', // Runs
+                              'w-32', // Wicket Description
+                              'w-24', // Wide
+                              'w-24', // No Ball
+                              'w-20', // Byes
+                              'w-20', // LB
+                              'w-32'  // Commentary
+                            ];
+                            return (
+                              <th key={h} className={`px-4 py-4 text-left font-semibold text-purple-100 sticky top-0 z-10 border-r border-white/10 uppercase tracking-wide text-xs ${columnWidths[index] || 'w-24'}`}>
+                                {h}
+                              </th>
+                            );
+                          })}
                           <th className="px-4 py-4 sticky top-0 z-10 border-r border-white/10 text-purple-100 uppercase tracking-wide text-xs font-semibold">
                             Actions
                           </th>
@@ -1361,11 +1412,28 @@ export default function LiveScoreCSVPage() {
                           const originalIndex = rows.indexOf(row);
                           return (
                             <tr key={r} className={`transition-all duration-200 hover:bg-white/10 ${r % 2 === 0 ? 'bg-white/5' : 'bg-white/2'}`}>
-                              {row.map((cell, c) => (
-                                <td key={c} className="px-4 py-3 align-top border-r border-white/5">
-                                  {renderCellContent(cell, c, originalIndex, '')}
-                                </td>
-                              ))}
+                              {row.map((cell, c) => {
+                                const columnWidths = [
+                                  'w-20', // Over
+                                  'w-16', // Ball  
+                                  'w-16', // Innings
+                                  'w-32', // Striker
+                                  'w-32', // Non-Striker
+                                  'w-32', // Bowler
+                                  'w-20', // Runs
+                                  'w-32', // Wicket Description
+                                  'w-24', // Wide
+                                  'w-24', // No Ball
+                                  'w-20', // Byes
+                                  'w-20', // LB
+                                  'w-32'  // Commentary
+                                ];
+                                return (
+                                  <td key={c} className={`px-4 py-3 align-top border-r border-white/5 ${columnWidths[c] || 'w-24'}`}>
+                                    {renderCellContent(cell, c, originalIndex, '')}
+                                  </td>
+                                );
+                              })}
                               <td className="px-4 py-3 align-top border-r border-white/5 text-right">
                                 <button 
                                   onClick={() => removeRow(originalIndex)} 
