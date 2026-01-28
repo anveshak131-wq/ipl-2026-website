@@ -1147,43 +1147,6 @@ export default function LiveScoreCSVPage() {
                       Export CSV
                     </span>
                   </button>
-                  <button 
-                    onClick={saveRows} 
-                    className="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl font-semibold hover:from-green-700 hover:to-green-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-green-500/25 disabled:opacity-60 disabled:transform-none disabled:hover:scale-100" 
-                    disabled={saveStatus==='saving'}
-                  >
-                    <span className="flex items-center gap-2">
-                      {saveStatus === 'saving' ? (
-                        <>
-                          <svg className="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                          </svg>
-                          Saving...
-                        </>
-                      ) : saveStatus === 'success' ? (
-                        <>
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                          Saved!
-                        </>
-                      ) : saveStatus === 'error' ? (
-                        <>
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                          Error!
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V2" />
-                          </svg>
-                          Save Data
-                        </>
-                      )}
-                    </span>
-                  </button>
                 </div>
               </div>
             </div>
@@ -1498,6 +1461,47 @@ export default function LiveScoreCSVPage() {
                   </button>
                 </div>
               </div>
+            </div>
+
+            {/* Save Data Button at Bottom */}
+            <div className="mb-8 flex justify-center">
+              <button 
+                onClick={saveRows} 
+                className="px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl font-semibold hover:from-green-700 hover:to-green-800 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-green-500/25 disabled:opacity-60 disabled:transform-none disabled:hover:scale-100 text-lg"
+                disabled={saveStatus==='saving'}
+              >
+                <span className="flex items-center gap-3">
+                  {saveStatus === 'saving' ? (
+                    <>
+                      <svg className="w-6 h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      Saving...
+                    </>
+                  ) : saveStatus === 'success' ? (
+                    <>
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Saved!
+                    </>
+                  ) : saveStatus === 'error' ? (
+                    <>
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                      Error!
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V2" />
+                      </svg>
+                      Save Data
+                    </>
+                  )}
+                </span>
+              </button>
             </div>
         </div>
       </main>
