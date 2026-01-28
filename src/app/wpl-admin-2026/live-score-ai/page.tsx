@@ -312,6 +312,21 @@ export default function LiveScoreWithAIPage() {
 
   // Function to format wicket information like descriptive commentary
   const formatWicketInfo = (batsman: string, wicketType: string, wicketTaker: string, bowler: string, runs: number, balls: number) => {
+    // If wicketTaker contains full description (like "Harmanpreet Kaur caught by Richa Ghosh bowler de Klerk"), use it directly
+    if (wicketTaker && (wicketTaker.includes('caught by') || wicketTaker.includes('bowled by') || wicketTaker.includes('lbw by') || wicketTaker.includes('stumped by'))) {
+      let wicketInfo = wicketTaker;
+      
+      // Add runs and balls if available
+      if (runs > 0 && balls > 0) {
+        wicketInfo += ` ${runs}(${balls})`;
+      } else if (runs > 0) {
+        wicketInfo += ` ${runs}`;
+      }
+      
+      return wicketInfo;
+    }
+    
+    // Otherwise, use the dropdown-based format
     if (!wicketType) return `${batsman} vs ${bowler}`;
     
     let wicketInfo = '';
