@@ -630,10 +630,14 @@ export default function LiveScoreWithAIPage() {
                             const runs = parseInt(row[6]) || 0;
                             const balls = parseInt(row[1]) || 1; // Ball number as approximation
                             
+                            // Use the actual wicket type from the dropdown
+                            const wicketType = wicket.wicketType || '';
+                            const wicketTaker = wicket.wicketTaker || '';
+                            
                             eventType = formatWicketInfo(
                               batsman,
-                              wicket.wicketType || '',
-                              wicket.wicketTaker || '',
+                              wicketType,
+                              wicketTaker,
                               bowler,
                               runs,
                               balls
@@ -785,10 +789,14 @@ export default function LiveScoreWithAIPage() {
                                     const runs = parseInt(ball[6]) || 0;
                                     const balls = parseInt(ball[1]) || 1;
                                     
+                                    // Use the actual wicket type from the dropdown
+                                    const wicketType = wicket.wicketType || '';
+                                    const wicketTaker = wicket.wicketTaker || '';
+                                    
                                     const wicketDetails = formatWicketInfo(
                                       batsman,
-                                      wicket.wicketType || '',
-                                      wicket.wicketTaker || '',
+                                      wicketType,
+                                      wicketTaker,
                                       bowler,
                                       runs,
                                       balls
@@ -879,10 +887,14 @@ export default function LiveScoreWithAIPage() {
                             const runs = parseInt(row[6]) || 0;
                             const balls = parseInt(row[1]) || 1;
                             
+                            // Use the actual wicket type from the dropdown
+                            const wicketType = wicket.wicketType || '';
+                            const wicketTaker = wicket.wicketTaker || '';
+                            
                             eventText = formatWicketInfo(
                               batsman,
-                              wicket.wicketType || '',
-                              wicket.wicketTaker || '',
+                              wicketType,
+                              wicketTaker,
                               bowler,
                               runs,
                               balls
