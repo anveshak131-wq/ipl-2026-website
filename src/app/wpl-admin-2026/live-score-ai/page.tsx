@@ -94,24 +94,58 @@ export default function LiveScoreWithAIPage() {
           const hasWicket = row[11] === 'true' || row[11] === true;
           const hasWide = row[7] === 'true' || row[7] === true;
           const hasNoBall = row[8] === 'true' || row[8] === true;
+          const hasByes = row[9] && row[9] !== '' && row[9] !== '0';
+          const hasLB = row[10] && row[10] !== '' && row[10] !== '0';
           
+          // Count balls (exclude wides and no balls from ball count)
           if (!hasWide && !hasNoBall) {
             totalBalls++;
           }
           
+          // Count wickets
           if (hasWicket) {
             totalWickets++;
           }
           
+          // Add all runs including extras
           totalRuns += runs;
+          if (hasWide) totalRuns += (parseInt(row[7]) || 1);
+          if (hasNoBall) totalRuns += (parseInt(row[8]) || 1);
+          if (hasByes) totalRuns += (parseInt(row[9]) || 0);
+          if (hasLB) totalRuns += (parseInt(row[10]) || 0);
           
           // Get last 3 balls for commentary
           if (index >= data.length - 3) {
+            let ballEvent = '';
+            if (hasWicket) {
+              ballEvent = 'wicket';
+            } else if (hasWide) {
+              ballEvent = 'wide';
+            } else if (hasNoBall) {
+              ballEvent = 'no-ball';
+            } else if (hasByes) {
+              ballEvent = 'byes';
+            } else if (hasLB) {
+              ballEvent = 'leg-bye';
+            } else {
+              ballEvent = 'normal';
+            }
+            
             lastFewBalls.push({
-              runs,
+              runs: totalRuns - (data[index - 1] ? 
+                (parseInt(data[index - 1][6]) || 0) + 
+                (data[index - 1][7] === 'true' ? (parseInt(data[index - 1][7]) || 1) : 0) +
+                (data[index - 1][8] === 'true' ? (parseInt(data[index - 1][8]) || 1) : 0) +
+                (data[index - 1][9] && data[index - 1][9] !== '' && data[index - 1][9] !== '0' ? (parseInt(data[index - 1][9]) || 0) : 0) +
+                (data[index - 1][10] && data[index - 1][10] !== '' && data[index - 1][10] !== '0' ? (parseInt(data[index - 1][10]) || 0) : 0) : 0),
               hasWicket,
+              hasWide,
+              hasNoBall,
+              hasByes,
+              hasLB,
               striker: row[3],
-              bowler: row[5]
+              bowler: row[5],
+              event: ballEvent
             });
           }
         });
@@ -152,6 +186,22 @@ export default function LiveScoreWithAIPage() {
         if (lastBall?.hasWicket) {
           basicCommentary = `💥 **WICKET!** ${lastBall.striker} is out! Score: ${currentInnings.runs}/${currentInnings.wickets} (${currentInnings.overs} overs)`;
           enhancedCommentary = `⚡ **Dramatic Moment!** \n\n💥 **WICKET FALLS!** ${lastBall.striker} departs after a fighting innings. The bowling side strikes back through ${lastBall.bowler}. \n\n**Current Situation:** ${currentInnings.runs}/${currentInnings.wickets} (${currentInnings.overs} overs) \n**Run Rate:** ${currentInnings.runRate} runs per over`;
+        } else if (lastBall?.hasWide) {
+          const wideRuns = lastBall.runs || 1;
+          basicCommentary = `📏 **WIDE!** ${wideRuns} run${wideRuns !== 1 ? 's' : ''} added to total. Score: ${currentInnings.runs}/${currentInnings.wickets} (${currentInnings.overs} overs)`;
+          enhancedCommentary = `📏 **Bowling Error!** \n\n📏 **WIDE BALL!** The bowler loses control and concedes ${wideRuns} run${wideRuns !== 1 ? 's' : ''}. Extra runs added to the total. \n\n**Current Situation:** ${currentInnings.runs}/${currentInnings.wickets} (${currentInnings.overs} overs) \n**Run Rate:** ${currentInnings.runRate} runs per over`;
+        } else if (lastBall?.hasNoBall) {
+          const noBallRuns = lastBall.runs || 1;
+          basicCommentary = `⚠️ **NO BALL!** Free hit! ${noBallRuns} run${noBallRuns !== 1 ? 's' : ''} added. Score: ${currentInnings.runs}/${currentInnings.wickets} (${currentInnings.overs} overs)`;
+          enhancedCommentary = `⚠️ **No Ball Delivered!** \n\n⚠️ **ILLEGAL DELIVERY!** The bowler oversteps and concedes ${noBallRuns} run${noBallRuns !== 1 ? 's' : ''} plus a free hit for the batsman. \n\n**Current Situation:** ${currentInnings.runs}/${currentInnings.wickets} (${currentInnings.overs} overs) \n**Run Rate:** ${currentInnings.runRate} runs per over`;
+        } else if (lastBall?.hasByes) {
+          const byeRuns = lastBall.runs || 0;
+          basicCommentary = `🏃 **BYES!** ${byeRuns} run${byeRuns !== 1 ? 's' : ''} taken as byes. Score: ${currentInnings.runs}/${currentInnings.wickets} (${currentInnings.overs} overs)`;
+          enhancedCommentary = `🏃 **Quick Running!** \n\n🏃 **BYES TAKEN!** The batsmen run ${byeRuns} bye${byeRuns !== 1 ? 's' : ''} as the ball evades the keeper. Smart running between the wickets. \n\n**Current Situation:** ${currentInnings.runs}/${currentInnings.wickets} (${currentInnings.overs} overs) \n**Run Rate:** ${currentInnings.runRate} runs per over`;
+        } else if (lastBall?.hasLB) {
+          const lbRuns = lastBall.runs || 0;
+          basicCommentary = `🦵 **LEG BYE!** ${lbRuns} run${lbRuns !== 1 ? 's' : ''} taken. Score: ${currentInnings.runs}/${currentInnings.wickets} (${currentInnings.overs} overs)`;
+          enhancedCommentary = `🦵 **Leg Bye Taken!** \n\n🦵 **LEG BYES!** The ball deflects off the pads and ${lbRuns} run${lbRuns !== 1 ? 's' : ''} are taken. Good piece of running by the batting pair. \n\n**Current Situation:** ${currentInnings.runs}/${currentInnings.wickets} (${currentInnings.overs} overs) \n**Run Rate:** ${currentInnings.runRate} runs per over`;
         } else if (lastBall?.runs >= 4) {
           basicCommentary = `🎯 **BOUNDARY!** ${lastBall.runs} runs by ${lastBall.striker}! Score: ${currentInnings.runs}/${currentInnings.wickets} (${currentInnings.overs} overs)`;
           enhancedCommentary = `🔥 **Explosive Batting!** \n\n🎯 **BEAUTIFUL SHOT!** ${lastBall.striker} finds the rope for ${lastBall.runs} runs! The crowd is on its feet as the ball races to the boundary. \n\n**Current Situation:** ${currentInnings.runs}/${currentInnings.wickets} (${currentInnings.overs} overs) \n**Run Rate:** ${currentInnings.runRate} runs per over`;
@@ -191,16 +241,25 @@ export default function LiveScoreWithAIPage() {
       const hasWicket = row[11] === 'true' || row[11] === true;
       const hasWide = row[7] === 'true' || row[7] === true;
       const hasNoBall = row[8] === 'true' || row[8] === true;
+      const hasByes = row[9] && row[9] !== '' && row[9] !== '0';
+      const hasLB = row[10] && row[10] !== '' && row[10] !== '0';
       
+      // Count balls (exclude wides and no balls from ball count)
       if (!hasWide && !hasNoBall) {
         totalBalls++;
       }
       
+      // Count wickets
       if (hasWicket) {
         totalWickets++;
       }
       
+      // Add all runs including extras
       totalRuns += runs;
+      if (hasWide) totalRuns += (parseInt(row[7]) || 1);
+      if (hasNoBall) totalRuns += (parseInt(row[8]) || 1);
+      if (hasByes) totalRuns += (parseInt(row[9]) || 0);
+      if (hasLB) totalRuns += (parseInt(row[10]) || 0);
     });
     
     const overs = Math.floor(totalBalls / 6);
@@ -383,9 +442,63 @@ export default function LiveScoreWithAIPage() {
                         {liveData.slice(-3).reverse().map((row, index) => {
                           const runs = parseInt(row[6]) || 0;
                           const hasWicket = row[11] === 'true' || row[11] === true;
-                          const isBoundary = runs >= 4;
-                          const isSix = runs === 6;
+                          const hasWide = row[7] === 'true' || row[7] === true;
+                          const hasNoBall = row[8] === 'true' || row[8] === true;
+                          const hasByes = row[9] && row[9] !== '' && row[9] !== '0';
+                          const hasLB = row[10] && row[10] !== '' && row[10] !== '0';
+                          const isBoundary = runs >= 4 && !hasWide && !hasNoBall;
+                          const isSix = runs === 6 && !hasWide && !hasNoBall;
                           const ballNumber = `${row[0]}.${row[1]}`;
+                          
+                          // Calculate total runs for this ball
+                          const wideRuns = hasWide ? (parseInt(row[7]) || 1) : 0;
+                          const noBallRuns = hasNoBall ? (parseInt(row[8]) || 1) : 0;
+                          const byeRuns = hasByes ? (parseInt(row[9]) || 0) : 0;
+                          const lbRuns = hasLB ? (parseInt(row[10]) || 0) : 0;
+                          const totalRuns = runs + wideRuns + noBallRuns + byeRuns + lbRuns;
+                          
+                          // Determine event type and icon
+                          let eventType = '';
+                          let eventIcon = '';
+                          let eventColor = '';
+                          
+                          if (hasWicket) {
+                            eventType = 'Wicket';
+                            eventIcon = '💥';
+                            eventColor = 'text-red-400';
+                          } else if (hasWide) {
+                            eventType = `Wide ${wideRuns} run${wideRuns !== 1 ? 's' : ''}`;
+                            eventIcon = '📏';
+                            eventColor = 'text-yellow-400';
+                          } else if (hasNoBall) {
+                            eventType = `No Ball ${noBallRuns} run${noBallRuns !== 1 ? 's' : ''}`;
+                            eventIcon = '⚠️';
+                            eventColor = 'text-orange-400';
+                          } else if (hasByes) {
+                            eventType = `Byes ${byeRuns} run${byeRuns !== 1 ? 's' : ''}`;
+                            eventIcon = '🏃';
+                            eventColor = 'text-cyan-400';
+                          } else if (hasLB) {
+                            eventType = `Leg Bye ${lbRuns} run${lbRuns !== 1 ? 's' : ''}`;
+                            eventIcon = '🦵';
+                            eventColor = 'text-teal-400';
+                          } else if (isSix) {
+                            eventType = 'Six';
+                            eventIcon = '⚡';
+                            eventColor = 'text-purple-400';
+                          } else if (isBoundary) {
+                            eventType = 'Boundary';
+                            eventIcon = '🎯';
+                            eventColor = 'text-green-400';
+                          } else if (runs === 0) {
+                            eventType = 'Dot ball';
+                            eventIcon = '🏏';
+                            eventColor = 'text-gray-400';
+                          } else {
+                            eventType = `${runs} run${runs !== 1 ? 's' : ''}`;
+                            eventIcon = '🏃';
+                            eventColor = 'text-blue-400';
+                          }
                           
                           return (
                             <div key={index} className="bg-white/5 rounded-lg p-3 border border-white/10 hover:bg-white/10 transition-all duration-200">
@@ -393,15 +506,18 @@ export default function LiveScoreWithAIPage() {
                                 <div className="flex items-center gap-3">
                                   <span className="text-gray-400 font-mono text-sm">{ballNumber}</span>
                                   <div className="flex items-center gap-2">
-                                    {hasWicket && <span className="text-red-400 text-lg">💥</span>}
-                                    {isSix && <span className="text-purple-400 text-lg">⚡</span>}
-                                    {isBoundary && !isSix && <span className="text-green-400 text-lg">🎯</span>}
-                                    {!hasWicket && !isBoundary && runs === 0 && <span className="text-gray-400 text-lg">🏏</span>}
-                                    {!hasWicket && !isBoundary && runs > 0 && runs < 4 && <span className="text-blue-400 text-lg">🏃</span>}
+                                    <span className={`${eventColor} text-lg`}>{eventIcon}</span>
                                   </div>
-                                  <span className="text-white font-medium">
-                                    {hasWicket ? 'Wicket' : `${runs} runs`}
-                                  </span>
+                                  <div>
+                                    <span className="text-white font-medium">
+                                      {eventType}
+                                    </span>
+                                    {totalRuns > 0 && (
+                                      <span className="text-gray-300 ml-2">
+                                        Total: {totalRuns} run{totalRuns !== 1 ? 's' : ''}
+                                      </span>
+                                    )}
+                                  </div>
                                   <span className="text-gray-400 text-sm">
                                     ({row[3]}{row[5] ? ` vs ${row[5]}` : ''})
                                   </span>
@@ -410,6 +526,10 @@ export default function LiveScoreWithAIPage() {
                                   {hasWicket && <span className="text-red-300 text-sm">OUT!</span>}
                                   {isSix && <span className="text-purple-300 text-sm">SIX!</span>}
                                   {isBoundary && !isSix && <span className="text-green-300 text-sm">FOUR!</span>}
+                                  {hasWide && <span className="text-yellow-300 text-sm">WIDE!</span>}
+                                  {hasNoBall && <span className="text-orange-300 text-sm">NO BALL!</span>}
+                                  {hasByes && <span className="text-cyan-300 text-sm">BYES!</span>}
+                                  {hasLB && <span className="text-teal-300 text-sm">LEG BYE!</span>}
                                 </div>
                               </div>
                             </div>
@@ -428,9 +548,29 @@ export default function LiveScoreWithAIPage() {
                         {(() => {
                           const currentOver = liveData[liveData.length - 1]?.[0] || '0';
                           const overBalls = liveData.filter(row => row[0] === currentOver);
-                          const overRuns = overBalls.reduce((sum, row) => sum + (parseInt(row[6]) || 0), 0);
-                          const overWickets = overBalls.filter(row => row[11] === 'true' || row[11] === true).length;
+                          
+                          // Calculate all runs and extras
+                          let overRuns = 0;
+                          let overWickets = 0;
                           const bowler = overBalls[0]?.[5] || 'Unknown';
+                          
+                          overBalls.forEach(ball => {
+                            const runs = parseInt(ball[6]) || 0;
+                            const hasWicket = ball[11] === 'true' || ball[11] === true;
+                            const hasWide = ball[7] === 'true' || ball[7] === true;
+                            const hasNoBall = ball[8] === 'true' || ball[8] === true;
+                            const hasByes = ball[9] && ball[9] !== '' && ball[9] !== '0';
+                            const hasLB = ball[10] && ball[10] !== '' && ball[10] !== '0';
+                            
+                            if (hasWicket) overWickets++;
+                            
+                            // Add all runs
+                            overRuns += runs;
+                            if (hasWide) overRuns += (parseInt(ball[7]) || 1);
+                            if (hasNoBall) overRuns += (parseInt(ball[8]) || 1);
+                            if (hasByes) overRuns += (parseInt(ball[9]) || 0);
+                            if (hasLB) overRuns += (parseInt(ball[10]) || 0);
+                          });
                           
                           return (
                             <div className="flex justify-between items-center">
@@ -446,15 +586,46 @@ export default function LiveScoreWithAIPage() {
                                 {overBalls.map((ball, idx) => {
                                   const runs = parseInt(ball[6]) || 0;
                                   const hasWicket = ball[11] === 'true' || ball[11] === true;
+                                  const hasWide = ball[7] === 'true' || ball[7] === true;
+                                  const hasNoBall = ball[8] === 'true' || ball[8] === true;
+                                  const hasByes = ball[9] && ball[9] !== '' && ball[9] !== '0';
+                                  const hasLB = ball[10] && ball[10] !== '' && ball[10] !== '0';
+                                  
+                                  let ballDisplay = '';
+                                  let ballColor = '';
+                                  
+                                  if (hasWicket) {
+                                    ballDisplay = 'W';
+                                    ballColor = 'bg-red-500/30 text-red-300 border border-red-400/30';
+                                  } else if (hasWide) {
+                                    ballDisplay = 'WD';
+                                    ballColor = 'bg-yellow-500/30 text-yellow-300 border border-yellow-400/30';
+                                  } else if (hasNoBall) {
+                                    ballDisplay = 'NB';
+                                    ballColor = 'bg-orange-500/30 text-orange-300 border border-orange-400/30';
+                                  } else if (hasByes) {
+                                    ballDisplay = 'B';
+                                    ballColor = 'bg-cyan-500/30 text-cyan-300 border border-cyan-400/30';
+                                  } else if (hasLB) {
+                                    ballDisplay = 'LB';
+                                    ballColor = 'bg-teal-500/30 text-teal-300 border border-teal-400/30';
+                                  } else if (runs === 6) {
+                                    ballDisplay = '6';
+                                    ballColor = 'bg-purple-500/30 text-purple-300 border border-purple-400/30';
+                                  } else if (runs >= 4) {
+                                    ballDisplay = '4';
+                                    ballColor = 'bg-green-500/30 text-green-300 border border-green-400/30';
+                                  } else if (runs > 0) {
+                                    ballDisplay = runs.toString();
+                                    ballColor = 'bg-blue-500/30 text-blue-300 border border-blue-400/30';
+                                  } else {
+                                    ballDisplay = '0';
+                                    ballColor = 'bg-gray-500/30 text-gray-300 border border-gray-400/30';
+                                  }
+                                  
                                   return (
-                                    <div key={idx} className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold
-                                      ${hasWicket ? 'bg-red-500/30 text-red-300 border border-red-400/30' : 
-                                        runs === 6 ? 'bg-purple-500/30 text-purple-300 border border-purple-400/30' :
-                                        runs >= 4 ? 'bg-green-500/30 text-green-300 border border-green-400/30' :
-                                        runs > 0 ? 'bg-blue-500/30 text-blue-300 border border-blue-400/30' :
-                                        'bg-gray-500/30 text-gray-300 border border-gray-400/30'}`}
-                                    >
-                                      {hasWicket ? 'W' : runs}
+                                    <div key={idx} className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${ballColor}`}>
+                                      {ballDisplay}
                                     </div>
                                   );
                                 })}
@@ -475,21 +646,76 @@ export default function LiveScoreWithAIPage() {
                         {liveData.map((row, index) => {
                           const runs = parseInt(row[6]) || 0;
                           const hasWicket = row[11] === 'true' || row[11] === true;
+                          const hasWide = row[7] === 'true' || row[7] === true;
+                          const hasNoBall = row[8] === 'true' || row[8] === true;
+                          const hasByes = row[9] && row[9] !== '' && row[9] !== '0';
+                          const hasLB = row[10] && row[10] !== '' && row[10] !== '0';
                           const ballNumber = `${row[0]}.${row[1]}`;
+                          
+                          // Calculate total runs
+                          const wideRuns = hasWide ? (parseInt(row[7]) || 1) : 0;
+                          const noBallRuns = hasNoBall ? (parseInt(row[8]) || 1) : 0;
+                          const byeRuns = hasByes ? (parseInt(row[9]) || 0) : 0;
+                          const lbRuns = hasLB ? (parseInt(row[10]) || 0) : 0;
+                          const totalRuns = runs + wideRuns + noBallRuns + byeRuns + lbRuns;
+                          
+                          // Determine icon and color
+                          let eventIcon = '';
+                          let eventColor = '';
+                          let eventText = '';
+                          
+                          if (hasWicket) {
+                            eventIcon = '💥';
+                            eventColor = 'text-red-400';
+                            eventText = 'Wicket';
+                          } else if (hasWide) {
+                            eventIcon = '📏';
+                            eventColor = 'text-yellow-400';
+                            eventText = `Wide ${wideRuns}`;
+                          } else if (hasNoBall) {
+                            eventIcon = '⚠️';
+                            eventColor = 'text-orange-400';
+                            eventText = `No Ball ${noBallRuns}`;
+                          } else if (hasByes) {
+                            eventIcon = '🏃';
+                            eventColor = 'text-cyan-400';
+                            eventText = `Byes ${byeRuns}`;
+                          } else if (hasLB) {
+                            eventIcon = '🦵';
+                            eventColor = 'text-teal-400';
+                            eventText = `Leg Bye ${lbRuns}`;
+                          } else if (runs === 6) {
+                            eventIcon = '⚡';
+                            eventColor = 'text-purple-400';
+                            eventText = 'Six';
+                          } else if (runs >= 4) {
+                            eventIcon = '🎯';
+                            eventColor = 'text-green-400';
+                            eventText = 'Boundary';
+                          } else if (runs > 0) {
+                            eventIcon = '🏃';
+                            eventColor = 'text-blue-400';
+                            eventText = `${runs} run${runs !== 1 ? 's' : ''}`;
+                          } else {
+                            eventIcon = '🏏';
+                            eventColor = 'text-gray-400';
+                            eventText = 'Dot ball';
+                          }
                           
                           return (
                             <div key={index} className="flex items-center gap-3 text-sm bg-white/5 rounded px-3 py-2 hover:bg-white/10 transition-all duration-200">
                               <span className="text-gray-400 font-mono w-12">{ballNumber}</span>
                               <div className="flex items-center gap-2">
-                                {hasWicket && <span className="text-red-400">💥</span>}
-                                {runs === 6 && <span className="text-purple-400">⚡</span>}
-                                {runs >= 4 && runs < 6 && <span className="text-green-400">🎯</span>}
-                                {runs > 0 && runs < 4 && <span className="text-blue-400">🏃</span>}
-                                {runs === 0 && !hasWicket && <span className="text-gray-400">🏏</span>}
+                                <span className={eventColor}>{eventIcon}</span>
                               </div>
                               <span className="text-white">
-                                {hasWicket ? 'Wicket' : `${runs} run${runs !== 1 ? 's' : ''}`}
+                                {eventText}
                               </span>
+                              {totalRuns > 0 && (
+                                <span className="text-gray-300 text-xs">
+                                  ({totalRuns} total)
+                                </span>
+                              )}
                               <span className="text-gray-400 text-xs">
                                 {row[3]} vs {row[5]}
                               </span>
