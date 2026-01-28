@@ -344,16 +344,16 @@ export default function LiveScoreWithAIPage() {
                   </div>
                 </div>
 
-                {/* Recent Balls */}
+                {/* All Balls */}
                 {liveData.length > 0 && (
                   <div className="mt-8 bg-gradient-to-br from-gray-500/20 to-gray-600/20 backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-2xl">
                     <h3 className="text-xl font-bold text-gray-100 mb-4 flex items-center gap-2">
                       <span className="w-3 h-3 bg-gray-400 rounded-full animate-pulse"></span>
-                      📊 Recent Balls
+                      📊 All Balls
                     </h3>
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto max-h-96 overflow-y-auto">
                       <table className="w-full text-sm">
-                        <thead>
+                        <thead className="sticky top-0 bg-gray-500/20 backdrop-blur-xl z-10">
                           <tr className="border-b border-white/10">
                             {HEADERS.map((header, index) => (
                               <th key={index} className="text-left p-2 text-gray-300 font-medium">
@@ -363,7 +363,7 @@ export default function LiveScoreWithAIPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          {liveData.slice(-5).reverse().map((row, rowIndex) => (
+                          {liveData.map((row, rowIndex) => (
                             <tr key={rowIndex} className="border-b border-white/5 hover:bg-white/5">
                               {row.map((cell, cellIndex) => (
                                 <td key={cellIndex} className="p-2 text-white">
