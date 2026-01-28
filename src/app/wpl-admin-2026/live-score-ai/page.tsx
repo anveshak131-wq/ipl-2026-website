@@ -21,9 +21,15 @@ export default function LiveScoreWithAIPage() {
   useEffect(() => {
     (async () => {
       try {
-        const matchesResp = await dataApi.matches();
-        if (matchesResp?.matches) {
-          setMatches(matchesResp.matches);
+        // Fetch matches (like scorecard page)
+        const data = await dataApi.getMatches('wpl');
+        console.log('=== MATCHES LIST DEBUG AI ===');
+        console.log('Fetched WPL matches:', data);
+        if (data && data.length > 0) {
+          setMatches(data);
+          setSelectedMatch(data[0].id);
+        } else {
+          console.log('No WPL matches found');
         }
       } catch (error) {
         console.error('Error loading matches:', error);
@@ -236,7 +242,7 @@ export default function LiveScoreWithAIPage() {
                 <option value="" className="bg-gray-800">Choose a match...</option>
                 {matches.map((match) => (
                   <option key={match.id} value={match.id} className="bg-gray-800">
-                    {match.name}
+                    {match.team1.name} vs {match.team2.name}
                   </option>
                 ))}
               </select>
