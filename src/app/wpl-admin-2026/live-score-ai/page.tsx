@@ -250,12 +250,23 @@ export default function LiveScoreWithAIPage() {
         
         if (lastBall?.hasWicket) {
           const actualRowIndex = liveData.findIndex(row => row[3] === lastBall.striker && row[5] === lastBall.bowler);
-          const wicket = actualRowIndex >= 0 ? wicketData[actualRowIndex] || {} : {};
+          const wicket = actualRowIndex >= 0 ? (wicketData[actualRowIndex] || { hasWicket: false, wicketType: '', wicketTaker: '' }) : { hasWicket: false, wicketType: '', wicketTaker: '' };
           const batsman = lastBall.striker || 'Unknown';
           const bowler = wicket.wicketTaker || lastBall.bowler || 'Unknown';
+          const runs = lastBall.runs || 0;
+          const balls = 1; // We don't have exact balls faced, using 1 as default
           
-          basicCommentary = `💥 **WICKET!** ${batsman} vs ${bowler} is out! Score: ${currentInnings.runs}/${currentInnings.wickets} (${currentInnings.overs} overs)`;
-          enhancedCommentary = `⚡ **Dramatic Moment!** \n\n💥 **WICKET FALLS!** ${batsman} departs after a fighting innings. The bowling side strikes back through ${bowler}. \n\n**Current Situation:** ${currentInnings.runs}/${currentInnings.wickets} (${currentInnings.overs} overs) \n**Run Rate:** ${currentInnings.runRate} runs per over`;
+          const wicketDetails = formatWicketInfo(
+            batsman,
+            wicket.wicketType || '',
+            wicket.wicketTaker || '',
+            bowler,
+            runs,
+            balls
+          );
+          
+          basicCommentary = `💥 **WICKET!** ${wicketDetails}. Score: ${currentInnings.runs}/${currentInnings.wickets} (${currentInnings.overs} overs)`;
+          enhancedCommentary = `⚡ **Dramatic Moment!** \n\n💥 **WICKET FALLS!** ${wicketDetails}. The bowling side celebrates this crucial breakthrough. \n\n**Current Situation:** ${currentInnings.runs}/${currentInnings.wickets} (${currentInnings.overs} overs) \n**Run Rate:** ${currentInnings.runRate} runs per over`;
         } else if (lastBall?.hasWide) {
           const wideRuns = lastBall.runs || 1;
           basicCommentary = `📏 **WIDE!** ${wideRuns} run${wideRuns !== 1 ? 's' : ''} added to total. Score: ${currentInnings.runs}/${currentInnings.wickets} (${currentInnings.overs} overs)`;
@@ -297,6 +308,61 @@ export default function LiveScoreWithAIPage() {
     } finally {
       setIsGeneratingCommentary(false);
     }
+  };
+
+  // Function to format wicket information like cricket notation
+  const formatWicketInfo = (batsman: string, wicketType: string, wicketTaker: string, bowler: string, runs: number, balls: number) => {
+    if (!wicketType) return `${batsman} vs ${bowler}`;
+    
+    let wicketInfo = batsman;
+    
+    switch (wicketType) {
+      case 'Caught':
+        wicketInfo += ` c ${wicketTaker} b ${bowler}`;
+        break;
+      case 'Caught and Bowled':
+        wicketInfo += ` c & b ${bowler}`;
+        break;
+      case 'Bowled':
+        wicketInfo += ` b ${bowler}`;
+        break;
+      case 'LBW':
+        wicketInfo += ` lbw ${bowler}`;
+        break;
+      case 'Stumped':
+        wicketInfo += ` st ${wicketTaker} b ${bowler}`;
+        break;
+      case 'Run Out':
+        wicketInfo += ` run out (${wicketTaker})`;
+        break;
+      case 'Hit Wicket':
+        wicketInfo += ` hit wicket ${bowler}`;
+        break;
+      case 'Obstructing the Field':
+        wicketInfo += ` obstructing the field ${bowler}`;
+        break;
+      case 'Handled the Ball':
+        wicketInfo += ` handled the ball ${bowler}`;
+        break;
+      case 'Timed Out':
+        wicketInfo += ` timed out`;
+        break;
+      case 'Mankading (Run out at non-striker end)':
+        wicketInfo += ` run out (mankading) ${bowler}`;
+        break;
+      default:
+        wicketInfo += ` ${wicketType.toLowerCase()} ${bowler}`;
+        break;
+    }
+    
+    // Add runs and balls if available
+    if (runs > 0 && balls > 0) {
+      wicketInfo += ` ${runs}(${balls})`;
+    } else if (runs > 0) {
+      wicketInfo += ` ${runs}`;
+    }
+    
+    return wicketInfo;
   };
 
   const calculateTeamTotal = (innings: string | number) => {
@@ -559,10 +625,20 @@ export default function LiveScoreWithAIPage() {
                             eventType = 'Wicket';
                             eventIcon = '💥';
                             eventColor = 'text-red-400';
-                            // Show "Batsman vs Bowler" format
+                            // Use the formatWicketInfo function to show complete wicket details
                             const batsman = row[3] || 'Unknown';
-                            const bowler = wicket.wicketTaker || row[5] || 'Unknown';
-                            eventType = `${batsman} vs ${bowler}`;
+                            const bowler = row[5] || 'Unknown';
+                            const runs = parseInt(row[6]) || 0;
+                            const balls = parseInt(row[1]) || 1; // Ball number as approximation
+                            
+                            eventType = formatWicketInfo(
+                              batsman,
+                              wicket.wicketType || '',
+                              wicket.wicketTaker || '',
+                              bowler,
+                              runs,
+                              balls
+                            );
                           } else if (hasWide) {
                             eventType = `Wide ${wideRuns} run${wideRuns !== 1 ? 's' : ''}`;
                             eventIcon = '📏';
@@ -704,11 +780,23 @@ export default function LiveScoreWithAIPage() {
                                   if (hasWicket) {
                                     ballDisplay = 'W';
                                     ballColor = 'bg-red-500/30 text-red-300 border border-red-400/30';
-                                    // Add title attribute to show batsman vs bowler on hover
+                                    // Add title attribute to show complete wicket details
                                     const batsman = ball[3] || 'Unknown';
-                                    const bowler = wicket.wicketTaker || ball[5] || 'Unknown';
+                                    const bowler = ball[5] || 'Unknown';
+                                    const runs = parseInt(ball[6]) || 0;
+                                    const balls = parseInt(ball[1]) || 1;
+                                    
+                                    const wicketDetails = formatWicketInfo(
+                                      batsman,
+                                      wicket.wicketType || '',
+                                      wicket.wicketTaker || '',
+                                      bowler,
+                                      runs,
+                                      balls
+                                    );
+                                    
                                     return (
-                                      <div key={idx} className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${ballColor}`} title={`${batsman} vs ${bowler}`}>
+                                      <div key={idx} className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${ballColor}`} title={wicketDetails}>
                                         {ballDisplay}
                                       </div>
                                     );
@@ -786,10 +874,20 @@ export default function LiveScoreWithAIPage() {
                           if (hasWicket) {
                             eventIcon = '💥';
                             eventColor = 'text-red-400';
-                            // Show "Batsman vs Bowler" format
+                            // Use the formatWicketInfo function to show complete wicket details
                             const batsman = row[3] || 'Unknown';
-                            const bowler = wicket.wicketTaker || row[5] || 'Unknown';
-                            eventText = `${batsman} vs ${bowler}`;
+                            const bowler = row[5] || 'Unknown';
+                            const runs = parseInt(row[6]) || 0;
+                            const balls = parseInt(row[1]) || 1;
+                            
+                            eventText = formatWicketInfo(
+                              batsman,
+                              wicket.wicketType || '',
+                              wicket.wicketTaker || '',
+                              bowler,
+                              runs,
+                              balls
+                            );
                           } else if (hasWide) {
                             eventIcon = '📏';
                             eventColor = 'text-yellow-400';
