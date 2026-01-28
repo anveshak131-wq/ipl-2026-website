@@ -344,36 +344,159 @@ export default function LiveScoreWithAIPage() {
                   </div>
                 </div>
 
-                {/* All Balls */}
+                {/* Game-Style Match View */}
                 {liveData.length > 0 && (
                   <div className="mt-8 bg-gradient-to-br from-gray-500/20 to-gray-600/20 backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-2xl">
-                    <h3 className="text-xl font-bold text-gray-100 mb-4 flex items-center gap-2">
+                    <h3 className="text-xl font-bold text-gray-100 mb-6 flex items-center gap-2">
                       <span className="w-3 h-3 bg-gray-400 rounded-full animate-pulse"></span>
-                      📊 All Balls
+                      📊 Live Match View
                     </h3>
-                    <div className="overflow-x-auto max-h-96 overflow-y-auto">
-                      <table className="w-full text-sm">
-                        <thead className="sticky top-0 bg-gray-500/20 backdrop-blur-xl z-10">
-                          <tr className="border-b border-white/10">
-                            {HEADERS.map((header, index) => (
-                              <th key={index} className="text-left p-2 text-gray-300 font-medium">
-                                {header}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {liveData.map((row, rowIndex) => (
-                            <tr key={rowIndex} className="border-b border-white/5 hover:bg-white/5">
-                              {row.map((cell, cellIndex) => (
-                                <td key={cellIndex} className="p-2 text-white">
-                                  {cell || '-'}
-                                </td>
-                              ))}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                    
+                    {/* Current Match Status */}
+                    <div className="mb-6 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl p-4 border border-white/10">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">🏏</span>
+                          <div>
+                            <div className="text-white font-bold text-lg">
+                              MI {calculateTeamTotal(1).runs}/{calculateTeamTotal(1).wickets} ({calculateTeamTotal(1).overs} ov) vs RCB
+                            </div>
+                            <div className="text-gray-300 text-sm">
+                              {calculateTeamTotal(2).runs > 0 && `RCB ${calculateTeamTotal(2).runs}/${calculateTeamTotal(2).wickets} (${calculateTeamTotal(2).overs} ov)`}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-green-400 font-bold">LIVE</div>
+                          <div className="text-gray-400 text-sm">Updated 5s ago</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Last 3 Balls */}
+                    <div className="mb-6">
+                      <h4 className="text-lg font-semibold text-gray-200 mb-3 flex items-center gap-2">
+                        <span className="text-xl">🎯</span>
+                        Last 3 Balls
+                      </h4>
+                      <div className="space-y-3">
+                        {liveData.slice(-3).reverse().map((row, index) => {
+                          const runs = parseInt(row[6]) || 0;
+                          const hasWicket = row[11] === 'true' || row[11] === true;
+                          const isBoundary = runs >= 4;
+                          const isSix = runs === 6;
+                          const ballNumber = `${row[0]}.${row[1]}`;
+                          
+                          return (
+                            <div key={index} className="bg-white/5 rounded-lg p-3 border border-white/10 hover:bg-white/10 transition-all duration-200">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <span className="text-gray-400 font-mono text-sm">{ballNumber}</span>
+                                  <div className="flex items-center gap-2">
+                                    {hasWicket && <span className="text-red-400 text-lg">💥</span>}
+                                    {isSix && <span className="text-purple-400 text-lg">⚡</span>}
+                                    {isBoundary && !isSix && <span className="text-green-400 text-lg">🎯</span>}
+                                    {!hasWicket && !isBoundary && runs === 0 && <span className="text-gray-400 text-lg">🏏</span>}
+                                    {!hasWicket && !isBoundary && runs > 0 && runs < 4 && <span className="text-blue-400 text-lg">🏃</span>}
+                                  </div>
+                                  <span className="text-white font-medium">
+                                    {hasWicket ? 'Wicket' : `${runs} runs`}
+                                  </span>
+                                  <span className="text-gray-400 text-sm">
+                                    ({row[3]}{row[5] ? ` vs ${row[5]}` : ''})
+                                  </span>
+                                </div>
+                                <div className="text-right">
+                                  {hasWicket && <span className="text-red-300 text-sm">OUT!</span>}
+                                  {isSix && <span className="text-purple-300 text-sm">SIX!</span>}
+                                  {isBoundary && !isSix && <span className="text-green-300 text-sm">FOUR!</span>}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Current Over Summary */}
+                    <div className="mb-6">
+                      <h4 className="text-lg font-semibold text-gray-200 mb-3 flex items-center gap-2">
+                        <span className="text-xl">📊</span>
+                        This Over
+                      </h4>
+                      <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                        {(() => {
+                          const currentOver = liveData[liveData.length - 1]?.[0] || '0';
+                          const overBalls = liveData.filter(row => row[0] === currentOver);
+                          const overRuns = overBalls.reduce((sum, row) => sum + (parseInt(row[6]) || 0), 0);
+                          const overWickets = overBalls.filter(row => row[11] === 'true' || row[11] === true).length;
+                          const bowler = overBalls[0]?.[5] || 'Unknown';
+                          
+                          return (
+                            <div className="flex justify-between items-center">
+                              <div>
+                                <div className="text-white font-bold text-lg">
+                                  Over {currentOver}: {overRuns} runs{overWickets > 0 && `, ${overWickets} wicket${overWickets > 1 ? 's' : ''}`}
+                                </div>
+                                <div className="text-gray-400 text-sm">
+                                  └─ {bowler}: {overRuns} runs, {overWickets} wicket{overWickets !== 1 ? 's' : ''}
+                                </div>
+                              </div>
+                              <div className="flex gap-1">
+                                {overBalls.map((ball, idx) => {
+                                  const runs = parseInt(ball[6]) || 0;
+                                  const hasWicket = ball[11] === 'true' || ball[11] === true;
+                                  return (
+                                    <div key={idx} className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold
+                                      ${hasWicket ? 'bg-red-500/30 text-red-300 border border-red-400/30' : 
+                                        runs === 6 ? 'bg-purple-500/30 text-purple-300 border border-purple-400/30' :
+                                        runs >= 4 ? 'bg-green-500/30 text-green-300 border border-green-400/30' :
+                                        runs > 0 ? 'bg-blue-500/30 text-blue-300 border border-blue-400/30' :
+                                        'bg-gray-500/30 text-gray-300 border border-gray-400/30'}`}
+                                    >
+                                      {hasWicket ? 'W' : runs}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </div>
+
+                    {/* All Balls (Compact View) */}
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-200 mb-3 flex items-center gap-2">
+                        <span className="text-xl">📋</span>
+                        All Balls
+                      </h4>
+                      <div className="max-h-64 overflow-y-auto space-y-2">
+                        {liveData.map((row, index) => {
+                          const runs = parseInt(row[6]) || 0;
+                          const hasWicket = row[11] === 'true' || row[11] === true;
+                          const ballNumber = `${row[0]}.${row[1]}`;
+                          
+                          return (
+                            <div key={index} className="flex items-center gap-3 text-sm bg-white/5 rounded px-3 py-2 hover:bg-white/10 transition-all duration-200">
+                              <span className="text-gray-400 font-mono w-12">{ballNumber}</span>
+                              <div className="flex items-center gap-2">
+                                {hasWicket && <span className="text-red-400">💥</span>}
+                                {runs === 6 && <span className="text-purple-400">⚡</span>}
+                                {runs >= 4 && runs < 6 && <span className="text-green-400">🎯</span>}
+                                {runs > 0 && runs < 4 && <span className="text-blue-400">🏃</span>}
+                                {runs === 0 && !hasWicket && <span className="text-gray-400">🏏</span>}
+                              </div>
+                              <span className="text-white">
+                                {hasWicket ? 'Wicket' : `${runs} run${runs !== 1 ? 's' : ''}`}
+                              </span>
+                              <span className="text-gray-400 text-xs">
+                                {row[3]} vs {row[5]}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
                 )}
