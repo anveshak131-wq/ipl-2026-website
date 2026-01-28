@@ -1278,7 +1278,7 @@ export default function LiveScoreCSVPage() {
                           {HEADERS.map((h, index) => {
                             const columnWidths = [
                               'w-24', // Over
-                              'w-20', // Ball  
+                              'w-32', // Ball - increased even more
                               'w-16', // Innings
                               'w-48', // Striker - much wider for player names
                               'w-48', // Non-Striker - much wider for player names
@@ -1310,7 +1310,7 @@ export default function LiveScoreCSVPage() {
                               {row.map((cell, c) => {
                                 const columnWidths = [
                                   'w-24', // Over
-                                  'w-20', // Ball  
+                                  'w-32', // Ball - increased even more
                                   'w-16', // Innings
                                   'w-48', // Striker - much wider for player names
                                   'w-48', // Non-Striker - much wider for player names
@@ -1383,7 +1383,7 @@ export default function LiveScoreCSVPage() {
                           {HEADERS.map((h, index) => {
                             const columnWidths = [
                               'w-24', // Over
-                              'w-20', // Ball  
+                              'w-32', // Ball - increased even more
                               'w-16', // Innings
                               'w-48', // Striker - much wider for player names
                               'w-48', // Non-Striker - much wider for player names
@@ -1415,7 +1415,7 @@ export default function LiveScoreCSVPage() {
                               {row.map((cell, c) => {
                                 const columnWidths = [
                                   'w-24', // Over
-                                  'w-20', // Ball  
+                                  'w-32', // Ball - increased even more
                                   'w-16', // Innings
                                   'w-48', // Striker - much wider for player names
                                   'w-48', // Non-Striker - much wider for player names
