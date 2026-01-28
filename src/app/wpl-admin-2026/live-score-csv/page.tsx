@@ -48,20 +48,143 @@ export default function LiveScoreCSVPage() {
 
   // Current striker and non-striker state for each innings
   const [currentBatsmen, setCurrentBatsmen] = useState<{ 
-    [innings: string]: { 
-      striker: string; 
-      nonStriker: string; 
-    } 
+    [innings: string]: { striker: string; nonStriker: string } 
   }>({});
 
   // Current over and bowler state for each innings
   const [currentOver, setCurrentOver] = useState<{ 
-    [innings: string]: { 
-      overNumber: string; 
-      bowler: string; 
-      ballsInOver: number;
-    } 
+    [innings: string]: { overNumber: string; bowler: string; ballsInOver: number } 
   }>({});
+
+  // Quick Templates Component
+  const QuickTemplates = ({ onApplyTemplate }) => {
+    const [activeTemplate, setActiveTemplate] = useState(null);
+    
+    const templates = [
+      { 
+        id: 'dot_ball', 
+        name: 'Dot Ball', 
+        icon: '○', 
+        color: 'from-gray-400/20 to-gray-500/20',
+        borderColor: 'border-gray-400/30',
+        hoverColor: 'hover:shadow-gray-500/25',
+        data: { runs: '0', ball: 'auto' }
+      },
+      { 
+        id: 'single', 
+        name: 'Single', 
+        icon: '1', 
+        color: 'from-blue-400/20 to-blue-500/20',
+        borderColor: 'border-blue-400/30',
+        hoverColor: 'hover:shadow-blue-500/25',
+        data: { runs: '1', ball: 'auto' }
+      },
+      { 
+        id: 'double', 
+        name: 'Double', 
+        icon: '2', 
+        color: 'from-cyan-400/20 to-cyan-500/20',
+        borderColor: 'border-cyan-400/30',
+        hoverColor: 'hover:shadow-cyan-500/25',
+        data: { runs: '2', ball: 'auto' }
+      },
+      { 
+        id: 'triple', 
+        name: 'Triple', 
+        icon: '3', 
+        color: 'from-teal-400/20 to-teal-500/20',
+        borderColor: 'border-teal-400/30',
+        hoverColor: 'hover:shadow-teal-500/25',
+        data: { runs: '3', ball: 'auto' }
+      },
+      { 
+        id: 'boundary', 
+        name: 'Boundary', 
+        icon: '4', 
+        color: 'from-green-400/20 to-green-500/20',
+        borderColor: 'border-green-400/30',
+        hoverColor: 'hover:shadow-green-500/25',
+        data: { runs: '4', ball: 'auto' }
+      },
+      { 
+        id: 'five', 
+        name: 'Five Runs', 
+        icon: '5', 
+        color: 'from-lime-400/20 to-lime-500/20',
+        borderColor: 'border-lime-400/30',
+        hoverColor: 'hover:shadow-lime-500/25',
+        data: { runs: '5', ball: 'auto' }
+      },
+      { 
+        id: 'six', 
+        name: 'Six', 
+        icon: '6', 
+        color: 'from-purple-400/20 to-purple-500/20',
+        borderColor: 'border-purple-400/30',
+        hoverColor: 'hover:shadow-purple-500/25',
+        data: { runs: '6', ball: 'auto' }
+      },
+      { 
+        id: 'wicket', 
+        name: 'Wicket', 
+        icon: 'W', 
+        color: 'from-red-400/20 to-red-500/20',
+        borderColor: 'border-red-400/30',
+        hoverColor: 'hover:shadow-red-500/25',
+        data: { runs: '0', wicket: true, ball: 'auto' }
+      },
+      { 
+        id: 'no_ball', 
+        name: 'No Ball', 
+        icon: 'NB', 
+        color: 'from-orange-400/20 to-orange-500/20',
+        borderColor: 'border-orange-400/30',
+        hoverColor: 'hover:shadow-orange-500/25',
+        data: { runs: '1', noBall: true, ball: 'auto' }
+      },
+      { 
+        id: 'wide', 
+        name: 'Wide', 
+        icon: 'WD', 
+        color: 'from-yellow-400/20 to-yellow-500/20',
+        borderColor: 'border-yellow-400/30',
+        hoverColor: 'hover:shadow-yellow-500/25',
+        data: { runs: '1', wide: true, ball: 'auto' }
+      },
+    ];
+
+    const handleTemplateClick = (template) => {
+      setActiveTemplate(template.id);
+      onApplyTemplate(template.data);
+      setTimeout(() => setActiveTemplate(null), 300);
+    };
+
+    return (
+      <div className="mb-6 p-4 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl">
+        <h4 className="text-sm font-semibold text-white/80 mb-3 flex items-center gap-2">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+          Quick Actions
+        </h4>
+        <div className="flex flex-wrap gap-2">
+          {templates.map((template) => (
+            <button
+              key={template.id}
+              onClick={() => handleTemplateClick(template)}
+              className={`px-3 py-2 bg-gradient-to-r ${template.color} ${template.borderColor} border 
+                       rounded-lg text-white font-medium hover:scale-105 transform transition-all 
+                       duration-200 shadow-lg ${template.hoverColor} flex items-center gap-2
+                       ${activeTemplate === template.id ? 'ring-2 ring-white/40 scale-105' : ''}`}
+            >
+              <span className="text-lg font-bold">{template.icon}</span>
+              <span className="text-xs">{template.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   // Extras data state
   const [extrasData, setExtrasData] = useState<{ [rowIndex: number]: { 
@@ -305,6 +428,104 @@ export default function LiveScoreCSVPage() {
     ];
     
     setRows(prev => [...prev, newRow]);
+  };
+
+  // Template application logic
+  const applyTemplateToLastRow = (templateData: any) => {
+    if (rows.length === 0) {
+      // If no rows exist, add a new row first
+      addRowToInnings(1); // Default to innings 1
+      setTimeout(() => applyTemplateToRow(rows.length - 1, templateData), 100);
+      return;
+    }
+    
+    // Apply to the last row
+    const lastRowIndex = rows.length - 1;
+    applyTemplateToRow(lastRowIndex, templateData);
+  };
+
+  const applyTemplateToRow = (rowIndex: number, templateData: any) => {
+    const currentRow = rows[rowIndex];
+    if (!currentRow) return;
+
+    // Get current innings
+    const currentInnings = currentRow[2] || '1';
+    const currentOverForInnings = currentOver[currentInnings] || { overNumber: '', bowler: '', ballsInOver: 0 };
+
+    // Update runs
+    if (templateData.runs !== undefined) {
+      updateCell(rowIndex, 6, templateData.runs);
+    }
+
+    // Handle wicket
+    if (templateData.wicket) {
+      setWicketData(prev => ({
+        ...prev,
+        [rowIndex]: {
+          hasWicket: true,
+          wicketType: 'Caught',
+          wicketTaker: currentOverForInnings.bowler || ''
+        }
+      }));
+    }
+
+    // Handle no ball
+    if (templateData.noBall) {
+      setExtrasData(prev => ({
+        ...prev,
+        [rowIndex]: {
+          ...prev[rowIndex],
+          hasNoBall: true,
+          noBallRuns: 0
+        }
+      }));
+    }
+
+    // Handle wide
+    if (templateData.wide) {
+      setExtrasData(prev => ({
+        ...prev,
+        [rowIndex]: {
+          ...prev[rowIndex],
+          hasWide: true,
+          wideRuns: 0
+        }
+      }));
+    }
+
+    // Auto-increment ball if needed
+    if (templateData.ball === 'auto') {
+      const currentBall = parseInt(currentRow[1]) || 0;
+      const newBall = currentBall + 1;
+      
+      if (newBall > 6) {
+        // Move to next over
+        const nextOver = String((parseInt(currentRow[0]) || 0) + 1);
+        updateCell(rowIndex, 0, nextOver);
+        updateCell(rowIndex, 1, '1');
+        
+        // Update persistent over state
+        setCurrentOver(prev => ({
+          ...prev,
+          [currentInnings]: {
+            ...prev[currentInnings],
+            overNumber: nextOver,
+            ballsInOver: 1
+          }
+        }));
+      } else {
+        updateCell(rowIndex, 1, String(newBall));
+        
+        // Update persistent over state
+        setCurrentOver(prev => ({
+          ...prev,
+          [currentInnings]: {
+            ...prev[currentInnings],
+            ballsInOver: newBall
+          }
+        }));
+      }
+    }
   };
 
   // Wicket handling functions
@@ -1267,6 +1488,9 @@ export default function LiveScoreCSVPage() {
                 </div>
               </div>
             </div>
+          
+            {/* Quick Templates */}
+            <QuickTemplates onApplyTemplate={applyTemplateToLastRow} />
           
             {/* Enhanced Innings 1 Table */}
             <div className="mb-8">
