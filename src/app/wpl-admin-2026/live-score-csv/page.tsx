@@ -1308,26 +1308,13 @@ export default function LiveScoreCSVPage() {
             {/* Enhanced Innings 1 Table */}
             <div className="mb-8">
               <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-2xl">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-blue-400 rounded-lg flex items-center justify-center">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <h2 className="text-2xl font-bold text-blue-100">Innings 1</h2>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 bg-blue-400 rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                   </div>
-                  <button 
-                    onClick={() => addRowToInnings(1)} 
-                    className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-blue-500/25"
-                  >
-                    <span className="flex items-center gap-2">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                      </svg>
-                      Add Row
-                    </span>
-                  </button>
+                  <h2 className="text-2xl font-bold text-blue-100">Innings 1</h2>
                 </div>
                 
                 <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm">
@@ -1407,32 +1394,24 @@ export default function LiveScoreCSVPage() {
                     </table>
                   </div>
                 </div>
+                <div className="mt-4 flex justify-center">
+                  <button onClick={() => addRowToInnings(1)} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                    Add Row to Innings 1
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* Enhanced Innings 2 Table */}
             <div className="mb-8">
               <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-lg rounded-2xl p-6 border border-white/20 shadow-2xl">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-purple-400 rounded-lg flex items-center justify-center">
-                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <h2 className="text-2xl font-bold text-purple-100">Innings 2</h2>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-8 h-8 bg-purple-400 rounded-lg flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                   </div>
-                  <button 
-                    onClick={() => addRowToInnings(2)} 
-                    className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-pink-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-purple-500/25"
-                  >
-                    <span className="flex items-center gap-2">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                      </svg>
-                      Add Row
-                    </span>
-                  </button>
+                  <h2 className="text-2xl font-bold text-purple-100">Innings 2</h2>
                 </div>
                 
                 <div className="overflow-hidden rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm">
@@ -1511,6 +1490,12 @@ export default function LiveScoreCSVPage() {
                       </tbody>
                     </table>
                   </div>
+                </div>
+                
+                <div className="mt-4 flex justify-center">
+                  <button onClick={() => addRowToInnings(2)} className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded">
+                    Add Row to Innings 2
+                  </button>
                 </div>
               </div>
             </div>
