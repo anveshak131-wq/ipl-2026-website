@@ -318,7 +318,7 @@ export default function LiveScoreWithAIPage() {
     
     switch (wicketType) {
       case 'Caught':
-        wicketInfo = `Catch ${batsman} Caught by ${wicketTaker} b ${bowler}`;
+        wicketInfo = `Catch ${batsman} Caught by ${wicketTaker} bowler ${bowler}`;
         break;
       case 'Caught and Bowled':
         wicketInfo = `Catch ${batsman} Caught and Bowled by ${bowler}`;
@@ -330,7 +330,7 @@ export default function LiveScoreWithAIPage() {
         wicketInfo = `LBW ${batsman} LBW by ${bowler}`;
         break;
       case 'Stumped':
-        wicketInfo = `Stumped ${batsman} Stumped by ${wicketTaker} b ${bowler}`;
+        wicketInfo = `Stumped ${batsman} Stumped by ${wicketTaker} bowler ${bowler}`;
         break;
       case 'Run Out':
         wicketInfo = `Run Out ${batsman} Run Out by ${wicketTaker}`;
