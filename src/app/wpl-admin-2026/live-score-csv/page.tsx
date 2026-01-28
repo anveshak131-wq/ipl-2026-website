@@ -39,6 +39,58 @@ export default function LiveScoreCSVPage() {
   const [teamIdMap, setTeamIdMap] = useState<{ [shortName: string]: string }>({});
   const [allPlayers, setAllPlayers] = useState<any[]>([]);
   
+  // Wicket data state
+  const [wicketData, setWicketData] = useState<{ [rowIndex: number]: { 
+    hasWicket: boolean; 
+    wicketType: string; 
+    wicketTaker: string; 
+  } }>({});
+
+  // Current striker and non-striker state for each innings
+  const [currentBatsmen, setCurrentBatsmen] = useState<{ 
+    [innings: string]: { 
+      striker: string; 
+      nonStriker: string; 
+    } 
+  }>({});
+
+  // Current over and bowler state for each innings
+  const [currentOver, setCurrentOver] = useState<{ 
+    [innings: string]: { 
+      overNumber: string; 
+      bowler: string; 
+      ballsInOver: number;
+    } 
+  }>({});
+
+  // Extras data state
+  const [extrasData, setExtrasData] = useState<{ [rowIndex: number]: { 
+    hasWide: boolean; 
+    hasNoBall: boolean; 
+    hasByes: boolean;
+    hasLB: boolean;
+    byesRuns: number;
+    lbRuns: number;
+    wideRuns: number; // Additional runs from wide (boundary or batsmen running)
+    noBallRuns: number; // Additional runs from no ball
+    noBallType: 'bat' | 'bye'; // Whether no ball runs go to batsman or byes
+  } }>({});
+
+  // Common cricket wicket types
+  const WICKET_TYPES = [
+    'Caught',
+    'Bowled', 
+    'LBW',
+    'Run Out',
+    'Stumped',
+    'Caught and Bowled',
+    'Hit Wicket',
+    'Obstructing the Field',
+    'Handled the Ball',
+    'Timed Out',
+    'Mankading (Run out at non-striker end)'
+  ];
+
   // Load data from localStorage on component mount
   useEffect(() => {
     const savedWicketData = localStorage.getItem('liveScoreWicketData');
@@ -98,58 +150,6 @@ export default function LiveScoreCSVPage() {
   useEffect(() => {
     localStorage.setItem('liveScoreCurrentOver', JSON.stringify(currentOver));
   }, [currentOver]);
-
-  // Wicket data state
-  const [wicketData, setWicketData] = useState<{ [rowIndex: number]: { 
-    hasWicket: boolean; 
-    wicketType: string; 
-    wicketTaker: string; 
-  } }>({});
-
-  // Current striker and non-striker state for each innings
-  const [currentBatsmen, setCurrentBatsmen] = useState<{ 
-    [innings: string]: { 
-      striker: string; 
-      nonStriker: string; 
-    } 
-  }>({});
-
-  // Current over and bowler state for each innings
-  const [currentOver, setCurrentOver] = useState<{ 
-    [innings: string]: { 
-      overNumber: string; 
-      bowler: string; 
-      ballsInOver: number;
-    } 
-  }>({});
-
-  // Extras data state
-  const [extrasData, setExtrasData] = useState<{ [rowIndex: number]: { 
-    hasWide: boolean; 
-    hasNoBall: boolean; 
-    hasByes: boolean;
-    hasLB: boolean;
-    byesRuns: number;
-    lbRuns: number;
-    wideRuns: number; // Additional runs from wide (boundary or batsmen running)
-    noBallRuns: number; // Additional runs from no ball
-    noBallType: 'bat' | 'bye'; // Whether no ball runs go to batsman or byes
-  } }>({});
-
-  // Common cricket wicket types
-  const WICKET_TYPES = [
-    'Caught',
-    'Bowled', 
-    'LBW',
-    'Run Out',
-    'Stumped',
-    'Caught and Bowled',
-    'Hit Wicket',
-    'Obstructing the Field',
-    'Handled the Ball',
-    'Timed Out',
-    'Mankading (Run out at non-striker end)'
-  ];
 
   // Fetch matches list on mount
   useEffect(() => {
