@@ -16,6 +16,25 @@ export default function LiveScoreWithAIPage() {
   const [aiCommentary, setAiCommentary] = useState<string>('');
   const [enhancedCommentary, setEnhancedCommentary] = useState<string>('');
   const [isGeneratingCommentary, setIsGeneratingCommentary] = useState(false);
+  
+  // Wicket and extras data state (like live-score-csv)
+  const [wicketData, setWicketData] = useState<{ [rowIndex: number]: { 
+    hasWicket: boolean; 
+    wicketType: string; 
+    wicketTaker: string; 
+  } }>({});
+  
+  const [extrasData, setExtrasData] = useState<{ [rowIndex: number]: { 
+    hasWide: boolean; 
+    hasNoBall: boolean; 
+    hasByes: boolean;
+    hasLB: boolean;
+    wideRuns: number;
+    noBallRuns: number;
+    noBallType: string;
+    byeRuns: number;
+    lbRuns: number;
+  } }>({});
 
   // Load matches on component mount
   useEffect(() => {
@@ -35,6 +54,30 @@ export default function LiveScoreWithAIPage() {
         console.error('Error loading matches:', error);
       }
     })();
+  }, []);
+
+  // Load wicket and extras data from localStorage on component mount
+  useEffect(() => {
+    const savedWicketData = localStorage.getItem('liveScoreWicketData');
+    const savedExtrasData = localStorage.getItem('liveScoreExtrasData');
+    
+    if (savedWicketData) {
+      try {
+        setWicketData(JSON.parse(savedWicketData));
+        console.log('Loaded wicket data from localStorage:', JSON.parse(savedWicketData));
+      } catch (e) {
+        console.error('Error loading wicket data:', e);
+      }
+    }
+    
+    if (savedExtrasData) {
+      try {
+        setExtrasData(JSON.parse(savedExtrasData));
+        console.log('Loaded extras data from localStorage:', JSON.parse(savedExtrasData));
+      } catch (e) {
+        console.error('Error loading extras data:', e);
+      }
+    }
   }, []);
 
   // Load live data when match is selected
@@ -108,12 +151,16 @@ export default function LiveScoreWithAIPage() {
         let lastFewBalls = [];
         
         data.forEach((row, index) => {
+          const actualRowIndex = liveData.indexOf(row);
           const runs = parseInt(row[6]) || 0;
-          const hasWicket = row[11] === 'true' || row[11] === true;
-          const hasWide = row[7] === 'true' || row[7] === true;
-          const hasNoBall = row[8] === 'true' || row[8] === true;
-          const hasByes = row[9] && row[9] !== '' && row[9] !== '0';
-          const hasLB = row[10] && row[10] !== '' && row[10] !== '0';
+          const wicket = wicketData[actualRowIndex] || {};
+          const extras = extrasData[actualRowIndex] || {};
+          
+          const hasWicket = wicket.hasWicket;
+          const hasWide = extras.hasWide;
+          const hasNoBall = extras.hasNoBall;
+          const hasByes = extras.hasByes;
+          const hasLB = extras.hasLB;
           
           // Count balls (exclude wides and no balls from ball count)
           if (!hasWide && !hasNoBall) {
@@ -127,10 +174,10 @@ export default function LiveScoreWithAIPage() {
           
           // Add all runs including extras
           totalRuns += runs;
-          if (hasWide) totalRuns += (parseInt(row[7]) || 1);
-          if (hasNoBall) totalRuns += (parseInt(row[8]) || 1);
-          if (hasByes) totalRuns += (parseInt(row[9]) || 0);
-          if (hasLB) totalRuns += (parseInt(row[10]) || 0);
+          if (hasWide) totalRuns += (extras.wideRuns || 0) + 1; // +1 for wide penalty
+          if (hasNoBall) totalRuns += (extras.noBallRuns || 0) + 1; // +1 for no ball penalty
+          if (hasByes) totalRuns += (extras.byeRuns || 0);
+          if (hasLB) totalRuns += (extras.lbRuns || 0);
           
           // Get last 3 balls for commentary
           if (index >= data.length - 3) {
@@ -152,10 +199,10 @@ export default function LiveScoreWithAIPage() {
             lastFewBalls.push({
               runs: totalRuns - (data[index - 1] ? 
                 (parseInt(data[index - 1][6]) || 0) + 
-                (data[index - 1][7] === 'true' ? (parseInt(data[index - 1][7]) || 1) : 0) +
-                (data[index - 1][8] === 'true' ? (parseInt(data[index - 1][8]) || 1) : 0) +
-                (data[index - 1][9] && data[index - 1][9] !== '' && data[index - 1][9] !== '0' ? (parseInt(data[index - 1][9]) || 0) : 0) +
-                (data[index - 1][10] && data[index - 1][10] !== '' && data[index - 1][10] !== '0' ? (parseInt(data[index - 1][10]) || 0) : 0) : 0),
+                (wicketData[liveData.indexOf(data[index - 1])]?.hasWide ? (extrasData[liveData.indexOf(data[index - 1])]?.wideRuns || 0) + 1 : 0) +
+                (wicketData[liveData.indexOf(data[index - 1])]?.hasNoBall ? (extrasData[liveData.indexOf(data[index - 1])]?.noBallRuns || 0) + 1 : 0) +
+                (extrasData[liveData.indexOf(data[index - 1])]?.hasByes ? (extrasData[liveData.indexOf(data[index - 1])]?.byeRuns || 0) : 0) +
+                (extrasData[liveData.indexOf(data[index - 1])]?.hasLB ? (extrasData[liveData.indexOf(data[index - 1])]?.lbRuns || 0) : 0) : 0),
               hasWicket,
               hasWide,
               hasNoBall,
@@ -255,12 +302,16 @@ export default function LiveScoreWithAIPage() {
     let totalBalls = 0;
     
     filteredRows.forEach((row) => {
+      const actualRowIndex = liveData.indexOf(row);
       const runs = parseInt(row[6]) || 0;
-      const hasWicket = row[11] === 'true' || row[11] === true;
-      const hasWide = row[7] === 'true' || row[7] === true;
-      const hasNoBall = row[8] === 'true' || row[8] === true;
-      const hasByes = row[9] && row[9] !== '' && row[9] !== '0';
-      const hasLB = row[10] && row[10] !== '' && row[10] !== '0';
+      const wicket = wicketData[actualRowIndex] || {};
+      const extras = extrasData[actualRowIndex] || {};
+      
+      const hasWicket = wicket.hasWicket;
+      const hasWide = extras.hasWide;
+      const hasNoBall = extras.hasNoBall;
+      const hasByes = extras.hasByes;
+      const hasLB = extras.hasLB;
       
       // Count balls (exclude wides and no balls from ball count)
       if (!hasWide && !hasNoBall) {
@@ -274,10 +325,10 @@ export default function LiveScoreWithAIPage() {
       
       // Add all runs including extras
       totalRuns += runs;
-      if (hasWide) totalRuns += (parseInt(row[7]) || 1);
-      if (hasNoBall) totalRuns += (parseInt(row[8]) || 1);
-      if (hasByes) totalRuns += (parseInt(row[9]) || 0);
-      if (hasLB) totalRuns += (parseInt(row[10]) || 0);
+      if (hasWide) totalRuns += (extras.wideRuns || 0) + 1; // +1 for wide penalty
+      if (hasNoBall) totalRuns += (extras.noBallRuns || 0) + 1; // +1 for no ball penalty
+      if (hasByes) totalRuns += (extras.byeRuns || 0);
+      if (hasLB) totalRuns += (extras.lbRuns || 0);
     });
     
     const overs = Math.floor(totalBalls / 6);
@@ -458,22 +509,22 @@ export default function LiveScoreWithAIPage() {
                       </h4>
                       <div className="space-y-3">
                         {liveData.slice(-3).reverse().map((row, index) => {
+                          const actualRowIndex = liveData.indexOf(row); // Get the actual row index in the array
                           console.log(`=== BALL DEBUG ${index} ===`);
                           console.log('Full row data:', row);
-                          console.log('Row length:', row.length);
-                          console.log('Runs (col 6):', row[6]);
-                          console.log('Wide (col 7):', row[7]);
-                          console.log('No Ball (col 8):', row[8]);
-                          console.log('Byes (col 9):', row[9]);
-                          console.log('LB (col 10):', row[10]);
-                          console.log('Wicket (col 11):', row[11]);
+                          console.log('Actual row index:', actualRowIndex);
+                          console.log('Wicket data for this row:', wicketData[actualRowIndex]);
+                          console.log('Extras data for this row:', extrasData[actualRowIndex]);
                           
                           const runs = parseInt(row[6]) || 0;
-                          const hasWicket = row[11] === 'true' || row[11] === true;
-                          const hasWide = row[7] === 'true' || row[7] === true;
-                          const hasNoBall = row[8] === 'true' || row[8] === true;
-                          const hasByes = row[9] && row[9] !== '' && row[9] !== '0';
-                          const hasLB = row[10] && row[10] !== '' && row[10] !== '0';
+                          const wicket = wicketData[actualRowIndex] || {};
+                          const extras = extrasData[actualRowIndex] || {};
+                          
+                          const hasWicket = wicket.hasWicket;
+                          const hasWide = extras.hasWide;
+                          const hasNoBall = extras.hasNoBall;
+                          const hasByes = extras.hasByes;
+                          const hasLB = extras.hasLB;
                           const isBoundary = runs >= 4 && !hasWide && !hasNoBall;
                           const isSix = runs === 6 && !hasWide && !hasNoBall;
                           const ballNumber = `${row[0]}.${row[1]}`;
@@ -484,10 +535,10 @@ export default function LiveScoreWithAIPage() {
                           });
                           
                           // Calculate total runs for this ball
-                          const wideRuns = hasWide ? (parseInt(row[7]) || 1) : 0;
-                          const noBallRuns = hasNoBall ? (parseInt(row[8]) || 1) : 0;
-                          const byeRuns = hasByes ? (parseInt(row[9]) || 0) : 0;
-                          const lbRuns = hasLB ? (parseInt(row[10]) || 0) : 0;
+                          const wideRuns = hasWide ? (extras.wideRuns || 0) + 1 : 0; // +1 for wide penalty
+                          const noBallRuns = hasNoBall ? (extras.noBallRuns || 0) + 1 : 0; // +1 for no ball penalty
+                          const byeRuns = hasByes ? (extras.byeRuns || 0) : 0;
+                          const lbRuns = hasLB ? (extras.lbRuns || 0) : 0;
                           const totalRuns = runs + wideRuns + noBallRuns + byeRuns + lbRuns;
                           
                           console.log('Runs calculation:', {
@@ -588,27 +639,31 @@ export default function LiveScoreWithAIPage() {
                           const currentOver = liveData[liveData.length - 1]?.[0] || '0';
                           const overBalls = liveData.filter(row => row[0] === currentOver);
                           
-                          // Calculate all runs and extras
+                          // Calculate all runs and extras using wicketData and extrasData
                           let overRuns = 0;
                           let overWickets = 0;
                           const bowler = overBalls[0]?.[5] || 'Unknown';
                           
                           overBalls.forEach(ball => {
+                            const actualRowIndex = liveData.indexOf(ball);
                             const runs = parseInt(ball[6]) || 0;
-                            const hasWicket = ball[11] === 'true' || ball[11] === true;
-                            const hasWide = ball[7] === 'true' || ball[7] === true;
-                            const hasNoBall = ball[8] === 'true' || ball[8] === true;
-                            const hasByes = ball[9] && ball[9] !== '' && ball[9] !== '0';
-                            const hasLB = ball[10] && ball[10] !== '' && ball[10] !== '0';
+                            const wicket = wicketData[actualRowIndex] || {};
+                            const extras = extrasData[actualRowIndex] || {};
+                            
+                            const hasWicket = wicket.hasWicket;
+                            const hasWide = extras.hasWide;
+                            const hasNoBall = extras.hasNoBall;
+                            const hasByes = extras.hasByes;
+                            const hasLB = extras.hasLB;
                             
                             if (hasWicket) overWickets++;
                             
-                            // Add all runs
+                            // Add all runs including extras
                             overRuns += runs;
-                            if (hasWide) overRuns += (parseInt(ball[7]) || 1);
-                            if (hasNoBall) overRuns += (parseInt(ball[8]) || 1);
-                            if (hasByes) overRuns += (parseInt(ball[9]) || 0);
-                            if (hasLB) overRuns += (parseInt(ball[10]) || 0);
+                            if (hasWide) overRuns += (extras.wideRuns || 0) + 1; // +1 for wide penalty
+                            if (hasNoBall) overRuns += (extras.noBallRuns || 0) + 1; // +1 for no ball penalty
+                            if (hasByes) overRuns += (extras.byeRuns || 0);
+                            if (hasLB) overRuns += (extras.lbRuns || 0);
                           });
                           
                           return (
@@ -623,12 +678,16 @@ export default function LiveScoreWithAIPage() {
                               </div>
                               <div className="flex gap-1">
                                 {overBalls.map((ball, idx) => {
+                                  const actualRowIndex = liveData.indexOf(ball);
                                   const runs = parseInt(ball[6]) || 0;
-                                  const hasWicket = ball[11] === 'true' || ball[11] === true;
-                                  const hasWide = ball[7] === 'true' || ball[7] === true;
-                                  const hasNoBall = ball[8] === 'true' || ball[8] === true;
-                                  const hasByes = ball[9] && ball[9] !== '' && ball[9] !== '0';
-                                  const hasLB = ball[10] && ball[10] !== '' && ball[10] !== '0';
+                                  const wicket = wicketData[actualRowIndex] || {};
+                                  const extras = extrasData[actualRowIndex] || {};
+                                  
+                                  const hasWicket = wicket.hasWicket;
+                                  const hasWide = extras.hasWide;
+                                  const hasNoBall = extras.hasNoBall;
+                                  const hasByes = extras.hasByes;
+                                  const hasLB = extras.hasLB;
                                   
                                   let ballDisplay = '';
                                   let ballColor = '';
@@ -683,19 +742,23 @@ export default function LiveScoreWithAIPage() {
                       </h4>
                       <div className="max-h-64 overflow-y-auto space-y-2">
                         {liveData.map((row, index) => {
+                          const actualRowIndex = liveData.indexOf(row);
                           const runs = parseInt(row[6]) || 0;
-                          const hasWicket = row[11] === 'true' || row[11] === true;
-                          const hasWide = row[7] === 'true' || row[7] === true;
-                          const hasNoBall = row[8] === 'true' || row[8] === true;
-                          const hasByes = row[9] && row[9] !== '' && row[9] !== '0';
-                          const hasLB = row[10] && row[10] !== '' && row[10] !== '0';
+                          const wicket = wicketData[actualRowIndex] || {};
+                          const extras = extrasData[actualRowIndex] || {};
+                          
+                          const hasWicket = wicket.hasWicket;
+                          const hasWide = extras.hasWide;
+                          const hasNoBall = extras.hasNoBall;
+                          const hasByes = extras.hasByes;
+                          const hasLB = extras.hasLB;
                           const ballNumber = `${row[0]}.${row[1]}`;
                           
                           // Calculate total runs
-                          const wideRuns = hasWide ? (parseInt(row[7]) || 1) : 0;
-                          const noBallRuns = hasNoBall ? (parseInt(row[8]) || 1) : 0;
-                          const byeRuns = hasByes ? (parseInt(row[9]) || 0) : 0;
-                          const lbRuns = hasLB ? (parseInt(row[10]) || 0) : 0;
+                          const wideRuns = hasWide ? (extras.wideRuns || 0) + 1 : 0; // +1 for wide penalty
+                          const noBallRuns = hasNoBall ? (extras.noBallRuns || 0) + 1 : 0; // +1 for no ball penalty
+                          const byeRuns = hasByes ? (extras.byeRuns || 0) : 0;
+                          const lbRuns = hasLB ? (extras.lbRuns || 0) : 0;
                           const totalRuns = runs + wideRuns + noBallRuns + byeRuns + lbRuns;
                           
                           // Determine icon and color
