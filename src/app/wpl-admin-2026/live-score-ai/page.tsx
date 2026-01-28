@@ -1,413 +1,381 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
-import AuroraBackground from '@/components/ui/AuroraBackground';
-import { api } from '@/lib/data';
-import { Player, Match } from '@/types';
-import { WPLColors } from '@/lib/wplColors';
+import { api as dataApi } from '@/lib/data';
+import { Match } from '@/types';
 
-export default function WPLLiveScoreAI() {
+const HEADERS = ['Overs','Ball','Innings','Striker','Non-Striker','Bowler','Runs','Wide','No Ball','Byes','LB','Wicket','Notes'];
+
+export default function LiveScoreWithAIPage() {
   const [matches, setMatches] = useState<Match[]>([]);
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [selectedMatchId, setSelectedMatchId] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [commentaryDrafts, setCommentaryDrafts] = useState<string[]>([]);
-  const [suggestion, setSuggestion] = useState<string>('');
-  const [savedMatch, setSavedMatch] = useState<Match | null>(null);
-  const [event, setEvent] = useState({
-    inning: '1',
-    over: '0',
-    ball: '1',
-    type: '0',
-    runs: 0,
-    dismissal: 'caught',
-    batterId: '',
-    bowlerId: '',
-    note: '',
-    tone: 'neutral'
-  });
+  const [selectedMatch, setSelectedMatch] = useState<string>('');
+  const [liveData, setLiveData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [tossInfo, setTossInfo] = useState<string>('');
+  const [aiCommentary, setAiCommentary] = useState<string>('');
+  const [enhancedCommentary, setEnhancedCommentary] = useState<string>('');
+  const [isGeneratingCommentary, setIsGeneratingCommentary] = useState(false);
 
-  // Toss controls
-  const [tossWinner, setTossWinner] = useState<'team1' | 'team2' | ''>('');
-  const [tossDecision, setTossDecision] = useState<'bat' | 'bowl' | ''>('');
-
+  // Load matches on component mount
   useEffect(() => {
-    const load = async () => {
+    (async () => {
       try {
-        const [m, p] = await Promise.all([api.getMatches('wpl'), api.getPlayers(undefined, 'wpl')]);
-        setMatches(m);
-        setPlayers(p);
-        if (m.length > 0) setSelectedMatchId(m[0].id);
-      } catch (e) {
-        console.error('Failed to load matches/players', e);
-      } finally {
-        setIsLoading(false);
+        const matchesResp = await dataApi.matches();
+        if (matchesResp?.matches) {
+          setMatches(matchesResp.matches);
+        }
+      } catch (error) {
+        console.error('Error loading matches:', error);
       }
-    };
-    load();
+    })();
   }, []);
 
-  const selectedMatch = matches.find((m) => m.id === selectedMatchId) || null;
-
-  // Default toss if none exists: set to team1 + bowl to match requested example
+  // Load live data when match is selected
   useEffect(() => {
     if (!selectedMatch) return;
-    const t = selectedMatch.toss || selectedMatch.matchState?.toss;
-    if (!t && !tossWinner && !tossDecision) {
-      setTossWinner('team1');
-      setTossDecision('bowl');
-    }
-  }, [selectedMatch, tossWinner, tossDecision]);
+    
+    const loadLiveData = async () => {
+      setLoading(true);
+      try {
+        const resp = await fetch(`/api/wpl-live-score/save?matchId=${encodeURIComponent(selectedMatch)}`);
+        if (resp.ok) {
+          const data = await resp.json();
+          if (Array.isArray(data.rows)) {
+            setLiveData(data.rows);
+          } else if (Array.isArray(data)) {
+            setLiveData(data);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading live data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Initialize toss from selectedMatch if present
-  useEffect(() => {
-    if (selectedMatch && (selectedMatch.toss || selectedMatch.matchState?.toss)) {
-      const t = selectedMatch.toss || selectedMatch.matchState?.toss;
-      setTossWinner(t?.winner || '');
-      setTossDecision(t?.decision || '');
-    } else {
-      setTossWinner('');
-      setTossDecision('');
-    }
+    loadLiveData();
+    
+    // Set up polling for real-time updates
+    const interval = setInterval(loadLiveData, 5000); // Update every 5 seconds
+    
+    return () => clearInterval(interval);
   }, [selectedMatch]);
 
-  const computeBattingTeamForInning = (inning: string) => {
-    if (!selectedMatch || !tossWinner || !tossDecision) return null;
-    const winnerTeam = tossWinner === 'team1' ? selectedMatch.team1 : selectedMatch.team2;
-    const otherTeam = tossWinner === 'team1' ? selectedMatch.team2 : selectedMatch.team1;
-
-    // If winner chose to bat, they bat first
-    let inning1Batting = tossDecision === 'bat' ? winnerTeam : otherTeam;
-    let inning2Batting = inning1Batting === winnerTeam ? otherTeam : winnerTeam;
-
-    return inning === '1' ? inning1Batting : inning2Batting;
-  };
-
-  // Determine if inning 1 has a score or has completed (used to hide toss save after match starts)
-  const inning1HasScore = Boolean(
-    selectedMatch?.score?.team1?.runs ||
-    selectedMatch?.score?.team2?.runs ||
-    selectedMatch?.matchState?.innings1?.completed
-  );
-
-  const generateSuggestion = async () => {
-    try {
-      const battingTeam = computeBattingTeamForInning(event.inning);
-
-      // If a batter/bowler is selected, ensure they belong to the respective team
-      const battingTeamId = battingTeam ? String(battingTeam.id) : null;
-      const bowlingTeamId = battingTeam && selectedMatch ? (String(battingTeam.id) === String(selectedMatch.team1?.id) ? String(selectedMatch.team2?.id) : String(selectedMatch.team1?.id)) : null;
-
-      if (event.batterId && battingTeamId && !players.find(p => p.id === event.batterId && String(p.teamId) === battingTeamId)) {
-        console.warn('Selected batter does not belong to batting team, clearing selection');
-        setEvent({ ...event, batterId: '' });
-      }
-      if (event.bowlerId && bowlingTeamId && !players.find(p => p.id === event.bowlerId && String(p.teamId) === bowlingTeamId)) {
-        console.warn('Selected bowler does not belong to bowling team, clearing selection');
-        setEvent({ ...event, bowlerId: '' });
-      }
-
-      const payload = {
-        matchId: selectedMatchId,
-        event,
-        battingTeamId: battingTeam ? battingTeam.id : undefined,
-        battingTeamName: battingTeam ? battingTeam.shortName || battingTeam.name : undefined,
-      };
-
-      const res = await fetch('/api/live-commentary', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) throw new Error('AI failed');
-      const data = await res.json();
-      setSuggestion(data.suggestion || 'No suggestion');
-    } catch (err) {
-      console.error(err);
-      setSuggestion('Failed to generate suggestion');
+  // Generate AI commentary when data changes
+  useEffect(() => {
+    if (liveData.length > 0) {
+      generateAICommentary();
     }
-  };
+  }, [liveData]);
 
-  const addSuggestion = () => {
-    if (suggestion) {
-      setCommentaryDrafts((s) => [suggestion, ...s]);
-      setSuggestion('');
-    }
-  };
-
-  const saveCommentaryToMatch = async () => {
-    if (!selectedMatch) return;
+  const generateAICommentary = async () => {
+    setIsGeneratingCommentary(true);
+    
     try {
-      const token = localStorage.getItem('adminToken');
-      const body = {
-        id: selectedMatch.id,
-        playing11: selectedMatch.playing11,
-        // Append commentary into match object under `liveCommentary` field
-        liveCommentary: (selectedMatch as any).liveCommentary ? [...(selectedMatch as any).liveCommentary, ...commentaryDrafts] : commentaryDrafts,
+      // Calculate current match situation
+      const innings1Data = liveData.filter(row => row[2] === '1');
+      const innings2Data = liveData.filter(row => row[2] === '2');
+      
+      const calculateInningsStats = (data: any[]) => {
+        let totalRuns = 0;
+        let totalWickets = 0;
+        let totalBalls = 0;
+        let lastFewBalls = [];
+        
+        data.forEach((row, index) => {
+          const runs = parseInt(row[6]) || 0;
+          const hasWicket = row[11] === 'true' || row[11] === true;
+          const hasWide = row[7] === 'true' || row[7] === true;
+          const hasNoBall = row[8] === 'true' || row[8] === true;
+          
+          if (!hasWide && !hasNoBall) {
+            totalBalls++;
+          }
+          
+          if (hasWicket) {
+            totalWickets++;
+          }
+          
+          totalRuns += runs;
+          
+          // Get last 3 balls for commentary
+          if (index >= data.length - 3) {
+            lastFewBalls.push({
+              runs,
+              hasWicket,
+              striker: row[3],
+              bowler: row[5]
+            });
+          }
+        });
+        
+        const overs = Math.floor(totalBalls / 6);
+        const balls = totalBalls % 6;
+        
+        return {
+          runs: totalRuns,
+          wickets: totalWickets,
+          overs: `${overs}.${balls}`,
+          balls: totalBalls,
+          runRate: totalBalls > 0 ? (totalRuns / totalBalls * 6).toFixed(2) : '0.00',
+          lastFewBalls
+        };
       };
-
-      const res = await fetch(`/api/matches`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) throw new Error('Failed to save');
-
-      const updated = await res.json();
-      alert('Saved commentary to match');
-      setCommentaryDrafts([]);
-
-      // After saving commentary, fetch the latest match object from the server
-      // to ensure any score changes (done by other endpoints) are reflected.
-      try {
-        const matchesRes = await fetch('/api/matches');
-        if (matchesRes.ok) {
-          const allMatches = await matchesRes.json();
-          const fresh = allMatches.find((m: any) => m.id === updated.id) || updated;
-          setSavedMatch(fresh || null);
+      
+      const innings1Stats = calculateInningsStats(innings1Data);
+      const innings2Stats = calculateInningsStats(innings2Data);
+      
+      // Determine current situation
+      const currentInnings = innings2Data.length > 0 ? innings2Stats : innings1Stats;
+      const isSecondInnings = innings2Data.length > 0;
+      const target = isSecondInnings ? innings1Stats.runs + 1 : null;
+      const needed = isSecondInnings ? target - innings2Stats.runs : null;
+      const remainingBalls = isSecondInnings ? 120 - innings2Stats.balls : null;
+      
+      // Generate basic AI commentary
+      let basicCommentary = '';
+      let enhancedCommentary = '';
+      
+      if (currentInnings.balls === 0) {
+        basicCommentary = `🏏 Welcome to the live coverage! The match is about to begin with ${currentInnings.wickets} wickets in hand.`;
+        enhancedCommentary = `🎯 **Exciting Cricket Action Ahead!** \n\nThe teams are ready to battle it out in what promises to be an thrilling encounter. With ${currentInnings.wickets} wickets remaining, the batting side looks to build a solid foundation.`;
+      } else {
+        const lastBall = currentInnings.lastFewBalls[currentInnings.lastFewBalls.length - 1];
+        
+        if (lastBall?.hasWicket) {
+          basicCommentary = `💥 **WICKET!** ${lastBall.striker} is out! Score: ${currentInnings.runs}/${currentInnings.wickets} (${currentInnings.overs} overs)`;
+          enhancedCommentary = `⚡ **Dramatic Moment!** \n\n💥 **WICKET FALLS!** ${lastBall.striker} departs after a fighting innings. The bowling side strikes back through ${lastBall.bowler}. \n\n**Current Situation:** ${currentInnings.runs}/${currentInnings.wickets} (${currentInnings.overs} overs) \n**Run Rate:** ${currentInnings.runRate} runs per over`;
+        } else if (lastBall?.runs >= 4) {
+          basicCommentary = `🎯 **BOUNDARY!** ${lastBall.runs} runs by ${lastBall.striker}! Score: ${currentInnings.runs}/${currentInnings.wickets} (${currentInnings.overs} overs)`;
+          enhancedCommentary = `🔥 **Explosive Batting!** \n\n🎯 **BEAUTIFUL SHOT!** ${lastBall.striker} finds the rope for ${lastBall.runs} runs! The crowd is on its feet as the ball races to the boundary. \n\n**Current Situation:** ${currentInnings.runs}/${currentInnings.wickets} (${currentInnings.overs} overs) \n**Run Rate:** ${currentInnings.runRate} runs per over`;
         } else {
-          setSavedMatch(updated || null);
+          basicCommentary = `🏏 ${lastBall?.runs || 0} runs added. Score: ${currentInnings.runs}/${currentInnings.wickets} (${currentInnings.overs} overs)`;
+          enhancedCommentary = `🏏 **Steady Progress** \n\n${lastBall?.runs || 0} runs added to the total. ${lastBall?.striker || 'Batsman'} working the ball around carefully. \n\n**Current Situation:** ${currentInnings.runs}/${currentInnings.wickets} (${currentInnings.overs} overs) \n**Run Rate:** ${currentInnings.runRate} runs per over`;
         }
-      } catch (err) {
-        console.warn('Failed to fetch fresh match after save, using PUT response', err);
-        setSavedMatch(updated || null);
+        
+        if (isSecondInnings && needed !== null) {
+          const reqRate = remainingBalls > 0 ? ((needed / remainingBalls) * 6).toFixed(2) : '∞';
+          basicCommentary += ` • Need ${needed} runs from ${remainingBalls} balls (RR: ${reqRate})`;
+          enhancedCommentary += `\n\n📊 **Chase Analysis:** \n• **Target:** ${target} runs \n• **Need:** ${needed} runs from ${remainingBalls} balls \n• **Required Rate:** ${reqRate} runs per over`;
+        }
       }
-
-      // Also clear selected batter/bowler to avoid stale selections
-      setEvent({ ...event, batterId: '', bowlerId: '' });
-    } catch (err) {
-      console.error(err);
-      alert('Failed to save commentary');
+      
+      setAiCommentary(basicCommentary);
+      setEnhancedCommentary(enhancedCommentary);
+      
+    } catch (error) {
+      console.error('Error generating commentary:', error);
+      setAiCommentary('📊 Live score data being processed...');
+      setEnhancedCommentary('🎯 **Match in Progress**\n\nLive score data is being updated. Commentary will appear here as the action unfolds.');
+    } finally {
+      setIsGeneratingCommentary(false);
     }
   };
 
-  const bgStyle = { background: `linear-gradient(to bottom, ${WPLColors.base}, ${WPLColors.gradientStart}66, ${WPLColors.gradientMid}33, ${WPLColors.base})` };
-
-  if (isLoading) return (
-    <div className="flex min-h-screen" style={bgStyle}>
-      <AuroraBackground />
-      <WPLAdminSidebarNew />
-      <div className="flex-1 flex items-center justify-center">
-        <div className="text-white">Loading...</div>
-      </div>
-    </div>
-  );
+  const calculateTeamTotal = (innings: string | number) => {
+    const filteredRows = liveData.filter(row => row[2] === String(innings));
+    
+    let totalRuns = 0;
+    let totalWickets = 0;
+    let totalBalls = 0;
+    
+    filteredRows.forEach((row) => {
+      const runs = parseInt(row[6]) || 0;
+      const hasWicket = row[11] === 'true' || row[11] === true;
+      const hasWide = row[7] === 'true' || row[7] === true;
+      const hasNoBall = row[8] === 'true' || row[8] === true;
+      
+      if (!hasWide && !hasNoBall) {
+        totalBalls++;
+      }
+      
+      if (hasWicket) {
+        totalWickets++;
+      }
+      
+      totalRuns += runs;
+    });
+    
+    const overs = Math.floor(totalBalls / 6);
+    const balls = totalBalls % 6;
+    
+    return {
+      runs: totalRuns,
+      wickets: totalWickets,
+      overs: `${overs}.${balls}`,
+      balls: totalBalls,
+      runRate: totalBalls > 0 ? (totalRuns / totalBalls * 6).toFixed(2) : '0.00'
+    };
+  };
 
   return (
-    <div className="flex min-h-screen" style={bgStyle}>
-      <AuroraBackground />
-      <WPLAdminSidebarNew />
-
-      <main className="flex-1 relative z-20 p-4 md:p-8 overflow-y-auto">
-        <div className="max-w-7xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="mb-6">
-            <h1 className="text-4xl font-bold" style={{ background: `linear-gradient(to right, ${WPLColors.textPrimary}, ${WPLColors.purple})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              Live Score (AI Assistant)
-            </h1>
-            <p style={{ color: WPLColors.textSecondary }}>Dropdown-driven live event entry with AI-generated commentary suggestions.</p>
-          </motion.div>
-
-          <motion.div initial={{ scale: 0.995, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.35 }} className="rounded-2xl p-6 md:p-8 backdrop-blur-xl border mb-6" style={{ background: WPLColors.purpleRGBA[10], borderColor: WPLColors.purpleRGBA[30] }}>
-            <label className="block text-sm font-medium mb-2" style={{ color: WPLColors.textPrimary }}>Select Match</label>
-            <select value={selectedMatchId} onChange={(e) => setSelectedMatchId(e.target.value)} className="w-full md:w-96 px-4 py-3 rounded-lg text-white text-sm" style={{ background: WPLColors.purpleRGBA[20], border: `1px solid ${WPLColors.purpleRGBA[30]}` }}>
-              {matches.map((m) => (<option key={m.id} value={m.id}>{m.team1.shortName} vs {m.team2.shortName} · {new Date(m.date).toLocaleDateString()}</option>))}
-            </select>
-
-            {/* Top toss bar: editable dropdowns + save (replaces lower toss controls) */}
-            <div className="flex items-center justify-between gap-4 p-4 rounded-lg mb-4" style={{ background: WPLColors.purpleRGBA[30], border: `1px solid ${WPLColors.purpleRGBA[40]}` }}>
-              <div className="flex items-center gap-3">
-                <select value={tossWinner} onChange={(e) => setTossWinner(e.target.value as any)} className="px-3 py-2 rounded text-sm text-white" style={{ background: WPLColors.purpleRGBA[20] }}>
-                  <option value="">Toss winner</option>
-                  <option value="team1">{selectedMatch ? `${selectedMatch.team1.shortName} (team1)` : 'Team 1'}</option>
-                  <option value="team2">{selectedMatch ? `${selectedMatch.team2.shortName} (team2)` : 'Team 2'}</option>
-                </select>
-
-                <select value={tossDecision} onChange={(e) => setTossDecision(e.target.value as any)} className="px-3 py-2 rounded text-sm text-white" style={{ background: WPLColors.purpleRGBA[20] }}>
-                  <option value="">Decision</option>
-                  <option value="bat">Bat</option>
-                  <option value="bowl">Bowl</option>
-                </select>
-
-                {!inning1HasScore && (
-                  <button onClick={async () => {
-                    // Save toss to match via API
-                    if (!selectedMatch || !tossWinner || !tossDecision) {
-                      alert('Select toss winner and decision first');
-                      return;
-                    }
-                    try {
-                      const token = localStorage.getItem('adminToken');
-                      const res = await fetch('/api/matches', {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                        body: JSON.stringify({ id: selectedMatch.id, toss: { winner: tossWinner, decision: tossDecision } })
-                      });
-                      if (!res.ok) throw new Error('Failed to save toss');
-                      const updated = await res.json();
-                      alert('Toss saved');
-                      setTossWinner(updated.toss?.winner || tossWinner);
-                      setTossDecision(updated.toss?.decision || tossDecision);
-                    } catch (err) {
-                      console.error(err);
-                      alert('Failed to save toss: ' + (err.message || err));
-                    }
-                  }} className="px-4 py-2 rounded-lg font-semibold" style={{ background: WPLColors.pink, color: '#fff' }}>
-                    Save Toss
-                  </button>
-                )}
-              </div>
-
-              <div style={{ color: WPLColors.textSecondary }}>
-                {event.inning && (computeBattingTeamForInning(event.inning) ? `Batting (Inning ${event.inning}): ${computeBattingTeamForInning(event.inning).shortName}` : 'Set toss to compute batting team')}
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="flex">
+        <WPLAdminSidebarNew />
+        <main className="flex-1 p-8">
+          <div className="max-w-7xl mx-auto">
+            {/* Header */}
+            <div className="mb-8 text-center">
+              <h1 className="text-4xl font-bold text-white mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                🤖 Live Score with AI Commentary
+              </h1>
+              <p className="text-gray-300">Real-time cricket scores with AI-powered commentary and insights</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mt-0">
-              <select value={event.inning} onChange={(e) => setEvent({ ...event, inning: e.target.value })} className="px-3 py-2 rounded text-sm text-white" style={{ background: WPLColors.purpleRGBA[20] }}>
-                <option value="1">Inning 1</option>
-                <option value="2">Inning 2</option>
-              </select>
-              <select value={event.over} onChange={(e) => setEvent({ ...event, over: e.target.value })} className="px-3 py-2 rounded text-sm text-white" style={{ background: WPLColors.purpleRGBA[20] }}>
-                <option value="">Over</option>
-                {Array.from({ length: 20 }).map((_, i) => (
-                  <option key={i+1} value={String(i+1)}>{i+1}</option>
+            {/* Match Selection */}
+            <div className="mb-8">
+              <label className="block text-white text-sm font-medium mb-2">Select Match</label>
+              <select
+                value={selectedMatch}
+                onChange={(e) => setSelectedMatch(e.target.value)}
+                className="w-full px-4 py-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl 
+                         text-white focus:outline-none focus:border-white/40 focus:bg-white/15 
+                         transition-all duration-300 shadow-lg"
+              >
+                <option value="" className="bg-gray-800">Choose a match...</option>
+                {matches.map((match) => (
+                  <option key={match.id} value={match.id} className="bg-gray-800">
+                    {match.name}
+                  </option>
                 ))}
               </select>
-
-              <select value={event.ball} onChange={(e) => setEvent({ ...event, ball: e.target.value })} className="px-3 py-2 rounded text-sm text-white" style={{ background: WPLColors.purpleRGBA[20] }}>
-                <option value="">Ball</option>
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <option key={i+1} value={String(i+1)}>{i+1}</option>
-                ))}
-              </select>
-
-              <select value={event.type} onChange={(e) => setEvent({ ...event, type: e.target.value })} className="px-3 py-2 rounded text-sm text-white" style={{ background: WPLColors.purpleRGBA[20] }}>
-                <option value="0">0</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="6">6</option>
-                <option value="W">Wicket</option>
-                <option value="NB">No ball</option>
-                <option value="WD">Wide</option>
-                <option value="1B">Bye</option>
-                <option value="1LB">Leg Bye</option>
-              </select>
             </div>
 
-            
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3">
-              {/* Batter dropdown - only players from batting team */}
-              <select value={event.batterId} onChange={(e) => setEvent({ ...event, batterId: e.target.value })} className="px-3 py-2 rounded text-sm text-white" style={{ background: WPLColors.purpleRGBA[20] }}>
-                <option value="">{computeBattingTeamForInning(event.inning) ? `Select Batter (${computeBattingTeamForInning(event.inning)?.shortName})` : 'Select Batter'}</option>
-                {(() => {
-                  const battingTeam = computeBattingTeamForInning(event.inning);
-                  const battingTeamId = battingTeam ? String(battingTeam.id) : null;
-                  const battingPlayers = battingTeamId ? players.filter(p => String(p.teamId) === battingTeamId) : players;
-                  if (battingPlayers.length === 0) {
-                    return (<option value="" disabled>No players available</option>);
-                  }
-                  return battingPlayers.map(p => (<option key={p.id} value={p.id}>{p.name} ({p.teamId})</option>));
-                })()}
-              </select>
-
-              {/* Bowler dropdown - only players from bowling/opposition team */}
-              <select value={event.bowlerId} onChange={(e) => setEvent({ ...event, bowlerId: e.target.value })} className="px-3 py-2 rounded text-sm text-white" style={{ background: WPLColors.purpleRGBA[20] }}>
-                <option value="">{computeBattingTeamForInning(event.inning) ? `Select Bowler (${(computeBattingTeamForInning(event.inning)?.id === selectedMatch?.team1?.id ? selectedMatch.team2.shortName : selectedMatch?.team1?.shortName) || 'Opposition'})` : 'Select Bowler'}</option>
-                {(() => {
-                  const battingTeam = computeBattingTeamForInning(event.inning);
-                  let bowlingTeamId = null;
-                  if (battingTeam && selectedMatch) {
-                    bowlingTeamId = battingTeam.id === selectedMatch.team1?.id ? String(selectedMatch.team2?.id) : String(selectedMatch.team1?.id);
-                  }
-                  const bowlingPlayers = bowlingTeamId ? players.filter(p => String(p.teamId) === bowlingTeamId) : players;
-                  if (bowlingPlayers.length === 0) {
-                    return (<option value="" disabled>No players available</option>);
-                  }
-                  return bowlingPlayers.map(p => (<option key={p.id} value={p.id}>{p.name} ({p.teamId})</option>));
-                })()}
-              </select>
-
-              <select value={event.tone} onChange={(e) => setEvent({ ...event, tone: e.target.value })} className="px-3 py-2 rounded text-sm text-white" style={{ background: WPLColors.purpleRGBA[20] }}>
-                <option value="neutral">Neutral</option>
-                <option value="excited">Excited</option>
-                <option value="analytical">Analytical</option>
-              </select>
-            </div>
-
-            <div className="mt-4 flex gap-3 items-center">
-              <motion.button whileTap={{ scale: 0.98 }} onClick={generateSuggestion} className="px-4 py-2 rounded-lg font-semibold" style={{ background: WPLColors.pink, color: '#fff' }}>Generate Suggestion</motion.button>
-              <motion.button whileTap={{ scale: 0.98 }} onClick={addSuggestion} className="px-4 py-2 rounded-lg font-semibold" style={{ background: WPLColors.purple, color: '#fff' }} disabled={!suggestion}>Add Suggestion</motion.button>
-              <motion.button whileTap={{ scale: 0.98 }} onClick={saveCommentaryToMatch} className="px-4 py-2 rounded-lg font-semibold ml-auto" style={{ background: '#10B981', color: '#fff' }} disabled={commentaryDrafts.length === 0}>Save to Match</motion.button>
-            </div>
-
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-              {suggestion && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }} className="p-3 rounded bg-gradient-to-r from-purple-900 to-purple-800 text-white">
-                  <div className="text-sm font-semibold mb-2">AI Suggestion</div>
-                  <div className="text-sm">{suggestion}</div>
-                </motion.div>
-              )}
-
-              {commentaryDrafts.length > 0 && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }} className="p-3 rounded bg-purple-900 text-white">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold">Commentary Drafts</h3>
-                    <button onClick={() => setCommentaryDrafts([])} className="text-xs text-purple-200">Clear</button>
+            {selectedMatch && (
+              <>
+                {/* Live Score Display */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                  {/* Innings 1 */}
+                  <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-2xl">
+                    <h3 className="text-xl font-bold text-blue-100 mb-4 flex items-center gap-2">
+                      <span className="w-3 h-3 bg-blue-400 rounded-full animate-pulse"></span>
+                      Innings 1
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="bg-white/5 rounded-lg p-4">
+                        <div className="flex justify-between items-center">
+                          <span className="text-blue-200 font-medium">Score</span>
+                          <span className="font-mono text-white font-bold text-2xl">
+                            {calculateTeamTotal(1).runs}/{calculateTeamTotal(1).wickets}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                        <span className="text-blue-200 font-medium">Overs</span>
+                        <span className="font-mono text-white font-bold">{calculateTeamTotal(1).overs}</span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                        <span className="text-blue-200 font-medium">Run Rate</span>
+                        <span className="font-mono text-white font-bold">{calculateTeamTotal(1).runRate}</span>
+                      </div>
+                    </div>
                   </div>
-                  <ul className="space-y-2">
-                    {commentaryDrafts.map((c, idx) => (
-                      <li key={idx} className="p-3 rounded bg-purple-800/60">{c}</li>
-                    ))}
-                  </ul>
-                </motion.div>
-              )}
-            </div>
 
-            {/* Saved match score display (shows after Save to Match) */}
-            {savedMatch && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }} className="mt-6 p-4 rounded-2xl border" style={{ background: WPLColors.purpleRGBA[8], borderColor: WPLColors.purpleRGBA[30], color: WPLColors.textPrimary }}>
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-semibold">Saved Match Score</h4>
-                  <div className="text-sm text-purple-200">Match ID: {savedMatch.id}</div>
+                  {/* Innings 2 */}
+                  <div className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-2xl">
+                    <h3 className="text-xl font-bold text-purple-100 mb-4 flex items-center gap-2">
+                      <span className="w-3 h-3 bg-purple-400 rounded-full animate-pulse"></span>
+                      Innings 2
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="bg-white/5 rounded-lg p-4">
+                        <div className="flex justify-between items-center">
+                          <span className="text-purple-200 font-medium">Score</span>
+                          <span className="font-mono text-white font-bold text-2xl">
+                            {calculateTeamTotal(2).runs}/{calculateTeamTotal(2).wickets}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                        <span className="text-purple-200 font-medium">Overs</span>
+                        <span className="font-mono text-white font-bold">{calculateTeamTotal(2).overs}</span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 bg-white/5 rounded-lg">
+                        <span className="text-purple-200 font-medium">Run Rate</span>
+                        <span className="font-mono text-white font-bold">{calculateTeamTotal(2).runRate}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                {/* Prefer structured score if available, otherwise fall back to legacy team1Score/team2Score strings */}
-                {savedMatch.score ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                      <div className="text-sm text-purple-200">{savedMatch.team1?.shortName || savedMatch.team1?.name}</div>
-                      <div className="text-2xl font-bold">{savedMatch.score.team1?.runs ?? '0'}/{savedMatch.score.team1?.wickets ?? '0'}</div>
-                      <div className="text-xs text-purple-300">{savedMatch.score.team1?.overs ?? '--'} ov</div>
-                    </div>
-                    <div>
-                      <div className="text-sm text-purple-200">{savedMatch.team2?.shortName || savedMatch.team2?.name}</div>
-                      <div className="text-2xl font-bold">{savedMatch.score.team2?.runs ?? '0'}/{savedMatch.score.team2?.wickets ?? '0'}</div>
-                      <div className="text-xs text-purple-300">{savedMatch.score.team2?.overs ?? '--'} ov</div>
+
+                {/* AI Commentary Section */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Basic AI Commentary */}
+                  <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-2xl">
+                    <h3 className="text-xl font-bold text-green-100 mb-4 flex items-center gap-2">
+                      <span className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></span>
+                      🤖 AI Commentary
+                    </h3>
+                    <div className="bg-white/5 rounded-lg p-4 min-h-[120px]">
+                      {isGeneratingCommentary ? (
+                        <div className="flex items-center justify-center h-full">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-400"></div>
+                        </div>
+                      ) : (
+                        <p className="text-green-200 leading-relaxed">{aiCommentary}</p>
+                      )}
                     </div>
                   </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                      <div className="text-sm text-purple-200">{savedMatch.team1?.shortName || savedMatch.team1?.name}</div>
-                      <div className="text-2xl font-bold">{savedMatch.team1Score || '—'}</div>
+
+                  {/* Enhanced AI Commentary */}
+                  <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-2xl">
+                    <h3 className="text-xl font-bold text-orange-100 mb-4 flex items-center gap-2">
+                      <span className="w-3 h-3 bg-orange-400 rounded-full animate-pulse"></span>
+                      ✨ Enhanced Commentary
+                    </h3>
+                    <div className="bg-white/5 rounded-lg p-4 min-h-[120px]">
+                      {isGeneratingCommentary ? (
+                        <div className="flex items-center justify-center h-full">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-400"></div>
+                        </div>
+                      ) : (
+                        <div className="text-orange-200 leading-relaxed whitespace-pre-line">
+                          {enhancedCommentary}
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <div className="text-sm text-purple-200">{savedMatch.team2?.shortName || savedMatch.team2?.name}</div>
-                      <div className="text-2xl font-bold">{savedMatch.team2Score || '—'}</div>
+                  </div>
+                </div>
+
+                {/* Recent Balls */}
+                {liveData.length > 0 && (
+                  <div className="mt-8 bg-gradient-to-br from-gray-500/20 to-gray-600/20 backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-2xl">
+                    <h3 className="text-xl font-bold text-gray-100 mb-4 flex items-center gap-2">
+                      <span className="w-3 h-3 bg-gray-400 rounded-full animate-pulse"></span>
+                      📊 Recent Balls
+                    </h3>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-white/10">
+                            {HEADERS.map((header, index) => (
+                              <th key={index} className="text-left p-2 text-gray-300 font-medium">
+                                {header}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {liveData.slice(-5).reverse().map((row, rowIndex) => (
+                            <tr key={rowIndex} className="border-b border-white/5 hover:bg-white/5">
+                              {row.map((cell, cellIndex) => (
+                                <td key={cellIndex} className="p-2 text-white">
+                                  {cell || '-'}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 )}
-              </motion.div>
+              </>
             )}
-          </motion.div>
-
-        </div>
-      </main>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
