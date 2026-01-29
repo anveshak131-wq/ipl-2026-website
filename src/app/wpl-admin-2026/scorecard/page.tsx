@@ -765,25 +765,26 @@ export default function ScorecardAdminPage() {
       addDecorativePattern(y + 8, colors.success);
       y += 25;
       
-      // Enhanced Batting Table Header
+      // Enhanced Batting Table Header with proper column widths
       doc.setFillColor(...colors.light);
       doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'F');
       doc.setDrawColor(...colors.success);
       doc.setLineWidth(2);
       doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'D');
       
-      const battingHeaders = [
-        { text: 'BATTER', x: 40, color: colors.dark },
-        { text: 'R', x: 200, color: colors.danger },
-        { text: 'B', x: 240, color: colors.info },
-        { text: '4s', x: 280, color: colors.cyan },
-        { text: '6s', x: 320, color: colors.warning },
-        { text: 'SR', x: 380, color: colors.purple },
-        { text: 'DISMISSAL', x: 450, color: colors.rose }
+      // Define column boundaries for proper text wrapping
+      const columns = [
+        { start: 40, end: 150, text: 'BATTER' },      // 110px width
+        { start: 155, end: 195, text: 'R' },           // 40px width  
+        { start: 200, end: 240, text: 'B' },           // 40px width
+        { start: 245, end: 285, text: '4s' },          // 40px width
+        { start: 290, end: 330, text: '6s' },          // 40px width
+        { start: 335, end: 385, text: 'SR' },          // 50px width
+        { start: 390, end: pageWidth - 40, text: 'DISMISSAL' } // Remaining width
       ];
       
-      battingHeaders.forEach(header => {
-        addColorfulText(header.text, header.x, y, header.color, 10, 'bold', 'center');
+      columns.forEach(column => {
+        addColorfulText(column.text, (column.start + column.end) / 2, y, colors.dark, 10, 'bold', 'center');
       });
       y += lineHeight;
       
@@ -808,14 +809,21 @@ export default function ScorecardAdminPage() {
         const runsColor = b.runs >= 50 ? colors.success : b.runs >= 30 ? colors.warning : colors.dark;
         const srColor = (b.strikeRate && b.strikeRate >= 150) ? colors.success : (b.strikeRate && b.strikeRate >= 100) ? colors.info : colors.dark;
         
-        addColorfulText(`${b.name || b.playerId || ''}`, 40, y, colors.dark, 10);
-        addColorfulText(String(b.runs || 0), 200, y, runsColor, 11, 'bold', 'center');
-        addColorfulText(String(b.balls || 0), 240, y, colors.info, 10, 'center');
-        addColorfulText(String(b.fours || 0), 280, y, colors.cyan, 10, 'bold', 'center');
-        addColorfulText(String(b.sixes || 0), 320, y, colors.warning, 10, 'bold', 'center');
-        addColorfulText(String(b.strikeRate ? b.strikeRate.toFixed(1) : '-'), 380, y, srColor, 9, 'center');
+        // Truncate player name if too long
+        let playerName = b.name || b.playerId || '';
+        if (playerName.length > 18) {
+          playerName = playerName.substring(0, 15) + '...';
+        }
         
-        // Enhanced dismissal info
+        // Add text within column boundaries
+        addColorfulText(playerName, 40, y, colors.dark, 10); // BATTER column
+        addColorfulText(String(b.runs || 0), 175, y, runsColor, 11, 'bold', 'center'); // R column
+        addColorfulText(String(b.balls || 0), 220, y, colors.info, 10, 'center'); // B column
+        addColorfulText(String(b.fours || 0), 265, y, colors.cyan, 10, 'bold', 'center'); // 4s column
+        addColorfulText(String(b.sixes || 0), 310, y, colors.warning, 10, 'bold', 'center'); // 6s column
+        addColorfulText(String(b.strikeRate ? b.strikeRate.toFixed(1) : '-'), 360, y, srColor, 9, 'center'); // SR column
+        
+        // Enhanced dismissal info with truncation
         let dismissalText = 'not out';
         let dismissalColor = colors.success;
         
@@ -828,13 +836,19 @@ export default function ScorecardAdminPage() {
           } else if (b.dismissal.type === 'lbw') {
             dismissalText = `lbw b ${b.dismissal.bowlerId || 'bowler'}`;
           } else if (b.dismissal.type === 'run_out') {
-            dismissalText = `run out`;
+            dismissalText = 'run out';
           } else {
             dismissalText = `${b.dismissal.details || b.dismissal.type}`;
           }
+          
+          // Truncate dismissal text if too long for column
+          const maxDismissalLength = Math.floor((pageWidth - 40 - 390) / 6); // Approx 6 chars per 1px
+          if (dismissalText.length > maxDismissalLength) {
+            dismissalText = dismissalText.substring(0, maxDismissalLength - 3) + '...';
+          }
         }
         
-        addColorfulText(dismissalText, 450, y, dismissalColor, 8);
+        addColorfulText(dismissalText, 395, y, dismissalColor, 8); // DISMISSAL column
         y += lineHeight;
       });
       
@@ -845,25 +859,26 @@ export default function ScorecardAdminPage() {
       addDecorativePattern(y + 8, colors.purple);
       y += 25;
       
-      // Enhanced Bowling Table Header
+      // Enhanced Bowling Table Header with proper column widths
       doc.setFillColor(...colors.light);
       doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'F');
       doc.setDrawColor(...colors.purple);
       doc.setLineWidth(2);
       doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'D');
       
-      const bowlingHeaders = [
-        { text: 'BOWLER', x: 40, color: colors.dark },
-        { text: 'O', x: 180, color: colors.info },
-        { text: 'R', x: 220, color: colors.danger },
-        { text: 'W', x: 260, color: colors.success },
-        { text: 'ECON', x: 320, color: colors.warning },
-        { text: 'WD', x: 380, color: colors.cyan },
-        { text: 'NB', x: 420, color: colors.rose }
+      // Define bowling column boundaries
+      const bowlingColumns = [
+        { start: 40, end: 180, text: 'BOWLER' },      // 140px width
+        { start: 185, end: 225, text: 'O' },           // 40px width  
+        { start: 230, end: 270, text: 'R' },           // 40px width
+        { start: 275, end: 315, text: 'W' },           // 40px width
+        { start: 320, end: 380, text: 'ECON' },        // 60px width
+        { start: 385, end: 425, text: 'WD' },          // 40px width
+        { start: 430, end: pageWidth - 40, text: 'NB' } // Remaining width
       ];
       
-      bowlingHeaders.forEach(header => {
-        addColorfulText(header.text, header.x, y, header.color, 10, 'bold', 'center');
+      bowlingColumns.forEach(column => {
+        addColorfulText(column.text, (column.start + column.end) / 2, y, colors.dark, 10, 'bold', 'center');
       });
       y += lineHeight;
       
@@ -882,16 +897,23 @@ export default function ScorecardAdminPage() {
         doc.roundedRect(35, y - 12, pageWidth - 70, 20, 2, 2, 'F');
         
         // Colorful performance indicators
-        const wicketsColor = (bw.wickets >= 3) ? colors.success : (bw.wickets >= 1) ? colors.warning : colors.dark;
-        const economyColor = (bw.economyRate && bw.economyRate <= 6) ? colors.success : (bw.economyRate && bw.economyRate <= 8) ? colors.warning : colors.danger;
+        const wicketColor = bw.wickets >= 3 ? colors.success : bw.wickets >= 1 ? colors.warning : colors.dark;
+        const economyColor = bw.economy && bw.economy <= 6 ? colors.success : bw.economy && bw.economy <= 8 ? colors.warning : colors.danger;
         
-        addColorfulText(`${bw.name || bw.playerId || ''}`, 40, y, colors.dark, 10);
-        addColorfulText(String(bw.overs || '0.0'), 180, y, colors.info, 10, 'center');
-        addColorfulText(String(bw.runs || 0), 220, y, colors.danger, 10, 'center');
-        addColorfulText(String(bw.wickets || 0), 260, y, wicketsColor, 11, 'bold', 'center');
-        addColorfulText(String(bw.economyRate ? bw.economyRate.toFixed(2) : '-'), 320, y, economyColor, 10, 'bold', 'center');
-        addColorfulText(String(bw.wides || 0), 380, y, colors.cyan, 10, 'center');
-        addColorfulText(String(bw.noBalls || 0), 420, y, colors.rose, 10, 'center');
+        // Truncate bowler name if too long
+        let bowlerName = bw.name || bw.playerId || '';
+        if (bowlerName.length > 22) {
+          bowlerName = bowlerName.substring(0, 19) + '...';
+        }
+        
+        // Add bowling data within column boundaries
+        addColorfulText(bowlerName, 40, y, colors.dark, 10); // BOWLER column
+        addColorfulText(String(bw.overs || '0.0'), 205, y, colors.info, 10, 'center'); // O column
+        addColorfulText(String(bw.runs || 0), 250, y, colors.danger, 10, 'center'); // R column
+        addColorfulText(String(bw.wickets || 0), 295, y, wicketColor, 11, 'bold', 'center'); // W column
+        addColorfulText(String(bw.economy ? bw.economy.toFixed(2) : '-'), 350, y, economyColor, 10, 'center'); // ECON column
+        addColorfulText(String(bw.wides || 0), 405, y, colors.cyan, 10, 'center'); // WD column
+        addColorfulText(String(bw.noBalls || 0), 435, y, colors.rose, 10, 'center'); // NB column
         y += lineHeight;
       });
       
