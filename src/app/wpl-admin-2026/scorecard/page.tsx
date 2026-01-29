@@ -1234,22 +1234,154 @@ export default function ScorecardAdminPage() {
         {!selectedMatch && (
           <div>
             <h2 className="text-2xl font-bold mb-6">Select a Match</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {matches.map((match) => (
-                <button
-                  key={match.id}
-                  onClick={() => handleSelectMatch(match)}
-                  className="p-6 rounded-lg bg-gray-800 hover:bg-gray-700 transition text-left border border-gray-700 hover:border-blue-500"
-                >
-                  <div className="font-bold text-lg mb-2">
-                    {match.team1.name} vs {match.team2.name}
+            
+            {/* Published Scorecards Section */}
+            {matches.some(match => match.scorecard && match.scorecard.draft === false) && (
+              <div className="mb-8">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <h3 className="text-xl font-bold text-green-400">📢 Published Scorecards</h3>
+                  <span className="text-sm text-gray-400">(Live and visible to public)</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {matches
+                    .filter(match => match.scorecard && match.scorecard.draft === false)
+                    .map((match) => (
+                      <button
+                        key={match.id}
+                        onClick={() => handleSelectMatch(match)}
+                        className="p-6 rounded-lg bg-gradient-to-r from-green-900/30 to-emerald-900/30 hover:from-green-800/40 hover:to-emerald-800/40 transition text-left border-2 border-green-500/50 hover:border-green-400 shadow-lg shadow-green-500/20 relative overflow-hidden group"
+                      >
+                        {/* Published Badge */}
+                        <div className="absolute top-2 right-2 px-2 py-1 bg-green-500 text-white text-xs font-bold rounded-full flex items-center gap-1">
+                          <span>📢</span>
+                          <span>PUBLISHED</span>
+                        </div>
+                        
+                        {/* Decorative gradient overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        
+                        <div className="relative z-10">
+                          <div className="font-bold text-lg mb-2 text-green-300">
+                            {match.team1.name} vs {match.team2.name}
+                          </div>
+                          <div className="text-sm text-gray-300">
+                            📅 {match.date} • ⏰ {match.time}
+                          </div>
+                          <div className="text-sm text-gray-300">🏟️ {match.venue}</div>
+                          {match.scorecard?.publishedAt && (
+                            <div className="text-xs text-green-400 mt-2">
+                              Published: {new Date(match.scorecard.publishedAt).toLocaleDateString()}
+                            </div>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {/* Draft Scorecards Section */}
+            {matches.some(match => match.scorecard && match.scorecard.draft !== false) && (
+              <div className="mb-8">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <h3 className="text-xl font-bold text-yellow-400">📝 Draft Scorecards</h3>
+                  <span className="text-sm text-gray-400">(Saved but not published)</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {matches
+                    .filter(match => match.scorecard && match.scorecard.draft !== false)
+                    .map((match) => (
+                      <button
+                        key={match.id}
+                        onClick={() => handleSelectMatch(match)}
+                        className="p-6 rounded-lg bg-gradient-to-r from-yellow-900/30 to-amber-900/30 hover:from-yellow-800/40 hover:to-amber-800/40 transition text-left border-2 border-yellow-500/50 hover:border-yellow-400 shadow-lg shadow-yellow-500/20 relative overflow-hidden group"
+                      >
+                        {/* Draft Badge */}
+                        <div className="absolute top-2 right-2 px-2 py-1 bg-yellow-500 text-black text-xs font-bold rounded-full flex items-center gap-1">
+                          <span>📝</span>
+                          <span>DRAFT</span>
+                        </div>
+                        
+                        {/* Decorative gradient overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        
+                        <div className="relative z-10">
+                          <div className="font-bold text-lg mb-2 text-yellow-300">
+                            {match.team1.name} vs {match.team2.name}
+                          </div>
+                          <div className="text-sm text-gray-300">
+                            📅 {match.date} • ⏰ {match.time}
+                          </div>
+                          <div className="text-sm text-gray-300">🏟️ {match.venue}</div>
+                          {match.scorecard?.updatedAt && (
+                            <div className="text-xs text-yellow-400 mt-2">
+                              Last saved: {new Date(match.scorecard.updatedAt).toLocaleDateString()}
+                            </div>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {/* Matches without Scorecards */}
+            {matches.some(match => !match.scorecard) && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
+                  <h3 className="text-xl font-bold text-gray-400">🆕 New Matches</h3>
+                  <span className="text-sm text-gray-500">(No scorecard created yet)</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {matches
+                    .filter(match => !match.scorecard)
+                    .map((match) => (
+                      <button
+                        key={match.id}
+                        onClick={() => handleSelectMatch(match)}
+                        className="p-6 rounded-lg bg-gray-800 hover:bg-gray-700 transition text-left border border-gray-700 hover:border-blue-500 group"
+                      >
+                        <div className="font-bold text-lg mb-2 group-hover:text-blue-300 transition-colors">
+                          {match.team1.name} vs {match.team2.name}
+                        </div>
+                        <div className="text-sm text-gray-400">
+                          📅 {match.date} • ⏰ {match.time}
+                        </div>
+                        <div className="text-sm text-gray-400">🏟️ {match.venue}</div>
+                        <div className="text-xs text-gray-500 mt-2">
+                          Click to create scorecard
+                        </div>
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {/* Summary Stats */}
+            <div className="mt-8 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div>
+                  <div className="text-2xl font-bold text-green-400">
+                    {matches.filter(match => match.scorecard && match.scorecard.draft === false).length}
                   </div>
-                  <div className="text-sm text-gray-400">
-                    {match.date} • {match.time}
+                  <div className="text-sm text-gray-400">Published</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-yellow-400">
+                    {matches.filter(match => match.scorecard && match.scorecard.draft !== false).length}
                   </div>
-                  <div className="text-sm text-gray-400">{match.venue}</div>
-                </button>
-              ))}
+                  <div className="text-sm text-gray-400">Drafts</div>
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-400">
+                    {matches.filter(match => !match.scorecard).length}
+                  </div>
+                  <div className="text-sm text-gray-400">New Matches</div>
+                </div>
+              </div>
             </div>
           </div>
         )}
