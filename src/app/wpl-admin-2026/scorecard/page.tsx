@@ -981,8 +981,8 @@ export default function ScorecardAdminPage() {
     // Enhanced Footer
     const footerY = pageHeight - 40;
     addGradientBackground(footerY - 10, 50, colors.dark, colors.secondary);
-    addColorfulText('Generated on WPL Official Website', pageWidth / 2, footerY + 10, [255, 255, 255], 10, 'italic', 'center');
-    addColorfulText('© 2026 Women\'s Premier League. All rights reserved.', pageWidth / 2, footerY + 25, [255, 215, 0], 9, 'italic', 'center');
+    addColorfulText('Generated on SportsUP18', pageWidth / 2, footerY + 10, [255, 255, 255], 10, 'italic', 'center');
+    addColorfulText('© 2026 SportsUP18. All rights reserved.', pageWidth / 2, footerY + 25, [255, 215, 0], 9, 'italic', 'center');
 
     const filename = `WPL_Premium_Scorecard_${sc.matchInfo.team1.shortName || 'Team1'}_vs_${sc.matchInfo.team2.shortName || 'Team2'}_${new Date().toISOString().split('T')[0]}.pdf`;
     doc.save(filename);
