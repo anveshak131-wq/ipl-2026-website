@@ -2263,17 +2263,20 @@ export default function ScorecardAdminPage() {
                           {(scorecard.innings[activeInnings].fallOfWickets || []).map((fow, idx) => (
                             <tr key={idx} className="border-b border-gray-700">
                               <td className="p-2">
-                                <input
-                                  type="text"
+                                <select
                                   value={fow.player}
                                   onChange={(e) => {
                                     const updated = { ...scorecard };
                                     updated.innings[activeInnings].fallOfWickets[idx].player = e.target.value;
                                     setScorecard(updated);
                                   }}
-                                  placeholder="Player name"
                                   className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
-                                />
+                                >
+                                  <option value="">Select Player</option>
+                                  {getPlayersByTeam(scorecard.innings[activeInnings].battingTeamId).map(player => (
+                                    <option key={player.id} value={player.name}>{player.name}</option>
+                                  ))}
+                                </select>
                               </td>
                               <td className="p-2">
                                 <input
@@ -2443,17 +2446,20 @@ export default function ScorecardAdminPage() {
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                               <label className="block text-sm text-gray-400 mb-2">Batsman 1</label>
-                              <input
-                                type="text"
-                                value={partnership.batsman1}
-                                onChange={(e) => {
-                                  const updated = { ...scorecard };
-                                  updated.innings[activeInnings].partnerships[idx].batsman1 = e.target.value;
-                                  setScorecard(updated);
-                                }}
-                                placeholder="Player name"
-                                className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white mb-2"
-                              />
+                              <select
+                                  value={partnership.batsman1}
+                                  onChange={(e) => {
+                                    const updated = { ...scorecard };
+                                    updated.innings[activeInnings].partnerships[idx].batsman1 = e.target.value;
+                                    setScorecard(updated);
+                                  }}
+                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white mb-2"
+                                >
+                                  <option value="">Select Player</option>
+                                  {getPlayersByTeam(scorecard.innings[activeInnings].battingTeamId).map(player => (
+                                    <option key={player.id} value={player.name}>{player.name}</option>
+                                  ))}
+                                </select>
                               <div className="grid grid-cols-2 gap-2">
                                 <input
                                   type="text"
@@ -2482,17 +2488,20 @@ export default function ScorecardAdminPage() {
                             
                             <div>
                               <label className="block text-sm text-gray-400 mb-2">Batsman 2</label>
-                              <input
-                                type="text"
+                              <select
                                 value={partnership.batsman2}
                                 onChange={(e) => {
                                   const updated = { ...scorecard };
                                   updated.innings[activeInnings].partnerships[idx].batsman2 = e.target.value;
                                   setScorecard(updated);
                                 }}
-                                placeholder="Player name"
                                 className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white mb-2"
-                              />
+                              >
+                                <option value="">Select Player</option>
+                                {getPlayersByTeam(scorecard.innings[activeInnings].battingTeamId).map(player => (
+                                  <option key={player.id} value={player.name}>{player.name}</option>
+                                ))}
+                              </select>
                               <div className="grid grid-cols-2 gap-2">
                                 <input
                                   type="text"
