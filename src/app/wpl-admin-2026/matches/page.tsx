@@ -29,6 +29,62 @@ export default function WPLMatchesPage() {
     fetchTeams();
   }, []);
 
+  // Auto-create RCB-W final match
+  useEffect(() => {
+    const createFinalMatch = async () => {
+      if (teams.length === 0) return;
+      
+      const rcbTeam = teams.find(t => t.shortName === 'RCB-W' || t.name.includes('Royal Challengers Bangalore'));
+      if (!rcbTeam) return;
+      
+      // Check if final match already exists
+      const finalMatchExists = matches.some(m => 
+        (m.team1Id === rcbTeam.id || m.team2Id === rcbTeam.id) && 
+        m.date === '2026-02-05'
+      );
+      
+      if (finalMatchExists) return;
+      
+      // Create final match data
+      const finalMatch = {
+        team1Id: rcbTeam.id,
+        team2Id: 'tbd', // To be determined
+        venue: 'M. Chinnaswamy Stadium, Bangalore',
+        date: '2026-02-05',
+        time: '19:30',
+        status: 'upcoming' as const,
+        league: 'wpl',
+        matchType: 'final'
+      };
+      
+      try {
+        const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
+        if (!token) return;
+        
+        const response = await fetch('/api/matches', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(finalMatch)
+        });
+        
+        if (response.ok) {
+          const newMatch = await response.json();
+          setMatches(prev => [...prev, newMatch]);
+          console.log('RCB-W Final match created successfully!');
+        }
+      } catch (error) {
+        console.log('Could not create final match, but continuing...');
+      }
+    };
+    
+    if (teams.length > 0 && matches.length >= 0) {
+      createFinalMatch();
+    }
+  }, [teams, matches]);
+
   const fetchMatches = async () => {
     setLoading(true);
     try {
