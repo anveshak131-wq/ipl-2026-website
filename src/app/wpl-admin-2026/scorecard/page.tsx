@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { api as dataApi } from '@/lib/data';
 import WPLAdminSidebarNew from '@/components/admin/WPLAdminSidebarNew';
 
@@ -275,6 +275,27 @@ export default function ScorecardAdminPage() {
       innings.partnerships = [];
     }
     return innings;
+  };
+
+  // Ensure data is initialized when scorecard changes
+  React.useEffect(() => {
+    if (scorecard && scorecard.innings) {
+      const updated = { ...scorecard };
+      updated.innings = updated.innings.map((innings: any) => initializeInningsData(innings));
+      setScorecard(updated);
+    }
+  }, [scorecard?.matchId]); // Only run when matchId changes (initial load)
+
+  // Helper to get safe current innings data
+  const getCurrentInnings = () => {
+    if (!scorecard || !scorecard.innings || !scorecard.innings[activeInnings]) {
+      return initializeInningsData({
+        fallOfWickets: [],
+        powerplays: { mandatory: { overs: '', runs: 0 }, optional: { overs: '', runs: 0 } },
+        partnerships: []
+      });
+    }
+    return initializeInningsData(scorecard.innings[activeInnings]);
   };
 
   const handleSaveScorecard = async () => {
@@ -2314,7 +2335,7 @@ export default function ScorecardAdminPage() {
                           <label className="block text-xs text-gray-500 mb-1">Overs</label>
                           <input
                             type="text"
-                            value={scorecard.innings[activeInnings].powerplays?.mandatory?.overs || ''}
+                            value={getCurrentInnings().powerplays.mandatory.overs}
                             onChange={(e) => {
                               const updated = { ...scorecard };
                               if (!updated.innings[activeInnings].powerplays) {
@@ -2334,9 +2355,15 @@ export default function ScorecardAdminPage() {
                           <label className="block text-xs text-gray-500 mb-1">Runs</label>
                           <input
                             type="number"
-                            value={scorecard.innings[activeInnings].powerplays.mandatory.runs}
+                            value={getCurrentInnings().powerplays.mandatory.runs}
                             onChange={(e) => {
                               const updated = { ...scorecard };
+                              if (!updated.innings[activeInnings].powerplays) {
+                                updated.innings[activeInnings].powerplays = { mandatory: { overs: '', runs: 0 }, optional: { overs: '', runs: 0 } };
+                              }
+                              if (!updated.innings[activeInnings].powerplays.mandatory) {
+                                updated.innings[activeInnings].powerplays.mandatory = { overs: '', runs: 0 };
+                              }
                               updated.innings[activeInnings].powerplays.mandatory.runs = e.target.value ? parseInt(e.target.value) : 0;
                               setScorecard(updated);
                             }}
