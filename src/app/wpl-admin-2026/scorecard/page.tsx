@@ -753,8 +753,12 @@ export default function ScorecardAdminPage() {
     ];
     
     infoBoxes.forEach((box, index) => {
-      const xPos = 50 + (index % 2) * (pageWidth / 2 - 100);
-      const yPos = y + Math.floor(index / 2) * 40;
+      const boxWidth = pageWidth / 2 - 120; // Reduced width for more gap
+      const horizontalGap = 30; // Gap between left and right boxes
+      const verticalGap = 50; // Increased vertical gap
+      
+      const xPos = 50 + (index % 2) * (boxWidth + horizontalGap);
+      const yPos = y + Math.floor(index / 2) * verticalGap;
       
       // Truncate long values
       let displayValue = box.value;
@@ -763,12 +767,12 @@ export default function ScorecardAdminPage() {
       }
       
       doc.setFillColor(...box.color);
-      doc.roundedRect(xPos - 5, yPos - 15, pageWidth / 2 - 90, 35, 3, 3, 'F');
+      doc.roundedRect(xPos - 5, yPos - 15, boxWidth, 35, 3, 3, 'F');
       addColorfulText(box.label, xPos + 5, yPos, [255, 255, 255], 9, 'bold');
       addColorfulText(displayValue, xPos + 5, yPos + 12, [255, 255, 255], 11);
     });
     
-    y += 100;
+    y += 120; // Increased to account for larger vertical gap
     
     // Process each innings with ultra-enhanced design
     sc.innings.forEach((inn, innIndex) => {
