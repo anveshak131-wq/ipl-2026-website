@@ -100,17 +100,19 @@ interface Scorecard {
 export default function ScorecardAdminPage() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
+  const [scorecards, setScorecards] = useState<any[]>([]);
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [scorecard, setScorecard] = useState<Scorecard | null>(null);
-  const [activeTab, setActiveTab] = useState('matchInfo');
-  const [activeInnings, setActiveInnings] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [activeTab, setActiveTab] = useState<'matchInfo' | 'innings1' | 'innings2'>('matchInfo');
+  const [activeInnings, setActiveInnings] = useState(0);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     fetchMatches();
     fetchPlayers();
+    fetchAllScorecards();
   }, []);
 
   // Sync activeInnings with activeTab
@@ -137,6 +139,18 @@ export default function ScorecardAdminPage() {
     } catch (err) {
       console.error('Error fetching matches:', err);
       setMessage('❌ Error fetching WPL matches');
+    }
+  };
+
+  const fetchAllScorecards = async () => {
+    try {
+      const response = await fetch('/api/scorecards?league=wpl');
+      if (response.ok) {
+        const data = await response.json();
+        setScorecards(data || []);
+      }
+    } catch (err) {
+      console.error('Error fetching scorecards:', err);
     }
   };
 
@@ -1236,7 +1250,7 @@ export default function ScorecardAdminPage() {
             <h2 className="text-2xl font-bold mb-6">Select a Match</h2>
             
             {/* Published Scorecards Section */}
-            {matches.some(match => match.scorecard && match.scorecard.draft === false) && (
+            {matches.some(match => scorecards.some(sc => sc.matchInfo?.matchId === match.id && sc.draft === false)) && (
               <div className="mb-8">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-3 h-3 bg-green-500 rounded-full"></div>
@@ -1245,44 +1259,47 @@ export default function ScorecardAdminPage() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {matches
-                    .filter(match => match.scorecard && match.scorecard.draft === false)
-                    .map((match) => (
-                      <button
-                        key={match.id}
-                        onClick={() => handleSelectMatch(match)}
-                        className="p-6 rounded-lg bg-gradient-to-r from-green-900/30 to-emerald-900/30 hover:from-green-800/40 hover:to-emerald-800/40 transition text-left border-2 border-green-500/50 hover:border-green-400 shadow-lg shadow-green-500/20 relative overflow-hidden group"
-                      >
-                        {/* Published Badge */}
-                        <div className="absolute top-2 right-2 px-2 py-1 bg-green-500 text-white text-xs font-bold rounded-full flex items-center gap-1">
-                          <span>📢</span>
-                          <span>PUBLISHED</span>
-                        </div>
-                        
-                        {/* Decorative gradient overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        
-                        <div className="relative z-10">
-                          <div className="font-bold text-lg mb-2 text-green-300">
-                            {match.team1.name} vs {match.team2.name}
+                    .filter(match => scorecards.some(sc => sc.matchInfo?.matchId === match.id && sc.draft === false))
+                    .map((match) => {
+                      const scorecard = scorecards.find(sc => sc.matchInfo?.matchId === match.id);
+                      return (
+                        <button
+                          key={match.id}
+                          onClick={() => handleSelectMatch(match)}
+                          className="p-6 rounded-lg bg-gradient-to-r from-green-900/30 to-emerald-900/30 hover:from-green-800/40 hover:to-emerald-800/40 transition text-left border-2 border-green-500/50 hover:border-green-400 shadow-lg shadow-green-500/20 relative overflow-hidden group"
+                        >
+                          {/* Published Badge */}
+                          <div className="absolute top-2 right-2 px-2 py-1 bg-green-500 text-white text-xs font-bold rounded-full flex items-center gap-1">
+                            <span>📢</span>
+                            <span>PUBLISHED</span>
                           </div>
-                          <div className="text-sm text-gray-300">
-                            📅 {match.date} • ⏰ {match.time}
-                          </div>
-                          <div className="text-sm text-gray-300">🏟️ {match.venue}</div>
-                          {match.scorecard?.publishedAt && (
-                            <div className="text-xs text-green-400 mt-2">
-                              Published: {new Date(match.scorecard.publishedAt).toLocaleDateString()}
+                          
+                          {/* Decorative gradient overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                          
+                          <div className="relative z-10">
+                            <div className="font-bold text-lg mb-2 text-green-300">
+                              {match.team1.name} vs {match.team2.name}
                             </div>
-                          )}
-                        </div>
-                      </button>
-                    ))}
+                            <div className="text-sm text-gray-300">
+                              📅 {match.date} • ⏰ {match.time}
+                            </div>
+                            <div className="text-sm text-gray-300">🏟️ {match.venue}</div>
+                            {scorecard?.publishedAt && (
+                              <div className="text-xs text-green-400 mt-2">
+                                Published: {new Date(scorecard.publishedAt).toLocaleDateString()}
+                              </div>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
                 </div>
               </div>
             )}
 
             {/* Draft Scorecards Section */}
-            {matches.some(match => match.scorecard && match.scorecard.draft !== false) && (
+            {matches.some(match => scorecards.some(sc => sc.matchInfo?.matchId === match.id && sc.draft !== false)) && (
               <div className="mb-8">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
@@ -1291,44 +1308,47 @@ export default function ScorecardAdminPage() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {matches
-                    .filter(match => match.scorecard && match.scorecard.draft !== false)
-                    .map((match) => (
-                      <button
-                        key={match.id}
-                        onClick={() => handleSelectMatch(match)}
-                        className="p-6 rounded-lg bg-gradient-to-r from-yellow-900/30 to-amber-900/30 hover:from-yellow-800/40 hover:to-amber-800/40 transition text-left border-2 border-yellow-500/50 hover:border-yellow-400 shadow-lg shadow-yellow-500/20 relative overflow-hidden group"
-                      >
-                        {/* Draft Badge */}
-                        <div className="absolute top-2 right-2 px-2 py-1 bg-yellow-500 text-black text-xs font-bold rounded-full flex items-center gap-1">
-                          <span>📝</span>
-                          <span>DRAFT</span>
-                        </div>
-                        
-                        {/* Decorative gradient overlay */}
-                        <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                        
-                        <div className="relative z-10">
-                          <div className="font-bold text-lg mb-2 text-yellow-300">
-                            {match.team1.name} vs {match.team2.name}
+                    .filter(match => scorecards.some(sc => sc.matchInfo?.matchId === match.id && sc.draft !== false))
+                    .map((match) => {
+                      const scorecard = scorecards.find(sc => sc.matchInfo?.matchId === match.id);
+                      return (
+                        <button
+                          key={match.id}
+                          onClick={() => handleSelectMatch(match)}
+                          className="p-6 rounded-lg bg-gradient-to-r from-yellow-900/30 to-amber-900/30 hover:from-yellow-800/40 hover:to-amber-800/40 transition text-left border-2 border-yellow-500/50 hover:border-yellow-400 shadow-lg shadow-yellow-500/20 relative overflow-hidden group"
+                        >
+                          {/* Draft Badge */}
+                          <div className="absolute top-2 right-2 px-2 py-1 bg-yellow-500 text-black text-xs font-bold rounded-full flex items-center gap-1">
+                            <span>📝</span>
+                            <span>DRAFT</span>
                           </div>
-                          <div className="text-sm text-gray-300">
-                            📅 {match.date} • ⏰ {match.time}
-                          </div>
-                          <div className="text-sm text-gray-300">🏟️ {match.venue}</div>
-                          {match.scorecard?.updatedAt && (
-                            <div className="text-xs text-yellow-400 mt-2">
-                              Last saved: {new Date(match.scorecard.updatedAt).toLocaleDateString()}
+                          
+                          {/* Decorative gradient overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-amber-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                          
+                          <div className="relative z-10">
+                            <div className="font-bold text-lg mb-2 text-yellow-300">
+                              {match.team1.name} vs {match.team2.name}
                             </div>
-                          )}
-                        </div>
-                      </button>
-                    ))}
+                            <div className="text-sm text-gray-300">
+                              📅 {match.date} • ⏰ {match.time}
+                            </div>
+                            <div className="text-sm text-gray-300">🏟️ {match.venue}</div>
+                            {scorecard?.updatedAt && (
+                              <div className="text-xs text-yellow-400 mt-2">
+                                Last saved: {new Date(scorecard.updatedAt).toLocaleDateString()}
+                              </div>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
                 </div>
               </div>
             )}
 
             {/* Matches without Scorecards */}
-            {matches.some(match => !match.scorecard) && (
+            {matches.some(match => !scorecards.some(sc => sc.matchInfo?.matchId === match.id)) && (
               <div>
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
@@ -1337,7 +1357,7 @@ export default function ScorecardAdminPage() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {matches
-                    .filter(match => !match.scorecard)
+                    .filter(match => !scorecards.some(sc => sc.matchInfo?.matchId === match.id))
                     .map((match) => (
                       <button
                         key={match.id}
@@ -1365,19 +1385,19 @@ export default function ScorecardAdminPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                 <div>
                   <div className="text-2xl font-bold text-green-400">
-                    {matches.filter(match => match.scorecard && match.scorecard.draft === false).length}
+                    {matches.filter(match => scorecards.some(sc => sc.matchInfo?.matchId === match.id && sc.draft === false)).length}
                   </div>
                   <div className="text-sm text-gray-400">Published</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-yellow-400">
-                    {matches.filter(match => match.scorecard && match.scorecard.draft !== false).length}
+                    {matches.filter(match => scorecards.some(sc => sc.matchInfo?.matchId === match.id && sc.draft !== false)).length}
                   </div>
                   <div className="text-sm text-gray-400">Drafts</div>
                 </div>
                 <div>
                   <div className="text-2xl font-bold text-gray-400">
-                    {matches.filter(match => !match.scorecard).length}
+                    {matches.filter(match => !scorecards.some(sc => sc.matchInfo?.matchId === match.id)).length}
                   </div>
                   <div className="text-sm text-gray-400">New Matches</div>
                 </div>
