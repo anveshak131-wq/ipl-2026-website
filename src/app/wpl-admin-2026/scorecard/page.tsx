@@ -69,6 +69,24 @@ interface Innings {
   totalWickets?: number;
   totalOvers?: number;
   powerplay?: { overs: number; runs: number };
+  fallOfWickets?: Array<{
+    player: string;
+    score: string;
+    over: string;
+  }>;
+  powerplays?: {
+    mandatory: { overs: string; runs: number };
+    optional: { overs: string; runs: number };
+  };
+  partnerships?: Array<{
+    batsman1: string;
+    batsman1Runs: string;
+    batsman1Balls: string;
+    batsman2: string;
+    batsman2Runs: string;
+    batsman2Balls: string;
+    totalRuns: string;
+  }>;
 }
 
 interface Scorecard {
@@ -241,6 +259,22 @@ export default function ScorecardAdminPage() {
         },
       ],
     };
+  };
+
+  const initializeInningsData = (innings: any) => {
+    if (!innings.fallOfWickets) {
+      innings.fallOfWickets = [];
+    }
+    if (!innings.powerplays) {
+      innings.powerplays = {
+        mandatory: { overs: '', runs: 0 },
+        optional: { overs: '', runs: 0 }
+      };
+    }
+    if (!innings.partnerships) {
+      innings.partnerships = [];
+    }
+    return innings;
   };
 
   const handleSaveScorecard = async () => {
@@ -2168,29 +2202,32 @@ export default function ScorecardAdminPage() {
                 )}
               )}
 
-                {/* Fall of Wickets Section */}
-                <div className="bg-gray-800 p-6 rounded-lg">
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-bold">Fall of Wickets</h3>
-                    <button
-                      onClick={() => {
-                        const updated = { ...scorecard };
-                        updated.innings[activeInnings].fallOfWickets.push({
-                          player: '',
-                          score: '',
-                          over: ''
-                        });
-                        setScorecard(updated);
-                      }}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition"
-                    >
-                      + Add FOW
-                    </button>
-                  </div>
+              {/* Fall of Wickets Section */}
+              <div className="bg-gray-800 p-6 rounded-lg">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-bold">Fall of Wickets</h3>
+                  <button
+                    onClick={() => {
+                      const updated = { ...scorecard };
+                      if (!updated.innings[activeInnings].fallOfWickets) {
+                        updated.innings[activeInnings].fallOfWickets = [];
+                      }
+                      updated.innings[activeInnings].fallOfWickets.push({
+                        player: '',
+                        score: '',
+                        over: ''
+                      });
+                      setScorecard(updated);
+                    }}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition"
+                  >
+                    + Add FOW
+                  </button>
+                </div>
 
-                  {scorecard.innings[activeInnings].fallOfWickets.length === 0 ? (
-                    <p className="text-gray-400">No fall of wickets added yet</p>
-                  ) : (
+                {(!scorecard.innings[activeInnings].fallOfWickets || scorecard.innings[activeInnings].fallOfWickets.length === 0) ? (
+                  <p className="text-gray-400">No fall of wickets added yet</p>
+                ) : (
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead>
@@ -2202,7 +2239,7 @@ export default function ScorecardAdminPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          {scorecard.innings[activeInnings].fallOfWickets.map((fow, idx) => (
+                          {(scorecard.innings[activeInnings].fallOfWickets || []).map((fow, idx) => (
                             <tr key={idx} className="border-b border-gray-700">
                               <td className="p-2">
                                 <input
@@ -2277,9 +2314,15 @@ export default function ScorecardAdminPage() {
                           <label className="block text-xs text-gray-500 mb-1">Overs</label>
                           <input
                             type="text"
-                            value={scorecard.innings[activeInnings].powerplays.mandatory.overs}
+                            value={scorecard.innings[activeInnings].powerplays?.mandatory?.overs || ''}
                             onChange={(e) => {
                               const updated = { ...scorecard };
+                              if (!updated.innings[activeInnings].powerplays) {
+                                updated.innings[activeInnings].powerplays = { mandatory: { overs: '', runs: 0 }, optional: { overs: '', runs: 0 } };
+                              }
+                              if (!updated.innings[activeInnings].powerplays.mandatory) {
+                                updated.innings[activeInnings].powerplays.mandatory = { overs: '', runs: 0 };
+                              }
                               updated.innings[activeInnings].powerplays.mandatory.overs = e.target.value;
                               setScorecard(updated);
                             }}
