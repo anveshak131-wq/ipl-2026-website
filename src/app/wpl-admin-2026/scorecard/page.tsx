@@ -703,6 +703,137 @@ export default function ScorecardAdminPage() {
       doc.text(text, x, yPos, { align });
     };
     
+    // Data Visualization Functions
+    const addMiniBarChart = (x: number, y: number, width: number, height: number, data: number[], color: number[]) => {
+      if (data.length === 0) return;
+      
+      const maxValue = Math.max(...data);
+      const barWidth = width / data.length;
+      
+      data.forEach((value, index) => {
+        const barHeight = (value / maxValue) * height;
+        const barX = x + (index * barWidth);
+        const barY = y + (height - barHeight);
+        
+        doc.setFillColor(...color);
+        doc.rect(barX + 1, barY, barWidth - 2, barHeight, 'F');
+      });
+      
+      // Add border
+      doc.setDrawColor(100, 100, 100);
+      doc.rect(x, y, width, height, 'D');
+    };
+    
+    const addStrikeRateIndicator = (x: number, y: number, width: number, height: number, strikeRate: number) => {
+      // Background
+      doc.setFillColor(240, 240, 240);
+      doc.rect(x, y, width, height, 'F');
+      
+      // Strike rate bar (0-200 scale, with 100 as baseline)
+      const normalizedRate = Math.min(Math.max(strikeRate, 0), 200);
+      const barWidth = (normalizedRate / 200) * width;
+      
+      // Color based on strike rate
+      let barColor: number[];
+      if (strikeRate < 80) {
+        barColor = [255, 100, 100]; // Red for low SR
+      } else if (strikeRate < 120) {
+        barColor = [255, 200, 100]; // Orange for medium SR
+      } else {
+        barColor = [100, 255, 100]; // Green for high SR
+      }
+      
+      doc.setFillColor(...barColor);
+      doc.rect(x, y, barWidth, height, 'F');
+      
+      // Border
+      doc.setDrawColor(100, 100, 100);
+      doc.rect(x, y, width, height, 'D');
+      
+      // SR text
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(8);
+      doc.text(`SR: ${strikeRate.toFixed(1)}`, x + width/2, y + height/2 + 2, { align: 'center' });
+    };
+    
+    const addPartnershipBreakdown = (x: number, y: number, width: number, height: number, partnerships: any[]) => {
+      if (!partnerships || partnerships.length === 0) return;
+      
+      const barHeight = 15;
+      const spacing = 5;
+      let currentY = y;
+      
+      partnerships.slice(0, 5).forEach((partnership, index) => {
+        const runs = partnership.runs || 0;
+        const maxRuns = Math.max(...partnerships.map(p => p.runs || 0));
+        const barWidth = (runs / maxRuns) * (width - 60);
+        
+        // Bar
+        doc.setFillColor(100, 150, 255);
+        doc.rect(x + 60, currentY, barWidth, barHeight, 'F');
+        
+        // Text
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(8);
+        doc.text(`${partnership.batsman1 || 'Player1'}-${partnership.batsman2 || 'Player2'}`, x + 2, currentY + 10);
+        doc.text(`${runs} runs`, x + 62 + barWidth, currentY + 10);
+        
+        currentY += barHeight + spacing;
+      });
+      
+      // Border
+      doc.setDrawColor(100, 100, 100);
+      doc.rect(x, y, width, currentY - y, 'D');
+    };
+    
+    const addPerformanceGraph = (x: number, y: number, width: number, height: number, data: number[], color: number[]) => {
+      if (data.length === 0) return;
+      
+      const maxValue = Math.max(...data);
+      const minValue = Math.min(...data);
+      const range = maxValue - minValue || 1;
+      
+      // Background
+      doc.setFillColor(250, 250, 250);
+      doc.rect(x, y, width, height, 'F');
+      
+      // Draw grid lines
+      doc.setDrawColor(220, 220, 220);
+      for (let i = 0; i <= 4; i++) {
+        const gridY = y + (i * height / 4);
+        doc.line(x, gridY, x + width, gridY);
+      }
+      
+      // Draw line graph
+      doc.setDrawColor(...color);
+      doc.setLineWidth(2);
+      
+      data.forEach((value, index) => {
+        const pointX = x + (index * width / (data.length - 1));
+        const pointY = y + height - ((value - minValue) / range * height);
+        
+        if (index === 0) {
+          doc.moveTo(pointX, pointY);
+        } else {
+          doc.lineTo(pointX, pointY);
+        }
+      });
+      
+      doc.stroke();
+      
+      // Draw points
+      doc.setFillColor(...color);
+      data.forEach((value, index) => {
+        const pointX = x + (index * width / (data.length - 1));
+        const pointY = y + height - ((value - minValue) / range * height);
+        doc.circle(pointX, pointY, 2, 'F');
+      });
+      
+      // Border
+      doc.setDrawColor(100, 100, 100);
+      doc.rect(x, y, width, height, 'D');
+    };
+    
     // Ultra-Premium Title Header with Gradient
     addGradientBackground(0, 100, colors.primary, colors.secondary);
     
@@ -887,6 +1018,38 @@ export default function ScorecardAdminPage() {
       
       y += 15;
       
+      // Data Visualization Section - Batting Performance
+      if (y > pageHeight - 200) { doc.addPage(); y = 40; }
+      
+      addColorfulText('BATTING PERFORMANCE ANALYSIS', pageWidth / 2, y, colors.info, 14, 'bold', 'center');
+      addDecorativePattern(y + 8, colors.info);
+      y += 25;
+      
+      // Mini bar chart for runs progression
+      const battingRuns = inn.batting.map(b => b.runs || 0);
+      addColorfulText('Runs Progression', 40, y, colors.dark, 10, 'bold');
+      addMiniBarChart(40, y + 5, pageWidth - 80, 40, battingRuns, colors.success);
+      y += 60;
+      
+      // Strike rate indicators for top batsmen
+      addColorfulText('Strike Rate Analysis', 40, y, colors.dark, 10, 'bold');
+      const topBatsmen = inn.batting.slice(0, 5);
+      topBatsmen.forEach((batsman, index) => {
+        if (batsman.strikeRate) {
+          addStrikeRateIndicator(40 + (index * 110), y + 5, 100, 20, batsman.strikeRate);
+        }
+      });
+      y += 40;
+      
+      // Partnership breakdown
+      if (inn.partnerships && inn.partnerships.length > 0) {
+        addColorfulText('Partnership Breakdown', 40, y, colors.dark, 10, 'bold');
+        addPartnershipBreakdown(40, y + 5, pageWidth - 80, 100, inn.partnerships);
+        y += 120;
+      }
+      
+      y += 15;
+      
       // Bowling Section with Enhanced Design
       addColorfulText('BOWLING FIGURES', pageWidth / 2, y, colors.purple, 14, 'bold', 'center');
       addDecorativePattern(y + 8, colors.purple);
@@ -949,6 +1112,43 @@ export default function ScorecardAdminPage() {
         addColorfulText(String(bw.noBalls || 0), 435, y, colors.rose, 10, 'center'); // NB column
         y += lineHeight;
       });
+      
+      y += 20;
+      
+      // Data Visualization Section - Bowling Performance
+      if (y > pageHeight - 200) { doc.addPage(); y = 40; }
+      
+      addColorfulText('BOWLING PERFORMANCE ANALYSIS', pageWidth / 2, y, colors.purple, 14, 'bold', 'center');
+      addDecorativePattern(y + 8, colors.purple);
+      y += 25;
+      
+      // Mini bar chart for wickets
+      const bowlingWickets = inn.bowling.map(b => b.wickets || 0);
+      addColorfulText('Wickets Distribution', 40, y, colors.dark, 10, 'bold');
+      addMiniBarChart(40, y + 5, pageWidth - 80, 40, bowlingWickets, colors.purple);
+      y += 60;
+      
+      // Economy rate indicators
+      addColorfulText('Economy Rate Analysis', 40, y, colors.dark, 10, 'bold');
+      const topBowlers = inn.bowling.slice(0, 5);
+      topBowlers.forEach((bowler, index) => {
+        if (bowler.economy) {
+          // Create economy indicator (lower is better, so invert the scale)
+          const economyScore = Math.max(0, 15 - bowler.economy) * 10; // Scale 0-150
+          addStrikeRateIndicator(40 + (index * 110), y + 5, 100, 20, economyScore);
+          // Add economy text
+          doc.setTextColor(0, 0, 0);
+          doc.setFontSize(7);
+          doc.text(`Econ: ${bowler.economy.toFixed(1)}`, 40 + (index * 110) + 50, y + 15, { align: 'center' });
+        }
+      });
+      y += 40;
+      
+      // Performance graph for runs conceded
+      const bowlingRuns = inn.bowling.map(b => b.runs || 0);
+      addColorfulText('Runs Conceded Trend', 40, y, colors.dark, 10, 'bold');
+      addPerformanceGraph(40, y + 5, pageWidth - 80, 60, bowlingRuns, colors.danger);
+      y += 80;
       
       y += 20;
       
