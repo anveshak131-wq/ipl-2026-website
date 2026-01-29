@@ -610,90 +610,248 @@ export default function ScorecardAdminPage() {
     });
   };
 
-  // Export scorecard to a simple PDF using jsPDF
+  // Export scorecard to enhanced PDF with beautiful design
   const exportScorecardPDF = async (sc: Scorecard) => {
     const jspdfAny = (window as any).jspdf || (window as any).jsPDF || null;
     const jsPDFCtor = jspdfAny && jspdfAny.jsPDF ? jspdfAny.jsPDF : (window as any).jsPDF;
     if (!jsPDFCtor) throw new Error('jsPDF not available');
 
     const doc = new jsPDFCtor({ unit: 'pt', format: 'a4' });
-    const left = 40;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    
+    // Colors
+    const primaryColor = [255, 111, 97];    // Coral red
+    const secondaryColor = [75, 0, 130];    // Indigo
+    const accentColor = [255, 215, 0];       // Gold
+    const textDark = [52, 73, 94];          // Dark blue-gray
+    const textLight = [149, 165, 166];      // Light gray
+    const bgLight = [248, 248, 248];        // Light background
+    
     let y = 40;
-    const lineHeight = 14;
-
-    doc.setFontSize(14);
-    doc.text(`${sc.matchInfo.team1.name} vs ${sc.matchInfo.team2.name}`, left, y);
-    y += lineHeight * 1.5;
-
-    doc.setFontSize(10);
-    doc.text(`Venue: ${sc.matchInfo.venue || ''}`, left, y); y += lineHeight;
-    doc.text(`Date: ${sc.matchInfo.date || ''}  Time: ${sc.matchInfo.time || ''}`, left, y); y += lineHeight;
-    doc.text(`Toss: ${sc.matchInfo.toss?.winner || ''} (${sc.matchInfo.toss?.decision || ''})`, left, y); y += lineHeight * 1.5;
-
-    sc.innings.forEach((inn) => {
-      const battingTeamName = inn.battingTeamId === sc.matchInfo.team1.id ? sc.matchInfo.team1.name : sc.matchInfo.team2.name;
-      doc.setFontSize(12);
-      doc.text(`Innings ${inn.inningsNumber} - ${battingTeamName}`, left, y);
-      y += lineHeight;
-
-      // Batting header
-      doc.setFontSize(10);
-      doc.text('Batter', left, y);
-      doc.text('R', left + 200, y);
-      doc.text('B', left + 240, y);
-      doc.text('4s', left + 280, y);
-      doc.text('6s', left + 320, y);
-      doc.text('SR', left + 360, y);
-      y += lineHeight;
-
-      inn.batting.forEach((b) => {
-        if (y > 760) { doc.addPage(); y = 40; }
-        doc.text(`${b.name || b.playerId || ''}`, left, y);
-        doc.text(String(b.runs || 0), left + 200, y);
-        doc.text(String(b.balls || 0), left + 240, y);
-        doc.text(String(b.fours || 0), left + 280, y);
-        doc.text(String(b.sixes || 0), left + 320, y);
-        doc.text(String(b.strikeRate || ''), left + 360, y);
-        y += lineHeight;
-      });
-
-      y += lineHeight * 0.5;
-      // Bowling
-      doc.setFontSize(10);
-      doc.text('Bowler', left, y);
-      doc.text('O', left + 200, y);
-      doc.text('R', left + 240, y);
-      doc.text('W', left + 280, y);
-      doc.text('Econ', left + 320, y);
-      y += lineHeight;
-
-      inn.bowling.forEach((bw) => {
-        if (y > 760) { doc.addPage(); y = 40; }
-        doc.text(`${bw.name || bw.playerId || ''}`, left, y);
-        doc.text(String(bw.overs || ''), left + 200, y);
-        doc.text(String(bw.runs || 0), left + 240, y);
-        doc.text(String(bw.wickets || 0), left + 280, y);
-        doc.text(String(bw.economyRate || ''), left + 320, y);
-        y += lineHeight;
-      });
-
-      y += lineHeight;
-      doc.text(`Extras: ${(inn.extras.wides || 0) + (inn.extras.noBalls || 0) + (inn.extras.byes || 0) + (inn.extras.legByes || 0)}`, left, y);
-      y += lineHeight;
-      doc.text(`Total: ${inn.totalRuns || 0}/${inn.totalWickets || 0} (${inn.totalOvers || ''})`, left, y);
-      y += lineHeight * 1.2;
-    });
-
-    // Result
-    y += lineHeight * 0.5;
+    const lineHeight = 16;
+    const sectionSpacing = 20;
+    
+    // Helper function to add background
+    const addBackground = (startY: number, height: number, color: number[]) => {
+      doc.setFillColor(...color);
+      doc.rect(0, startY, pageWidth, height, 'F');
+    };
+    
+    // Helper function to add decorative line
+    const addDecorativeLine = (yPos: number, color: number[]) => {
+      doc.setDrawColor(...color);
+      doc.setLineWidth(2);
+      doc.line(40, yPos, pageWidth - 40, yPos);
+    };
+    
+    // Title Header with Background
+    addBackground(0, 80, primaryColor);
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(24);
+    doc.setFont('helvetica', 'bold');
+    doc.text('WPL SCORECARD', pageWidth / 2, 35, { align: 'center' });
+    
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`${sc.matchInfo.team1.name} vs ${sc.matchInfo.team2.name}`, pageWidth / 2, 60, { align: 'center' });
+    
+    // Match Info Section
+    y = 100;
+    doc.setTextColor(...textDark);
     doc.setFontSize(12);
-    doc.text('Result', left, y); y += lineHeight;
-    doc.setFontSize(10);
-    doc.text(`Winner: ${sc.result?.winner || ''}`, left, y); y += lineHeight;
-    doc.text(`Margin: ${sc.result?.margin || ''}`, left, y); y += lineHeight;
-    doc.text(`MoM: ${sc.result?.manOfTheMatch || ''}`, left, y); y += lineHeight;
+    doc.setFont('helvetica', 'bold');
+    doc.text('MATCH INFORMATION', 40, y);
+    addDecorativeLine(y + 5, primaryColor);
+    y += 20;
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.setTextColor(...textLight);
+    doc.text(`Venue: ${sc.matchInfo.venue || 'Stadium'}`, 40, y); y += lineHeight;
+    doc.text(`Date: ${sc.matchInfo.date || ''}  Time: ${sc.matchInfo.time || ''}`, 40, y); y += lineHeight;
+    doc.text(`Toss: ${sc.matchInfo.toss?.winner || 'N/A'} (${sc.matchInfo.toss?.decision || 'N/A'})`, 40, y); y += sectionSpacing;
+    
+    // Process each innings
+    sc.innings.forEach((inn, innIndex) => {
+      const battingTeamName = inn.battingTeamId === sc.matchInfo.team1.id ? sc.matchInfo.team1.name : sc.matchInfo.team2.name;
+      
+      // Innings Header with Background
+      if (y > pageHeight - 200) { doc.addPage(); y = 40; }
+      
+      addBackground(y - 10, 35, secondaryColor);
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`INNINGS ${inn.inningsNumber} - ${battingTeamName.toUpperCase()}`, 40, y + 5);
+      y += 40;
+      
+      // Batting Section
+      doc.setTextColor(...textDark);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('BATTING SCORECARD', 40, y);
+      addDecorativeLine(y + 5, accentColor);
+      y += 20;
+      
+      // Batting Table Headers
+      doc.setFillColor(...bgLight);
+      doc.rect(35, y - 12, pageWidth - 70, 20, 'F');
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...textDark);
+      doc.text('BATTER', 40, y);
+      doc.text('R', 200, y, { align: 'center' });
+      doc.text('B', 240, y, { align: 'center' });
+      doc.text('4s', 280, y, { align: 'center' });
+      doc.text('6s', 320, y, { align: 'center' });
+      doc.text('SR', 380, y, { align: 'center' });
+      doc.text('DISMISSAL', 450, y);
+      y += lineHeight;
+      
+      // Batting Data
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      inn.batting.forEach((b, index) => {
+        if (y > pageHeight - 100) { doc.addPage(); y = 40; }
+        
+        // Alternate row colors
+        if (index % 2 === 0) {
+          doc.setFillColor(250, 250, 250);
+          doc.rect(35, y - 10, pageWidth - 70, 16, 'F');
+        }
+        
+        doc.setTextColor(...textDark);
+        doc.text(`${b.name || b.playerId || ''}`, 40, y);
+        doc.text(String(b.runs || 0), 200, y, { align: 'center' });
+        doc.text(String(b.balls || 0), 240, y, { align: 'center' });
+        doc.text(String(b.fours || 0), 280, y, { align: 'center' });
+        doc.text(String(b.sixes || 0), 320, y, { align: 'center' });
+        doc.text(String(b.strikeRate ? b.strikeRate.toFixed(1) : '-'), 380, y, { align: 'center' });
+        
+        // Dismissal info
+        let dismissalText = 'not out';
+        if (b.dismissal) {
+          if (b.dismissal.type === 'caught') {
+            dismissalText = `c ${b.dismissal.fielderId || 'fielder'} b ${b.dismissal.bowlerId || 'bowler'}`;
+          } else if (b.dismissal.type === 'bowled') {
+            dismissalText = `b ${b.dismissal.bowlerId || 'bowler'}`;
+          } else if (b.dismissal.type === 'lbw') {
+            dismissalText = `lbw b ${b.dismissal.bowlerId || 'bowler'}`;
+          } else if (b.dismissal.type === 'run_out') {
+            dismissalText = `run out`;
+          } else {
+            dismissalText = b.dismissal.details || b.dismissal.type;
+          }
+        }
+        doc.setFontSize(9);
+        doc.setTextColor(...textLight);
+        doc.text(dismissalText, 450, y);
+        
+        y += lineHeight;
+      });
+      
+      y += 10;
+      
+      // Bowling Section
+      if (y > pageHeight - 150) { doc.addPage(); y = 40; }
+      
+      doc.setTextColor(...textDark);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('BOWLING FIGURES', 40, y);
+      addDecorativeLine(y + 5, accentColor);
+      y += 20;
+      
+      // Bowling Table Headers
+      doc.setFillColor(...bgLight);
+      doc.rect(35, y - 12, pageWidth - 70, 20, 'F');
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(...textDark);
+      doc.text('BOWLER', 40, y);
+      doc.text('O', 200, y, { align: 'center' });
+      doc.text('R', 240, y, { align: 'center' });
+      doc.text('W', 280, y, { align: 'center' });
+      doc.text('ECON', 340, y, { align: 'center' });
+      doc.text('WD', 380, y, { align: 'center' });
+      doc.text('NB', 420, y, { align: 'center' });
+      y += lineHeight;
+      
+      // Bowling Data
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      inn.bowling.forEach((bw, index) => {
+        if (y > pageHeight - 100) { doc.addPage(); y = 40; }
+        
+        // Alternate row colors
+        if (index % 2 === 0) {
+          doc.setFillColor(250, 250, 250);
+          doc.rect(35, y - 10, pageWidth - 70, 16, 'F');
+        }
+        
+        doc.setTextColor(...textDark);
+        doc.text(`${bw.name || bw.playerId || ''}`, 40, y);
+        doc.text(String(bw.overs || '0.0'), 200, y, { align: 'center' });
+        doc.text(String(bw.runs || 0), 240, y, { align: 'center' });
+        doc.text(String(bw.wickets || 0), 280, y, { align: 'center' });
+        doc.text(String(bw.economyRate ? bw.economyRate.toFixed(2) : '-'), 340, y, { align: 'center' });
+        doc.text(String(bw.wides || 0), 380, y, { align: 'center' });
+        doc.text(String(bw.noBalls || 0), 420, y, { align: 'center' });
+        y += lineHeight;
+      });
+      
+      y += 15;
+      
+      // Innings Summary
+      if (y > pageHeight - 80) { doc.addPage(); y = 40; }
+      
+      addBackground(y - 5, 30, accentColor);
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      
+      const extras = (inn.extras.wides || 0) + (inn.extras.noBalls || 0) + (inn.extras.byes || 0) + (inn.extras.legByes || 0);
+      doc.text(`Extras: ${extras} (W ${inn.extras.wides || 0}, NB ${inn.extras.noBalls || 0}, B ${inn.extras.byes || 0}, LB ${inn.extras.legByes || 0})`, 40, y + 10);
+      y += 35;
+      
+      doc.setFontSize(12);
+      doc.text(`TOTAL: ${inn.totalRuns || 0}/${inn.totalWickets || 0} (${inn.totalOvers || '0.0'} overs)`, 40, y);
+      y += sectionSpacing;
+    });
+    
+    // Result Section
+    if (y > pageHeight - 100) { doc.addPage(); y = 40; }
+    
+    addBackground(y - 10, 40, secondaryColor);
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('MATCH RESULT', pageWidth / 2, y + 10, { align: 'center' });
+    y += 50;
+    
+    doc.setTextColor(...textDark);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Winner: ${sc.result?.winner || 'To be determined'}`, 40, y); y += lineHeight;
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.setTextColor(...textLight);
+    doc.text(`Margin: ${sc.result?.margin || 'N/A'}`, 40, y); y += lineHeight;
+    doc.text(`Man of the Match: ${sc.result?.manOfTheMatch || 'N/A'}`, 40, y); y += lineHeight * 2;
+    
+    // Footer
+    const footerY = pageHeight - 30;
+    doc.setTextColor(...textLight);
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'italic');
+    doc.text('Generated on WPL Official Website', pageWidth / 2, footerY, { align: 'center' });
+    doc.text(`© 2026 Women\'s Premier League. All rights reserved.`, pageWidth / 2, footerY + 12, { align: 'center' });
 
-    const filename = `scorecard_${sc.matchId || 'unknown'}.pdf`;
+    const filename = `WPL_Scorecard_${sc.matchInfo.team1.shortName || 'Team1'}_vs_${sc.matchInfo.team2.shortName || 'Team2'}_${new Date().toISOString().split('T')[0]}.pdf`;
     doc.save(filename);
   };
 
