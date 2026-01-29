@@ -31,37 +31,12 @@ export default function WPLAdminPointsTablePage() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Try to fetch from statistics API first
-        try {
-          const statsResponse = await fetch('/api/stats?league=wpl&type=teams');
-          if (statsResponse.ok) {
-            const statsData = await statsResponse.json();
-            if (statsData.teamStats && statsData.teamStats.length > 0) {
-              console.log('Loaded points table from statistics API');
-              // We still need teams data for full info
-              const teamsData = await api.getTeams('wpl');
-              setTeams(teamsData);
-              
-              // Store the calculated stats for use
-              (window as any).calculatedTeamStats = statsData.teamStats;
-              setIsLoading(false);
-              return;
-            }
-          }
-        } catch (err) {
-          console.log('Statistics API not available, falling back to matches');
-        }
-
-        // Fallback to old method
-        const [teamsData, matchesData] = await Promise.all([
-          api.getTeams('wpl'),
-          api.getMatches('wpl')
-        ]);
-        
+        // Only fetch teams data - no automatic calculation from matches
+        const teamsData = await api.getTeams('wpl');
         setTeams(teamsData);
-        setMatches(matchesData);
+        console.log('Loaded teams data for points table');
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching teams data:', error);
       } finally {
         setIsLoading(false);
       }
@@ -80,14 +55,14 @@ export default function WPLAdminPointsTablePage() {
     setAvailableYears(years);
   }, []);
 
-  // Calculate points table data
+  // Calculate points table data - only use manually entered stats
   const pointsTable = useMemo(() => {
     return teams.map(team => {
       // Add shortName display
       const displayShortName = team.shortName || team.name.split(' ').map(w => w[0]).join('');
       const displayName = team.name && team.name.includes('(WPL)') ? team.name : `${team.name || ''} (WPL)`;
       
-      // Priority 1: Use saved team.stats if available (manually edited values)
+      // Only use saved team.stats if available (manually edited values)
       if (team.stats && typeof team.stats === 'object') {
         return {
           ...team,
@@ -101,26 +76,7 @@ export default function WPLAdminPointsTablePage() {
         };
       }
       
-      // Priority 2: Check if we have calculated stats from the API (only in browser)
-      const calculatedStats = typeof window !== 'undefined' ? (window as any).calculatedTeamStats : null;
-      if (calculatedStats && calculatedStats.length > 0) {
-        const teamStat = calculatedStats.find((s: any) => s.teamId === parseInt(team.id) || s.teamName === team.name);
-        
-        if (teamStat) {
-          return {
-            ...team,
-            shortName: displayShortName,
-            name: displayName,
-            matchesPlayed: teamStat.matches,
-            wins: teamStat.wins,
-            losses: teamStat.losses,
-            points: teamStat.points,
-            netRunRate: teamStat.netRunRate
-          };
-        }
-      }
-      
-      // Priority 3: Return team with zero stats if no data yet
+      // Return team with zero stats if no manual data yet
       return {
         ...team,
         shortName: displayShortName,
@@ -132,7 +88,7 @@ export default function WPLAdminPointsTablePage() {
         netRunRate: 0.00
       };
     });
-  }, [teams, matches, selectedYear]);
+  }, [teams]);
 
   // Sort and filter points table
   const sortedPointsTable = useMemo(() => {
@@ -307,19 +263,15 @@ export default function WPLAdminPointsTablePage() {
   };
 
   const refreshData = () => {
-    // Refetch data
+    // Refetch only teams data
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const [teamsData, matchesData] = await Promise.all([
-          api.getTeams('wpl'),
-          api.getMatches('wpl')
-        ]);
-        
+        const teamsData = await api.getTeams('wpl');
         setTeams(teamsData);
-        setMatches(matchesData);
+        console.log('Refreshed teams data');
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching teams data:', error);
       } finally {
         setIsLoading(false);
       }
@@ -600,7 +552,7 @@ export default function WPLAdminPointsTablePage() {
                             min="0"
                           />
                         ) : (
-                          team.matchesPlayed > 0 ? team.matchesPlayed : <span className="text-gray-500">N/A</span>
+                          team.matchesPlayed
                         )}
                       </div>
 
@@ -618,7 +570,7 @@ export default function WPLAdminPointsTablePage() {
                         ) : (
                           <>
                             <TrendingUp className="w-4 h-4" />
-                            {team.matchesPlayed > 0 ? team.wins : <span className="text-gray-500">N/A</span>}
+                            {team.wins}
                           </>
                         )}
                       </div>
@@ -637,7 +589,7 @@ export default function WPLAdminPointsTablePage() {
                         ) : (
                           <>
                             <TrendingDown className="w-4 h-4" />
-                            {team.matchesPlayed > 0 ? team.losses : <span className="text-gray-500">N/A</span>}
+                            {team.losses}
                           </>
                         )}
                       </div>
@@ -654,7 +606,7 @@ export default function WPLAdminPointsTablePage() {
                             min="0"
                           />
                         ) : (
-                          team.matchesPlayed > 0 ? team.points : <span className="text-gray-500">N/A</span>
+                          team.points
                         )}
                       </div>
 
@@ -671,9 +623,7 @@ export default function WPLAdminPointsTablePage() {
                             placeholder="0.00"
                           />
                         ) : (
-                          team.matchesPlayed > 0 ? (
-                            team.netRunRate > 0 ? `+${team.netRunRate.toFixed(2)}` : team.netRunRate.toFixed(2)
-                          ) : <span className="text-gray-500">N/A</span>
+                          team.netRunRate > 0 ? `+${team.netRunRate.toFixed(2)}` : team.netRunRate.toFixed(2)
                         )}
                       </div>
 
