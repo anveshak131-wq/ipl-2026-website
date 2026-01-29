@@ -86,20 +86,56 @@ export default function WPLLeaderboardPage() {
         const teamsData = await api.getTeams('wpl');
         setTeams(teamsData || []);
 
-        // Use points table data from WPL admin (stored in teams stats)
+        // Use points table data from WPL admin (stored in teams stats and localStorage)
         if (teamsData && teamsData.length > 0) {
+          // Load saved stats from localStorage (only on client side)
+          let savedStats = {};
+          if (typeof window !== 'undefined') {
+            savedStats = JSON.parse(localStorage.getItem('pointsTableStats') || '{}');
+          }
+          
           const pointsTableStats = teamsData
-            .filter(team => team.stats && (team.stats.matchesPlayed || 0) > 0) // Only teams with matches
-            .map(team => ({
-              teamId: parseInt(team.id),
-              teamName: team.name,
-              matches: team.stats?.matchesPlayed || 0,
-              wins: team.stats?.wins || 0,
-              losses: team.stats?.losses || 0,
-              points: team.stats?.points || 0,
-              netRunRate: team.stats?.netRunRate || 0.00,
-              qualified: team.stats?.qualified || false // Include qualification status
-            }));
+            .map(team => {
+              // Priority 1: Use localStorage saved stats if available
+              if (savedStats[team.id]) {
+                return {
+                  teamId: parseInt(team.id),
+                  teamName: team.name,
+                  matches: savedStats[team.id].matchesPlayed || 0,
+                  wins: savedStats[team.id].wins || 0,
+                  losses: savedStats[team.id].losses || 0,
+                  points: savedStats[team.id].points || 0,
+                  netRunRate: savedStats[team.id].netRunRate || 0.00,
+                  qualified: savedStats[team.id].qualified || false
+                };
+              }
+              
+              // Priority 2: Use team.stats if available
+              if (team.stats && typeof team.stats === 'object') {
+                return {
+                  teamId: parseInt(team.id),
+                  teamName: team.name,
+                  matches: team.stats?.matchesPlayed || 0,
+                  wins: team.stats?.wins || 0,
+                  losses: team.stats?.losses || 0,
+                  points: team.stats?.points || 0,
+                  netRunRate: team.stats?.netRunRate || 0.00,
+                  qualified: team.stats?.qualified || false
+                };
+              }
+              
+              // Priority 3: Return team with zero stats
+              return {
+                teamId: parseInt(team.id),
+                teamName: team.name,
+                matches: 0,
+                wins: 0,
+                losses: 0,
+                points: 0,
+                netRunRate: 0.00,
+                qualified: false
+              };
+            });
           
           if (pointsTableStats.length > 0) {
             setTeamStats(pointsTableStats);
