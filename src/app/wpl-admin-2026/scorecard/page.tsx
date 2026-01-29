@@ -698,29 +698,29 @@ export default function ScorecardAdminPage() {
     for (let i = 0; i < 20; i++) {
       const x = Math.random() * pageWidth;
       const y = Math.random() * 100;
-      doc.text('✦', x, y);
+      doc.text('*', x, y);
     }
     
-    addColorfulText('⭐ WPL 2026 PREMIUM SCORECARD ⭐', pageWidth / 2, 35, [255, 255, 255], 26, 'bold', 'center');
-    addColorfulText('🏆 WOMEN\'S PREMIER LEAGUE 🏆', pageWidth / 2, 60, [255, 215, 0], 16, 'bold', 'center');
+    addColorfulText('WPL 2026 PREMIUM SCORECARD', pageWidth / 2, 35, [255, 255, 255], 26, 'bold', 'center');
+    addColorfulText('WOMEN\'S PREMIER LEAGUE', pageWidth / 2, 60, [255, 215, 0], 16, 'bold', 'center');
     
     // Team names with colorful background
     doc.setFillColor(...colors.accent);
     doc.roundedRect(pageWidth / 2 - 150, 75, 300, 30, 5, 5, 'F');
-    addColorfulText(`${sc.matchInfo.team1.name} 🆚 ${sc.matchInfo.team2.name}`, pageWidth / 2, 95, colors.dark, 14, 'bold', 'center');
+    addColorfulText(`${sc.matchInfo.team1.name} vs ${sc.matchInfo.team2.name}`, pageWidth / 2, 95, colors.dark, 14, 'bold', 'center');
     
     // Match Information Section with Enhanced Design
     y = 130;
-    addColorfulText('📋 MATCH INFORMATION', pageWidth / 2, y, colors.primary, 16, 'bold', 'center');
+    addColorfulText('MATCH INFORMATION', pageWidth / 2, y, colors.primary, 16, 'bold', 'center');
     addDecorativePattern(y + 8, colors.primary);
     y += 25;
     
     // Create info boxes with colors
     const infoBoxes = [
-      { label: '🏟️ Venue', value: sc.matchInfo.venue || 'Stadium', color: colors.info },
-      { label: '📅 Date', value: sc.matchInfo.date || 'TBD', color: colors.success },
-      { label: '⏰ Time', value: sc.matchInfo.time || 'TBD', color: colors.warning },
-      { label: '🎲 Toss', value: `${sc.matchInfo.toss?.winner || 'N/A'} (${sc.matchInfo.toss?.decision || 'N/A'})`, color: colors.purple }
+      { label: 'Venue', value: sc.matchInfo.venue || 'Stadium', color: colors.info },
+      { label: 'Date', value: sc.matchInfo.date || 'TBD', color: colors.success },
+      { label: 'Time', value: sc.matchInfo.time || 'TBD', color: colors.warning },
+      { label: 'Toss', value: `${sc.matchInfo.toss?.winner || 'N/A'} (${sc.matchInfo.toss?.decision || 'N/A'})`, color: colors.purple }
     ];
     
     infoBoxes.forEach((box, index) => {
@@ -743,11 +743,11 @@ export default function ScorecardAdminPage() {
       
       // Innings Header with Gradient
       addGradientBackground(y - 15, 50, colors.secondary, colors.purple);
-      addColorfulText(`🏏 INNINGS ${inn.inningsNumber} - ${battingTeamName.toUpperCase()} 🏏`, pageWidth / 2, y + 15, [255, 255, 255], 18, 'bold', 'center');
+      addColorfulText(`INNINGS ${inn.inningsNumber} - ${battingTeamName.toUpperCase()}`, pageWidth / 2, y + 15, [255, 255, 255], 18, 'bold', 'center');
       y += 60;
       
       // Batting Section with Enhanced Design
-      addColorfulText('🎯 BATTING SCORECARD', pageWidth / 2, y, colors.success, 14, 'bold', 'center');
+      addColorfulText('BATTING SCORECARD', pageWidth / 2, y, colors.success, 14, 'bold', 'center');
       addDecorativePattern(y + 8, colors.success);
       y += 25;
       
@@ -759,13 +759,13 @@ export default function ScorecardAdminPage() {
       doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'D');
       
       const battingHeaders = [
-        { text: '🏏 BATTER', x: 40, color: colors.dark },
-        { text: '🎯 R', x: 200, color: colors.danger },
-        { text: '⚪ B', x: 240, color: colors.info },
-        { text: '🔷 4s', x: 280, color: colors.cyan },
-        { text: '🔶 6s', x: 320, color: colors.warning },
-        { text: '📊 SR', x: 380, color: colors.purple },
-        { text: '❌ DISMISSAL', x: 450, color: colors.rose }
+        { text: 'BATTER', x: 40, color: colors.dark },
+        { text: 'R', x: 200, color: colors.danger },
+        { text: 'B', x: 240, color: colors.info },
+        { text: '4s', x: 280, color: colors.cyan },
+        { text: '6s', x: 320, color: colors.warning },
+        { text: 'SR', x: 380, color: colors.purple },
+        { text: 'DISMISSAL', x: 450, color: colors.rose }
       ];
       
       battingHeaders.forEach(header => {
@@ -802,21 +802,21 @@ export default function ScorecardAdminPage() {
         addColorfulText(String(b.strikeRate ? b.strikeRate.toFixed(1) : '-'), 380, y, srColor, 9, 'center');
         
         // Enhanced dismissal info
-        let dismissalText = '🏏 not out';
+        let dismissalText = 'not out';
         let dismissalColor = colors.success;
         
         if (b.dismissal) {
           dismissalColor = colors.danger;
           if (b.dismissal.type === 'caught') {
-            dismissalText = `🤲 c ${b.dismissal.fielderId || 'fielder'} b ${b.dismissal.bowlerId || 'bowler'}`;
+            dismissalText = `c ${b.dismissal.fielderId || 'fielder'} b ${b.dismissal.bowlerId || 'bowler'}`;
           } else if (b.dismissal.type === 'bowled') {
-            dismissalText = `🎳 b ${b.dismissal.bowlerId || 'bowler'}`;
+            dismissalText = `b ${b.dismissal.bowlerId || 'bowler'}`;
           } else if (b.dismissal.type === 'lbw') {
-            dismissalText = `⚖️ lbw b ${b.dismissal.bowlerId || 'bowler'}`;
+            dismissalText = `lbw b ${b.dismissal.bowlerId || 'bowler'}`;
           } else if (b.dismissal.type === 'run_out') {
-            dismissalText = `🏃 run out`;
+            dismissalText = `run out`;
           } else {
-            dismissalText = `❌ ${b.dismissal.details || b.dismissal.type}`;
+            dismissalText = `${b.dismissal.details || b.dismissal.type}`;
           }
         }
         
@@ -827,7 +827,7 @@ export default function ScorecardAdminPage() {
       y += 15;
       
       // Bowling Section with Enhanced Design
-      addColorfulText('🎳 BOWLING FIGURES', pageWidth / 2, y, colors.purple, 14, 'bold', 'center');
+      addColorfulText('BOWLING FIGURES', pageWidth / 2, y, colors.purple, 14, 'bold', 'center');
       addDecorativePattern(y + 8, colors.purple);
       y += 25;
       
@@ -839,13 +839,13 @@ export default function ScorecardAdminPage() {
       doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'D');
       
       const bowlingHeaders = [
-        { text: '🎳 BOWLER', x: 40, color: colors.dark },
-        { text: '⏱️ O', x: 180, color: colors.info },
-        { text: '🎯 R', x: 220, color: colors.danger },
-        { text: '🔥 W', x: 260, color: colors.success },
-        { text: '📈 ECON', x: 320, color: colors.warning },
-        { text: '↔️ WD', x: 380, color: colors.cyan },
-        { text: '⚡ NB', x: 420, color: colors.rose }
+        { text: 'BOWLER', x: 40, color: colors.dark },
+        { text: 'O', x: 180, color: colors.info },
+        { text: 'R', x: 220, color: colors.danger },
+        { text: 'W', x: 260, color: colors.success },
+        { text: 'ECON', x: 320, color: colors.warning },
+        { text: 'WD', x: 380, color: colors.cyan },
+        { text: 'NB', x: 420, color: colors.rose }
       ];
       
       bowlingHeaders.forEach(header => {
@@ -888,10 +888,10 @@ export default function ScorecardAdminPage() {
       
       addGradientBackground(y - 10, 40, colors.accent, colors.warning);
       const extras = (inn.extras.wides || 0) + (inn.extras.noBalls || 0) + (inn.extras.byes || 0) + (inn.extras.legByes || 0);
-      addColorfulText(`🎁 Extras: ${extras} (W ${inn.extras.wides || 0}, NB ${inn.extras.noBalls || 0}, B ${inn.extras.byes || 0}, LB ${inn.extras.legByes || 0})`, pageWidth / 2, y + 10, [255, 255, 255], 12, 'bold', 'center');
+      addColorfulText(`Extras: ${extras} (W ${inn.extras.wides || 0}, NB ${inn.extras.noBalls || 0}, B ${inn.extras.byes || 0}, LB ${inn.extras.legByes || 0})`, pageWidth / 2, y + 10, [255, 255, 255], 12, 'bold', 'center');
       y += 50;
       
-      addColorfulText(`🏆 TOTAL: ${inn.totalRuns || 0}/${inn.totalWickets || 0} (${inn.totalOvers || '0.0'} overs)`, pageWidth / 2, y, colors.success, 16, 'bold', 'center');
+      addColorfulText(`TOTAL: ${inn.totalRuns || 0}/${inn.totalWickets || 0} (${inn.totalOvers || '0.0'} overs)`, pageWidth / 2, y, colors.success, 16, 'bold', 'center');
       y += sectionSpacing;
     });
     
@@ -899,21 +899,21 @@ export default function ScorecardAdminPage() {
     if (y > pageHeight - 120) { doc.addPage(); y = 40; }
     
     addGradientBackground(y - 15, 60, colors.success, colors.primary);
-    addColorfulText('🏆 MATCH RESULT 🏆', pageWidth / 2, y + 15, [255, 255, 255], 18, 'bold', 'center');
+    addColorfulText('MATCH RESULT', pageWidth / 2, y + 15, [255, 255, 255], 18, 'bold', 'center');
     y += 70;
     
-    addColorfulText(`🥇 Winner: ${sc.result?.winner || 'To be determined'}`, pageWidth / 2, y, colors.success, 14, 'bold', 'center');
+    addColorfulText(`Winner: ${sc.result?.winner || 'To be determined'}`, pageWidth / 2, y, colors.success, 14, 'bold', 'center');
     y += lineHeight;
-    addColorfulText(`📊 Margin: ${sc.result?.margin || 'N/A'}`, pageWidth / 2, y, colors.info, 12, 'center');
+    addColorfulText(`Margin: ${sc.result?.margin || 'N/A'}`, pageWidth / 2, y, colors.info, 12, 'center');
     y += lineHeight;
-    addColorfulText(`⭐ Man of the Match: ${sc.result?.manOfTheMatch || 'N/A'}`, pageWidth / 2, y, colors.accent, 12, 'center');
+    addColorfulText(`Man of the Match: ${sc.result?.manOfTheMatch || 'N/A'}`, pageWidth / 2, y, colors.accent, 12, 'center');
     y += lineHeight * 2;
     
     // Enhanced Footer
     const footerY = pageHeight - 40;
     addGradientBackground(footerY - 10, 50, colors.dark, colors.secondary);
-    addColorfulText('🌟 Generated on WPL Official Website 🌟', pageWidth / 2, footerY + 10, [255, 255, 255], 10, 'italic', 'center');
-    addColorfulText('© 2026 Women\'s Premier League. All rights reserved. 🏏', pageWidth / 2, footerY + 25, [255, 215, 0], 9, 'italic', 'center');
+    addColorfulText('Generated on WPL Official Website', pageWidth / 2, footerY + 10, [255, 255, 255], 10, 'italic', 'center');
+    addColorfulText('© 2026 Women\'s Premier League. All rights reserved.', pageWidth / 2, footerY + 25, [255, 215, 0], 9, 'italic', 'center');
 
     const filename = `WPL_Premium_Scorecard_${sc.matchInfo.team1.shortName || 'Team1'}_vs_${sc.matchInfo.team2.shortName || 'Team2'}_${new Date().toISOString().split('T')[0]}.pdf`;
     doc.save(filename);
