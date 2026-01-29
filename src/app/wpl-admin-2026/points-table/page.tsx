@@ -156,7 +156,7 @@ export default function WPLAdminPointsTablePage() {
 
   const handleToggleQualified = async (teamId: string, qualified: boolean) => {
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
       if (!token) {
         alert('Authentication token not found');
         return;
@@ -197,7 +197,7 @@ export default function WPLAdminPointsTablePage() {
 
   const handleSave = async (teamId: string) => {
     try {
-      const token = localStorage.getItem('adminToken');
+      const token = localStorage.getItem('adminToken') || localStorage.getItem('auth_token');
       if (!token) {
         alert('Authentication token not found');
         return;
@@ -217,24 +217,28 @@ export default function WPLAdminPointsTablePage() {
       }
 
       // Update team stats
+      const payload = {
+        id: teamId,
+        ...teamToUpdate,
+        stats: {
+          matchesPlayed: dataToSave.matchesPlayed,
+          wins: dataToSave.wins,
+          losses: dataToSave.losses,
+          points: dataToSave.points,
+          netRunRate: dataToSave.netRunRate,
+          qualified: Boolean(dataToSave.qualified)
+        }
+      };
+      
+      console.log('Saving team data:', payload);
+      
       const response = await fetch('/api/teams', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          id: teamId,
-          ...teamToUpdate,
-          stats: {
-            matchesPlayed: dataToSave.matchesPlayed,
-            wins: dataToSave.wins,
-            losses: dataToSave.losses,
-            points: dataToSave.points,
-            netRunRate: dataToSave.netRunRate,
-            qualified: Boolean(dataToSave.qualified)
-          }
-        })
+        body: JSON.stringify(payload)
       });
 
       if (response.ok) {
