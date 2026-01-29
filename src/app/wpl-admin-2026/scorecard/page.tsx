@@ -216,6 +216,12 @@ export default function ScorecardAdminPage() {
           totalRuns: 0,
           totalWickets: 0,
           totalOvers: 0,
+          fallOfWickets: [],
+          powerplays: {
+            mandatory: { overs: '', runs: 0 },
+            optional: { overs: '', runs: 0 }
+          },
+          partnerships: []
         },
         {
           inningsNumber: 2,
@@ -226,6 +232,12 @@ export default function ScorecardAdminPage() {
           totalRuns: 0,
           totalWickets: 0,
           totalOvers: 0,
+          fallOfWickets: [],
+          powerplays: {
+            mandatory: { overs: '', runs: 0 },
+            optional: { overs: '', runs: 0 }
+          },
+          partnerships: []
         },
       ],
     };
@@ -2154,6 +2166,319 @@ export default function ScorecardAdminPage() {
                     </div>
                   </div>
                 )}
+              )}
+
+                {/* Fall of Wickets Section */}
+                <div className="bg-gray-800 p-6 rounded-lg">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold">Fall of Wickets</h3>
+                    <button
+                      onClick={() => {
+                        const updated = { ...scorecard };
+                        updated.innings[activeInnings].fallOfWickets.push({
+                          player: '',
+                          score: '',
+                          over: ''
+                        });
+                        setScorecard(updated);
+                      }}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition"
+                    >
+                      + Add FOW
+                    </button>
+                  </div>
+
+                  {scorecard.innings[activeInnings].fallOfWickets.length === 0 ? (
+                    <p className="text-gray-400">No fall of wickets added yet</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-gray-600">
+                            <th className="text-left p-2">Player</th>
+                            <th className="text-center p-2">Score</th>
+                            <th className="text-center p-2">Over</th>
+                            <th className="text-center p-2">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {scorecard.innings[activeInnings].fallOfWickets.map((fow, idx) => (
+                            <tr key={idx} className="border-b border-gray-700">
+                              <td className="p-2">
+                                <input
+                                  type="text"
+                                  value={fow.player}
+                                  onChange={(e) => {
+                                    const updated = { ...scorecard };
+                                    updated.innings[activeInnings].fallOfWickets[idx].player = e.target.value;
+                                    setScorecard(updated);
+                                  }}
+                                  placeholder="Player name"
+                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
+                                />
+                              </td>
+                              <td className="p-2">
+                                <input
+                                  type="text"
+                                  value={fow.score}
+                                  onChange={(e) => {
+                                    const updated = { ...scorecard };
+                                    updated.innings[activeInnings].fallOfWickets[idx].score = e.target.value;
+                                    setScorecard(updated);
+                                  }}
+                                  placeholder="e.g., 40-1"
+                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center"
+                                />
+                              </td>
+                              <td className="p-2">
+                                <input
+                                  type="text"
+                                  value={fow.over}
+                                  onChange={(e) => {
+                                    const updated = { ...scorecard };
+                                    updated.innings[activeInnings].fallOfWickets[idx].over = e.target.value;
+                                    setScorecard(updated);
+                                  }}
+                                  placeholder="e.g., 3.5"
+                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-center"
+                                />
+                              </td>
+                              <td className="p-2 text-center">
+                                <button
+                                  onClick={() => {
+                                    const updated = { ...scorecard };
+                                    updated.innings[activeInnings].fallOfWickets.splice(idx, 1);
+                                    setScorecard(updated);
+                                  }}
+                                  className="px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-white text-sm transition"
+                                >
+                                  Remove
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+                {/* Powerplays Section */}
+                <div className="bg-gray-800 p-6 rounded-lg">
+                  <div className="mb-6">
+                    <h3 className="text-xl font-bold">Powerplays</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-2">Mandatory Powerplay</label>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Overs</label>
+                          <input
+                            type="text"
+                            value={scorecard.innings[activeInnings].powerplays.mandatory.overs}
+                            onChange={(e) => {
+                              const updated = { ...scorecard };
+                              updated.innings[activeInnings].powerplays.mandatory.overs = e.target.value;
+                              setScorecard(updated);
+                            }}
+                            placeholder="e.g., 0.1 - 6"
+                            className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Runs</label>
+                          <input
+                            type="number"
+                            value={scorecard.innings[activeInnings].powerplays.mandatory.runs}
+                            onChange={(e) => {
+                              const updated = { ...scorecard };
+                              updated.innings[activeInnings].powerplays.mandatory.runs = e.target.value ? parseInt(e.target.value) : 0;
+                              setScorecard(updated);
+                            }}
+                            placeholder="57"
+                            className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm text-gray-400 mb-2">Optional Powerplay</label>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Overs</label>
+                          <input
+                            type="text"
+                            value={scorecard.innings[activeInnings].powerplays.optional.overs}
+                            onChange={(e) => {
+                              const updated = { ...scorecard };
+                              updated.innings[activeInnings].powerplays.optional.overs = e.target.value;
+                              setScorecard(updated);
+                            }}
+                            placeholder="e.g., 16.1 - 19"
+                            className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-500 mb-1">Runs</label>
+                          <input
+                            type="number"
+                            value={scorecard.innings[activeInnings].powerplays.optional.runs}
+                            onChange={(e) => {
+                              const updated = { ...scorecard };
+                              updated.innings[activeInnings].powerplays.optional.runs = e.target.value ? parseInt(e.target.value) : 0;
+                              setScorecard(updated);
+                            }}
+                            placeholder="45"
+                            className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Partnerships Section */}
+                <div className="bg-gray-800 p-6 rounded-lg">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold">Partnerships</h3>
+                    <button
+                      onClick={() => {
+                        const updated = { ...scorecard };
+                        updated.innings[activeInnings].partnerships.push({
+                          batsman1: '',
+                          batsman1Runs: '',
+                          batsman1Balls: '',
+                          batsman2: '',
+                          batsman2Runs: '',
+                          batsman2Balls: '',
+                          totalRuns: ''
+                        });
+                        setScorecard(updated);
+                      }}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition"
+                    >
+                      + Add Partnership
+                    </button>
+                  </div>
+
+                  {scorecard.innings[activeInnings].partnerships.length === 0 ? (
+                    <p className="text-gray-400">No partnerships added yet</p>
+                  ) : (
+                    <div className="space-y-4">
+                      {scorecard.innings[activeInnings].partnerships.map((partnership, idx) => (
+                        <div key={idx} className="border border-gray-600 rounded-lg p-4">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                              <label className="block text-sm text-gray-400 mb-2">Batsman 1</label>
+                              <input
+                                type="text"
+                                value={partnership.batsman1}
+                                onChange={(e) => {
+                                  const updated = { ...scorecard };
+                                  updated.innings[activeInnings].partnerships[idx].batsman1 = e.target.value;
+                                  setScorecard(updated);
+                                }}
+                                placeholder="Player name"
+                                className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white mb-2"
+                              />
+                              <div className="grid grid-cols-2 gap-2">
+                                <input
+                                  type="text"
+                                  value={partnership.batsman1Runs}
+                                  onChange={(e) => {
+                                    const updated = { ...scorecard };
+                                    updated.innings[activeInnings].partnerships[idx].batsman1Runs = e.target.value;
+                                    setScorecard(updated);
+                                  }}
+                                  placeholder="Runs"
+                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-sm"
+                                />
+                                <input
+                                  type="text"
+                                  value={partnership.batsman1Balls}
+                                  onChange={(e) => {
+                                    const updated = { ...scorecard };
+                                    updated.innings[activeInnings].partnerships[idx].batsman1Balls = e.target.value;
+                                    setScorecard(updated);
+                                  }}
+                                  placeholder="Balls"
+                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-sm"
+                                />
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <label className="block text-sm text-gray-400 mb-2">Batsman 2</label>
+                              <input
+                                type="text"
+                                value={partnership.batsman2}
+                                onChange={(e) => {
+                                  const updated = { ...scorecard };
+                                  updated.innings[activeInnings].partnerships[idx].batsman2 = e.target.value;
+                                  setScorecard(updated);
+                                }}
+                                placeholder="Player name"
+                                className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white mb-2"
+                              />
+                              <div className="grid grid-cols-2 gap-2">
+                                <input
+                                  type="text"
+                                  value={partnership.batsman2Runs}
+                                  onChange={(e) => {
+                                    const updated = { ...scorecard };
+                                    updated.innings[activeInnings].partnerships[idx].batsman2Runs = e.target.value;
+                                    setScorecard(updated);
+                                  }}
+                                  placeholder="Runs"
+                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-sm"
+                                />
+                                <input
+                                  type="text"
+                                  value={partnership.batsman2Balls}
+                                  onChange={(e) => {
+                                    const updated = { ...scorecard };
+                                    updated.innings[activeInnings].partnerships[idx].batsman2Balls = e.target.value;
+                                    setScorecard(updated);
+                                  }}
+                                  placeholder="Balls"
+                                  className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white text-sm"
+                                />
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <label className="block text-sm text-gray-400 mb-2">Total Partnership</label>
+                              <input
+                                type="text"
+                                value={partnership.totalRuns}
+                                onChange={(e) => {
+                                  const updated = { ...scorecard };
+                                  updated.innings[activeInnings].partnerships[idx].totalRuns = e.target.value;
+                                  setScorecard(updated);
+                                }}
+                                placeholder="Total runs"
+                                className="w-full bg-gray-700 p-2 rounded border border-gray-600 text-white mb-2"
+                              />
+                              <button
+                                onClick={() => {
+                                  const updated = { ...scorecard };
+                                  updated.innings[activeInnings].partnerships.splice(idx, 1);
+                                  setScorecard(updated);
+                                }}
+                                className="w-full px-3 py-1 bg-red-600 hover:bg-red-700 rounded text-white text-sm transition"
+                              >
+                                Remove Partnership
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 
