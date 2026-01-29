@@ -144,6 +144,72 @@ export const mockTeams: Team[] = [
       { year: 2021, name: 'IPL Champions' }
     ],
     homeGrounds: ['M. A. Chidambaram Stadium']
+  },
+  // WPL Teams
+  {
+    id: '11',
+    league: 'wpl',
+    name: 'Mumbai Indians (WPL)',
+    shortName: 'MI-W',
+    logo: '/logos/wpl_mi_logo_animated.svg',
+    description: 'The women\'s franchise of Mumbai Indians bringing championship pedigree',
+    colors: { primary: '#004BA0', secondary: '#FFD700' },
+    players: [],
+    trophies: [],
+    homeGrounds: ['Wankhede Stadium, Mumbai']
+  },
+  {
+    id: '12',
+    league: 'wpl',
+    name: 'Royal Challengers Bangalore (WPL)',
+    shortName: 'RCB-W',
+    logo: '/logos/wpl_rcb_logo_animated.svg',
+    description: 'The women\'s franchise of RCB with explosive talent',
+    colors: { primary: '#C8102E', secondary: '#FFD700' },
+    players: [],
+    trophies: [
+      {
+        year: 2024,
+        name: 'WPL Champions'
+      }
+    ],
+    homeGrounds: ['M. Chinnaswamy Stadium, Bengaluru']
+  },
+  {
+    id: '13',
+    league: 'wpl',
+    name: 'Delhi Capitals (WPL)',
+    shortName: 'DC-W',
+    logo: '/logos/wpl_dc_logo_animated.svg',
+    description: 'The women\'s franchise of Delhi Capitals combining youth and experience',
+    colors: { primary: '#004BA0', secondary: '#DC2626' },
+    players: [],
+    trophies: [],
+    homeGrounds: ['Arun Jaitley Stadium, Delhi']
+  },
+  {
+    id: '14',
+    league: 'wpl',
+    name: 'Gujarat Giants (WPL)',
+    shortName: 'GG',
+    logo: '/logos/wpl_gg_logo_animated.svg',
+    description: 'The women\'s franchise of Gujarat Giants aiming for glory',
+    colors: { primary: '#F97316', secondary: '#FFD700' },
+    players: [],
+    trophies: [],
+    homeGrounds: ['Narendra Modi Stadium, Ahmedabad']
+  },
+  {
+    id: '15',
+    league: 'wpl',
+    name: 'UP Warriorz (WPL)',
+    shortName: 'UPW',
+    logo: '/logos/wpl_upw_logo_animated.svg',
+    description: 'The women\'s franchise of UP Warriorz bringing fierce competition',
+    colors: { primary: '#059669', secondary: '#F97316' },
+    players: [],
+    trophies: [],
+    homeGrounds: ['Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium, Lucknow']
   }
 ];
 
