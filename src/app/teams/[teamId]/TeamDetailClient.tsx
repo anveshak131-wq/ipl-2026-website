@@ -1563,6 +1563,85 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
                             </div>
                           </div>
                         )}
+
+                        {/* Fall of Wickets */}
+                        {inning.fallOfWickets && inning.fallOfWickets.length > 0 && (
+                          <div className="mb-6">
+                            <h4 className="text-lg font-semibold text-white mb-3">Fall of Wickets</h4>
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-sm">
+                                <thead className="bg-gray-700/50">
+                                  <tr className="text-left text-gray-300">
+                                    <th className="p-2">Player</th>
+                                    <th className="p-2 text-center">Score</th>
+                                    <th className="p-2 text-center">Over</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="text-gray-200">
+                                  {inning.fallOfWickets.map((fow: any, i: number) => (
+                                    <tr key={i} className="border-t border-gray-700">
+                                      <td className="p-2 font-semibold">{fow.player}</td>
+                                      <td className="p-2 text-center font-bold text-yellow-400">{fow.score}</td>
+                                      <td className="p-2 text-center">{fow.over}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Powerplays */}
+                        {inning.powerplays && (
+                          <div className="mb-6">
+                            <h4 className="text-lg font-semibold text-white mb-3">Powerplays</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {inning.powerplays.mandatory && (
+                                <div className="bg-gray-700/30 rounded-lg p-4">
+                                  <div className="text-sm text-gray-400 mb-1">Mandatory Powerplay</div>
+                                  <div className="text-white font-semibold">{inning.powerplays.mandatory.overs || 'N/A'}</div>
+                                  <div className="text-green-400 font-bold">{inning.powerplays.mandatory.runs || 0} runs</div>
+                                </div>
+                              )}
+                              {inning.powerplays.optional && (
+                                <div className="bg-gray-700/30 rounded-lg p-4">
+                                  <div className="text-sm text-gray-400 mb-1">Optional Powerplay</div>
+                                  <div className="text-white font-semibold">{inning.powerplays.optional.overs || 'N/A'}</div>
+                                  <div className="text-green-400 font-bold">{inning.powerplays.optional.runs || 0} runs</div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Partnerships */}
+                        {inning.partnerships && inning.partnerships.length > 0 && (
+                          <div className="mb-6">
+                            <h4 className="text-lg font-semibold text-white mb-3">Partnerships</h4>
+                            <div className="space-y-3">
+                              {inning.partnerships.map((partnership: any, i: number) => (
+                                <div key={i} className="bg-gray-700/30 rounded-lg p-4">
+                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                      <div className="text-sm text-gray-400 mb-1">Batsman 1</div>
+                                      <div className="text-white font-semibold">{partnership.batsman1}</div>
+                                      <div className="text-green-400">{partnership.batsman1Runs} ({partnership.batsman1Balls})</div>
+                                    </div>
+                                    <div>
+                                      <div className="text-sm text-gray-400 mb-1">Batsman 2</div>
+                                      <div className="text-white font-semibold">{partnership.batsman2}</div>
+                                      <div className="text-green-400">{partnership.batsman2Runs} ({partnership.batsman2Balls})</div>
+                                    </div>
+                                    <div>
+                                      <div className="text-sm text-gray-400 mb-1">Partnership</div>
+                                      <div className="text-yellow-400 font-bold text-lg">{partnership.totalRuns} runs</div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
