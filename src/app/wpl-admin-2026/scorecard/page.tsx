@@ -718,10 +718,20 @@ export default function ScorecardAdminPage() {
     addColorfulText('WPL 2026 PREMIUM SCORECARD', pageWidth / 2, 35, [255, 255, 255], 26, 'bold', 'center');
     addColorfulText('WOMEN\'S PREMIER LEAGUE', pageWidth / 2, 60, [255, 215, 0], 16, 'bold', 'center');
     
-    // Team names with colorful background
+    // Team names with colorful background - wider box to accommodate long names
     doc.setFillColor(...colors.accent);
-    doc.roundedRect(pageWidth / 2 - 150, 75, 300, 30, 5, 5, 'F');
-    addColorfulText(`${sc.matchInfo.team1.name} vs ${sc.matchInfo.team2.name}`, pageWidth / 2, 95, colors.dark, 14, 'bold', 'center');
+    const teamNameBoxWidth = Math.min(450, pageWidth - 100); // Wider box, but not wider than page
+    const teamNameBoxX = (pageWidth - teamNameBoxWidth) / 2;
+    doc.roundedRect(teamNameBoxX, 75, teamNameBoxWidth, 30, 5, 5, 'F');
+    
+    // Truncate team names if too long
+    let teamNameText = `${sc.matchInfo.team1.name} vs ${sc.matchInfo.team2.name}`;
+    const maxTeamNameLength = Math.floor(teamNameBoxWidth / 8); // Approx 8 chars per pixel
+    if (teamNameText.length > maxTeamNameLength) {
+      teamNameText = teamNameText.substring(0, maxTeamNameLength - 3) + '...';
+    }
+    
+    addColorfulText(teamNameText, pageWidth / 2, 95, colors.dark, 14, 'bold', 'center');
     
     // Match Information Section with Enhanced Design
     y = 130;
@@ -729,9 +739,14 @@ export default function ScorecardAdminPage() {
     addDecorativePattern(y + 8, colors.primary);
     y += 25;
     
-    // Create info boxes with colors
+    // Create info boxes with colors and proper text truncation
     const infoBoxes = [
-      { label: 'Venue', value: sc.matchInfo.venue || 'Stadium', color: colors.info },
+      { 
+        label: 'Venue', 
+        value: sc.matchInfo.venue || 'Stadium', 
+        color: colors.info,
+        maxLength: 25 // Truncate venue names
+      },
       { label: 'Date', value: sc.matchInfo.date || 'TBD', color: colors.success },
       { label: 'Time', value: sc.matchInfo.time || 'TBD', color: colors.warning },
       { label: 'Toss', value: `${sc.matchInfo.toss?.winner || 'N/A'} (${sc.matchInfo.toss?.decision || 'N/A'})`, color: colors.purple }
@@ -741,10 +756,16 @@ export default function ScorecardAdminPage() {
       const xPos = 50 + (index % 2) * (pageWidth / 2 - 100);
       const yPos = y + Math.floor(index / 2) * 40;
       
+      // Truncate long values
+      let displayValue = box.value;
+      if (box.maxLength && displayValue.length > box.maxLength) {
+        displayValue = displayValue.substring(0, box.maxLength - 3) + '...';
+      }
+      
       doc.setFillColor(...box.color);
       doc.roundedRect(xPos - 5, yPos - 15, pageWidth / 2 - 90, 35, 3, 3, 'F');
       addColorfulText(box.label, xPos + 5, yPos, [255, 255, 255], 9, 'bold');
-      addColorfulText(box.value, xPos + 5, yPos + 12, [255, 255, 255], 11);
+      addColorfulText(displayValue, xPos + 5, yPos + 12, [255, 255, 255], 11);
     });
     
     y += 100;
@@ -755,9 +776,17 @@ export default function ScorecardAdminPage() {
       
       if (y > pageHeight - 250) { doc.addPage(); y = 40; }
       
-      // Innings Header with Gradient
+      // Innings Header with Gradient - truncate long team names
       addGradientBackground(y - 15, 50, colors.secondary, colors.purple);
-      addColorfulText(`INNINGS ${inn.inningsNumber} - ${battingTeamName.toUpperCase()}`, pageWidth / 2, y + 15, [255, 255, 255], 18, 'bold', 'center');
+      
+      // Truncate team name for header if too long
+      let headerTeamName = battingTeamName.toUpperCase();
+      const maxHeaderLength = 35; // Maximum characters for header
+      if (headerTeamName.length > maxHeaderLength) {
+        headerTeamName = headerTeamName.substring(0, maxHeaderLength - 3) + '...';
+      }
+      
+      addColorfulText(`INNINGS ${inn.inningsNumber} - ${headerTeamName}`, pageWidth / 2, y + 15, [255, 255, 255], 18, 'bold', 'center');
       y += 60;
       
       // Batting Section with Enhanced Design
