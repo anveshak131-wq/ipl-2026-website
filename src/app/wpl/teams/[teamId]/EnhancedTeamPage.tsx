@@ -393,12 +393,11 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       return (
         sc.matchId === match.id || 
         (sc.matchInfo && (
-          // Match by team combination and date/venue
+          // Match by team combination (ignore date since scorecards have null dates)
           ((sc.matchInfo.team1?.shortName === match.team1?.shortName && 
             sc.matchInfo.team2?.shortName === match.team2?.shortName) ||
            (sc.matchInfo.team1?.shortName === match.team2?.shortName && 
-            sc.matchInfo.team2?.shortName === match.team1?.shortName)) &&
-          sc.matchInfo.date === match.date
+            sc.matchInfo.team2?.shortName === match.team1?.shortName))
         ))
       );
     });
@@ -421,6 +420,19 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       setSelectedScorecard(null);
       setShowScorecard(true);
     }
+  };
+
+  // Check if a match has a scorecard available
+  const hasScorecard = (match: any) => {
+    return allScorecards.some(sc => 
+      sc.matchId === match.id || 
+      (sc.matchInfo && (
+        ((sc.matchInfo.team1?.shortName === match.team1?.shortName && 
+          sc.matchInfo.team2?.shortName === match.team2?.shortName) ||
+         (sc.matchInfo.team1?.shortName === match.team2?.shortName && 
+          sc.matchInfo.team2?.shortName === match.team1?.shortName))
+      ))
+    );
   };
 
   const closeScorecard = () => {
@@ -733,8 +745,12 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className="bg-white/5 rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer"
-                        onClick={() => handleMatchClick(match)}
+                        className={`bg-white/5 rounded-xl p-4 border border-white/10 transition-all ${
+                          hasScorecard(match) 
+                            ? 'hover:bg-white/10 cursor-pointer border-green-500/30' 
+                            : 'opacity-75 cursor-not-allowed'
+                        }`}
+                        onClick={() => hasScorecard(match) && handleMatchClick(match)}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
@@ -750,7 +766,13 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                           <div className="text-right">
                             <div className="text-white/60 text-sm">{match.date}</div>
                             <div className="text-white/60 text-sm">{match.venue}</div>
-                            <div className="text-blue-400 text-xs mt-1">Click for details</div>
+                            <div className={`text-xs mt-1 ${
+                              hasScorecard(match) 
+                                ? 'text-green-400' 
+                                : 'text-gray-400'
+                            }`}>
+                              {hasScorecard(match) ? '📊 Scorecard Available' : 'No Scorecard'}
+                            </div>
                           </div>
                         </div>
                       </motion.div>
