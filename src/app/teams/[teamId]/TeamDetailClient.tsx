@@ -275,7 +275,12 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
 
   useEffect(() => {
     const fetchTeamData = async () => {
+      // Prevent infinite loops
+      if (isLoading) return;
+      
       try {
+        console.log('TeamDetailClient: Starting fetch for teamId:', teamId, 'league:', league);
+        
         // Handle different route formats: shortName (RCB, MI), numeric (1, 2), or team prefix (team1, team2)
         const numericId = teamId.replace('team', '');
         const shortNameUpper = teamId.toUpperCase();
@@ -283,74 +288,77 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
         
         // Fetch teams with league filter if provided
         const teamsUrl = league ? `/api/teams?league=${league}` : '/api/teams';
+        console.log('TeamDetailClient: Fetching from URL:', teamsUrl);
+        
         const teamsResponse = await fetch(teamsUrl);
-        if (teamsResponse.ok) {
-          const allTeams = await teamsResponse.json();
-          console.log('TeamDetailClient: Looking for teamId:', teamId, 'shortNameLower:', shortNameLower, 'shortNameUpper:', shortNameUpper, 'league:', league);
-          console.log('TeamDetailClient: Available teams:', allTeams.map(t => ({ id: t.id, name: t.name, shortName: t.shortName, league: t.league })));
+        if (!teamsResponse.ok) {
+          console.error('TeamDetailClient: Teams API response not OK:', teamsResponse.status, teamsResponse.statusText);
+          setTeamData(null);
+          return;
+        }
+        
+        const allTeams = await teamsResponse.json();
+        console.log('TeamDetailClient: Looking for teamId:', teamId, 'shortNameLower:', shortNameLower, 'shortNameUpper:', shortNameUpper, 'league:', league);
+        console.log('TeamDetailClient: Available teams:', allTeams.map(t => ({ id: t.id, name: t.name, shortName: t.shortName, league: t.league })));
+        
+        // First, filter teams by league if specified
+        const filteredTeams = league ? allTeams.filter((t: Team) => t.league === league) : allTeams;
+        console.log('TeamDetailClient: Filtered teams by league:', filteredTeams.length);
+        
+        // Try to find team by shortName first (RCB, MI, etc.), then by ID
+        let team = filteredTeams.find((t: Team) => {
+          if (!t.shortName) return false;
+          const tShortNameLower = t.shortName.toLowerCase();
           
-          // First, filter teams by league if specified
-          const filteredTeams = league ? allTeams.filter((t: Team) => t.league === league) : allTeams;
-          console.log('TeamDetailClient: Filtered teams by league:', filteredTeams.length);
-          
-          // Try to find team by shortName first (RCB, MI, etc.), then by ID
-          let team = filteredTeams.find((t: Team) => {
-            if (!t.shortName) return false;
-            const tShortNameLower = t.shortName.toLowerCase();
-            
-            // Exact match - this should work for RCB-W
-            if (tShortNameLower === shortNameLower || t.shortName.toUpperCase() === shortNameUpper) {
-              console.log('TeamDetailClient: Exact match found:', t.name, 'shortName:', t.shortName, 'league:', t.league);
-              return true;
-            }
-            // Partial match for WPL teams (e.g., "rcb" matches "rcb-w")
-            if (tShortNameLower.includes(shortNameLower) || shortNameLower.includes(tShortNameLower.replace('-w', ''))) {
-              console.log('TeamDetailClient: Partial match found:', t.name, 'shortName:', t.shortName, 'league:', t.league);
-              return true;
-            }
-            // Match without -W suffix (e.g., "rcb" matches "rcb-w")
-            if (tShortNameLower.replace('-w', '') === shortNameLower || shortNameLower === tShortNameLower.replace('-w', '')) {
-              console.log('TeamDetailClient: Suffix match found:', t.name, 'shortName:', t.shortName, 'league:', t.league);
-              return true;
-            }
-            return false;
-          });
-          
-          // Fallback to ID matching if shortName not found (for backward compatibility)
-          if (!team) {
-            console.log('TeamDetailClient: No shortName match, trying ID matching with numericId:', numericId, 'teamId:', teamId);
-            team = filteredTeams.find((t: Team) => t.id === numericId || t.id === teamId);
-            if (team) {
-              console.log('TeamDetailClient: ID match found:', team.name, 'id:', team.id, 'league:', team.league);
-            }
+          // Exact match - this should work for RCB-W
+          if (tShortNameLower === shortNameLower || t.shortName.toUpperCase() === shortNameUpper) {
+            console.log('TeamDetailClient: Exact match found:', t.name, 'shortName:', t.shortName, 'league:', t.league);
+            return true;
           }
-          
-          console.log('TeamDetailClient: Final team result:', team ? team.name : 'null');
-          
+          // Partial match for WPL teams (e.g., "rcb" matches "rcb-w")
+          if (tShortNameLower.includes(shortNameLower) || shortNameLower.includes(tShortNameLower.replace('-w', ''))) {
+            console.log('TeamDetailClient: Partial match found:', t.name, 'shortName:', t.shortName, 'league:', t.league);
+            return true;
+          }
+          // Match without -W suffix (e.g., "rcb" matches "rcb-w")
+          if (tShortNameLower.replace('-w', '') === shortNameLower || shortNameLower === tShortNameLower.replace('-w', '')) {
+            console.log('TeamDetailClient: Suffix match found:', t.name, 'shortName:', t.shortName, 'league:', t.league);
+            return true;
+          }
+          return false;
+        });
+        
+        // Fallback to ID matching if shortName not found (for backward compatibility)
+        if (!team) {
+          console.log('TeamDetailClient: No shortName match, trying ID matching with numericId:', numericId, 'teamId:', teamId);
+          team = filteredTeams.find((t: Team) => t.id === numericId || t.id === teamId);
           if (team) {
-            // Fetch players using api helper for better error handling and ID normalization
-            const teamLeague = league || (team.league as 'ipl' | 'wpl') || 'ipl';
-            console.log('TeamDetailClient: Fetching players for league:', teamLeague, 'team ID:', team.id);
+            console.log('TeamDetailClient: ID match found:', team.name, 'id:', team.id, 'league:', team.league);
+          }
+        }
+        
+        console.log('TeamDetailClient: Final team result:', team ? team.name : 'null');
+        
+        if (team) {
+          // Fetch players using api helper for better error handling and ID normalization
+          const teamLeague = league || (team.league as 'ipl' | 'wpl') || 'ipl';
+          console.log('TeamDetailClient: Fetching players for league:', teamLeague, 'team ID:', team.id);
+          
+          const allPlayers = await api.getPlayers(undefined, teamLeague);
+          console.log('TeamDetailClient: Fetched players:', allPlayers.length);
+          
+          if (allPlayers.length > 0) {
+            console.log('TeamDetailClient: Sample player teamIds:', allPlayers.slice(0, 5).map(p => ({ 
+              name: p.name, 
+              teamId: p.teamId, 
+              normalizedTeamId: normalizeId(p.teamId)
+            })));
             
-            const allPlayers = await api.getPlayers(undefined, teamLeague);
-            console.log('TeamDetailClient: Fetched players:', allPlayers.length);
-            
-            if (allPlayers.length > 0) {
-              console.log('TeamDetailClient: Sample player teamIds:', allPlayers.slice(0, 5).map(p => ({ 
-                name: p.name, 
-                teamId: p.teamId, 
-                teamIdType: typeof p.teamId 
-              })));
-            }
-            
-            // Match players by teamId - handle both "1" and "team1" formats
-            // Normalize both IDs for comparison
-            const normalizeId = (id: string | number | undefined): string => {
+            const normalizeId = (id: any) => {
               if (!id) return '';
-              const str = String(id).trim();
-              // Remove 'team' prefix if present and convert to number then back to string for consistency
-              const numMatch = str.replace(/^team/i, '').match(/^\d+$/);
-              return numMatch ? numMatch[0] : str.toLowerCase();
+              const idStr = String(id);
+              // Remove 'team' prefix if present
+              return idStr.replace(/^team/i, '');
             };
             
             const normalizedTeamId = normalizeId(team.id);
@@ -387,15 +395,7 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
               return matches;
             });
             
-            console.log('TeamDetailClient: Matched players for team:', teamPlayers.length, 'out of', allPlayers.length, 'total players');
-            
-            if (teamPlayers.length === 0 && allPlayers.length > 0) {
-              console.warn('TeamDetailClient: No players matched! Sample player teamIds:', allPlayers.slice(0, 10).map(p => ({
-                name: p.name,
-                teamId: p.teamId,
-                normalized: normalizeId(p.teamId)
-              })));
-            }
+            console.log('TeamDetailClient: Matched players count:', teamPlayers.length);
             
             // Use matched players if found, otherwise fall back to team's original players array
             const finalPlayers = teamPlayers.length > 0 
@@ -410,46 +410,56 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
             };
             setTeamData(teamWithPlayers);
             
-            // Fetch coaching staff for this team
-            try {
-              const coachesResponse = await fetch(`/api/coaches?teamId=${team.id}`);
-              if (coachesResponse.ok) {
-                const coaches = await coachesResponse.json();
-                setCoachingStaff(coaches);
-              }
-            } catch (err) {
-              console.error('Error fetching coaching staff:', err);
-            }
-
-            // Fetch key players for this team
-            try {
-              const keyPlayersResponse = await fetch(`/api/key-players?teamId=${team.id}`);
-              if (keyPlayersResponse.ok) {
-                const raw = await keyPlayersResponse.json() as { keyPlayers?: KeyPlayers };
-                if (raw && raw.keyPlayers) {
-                  const normalized: KeyPlayers = {
-                    teamId: raw.keyPlayers.teamId || team.id,
-                    powerHitterIds: raw.keyPlayers.powerHitterIds || [],
-                    anchorIds: raw.keyPlayers.anchorIds || [],
-                    finisherIds: raw.keyPlayers.finisherIds || [],
-                    strikeBowlerIds: raw.keyPlayers.strikeBowlerIds || [],
-                    deathSpecialistIds: raw.keyPlayers.deathSpecialistIds || [],
-                    allRoundXFactorIds: raw.keyPlayers.allRoundXFactorIds || [],
-                  };
-                  setKeyPlayers(normalized);
-                } else {
-                  setKeyPlayers(null);
-                }
-              }
-            } catch (err) {
-              console.error('Error fetching key players:', err);
-            }
           } else {
-            setTeamData(null);
+            console.log('TeamDetailClient: No players found, using empty array');
+            const teamWithPlayers = {
+              ...team,
+              players: []
+            };
+            setTeamData(teamWithPlayers);
           }
+          
+          // Fetch coaching staff for this team
+          try {
+            const coachesResponse = await fetch(`/api/coaches?teamId=${team.id}`);
+            if (coachesResponse.ok) {
+              const coaches = await coachesResponse.json();
+              setCoachingStaff(coaches);
+            }
+          } catch (err) {
+            console.error('Error fetching coaching staff:', err);
+          }
+
+          // Fetch key players for this team
+          try {
+            const keyPlayersResponse = await fetch(`/api/key-players?teamId=${team.id}`);
+            if (keyPlayersResponse.ok) {
+              const raw = await keyPlayersResponse.json();
+              if (raw && raw.keyPlayers) {
+                const normalized = {
+                  captain: raw.keyPlayers.captain || '',
+                  viceCaptain: raw.keyPlayers.viceCaptain || '',
+                  wicketKeeper: raw.keyPlayers.wicketKeeper || '',
+                  batters: raw.keyPlayers.batters || [],
+                  allRounders: raw.keyPlayers.allRounders || [],
+                  bowlers: raw.keyPlayers.bowlers || [],
+                  allRoundXFactorIds: raw.keyPlayers.allRoundXFactorIds || [],
+                };
+                setKeyPlayers(normalized);
+              } else {
+                setKeyPlayers(null);
+              }
+            }
+          } catch (err) {
+            console.error('Error fetching key players:', err);
+          }
+        } else {
+          console.log('TeamDetailClient: No team found, setting teamData to null');
+          setTeamData(null);
         }
       } catch (error) {
         console.error('Error fetching team data:', error);
+        setTeamData(null);
       } finally {
         setIsLoading(false);
       }
