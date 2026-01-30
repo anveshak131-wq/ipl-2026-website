@@ -901,6 +901,197 @@ export default function ScorecardAdminPage() {
       doc.rect(x, y, width, height, 'D');
     };
     
+    // New visualization functions for Fall of Wickets, Powerplays, and Partnerships
+    const addWicketsFallChart = (x: number, y: number, width: number, height: number, fallOfWickets: any[], color: number[]) => {
+      if (fallOfWickets.length === 0) return;
+      
+      // Background
+      doc.setFillColor(250, 250, 250);
+      doc.rect(x, y, width, height, 'F');
+      
+      // Extract wicket scores for visualization
+      const wicketScores = fallOfWickets.map(fow => {
+        const score = fow.score || '0-0';
+        const runs = parseInt(score.split('-')[1]) || 0;
+        return runs;
+      });
+      
+      const maxRuns = Math.max(...wicketScores);
+      const barWidth = width / (fallOfWickets.length * 2);
+      
+      // Draw bars
+      fallOfWickets.forEach((fow, index) => {
+        const score = fow.score || '0-0';
+        const runs = parseInt(score.split('-')[1]) || 0;
+        const barHeight = maxRuns > 0 ? (runs / maxRuns) * (height - 20) : 0;
+        const barX = x + (index * 2 * barWidth) + barWidth / 2;
+        const barY = y + height - barHeight - 10;
+        
+        // Draw bar
+        doc.setFillColor(...color);
+        doc.rect(barX, barY, barWidth, barHeight, 'F');
+        
+        // Add wicket number label
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(8);
+        doc.text(`W${index + 1}`, barX + barWidth / 2, y + height - 2, { align: 'center' });
+        
+        // Add runs label
+        if (runs > 0) {
+          doc.text(`${runs}`, barX + barWidth / 2, barY - 2, { align: 'center' });
+        }
+      });
+      
+      // Border
+      doc.setDrawColor(100, 100, 100);
+      doc.rect(x, y, width, height, 'D');
+    };
+    
+    const addPowerplayComparisonChart = (x: number, y: number, width: number, height: number, powerplays: any, colors: any) => {
+      if (!powerplays) return;
+      
+      // Background
+      doc.setFillColor(250, 250, 250);
+      doc.rect(x, y, width, height, 'F');
+      
+      const data: number[] = [];
+      const labels: string[] = [];
+      const barColors: number[][] = [];
+      
+      if (powerplays.mandatory) {
+        data.push(powerplays.mandatory.runs || 0);
+        labels.push('Mandatory');
+        barColors.push(colors.info);
+      }
+      
+      if (powerplays.optional) {
+        data.push(powerplays.optional.runs || 0);
+        labels.push('Optional');
+        barColors.push(colors.warning);
+      }
+      
+      if (data.length === 0) return;
+      
+      const maxValue = Math.max(...data);
+      const barWidth = width / (data.length * 2);
+      
+      // Draw bars
+      data.forEach((value, index) => {
+        const barHeight = maxValue > 0 ? (value / maxValue) * (height - 30) : 0;
+        const barX = x + (index * 2 * barWidth) + barWidth / 2;
+        const barY = y + height - barHeight - 20;
+        
+        // Draw bar
+        doc.setFillColor(...barColors[index]);
+        doc.rect(barX, barY, barWidth, barHeight, 'F');
+        
+        // Add label
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(8);
+        doc.text(labels[index], barX + barWidth / 2, y + height - 2, { align: 'center' });
+        
+        // Add value
+        doc.text(`${value} runs`, barX + barWidth / 2, barY - 2, { align: 'center' });
+      });
+      
+      // Border
+      doc.setDrawColor(100, 100, 100);
+      doc.rect(x, y, width, height, 'D');
+    };
+    
+    const addPartnershipContributionChart = (x: number, y: number, width: number, height: number, partnerships: any[], color: number[]) => {
+      if (partnerships.length === 0) return;
+      
+      // Background
+      doc.setFillColor(250, 250, 250);
+      doc.rect(x, y, width, height, 'F');
+      
+      // Extract partnership totals
+      const partnershipRuns = partnerships.map(p => {
+        const total = p.totalRuns || '0';
+        return parseInt(total) || 0;
+      });
+      
+      const maxRuns = Math.max(...partnershipRuns);
+      const barWidth = Math.min(30, width / (partnerships.length * 1.5));
+      
+      // Draw bars
+      partnerships.forEach((partnership, index) => {
+        const total = parseInt(partnership.totalRuns) || 0;
+        const barHeight = maxRuns > 0 ? (total / maxRuns) * (height - 25) : 0;
+        const barX = x + (index * (barWidth + 5)) + 5;
+        const barY = y + height - barHeight - 15;
+        
+        // Draw bar
+        doc.setFillColor(...color);
+        doc.rect(barX, barY, barWidth, barHeight, 'F');
+        
+        // Add partnership number
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(7);
+        doc.text(`P${index + 1}`, barX + barWidth / 2, y + height - 2, { align: 'center' });
+        
+        // Add runs value
+        if (total > 0) {
+          doc.text(`${total}`, barX + barWidth / 2, barY - 2, { align: 'center' });
+        }
+      });
+      
+      // Border
+      doc.setDrawColor(100, 100, 100);
+      doc.rect(x, y, width, height, 'D');
+    };
+    
+    const addWicketsTimelineChart = (x: number, y: number, width: number, height: number, fallOfWickets: any[], color: number[]) => {
+      if (fallOfWickets.length === 0) return;
+      
+      // Background
+      doc.setFillColor(250, 250, 250);
+      doc.rect(x, y, width, height, 'F');
+      
+      // Extract over numbers for timeline
+      const overData = fallOfWickets.map(fow => {
+        const over = fow.over || '0.0';
+        return parseFloat(over) || 0;
+      });
+      
+      const maxOver = Math.max(...overData);
+      const pointRadius = 3;
+      
+      // Draw timeline axis
+      doc.setDrawColor(100, 100, 100);
+      doc.setLineWidth(1);
+      doc.line(x + 10, y + height - 15, x + width - 10, y + height - 15);
+      
+      // Draw timeline points and connections
+      doc.setDrawColor(...color);
+      doc.setLineWidth(2);
+      
+      overData.forEach((over, index) => {
+        const pointX = x + 10 + ((over / maxOver) * (width - 20));
+        const pointY = y + height - 15;
+        
+        // Draw vertical line from axis
+        doc.line(pointX, pointY, pointX, pointY - (height - 25));
+        
+        // Draw point
+        doc.setFillColor(...color);
+        doc.circle(pointX, pointY, pointRadius, 'F');
+        
+        // Add over label
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(7);
+        doc.text(`${over}`, pointX, pointY + 10, { align: 'center' });
+        
+        // Add wicket number
+        doc.text(`W${index + 1}`, pointX, pointY - (height - 25) - 5, { align: 'center' });
+      });
+      
+      // Border
+      doc.setDrawColor(100, 100, 100);
+      doc.rect(x, y, width, height, 'D');
+    };
+    
     // Ultra-Premium Title Header with Gradient
     addGradientBackground(0, 100, colors.primary, colors.secondary);
     
@@ -1115,6 +1306,39 @@ export default function ScorecardAdminPage() {
         y += 120;
       }
       
+      // Enhanced Partnership Contribution Chart
+      if (inn.partnerships && inn.partnerships.length > 0) {
+        addColorfulText('Partnership Contributions', 40, y, colors.dark, 10, 'bold');
+        addPartnershipContributionChart(40, y + 5, pageWidth - 80, 60, inn.partnerships, colors.accent);
+        y += 80;
+      }
+      
+      // Fall of Wickets Analysis
+      if (inn.fallOfWickets && inn.fallOfWickets.length > 0) {
+        if (y > pageHeight - 200) { doc.addPage(); y = 40; }
+        
+        addColorfulText('FALL OF WICKETS ANALYSIS', 40, y, colors.warning, 10, 'bold');
+        
+        // Wickets Fall Chart (runs at which wickets fell)
+        addColorfulText('Runs at Wickets', 40, y + 15, colors.dark, 9, 'bold');
+        addWicketsFallChart(40, y + 20, pageWidth - 80, 50, inn.fallOfWickets, colors.warning);
+        y += 80;
+        
+        // Wickets Timeline Chart (when wickets fell)
+        addColorfulText('Wickets Timeline', 40, y, colors.dark, 9, 'bold');
+        addWicketsTimelineChart(40, y + 5, pageWidth - 80, 50, inn.fallOfWickets, colors.danger);
+        y += 70;
+      }
+      
+      // Powerplays Analysis
+      if (inn.powerplays) {
+        if (y > pageHeight - 150) { doc.addPage(); y = 40; }
+        
+        addColorfulText('POWERPLAYS ANALYSIS', 40, y, colors.info, 10, 'bold');
+        addPowerplayComparisonChart(40, y + 5, pageWidth - 80, 60, inn.powerplays, colors);
+        y += 80;
+      }
+      
       y += 15;
       
       // Bowling Section with Enhanced Design
@@ -1217,6 +1441,40 @@ export default function ScorecardAdminPage() {
       addPerformanceGraph(40, y + 5, pageWidth - 80, 60, bowlingRuns, colors.danger);
       y += 80;
       
+      // Bowling vs Partnerships Analysis
+      if (inn.partnerships && inn.partnerships.length > 0 && inn.bowling.length > 0) {
+        addColorfulText('Bowling Impact on Partnerships', 40, y, colors.dark, 10, 'bold');
+        
+        // Create a comparison chart showing partnership runs vs bowling economy
+        const partnershipData = inn.partnerships.map(p => parseInt(p.totalRuns) || 0);
+        const bowlingEconomies = inn.bowling.slice(0, partnershipData.length).map(b => b.economy || 0);
+        
+        // Show partnership runs as bars and overlay bowling economy as a line
+        addColorfulText('Partnership Runs vs Bowling Economy', 40, y + 15, colors.dark, 9, 'italic');
+        
+        // Draw partnership bars
+        const maxPartnershipRuns = Math.max(...partnershipData);
+        const barWidth = Math.min(40, (pageWidth - 80) / (partnershipData.length * 1.5));
+        
+        partnershipData.forEach((runs, index) => {
+          const barHeight = maxPartnershipRuns > 0 ? (runs / maxPartnershipRuns) * 40 : 0;
+          const barX = 40 + (index * (barWidth + 10));
+          const barY = y + 35;
+          
+          doc.setFillColor(...colors.accent);
+          doc.rect(barX, barY - barHeight, barWidth, barHeight, 'F');
+          
+          doc.setTextColor(0, 0, 0);
+          doc.setFontSize(7);
+          doc.text(`P${index + 1}`, barX + barWidth / 2, barY + 5, { align: 'center' });
+          doc.text(`${runs}`, barX + barWidth / 2, barY - barHeight - 2, { align: 'center' });
+        });
+        
+        y += 70;
+      }
+      
+      y += 20;
+
       // Fall of Wickets Section
       if (inn.fallOfWickets && inn.fallOfWickets.length > 0) {
         if (y > pageHeight - 150) { doc.addPage(); y = 40; }
