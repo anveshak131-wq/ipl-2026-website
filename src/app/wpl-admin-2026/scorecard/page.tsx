@@ -766,7 +766,14 @@ export default function ScorecardAdminPage() {
     const addColorfulText = (text: string, x: number, yPos: number, color: number[], fontSize: number, fontWeight: string = 'normal', align: 'left' = 'left') => {
       doc.setTextColor(...color);
       doc.setFontSize(fontSize);
-      doc.setFont('helvetica', fontWeight);
+      
+      // Set font based on weight - jsPDF has limited font options
+      if (fontWeight === 'bold') {
+        doc.setFont('helvetica', 'bold');
+      } else {
+        doc.setFont('helvetica', 'normal');
+      }
+      
       doc.text(text, x, yPos, { align });
     };
     
