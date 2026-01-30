@@ -63,6 +63,24 @@ export async function onRequest(context) {
           logo: "/teams/dc-w.png",
           colors: { primary: "#0078BC", secondary: "#EF1B26" },
           description: "DC Women's team"
+        },
+        {
+          id: "14",
+          name: "Gujarat Giants Women",
+          shortName: "GG",
+          league: "wpl",
+          logo: "/teams/gg.png",
+          colors: { primary: "#F97316", secondary: "#FFD700" },
+          description: "Gujarat Giants Women's team"
+        },
+        {
+          id: "15",
+          name: "UP Warriorz Women",
+          shortName: "UPW",
+          league: "wpl",
+          logo: "/teams/upw.png",
+          colors: { primary: "#059669", secondary: "#F97316" },
+          description: "UP Warriorz Women's team"
         }
       ];
 
