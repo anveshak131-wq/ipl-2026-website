@@ -617,6 +617,85 @@ export default function MatchCard({ match, index = 0, players }: MatchCardProps)
                             </div>
                           </div>
                         )}
+
+                        {/* Fall of Wickets */}
+                        {inning.fallOfWickets && inning.fallOfWickets.length > 0 && (
+                          <div className="mb-6">
+                            <h4 className="text-lg font-semibold text-white mb-3">Fall of Wickets</h4>
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-sm">
+                                <thead>
+                                  <tr className="border-b border-white/20 text-gray-400">
+                                    <th className="text-left p-2">Player</th>
+                                    <th className="text-center p-2">Score</th>
+                                    <th className="text-center p-2">Over</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {inning.fallOfWickets.map((fow: any, fidx: number) => (
+                                    <tr key={fidx} className="border-b border-white/10 text-white">
+                                      <td className="p-2 font-semibold">{fow.player}</td>
+                                      <td className="p-2 text-center font-bold text-yellow-400">{fow.score}</td>
+                                      <td className="p-2 text-center">{fow.over}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Powerplays */}
+                        {inning.powerplays && (
+                          <div className="mb-6">
+                            <h4 className="text-lg font-semibold text-white mb-3">Powerplays</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {inning.powerplays.mandatory && (
+                                <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                                  <div className="text-sm text-gray-400 mb-1">Mandatory Powerplay</div>
+                                  <div className="text-white font-semibold">{inning.powerplays.mandatory.overs || 'N/A'}</div>
+                                  <div className="text-green-400 font-bold">{inning.powerplays.mandatory.runs || 0} runs</div>
+                                </div>
+                              )}
+                              {inning.powerplays.optional && (
+                                <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                                  <div className="text-sm text-gray-400 mb-1">Optional Powerplay</div>
+                                  <div className="text-white font-semibold">{inning.powerplays.optional.overs || 'N/A'}</div>
+                                  <div className="text-green-400 font-bold">{inning.powerplays.optional.runs || 0} runs</div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Partnerships */}
+                        {inning.partnerships && inning.partnerships.length > 0 && (
+                          <div className="mb-6">
+                            <h4 className="text-lg font-semibold text-white mb-3">Partnerships</h4>
+                            <div className="space-y-3">
+                              {inning.partnerships.map((partnership: any, pidx: number) => (
+                                <div key={pidx} className="bg-white/5 rounded-lg p-4 border border-white/10">
+                                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                      <div className="text-sm text-gray-400 mb-1">Batsman 1</div>
+                                      <div className="text-white font-semibold">{partnership.batsman1}</div>
+                                      <div className="text-green-400">{partnership.batsman1Runs} ({partnership.batsman1Balls})</div>
+                                    </div>
+                                    <div>
+                                      <div className="text-sm text-gray-400 mb-1">Batsman 2</div>
+                                      <div className="text-white font-semibold">{partnership.batsman2}</div>
+                                      <div className="text-green-400">{partnership.batsman2Runs} ({partnership.batsman2Balls})</div>
+                                    </div>
+                                    <div>
+                                      <div className="text-sm text-gray-400 mb-1">Partnership</div>
+                                      <div className="text-yellow-400 font-bold text-lg">{partnership.totalRuns} runs</div>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
