@@ -95,10 +95,56 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       const teamsResponse = await fetch(`/api/teams?league=wpl`);
       if (teamsResponse.ok) {
         const teams = await teamsResponse.json();
-        const foundTeam = teams.find((t: Team) => 
-          t.shortName?.toLowerCase() === teamId.toLowerCase() || 
-          t.id === teamId
-        );
+        console.log('EnhancedTeamPage: Looking for teamId:', teamId);
+        console.log('EnhancedTeamPage: Available teams:', teams.map((t: Team) => ({ id: t.id, name: t.name, shortName: t.shortName })));
+        
+        // Enhanced team matching logic
+        const normalizedTeamId = teamId.toLowerCase().trim();
+        let foundTeam = null;
+        
+        // Try multiple matching strategies
+        foundTeam = teams.find((t: Team) => {
+          const teamShortName = t.shortName?.toLowerCase().trim();
+          const teamId = String(t.id).toLowerCase().trim();
+          
+          // Exact shortName match (e.g., "rcb-w" === "rcb-w")
+          if (teamShortName === normalizedTeamId) {
+            console.log('EnhancedTeamPage: Exact shortName match:', t.name);
+            return true;
+          }
+          
+          // ID match (e.g., "12" === "12")
+          if (teamId === normalizedTeamId) {
+            console.log('EnhancedTeamPage: ID match:', t.name);
+            return true;
+          }
+          
+          // Handle variations without -w suffix (e.g., "rcb" matches "rcb-w")
+          if (normalizedTeamId === 'rcb' && teamShortName === 'rcb-w') {
+            console.log('EnhancedTeamPage: RCB variation match:', t.name);
+            return true;
+          }
+          
+          if (normalizedTeamId === 'mi' && teamShortName === 'mi-w') {
+            console.log('EnhancedTeamPage: MI variation match:', t.name);
+            return true;
+          }
+          
+          if (normalizedTeamId === 'dc' && teamShortName === 'dc-w') {
+            console.log('EnhancedTeamPage: DC variation match:', t.name);
+            return true;
+          }
+          
+          // Handle team prefix format (e.g., "team12" === "12")
+          if (normalizedTeamId.replace('team', '') === teamId) {
+            console.log('EnhancedTeamPage: Team prefix match:', t.name);
+            return true;
+          }
+          
+          return false;
+        });
+        
+        console.log('EnhancedTeamPage: Final team result:', foundTeam ? foundTeam.name : 'null');
         
         if (foundTeam) {
           setTeam(foundTeam);
