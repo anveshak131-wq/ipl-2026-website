@@ -286,20 +286,27 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
         const teamsResponse = await fetch(teamsUrl);
         if (teamsResponse.ok) {
           const allTeams = await teamsResponse.json();
+          console.log('TeamDetailClient: Looking for teamId:', teamId, 'shortNameLower:', shortNameLower, 'shortNameUpper:', shortNameUpper);
+          console.log('TeamDetailClient: Available teams:', allTeams.map(t => ({ id: t.id, name: t.name, shortName: t.shortName, league: t.league })));
+          
           // Try to find team by shortName first (RCB, MI, etc.), then by ID
           let team = allTeams.find((t: Team) => {
             if (!t.shortName) return false;
             const tShortNameLower = t.shortName.toLowerCase();
+            
             // Exact match
             if (tShortNameLower === shortNameLower || t.shortName.toUpperCase() === shortNameUpper) {
+              console.log('TeamDetailClient: Exact match found:', t.name, 'shortName:', t.shortName);
               return true;
             }
             // Partial match for WPL teams (e.g., "dc" matches "dc-w")
             if (tShortNameLower.includes(shortNameLower) || shortNameLower.includes(tShortNameLower.replace('-w', ''))) {
+              console.log('TeamDetailClient: Partial match found:', t.name, 'shortName:', t.shortName);
               return true;
             }
             // Match without -W suffix (e.g., "dc" matches "dc-w")
             if (tShortNameLower.replace('-w', '') === shortNameLower || shortNameLower === tShortNameLower.replace('-w', '')) {
+              console.log('TeamDetailClient: Suffix match found:', t.name, 'shortName:', t.shortName);
               return true;
             }
             return false;
@@ -307,8 +314,14 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
           
           // Fallback to ID matching if shortName not found (for backward compatibility)
           if (!team) {
+            console.log('TeamDetailClient: No shortName match, trying ID matching with numericId:', numericId, 'teamId:', teamId);
             team = allTeams.find((t: Team) => t.id === numericId || t.id === teamId);
+            if (team) {
+              console.log('TeamDetailClient: ID match found:', team.name, 'id:', team.id);
+            }
           }
+          
+          console.log('TeamDetailClient: Final team result:', team ? team.name : 'null');
           
           if (team) {
             // Fetch players using api helper for better error handling and ID normalization
