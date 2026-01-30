@@ -148,10 +148,9 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
               const allPlayers = await playersResponse.json();
               console.log('EnhancedTeamPage: Total players received:', allPlayers?.length || 0);
               
-              // Filter players to ensure they belong to this team
+              // Filter players to ensure they belong to this team ONLY
               const teamPlayers = Array.isArray(allPlayers) ? allPlayers.filter(player => 
-                String(player.teamId) === String(foundTeam.id) || 
-                player.league === 'wpl'
+                String(player.teamId) === String(foundTeam.id)
               ) : [];
               
               console.log('EnhancedTeamPage: Filtered players for', foundTeam.shortName, ':', teamPlayers.length);
