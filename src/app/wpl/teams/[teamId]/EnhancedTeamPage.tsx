@@ -747,12 +747,12 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className={`bg-white/5 rounded-xl p-4 border border-white/10 transition-all ${
+                        className={`bg-white/5 rounded-xl p-4 border border-white/10 transition-all cursor-pointer hover:bg-white/10 ${
                           hasScorecard(match) 
-                            ? 'hover:bg-white/10 cursor-pointer border-green-500/30' 
-                            : 'opacity-75 cursor-not-allowed'
+                            ? 'border-green-500/30' 
+                            : 'border-white/10'
                         }`}
-                        onClick={() => hasScorecard(match) && handleMatchClick(match)}
+                        onClick={() => handleMatchClick(match)}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
@@ -771,9 +771,9 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                             <div className={`text-xs mt-1 ${
                               hasScorecard(match) 
                                 ? 'text-green-400' 
-                                : 'text-gray-400'
+                                : 'text-blue-400'
                             }`}>
-                              {hasScorecard(match) ? '📊 Scorecard Available' : 'No Scorecard'}
+                              {hasScorecard(match) ? '📊 Full Scorecard Available' : '📋 Match Details'}
                             </div>
                           </div>
                         </div>
