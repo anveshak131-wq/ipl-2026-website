@@ -782,7 +782,7 @@ export default function ScorecardAdminPage() {
         doc.setFont('helvetica', 'normal');
       }
       
-      doc.text(text, x, yPos, { align });
+      safeText(text, x, yPos, { align });
     };
     
     // Safe rect function with validation
@@ -796,6 +796,23 @@ export default function ScorecardAdminPage() {
         doc.rect(x, y, width, height, style);
       } catch (error) {
         console.error('Error in rect:', error, { x, y, width, height, style });
+      }
+    };
+    
+    // Safe text function with validation
+    const safeText = (text: string, x: number, y: number, options?: any) => {
+      if (!isFinite(x) || !isFinite(y) || !text) {
+        console.warn('Invalid parameters for text:', { text, x, y, options });
+        return;
+      }
+      try {
+        if (options) {
+          doc.text(text, x, y, options);
+        } else {
+          doc.text(text, x, y);
+        }
+      } catch (error) {
+        console.error('Error in text:', error, { text, x, y, options });
       }
     };
     
@@ -870,7 +887,7 @@ export default function ScorecardAdminPage() {
       // SR text
       doc.setTextColor(0, 0, 0);
       doc.setFontSize(8);
-      doc.text(`SR: ${strikeRate.toFixed(1)}`, x + width/2, y + height/2 + 2, { align: 'center' });
+      safeText(`SR: ${strikeRate.toFixed(1)}`, x + width/2, y + height/2 + 2, { align: 'center' });
     };
     
     const addPartnershipBreakdown = (x: number, y: number, width: number, height: number, partnerships: any[]) => {
@@ -892,8 +909,8 @@ export default function ScorecardAdminPage() {
         // Text
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(8);
-        doc.text(`${partnership.batsman1 || 'Player1'}-${partnership.batsman2 || 'Player2'}`, x + 2, currentY + 10);
-        doc.text(`${runs} runs`, x + 62 + barWidth, currentY + 10);
+        safeText(`${partnership.batsman1 || 'Player1'}-${partnership.batsman2 || 'Player2'}`, x + 2, currentY + 10);
+        safeText(`${runs} runs`, x + 62 + barWidth, currentY + 10);
         
         currentY += barHeight + spacing;
       });
@@ -984,11 +1001,11 @@ export default function ScorecardAdminPage() {
         // Add wicket number label
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(8);
-        doc.text(`W${index + 1}`, barX + barWidth / 2, y + height - 2, { align: 'center' });
+        safeText(`W${index + 1}`, barX + barWidth / 2, y + height - 2, { align: 'center' });
         
         // Add runs label
         if (runs > 0) {
-          doc.text(`${runs}`, barX + barWidth / 2, barY - 2, { align: 'center' });
+          safeText(`${runs}`, barX + barWidth / 2, barY - 2, { align: 'center' });
         }
       });
       
@@ -1038,10 +1055,10 @@ export default function ScorecardAdminPage() {
         // Add label
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(8);
-        doc.text(labels[index], barX + barWidth / 2, y + height - 2, { align: 'center' });
+        safeText(labels[index], barX + barWidth / 2, y + height - 2, { align: 'center' });
         
         // Add value
-        doc.text(`${value} runs`, barX + barWidth / 2, barY - 2, { align: 'center' });
+        safeText(`${value} runs`, barX + barWidth / 2, barY - 2, { align: 'center' });
       });
       
       // Border
@@ -1079,11 +1096,11 @@ export default function ScorecardAdminPage() {
         // Add partnership number
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(7);
-        doc.text(`P${index + 1}`, barX + barWidth / 2, y + height - 2, { align: 'center' });
+        safeText(`P${index + 1}`, barX + barWidth / 2, y + height - 2, { align: 'center' });
         
         // Add runs value
         if (total > 0) {
-          doc.text(`${total}`, barX + barWidth / 2, barY - 2, { align: 'center' });
+          safeText(`${total}`, barX + barWidth / 2, barY - 2, { align: 'center' });
         }
       });
       
@@ -1131,10 +1148,10 @@ export default function ScorecardAdminPage() {
         // Add over label
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(7);
-        doc.text(`${over}`, pointX, pointY + 10, { align: 'center' });
+        safeText(`${over}`, pointX, pointY + 10, { align: 'center' });
         
         // Add wicket number
-        doc.text(`W${index + 1}`, pointX, pointY - (height - 25) - 5, { align: 'center' });
+        safeText(`W${index + 1}`, pointX, pointY - (height - 25) - 5, { align: 'center' });
       });
       
       // Border
@@ -1151,7 +1168,7 @@ export default function ScorecardAdminPage() {
     for (let i = 0; i < 20; i++) {
       const x = Math.random() * pageWidth;
       const y = Math.random() * 100;
-      doc.text('*', x, y);
+      safeText('*', x, y);
     }
     
     addColorfulText('WPL 2026 PREMIUM SCORECARD', pageWidth / 2, 35, [255, 255, 255], 26, 'bold', 'center');
@@ -1480,7 +1497,7 @@ export default function ScorecardAdminPage() {
           // Add economy text
           doc.setTextColor(0, 0, 0);
           doc.setFontSize(7);
-          doc.text(`Econ: ${bowler.economyRate.toFixed(1)}`, 40 + (index * 110) + 50, y + 15, { align: 'center' });
+          safeText(`Econ: ${bowler.economyRate.toFixed(1)}`, 40 + (index * 110) + 50, y + 15, { align: 'center' });
         }
       });
       y += 40;
@@ -1516,8 +1533,8 @@ export default function ScorecardAdminPage() {
           
           doc.setTextColor(0, 0, 0);
           doc.setFontSize(7);
-          doc.text(`P${index + 1}`, barX + barWidth / 2, barY + 5, { align: 'center' });
-          doc.text(`${runs}`, barX + barWidth / 2, barY - barHeight - 2, { align: 'center' });
+          safeText(`P${index + 1}`, barX + barWidth / 2, barY + 5, { align: 'center' });
+          safeText(`${runs}`, barX + barWidth / 2, barY - barHeight - 2, { align: 'center' });
         });
         
         y += 70;
