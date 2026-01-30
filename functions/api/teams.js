@@ -258,12 +258,20 @@ export async function onRequest(context) {
       // Try to get teams from KV storage
       let teams = [];
       try {
-        const cachedTeams = await env.IPL_CACHE.get("teams");
-        if (cachedTeams) {
-          teams = JSON.parse(cachedTeams);
+        if (env && env.IPL_CACHE) {
+          const cachedTeams = await env.IPL_CACHE.get("teams");
+          if (cachedTeams) {
+            teams = JSON.parse(cachedTeams);
+            console.log(`Loaded ${teams.length} teams from KV cache`);
+          } else {
+            console.log("No teams found in KV cache, using defaults");
+          }
+        } else {
+          console.log("IPL_CACHE not available, using default teams");
         }
       } catch (error) {
         console.error("Error reading teams from KV:", error);
+        console.log("Falling back to default teams due to KV error");
       }
 
       // Force refresh from default teams if:
@@ -298,7 +306,12 @@ export async function onRequest(context) {
         teams = defaultTeams;
         // Update KV storage with fresh data
         try {
-          await env.IPL_CACHE.put("teams", JSON.stringify(teams));
+          if (env && env.IPL_CACHE) {
+            await env.IPL_CACHE.put("teams", JSON.stringify(teams));
+            console.log("Updated KV cache with default teams");
+          } else {
+            console.log("IPL_CACHE not available, skipping KV update");
+          }
         } catch (kvError) {
           console.error("Error updating KV cache with default teams:", kvError);
           // Continue without updating KV cache
@@ -330,20 +343,29 @@ export async function onRequest(context) {
       // Deduplicate teams by shortName (handles both string/number ID duplicates)
       const uniqueTeamsMap = new Map();
       for (const team of teams) {
-        // Use shortName as key to deduplicate (some teams have both "11" and 11 as IDs)
-        // Only process teams that have a shortName
-        if (team.shortName) {
-          if (!uniqueTeamsMap.has(team.shortName)) {
-            uniqueTeamsMap.set(team.shortName, team);
+        try {
+          // Use shortName as key to deduplicate (some teams have both "11" and 11 as IDs)
+          // Only process teams that have a shortName
+          if (team.shortName) {
+            if (!uniqueTeamsMap.has(team.shortName)) {
+              uniqueTeamsMap.set(team.shortName, team);
+            }
+          } else {
+            // For teams without shortName, use ID as fallback
+            const teamId = String(team.id);
+            if (!uniqueTeamsMap.has(teamId)) {
+              uniqueTeamsMap.set(teamId, team);
+            }
           }
-        } else {
-          // For teams without shortName, use ID as fallback
-          if (!uniqueTeamsMap.has(team.id)) {
-            uniqueTeamsMap.set(team.id, team);
-          }
+        } catch (error) {
+          console.error('Error processing team in deduplication:', team, error);
+          // Skip problematic team but continue processing others
+          continue;
         }
       }
       const uniqueTeams = Array.from(uniqueTeamsMap.values());
+
+      console.log(`Teams processing: Original=${teams.length}, Unique=${uniqueTeams.length}`);
 
       // If duplicates were found, update KV storage with clean data
       if (uniqueTeams.length < teams.length) {
@@ -351,7 +373,12 @@ export async function onRequest(context) {
           `Found ${teams.length - uniqueTeams.length} duplicate teams, cleaning up...`,
         );
         try {
-          await env.IPL_CACHE.put("teams", JSON.stringify(uniqueTeams));
+          if (env && env.IPL_CACHE) {
+            await env.IPL_CACHE.put("teams", JSON.stringify(uniqueTeams));
+            console.log("Updated KV cache with unique teams");
+          } else {
+            console.log("IPL_CACHE not available, skipping unique teams KV update");
+          }
         } catch (kvError) {
           console.error("Error updating KV cache with unique teams:", kvError);
           // Continue without updating KV cache
