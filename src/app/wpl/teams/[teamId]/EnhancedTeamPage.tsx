@@ -101,7 +101,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       
       // Add timeout to prevent infinite loops
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Request timeout')), 10000);
+        setTimeout(() => reject(new Error('Request timeout')), 5000);
       });
       
       // Fetch team data with timeout
@@ -192,6 +192,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
             if (matchesResponse.ok) {
               const teamMatches = await matchesResponse.json();
               setMatches(teamMatches);
+              calculateTeamStats(teamMatches);
             }
           } catch (matchError) {
             console.error('Error fetching matches:', matchError);
@@ -213,17 +214,23 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
             console.error('Error fetching coaches:', coachError);
             setCoachingStaff([]);
           }
-          
-          // Calculate team stats
-          calculateTeamStats(matches);
         }
       } else {
         console.error('Teams API returned status:', teamsResponse.status);
+        // Don't reset fetch flag on server errors to prevent infinite loops
+        if (teamsResponse.status >= 500) {
+          console.error('Server error detected, preventing retry');
+          hasFetchedData.current = true; // Prevent retry on server errors
+        }
       }
     } catch (error) {
       console.error('Error fetching team data:', error);
-      // Reset fetch flag on error to allow retry
-      hasFetchedData.current = false;
+      // Only reset fetch flag on network errors, not server errors
+      if (error instanceof Error && !error.message.includes('Request timeout')) {
+        hasFetchedData.current = false; // Allow retry on network errors
+      } else {
+        hasFetchedData.current = true; // Prevent retry on timeouts
+      }
     } finally {
       setLoading(false);
     }

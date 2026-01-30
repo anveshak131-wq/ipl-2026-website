@@ -255,72 +255,33 @@ export async function onRequest(context) {
       const url = new URL(request.url);
       const league = url.searchParams.get("league");
 
-      // Try to get teams from KV storage
-      let teams = [];
-      try {
-        if (env && env.IPL_CACHE) {
-          const cachedTeams = await env.IPL_CACHE.get("teams");
-          if (cachedTeams) {
-            teams = JSON.parse(cachedTeams);
-            console.log(`Loaded ${teams.length} teams from KV cache`);
-          } else {
-            console.log("No teams found in KV cache, using defaults");
-          }
-        } else {
-          console.log("IPL_CACHE not available, using default teams");
-        }
-      } catch (error) {
-        console.error("Error reading teams from KV:", error);
-        console.log("Falling back to default teams due to KV error");
-      }
+      // Always use default teams as primary source to avoid KV issues
+      console.log("Using default teams as primary source");
+      let teams = defaultTeams;
 
-      // Force refresh from default teams if:
-      // 1. CSK has old color
-      // 2. WPL teams are missing
-      // 3. WPL teams have wrong shortName format (should be MI-W, RCB-W, DC-W not MI, RCB, DC)
-      const hasCSKColorIssue =
-        teams &&
-        teams.find(
-          (t) => t.shortName === "CSK" && t.colors.primary === "#FFFF00",
-        );
-      const hasWPLTeams = teams && teams.find((t) => t.league === "wpl");
-      const hasWPLShortNameIssue =
-        teams &&
-        teams.find(
-          (t) =>
-            t.league === "wpl" &&
-            t.name.includes("Mumbai Indians") &&
-            t.shortName === "MI",
-        );
-
-      if (hasCSKColorIssue || !hasWPLTeams || hasWPLShortNameIssue) {
-        console.log(
-          "Clearing KV cache and using default teams (CSK color fix:",
-          !!hasCSKColorIssue,
-          ", WPL teams missing:",
-          !hasWPLTeams,
-          ", WPL shortName issue:",
-          !!hasWPLShortNameIssue,
-          ")",
-        );
-        teams = defaultTeams;
-        // Update KV storage with fresh data
+      // Try to get teams from KV storage only if default teams fail
+      if (!teams || teams.length === 0) {
         try {
           if (env && env.IPL_CACHE) {
-            await env.IPL_CACHE.put("teams", JSON.stringify(teams));
-            console.log("Updated KV cache with default teams");
+            const cachedTeams = await env.IPL_CACHE.get("teams");
+            if (cachedTeams) {
+              teams = JSON.parse(cachedTeams);
+              console.log(`Loaded ${teams.length} teams from KV cache as fallback`);
+            } else {
+              console.log("No teams found in KV cache, using defaults");
+            }
           } else {
-            console.log("IPL_CACHE not available, skipping KV update");
+            console.log("IPL_CACHE not available, using default teams");
           }
-        } catch (kvError) {
-          console.error("Error updating KV cache with default teams:", kvError);
-          // Continue without updating KV cache
+        } catch (error) {
+          console.error("Error reading teams from KV:", error);
+          console.log("Falling back to default teams due to KV error");
         }
       }
 
-      // Fallback to default teams if KV storage is empty
-      if (!teams) {
-        console.log("KV cache empty, using default teams");
+      // Final fallback - ensure we always have teams
+      if (!teams || teams.length === 0) {
+        console.log("All sources failed, using hardcoded default teams");
         teams = defaultTeams;
       }
 
