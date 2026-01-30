@@ -1,5 +1,4 @@
-import TeamDetailClient from '@/app/teams/[teamId]/TeamDetailClient';
-import { api } from '@/lib/data';
+import EnhancedWPLTeamPage from './EnhancedTeamPage';
 
 // Generate static params for WPL teams
 // With static export, all routes must be pre-generated at build time
@@ -33,28 +32,31 @@ export async function generateStaticParams() {
 
   try {
     // Try to fetch WPL teams to get their shortNames (for additional routes)
-    const teams = await api.getTeams('wpl');
-    
-    // Add any additional shortNames from API that aren't in defaults
-    teams.forEach(team => {
-      if (team.shortName) {
-        const shortNameLower = team.shortName.toLowerCase();
-        // Check if already in defaultParams
-        const exists = defaultParams.some(p => p.teamId === shortNameLower);
-        if (!exists) {
-          defaultParams.push({ teamId: shortNameLower });
-        }
-        
-        // Also add without -W suffix if applicable
-        if (shortNameLower.includes('-w')) {
-          const withoutSuffix = shortNameLower.replace('-w', '');
-          const existsWithout = defaultParams.some(p => p.teamId === withoutSuffix);
-          if (!existsWithout) {
-            defaultParams.push({ teamId: withoutSuffix });
+    const teamsResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || ''}/api/teams?league=wpl`);
+    if (teamsResponse.ok) {
+      const teams = await teamsResponse.json();
+      
+      // Add any additional shortNames from API that aren't in defaults
+      teams.forEach((team: any) => {
+        if (team.shortName) {
+          const shortNameLower = team.shortName.toLowerCase();
+          // Check if already in defaultParams
+          const exists = defaultParams.some(p => p.teamId === shortNameLower);
+          if (!exists) {
+            defaultParams.push({ teamId: shortNameLower });
+          }
+          
+          // Also add without -W suffix if applicable
+          if (shortNameLower.includes('-w')) {
+            const withoutSuffix = shortNameLower.replace('-w', '');
+            const existsWithout = defaultParams.some(p => p.teamId === withoutSuffix);
+            if (!existsWithout) {
+              defaultParams.push({ teamId: withoutSuffix });
+            }
           }
         }
-      }
-    });
+      });
+    }
   } catch (error) {
     // If API fails, use default params (already set above)
     console.warn('Could not fetch WPL teams for static params, using defaults:', error);
@@ -64,8 +66,7 @@ export async function generateStaticParams() {
 }
 
 export default function WPLTeamDetailPage({ params }: { params: { teamId: string } }) {
-  // All data fetching happens client-side in TeamDetailClient
-  // This provides static pre-rendered pages for WPL teams
-  return <TeamDetailClient teamId={params.teamId} league="wpl" />;
+  // Use the enhanced team page with modern UI and animations
+  return <EnhancedWPLTeamPage teamId={params.teamId} />;
 }
 
