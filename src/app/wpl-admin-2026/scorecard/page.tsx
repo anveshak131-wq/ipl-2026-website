@@ -789,24 +789,45 @@ export default function ScorecardAdminPage() {
     const addMiniBarChart = (x: number, y: number, width: number, height: number, data: number[], color: number[]) => {
       if (data.length === 0) return;
       
+      // Validate parameters
+      if (!isFinite(x) || !isFinite(y) || !isFinite(width) || !isFinite(height) || width <= 0 || height <= 0) {
+        console.warn('Invalid parameters for addMiniBarChart:', { x, y, width, height });
+        return;
+      }
+      
       const maxValue = Math.max(...data);
+      if (!isFinite(maxValue) || maxValue <= 0) {
+        console.warn('Invalid data for addMiniBarChart:', data);
+        return;
+      }
+      
       const barWidth = width / data.length;
       
       data.forEach((value, index) => {
-        const barHeight = (value / maxValue) * height;
+        const barHeight = maxValue > 0 ? (value / maxValue) * height : 0;
         const barX = x + (index * barWidth);
-        const barY = y + (height - barHeight);
+        const barY = y + height - barHeight;
         
-        doc.setFillColor(...color);
-        doc.rect(barX + 1, barY, barWidth - 2, barHeight, 'F');
+        // Validate bar parameters
+        if (isFinite(barX) && isFinite(barY) && isFinite(barWidth) && isFinite(barHeight) && 
+            barWidth > 0 && barHeight >= 0) {
+          doc.setFillColor(...color);
+          doc.rect(barX + 1, barY, barWidth - 2, barHeight, 'F');
+        }
       });
       
-      // Add border
+      // Border
       doc.setDrawColor(100, 100, 100);
       doc.rect(x, y, width, height, 'D');
     };
     
     const addStrikeRateIndicator = (x: number, y: number, width: number, height: number, strikeRate: number) => {
+      // Validate parameters
+      if (!isFinite(x) || !isFinite(y) || !isFinite(width) || !isFinite(height) || !isFinite(strikeRate)) {
+        console.warn('Invalid parameters for addStrikeRateIndicator:', { x, y, width, height, strikeRate });
+        return;
+      }
+      
       // Background
       doc.setFillColor(240, 240, 240);
       doc.rect(x, y, width, height, 'F');
