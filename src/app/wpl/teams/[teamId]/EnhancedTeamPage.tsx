@@ -392,12 +392,12 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       
       return (
         sc.matchId === match.id || 
-        (sc.matchInfo && (
+        (sc.matchInfo && match.team1 && match.team2 && (
           // Match by team combination (ignore date since scorecards have null dates)
-          ((sc.matchInfo.team1?.shortName === match.team1?.shortName && 
-            sc.matchInfo.team2?.shortName === match.team2?.shortName) ||
-           (sc.matchInfo.team1?.shortName === match.team2?.shortName && 
-            sc.matchInfo.team2?.shortName === match.team1?.shortName))
+          ((sc.matchInfo.team1?.shortName === match.team1.shortName && 
+            sc.matchInfo.team2?.shortName === match.team2.shortName) ||
+           (sc.matchInfo.team1?.shortName === match.team2.shortName && 
+            sc.matchInfo.team2?.shortName === match.team1.shortName))
         ))
       );
     });
@@ -426,11 +426,11 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   const hasScorecard = (match: any) => {
     return allScorecards.some(sc => 
       sc.matchId === match.id || 
-      (sc.matchInfo && (
-        ((sc.matchInfo.team1?.shortName === match.team1?.shortName && 
-          sc.matchInfo.team2?.shortName === match.team2?.shortName) ||
-         (sc.matchInfo.team1?.shortName === match.team2?.shortName && 
-          sc.matchInfo.team2?.shortName === match.team1?.shortName))
+      (sc.matchInfo && match.team1 && match.team2 && (
+        ((sc.matchInfo.team1?.shortName === match.team1.shortName && 
+          sc.matchInfo.team2?.shortName === match.team2.shortName) ||
+         (sc.matchInfo.team1?.shortName === match.team2.shortName && 
+          sc.matchInfo.team2?.shortName === match.team1.shortName))
       ))
     );
   };
@@ -474,7 +474,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   }, [players, searchQuery, selectedRole]);
 
   const recentMatches: RecentMatch[] = useMemo(() => {
-    return matches.slice(-5).map(match => {
+    return matches.map(match => {
       const isTeam1 = match.team1?.id === teamId;
       const opponent = isTeam1 ? match.team2?.name : match.team1?.name;
       const teamInnings = match.innings?.find(i => i.teamId === teamId);
@@ -488,7 +488,9 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
           : 'upcoming',
         score,
         date: match.date || 'TBD',
-        venue: match.venue || 'TBD'
+        venue: match.venue || 'TBD',
+        team1: match.team1,
+        team2: match.team2
       };
     });
   }, [matches, teamId]);
