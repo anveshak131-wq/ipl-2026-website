@@ -78,21 +78,38 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState('all');
   const [teamStats, setTeamStats] = useState<TeamStats | null>(null);
+  const hasFetchedData = useRef(false);
 
   const { scrollY } = useScroll();
   const headerOpacity = useTransform(scrollY, [0, 300], [1, 0]);
   const headerScale = useTransform(scrollY, [0, 300], [1, 0.8]);
 
   useEffect(() => {
-    fetchTeamData();
+    const fetchData = async () => {
+      if (!hasFetchedData.current) {
+        hasFetchedData.current = true;
+        await fetchTeamData();
+      }
+    };
+    
+    fetchData();
   }, [teamId]);
 
   const fetchTeamData = async () => {
     try {
       setLoading(true);
       
-      // Fetch team data
-      const teamsResponse = await fetch(`/api/teams?league=wpl`);
+      // Add timeout to prevent infinite loops
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Request timeout')), 10000);
+      });
+      
+      // Fetch team data with timeout
+      const teamsResponse = await Promise.race([
+        fetch(`/api/teams?league=wpl`),
+        timeoutPromise
+      ]) as Response;
+      
       if (teamsResponse.ok) {
         const teams = await teamsResponse.json();
         console.log('EnhancedTeamPage: Looking for teamId:', teamId);
@@ -149,33 +166,64 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
         if (foundTeam) {
           setTeam(foundTeam);
           
-          // Fetch players
-          const playersResponse = await fetch(`/api/players?teamId=${foundTeam.id}&league=wpl`);
-          if (playersResponse.ok) {
-            const teamPlayers = await playersResponse.json();
-            setPlayers(teamPlayers);
+          // Fetch players with timeout
+          try {
+            const playersResponse = await Promise.race([
+              fetch(`/api/players?teamId=${foundTeam.id}&league=wpl`),
+              timeoutPromise
+            ]) as Response;
+            
+            if (playersResponse.ok) {
+              const teamPlayers = await playersResponse.json();
+              setPlayers(teamPlayers);
+            }
+          } catch (playerError) {
+            console.error('Error fetching players:', playerError);
+            setPlayers([]);
           }
           
-          // Fetch matches
-          const matchesResponse = await fetch(`/api/matches?teamId=${foundTeam.id}&league=wpl`);
-          if (matchesResponse.ok) {
-            const teamMatches = await matchesResponse.json();
-            setMatches(teamMatches);
+          // Fetch matches with timeout
+          try {
+            const matchesResponse = await Promise.race([
+              fetch(`/api/matches?teamId=${foundTeam.id}&league=wpl`),
+              timeoutPromise
+            ]) as Response;
+            
+            if (matchesResponse.ok) {
+              const teamMatches = await matchesResponse.json();
+              setMatches(teamMatches);
+            }
+          } catch (matchError) {
+            console.error('Error fetching matches:', matchError);
+            setMatches([]);
           }
           
-          // Fetch coaching staff
-          const coachesResponse = await fetch(`/api/coaches?teamId=${foundTeam.id}`);
-          if (coachesResponse.ok) {
-            const staff = await coachesResponse.json();
-            setCoachingStaff(staff);
+          // Fetch coaching staff with timeout
+          try {
+            const coachesResponse = await Promise.race([
+              fetch(`/api/coaches?teamId=${foundTeam.id}`),
+              timeoutPromise
+            ]) as Response;
+            
+            if (coachesResponse.ok) {
+              const staff = await coachesResponse.json();
+              setCoachingStaff(staff);
+            }
+          } catch (coachError) {
+            console.error('Error fetching coaches:', coachError);
+            setCoachingStaff([]);
           }
           
           // Calculate team stats
-          calculateTeamStats(teamMatches);
+          calculateTeamStats(matches);
         }
+      } else {
+        console.error('Teams API returned status:', teamsResponse.status);
       }
     } catch (error) {
       console.error('Error fetching team data:', error);
+      // Reset fetch flag on error to allow retry
+      hasFetchedData.current = false;
     } finally {
       setLoading(false);
     }
