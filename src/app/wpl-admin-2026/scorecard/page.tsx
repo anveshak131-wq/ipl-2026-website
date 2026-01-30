@@ -754,25 +754,25 @@ export default function ScorecardAdminPage() {
     
     // Helper function to add gradient background
     const addGradientBackground = (startY: number, height: number, color1: number[], color2: number[]) => {
-      doc.setFillColor(...color1);
+      safeSetFillColor(...color1);
       safeRect(0, startY, pageWidth, height / 2, 'F');
-      doc.setFillColor(...color2);
+      safeSetFillColor(...color2);
       safeRect(0, startY + height / 2, pageWidth, height / 2, 'F');
     };
     
     // Helper function to add decorative pattern
     const addDecorativePattern = (yPos: number, color: number[]) => {
-      doc.setDrawColor(...color);
+      safeSetDrawColor(...color);
       doc.setLineWidth(3);
       doc.line(40, yPos, pageWidth - 40, yPos);
       doc.setLineWidth(1);
-      doc.setDrawColor(...color.map(c => c * 0.7));
+      safeSetDrawColor(...color.map(c => c * 0.7));
       doc.line(40, yPos + 3, pageWidth - 40, yPos + 3);
     };
     
     // Helper function to add colorful text
     const addColorfulText = (text: string, x: number, yPos: number, color: number[], fontSize: number, fontWeight: string = 'normal', align: 'left' = 'left') => {
-      doc.setTextColor(...color);
+      safeSetTextColor(...color);
       doc.setFontSize(fontSize);
       
       // Set font based on weight - jsPDF has limited font options
@@ -816,6 +816,45 @@ export default function ScorecardAdminPage() {
       }
     };
     
+    // Safe setFillColor function with validation
+    const safeSetFillColor = (...args: number[]) => {
+      if (!args.every(arg => isFinite(arg) && arg >= 0 && arg <= 255)) {
+        console.warn('Invalid parameters for setFillColor:', args);
+        return;
+      }
+      try {
+        doc.setFillColor(...args);
+      } catch (error) {
+        console.error('Error in setFillColor:', error, args);
+      }
+    };
+    
+    // Safe setTextColor function with validation
+    const safeSetTextColor = (...args: number[]) => {
+      if (!args.every(arg => isFinite(arg) && arg >= 0 && arg <= 255)) {
+        console.warn('Invalid parameters for setTextColor:', args);
+        return;
+      }
+      try {
+        doc.setTextColor(...args);
+      } catch (error) {
+        console.error('Error in setTextColor:', error, args);
+      }
+    };
+    
+    // Safe setDrawColor function with validation
+    const safeSetDrawColor = (...args: number[]) => {
+      if (!args.every(arg => isFinite(arg) && arg >= 0 && arg <= 255)) {
+        console.warn('Invalid parameters for setDrawColor:', args);
+        return;
+      }
+      try {
+        doc.setDrawColor(...args);
+      } catch (error) {
+        console.error('Error in setDrawColor:', error, args);
+      }
+    };
+    
     // Data Visualization Functions
     const addMiniBarChart = (x: number, y: number, width: number, height: number, data: number[], color: number[]) => {
       if (data.length === 0) return;
@@ -842,13 +881,13 @@ export default function ScorecardAdminPage() {
         // Validate bar parameters
         if (isFinite(barX) && isFinite(barY) && isFinite(barWidth) && isFinite(barHeight) && 
             barWidth > 0 && barHeight >= 0) {
-          doc.setFillColor(...color);
+          safeSetFillColor(...color);
           safeRect(barX + 1, barY, barWidth - 2, barHeight, 'F');
         }
       });
       
       // Border
-      doc.setDrawColor(100, 100, 100);
+      safeSetDrawColor(100, 100, 100);
       safeRect(x, y, width, height, 'D');
     };
     
@@ -860,7 +899,7 @@ export default function ScorecardAdminPage() {
       }
       
       // Background
-      doc.setFillColor(240, 240, 240);
+      safeSetFillColor(240, 240, 240);
       safeRect(x, y, width, height, 'F');
       
       // Strike rate bar (0-200 scale, with 100 as baseline)
@@ -877,15 +916,15 @@ export default function ScorecardAdminPage() {
         barColor = [100, 255, 100]; // Green for high SR
       }
       
-      doc.setFillColor(...barColor);
+      safeSetFillColor(...barColor);
       safeRect(x, y, barWidth, height, 'F');
       
       // Border
-      doc.setDrawColor(100, 100, 100);
+      safeSetDrawColor(100, 100, 100);
       safeRect(x, y, width, height, 'D');
       
       // SR text
-      doc.setTextColor(0, 0, 0);
+      safeSetTextColor(0, 0, 0);
       doc.setFontSize(8);
       safeText(`SR: ${strikeRate.toFixed(1)}`, x + width/2, y + height/2 + 2, { align: 'center' });
     };
@@ -903,11 +942,11 @@ export default function ScorecardAdminPage() {
         const barWidth = (runs / maxRuns) * (width - 60);
         
         // Bar
-        doc.setFillColor(100, 150, 255);
+        safeSetFillColor(100, 150, 255);
         safeRect(x + 60, currentY, barWidth, barHeight, 'F');
         
         // Text
-        doc.setTextColor(0, 0, 0);
+        safeSetTextColor(0, 0, 0);
         doc.setFontSize(8);
         safeText(`${partnership.batsman1 || 'Player1'}-${partnership.batsman2 || 'Player2'}`, x + 2, currentY + 10);
         safeText(`${runs} runs`, x + 62 + barWidth, currentY + 10);
@@ -916,7 +955,7 @@ export default function ScorecardAdminPage() {
       });
       
       // Border
-      doc.setDrawColor(100, 100, 100);
+      safeSetDrawColor(100, 100, 100);
       safeRect(x, y, width, currentY - y, 'D');
     };
     
@@ -928,18 +967,18 @@ export default function ScorecardAdminPage() {
       const range = maxValue - minValue || 1;
       
       // Background
-      doc.setFillColor(250, 250, 250);
+      safeSetFillColor(250, 250, 250);
       safeRect(x, y, width, height, 'F');
       
       // Draw grid lines
-      doc.setDrawColor(220, 220, 220);
+      safeSetDrawColor(220, 220, 220);
       for (let i = 0; i <= 4; i++) {
         const gridY = y + (i * height / 4);
         doc.line(x, gridY, x + width, gridY);
       }
       
       // Draw line graph
-      doc.setDrawColor(...color);
+      safeSetDrawColor(...color);
       doc.setLineWidth(2);
       
       data.forEach((value, index) => {
@@ -956,7 +995,7 @@ export default function ScorecardAdminPage() {
       doc.stroke();
       
       // Draw points
-      doc.setFillColor(...color);
+      safeSetFillColor(...color);
       data.forEach((value, index) => {
         const pointX = x + (index * width / (data.length - 1));
         const pointY = y + height - ((value - minValue) / range * height);
@@ -964,7 +1003,7 @@ export default function ScorecardAdminPage() {
       });
       
       // Border
-      doc.setDrawColor(100, 100, 100);
+      safeSetDrawColor(100, 100, 100);
       safeRect(x, y, width, height, 'D');
     };
     
@@ -973,7 +1012,7 @@ export default function ScorecardAdminPage() {
       if (fallOfWickets.length === 0) return;
       
       // Background
-      doc.setFillColor(250, 250, 250);
+      safeSetFillColor(250, 250, 250);
       safeRect(x, y, width, height, 'F');
       
       // Extract wicket scores for visualization
@@ -995,11 +1034,11 @@ export default function ScorecardAdminPage() {
         const barY = y + height - barHeight - 10;
         
         // Draw bar
-        doc.setFillColor(...color);
+        safeSetFillColor(...color);
         safeRect(barX, barY, barWidth, barHeight, 'F');
         
         // Add wicket number label
-        doc.setTextColor(0, 0, 0);
+        safeSetTextColor(0, 0, 0);
         doc.setFontSize(8);
         safeText(`W${index + 1}`, barX + barWidth / 2, y + height - 2, { align: 'center' });
         
@@ -1010,7 +1049,7 @@ export default function ScorecardAdminPage() {
       });
       
       // Border
-      doc.setDrawColor(100, 100, 100);
+      safeSetDrawColor(100, 100, 100);
       safeRect(x, y, width, height, 'D');
     };
     
@@ -1018,7 +1057,7 @@ export default function ScorecardAdminPage() {
       if (!powerplays) return;
       
       // Background
-      doc.setFillColor(250, 250, 250);
+      safeSetFillColor(250, 250, 250);
       safeRect(x, y, width, height, 'F');
       
       const data: number[] = [];
@@ -1049,11 +1088,11 @@ export default function ScorecardAdminPage() {
         const barY = y + height - barHeight - 20;
         
         // Draw bar
-        doc.setFillColor(...barColors[index]);
+        safeSetFillColor(...barColors[index]);
         safeRect(barX, barY, barWidth, barHeight, 'F');
         
         // Add label
-        doc.setTextColor(0, 0, 0);
+        safeSetTextColor(0, 0, 0);
         doc.setFontSize(8);
         safeText(labels[index], barX + barWidth / 2, y + height - 2, { align: 'center' });
         
@@ -1062,7 +1101,7 @@ export default function ScorecardAdminPage() {
       });
       
       // Border
-      doc.setDrawColor(100, 100, 100);
+      safeSetDrawColor(100, 100, 100);
       safeRect(x, y, width, height, 'D');
     };
     
@@ -1070,7 +1109,7 @@ export default function ScorecardAdminPage() {
       if (partnerships.length === 0) return;
       
       // Background
-      doc.setFillColor(250, 250, 250);
+      safeSetFillColor(250, 250, 250);
       safeRect(x, y, width, height, 'F');
       
       // Extract partnership totals
@@ -1090,11 +1129,11 @@ export default function ScorecardAdminPage() {
         const barY = y + height - barHeight - 15;
         
         // Draw bar
-        doc.setFillColor(...color);
+        safeSetFillColor(...color);
         safeRect(barX, barY, barWidth, barHeight, 'F');
         
         // Add partnership number
-        doc.setTextColor(0, 0, 0);
+        safeSetTextColor(0, 0, 0);
         doc.setFontSize(7);
         safeText(`P${index + 1}`, barX + barWidth / 2, y + height - 2, { align: 'center' });
         
@@ -1105,7 +1144,7 @@ export default function ScorecardAdminPage() {
       });
       
       // Border
-      doc.setDrawColor(100, 100, 100);
+      safeSetDrawColor(100, 100, 100);
       safeRect(x, y, width, height, 'D');
     };
     
@@ -1113,7 +1152,7 @@ export default function ScorecardAdminPage() {
       if (fallOfWickets.length === 0) return;
       
       // Background
-      doc.setFillColor(250, 250, 250);
+      safeSetFillColor(250, 250, 250);
       safeRect(x, y, width, height, 'F');
       
       // Extract over numbers for timeline
@@ -1126,12 +1165,12 @@ export default function ScorecardAdminPage() {
       const pointRadius = 3;
       
       // Draw timeline axis
-      doc.setDrawColor(100, 100, 100);
+      safeSetDrawColor(100, 100, 100);
       doc.setLineWidth(1);
       doc.line(x + 10, y + height - 15, x + width - 10, y + height - 15);
       
       // Draw timeline points and connections
-      doc.setDrawColor(...color);
+      safeSetDrawColor(...color);
       doc.setLineWidth(2);
       
       overData.forEach((over, index) => {
@@ -1142,11 +1181,11 @@ export default function ScorecardAdminPage() {
         doc.line(pointX, pointY, pointX, pointY - (height - 25));
         
         // Draw point
-        doc.setFillColor(...color);
+        safeSetFillColor(...color);
         doc.circle(pointX, pointY, pointRadius, 'F');
         
         // Add over label
-        doc.setTextColor(0, 0, 0);
+        safeSetTextColor(0, 0, 0);
         doc.setFontSize(7);
         safeText(`${over}`, pointX, pointY + 10, { align: 'center' });
         
@@ -1155,7 +1194,7 @@ export default function ScorecardAdminPage() {
       });
       
       // Border
-      doc.setDrawColor(100, 100, 100);
+      safeSetDrawColor(100, 100, 100);
       safeRect(x, y, width, height, 'D');
     };
     
@@ -1163,7 +1202,7 @@ export default function ScorecardAdminPage() {
     addGradientBackground(0, 100, colors.primary, colors.secondary);
     
     // Add decorative stars pattern
-    doc.setTextColor(255, 255, 255);
+    safeSetTextColor(255, 255, 255);
     doc.setFontSize(8);
     for (let i = 0; i < 20; i++) {
       const x = Math.random() * pageWidth;
@@ -1175,7 +1214,7 @@ export default function ScorecardAdminPage() {
     addColorfulText('WOMEN\'S PREMIER LEAGUE', pageWidth / 2, 60, [255, 215, 0], 16, 'bold', 'center');
     
     // Team names with colorful background - wider box to accommodate long names
-    doc.setFillColor(...colors.accent);
+    safeSetFillColor(...colors.accent);
     const teamNameBoxWidth = Math.min(450, pageWidth - 100); // Wider box, but not wider than page
     const teamNameBoxX = (pageWidth - teamNameBoxWidth) / 2;
     doc.roundedRect(teamNameBoxX, 75, teamNameBoxWidth, 30, 5, 5, 'F');
@@ -1222,7 +1261,7 @@ export default function ScorecardAdminPage() {
         displayValue = displayValue.substring(0, box.maxLength - 3) + '...';
       }
       
-      doc.setFillColor(...box.color);
+      safeSetFillColor(...box.color);
       doc.roundedRect(xPos - 5, yPos - 15, boxWidth, 35, 3, 3, 'F');
       addColorfulText(box.label, xPos + 5, yPos, [255, 255, 255], 9, 'bold');
       addColorfulText(displayValue, xPos + 5, yPos + 12, [255, 255, 255], 11);
@@ -1255,9 +1294,9 @@ export default function ScorecardAdminPage() {
       y += 25;
       
       // Enhanced Batting Table Header with proper column widths
-      doc.setFillColor(...colors.light);
+      safeSetFillColor(...colors.light);
       doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'F');
-      doc.setDrawColor(...colors.success);
+      safeSetDrawColor(...colors.success);
       doc.setLineWidth(2);
       doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'D');
       
@@ -1291,7 +1330,7 @@ export default function ScorecardAdminPage() {
         ];
         const rowColor = rowColors[index % rowColors.length];
         
-        doc.setFillColor(...rowColor);
+        safeSetFillColor(...rowColor);
         doc.roundedRect(35, y - 12, pageWidth - 70, 20, 2, 2, 'F');
         
         // Colorful stats based on performance
@@ -1414,9 +1453,9 @@ export default function ScorecardAdminPage() {
       y += 25;
       
       // Enhanced Bowling Table Header with proper column widths
-      doc.setFillColor(...colors.light);
+      safeSetFillColor(...colors.light);
       doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'F');
-      doc.setDrawColor(...colors.purple);
+      safeSetDrawColor(...colors.purple);
       doc.setLineWidth(2);
       doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'D');
       
@@ -1447,7 +1486,7 @@ export default function ScorecardAdminPage() {
         ];
         const rowColor = bowlingRowColors[index % bowlingRowColors.length];
         
-        doc.setFillColor(...rowColor);
+        safeSetFillColor(...rowColor);
         doc.roundedRect(35, y - 12, pageWidth - 70, 20, 2, 2, 'F');
         
         // Colorful performance indicators
@@ -1495,7 +1534,7 @@ export default function ScorecardAdminPage() {
           const economyScore = Math.max(0, 15 - bowler.economyRate) * 10; // Scale 0-150
           addStrikeRateIndicator(40 + (index * 110), y + 5, 100, 20, economyScore);
           // Add economy text
-          doc.setTextColor(0, 0, 0);
+          safeSetTextColor(0, 0, 0);
           doc.setFontSize(7);
           safeText(`Econ: ${bowler.economyRate.toFixed(1)}`, 40 + (index * 110) + 50, y + 15, { align: 'center' });
         }
@@ -1528,10 +1567,10 @@ export default function ScorecardAdminPage() {
           const barX = 40 + (index * (barWidth + 10));
           const barY = y + 35;
           
-          doc.setFillColor(...colors.accent);
+          safeSetFillColor(...colors.accent);
           safeRect(barX, barY - barHeight, barWidth, barHeight, 'F');
           
-          doc.setTextColor(0, 0, 0);
+          safeSetTextColor(0, 0, 0);
           doc.setFontSize(7);
           safeText(`P${index + 1}`, barX + barWidth / 2, barY + 5, { align: 'center' });
           safeText(`${runs}`, barX + barWidth / 2, barY - barHeight - 2, { align: 'center' });
@@ -1551,9 +1590,9 @@ export default function ScorecardAdminPage() {
         y += 25;
         
         // Fall of Wickets Table Header
-        doc.setFillColor(...colors.light);
+        safeSetFillColor(...colors.light);
         doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'F');
-        doc.setDrawColor(...colors.warning);
+        safeSetDrawColor(...colors.warning);
         doc.setLineWidth(2);
         doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'D');
         
@@ -1580,7 +1619,7 @@ export default function ScorecardAdminPage() {
           ];
           const rowColor = fowRowColors[index % fowRowColors.length];
           
-          doc.setFillColor(...rowColor);
+          safeSetFillColor(...rowColor);
           doc.roundedRect(35, y - 12, pageWidth - 70, 20, 2, 2, 'F');
           
           addColorfulText(fow.player || 'N/A', 40, y, colors.dark, 10);
@@ -1608,16 +1647,16 @@ export default function ScorecardAdminPage() {
         
         // Mandatory Powerplay
         if (inn.powerplays.mandatory) {
-          doc.setFillColor(...colors.light);
+          safeSetFillColor(...colors.light);
           doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'F');
-          doc.setDrawColor(...colors.info);
+          safeSetDrawColor(...colors.info);
           doc.setLineWidth(2);
           doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'D');
           
           addColorfulText('MANDATORY POWERPLAY', pageWidth / 2, y, colors.dark, 10, 'bold', 'center');
           y += lineHeight;
           
-          doc.setFillColor([240, 248, 255]);
+          safeSetFillColor([240, 248, 255]);
           doc.roundedRect(35, y - 12, pageWidth - 70, 20, 2, 2, 'F');
           
           addColorfulText('Overs:', 40, y, colors.dark, 10);
@@ -1629,16 +1668,16 @@ export default function ScorecardAdminPage() {
         
         // Optional Powerplay
         if (inn.powerplays.optional) {
-          doc.setFillColor(...colors.light);
+          safeSetFillColor(...colors.light);
           doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'F');
-          doc.setDrawColor(...colors.info);
+          safeSetDrawColor(...colors.info);
           doc.setLineWidth(2);
           doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'D');
           
           addColorfulText('OPTIONAL POWERPLAY', pageWidth / 2, y, colors.dark, 10, 'bold', 'center');
           y += lineHeight;
           
-          doc.setFillColor([240, 248, 255]);
+          safeSetFillColor([240, 248, 255]);
           doc.roundedRect(35, y - 12, pageWidth - 70, 20, 2, 2, 'F');
           
           addColorfulText('Overs:', 40, y, colors.dark, 10);
@@ -1660,9 +1699,9 @@ export default function ScorecardAdminPage() {
         y += 25;
         
         // Partnerships Table Header
-        doc.setFillColor(...colors.light);
+        safeSetFillColor(...colors.light);
         doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'F');
-        doc.setDrawColor(...colors.accent);
+        safeSetDrawColor(...colors.accent);
         doc.setLineWidth(2);
         doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'D');
         
@@ -1691,7 +1730,7 @@ export default function ScorecardAdminPage() {
           ];
           const rowColor = partnershipRowColors[index % partnershipRowColors.length];
           
-          doc.setFillColor(...rowColor);
+          safeSetFillColor(...rowColor);
           doc.roundedRect(35, y - 12, pageWidth - 70, 20, 2, 2, 'F');
           
           addColorfulText(partnership.batsman1 || 'N/A', 40, y, colors.dark, 9);
