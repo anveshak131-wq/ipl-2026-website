@@ -627,43 +627,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                 exit={{ opacity: 0, y: -20 }}
                 className="space-y-8"
               >
-                {/* Recent Matches */}
-                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
-                  <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                    <Clock className="w-6 h-6" />
-                    Recent Matches
-                  </h2>
-                  <div className="space-y-4">
-                    {recentMatches.map((match, index) => (
-                      <motion.div
-                        key={match.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="bg-white/5 rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer"
-                        onClick={() => handleMatchClick(match)}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className={`w-3 h-3 rounded-full ${
-                              match.result === 'win' ? 'bg-green-500' :
-                              match.result === 'loss' ? 'bg-red-500' : 'bg-yellow-500'
-                            }`} />
-                            <div>
-                              <div className="text-white font-medium">vs {match.opponent}</div>
-                              <div className="text-white/60 text-sm">{match.score}</div>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-white/60 text-sm">{match.date}</div>
-                            <div className="text-white/60 text-sm">{match.venue}</div>
-                            <div className="text-blue-400 text-xs mt-1">Click for details</div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
+                  {/* Recent Matches - Moved to separate Matches tab */}
 
                 {/* Key Players */}
                 <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
@@ -701,6 +665,104 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                         </div>
                       </motion.div>
                     ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Matches Tab */}
+            {activeTab === 'matches' && (
+              <motion.div
+                key="matches"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="space-y-8"
+              >
+                {/* Match Schedule */}
+                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
+                  <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                    <Calendar className="w-6 h-6" />
+                    Match Schedule
+                  </h2>
+                  <div className="space-y-4">
+                    {recentMatches.map((match, index) => (
+                      <motion.div
+                        key={match.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="bg-white/5 rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer"
+                        onClick={() => handleMatchClick(match)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className={`w-3 h-3 rounded-full ${
+                              match.result === 'win' ? 'bg-green-500' :
+                              match.result === 'loss' ? 'bg-red-500' : 'bg-yellow-500'
+                            }`} />
+                            <div>
+                              <div className="text-white font-medium">vs {match.opponent}</div>
+                              <div className="text-white/60 text-sm">{match.score}</div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-white/60 text-sm">{match.date}</div>
+                            <div className="text-white/60 text-sm">{match.venue}</div>
+                            <div className="text-blue-400 text-xs mt-1">Click for details</div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Full Scorecard & Playing 11 Features */}
+                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
+                  <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                    <BarChart3 className="w-6 h-6" />
+                    Full Scorecard & Playing 11 Features
+                  </h2>
+                  <div className="text-white/80 mb-4">
+                    Click on any match above to view detailed scorecard with complete Playing 11 information including:
+                  </div>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                      <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                        <Users className="w-4 h-4" />
+                        Batting Scorecard
+                      </h3>
+                      <ul className="text-white/60 text-sm space-y-2">
+                        <li>• Complete Playing 11 batting lineup</li>
+                        <li>• Runs scored, balls faced, strike rate</li>
+                        <li>• Fours, sixes, and dismissal details</li>
+                        <li>• Captain and wicket-keeper indicators</li>
+                      </ul>
+                    </div>
+                    <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                      <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                        <Target className="w-4 h-4" />
+                        Bowling Scorecard
+                      </h3>
+                      <ul className="text-white/60 text-sm space-y-2">
+                        <li>• Complete Playing 11 bowling figures</li>
+                        <li>• Overs bowled, runs conceded</li>
+                        <li>• Wickets taken and economy rate</li>
+                        <li>• Dots, fours, and sixes analysis</li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div className="bg-white/5 rounded-xl p-4 border border-white/10 mt-6">
+                    <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                      <Trophy className="w-4 h-4" />
+                      Match Details
+                    </h3>
+                    <ul className="text-white/60 text-sm space-y-2">
+                      <li>• Match result with winner and margin</li>
+                      <li>• Man of the Match award</li>
+                      <li>• Innings-wise complete breakdown</li>
+                      <li>• Professional scorecard format</li>
+                    </ul>
                   </div>
                 </div>
               </motion.div>
