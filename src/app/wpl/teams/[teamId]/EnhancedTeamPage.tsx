@@ -371,15 +371,37 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
 
   const handleMatchClick = (match: any) => {
     console.log('Match clicked:', match.id);
+    console.log('Match details:', {
+      id: match.id,
+      team1: match.team1?.shortName,
+      team2: match.team2?.shortName,
+      date: match.date,
+      venue: match.venue
+    });
     
     // Find the corresponding scorecard for this match
-    const scorecard = allScorecards.find(sc => 
-      sc.matchId === match.id || 
-      (sc.matchInfo && (
-        String(sc.matchInfo.team1?.id) === String(match.team1Id) &&
-        String(sc.matchInfo.team2?.id) === String(match.team2Id)
-      ))
-    );
+    const scorecard = allScorecards.find(sc => {
+      console.log('Checking scorecard:', {
+        id: sc.id,
+        matchId: sc.matchId,
+        team1: sc.matchInfo?.team1?.shortName,
+        team2: sc.matchInfo?.team2?.shortName,
+        date: sc.matchInfo?.date,
+        venue: sc.matchInfo?.venue
+      });
+      
+      return (
+        sc.matchId === match.id || 
+        (sc.matchInfo && (
+          // Match by team combination and date/venue
+          ((sc.matchInfo.team1?.shortName === match.team1?.shortName && 
+            sc.matchInfo.team2?.shortName === match.team2?.shortName) ||
+           (sc.matchInfo.team1?.shortName === match.team2?.shortName && 
+            sc.matchInfo.team2?.shortName === match.team1?.shortName)) &&
+          sc.matchInfo.date === match.date
+        ))
+      );
+    });
     
     if (scorecard) {
       console.log('Found scorecard for match:', scorecard.id);
@@ -388,6 +410,12 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       setShowScorecard(true);
     } else {
       console.log('No scorecard found for match:', match.id);
+      console.log('Available scorecards:', allScorecards.map(sc => ({
+        id: sc.id,
+        matchId: sc.matchId,
+        teams: `${sc.matchInfo?.team1?.shortName} vs ${sc.matchInfo?.team2?.shortName}`,
+        date: sc.matchInfo?.date
+      })));
       // Still show the match info even without scorecard
       setSelectedMatch(match);
       setSelectedScorecard(null);
