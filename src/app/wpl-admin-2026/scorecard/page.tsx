@@ -1423,14 +1423,14 @@ export default function ScorecardAdminPage() {
       addColorfulText('Economy Rate Analysis', 40, y, colors.dark, 10, 'bold');
       const topBowlers = inn.bowling.slice(0, 5);
       topBowlers.forEach((bowler, index) => {
-        if (bowler.economy) {
+        if (bowler.economyRate) {
           // Create economy indicator (lower is better, so invert the scale)
-          const economyScore = Math.max(0, 15 - bowler.economy) * 10; // Scale 0-150
+          const economyScore = Math.max(0, 15 - bowler.economyRate) * 10; // Scale 0-150
           addStrikeRateIndicator(40 + (index * 110), y + 5, 100, 20, economyScore);
           // Add economy text
           doc.setTextColor(0, 0, 0);
           doc.setFontSize(7);
-          doc.text(`Econ: ${bowler.economy.toFixed(1)}`, 40 + (index * 110) + 50, y + 15, { align: 'center' });
+          doc.text(`Econ: ${bowler.economyRate.toFixed(1)}`, 40 + (index * 110) + 50, y + 15, { align: 'center' });
         }
       });
       y += 40;
