@@ -176,8 +176,21 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                 (typeof match.team2 === 'string' && match.team2 === foundTeam.id)
               ) : [];
               
+              // Deduplicate matches by unique combination of date, venue, team1, team2
+              const uniqueMatches = teamMatches.filter((match, index, self) => 
+                index === self.findIndex((m) => 
+                  m.date === match.date && 
+                  m.venue === match.venue &&
+                  ((m.team1?.id === match.team1?.id && m.team2?.id === match.team2?.id) ||
+                   (m.team1?.id === match.team2?.id && m.team2?.id === match.team1?.id))
+                )
+              );
+              
               console.log('EnhancedTeamPage: Filtered matches for', foundTeam.shortName, ':', teamMatches.length);
-              setMatches(teamMatches);
+              console.log('EnhancedTeamPage: Unique matches after deduplication:', uniqueMatches.length);
+              setMatches(uniqueMatches);
+            } else {
+              setMatches([]);
             }
             
             // Process coaches
