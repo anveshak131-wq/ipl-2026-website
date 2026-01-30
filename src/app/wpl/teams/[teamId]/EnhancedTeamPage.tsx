@@ -78,6 +78,10 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState('all');
   const [teamStats, setTeamStats] = useState<TeamStats | null>(null);
+  const [selectedMatch, setSelectedMatch] = useState<any | null>(null);
+  const [showScorecard, setShowScorecard] = useState(false);
+  const [allScorecards, setAllScorecards] = useState<any[]>([]);
+
   const hasFetchedData = useRef(false);
 
   const { scrollY } = useScroll();
@@ -348,6 +352,17 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
     setTeamStats(stats);
   };
 
+  const handleMatchClick = (match: any) => {
+    console.log('Match clicked:', match.id);
+    setSelectedMatch(match);
+    setShowScorecard(true);
+  };
+
+  const closeScorecard = () => {
+    setShowScorecard(false);
+    setSelectedMatch(null);
+  };
+
   const calculateTeamStats = (teamMatches: Match[]) => {
     const completedMatches = teamMatches.filter(m => m.status === 'completed');
     const wins = completedMatches.filter(m => m.result?.winner === teamId).length;
@@ -600,7 +615,8 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className="bg-white/5 rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-colors"
+                        className="bg-white/5 rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer"
+                        onClick={() => handleMatchClick(match)}
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
@@ -616,6 +632,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                           <div className="text-right">
                             <div className="text-white/60 text-sm">{match.date}</div>
                             <div className="text-white/60 text-sm">{match.venue}</div>
+                            <div className="text-blue-400 text-xs mt-1">Click for details</div>
                           </div>
                         </div>
                       </motion.div>
@@ -974,6 +991,38 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
           </AnimatePresence>
         </div>
       </section>
+      
+      {/* Simple Scorecard Modal */}
+      {showScorecard && selectedMatch && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-white/20 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-white">Match Details</h2>
+              <button
+                onClick={closeScorecard}
+                className="text-white/60 hover:text-white transition-colors text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            <div className="text-white">
+              <div className="mb-4">
+                <div className="text-lg font-medium">vs {selectedMatch.opponent}</div>
+                <div className="text-white/60">{selectedMatch.date} • {selectedMatch.venue}</div>
+                <div className="text-white/60 mt-2">{selectedMatch.score}</div>
+              </div>
+              <div className="bg-white/10 rounded-xl p-4">
+                <div className="text-center text-white">
+                  <div className="text-lg font-medium mb-2">Scorecard Details</div>
+                  <div className="text-white/60">
+                    Full scorecard and playing 11 details will be available here.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
