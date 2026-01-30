@@ -713,13 +713,21 @@ export default function ScorecardAdminPage() {
 
   // Export scorecard to ultra-enhanced PDF with colorful fonts and premium design
   const exportScorecardPDF = async (sc: Scorecard) => {
-    const jspdfAny = (window as any).jspdf || (window as any).jsPDF || null;
-    const jsPDFCtor = jspdfAny && jspdfAny.jsPDF ? jspdfAny.jsPDF : (window as any).jsPDF;
-    if (!jsPDFCtor) throw new Error('jsPDF not available');
+    try {
+      console.log('Starting PDF export...');
+      
+      const jspdfAny = (window as any).jspdf || (window as any).jsPDF || null;
+      const jsPDFCtor = jspdfAny && jspdfAny.jsPDF ? jspdfAny.jsPDF : (window as any).jsPDF;
+      if (!jsPDFCtor) {
+        throw new Error('jsPDF not available - please check if jsPDF library is loaded');
+      }
 
-    const doc = new jsPDFCtor({ unit: 'pt', format: 'a4' });
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
+      console.log('jsPDF constructor found, creating document...');
+      const doc = new jsPDFCtor({ unit: 'pt', format: 'a4' });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      
+      console.log('PDF document created, setting up colors...');
     
     // Premium Color Palette
     const colors = {
@@ -1679,8 +1687,16 @@ export default function ScorecardAdminPage() {
     addColorfulText('Generated on SportsUP18', pageWidth / 2, footerY + 10, [255, 255, 255], 10, 'italic', 'center');
     addColorfulText('© 2026 SportsUP18. All rights reserved.', pageWidth / 2, footerY + 25, [255, 215, 0], 9, 'italic', 'center');
 
-    const filename = `WPL_Premium_Scorecard_${sc.matchInfo.team1.shortName || 'Team1'}_vs_${sc.matchInfo.team2.shortName || 'Team2'}_${new Date().toISOString().split('T')[0]}.pdf`;
-    doc.save(filename);
+      console.log('PDF generation complete, saving file...');
+      const filename = `WPL_Premium_Scorecard_${sc.matchInfo.team1.shortName || 'Team1'}_vs_${sc.matchInfo.team2.shortName || 'Team2'}_${new Date().toISOString().split('T')[0]}.pdf`;
+      doc.save(filename);
+      console.log('PDF saved successfully:', filename);
+      
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      alert(`Error exporting PDF: ${error instanceof Error ? error.message : 'Unknown error occurred'}`);
+      throw error;
+    }
   };
 
   // Export scorecard to enhanced Excel with premium styling
