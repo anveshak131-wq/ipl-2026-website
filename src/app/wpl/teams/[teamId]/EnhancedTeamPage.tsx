@@ -138,10 +138,11 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
             const fetchPromises = [
               fetch(`/api/players?teamId=${foundTeam.id}&league=wpl`).catch(() => null),
               fetch(`/api/matches?teamId=${foundTeam.id}&league=wpl`).catch(() => null),
-              fetch(`/api/coaches?teamId=${foundTeam.id}`).catch(() => null)
+              fetch(`/api/coaches?teamId=${foundTeam.id}`).catch(() => null),
+              fetch(`/api/scorecards`).catch(() => null) // Fetch all scorecards for detailed stats
             ];
             
-            const [playersResponse, matchesResponse, coachesResponse] = await Promise.all(fetchPromises);
+            const [playersResponse, matchesResponse, coachesResponse, scorecardsResponse] = await Promise.all(fetchPromises);
             
             // Process players - filter for this team only
             if (playersResponse?.ok) {
@@ -172,7 +173,6 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
               
               console.log('EnhancedTeamPage: Filtered matches for', foundTeam.shortName, ':', teamMatches.length);
               setMatches(teamMatches);
-              calculateTeamStats(teamMatches);
             }
             
             // Process coaches
@@ -182,6 +182,26 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
               setCoachingStaff(Array.isArray(staff) ? staff : []);
             } else {
               setCoachingStaff([]);
+            }
+            
+            // Process scorecards for detailed stats
+            if (scorecardsResponse?.ok) {
+              const allScorecards = await scorecardsResponse.json();
+              console.log('EnhancedTeamPage: Total scorecards received:', allScorecards?.length || 0);
+              
+              // Filter scorecards for this team's matches
+              const teamScorecards = Array.isArray(allScorecards) ? allScorecards.filter(scorecard => 
+                scorecard.matchInfo && (
+                  String(scorecard.matchInfo.team1?.id) === String(foundTeam.id) ||
+                  String(scorecard.matchInfo.team2?.id) === String(foundTeam.id)
+                )
+              ) : [];
+              
+              console.log('EnhancedTeamPage: Filtered scorecards for', foundTeam.shortName, ':', teamScorecards.length);
+              calculateTeamStatsFromScorecards(teamScorecards, foundTeam.id);
+            } else {
+              // Fallback to basic match stats if scorecards fail
+              calculateTeamStats(matches || []);
             }
             
           } catch (fetchError) {
@@ -201,6 +221,131 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
     } finally {
       setLoading(false);
     }
+  };
+
+  const calculateTeamStatsFromScorecards = (teamScorecards: any[], teamId: string) => {
+    console.log('EnhancedTeamPage: Calculating stats from scorecards for team:', teamId);
+    
+    if (!teamScorecards || teamScorecards.length === 0) {
+      console.log('EnhancedTeamPage: No scorecards found, using empty stats');
+      setTeamStats({
+        matchesPlayed: 0,
+        wins: 0,
+        losses: 0,
+        titles: 0,
+        highestScore: 0,
+        lowestScore: 0,
+        averageScore: 0,
+        winPercentage: 0
+      });
+      return;
+    }
+
+    let totalMatches = 0;
+    let wins = 0;
+    let losses = 0;
+    let teamScores: number[] = [];
+    let totalRuns = 0;
+    let totalWickets = 0;
+    let totalOvers = 0;
+    let highestIndividualScore = 0;
+    let bestBowlingFigures = { wickets: 0, runs: 0 };
+    let totalFifties = 0;
+    let totalHundreds = 0;
+    let totalWicketsTaken = 0;
+
+    teamScorecards.forEach(scorecard => {
+      if (!scorecard.innings || !Array.isArray(scorecard.innings)) return;
+
+      // Determine if team won
+      const isWinner = scorecard.result?.winner?.includes('Royal Challengers') || 
+                       scorecard.result?.winner === teamId;
+      
+      if (isWinner) wins++;
+      else losses++;
+      
+      totalMatches++;
+
+      // Process each innings to find team's batting and bowling performance
+      scorecard.innings.forEach(innings => {
+        // Check if this is team's batting innings
+        if (String(innings.battingTeamId) === String(teamId)) {
+          const teamTotalRuns = innings.totalRuns || 0;
+          const teamTotalWickets = innings.totalWickets || 0;
+          const teamTotalOvers = innings.totalOvers || '0';
+          
+          teamScores.push(teamTotalRuns);
+          totalRuns += teamTotalRuns;
+          totalWickets += teamTotalWickets;
+          
+          // Parse overs for calculation
+          const oversParts = teamTotalOvers.split('.');
+          const overs = parseInt(oversParts[0]) || 0;
+          const balls = parseInt(oversParts[1]) || 0;
+          totalOvers += overs + (balls / 6);
+
+          // Find highest individual score
+          if (innings.batting && Array.isArray(innings.batting)) {
+            innings.batting.forEach(batsman => {
+              if (batsman.runs > highestIndividualScore) {
+                highestIndividualScore = batsman.runs;
+              }
+              
+              // Count fifties and hundreds
+              if (batsman.runs >= 100) totalHundreds++;
+              else if (batsman.runs >= 50) totalFifties++;
+            });
+          }
+        }
+        
+        // Check if this is team's bowling innings
+        if (String(innings.battingTeamId) !== String(teamId)) {
+          if (innings.bowling && Array.isArray(innings.bowling)) {
+            innings.bowling.forEach(bowler => {
+              totalWicketsTaken += bowler.wickets || 0;
+              
+              // Track best bowling figures
+              if (bowler.wickets > bestBowlingFigures.wickets || 
+                  (bowler.wickets === bestBowlingFigures.wickets && bowler.runs < bestBowlingFigures.runs)) {
+                bestBowlingFigures = {
+                  wickets: bowler.wickets || 0,
+                  runs: bowler.runs || 0
+                };
+              }
+            });
+          }
+        }
+      });
+    });
+
+    const stats: TeamStats = {
+      matchesPlayed: totalMatches,
+      wins,
+      losses,
+      titles: 0, // Could be calculated from tournament data
+      highestScore: Math.max(...teamScores, 0),
+      lowestScore: Math.min(...teamScores, 0),
+      averageScore: teamScores.length > 0 ? Math.round(totalRuns / teamScores.length) : 0,
+      winPercentage: totalMatches > 0 ? Math.round((wins / totalMatches) * 100) : 0
+    };
+
+    // Add additional detailed stats from scorecards
+    const detailedStats = {
+      ...stats,
+      totalRuns,
+      totalWickets,
+      totalOvers: Math.round(totalOvers * 10) / 10,
+      averageRunRate: totalOvers > 0 ? Math.round((totalRuns / totalOvers) * 100) / 100 : 0,
+      highestIndividualScore,
+      bestBowlingFigures,
+      totalFifties,
+      totalHundreds,
+      totalWicketsTaken,
+      averageEconomyRate: totalOvers > 0 ? Math.round((totalRuns / totalOvers) * 100) / 100 : 0
+    };
+
+    console.log('EnhancedTeamPage: Calculated detailed stats from scorecards:', detailedStats);
+    setTeamStats(stats);
   };
 
   const calculateTeamStats = (teamMatches: Match[]) => {
