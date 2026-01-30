@@ -133,29 +133,64 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
         if (foundTeam) {
           setTeam(foundTeam);
           
-          // Simple parallel fetch for other data
-          const fetchPromises = [
-            fetch(`/api/players?teamId=${foundTeam.id}&league=wpl`).catch(() => null),
-            fetch(`/api/matches?teamId=${foundTeam.id}&league=wpl`).catch(() => null),
-            fetch(`/api/coaches?teamId=${foundTeam.id}`).catch(() => null)
-          ];
-          
-          const [playersResponse, matchesResponse, coachesResponse] = await Promise.all(fetchPromises);
-          
-          if (playersResponse?.ok) {
-            const teamPlayers = await playersResponse.json();
-            setPlayers(teamPlayers || []);
-          }
-          
-          if (matchesResponse?.ok) {
-            const teamMatches = await matchesResponse.json();
-            setMatches(teamMatches || []);
-            calculateTeamStats(teamMatches || []);
-          }
-          
-          if (coachesResponse?.ok) {
-            const staff = await coachesResponse.json();
-            setCoachingStaff(staff || []);
+          // Fetch real data for this specific team
+          try {
+            const fetchPromises = [
+              fetch(`/api/players?teamId=${foundTeam.id}&league=wpl`).catch(() => null),
+              fetch(`/api/matches?teamId=${foundTeam.id}&league=wpl`).catch(() => null),
+              fetch(`/api/coaches?teamId=${foundTeam.id}`).catch(() => null)
+            ];
+            
+            const [playersResponse, matchesResponse, coachesResponse] = await Promise.all(fetchPromises);
+            
+            // Process players - filter for this team only
+            if (playersResponse?.ok) {
+              const allPlayers = await playersResponse.json();
+              console.log('EnhancedTeamPage: Total players received:', allPlayers?.length || 0);
+              
+              // Filter players to ensure they belong to this team
+              const teamPlayers = Array.isArray(allPlayers) ? allPlayers.filter(player => 
+                String(player.teamId) === String(foundTeam.id) || 
+                player.league === 'wpl'
+              ) : [];
+              
+              console.log('EnhancedTeamPage: Filtered players for', foundTeam.shortName, ':', teamPlayers.length);
+              setPlayers(teamPlayers);
+            }
+            
+            // Process matches - filter for this team only
+            if (matchesResponse?.ok) {
+              const allMatches = await matchesResponse.json();
+              console.log('EnhancedTeamPage: Total matches received:', allMatches?.length || 0);
+              
+              // Filter matches to ensure they involve this team
+              const teamMatches = Array.isArray(allMatches) ? allMatches.filter(match => 
+                (match.team1 && String(match.team1.id) === String(foundTeam.id)) ||
+                (match.team2 && String(match.team2.id) === String(foundTeam.id)) ||
+                (typeof match.team1 === 'string' && match.team1 === foundTeam.id) ||
+                (typeof match.team2 === 'string' && match.team2 === foundTeam.id)
+              ) : [];
+              
+              console.log('EnhancedTeamPage: Filtered matches for', foundTeam.shortName, ':', teamMatches.length);
+              setMatches(teamMatches);
+              calculateTeamStats(teamMatches);
+            }
+            
+            // Process coaches
+            if (coachesResponse?.ok) {
+              const staff = await coachesResponse.json();
+              console.log('EnhancedTeamPage: Coaches received:', staff?.length || 0);
+              setCoachingStaff(Array.isArray(staff) ? staff : []);
+            } else {
+              setCoachingStaff([]);
+            }
+            
+          } catch (fetchError) {
+            console.error('EnhancedTeamPage: Error fetching team data:', fetchError);
+            // Set empty arrays on error
+            setPlayers([]);
+            setMatches([]);
+            setCoachingStaff([]);
           }
         }
       } else {
