@@ -99,138 +99,71 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
     try {
       setLoading(true);
       
-      // Add timeout to prevent infinite loops
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Request timeout')), 5000);
+      console.log('EnhancedTeamPage: Starting data fetch for teamId:', teamId);
+      
+      // Simple fetch with minimal timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      
+      const teamsResponse = await fetch(`/api/teams?league=wpl`, {
+        signal: controller.signal
       });
       
-      // Fetch team data with timeout
-      const teamsResponse = await Promise.race([
-        fetch(`/api/teams?league=wpl`),
-        timeoutPromise
-      ]) as Response;
+      clearTimeout(timeoutId);
       
       if (teamsResponse.ok) {
         const teams = await teamsResponse.json();
-        console.log('EnhancedTeamPage: Looking for teamId:', teamId);
-        console.log('EnhancedTeamPage: Available teams:', teams.map((t: Team) => ({ id: t.id, name: t.name, shortName: t.shortName })));
+        console.log('EnhancedTeamPage: Received teams:', teams.length);
         
-        // Enhanced team matching logic
+        // Simple team matching
         const normalizedTeamId = teamId.toLowerCase().trim();
-        let foundTeam = null;
-        
-        // Try multiple matching strategies
-        foundTeam = teams.find((t: Team) => {
+        const foundTeam = teams.find((t: Team) => {
           const teamShortName = t.shortName?.toLowerCase().trim();
           const teamId = String(t.id).toLowerCase().trim();
           
-          // Exact shortName match (e.g., "rcb-w" === "rcb-w")
-          if (teamShortName === normalizedTeamId) {
-            console.log('EnhancedTeamPage: Exact shortName match:', t.name);
-            return true;
-          }
-          
-          // ID match (e.g., "12" === "12")
-          if (teamId === normalizedTeamId) {
-            console.log('EnhancedTeamPage: ID match:', t.name);
-            return true;
-          }
-          
-          // Handle variations without -w suffix (e.g., "rcb" matches "rcb-w")
-          if (normalizedTeamId === 'rcb' && teamShortName === 'rcb-w') {
-            console.log('EnhancedTeamPage: RCB variation match:', t.name);
-            return true;
-          }
-          
-          if (normalizedTeamId === 'mi' && teamShortName === 'mi-w') {
-            console.log('EnhancedTeamPage: MI variation match:', t.name);
-            return true;
-          }
-          
-          if (normalizedTeamId === 'dc' && teamShortName === 'dc-w') {
-            console.log('EnhancedTeamPage: DC variation match:', t.name);
-            return true;
-          }
-          
-          // Handle team prefix format (e.g., "team12" === "12")
-          if (normalizedTeamId.replace('team', '') === teamId) {
-            console.log('EnhancedTeamPage: Team prefix match:', t.name);
-            return true;
-          }
-          
-          return false;
+          return teamShortName === normalizedTeamId || 
+                 teamId === normalizedTeamId ||
+                 (normalizedTeamId === 'rcb' && teamShortName === 'rcb-w') ||
+                 (normalizedTeamId === 'mi' && teamShortName === 'mi-w') ||
+                 (normalizedTeamId === 'dc' && teamShortName === 'dc-w');
         });
         
-        console.log('EnhancedTeamPage: Final team result:', foundTeam ? foundTeam.name : 'null');
+        console.log('EnhancedTeamPage: Found team:', foundTeam?.name || 'null');
         
         if (foundTeam) {
           setTeam(foundTeam);
           
-          // Fetch players with timeout
-          try {
-            const playersResponse = await Promise.race([
-              fetch(`/api/players?teamId=${foundTeam.id}&league=wpl`),
-              timeoutPromise
-            ]) as Response;
-            
-            if (playersResponse.ok) {
-              const teamPlayers = await playersResponse.json();
-              setPlayers(teamPlayers);
-            }
-          } catch (playerError) {
-            console.error('Error fetching players:', playerError);
-            setPlayers([]);
+          // Simple parallel fetch for other data
+          const fetchPromises = [
+            fetch(`/api/players?teamId=${foundTeam.id}&league=wpl`).catch(() => null),
+            fetch(`/api/matches?teamId=${foundTeam.id}&league=wpl`).catch(() => null),
+            fetch(`/api/coaches?teamId=${foundTeam.id}`).catch(() => null)
+          ];
+          
+          const [playersResponse, matchesResponse, coachesResponse] = await Promise.all(fetchPromises);
+          
+          if (playersResponse?.ok) {
+            const teamPlayers = await playersResponse.json();
+            setPlayers(teamPlayers || []);
           }
           
-          // Fetch matches with timeout
-          try {
-            const matchesResponse = await Promise.race([
-              fetch(`/api/matches?teamId=${foundTeam.id}&league=wpl`),
-              timeoutPromise
-            ]) as Response;
-            
-            if (matchesResponse.ok) {
-              const teamMatches = await matchesResponse.json();
-              setMatches(teamMatches);
-              calculateTeamStats(teamMatches);
-            }
-          } catch (matchError) {
-            console.error('Error fetching matches:', matchError);
-            setMatches([]);
+          if (matchesResponse?.ok) {
+            const teamMatches = await matchesResponse.json();
+            setMatches(teamMatches || []);
+            calculateTeamStats(teamMatches || []);
           }
           
-          // Fetch coaching staff with timeout
-          try {
-            const coachesResponse = await Promise.race([
-              fetch(`/api/coaches?teamId=${foundTeam.id}`),
-              timeoutPromise
-            ]) as Response;
-            
-            if (coachesResponse.ok) {
-              const staff = await coachesResponse.json();
-              setCoachingStaff(staff);
-            }
-          } catch (coachError) {
-            console.error('Error fetching coaches:', coachError);
-            setCoachingStaff([]);
+          if (coachesResponse?.ok) {
+            const staff = await coachesResponse.json();
+            setCoachingStaff(staff || []);
           }
         }
       } else {
-        console.error('Teams API returned status:', teamsResponse.status);
-        // Don't reset fetch flag on server errors to prevent infinite loops
-        if (teamsResponse.status >= 500) {
-          console.error('Server error detected, preventing retry');
-          hasFetchedData.current = true; // Prevent retry on server errors
-        }
+        console.error('EnhancedTeamPage: API error:', teamsResponse.status);
       }
     } catch (error) {
-      console.error('Error fetching team data:', error);
-      // Only reset fetch flag on network errors, not server errors
-      if (error instanceof Error && !error.message.includes('Request timeout')) {
-        hasFetchedData.current = false; // Allow retry on network errors
-      } else {
-        hasFetchedData.current = true; // Prevent retry on timeouts
-      }
+      console.error('EnhancedTeamPage: Fetch error:', error);
+      // Don't reset hasFetchedData - prevent infinite retries
     } finally {
       setLoading(false);
     }
