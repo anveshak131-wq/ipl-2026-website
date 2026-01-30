@@ -755,9 +755,9 @@ export default function ScorecardAdminPage() {
     // Helper function to add gradient background
     const addGradientBackground = (startY: number, height: number, color1: number[], color2: number[]) => {
       doc.setFillColor(...color1);
-      doc.rect(0, startY, pageWidth, height / 2, 'F');
+      safeRect(0, startY, pageWidth, height / 2, 'F');
       doc.setFillColor(...color2);
-      doc.rect(0, startY + height / 2, pageWidth, height / 2, 'F');
+      safeRect(0, startY + height / 2, pageWidth, height / 2, 'F');
     };
     
     // Helper function to add decorative pattern
@@ -783,6 +783,20 @@ export default function ScorecardAdminPage() {
       }
       
       doc.text(text, x, yPos, { align });
+    };
+    
+    // Safe rect function with validation
+    const safeRect = (x: number, y: number, width: number, height: number, style: string = 'F') => {
+      if (!isFinite(x) || !isFinite(y) || !isFinite(width) || !isFinite(height) || 
+          width <= 0 || height <= 0) {
+        console.warn('Invalid parameters for rect:', { x, y, width, height, style });
+        return;
+      }
+      try {
+        doc.rect(x, y, width, height, style);
+      } catch (error) {
+        console.error('Error in rect:', error, { x, y, width, height, style });
+      }
     };
     
     // Data Visualization Functions
@@ -812,13 +826,13 @@ export default function ScorecardAdminPage() {
         if (isFinite(barX) && isFinite(barY) && isFinite(barWidth) && isFinite(barHeight) && 
             barWidth > 0 && barHeight >= 0) {
           doc.setFillColor(...color);
-          doc.rect(barX + 1, barY, barWidth - 2, barHeight, 'F');
+          safeRect(barX + 1, barY, barWidth - 2, barHeight, 'F');
         }
       });
       
       // Border
       doc.setDrawColor(100, 100, 100);
-      doc.rect(x, y, width, height, 'D');
+      safeRect(x, y, width, height, 'D');
     };
     
     const addStrikeRateIndicator = (x: number, y: number, width: number, height: number, strikeRate: number) => {
@@ -830,7 +844,7 @@ export default function ScorecardAdminPage() {
       
       // Background
       doc.setFillColor(240, 240, 240);
-      doc.rect(x, y, width, height, 'F');
+      safeRect(x, y, width, height, 'F');
       
       // Strike rate bar (0-200 scale, with 100 as baseline)
       const normalizedRate = Math.min(Math.max(strikeRate, 0), 200);
@@ -847,11 +861,11 @@ export default function ScorecardAdminPage() {
       }
       
       doc.setFillColor(...barColor);
-      doc.rect(x, y, barWidth, height, 'F');
+      safeRect(x, y, barWidth, height, 'F');
       
       // Border
       doc.setDrawColor(100, 100, 100);
-      doc.rect(x, y, width, height, 'D');
+      safeRect(x, y, width, height, 'D');
       
       // SR text
       doc.setTextColor(0, 0, 0);
@@ -873,7 +887,7 @@ export default function ScorecardAdminPage() {
         
         // Bar
         doc.setFillColor(100, 150, 255);
-        doc.rect(x + 60, currentY, barWidth, barHeight, 'F');
+        safeRect(x + 60, currentY, barWidth, barHeight, 'F');
         
         // Text
         doc.setTextColor(0, 0, 0);
@@ -886,7 +900,7 @@ export default function ScorecardAdminPage() {
       
       // Border
       doc.setDrawColor(100, 100, 100);
-      doc.rect(x, y, width, currentY - y, 'D');
+      safeRect(x, y, width, currentY - y, 'D');
     };
     
     const addPerformanceGraph = (x: number, y: number, width: number, height: number, data: number[], color: number[]) => {
@@ -898,7 +912,7 @@ export default function ScorecardAdminPage() {
       
       // Background
       doc.setFillColor(250, 250, 250);
-      doc.rect(x, y, width, height, 'F');
+      safeRect(x, y, width, height, 'F');
       
       // Draw grid lines
       doc.setDrawColor(220, 220, 220);
@@ -934,7 +948,7 @@ export default function ScorecardAdminPage() {
       
       // Border
       doc.setDrawColor(100, 100, 100);
-      doc.rect(x, y, width, height, 'D');
+      safeRect(x, y, width, height, 'D');
     };
     
     // New visualization functions for Fall of Wickets, Powerplays, and Partnerships
@@ -943,7 +957,7 @@ export default function ScorecardAdminPage() {
       
       // Background
       doc.setFillColor(250, 250, 250);
-      doc.rect(x, y, width, height, 'F');
+      safeRect(x, y, width, height, 'F');
       
       // Extract wicket scores for visualization
       const wicketScores = fallOfWickets.map(fow => {
@@ -965,7 +979,7 @@ export default function ScorecardAdminPage() {
         
         // Draw bar
         doc.setFillColor(...color);
-        doc.rect(barX, barY, barWidth, barHeight, 'F');
+        safeRect(barX, barY, barWidth, barHeight, 'F');
         
         // Add wicket number label
         doc.setTextColor(0, 0, 0);
@@ -980,7 +994,7 @@ export default function ScorecardAdminPage() {
       
       // Border
       doc.setDrawColor(100, 100, 100);
-      doc.rect(x, y, width, height, 'D');
+      safeRect(x, y, width, height, 'D');
     };
     
     const addPowerplayComparisonChart = (x: number, y: number, width: number, height: number, powerplays: any, colors: any) => {
@@ -988,7 +1002,7 @@ export default function ScorecardAdminPage() {
       
       // Background
       doc.setFillColor(250, 250, 250);
-      doc.rect(x, y, width, height, 'F');
+      safeRect(x, y, width, height, 'F');
       
       const data: number[] = [];
       const labels: string[] = [];
@@ -1019,7 +1033,7 @@ export default function ScorecardAdminPage() {
         
         // Draw bar
         doc.setFillColor(...barColors[index]);
-        doc.rect(barX, barY, barWidth, barHeight, 'F');
+        safeRect(barX, barY, barWidth, barHeight, 'F');
         
         // Add label
         doc.setTextColor(0, 0, 0);
@@ -1032,7 +1046,7 @@ export default function ScorecardAdminPage() {
       
       // Border
       doc.setDrawColor(100, 100, 100);
-      doc.rect(x, y, width, height, 'D');
+      safeRect(x, y, width, height, 'D');
     };
     
     const addPartnershipContributionChart = (x: number, y: number, width: number, height: number, partnerships: any[], color: number[]) => {
@@ -1040,7 +1054,7 @@ export default function ScorecardAdminPage() {
       
       // Background
       doc.setFillColor(250, 250, 250);
-      doc.rect(x, y, width, height, 'F');
+      safeRect(x, y, width, height, 'F');
       
       // Extract partnership totals
       const partnershipRuns = partnerships.map(p => {
@@ -1060,7 +1074,7 @@ export default function ScorecardAdminPage() {
         
         // Draw bar
         doc.setFillColor(...color);
-        doc.rect(barX, barY, barWidth, barHeight, 'F');
+        safeRect(barX, barY, barWidth, barHeight, 'F');
         
         // Add partnership number
         doc.setTextColor(0, 0, 0);
@@ -1075,7 +1089,7 @@ export default function ScorecardAdminPage() {
       
       // Border
       doc.setDrawColor(100, 100, 100);
-      doc.rect(x, y, width, height, 'D');
+      safeRect(x, y, width, height, 'D');
     };
     
     const addWicketsTimelineChart = (x: number, y: number, width: number, height: number, fallOfWickets: any[], color: number[]) => {
@@ -1083,7 +1097,7 @@ export default function ScorecardAdminPage() {
       
       // Background
       doc.setFillColor(250, 250, 250);
-      doc.rect(x, y, width, height, 'F');
+      safeRect(x, y, width, height, 'F');
       
       // Extract over numbers for timeline
       const overData = fallOfWickets.map(fow => {
@@ -1125,7 +1139,7 @@ export default function ScorecardAdminPage() {
       
       // Border
       doc.setDrawColor(100, 100, 100);
-      doc.rect(x, y, width, height, 'D');
+      safeRect(x, y, width, height, 'D');
     };
     
     // Ultra-Premium Title Header with Gradient
@@ -1498,7 +1512,7 @@ export default function ScorecardAdminPage() {
           const barY = y + 35;
           
           doc.setFillColor(...colors.accent);
-          doc.rect(barX, barY - barHeight, barWidth, barHeight, 'F');
+          safeRect(barX, barY - barHeight, barWidth, barHeight, 'F');
           
           doc.setTextColor(0, 0, 0);
           doc.setFontSize(7);
