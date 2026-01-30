@@ -1217,6 +1217,169 @@ export default function ScorecardAdminPage() {
       addPerformanceGraph(40, y + 5, pageWidth - 80, 60, bowlingRuns, colors.danger);
       y += 80;
       
+      // Fall of Wickets Section
+      if (inn.fallOfWickets && inn.fallOfWickets.length > 0) {
+        if (y > pageHeight - 150) { doc.addPage(); y = 40; }
+        
+        addColorfulText('FALL OF WICKETS', pageWidth / 2, y, colors.warning, 14, 'bold', 'center');
+        addDecorativePattern(y + 8, colors.warning);
+        y += 25;
+        
+        // Fall of Wickets Table Header
+        doc.setFillColor(...colors.light);
+        doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'F');
+        doc.setDrawColor(...colors.warning);
+        doc.setLineWidth(2);
+        doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'D');
+        
+        // Fall of Wickets columns
+        const fowColumns = [
+          { start: 40, end: 200, text: 'PLAYER' },
+          { start: 205, end: 280, text: 'SCORE' },
+          { start: 285, end: pageWidth - 40, text: 'OVER' }
+        ];
+        
+        fowColumns.forEach(column => {
+          addColorfulText(column.text, (column.start + column.end) / 2, y, colors.dark, 10, 'bold', 'center');
+        });
+        y += lineHeight;
+        
+        // Fall of Wickets Data
+        inn.fallOfWickets.forEach((fow, index) => {
+          if (y > pageHeight - 80) { doc.addPage(); y = 40; }
+          
+          // Alternating row colors
+          const fowRowColors = [
+            [255, 248, 225], // Light Yellow
+            [255, 240, 245], // Light Pink
+          ];
+          const rowColor = fowRowColors[index % fowRowColors.length];
+          
+          doc.setFillColor(...rowColor);
+          doc.roundedRect(35, y - 12, pageWidth - 70, 20, 2, 2, 'F');
+          
+          addColorfulText(fow.player || 'N/A', 40, y, colors.dark, 10);
+          addColorfulText(fow.score || 'N/A', 242, y, colors.warning, 10, 'bold', 'center');
+          addColorfulText(fow.over || 'N/A', (285 + pageWidth - 40) / 2, y, colors.info, 10, 'center');
+          y += lineHeight;
+        });
+        
+        y += 20;
+      }
+      
+      // Powerplays Section
+      if (inn.powerplays) {
+        if (y > pageHeight - 120) { doc.addPage(); y = 40; }
+        
+        addColorfulText('POWERPLAYS', pageWidth / 2, y, colors.info, 14, 'bold', 'center');
+        addDecorativePattern(y + 8, colors.info);
+        y += 25;
+        
+        // Powerplays Grid Layout
+        const powerplayColumns = [
+          { start: 40, end: pageWidth / 2 - 10, text: 'TYPE' },
+          { start: pageWidth / 2 + 10, end: pageWidth - 40, text: 'DETAILS' }
+        ];
+        
+        // Mandatory Powerplay
+        if (inn.powerplays.mandatory) {
+          doc.setFillColor(...colors.light);
+          doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'F');
+          doc.setDrawColor(...colors.info);
+          doc.setLineWidth(2);
+          doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'D');
+          
+          addColorfulText('MANDATORY POWERPLAY', pageWidth / 2, y, colors.dark, 10, 'bold', 'center');
+          y += lineHeight;
+          
+          doc.setFillColor([240, 248, 255]);
+          doc.roundedRect(35, y - 12, pageWidth - 70, 20, 2, 2, 'F');
+          
+          addColorfulText('Overs:', 40, y, colors.dark, 10);
+          addColorfulText(inn.powerplays.mandatory.overs || 'N/A', 100, y, colors.info, 10, 'bold');
+          addColorfulText('Runs:', pageWidth / 2, y, colors.dark, 10);
+          addColorfulText(String(inn.powerplays.mandatory.runs || 0), pageWidth / 2 + 50, y, colors.success, 10, 'bold');
+          y += lineHeight + 10;
+        }
+        
+        // Optional Powerplay
+        if (inn.powerplays.optional) {
+          doc.setFillColor(...colors.light);
+          doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'F');
+          doc.setDrawColor(...colors.info);
+          doc.setLineWidth(2);
+          doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'D');
+          
+          addColorfulText('OPTIONAL POWERPLAY', pageWidth / 2, y, colors.dark, 10, 'bold', 'center');
+          y += lineHeight;
+          
+          doc.setFillColor([240, 248, 255]);
+          doc.roundedRect(35, y - 12, pageWidth - 70, 20, 2, 2, 'F');
+          
+          addColorfulText('Overs:', 40, y, colors.dark, 10);
+          addColorfulText(inn.powerplays.optional.overs || 'N/A', 100, y, colors.info, 10, 'bold');
+          addColorfulText('Runs:', pageWidth / 2, y, colors.dark, 10);
+          addColorfulText(String(inn.powerplays.optional.runs || 0), pageWidth / 2 + 50, y, colors.success, 10, 'bold');
+          y += lineHeight + 10;
+        }
+        
+        y += 20;
+      }
+      
+      // Partnerships Section (Enhanced version)
+      if (inn.partnerships && inn.partnerships.length > 0) {
+        if (y > pageHeight - 200) { doc.addPage(); y = 40; }
+        
+        addColorfulText('PARTNERSHIPS', pageWidth / 2, y, colors.accent, 14, 'bold', 'center');
+        addDecorativePattern(y + 8, colors.accent);
+        y += 25;
+        
+        // Partnerships Table Header
+        doc.setFillColor(...colors.light);
+        doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'F');
+        doc.setDrawColor(...colors.accent);
+        doc.setLineWidth(2);
+        doc.roundedRect(35, y - 15, pageWidth - 70, 25, 3, 3, 'D');
+        
+        // Partnerships columns
+        const partnershipColumns = [
+          { start: 40, end: 150, text: 'BATSMAN 1' },
+          { start: 155, end: 220, text: 'SCORE' },
+          { start: 225, end: 290, text: 'BATSMAN 2' },
+          { start: 295, end: 360, text: 'SCORE' },
+          { start: 365, end: pageWidth - 40, text: 'TOTAL' }
+        ];
+        
+        partnershipColumns.forEach(column => {
+          addColorfulText(column.text, (column.start + column.end) / 2, y, colors.dark, 9, 'bold', 'center');
+        });
+        y += lineHeight;
+        
+        // Partnerships Data
+        inn.partnerships.forEach((partnership, index) => {
+          if (y > pageHeight - 80) { doc.addPage(); y = 40; }
+          
+          // Alternating row colors
+          const partnershipRowColors = [
+            [240, 255, 240], // Light Green
+            [255, 248, 220], // Light Yellow
+          ];
+          const rowColor = partnershipRowColors[index % partnershipRowColors.length];
+          
+          doc.setFillColor(...rowColor);
+          doc.roundedRect(35, y - 12, pageWidth - 70, 20, 2, 2, 'F');
+          
+          addColorfulText(partnership.batsman1 || 'N/A', 40, y, colors.dark, 9);
+          addColorfulText(`${partnership.batsman1Runs || 0} (${partnership.batsman1Balls || 0})`, 187, y, colors.info, 9, 'center');
+          addColorfulText(partnership.batsman2 || 'N/A', 225, y, colors.dark, 9);
+          addColorfulText(`${partnership.batsman2Runs || 0} (${partnership.batsman2Balls || 0})`, 327, y, colors.info, 9, 'center');
+          addColorfulText(`${partnership.totalRuns || 0} runs`, (365 + pageWidth - 40) / 2, y, colors.accent, 10, 'bold', 'center');
+          y += lineHeight;
+        });
+        
+        y += 20;
+      }
+      
       y += 20;
       
       // Innings Summary with Enhanced Design
