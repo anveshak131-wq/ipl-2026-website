@@ -297,7 +297,12 @@ export async function onRequest(context) {
         );
         teams = defaultTeams;
         // Update KV storage with fresh data
-        await env.IPL_CACHE.put("teams", JSON.stringify(teams));
+        try {
+          await env.IPL_CACHE.put("teams", JSON.stringify(teams));
+        } catch (kvError) {
+          console.error("Error updating KV cache with default teams:", kvError);
+          // Continue without updating KV cache
+        }
       }
 
       // Fallback to default teams if KV storage is empty
@@ -326,8 +331,16 @@ export async function onRequest(context) {
       const uniqueTeamsMap = new Map();
       for (const team of teams) {
         // Use shortName as key to deduplicate (some teams have both "11" and 11 as IDs)
-        if (!uniqueTeamsMap.has(team.shortName)) {
-          uniqueTeamsMap.set(team.shortName, team);
+        // Only process teams that have a shortName
+        if (team.shortName) {
+          if (!uniqueTeamsMap.has(team.shortName)) {
+            uniqueTeamsMap.set(team.shortName, team);
+          }
+        } else {
+          // For teams without shortName, use ID as fallback
+          if (!uniqueTeamsMap.has(team.id)) {
+            uniqueTeamsMap.set(team.id, team);
+          }
         }
       }
       const uniqueTeams = Array.from(uniqueTeamsMap.values());
@@ -337,7 +350,12 @@ export async function onRequest(context) {
         console.log(
           `Found ${teams.length - uniqueTeams.length} duplicate teams, cleaning up...`,
         );
-        await env.IPL_CACHE.put("teams", JSON.stringify(uniqueTeams));
+        try {
+          await env.IPL_CACHE.put("teams", JSON.stringify(uniqueTeams));
+        } catch (kvError) {
+          console.error("Error updating KV cache with unique teams:", kvError);
+          // Continue without updating KV cache
+        }
         teams = uniqueTeams;
       } else {
         teams = uniqueTeams;
