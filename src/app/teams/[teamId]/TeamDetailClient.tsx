@@ -286,27 +286,31 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
         const teamsResponse = await fetch(teamsUrl);
         if (teamsResponse.ok) {
           const allTeams = await teamsResponse.json();
-          console.log('TeamDetailClient: Looking for teamId:', teamId, 'shortNameLower:', shortNameLower, 'shortNameUpper:', shortNameUpper);
+          console.log('TeamDetailClient: Looking for teamId:', teamId, 'shortNameLower:', shortNameLower, 'shortNameUpper:', shortNameUpper, 'league:', league);
           console.log('TeamDetailClient: Available teams:', allTeams.map(t => ({ id: t.id, name: t.name, shortName: t.shortName, league: t.league })));
           
+          // First, filter teams by league if specified
+          const filteredTeams = league ? allTeams.filter((t: Team) => t.league === league) : allTeams;
+          console.log('TeamDetailClient: Filtered teams by league:', filteredTeams.length);
+          
           // Try to find team by shortName first (RCB, MI, etc.), then by ID
-          let team = allTeams.find((t: Team) => {
+          let team = filteredTeams.find((t: Team) => {
             if (!t.shortName) return false;
             const tShortNameLower = t.shortName.toLowerCase();
             
-            // Exact match
+            // Exact match - this should work for RCB-W
             if (tShortNameLower === shortNameLower || t.shortName.toUpperCase() === shortNameUpper) {
-              console.log('TeamDetailClient: Exact match found:', t.name, 'shortName:', t.shortName);
+              console.log('TeamDetailClient: Exact match found:', t.name, 'shortName:', t.shortName, 'league:', t.league);
               return true;
             }
-            // Partial match for WPL teams (e.g., "dc" matches "dc-w")
+            // Partial match for WPL teams (e.g., "rcb" matches "rcb-w")
             if (tShortNameLower.includes(shortNameLower) || shortNameLower.includes(tShortNameLower.replace('-w', ''))) {
-              console.log('TeamDetailClient: Partial match found:', t.name, 'shortName:', t.shortName);
+              console.log('TeamDetailClient: Partial match found:', t.name, 'shortName:', t.shortName, 'league:', t.league);
               return true;
             }
-            // Match without -W suffix (e.g., "dc" matches "dc-w")
+            // Match without -W suffix (e.g., "rcb" matches "rcb-w")
             if (tShortNameLower.replace('-w', '') === shortNameLower || shortNameLower === tShortNameLower.replace('-w', '')) {
-              console.log('TeamDetailClient: Suffix match found:', t.name, 'shortName:', t.shortName);
+              console.log('TeamDetailClient: Suffix match found:', t.name, 'shortName:', t.shortName, 'league:', t.league);
               return true;
             }
             return false;
@@ -315,9 +319,9 @@ export default function TeamDetailClient({ teamId, league }: TeamDetailClientPro
           // Fallback to ID matching if shortName not found (for backward compatibility)
           if (!team) {
             console.log('TeamDetailClient: No shortName match, trying ID matching with numericId:', numericId, 'teamId:', teamId);
-            team = allTeams.find((t: Team) => t.id === numericId || t.id === teamId);
+            team = filteredTeams.find((t: Team) => t.id === numericId || t.id === teamId);
             if (team) {
-              console.log('TeamDetailClient: ID match found:', team.name, 'id:', team.id);
+              console.log('TeamDetailClient: ID match found:', team.name, 'id:', team.id, 'league:', team.league);
             }
           }
           
