@@ -706,7 +706,9 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   const teamColors = team.colors || { primary: '#8B5CF6', secondary: '#F59E0B' };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+    <div className="min-h-screen" style={{
+      background: `linear-gradient(135deg, ${WPLColors.base} 0%, ${WPLColors.gradientStart} 25%, ${WPLColors.gradientMid} 50%, ${WPLColors.gradientEnd} 75%, ${WPLColors.base} 100%)`
+    }}>
       {/* Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -876,22 +878,36 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
               </motion.div>
             </div>
 
-            {/* Enhanced Team Name with Staggered Animation */}
+            {/* Enhanced Team Name with Maximum Visibility */}
             <motion.h1
-              className="text-7xl md:text-8xl font-black text-white mb-6 tracking-tight leading-none"
+              className="text-7xl md:text-8xl font-black mb-6 tracking-tight leading-none"
               initial={{ opacity: 0, y: 50, scale: 0.8 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.3 }}
               style={{ 
-                textShadow: `0 0 40px ${teamColors.primary}, 0 0 80px ${teamColors.primary}40`,
-                background: `linear-gradient(135deg, ${teamColors.primary}, ${teamColors.secondary}, white)`,
+                color: WPLColors.textPrimary,
+                textShadow: `
+                  0 0 20px ${teamColors.primary}80,
+                  0 0 40px ${teamColors.primary}60,
+                  0 0 60px ${teamColors.primary}40,
+                  2px 2px 4px rgba(0,0,0,0.8),
+                  4px 4px 8px rgba(0,0,0,0.6)
+                `,
+                background: `linear-gradient(135deg, ${WPLColors.textPrimary}, ${teamColors.primary}, ${WPLColors.accent})`,
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
+                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.8))'
               }}
               whileHover={{ 
                 scale: 1.05,
-                textShadow: `0 0 60px ${teamColors.primary}, 0 0 120px ${teamColors.primary}60`,
+                textShadow: `
+                  0 0 30px ${teamColors.primary},
+                  0 0 60px ${teamColors.primary}80,
+                  0 0 90px ${teamColors.primary}60,
+                  4px 4px 8px rgba(0,0,0,0.9),
+                  8px 8px 16px rgba(0,0,0,0.7)
+                `
               }}
             >
               <motion.span
@@ -914,12 +930,12 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
               <motion.div
                 className="flex items-center gap-3 px-6 py-3 rounded-full"
                 style={{
-                  ...getWPLGlassmorphism('purple', 20),
-                  border: `1px solid ${teamColors.primary}60`,
+                  ...getWPLGlassmorphism('primary', 20),
+                  border: `1px solid ${WPLColors.primaryRGBA[40]}`,
                 }}
                 whileHover={{ 
                   scale: 1.05,
-                  boxShadow: `0 10px 30px ${teamColors.primary}40`,
+                  boxShadow: `0 10px 30px ${WPLColors.primaryRGBA[40]}`,
                 }}
               >
                 <motion.div
@@ -928,7 +944,10 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                 >
                   <Crown className="w-5 h-5 text-yellow-400" />
                 </motion.div>
-                <span className="text-white font-bold text-lg">{team.shortName}</span>
+                <span className="font-bold text-lg" style={{
+                  color: WPLColors.textPrimary,
+                  textShadow: `0 0 10px ${WPLColors.primaryRGBA[60]}`
+                }}>{team.shortName}</span>
               </motion.div>
 
               <motion.div
@@ -943,7 +962,10 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                 }}
               >
                 <Flame className="w-5 h-5 text-orange-400" />
-                <span className="text-white font-bold text-lg">Women's Premier League</span>
+                <span className="font-bold text-lg" style={{
+                  color: WPLColors.textPrimary,
+                  textShadow: `0 0 10px ${WPLColors.pinkRGBA[60]}`
+                }}>Women's Premier League</span>
                 <motion.div
                   animate={{ scale: [1, 1.2, 1] }}
                   transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}

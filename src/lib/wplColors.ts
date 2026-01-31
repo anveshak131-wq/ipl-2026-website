@@ -5,27 +5,46 @@
  */
 
 export const WPLColors = {
-  // Primary Colors
-  purple: '#8B5CF6',
-  pink: '#14B8A6',
-  rose: '#06B6D4',
-  violet: '#A855F7',
-  fuchsia: '#10B981',
-  orange: '#FB923C',
+  // Enhanced Primary Colors - High Contrast Modern Sports Palette
+  primary: '#FF6B35',      // Vibrant Orange - High Energy
+  secondary: '#004E89',    // Deep Blue - Professional
+  accent: '#FFD700',       // Gold - Championship
+  success: '#00C896',      // Emerald Green - Victory
+  warning: '#FFB800',      // Amber - Alert
+  danger: '#FF4757',       // Coral Red - Intensity
+  
+  // Team-Specific Colors - Enhanced Visibility
+  purple: '#8B5CF6',       // RCB Purple - Enhanced
+  pink: '#EC4899',         // Bright Pink - High Contrast
+  rose: '#F43F5E',         // Rose Red - Vibrant
+  violet: '#7C3AED',       // Deep Violet - Rich
+  fuchsia: '#D946EF',      // Fuchsia - Bold
+  orange: '#FB923C',       // Orange - Warm
+  blue: '#3B82F6',         // Blue - Clear
+  green: '#10B981',        // Green - Fresh
 
-  // Background Colors
-  base: '#0F172A',        // Slate 950
-  gradientStart: '#1E1B4B', // Indigo 950
-  gradientMid: '#1E3A8A',   // Blue 900
-  gradientEnd: '#134E4A',   // Teal 900
+  // Enhanced Background Colors - Better Contrast
+  base: '#0A0E27',          // Deep Navy - Professional
+  gradientStart: '#1A1F3A', // Dark Blue-Gray
+  gradientMid: '#2D3561',   // Medium Blue
+  gradientEnd: '#1E293B',   // Slate Dark
+  surface: '#1E293B',       // Surface Dark
+  card: '#334155',          // Card Background
 
-  // Text Colors
-  textPrimary: '#FFFFFF',   // White
-  textSecondary: '#E2E8F0', // Slate 200
-  textMuted: '#94A3B8',     // Slate 400
-  textAccent: '#C084FC',    // Purple 300
+  // Enhanced Text Colors - Maximum Readability
+  textPrimary: '#FFFFFF',    // Pure White
+  textSecondary: '#F1F5F9',  // Light Slate
+  textMuted: '#CBD5E1',      // Muted Light
+  textAccent: '#FBBF24',     // Accent Yellow
+  textInverse: '#0F172A',     // Dark Text
 
-  // RGBA variants for transparency
+  // Status Colors - Clear Indicators
+  win: '#10B981',           // Victory Green
+  loss: '#EF4444',          // Defeat Red
+  draw: '#F59E0B',          // Draw Yellow
+  active: '#22D3EE',        // Active Cyan
+
+  // Enhanced RGBA variants for transparency
   purpleRGBA: {
     10: 'rgba(139, 92, 246, 0.1)',
     15: 'rgba(139, 92, 246, 0.15)',
@@ -35,28 +54,28 @@ export const WPLColors = {
     50: 'rgba(139, 92, 246, 0.5)',
   },
   pinkRGBA: {
-    10: 'rgba(20, 184, 166, 0.1)',
-    15: 'rgba(20, 184, 166, 0.15)',
-    20: 'rgba(20, 184, 166, 0.2)',
-    30: 'rgba(20, 184, 166, 0.3)',
-    40: 'rgba(20, 184, 166, 0.4)',
-    50: 'rgba(20, 184, 166, 0.5)',
+    10: 'rgba(236, 72, 153, 0.1)',
+    15: 'rgba(236, 72, 153, 0.15)',
+    20: 'rgba(236, 72, 153, 0.2)',
+    30: 'rgba(236, 72, 153, 0.3)',
+    40: 'rgba(236, 72, 153, 0.4)',
+    50: 'rgba(236, 72, 153, 0.5)',
   },
   roseRGBA: {
-    10: 'rgba(6, 182, 212, 0.1)',
-    15: 'rgba(6, 182, 212, 0.15)',
-    20: 'rgba(6, 182, 212, 0.2)',
-    30: 'rgba(6, 182, 212, 0.3)',
-    40: 'rgba(6, 182, 212, 0.4)',
-    50: 'rgba(6, 182, 212, 0.5)',
+    10: 'rgba(244, 63, 94, 0.1)',
+    15: 'rgba(244, 63, 94, 0.15)',
+    20: 'rgba(244, 63, 94, 0.2)',
+    30: 'rgba(244, 63, 94, 0.3)',
+    40: 'rgba(244, 63, 94, 0.4)',
+    50: 'rgba(244, 63, 94, 0.5)',
   },
   violetRGBA: {
-    10: 'rgba(168, 85, 247, 0.1)',
-    15: 'rgba(168, 85, 247, 0.15)',
-    20: 'rgba(168, 85, 247, 0.2)',
-    30: 'rgba(168, 85, 247, 0.3)',
-    40: 'rgba(168, 85, 247, 0.4)',
-    50: 'rgba(168, 85, 247, 0.5)',
+    10: 'rgba(124, 58, 237, 0.1)',
+    15: 'rgba(124, 58, 237, 0.15)',
+    20: 'rgba(124, 58, 237, 0.2)',
+    30: 'rgba(124, 58, 237, 0.3)',
+    40: 'rgba(124, 58, 237, 0.4)',
+    50: 'rgba(124, 58, 237, 0.5)',
   },
   orangeRGBA: {
     10: 'rgba(251, 146, 60, 0.1)',
@@ -65,6 +84,38 @@ export const WPLColors = {
     30: 'rgba(251, 146, 60, 0.3)',
     40: 'rgba(251, 146, 60, 0.4)',
     50: 'rgba(251, 146, 60, 0.5)',
+  },
+  blueRGBA: {
+    10: 'rgba(59, 130, 246, 0.1)',
+    15: 'rgba(59, 130, 246, 0.15)',
+    20: 'rgba(59, 130, 246, 0.2)',
+    30: 'rgba(59, 130, 246, 0.3)',
+    40: 'rgba(59, 130, 246, 0.4)',
+    50: 'rgba(59, 130, 246, 0.5)',
+  },
+  greenRGBA: {
+    10: 'rgba(16, 185, 129, 0.1)',
+    15: 'rgba(16, 185, 129, 0.15)',
+    20: 'rgba(16, 185, 129, 0.2)',
+    30: 'rgba(16, 185, 129, 0.3)',
+    40: 'rgba(16, 185, 129, 0.4)',
+    50: 'rgba(16, 185, 129, 0.5)',
+  },
+  primaryRGBA: {
+    10: 'rgba(255, 107, 53, 0.1)',
+    15: 'rgba(255, 107, 53, 0.15)',
+    20: 'rgba(255, 107, 53, 0.2)',
+    30: 'rgba(255, 107, 53, 0.3)',
+    40: 'rgba(255, 107, 53, 0.4)',
+    50: 'rgba(255, 107, 53, 0.5)',
+  },
+  secondaryRGBA: {
+    10: 'rgba(0, 78, 137, 0.1)',
+    15: 'rgba(0, 78, 137, 0.15)',
+    20: 'rgba(0, 78, 137, 0.2)',
+    30: 'rgba(0, 78, 137, 0.3)',
+    40: 'rgba(0, 78, 137, 0.4)',
+    50: 'rgba(0, 78, 137, 0.5)',
   },
 } as const;
 
@@ -82,15 +133,19 @@ export const getWPLGradient = (direction: 'to-r' | 'to-b' | 'to-br' | 'to-t' = '
 };
 
 /**
- * Get glassmorphism style object
+ * Get glassmorphism style object - Enhanced with new colors
  */
-export const getWPLGlassmorphism = (color: 'purple' | 'pink' | 'rose' | 'violet' | 'orange' = 'purple', opacity: 10 | 15 | 20 = 20) => {
+export const getWPLGlassmorphism = (color: 'purple' | 'pink' | 'rose' | 'violet' | 'orange' | 'blue' | 'green' | 'primary' | 'secondary' = 'purple', opacity: 10 | 15 | 20 = 20) => {
   const colorMap = {
     purple: WPLColors.purpleRGBA,
     pink: WPLColors.pinkRGBA,
     rose: WPLColors.roseRGBA,
     violet: WPLColors.violetRGBA,
     orange: WPLColors.orangeRGBA,
+    blue: WPLColors.blueRGBA,
+    green: WPLColors.greenRGBA,
+    primary: WPLColors.primaryRGBA,
+    secondary: WPLColors.secondaryRGBA,
   };
 
   // Map opacity to a valid lower opacity value
@@ -111,19 +166,25 @@ export const getWPLGlassmorphism = (color: 'purple' | 'pink' | 'rose' | 'violet'
 };
 
 /**
- * Get hover glow effect
+ * Get hover glow style object - Enhanced with new colors
  */
-export const getWPLHoverGlow = (color: 'purple' | 'pink' | 'rose' | 'violet' | 'orange' = 'purple') => {
+export const getWPLHoverGlow = (color: 'purple' | 'pink' | 'rose' | 'violet' | 'orange' | 'blue' | 'green' | 'primary' | 'secondary' = 'purple') => {
   const colorMap = {
-    purple: WPLColors.purple,
-    pink: WPLColors.pink,
-    rose: WPLColors.rose,
-    violet: WPLColors.violet,
-    orange: WPLColors.orange,
+    purple: WPLColors.purpleRGBA,
+    pink: WPLColors.pinkRGBA,
+    rose: WPLColors.roseRGBA,
+    violet: WPLColors.violetRGBA,
+    orange: WPLColors.orangeRGBA,
+    blue: WPLColors.blueRGBA,
+    green: WPLColors.greenRGBA,
+    primary: WPLColors.primaryRGBA,
+    secondary: WPLColors.secondaryRGBA,
   };
 
   return {
-    boxShadow: `0 12px 40px 0 ${WPLColors[`${color}RGBA` as keyof typeof WPLColors][30]}`,
+    '&:hover': {
+      boxShadow: `0 0 30px ${colorMap[color][40]}, 0 0 60px ${colorMap[color][30]}`,
+      transform: 'translateY(-2px)',
+    },
   };
 };
-
