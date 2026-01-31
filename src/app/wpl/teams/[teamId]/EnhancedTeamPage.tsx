@@ -96,18 +96,29 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   const [selectedPlayerForStats, setSelectedPlayerForStats] = useState<any | null>(null);
   const [isLoadingPlayerStats, setIsLoadingPlayerStats] = useState(false);
 
+  // Enhanced state for advanced interactions
+  const [isHoveringCard, setIsHoveringCard] = useState<string | null>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [isParallaxEnabled, setIsParallaxEnabled] = useState(true);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
   // Enhanced mouse tracking and animations
   const cursorX = useMotionValue(0);
   const cursorY = useMotionValue(0);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [isHoveringLogo, setIsHoveringLogo] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(heroRef, { once: false, amount: 0.3 });
   
-  // Scroll-based animations
+  // Advanced scroll tracking
   const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
+  // Enhanced parallax effects
   const scaleValue = useTransform(scrollYProgress, [0, 1], [1, 0.8]);
   const rotateValue = useTransform(scrollYProgress, [0, 1], [0, 5]);
   const opacityValue = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
@@ -844,137 +855,324 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
     <div className="min-h-screen" style={{
       background: `linear-gradient(135deg, ${WPLColors.base} 0%, ${WPLColors.gradientStart} 25%, ${WPLColors.gradientMid} 50%, ${WPLColors.gradientEnd} 75%, ${WPLColors.base} 100%)`
     }}>
-      {/* Animated Background */}
+      {/* Enhanced Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        {/* Multi-layer animated gradients */}
         <motion.div
           animate={{
             background: [
-              "radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.3) 0%, transparent 50%)",
-              "radial-gradient(circle at 80% 50%, rgba(59, 130, 246, 0.3) 0%, transparent 50%)",
-              "radial-gradient(circle at 50% 100%, rgba(236, 72, 153, 0.3) 0%, transparent 50%)",
+              "radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.4) 0%, transparent 60%)",
+              "radial-gradient(circle at 80% 50%, rgba(59, 130, 246, 0.4) 0%, transparent 60%)",
+              "radial-gradient(circle at 50% 100%, rgba(236, 72, 153, 0.4) 0%, transparent 60%)",
+              "radial-gradient(circle at 20% 20%, rgba(168, 85, 247, 0.3) 0%, transparent 50%)",
+              "radial-gradient(circle at 80% 80%, rgba(34, 197, 94, 0.3) 0%, transparent 50%)",
             ],
           }}
-          transition={{ duration: 10, repeat: Infinity, repeatType: "reverse" }}
+          transition={{ duration: 15, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
           className="absolute inset-0"
+        />
+        
+        {/* Floating particles */}
+        {[...Array(20)].map((_, i) => (
+          <motion.div
+            key={`particle-${i}`}
+            className="absolute w-2 h-2 bg-white/20 rounded-full blur-sm"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+            animate={{
+              x: [0, Math.random() * 200 - 100],
+              y: [0, Math.random() * 200 - 100],
+              opacity: [0, 1, 0],
+              scale: [0, 1, 0],
+            }}
+            transition={{
+              duration: Math.random() * 10 + 10,
+              repeat: Infinity,
+              delay: Math.random() * 5,
+              ease: "easeInOut"
+            }}
+          />
+        ))}
+        
+        {/* Geometric shapes */}
+        {[...Array(8)].map((_, i) => (
+          <motion.div
+            key={`shape-${i}`}
+            className="absolute border border-white/10"
+            style={{
+              width: `${Math.random() * 100 + 50}px`,
+              height: `${Math.random() * 100 + 50}px`,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              borderRadius: Math.random() > 0.5 ? '50%' : '10%',
+            }}
+            animate={{
+              rotate: [0, 360],
+              scale: [1, 1.2, 1],
+              opacity: [0.1, 0.3, 0.1],
+            }}
+            transition={{
+              duration: Math.random() * 20 + 20,
+              repeat: Infinity,
+              ease: "linear"
+            }}
+          />
+        ))}
+        
+        {/* Mouse-following gradient */}
+        <motion.div
+          className="absolute w-96 h-96 rounded-full blur-3xl pointer-events-none"
+          style={{
+            background: `radial-gradient(circle, ${teamColors.primary}40, ${teamColors.secondary}30, transparent)`,
+            left: mousePosition.x - 192,
+            top: mousePosition.y - 192,
+          }}
+          transition={{ type: "spring", stiffness: 500, damping: 28 }}
         />
       </div>
 
       {/* Enhanced Sticky Navigation Bar */}
       <motion.nav 
-        className="sticky top-0 z-50 backdrop-blur-lg bg-white/10 border-b border-white/20"
+        className="sticky top-0 z-50 backdrop-blur-xl bg-white/10 border-b border-white/20 shadow-2xl"
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 100 }}
+        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+        style={{
+          background: 'rgba(255, 255, 255, 0.08)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+        }}
       >
+        {/* Progress Bar */}
+        <motion.div
+          className="absolute top-0 left-0 h-1 bg-gradient-to-r from-purple-500 to-pink-500 origin-left"
+          style={{ scaleX }}
+        />
+        
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            {/* Team Logo and Name */}
+            {/* Enhanced Team Logo and Name */}
             <div className="flex items-center gap-3">
-              <Link href="/wpl/teams" className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
-                <ChevronRight className="w-4 h-4 rotate-180" />
-                <span className="hidden sm:inline text-sm">Teams</span>
-              </Link>
+              <motion.div
+                whileHover={{ scale: 1.1, rotate: -5 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Link href="/wpl/teams" className="flex items-center gap-2 text-white/70 hover:text-white transition-all duration-300 group">
+                  <motion.span
+                    animate={{ rotate: [0, -10, 10, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                    className="text-lg"
+                  >
+                    🔙
+                  </motion.span>
+                  <span className="hidden sm:inline text-sm font-medium group-hover:translate-x-1 transition-transform duration-300">Teams</span>
+                </Link>
+              </motion.div>
               
-              <div className="flex items-center gap-3">
+              <motion.div
+                className="flex items-center gap-3"
+                whileHover={{ scale: 1.05 }}
+              >
                 {logoUrl ? (
-                  <Image 
-                    src={logoUrl} 
-                    alt={team.name} 
-                    className="w-8 h-8 object-contain"
-                    width={32}
-                    height={32}
-                  />
+                  <motion.div
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.8, ease: "easeInOut" }}
+                    className="relative"
+                  >
+                    <Image 
+                      src={logoUrl} 
+                      alt={team.name} 
+                      className="w-10 h-10 object-contain drop-shadow-lg"
+                      width={40}
+                      height={40}
+                    />
+                    <motion.div
+                      className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 opacity-20"
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                  </motion.div>
                 ) : (
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                    <span className="text-white font-black text-xs">{team.shortName?.charAt(0) || 'T'}</span>
-                  </div>
+                  <motion.div
+                    className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg"
+                    whileHover={{ rotate: 360, scale: 1.1 }}
+                    transition={{ duration: 0.8, ease: "easeInOut" }}
+                  >
+                    <span className="text-white font-black text-lg">{team.shortName?.charAt(0) || 'T'}</span>
+                  </motion.div>
                 )}
                 <div className="hidden md:block">
-                  <div className="text-white font-bold text-sm">{team.shortName}</div>
-                  <div className="text-white/60 text-xs">Women's Premier League</div>
+                  <motion.div 
+                    className="text-white font-bold text-lg bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    {team.shortName}
+                  </motion.div>
+                  <div className="text-white/60 text-xs font-medium">Women's Premier League</div>
                 </div>
-              </div>
+              </motion.div>
             </div>
             
-            {/* Primary Navigation - Desktop */}
-            <div className="hidden md:flex items-center gap-1">
+            {/* Enhanced Primary Navigation - Desktop */}
+            <div className="hidden md:flex items-center gap-2">
               {[
-                { id: 'overview', label: 'Overview', icon: '🎯' },
-                { id: 'squad', label: 'Squad', icon: '👥' },
-                { id: 'matches', label: 'Matches', icon: '📅' },
-                { id: 'stats', label: 'Stats', icon: '📊' },
-                { id: 'about', label: 'About', icon: '⭐' }
+                { id: 'overview', label: 'Overview', icon: '🎯', color: 'from-purple-500 to-blue-500' },
+                { id: 'squad', label: 'Squad', icon: '👥', color: 'from-green-500 to-emerald-500' },
+                { id: 'matches', label: 'Matches', icon: '📅', color: 'from-orange-500 to-red-500' },
+                { id: 'stats', label: 'Stats', icon: '📊', color: 'from-blue-500 to-cyan-500' },
+                { id: 'about', label: 'About', icon: '⭐', color: 'from-yellow-500 to-orange-500' }
               ].map((item) => (
                 <motion.button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`relative px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${
+                  className={`relative px-4 py-2 rounded-xl text-sm font-bold transition-all duration-300 overflow-hidden ${
                     activeTab === item.id
-                      ? 'text-white bg-gradient-to-r from-purple-500/20 to-blue-500/20 shadow-lg border border-white/20'
-                      : 'text-white/70 hover:text-white hover:bg-white/10'
+                      ? 'text-white shadow-2xl border border-white/30'
+                      : 'text-white/70 hover:text-white border border-transparent'
                   }`}
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.05, y: -2 }}
                   whileTap={{ scale: 0.95 }}
+                  style={{
+                    background: activeTab === item.id 
+                      ? `linear-gradient(135deg, ${item.color.split(' ')[0].replace('from-', '').replace('-500', '')}40, ${item.color.split(' ')[2].replace('to-', '').replace('-500', '')}40)`
+                      : 'rgba(255, 255, 255, 0.05)',
+                    backdropFilter: 'blur(10px)',
+                  }}
                 >
-                  <span className="flex items-center gap-2">
+                  {/* Animated background for active tab */}
+                  {activeTab === item.id && (
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r opacity-20"
+                      style={{
+                        backgroundImage: `linear-gradient(135deg, ${item.color})`
+                      }}
+                      animate={{
+                        background: [
+                          `linear-gradient(135deg, ${item.color})`,
+                          `linear-gradient(225deg, ${item.color})`,
+                          `linear-gradient(135deg, ${item.color})`,
+                        ]
+                      }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                  )}
+                  
+                  <span className="relative z-10 flex items-center gap-2">
                     <motion.span
                       animate={{ 
                         rotate: activeTab === item.id ? [0, 360] : 0,
-                        scale: activeTab === item.id ? [1, 1.2, 1] : 1
+                        scale: activeTab === item.id ? [1, 1.3, 1] : [1, 1.1, 1]
                       }}
                       transition={{ 
-                        duration: activeTab === item.id ? 0.6 : 0.3,
-                        ease: "easeInOut"
+                        duration: activeTab === item.id ? 0.8 : 2,
+                        ease: "easeInOut",
+                        repeat: activeTab === item.id ? Infinity : 0
                       }}
-                      className="text-lg"
+                      className="text-base"
                     >
                       {item.icon}
                     </motion.span>
-                    <span>{item.label}</span>
+                    <span className="font-medium">{item.label}</span>
                   </span>
                   
-                  {/* Active indicator */}
+                  {/* Active indicator with enhanced animation */}
                   {activeTab === item.id && (
-                    <motion.div
-                      className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-white rounded-full"
-                      layoutId="activeNavIndicator"
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                    />
+                    <>
+                      <motion.div
+                        className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-gradient-to-r rounded-full"
+                        style={{
+                          backgroundImage: `linear-gradient(90deg, ${item.color})`
+                        }}
+                        layoutId="activeNavIndicator"
+                        transition={{ type: "spring", bounce: 0.3, duration: 0.8 }}
+                      />
+                      <motion.div
+                        className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white/20 rounded-full blur-md"
+                        animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      />
+                    </>
                   )}
                 </motion.button>
               ))}
             </div>
             
-            {/* Action Buttons */}
-            <div className="flex items-center gap-2">
+            {/* Enhanced Action Buttons */}
+            <div className="flex items-center gap-3">
               {/* Search Button */}
               <motion.button 
-                className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
-                whileHover={{ scale: 1.1 }}
+                className="relative p-3 text-white/70 hover:text-white rounded-xl transition-all duration-300 overflow-hidden group"
+                whileHover={{ scale: 1.1, rotate: 5 }}
                 whileTap={{ scale: 0.95 }}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  backdropFilter: 'blur(10px)',
+                }}
               >
-                <span className="text-lg">🔍</span>
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                />
+                <motion.span
+                  animate={{ rotate: [0, -10, 10, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  className="relative z-10 text-lg"
+                >
+                  🔍
+                </motion.span>
               </motion.button>
               
               {/* Favorite Button */}
               <motion.button 
-                className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+                className="relative p-3 text-white/70 hover:text-white rounded-xl transition-all duration-300 overflow-hidden group"
+                whileHover={{ scale: 1.1, rotate: -5 }}
+                whileTap={{ scale: 0.95 }}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  backdropFilter: 'blur(10px)',
+                }}
               >
-                <span className="text-lg">💝</span>
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-pink-500/20 to-red-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                />
+                <motion.span
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  className="relative z-10 text-lg"
+                >
+                  💝
+                </motion.span>
               </motion.button>
               
               {/* Mobile Menu Button */}
               <motion.button 
-                className="md:hidden p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
+                className="md:hidden relative p-3 text-white/70 hover:text-white rounded-xl transition-all duration-300 overflow-hidden group"
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
-                whileHover={{ scale: 1.1 }}
+                whileHover={{ scale: 1.1, rotate: 10 }}
                 whileTap={{ scale: 0.95 }}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  backdropFilter: 'blur(10px)',
+                }}
               >
-                <span className="text-xl">
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                />
+                <motion.span
+                  animate={{ 
+                    rotate: showMobileMenu ? [0, 360] : [0, -10, 10, 0],
+                    scale: showMobileMenu ? [1, 1.3, 1] : [1, 1.1, 1]
+                  }}
+                  transition={{ 
+                    duration: showMobileMenu ? 0.6 : 3,
+                    ease: "easeInOut",
+                    repeat: showMobileMenu ? 0 : Infinity
+                  }}
+                  className="relative z-10 text-xl"
+                >
                   {showMobileMenu ? '✨' : '📱'}
-                </span>
+                </motion.span>
               </motion.button>
             </div>
           </div>
@@ -1079,77 +1277,122 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       </motion.header>
 
       {/* Enhanced Hero Section with Dynamic Content */}
-      <section className="relative z-10 py-20" ref={containerRef}>
-        {/* Social Proof Bar */}
+      <section className="relative z-10 py-24" ref={containerRef}>
+        {/* Enhanced Social Proof Bar */}
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="mb-8"
+          transition={{ duration: 0.8, delay: 0.2, type: "spring" }}
+          className="mb-12"
         >
           <div className="container mx-auto px-4">
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
-              <div className="flex flex-wrap items-center justify-center gap-8 text-white">
-                <div className="flex items-center gap-2">
-                  <motion.span
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                    className="text-lg"
-                  >
-                    👥
-                  </motion.span>
-                  <span className="font-bold">2.3M</span>
-                  <span className="text-sm opacity-80">Followers</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <motion.span
+            <motion.div
+              className="bg-white/10 backdrop-blur-xl rounded-3xl p-6 border border-white/20 shadow-2xl"
+              whileHover={{ scale: 1.02, y: -5 }}
+              style={{
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+              }}
+            >
+              <div className="flex flex-wrap items-center justify-center gap-10 text-white">
+                <motion.div 
+                  className="flex items-center gap-3"
+                  whileHover={{ scale: 1.1 }}
+                >
+                  <motion.div
                     animate={{ 
                       scale: [1, 1.2, 1],
                       rotate: [0, -5, 5, 0]
-                    }}
-                    transition={{ 
-                      duration: 2.8, 
-                      repeat: Infinity, 
-                      ease: "easeInOut" 
-                    }}
-                    className="text-lg"
-                  >
-                    📈
-                  </motion.span>
-                  <span className="font-bold">85%</span>
-                  <span className="text-sm opacity-80">Win Rate</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <motion.span
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                    className="text-lg"
-                  >
-                    🏆
-                  </motion.span>
-                  <span className="font-bold">3</span>
-                  <span className="text-sm opacity-80">Championships</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <motion.span
-                    animate={{ 
-                      scale: [1, 1.1, 1],
-                      rotate: [0, 5, -5, 0]
                     }}
                     transition={{ 
                       duration: 3, 
                       repeat: Infinity, 
                       ease: "easeInOut" 
                     }}
-                    className="text-lg"
+                    className="text-2xl"
+                  >
+                    👥
+                  </motion.div>
+                  <div>
+                    <div className="font-black text-2xl">2.3M</div>
+                    <div className="text-white/70 text-sm font-medium">Followers</div>
+                  </div>
+                </motion.div>
+                
+                <motion.div 
+                  className="flex items-center gap-3"
+                  whileHover={{ scale: 1.1 }}
+                >
+                  <motion.div
+                    animate={{ 
+                      scale: [1, 1.3, 1],
+                      rotate: [0, 10, -10, 0]
+                    }}
+                    transition={{ 
+                      duration: 2.8, 
+                      repeat: Infinity, 
+                      ease: "easeInOut" 
+                    }}
+                    className="text-2xl"
+                  >
+                    📈
+                  </motion.div>
+                  <div>
+                    <div className="font-black text-2xl">85%</div>
+                    <div className="text-white/70 text-sm font-medium">Win Rate</div>
+                  </div>
+                </motion.div>
+                
+                <motion.div 
+                  className="flex items-center gap-3"
+                  whileHover={{ scale: 1.1 }}
+                >
+                  <motion.div
+                    animate={{ 
+                      scale: [1, 1.4, 1],
+                      rotate: [0, -15, 15, 0]
+                    }}
+                    transition={{ 
+                      duration: 3.2, 
+                      repeat: Infinity, 
+                      ease: "easeInOut" 
+                    }}
+                    className="text-2xl"
+                  >
+                    🏆
+                  </motion.div>
+                  <div>
+                    <div className="font-black text-2xl">3</div>
+                    <div className="text-white/70 text-sm font-medium">Championships</div>
+                  </div>
+                </motion.div>
+                
+                <motion.div 
+                  className="flex items-center gap-3"
+                  whileHover={{ scale: 1.1 }}
+                >
+                  <motion.div
+                    animate={{ 
+                      scale: [1, 1.2, 1],
+                      rotate: [0, 20, -20, 0]
+                    }}
+                    transition={{ 
+                      duration: 2.5, 
+                      repeat: Infinity, 
+                      ease: "easeInOut" 
+                    }}
+                    className="text-2xl"
                   >
                     ⚡
-                  </motion.span>
-                  <span className="font-bold">156K</span>
-                  <span className="text-sm opacity-80">Talking About</span>
-                </div>
+                  </motion.div>
+                  <div>
+                    <div className="font-black text-2xl">156K</div>
+                    <div className="text-white/70 text-sm font-medium">Talking About</div>
+                  </div>
+                </motion.div>
               </div>
-            </div>
+            </motion.div>
           </div>
         </motion.div>
 
