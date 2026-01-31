@@ -138,42 +138,44 @@ export default function WPLPlayersManagementPage() {
       let totalWickets = 0;
       let inningsCount = 0;
       let lastMatchDate = null;
+      const processedMatches = new Set<string>();
 
       // Process each scorecard
       for (const scorecard of scorecards) {
-        if (!scorecard.scorecard) continue;
+        if (!scorecard.innings) continue;
         
-        // Check if player is in batting scorecard
-        if (scorecard.scorecard.batting) {
-          for (const team of Object.keys(scorecard.scorecard.batting)) {
-            const battingTeam = scorecard.scorecard.batting[team];
-            if (battingTeam.players) {
-              for (const player of battingTeam.players) {
-                if (player.name && player.name.toLowerCase().includes(playerName.toLowerCase())) {
-                  totalMatches++;
-                  totalRuns += player.runs || 0;
-                  if (player.runs && player.runs > 0) {
-                    inningsCount++;
-                  }
-                  lastMatchDate = scorecard.date || lastMatchDate;
+        const matchId = scorecard.id;
+        let playerFoundInMatch = false;
+        
+        // Process each innings
+        for (const innings of scorecard.innings) {
+          // Check if player is in batting scorecard
+          if (innings.batting) {
+            for (const player of innings.batting) {
+              if (player.name && player.name.toLowerCase().trim() === playerName.toLowerCase().trim()) {
+                totalRuns += player.runs || 0;
+                if (player.runs && player.runs > 0) {
+                  inningsCount++;
                 }
+                if (!playerFoundInMatch) {
+                  totalMatches++;
+                  playerFoundInMatch = true;
+                }
+                lastMatchDate = scorecard.matchInfo?.date || lastMatchDate;
               }
             }
           }
-        }
 
-        // Check if player is in bowling scorecard
-        if (scorecard.scorecard.bowling) {
-          for (const team of Object.keys(scorecard.scorecard.bowling)) {
-            const bowlingTeam = scorecard.scorecard.bowling[team];
-            if (bowlingTeam.players) {
-              for (const player of bowlingTeam.players) {
-                if (player.name && player.name.toLowerCase().includes(playerName.toLowerCase())) {
-                  totalWickets += player.wickets || 0;
-                  if (!lastMatchDate) {
-                    lastMatchDate = scorecard.date || lastMatchDate;
-                  }
+          // Check if player is in bowling scorecard
+          if (innings.bowling) {
+            for (const player of innings.bowling) {
+              if (player.name && player.name.toLowerCase().trim() === playerName.toLowerCase().trim()) {
+                totalWickets += player.wickets || 0;
+                if (!playerFoundInMatch) {
+                  totalMatches++;
+                  playerFoundInMatch = true;
                 }
+                lastMatchDate = scorecard.matchInfo?.date || lastMatchDate;
               }
             }
           }
