@@ -878,99 +878,221 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
               </motion.div>
             </div>
 
-            {/* Enhanced Team Name with Maximum Visibility */}
-            <motion.h1
-              className="text-7xl md:text-8xl font-black mb-6 tracking-tight leading-none"
-              initial={{ opacity: 0, y: 50, scale: 0.8 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              style={{ 
-                color: WPLColors.textPrimary,
-                textShadow: `
-                  0 0 20px ${teamColors.primary}80,
-                  0 0 40px ${teamColors.primary}60,
-                  0 0 60px ${teamColors.primary}40,
-                  2px 2px 4px rgba(0,0,0,0.8),
-                  4px 4px 8px rgba(0,0,0,0.6)
-                `,
-                background: `linear-gradient(135deg, ${WPLColors.textPrimary}, ${teamColors.primary}, ${WPLColors.accent})`,
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.8))'
-              }}
-              whileHover={{ 
-                scale: 1.05,
-                textShadow: `
-                  0 0 30px ${teamColors.primary},
-                  0 0 60px ${teamColors.primary}80,
-                  0 0 90px ${teamColors.primary}60,
-                  4px 4px 8px rgba(0,0,0,0.9),
-                  8px 8px 16px rgba(0,0,0,0.7)
-                `
-              }}
-            >
-              <motion.span
-                className="block"
-                initial={{ opacity: 0, x: -100 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-              >
-                {team.name}
-              </motion.span>
-            </motion.h1>
-
-            {/* Enhanced Subtitle with Icons */}
+            {/* Modern Enhanced Header with Professional Typography */}
             <motion.div
-              className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12"
-              initial={{ opacity: 0, y: 30 }}
+              className="relative z-10 text-center mb-12"
+              initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
+              transition={{ duration: 1, delay: 0.2 }}
             >
+              {/* Team Badge/Logo Container */}
               <motion.div
-                className="flex items-center gap-3 px-6 py-3 rounded-full"
-                style={{
-                  ...getWPLGlassmorphism('primary', 20),
-                  border: `1px solid ${WPLColors.primaryRGBA[40]}`,
-                }}
-                whileHover={{ 
-                  scale: 1.05,
-                  boxShadow: `0 10px 30px ${WPLColors.primaryRGBA[40]}`,
-                }}
+                className="relative inline-block mb-8"
+                initial={{ scale: 0, rotate: -180 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ duration: 0.8, delay: 0.3, type: "spring" }}
+                whileHover={{ scale: 1.1, rotate: 5 }}
               >
-                <motion.div
-                  animate={{ rotate: [0, 360] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                >
-                  <Crown className="w-5 h-5 text-yellow-400" />
-                </motion.div>
-                <span className="font-bold text-lg" style={{
-                  color: WPLColors.textPrimary,
-                  textShadow: `0 0 10px ${WPLColors.primaryRGBA[60]}`
-                }}>{team.shortName}</span>
+                <div className="relative">
+                  {/* Animated Ring */}
+                  <motion.div
+                    className="absolute inset-0 rounded-full"
+                    style={{
+                      background: `conic-gradient(from 0deg, ${teamColors.primary}, ${teamColors.secondary}, ${WPLColors.accent}, ${teamColors.primary})`,
+                    }}
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                  />
+                  <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-gray-900 to-gray-800 p-1">
+                    <div className="w-full h-full rounded-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+                      {logoUrl ? (
+                        <Image
+                          src={logoUrl}
+                          alt={`${team.name} Logo`}
+                          width={120}
+                          height={120}
+                          className="w-24 h-24 md:w-32 md:h-32 object-contain filter drop-shadow-2xl"
+                          style={{
+                            filter: `drop-shadow(0 0 20px ${teamColors.primary}80)`,
+                          }}
+                        />
+                      ) : (
+                        <motion.div
+                          className="text-6xl md:text-7xl font-black"
+                          style={{
+                            background: `linear-gradient(135deg, ${teamColors.primary}, ${teamColors.secondary})`,
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text',
+                          }}
+                        >
+                          {team.shortName?.charAt(0) || 'T'}
+                        </motion.div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </motion.div>
 
+              {/* Enhanced Team Name with Modern Typography */}
               <motion.div
-                className="flex items-center gap-3 px-6 py-3 rounded-full"
-                style={{
-                  ...getWPLGlassmorphism('pink', 20),
-                  border: `1px solid ${teamColors.secondary}60`,
-                }}
-                whileHover={{ 
-                  scale: 1.05,
-                  boxShadow: `0 10px 30px ${teamColors.secondary}40`,
-                }}
+                className="space-y-2"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.5 }}
               >
-                <Flame className="w-5 h-5 text-orange-400" />
-                <span className="font-bold text-lg" style={{
-                  color: WPLColors.textPrimary,
-                  textShadow: `0 0 10px ${WPLColors.pinkRGBA[60]}`
-                }}>Women's Premier League</span>
-                <motion.div
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                <h1 
+                  className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight leading-none"
+                  style={{
+                    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                    color: WPLColors.textPrimary,
+                    textShadow: `
+                      0 0 20px rgba(255, 255, 255, 0.5),
+                      0 0 40px ${teamColors.primary}60,
+                      0 0 60px ${teamColors.primary}40,
+                      0 2px 4px rgba(0, 0, 0, 0.8),
+                      0 4px 8px rgba(0, 0, 0, 0.6),
+                      0 8px 16px rgba(0, 0, 0, 0.4)
+                    `,
+                    background: `linear-gradient(135deg, 
+                      ${WPLColors.textPrimary} 0%, 
+                      ${teamColors.primary} 30%, 
+                      ${WPLColors.accent} 60%, 
+                      ${WPLColors.textPrimary} 100%
+                    )`,
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    filter: 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.8))',
+                    letterSpacing: '-0.02em',
+                    fontWeight: 900,
+                  }}
+                  whileHover={{ 
+                    scale: 1.02,
+                    textShadow: `
+                      0 0 30px rgba(255, 255, 255, 0.7),
+                      0 0 60px ${teamColors.primary}80,
+                      0 0 90px ${teamColors.primary}60,
+                      0 4px 8px rgba(0, 0, 0, 0.9),
+                      0 8px 16px rgba(0, 0, 0, 0.7),
+                      0 16px 32px rgba(0, 0, 0, 0.5)
+                    `,
+                  }}
                 >
-                  <Trophy className="w-5 h-5 text-yellow-400" />
+                  <motion.span
+                    className="block"
+                    initial={{ opacity: 0, x: -50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: 0.6 }}
+                  >
+                    {team.name}
+                  </motion.span>
+                </h1>
+
+                {/* Team Short Name with Enhanced Visibility */}
+                <motion.div
+                  className="text-2xl md:text-3xl lg:text-4xl font-bold"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.7 }}
+                  style={{
+                    fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                    color: WPLColors.textSecondary,
+                    textShadow: `
+                      0 0 10px ${teamColors.secondary}60,
+                      0 0 20px ${teamColors.secondary}40,
+                      0 2px 4px rgba(0, 0, 0, 0.8),
+                      0 4px 8px rgba(0, 0, 0, 0.6)
+                    `,
+                    background: `linear-gradient(135deg, 
+                      ${WPLColors.textSecondary} 0%, 
+                      ${teamColors.secondary} 50%, 
+                      ${WPLColors.textSecondary} 100%
+                    )`,
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                    filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.8))',
+                    letterSpacing: '0.02em',
+                  }}
+                  animate={{ opacity: [0.8, 1, 0.8] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  {team.shortName}
+                </motion.div>
+              </motion.div>
+
+              {/* Modern Status Badges */}
+              <motion.div
+                className="flex flex-wrap justify-center gap-4 mt-8"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.8 }}
+              >
+                <motion.div
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full border-2"
+                  style={{
+                    ...getWPLGlassmorphism('primary', 20),
+                    borderColor: WPLColors.primaryRGBA[60],
+                    background: `linear-gradient(135deg, ${WPLColors.primaryRGBA[20]}, ${WPLColors.primaryRGBA[10]})`,
+                  }}
+                  whileHover={{ 
+                    scale: 1.05,
+                    boxShadow: `0 10px 30px ${WPLColors.primaryRGBA[40]}`,
+                  }}
+                >
+                  <motion.div
+                    animate={{ rotate: [0, 360] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Crown className="w-5 h-5" style={{ color: WPLColors.accent }} />
+                  </motion.div>
+                  <span 
+                    className="font-bold text-lg"
+                    style={{
+                      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                      color: WPLColors.textPrimary,
+                      textShadow: `0 0 10px ${WPLColors.primaryRGBA[60]}`
+                    }}
+                  >
+                    {team.shortName}
+                  </span>
+                </motion.div>
+
+                <motion.div
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full border-2"
+                  style={{
+                    ...getWPLGlassmorphism('secondary', 20),
+                    borderColor: WPLColors.secondaryRGBA[60],
+                    background: `linear-gradient(135deg, ${WPLColors.secondaryRGBA[20]}, ${WPLColors.secondaryRGBA[10]})`,
+                  }}
+                  whileHover={{ 
+                    scale: 1.05,
+                    boxShadow: `0 10px 30px ${WPLColors.secondaryRGBA[40]}`,
+                  }}
+                >
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <Flame className="w-5 h-5" style={{ color: WPLColors.warning }} />
+                  </motion.div>
+                  <span 
+                    className="font-bold text-lg"
+                    style={{
+                      fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                      color: WPLColors.textPrimary,
+                      textShadow: `0 0 10px ${WPLColors.secondaryRGBA[60]}`
+                    }}
+                  >
+                    Women's Premier League
+                  </span>
+                  <motion.div
+                    animate={{ rotate: [0, -10, 10, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <Trophy className="w-5 h-5" style={{ color: WPLColors.accent }} />
+                  </motion.div>
                 </motion.div>
               </motion.div>
             </motion.div>
