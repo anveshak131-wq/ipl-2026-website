@@ -1038,6 +1038,12 @@ export default function WPLPlayersManagementPage() {
                       className="px-6 py-3 text-left font-semibold"
                       style={{ color: WPLColors.textPrimary }}
                     >
+                      Nationality
+                    </th>
+                    <th
+                      className="px-6 py-3 text-left font-semibold"
+                      style={{ color: WPLColors.textPrimary }}
+                    >
                       Captain
                     </th>
                     <th
@@ -1097,6 +1103,11 @@ export default function WPLPlayersManagementPage() {
                               {currentTeam?.name || "Unassigned"}
                             </span>
                           )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span style={{ color: WPLColors.textSecondary }}>
+                            {getNationalityFlag(player.nationality || '')} {player.nationality || '-'}
+                          </span>
                         </td>
                         <td className="px-6 py-4">
                           {isEditing ? (
