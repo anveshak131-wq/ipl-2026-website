@@ -24,6 +24,9 @@ export default function WPLPlayersManagementPage() {
   const [editedTeamId, setEditedTeamId] = useState("");
   const [editedIsCaptain, setEditedIsCaptain] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showDuplicates, setShowDuplicates] = useState(false);
+  const [potentialDuplicates, setPotentialDuplicates] = useState<Array<{players: Player[], reason: string}>>([]);
+  const [useDeduplicatedView, setUseDeduplicatedView] = useState(false);
   const [newPlayer, setNewPlayer] = useState({
     name: "",
     role: "Batter",
@@ -42,6 +45,90 @@ export default function WPLPlayersManagementPage() {
     if (str.startsWith('Team ')) str = str.replace('Team ', '');
     if (str.toLowerCase().startsWith('team')) str = str.replace(/^team/i, '');
     return str;
+  };
+
+  // Deduplicate players based on name, team, and role to handle API duplicates
+  const deduplicatePlayers = (playersList: Player[]): Player[] => {
+    const seen = new Set<string>();
+    const uniquePlayers: Player[] = [];
+    
+    for (const player of playersList) {
+      // Create a unique key based on player name, team, and role
+      const playerKey = `${(player.name || '').toLowerCase().trim()}-${normalizeTeamId(player.teamId)}-${(player.role || '').toLowerCase().trim()}`;
+      
+      if (!seen.has(playerKey)) {
+        seen.add(playerKey);
+        uniquePlayers.push(player);
+      }
+    }
+    
+    return uniquePlayers;
+  };
+
+  // Find potential duplicates for admin review (without auto-deleting)
+  const findPotentialDuplicates = (playersList: Player[]): Array<{players: Player[], reason: string}> => {
+    const groups: { [key: string]: Player[] } = {};
+    
+    // Group players by similar criteria
+    for (const player of playersList) {
+      // Group by name and team (same player in same team)
+      const nameTeamKey = `${(player.name || '').toLowerCase().trim()}-${normalizeTeamId(player.teamId)}`;
+      if (!groups[nameTeamKey]) groups[nameTeamKey] = [];
+      groups[nameTeamKey].push(player);
+    }
+    
+    // Find groups with duplicates
+    const duplicates = Object.entries(groups)
+      .filter(([key, players]) => players.length > 1)
+      .map(([key, players]) => ({
+        players,
+        reason: `Same name "${players[0].name}" in team "${teams.find(t => t.id === players[0].teamId)?.name || 'Unknown'}"`
+      }));
+    
+    return duplicates;
+  };
+
+  // Merge duplicate players (keep the one with most complete data)
+  const mergeDuplicatePlayers = (duplicateGroup: Player[]): Player => {
+    // Sort by completeness of data (more fields = higher priority)
+    const sortedPlayers = duplicateGroup.sort((a, b) => {
+      const aScore = [
+        a.name ? 1 : 0,
+        a.role ? 1 : 0,
+        a.age ? 1 : 0,
+        a.nationality ? 1 : 0,
+        a.jerseyNumber ? 1 : 0,
+        a.battingStyle ? 1 : 0,
+        a.bowlingStyle ? 1 : 0
+      ].reduce((sum, val) => sum + val, 0);
+      
+      const bScore = [
+        b.name ? 1 : 0,
+        b.role ? 1 : 0,
+        b.age ? 1 : 0,
+        b.nationality ? 1 : 0,
+        b.jerseyNumber ? 1 : 0,
+        b.battingStyle ? 1 : 0,
+        b.bowlingStyle ? 1 : 0
+      ].reduce((sum, val) => sum + val, 0);
+      
+      return bScore - aScore;
+    });
+    
+    // Merge data from all duplicates, prioritizing the most complete one
+    const merged: Player = { ...sortedPlayers[0] };
+    
+    // Merge non-null values from other duplicates
+    for (const player of sortedPlayers.slice(1)) {
+      if (player.age && !merged.age) merged.age = player.age;
+      if (player.nationality && !merged.nationality) merged.nationality = player.nationality;
+      if (player.jerseyNumber && !merged.jerseyNumber) merged.jerseyNumber = player.jerseyNumber;
+      if (player.battingStyle && !merged.battingStyle) merged.battingStyle = player.battingStyle;
+      if (player.bowlingStyle && !merged.bowlingStyle) merged.bowlingStyle = player.bowlingStyle;
+      if (player.isCaptain && !merged.isCaptain) merged.isCaptain = player.isCaptain;
+    }
+    
+    return merged;
   };
 
   // Check authentication
@@ -70,6 +157,11 @@ export default function WPLPlayersManagementPage() {
           teamId: normalizeTeamId(p.teamId),
           name: p.name || "Unknown",
         }));
+        
+        // Detect potential duplicates
+        const duplicates = findPotentialDuplicates(normalizedPlayers);
+        setPotentialDuplicates(duplicates);
+        
         setPlayers(normalizedPlayers);
 
         // Deduplicate teams by ID and normalize ids to strings
@@ -238,15 +330,24 @@ export default function WPLPlayersManagementPage() {
     }
   };
 
-  const filteredPlayers = players.filter((p) => {
-    const matchesSearch = (p.name || "")
-      .toLowerCase()
-      .includes((searchTerm || "").toLowerCase());
-    const matchesTeam =
-      !selectedTeam ||
-      String(p.teamId || "").trim() === String(selectedTeam || "").trim();
-    return matchesSearch && matchesTeam;
-  });
+  const filteredPlayers = (() => {
+    let playersToFilter = players;
+    
+    // Apply deduplication if enabled
+    if (useDeduplicatedView) {
+      playersToFilter = deduplicatePlayers(players);
+    }
+    
+    return playersToFilter.filter((p) => {
+      const matchesSearch = (p.name || "")
+        .toLowerCase()
+        .includes((searchTerm || "").toLowerCase());
+      const matchesTeam =
+        !selectedTeam ||
+        String(p.teamId || "").trim() === String(selectedTeam || "").trim();
+      return matchesSearch && matchesTeam;
+    });
+  })();
 
   const bgStyle = {
     background: `linear-gradient(to bottom, ${WPLColors.base}, ${WPLColors.gradientStart}66, ${WPLColors.gradientMid}33, ${WPLColors.base})`,
@@ -294,6 +395,100 @@ export default function WPLPlayersManagementPage() {
               Edit player team assignments and captain status
             </p>
           </div>
+
+          {/* Duplicate Management Alert */}
+          {potentialDuplicates.length > 0 && (
+            <div className="mb-6 p-4 rounded-lg border" style={{
+              background: 'rgba(255, 193, 7, 0.1)',
+              borderColor: 'rgba(255, 193, 7, 0.3)',
+            }}>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Users className="w-5 h-5" style={{ color: '#FFC107' }} />
+                  <span className="text-white font-medium">
+                    {potentialDuplicates.length} potential duplicate group{potentialDuplicates.length > 1 ? 's' : ''} found
+                  </span>
+                </div>
+                <button
+                  onClick={() => setShowDuplicates(!showDuplicates)}
+                  className="px-3 py-1 rounded text-sm font-medium transition-colors"
+                  style={{
+                    background: 'rgba(255, 193, 7, 0.2)',
+                    color: '#FFC107',
+                    border: '1px solid rgba(255, 193, 7, 0.3)',
+                  }}
+                >
+                  {showDuplicates ? 'Hide' : 'Show'} Details
+                </button>
+              </div>
+              
+              {showDuplicates && (
+                <div className="space-y-3 mb-4">
+                  {potentialDuplicates.map((dup, index) => (
+                    <div key={index} className="p-3 rounded border" style={{
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      borderColor: 'rgba(255, 255, 255, 0.1)',
+                    }}>
+                      <div className="text-white text-sm mb-2">{dup.reason}</div>
+                      <div className="flex flex-wrap gap-2">
+                        {dup.players.map((player, pIndex) => (
+                          <div key={pIndex} className="px-2 py-1 rounded text-xs" style={{
+                            background: 'rgba(255, 255, 255, 0.1)',
+                            color: '#FFF',
+                          }}>
+                            ID: {player.id} {player.jerseyNumber && `(#${player.jerseyNumber})`}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={() => {
+                            const merged = mergeDuplicatePlayers(dup.players);
+                            // Remove all duplicates and add merged one
+                            setPlayers(prev => {
+                              const otherPlayers = prev.filter(p => 
+                                !dup.players.some(dp => dp.id === p.id)
+                              );
+                              return [...otherPlayers, merged];
+                            });
+                            // Remove from potential duplicates
+                            setPotentialDuplicates(prev => prev.filter((_, i) => i !== index));
+                          }}
+                          className="px-3 py-1 rounded text-xs font-medium bg-green-600 hover:bg-green-700 text-white transition-colors"
+                        >
+                          Merge All
+                        </button>
+                        <button
+                          onClick={() => {
+                            // Remove this duplicate group from the list
+                            setPotentialDuplicates(prev => prev.filter((_, i) => i !== index));
+                          }}
+                          className="px-3 py-1 rounded text-xs font-medium bg-gray-600 hover:bg-gray-700 text-white transition-colors"
+                        >
+                          Ignore
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              <div className="flex items-center gap-3">
+                <label className="flex items-center gap-2 text-white text-sm">
+                  <input
+                    type="checkbox"
+                    checked={useDeduplicatedView}
+                    onChange={(e) => setUseDeduplicatedView(e.target.checked)}
+                    className="rounded"
+                  />
+                  Hide duplicates in main view
+                </label>
+                <span className="text-white/60 text-xs">
+                  (Total: {players.length} → {deduplicatePlayers(players).length} unique)
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Search and Filter */}
           <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
