@@ -87,6 +87,33 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   const [showScorecard, setShowScorecard] = useState(false);
   const [allScorecards, setAllScorecards] = useState<any[]>([]);
   const [activeModalTab, setActiveModalTab] = useState<'scorecard' | 'playing11'>('scorecard');
+  
+  // Dynamic countdown timer state
+  const [timeLeft, setTimeLeft] = useState({
+    hours: 23,
+    minutes: 45,
+    seconds: 12
+  });
+
+  // Countdown timer effect
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        const totalSeconds = prev.hours * 3600 + prev.minutes * 60 + prev.seconds;
+        if (totalSeconds <= 0) return { hours: 0, minutes: 0, seconds: 0 };
+        
+        const newTotal = totalSeconds - 1;
+        return {
+          hours: Math.floor(newTotal / 3600),
+          minutes: Math.floor((newTotal % 3600) / 60),
+          seconds: newTotal % 60
+        };
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
   const [playerStats, setPlayerStats] = useState<{ [key: string]: any }>({});
 
   // Enhanced mouse tracking and animations
@@ -747,8 +774,94 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
         </div>
       </motion.header>
 
-      {/* Enhanced Hero Section with Mouse Tracking */}
+      {/* Enhanced Hero Section with Dynamic Content */}
       <section className="relative z-10 py-20" ref={containerRef}>
+        {/* Live Match Ticker */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="sticky top-0 z-50 mb-8"
+        >
+          <div className="container mx-auto px-4">
+            <div className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 rounded-full flex items-center gap-3 shadow-lg">
+              <motion.div
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <div className="w-2 h-2 bg-white rounded-full"></div>
+              </motion.div>
+              <span className="text-sm font-bold">LIVE</span>
+              <span className="text-sm">RCB-W vs MI-W - 45/2 (6.3 overs)</span>
+              <ChevronRight className="w-4 h-4" />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Next Match Countdown */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="mb-8"
+        >
+          <div className="container mx-auto px-4">
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl p-6 shadow-xl">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-bold mb-2">Next Match</h3>
+                  <p className="text-2xl font-black">RCB-W vs DC-W</p>
+                  <p className="text-sm opacity-90">Tomorrow, 7:30 PM • M. Chinnaswamy Stadium</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-black mb-2">
+                    {String(timeLeft.hours).padStart(2, '0')}:{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}
+                  </div>
+                  <div className="text-sm opacity-90">Hours : Minutes : Seconds</div>
+                  <button className="mt-3 bg-white text-blue-600 px-4 py-2 rounded-lg font-bold text-sm hover:bg-gray-100 transition-colors">
+                    Set Reminder
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Social Proof Bar */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="mb-8"
+        >
+          <div className="container mx-auto px-4">
+            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
+              <div className="flex flex-wrap items-center justify-center gap-8 text-white">
+                <div className="flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  <span className="font-bold">2.3M</span>
+                  <span className="text-sm opacity-80">Followers</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5" />
+                  <span className="font-bold">85%</span>
+                  <span className="text-sm opacity-80">Win Rate</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Trophy className="w-5 h-5" />
+                  <span className="font-bold">3</span>
+                  <span className="text-sm opacity-80">Championships</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Activity className="w-5 h-5" />
+                  <span className="font-bold">156K</span>
+                  <span className="text-sm opacity-80">Talking About</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Interactive mouse-following gradient */}
         <motion.div
           className="absolute w-96 h-96 rounded-full blur-3xl pointer-events-none"
@@ -993,6 +1106,35 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                     <Trophy className="w-5 h-5" style={{ color: WPLColors.accent }} />
                   </motion.div>
                 </motion.div>
+              </motion.div>
+
+              {/* Dynamic Team Stats Bar */}
+              <motion.div
+                className="mt-8"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.9 }}
+              >
+                <div className="bg-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/10">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-black text-white mb-1">#2</div>
+                      <div className="text-sm text-white/70">League Position</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-black text-green-400 mb-1">W3</div>
+                      <div className="text-sm text-white/70">Last 5 Games</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-black text-white mb-1">87%</div>
+                      <div className="text-sm text-white/70">Win Rate</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-black text-yellow-400 mb-1">+42</div>
+                      <div className="text-sm text-white/70">Net RR</div>
+                    </div>
+                  </div>
+                </div>
               </motion.div>
             </motion.div>
 
