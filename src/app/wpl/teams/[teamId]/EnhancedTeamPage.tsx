@@ -899,23 +899,37 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
             {/* Primary Navigation - Desktop */}
             <div className="hidden md:flex items-center gap-1">
               {[
-                { id: 'overview', label: 'Overview', icon: Activity },
-                { id: 'squad', label: 'Squad', icon: Users },
-                { id: 'matches', label: 'Matches', icon: Calendar },
-                { id: 'stats', label: 'Stats', icon: BarChart3 },
-                { id: 'about', label: 'About', icon: Star }
+                { id: 'overview', label: 'Overview', icon: '🎯' },
+                { id: 'squad', label: 'Squad', icon: '👥' },
+                { id: 'matches', label: 'Matches', icon: '📅' },
+                { id: 'stats', label: 'Stats', icon: '📊' },
+                { id: 'about', label: 'About', icon: '⭐' }
               ].map((item) => (
-                <button
+                <motion.button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                  className={`relative px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${
                     activeTab === item.id
-                      ? 'text-white bg-white/20 shadow-lg'
+                      ? 'text-white bg-gradient-to-r from-purple-500/20 to-blue-500/20 shadow-lg border border-white/20'
                       : 'text-white/70 hover:text-white hover:bg-white/10'
                   }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   <span className="flex items-center gap-2">
-                    <item.icon className="w-4 h-4" />
+                    <motion.span
+                      animate={{ 
+                        rotate: activeTab === item.id ? [0, 360] : 0,
+                        scale: activeTab === item.id ? [1, 1.2, 1] : 1
+                      }}
+                      transition={{ 
+                        duration: activeTab === item.id ? 0.6 : 0.3,
+                        ease: "easeInOut"
+                      }}
+                      className="text-lg"
+                    >
+                      {item.icon}
+                    </motion.span>
                     <span>{item.label}</span>
                   </span>
                   
@@ -927,21 +941,20 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                       transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                     />
                   )}
-                </button>
+                </motion.button>
               ))}
             </div>
             
             {/* Action Buttons */}
             <div className="flex items-center gap-2">
               {/* Search Button */}
-              <button className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200">
-                <Search className="w-4 h-4" />
-              </button>
-              
-              {/* Share Button */}
-              <button className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200">
-                <Share2 className="w-4 h-4" />
-              </button>
+              <motion.button 
+                className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <span className="text-lg">🔍</span>
+              </motion.button>
               
               {/* Favorite Button */}
               <motion.button 
@@ -949,16 +962,20 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
               >
-                <Heart className="w-4 h-4" />
+                <span className="text-lg">💝</span>
               </motion.button>
               
               {/* Mobile Menu Button */}
-              <button 
+              <motion.button 
                 className="md:hidden p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
               >
-                {showMobileMenu ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
+                <span className="text-xl">
+                  {showMobileMenu ? '✨' : '📱'}
+                </span>
+              </motion.button>
             </div>
           </div>
           
@@ -974,40 +991,62 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
               >
                 <div className="grid grid-cols-2 gap-2 pb-3">
                   {[
-                    { id: 'overview', label: 'Overview', icon: Activity },
-                    { id: 'squad', label: 'Squad', icon: Users },
-                    { id: 'matches', label: 'Matches', icon: Calendar },
-                    { id: 'stats', label: 'Stats', icon: BarChart3 },
-                    { id: 'about', label: 'About', icon: Star }
+                    { id: 'overview', label: 'Overview', icon: '🎯' },
+                    { id: 'squad', label: 'Squad', icon: '👥' },
+                    { id: 'matches', label: 'Matches', icon: '📅' },
+                    { id: 'stats', label: 'Stats', icon: '📊' },
+                    { id: 'about', label: 'About', icon: '⭐' }
                   ].map((item) => (
-                    <button
+                    <motion.button
                       key={item.id}
                       onClick={() => {
                         setActiveTab(item.id);
                         setShowMobileMenu(false);
                       }}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${
                         activeTab === item.id
-                          ? 'text-white bg-white/20'
+                          ? 'text-white bg-gradient-to-r from-purple-500/20 to-blue-500/20'
                           : 'text-white/70 hover:text-white hover:bg-white/10'
                       }`}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                     >
-                      <item.icon className="w-4 h-4" />
+                      <motion.span
+                        animate={{ 
+                          rotate: activeTab === item.id ? [0, 360] : 0,
+                          scale: activeTab === item.id ? [1, 1.2, 1] : 1
+                        }}
+                        transition={{ 
+                          duration: activeTab === item.id ? 0.6 : 0.3,
+                          ease: "easeInOut"
+                        }}
+                        className="text-base"
+                      >
+                        {item.icon}
+                      </motion.span>
                       <span>{item.label}</span>
-                    </button>
+                    </motion.button>
                   ))}
                 </div>
                 
                 {/* Mobile Quick Actions */}
                 <div className="flex gap-2 pt-2 border-t border-white/10">
-                  <button className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all">
-                    <Search className="w-4 h-4" />
+                  <motion.button 
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <span className="text-base">🔍</span>
                     Search
-                  </button>
-                  <button className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all">
-                    <Share2 className="w-4 h-4" />
+                  </motion.button>
+                  <motion.button 
+                    className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <span className="text-base">💝</span>
                     Share
-                  </button>
+                  </motion.button>
                 </div>
               </motion.div>
             )}
@@ -1052,22 +1091,60 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
               <div className="flex flex-wrap items-center justify-center gap-8 text-white">
                 <div className="flex items-center gap-2">
-                  <Users className="w-5 h-5" />
+                  <motion.span
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                    className="text-lg"
+                  >
+                    👥
+                  </motion.span>
                   <span className="font-bold">2.3M</span>
                   <span className="text-sm opacity-80">Followers</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5" />
+                  <motion.span
+                    animate={{ 
+                      scale: [1, 1.2, 1],
+                      rotate: [0, -5, 5, 0]
+                    }}
+                    transition={{ 
+                      duration: 2.8, 
+                      repeat: Infinity, 
+                      ease: "easeInOut" 
+                    }}
+                    className="text-lg"
+                  >
+                    📈
+                  </motion.span>
                   <span className="font-bold">85%</span>
                   <span className="text-sm opacity-80">Win Rate</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Trophy className="w-5 h-5" />
+                  <motion.span
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    className="text-lg"
+                  >
+                    🏆
+                  </motion.span>
                   <span className="font-bold">3</span>
                   <span className="text-sm opacity-80">Championships</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Activity className="w-5 h-5" />
+                  <motion.span
+                    animate={{ 
+                      scale: [1, 1.1, 1],
+                      rotate: [0, 5, -5, 0]
+                    }}
+                    transition={{ 
+                      duration: 3, 
+                      repeat: Infinity, 
+                      ease: "easeInOut" 
+                    }}
+                    className="text-lg"
+                  >
+                    ⚡
+                  </motion.span>
                   <span className="font-bold">156K</span>
                   <span className="text-sm opacity-80">Talking About</span>
                 </div>
@@ -2164,7 +2241,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                           }}
                           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                         >
-                          <Search className="w-5 h-5" />
+                          <span className="text-lg">🔍</span>
                         </motion.div>
                         <motion.input
                           type="text"
@@ -2221,7 +2298,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                         }}
                         transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                       >
-                        <Filter className="w-4 h-4" />
+                        <span className="text-lg">🎯</span>
                       </motion.div>
                       <span>
                         {filteredPlayers.length} {filteredPlayers.length === 1 ? 'player' : 'players'} found
@@ -2282,7 +2359,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                             whileHover={{ rotate: 360 }}
                             transition={{ duration: 0.8, ease: "easeInOut" }}
                           >
-                            <Users className="w-10 h-10 text-white" />
+                            <span className="text-3xl">👤</span>
                           </motion.div>
                           <div>
                             <motion.h3 
@@ -2308,7 +2385,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                                   animate={{ rotate: [0, -10, 10, 0] }}
                                   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                                 >
-                                  <Flag className="w-3 h-3" />
+                                  <span className="text-sm">🌍</span>
                                 </motion.div>
                                 {player.nationality}
                               </motion.div>
