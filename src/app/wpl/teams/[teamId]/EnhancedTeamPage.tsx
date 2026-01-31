@@ -1005,8 +1005,8 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                       </motion.div>
                       <motion.div 
                         className="text-4xl font-black text-white mb-2"
-                        initial={{ count: 0 }}
-                        animate={{ count: teamStats.matchesPlayed }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
                         transition={{ duration: 2, delay: 0.8 }}
                       >
                         {teamStats.matchesPlayed}
@@ -1147,8 +1147,8 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                       </motion.div>
                       <motion.div 
                         className="text-4xl font-black text-white mb-2"
-                        initial={{ count: 0 }}
-                        animate={{ count: teamStats.winPercentage }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
                         transition={{ duration: 2, delay: 1 }}
                       >
                         {teamStats.winPercentage}%
@@ -1382,44 +1382,180 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
               >
                   {/* Recent Matches - Moved to separate Matches tab */}
 
-                {/* Key Players */}
-                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
-                  <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                    <Star className="w-6 h-6" />
-                    Key Players
-                  </h2>
-                  <div className="grid md:grid-cols-3 gap-6">
-                    {players.slice(0, 3).map((player, index) => (
+                {/* Enhanced Key Players Panel */}
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="relative"
+                  style={{
+                    ...getWPLGlassmorphism('purple', 20),
+                    border: `1px solid ${teamColors.primary}30`,
+                    borderRadius: '1.5rem',
+                  }}
+                >
+                  {/* Animated background gradient */}
+                  <motion.div
+                    className="absolute inset-0 rounded-2xl opacity-30"
+                    style={{
+                      background: `linear-gradient(135deg, ${teamColors.primary}20, ${teamColors.secondary}20)`,
+                    }}
+                    animate={{
+                      background: [
+                        `linear-gradient(135deg, ${teamColors.primary}20, ${teamColors.secondary}20)`,
+                        `linear-gradient(225deg, ${teamColors.secondary}20, ${teamColors.primary}20)`,
+                        `linear-gradient(315deg, ${teamColors.primary}20, ${teamColors.secondary}20)`,
+                      ],
+                    }}
+                    transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+                  />
+                  
+                  <div className="relative z-10 p-8">
+                    <motion.div 
+                      className="flex items-center gap-3 mb-8"
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.3 }}
+                    >
                       <motion.div
-                        key={player.id}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.1 }}
-                        className="bg-white/5 rounded-xl p-6 border border-white/10 hover:bg-white/10 transition-colors"
+                        animate={{ 
+                          rotate: [0, 10, -10, 0],
+                          scale: [1, 1.1, 1]
+                        }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                       >
-                        <div className="flex items-center gap-4 mb-4">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                            <Users className="w-6 h-6 text-white" />
-                          </div>
-                          <div>
-                            <div className="text-white font-medium">{player.name}</div>
-                            <div className="text-white/60 text-sm">{player.role}</div>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4 text-center">
-                          <div>
-                            <div className="text-white font-bold">{player.stats?.runs || 0}</div>
-                            <div className="text-white/60 text-xs">Runs</div>
-                          </div>
-                          <div>
-                            <div className="text-white font-bold">{player.stats?.wickets || 0}</div>
-                            <div className="text-white/60 text-xs">Wickets</div>
-                          </div>
-                        </div>
+                        <Star className="w-8 h-8 text-yellow-400" />
                       </motion.div>
-                    ))}
+                      <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-400">
+                        Key Players
+                      </h2>
+                      <motion.div
+                        className="ml-auto"
+                        animate={{ opacity: [0.5, 1, 0.5] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      >
+                        <div className="w-2 h-2 bg-yellow-400 rounded-full" />
+                      </motion.div>
+                    </motion.div>
+                    
+                    <div className="grid md:grid-cols-3 gap-6">
+                      {players.slice(0, 3).map((player, index) => (
+                        <motion.div
+                          key={player.id}
+                          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          transition={{ delay: 0.4 + index * 0.1, duration: 0.6 }}
+                          whileHover={{ 
+                            scale: 1.05,
+                            rotateY: 5,
+                            z: 50,
+                            transition: { duration: 0.3 }
+                          }}
+                          whileTap={{ scale: 0.95 }}
+                          className="relative group overflow-hidden rounded-2xl"
+                          style={{
+                            ...getWPLGlassmorphism('pink', 20),
+                            border: `1px solid ${teamColors.secondary}40`,
+                          }}
+                        >
+                          {/* Hover background effect */}
+                          <motion.div
+                            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                            style={{
+                              background: `radial-gradient(circle at 50% 50%, ${teamColors.secondary}30, transparent 70%)`,
+                            }}
+                          />
+                          
+                          <div className="relative z-10 p-6">
+                            <div className="flex items-center gap-4 mb-6">
+                              <motion.div
+                                className="w-16 h-16 rounded-2xl flex items-center justify-center"
+                                style={{
+                                  background: `linear-gradient(135deg, ${teamColors.primary}, ${teamColors.secondary})`,
+                                }}
+                                whileHover={{ rotate: 360 }}
+                                transition={{ duration: 0.8, ease: "easeInOut" }}
+                              >
+                                <Users className="w-8 h-8 text-white" />
+                              </motion.div>
+                              <div>
+                                <motion.h3 
+                                  className="text-xl font-bold text-white mb-1"
+                                  whileHover={{ scale: 1.05 }}
+                                >
+                                  {player.name}
+                                </motion.h3>
+                                <motion.div 
+                                  className="text-white/70 text-sm font-medium"
+                                  animate={{ opacity: [0.7, 1, 0.7] }}
+                                  transition={{ duration: 3, repeat: Infinity, delay: index * 0.5 }}
+                                >
+                                  {player.role}
+                                </motion.div>
+                              </div>
+                            </div>
+                            
+                            {/* Enhanced Stats Grid */}
+                            <div className="grid grid-cols-2 gap-4">
+                              <motion.div
+                                className="text-center p-3 rounded-xl"
+                                style={{
+                                  background: `linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(147, 51, 234, 0.2))`,
+                                  border: `1px solid rgba(59, 130, 246, 0.3)`,
+                                }}
+                                whileHover={{ scale: 1.05, y: -2 }}
+                              >
+                                <motion.div
+                                  className="text-2xl font-black text-blue-400"
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  transition={{ duration: 1.5, delay: 0.6 + index * 0.1 }}
+                                >
+                                  {player.stats?.runs || 0}
+                                </motion.div>
+                                <div className="text-white/60 text-xs font-medium">Runs</div>
+                              </motion.div>
+                              
+                              <motion.div
+                                className="text-center p-3 rounded-xl"
+                                style={{
+                                  background: `linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(236, 72, 153, 0.2))`,
+                                  border: `1px solid rgba(16, 185, 129, 0.3)`,
+                                }}
+                                whileHover={{ scale: 1.05, y: -2 }}
+                              >
+                                <motion.div
+                                  className="text-2xl font-black text-green-400"
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  transition={{ duration: 1.5, delay: 0.7 + index * 0.1 }}
+                                >
+                                  {player.stats?.wickets || 0}
+                                </motion.div>
+                                <div className="text-white/60 text-xs font-medium">Wickets</div>
+                              </motion.div>
+                            </div>
+                            
+                            {/* Performance indicator */}
+                            <motion.div
+                              className="mt-4 h-1 bg-white/20 rounded-full overflow-hidden"
+                              initial={{ width: 0 }}
+                              animate={{ width: '100%' }}
+                              transition={{ delay: 0.8 + index * 0.1, duration: 0.5 }}
+                            >
+                              <motion.div
+                                className="h-full bg-gradient-to-r from-blue-400 to-green-400 rounded-full"
+                                initial={{ width: 0 }}
+                                animate={{ width: `${Math.min((player.stats?.runs || 0) / 5, 100)}%` }}
+                                transition={{ delay: 1 + index * 0.1, duration: 1, ease: "easeOut" }}
+                              />
+                            </motion.div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                </motion.div>
               </motion.div>
             )}
 
@@ -1432,53 +1568,219 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                 exit={{ opacity: 0, y: -20 }}
                 className="space-y-8"
               >
-                {/* Match Schedule */}
-                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
-                  <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                    <Calendar className="w-6 h-6" />
-                    Match Schedule
-                  </h2>
-                  <div className="space-y-4">
-                    {recentMatches.map((match, index) => (
+                {/* Enhanced Match Schedule Panel */}
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="relative"
+                  style={{
+                    ...getWPLGlassmorphism('blue', 25),
+                    border: `1px solid rgba(59, 130, 246, 0.3)`,
+                    borderRadius: '1.5rem',
+                  }}
+                >
+                  {/* Animated background gradient */}
+                  <motion.div
+                    className="absolute inset-0 rounded-2xl opacity-30"
+                    style={{
+                      background: `linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(147, 51, 234, 0.2))`,
+                    }}
+                    animate={{
+                      background: [
+                        `linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(147, 51, 234, 0.2))`,
+                        `linear-gradient(225deg, rgba(147, 51, 234, 0.2), rgba(59, 130, 246, 0.2))`,
+                        `linear-gradient(315deg, rgba(59, 130, 246, 0.2), rgba(147, 51, 234, 0.2))`,
+                      ],
+                    }}
+                    transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+                  />
+                  
+                  <div className="relative z-10 p-8">
+                    <motion.div 
+                      className="flex items-center gap-3 mb-8"
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.4 }}
+                    >
                       <motion.div
-                        key={match.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.1 }}
-                        className={`bg-white/5 rounded-xl p-4 border border-white/10 transition-all cursor-pointer hover:bg-white/10 ${
-                          hasScorecard(match) 
-                            ? 'border-green-500/30' 
-                            : 'border-white/10'
-                        }`}
-                        onClick={() => handleMatchClick(match)}
+                        animate={{ 
+                          rotate: [0, -10, 10, 0],
+                          scale: [1, 1.1, 1]
+                        }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className={`w-3 h-3 rounded-full ${
-                              match.result === 'win' ? 'bg-green-500' :
-                              match.result === 'loss' ? 'bg-red-500' : 'bg-yellow-500'
-                            }`} />
-                            <div>
-                              <div className="text-white font-medium">vs {match.opponent}</div>
-                              <div className="text-white/60 text-sm">{match.score}</div>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-white/60 text-sm">{match.date}</div>
-                            <div className="text-white/60 text-sm">{match.venue}</div>
-                            <div className={`text-xs mt-1 ${
-                              hasScorecard(match) 
-                                ? 'text-green-400' 
-                                : 'text-blue-400'
-                            }`}>
-                              {hasScorecard(match) ? '📊 Full Scorecard Available' : '📋 Match Details'}
-                            </div>
-                          </div>
-                        </div>
+                        <Calendar className="w-8 h-8 text-blue-400" />
                       </motion.div>
-                    ))}
+                      <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
+                        Match Schedule
+                      </h2>
+                      <motion.div
+                        className="ml-auto"
+                        animate={{ opacity: [0.5, 1, 0.5] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      >
+                        <div className="w-2 h-2 bg-blue-400 rounded-full" />
+                      </motion.div>
+                    </motion.div>
+                    
+                    <div className="space-y-4">
+                      {recentMatches.map((match, index) => (
+                        <motion.div
+                          key={match.id}
+                          initial={{ opacity: 0, x: -30 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.5 + index * 0.1, duration: 0.6 }}
+                          whileHover={{ 
+                            scale: 1.02,
+                            x: 10,
+                            transition: { duration: 0.3 }
+                          }}
+                          whileTap={{ scale: 0.98 }}
+                          className={`relative group overflow-hidden rounded-2xl cursor-pointer ${
+                            hasScorecard(match) 
+                              ? 'border-green-500/40' 
+                              : 'border-white/20'
+                          }`}
+                          style={{
+                            ...getWPLGlassmorphism('violet', 20),
+                            border: `1px solid ${hasScorecard(match) ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255, 255, 255, 0.2)'}`,
+                          }}
+                          onClick={() => handleMatchClick(match)}
+                        >
+                          {/* Hover background effect */}
+                          <motion.div
+                            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                            style={{
+                              background: `radial-gradient(circle at 50% 50%, ${hasScorecard(match) ? 'rgba(16, 185, 129, 0.3)' : 'rgba(147, 51, 234, 0.3)'}, transparent 70%)`,
+                            }}
+                          />
+                          
+                          {/* Scorecard indicator */}
+                          {hasScorecard(match) && (
+                            <motion.div
+                              className="absolute top-3 right-3"
+                              animate={{ 
+                                scale: [1, 1.2, 1],
+                                opacity: [0.8, 1, 0.8]
+                              }}
+                              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                            >
+                              <div className="w-3 h-3 bg-green-500 rounded-full" />
+                            </motion.div>
+                          )}
+                          
+                          <div className="relative z-10 p-6">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-6">
+                                {/* Match status indicator */}
+                                <motion.div
+                                  className={`w-4 h-4 rounded-full ${
+                                    match.result === 'win' ? 'bg-green-500' :
+                                    match.result === 'loss' ? 'bg-red-500' : 'bg-yellow-500'
+                                  }`}
+                                  animate={{ 
+                                    scale: [1, 1.3, 1],
+                                    opacity: [0.7, 1, 0.7]
+                                  }}
+                                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                />
+                                
+                                <div>
+                                  <motion.h3 
+                                    className="text-xl font-bold text-white mb-1"
+                                    whileHover={{ scale: 1.05 }}
+                                  >
+                                    vs {match.opponent}
+                                  </motion.h3>
+                                  <motion.div 
+                                    className="text-white/70 text-sm font-medium"
+                                    animate={{ opacity: [0.7, 1, 0.7] }}
+                                    transition={{ duration: 3, repeat: Infinity, delay: index * 0.3 }}
+                                  >
+                                    {match.score}
+                                  </motion.div>
+                                </div>
+                              </div>
+                              
+                              <div className="text-right">
+                                <motion.div 
+                                  className="text-white/60 text-sm font-medium mb-1"
+                                  animate={{ opacity: [0.7, 1, 0.7] }}
+                                  transition={{ duration: 3, repeat: Infinity, delay: index * 0.4 }}
+                                >
+                                  {match.date}
+                                </motion.div>
+                                <motion.div 
+                                  className="text-white/60 text-sm mb-2"
+                                  animate={{ opacity: [0.7, 1, 0.7] }}
+                                  transition={{ duration: 3, repeat: Infinity, delay: index * 0.5 }}
+                                >
+                                  {match.venue}
+                                </motion.div>
+                                
+                                {/* Scorecard indicator with animation */}
+                                <motion.div
+                                  className={`text-xs font-bold px-3 py-1 rounded-full inline-flex items-center gap-1 ${
+                                    hasScorecard(match) 
+                                      ? 'text-green-400 bg-green-400/20 border border-green-400/40' 
+                                      : 'text-blue-400 bg-blue-400/20 border border-blue-400/40'
+                                  }`}
+                                  whileHover={{ scale: 1.05 }}
+                                  animate={{ 
+                                    opacity: [0.8, 1, 0.8]
+                                  }}
+                                  transition={{ duration: 2, repeat: Infinity, delay: index * 0.6 }}
+                                >
+                                  {hasScorecard(match) ? (
+                                    <>
+                                      <motion.div
+                                        animate={{ rotate: [0, 360] }}
+                                        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                                      >
+                                        📊
+                                      </motion.div>
+                                      Full Scorecard Available
+                                    </>
+                                  ) : (
+                                    <>
+                                      <motion.div
+                                        animate={{ rotate: [0, -10, 10, 0] }}
+                                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                                      >
+                                        📋
+                                      </motion.div>
+                                      Match Details
+                                    </>
+                                  )}
+                                </motion.div>
+                              </div>
+                            </div>
+                            
+                            {/* Progress indicator */}
+                            <motion.div
+                              className="mt-4 h-0.5 bg-white/20 rounded-full overflow-hidden"
+                              initial={{ width: 0 }}
+                              animate={{ width: '100%' }}
+                              transition={{ delay: 0.8 + index * 0.1, duration: 0.5 }}
+                            >
+                              <motion.div
+                                className={`h-full rounded-full ${
+                                  hasScorecard(match) 
+                                    ? 'bg-gradient-to-r from-green-400 to-emerald-400'
+                                    : 'bg-gradient-to-r from-blue-400 to-purple-400'
+                                }`}
+                                initial={{ width: 0 }}
+                                animate={{ width: '100%' }}
+                                transition={{ delay: 1 + index * 0.1, duration: 1, ease: "easeOut" }}
+                              />
+                            </motion.div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                </motion.div>
 
                 {/* Full Scorecard & Playing 11 Features */}
                 <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
@@ -1540,76 +1842,310 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                 exit={{ opacity: 0, y: -20 }}
                 className="space-y-8"
               >
-                {/* Search and Filter */}
-                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-                  <div className="flex flex-col md:flex-row gap-4">
-                    <div className="flex-1 relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 w-5 h-5" />
-                      <input
-                        type="text"
-                        placeholder="Search players..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/60 focus:outline-none focus:border-white/40"
-                      />
-                    </div>
-                    <select
-                      value={selectedRole}
-                      onChange={(e) => setSelectedRole(e.target.value)}
-                      className="px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white focus:outline-none focus:border-white/40"
+                {/* Enhanced Search and Filter Panel */}
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="relative"
+                  style={{
+                    ...getWPLGlassmorphism('violet', 20),
+                    border: `1px solid rgba(16, 185, 129, 0.3)`,
+                    borderRadius: '1.5rem',
+                  }}
+                >
+                  {/* Animated background gradient */}
+                  <motion.div
+                    className="absolute inset-0 rounded-2xl opacity-30"
+                    style={{
+                      background: `linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(59, 130, 246, 0.2))`,
+                    }}
+                    animate={{
+                      background: [
+                        `linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(59, 130, 246, 0.2))`,
+                        `linear-gradient(225deg, rgba(59, 130, 246, 0.2), rgba(16, 185, 129, 0.2))`,
+                        `linear-gradient(315deg, rgba(16, 185, 129, 0.2), rgba(59, 130, 246, 0.2))`,
+                      ],
+                    }}
+                    transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+                  />
+                  
+                  <div className="relative z-10 p-6">
+                    <motion.div 
+                      className="flex flex-col md:flex-row gap-4"
+                      initial={{ y: 20, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: 0.3 }}
                     >
-                      <option value="all">All Roles</option>
-                      <option value="Batsman">Batsman</option>
-                      <option value="Bowler">Bowler</option>
-                      <option value="All-rounder">All-rounder</option>
-                      <option value="Wicket-keeper">Wicket-keeper</option>
-                    </select>
+                      {/* Enhanced Search Input */}
+                      <motion.div 
+                        className="flex-1 relative group"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <motion.div
+                          className="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/60"
+                          animate={{ 
+                            rotate: [0, -10, 10, 0],
+                            scale: [1, 1.1, 1]
+                          }}
+                          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                        >
+                          <Search className="w-5 h-5" />
+                        </motion.div>
+                        <motion.input
+                          type="text"
+                          placeholder="Search players..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-2xl text-white placeholder-white/60 focus:outline-none focus:border-green-400/50 focus:bg-white/15 transition-all duration-300"
+                          whileFocus={{ 
+                            scale: 1.02,
+                            borderColor: 'rgba(16, 185, 129, 0.5)'
+                          }}
+                        />
+                        {/* Search pulse effect */}
+                        <motion.div
+                          className="absolute inset-0 rounded-2xl border border-green-400/30 pointer-events-none"
+                          animate={{ 
+                            opacity: [0, 0.5, 0],
+                            scale: [1, 1.05, 1]
+                          }}
+                          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                        />
+                      </motion.div>
+                      
+                      {/* Enhanced Role Filter */}
+                      <motion.select
+                        value={selectedRole}
+                        onChange={(e) => setSelectedRole(e.target.value)}
+                        className="px-6 py-4 bg-white/10 border border-white/20 rounded-2xl text-white focus:outline-none focus:border-green-400/50 focus:bg-white/15 transition-all duration-300 cursor-pointer"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        initial={{ x: 20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 0.4 }}
+                      >
+                        <option value="all">All Roles</option>
+                        <option value="Batsman">Batsman</option>
+                        <option value="Bowler">Bowler</option>
+                        <option value="All-rounder">All-rounder</option>
+                        <option value="Wicket-keeper">Wicket-keeper</option>
+                      </motion.select>
+                    </motion.div>
+                    
+                    {/* Filter Results Indicator */}
+                    <motion.div
+                      className="mt-4 flex items-center gap-2 text-white/60 text-sm"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.5 }}
+                    >
+                      <motion.div
+                        animate={{ 
+                          scale: [1, 1.2, 1],
+                          opacity: [0.7, 1, 0.7]
+                        }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      >
+                        <Filter className="w-4 h-4" />
+                      </motion.div>
+                      <span>
+                        {filteredPlayers.length} {filteredPlayers.length === 1 ? 'player' : 'players'} found
+                        {selectedRole !== 'all' && ` • ${selectedRole}`}
+                        {searchQuery && ` • "${searchQuery}"`}
+                      </span>
+                    </motion.div>
                   </div>
-                </div>
+                </motion.div>
 
-                {/* Players Grid */}
+                {/* Enhanced Players Grid */}
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredPlayers.map((player, index) => (
                     <motion.div
                       key={player.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all hover:scale-105"
+                      initial={{ opacity: 0, scale: 0.8, y: 30 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      transition={{ delay: 0.6 + index * 0.05, duration: 0.6 }}
+                      whileHover={{ 
+                        scale: 1.05,
+                        rotateY: 5,
+                        z: 50,
+                        transition: { duration: 0.3 }
+                      }}
+                      whileTap={{ scale: 0.95 }}
+                      className="relative group overflow-hidden rounded-2xl"
+                      style={{
+                        ...getWPLGlassmorphism('orange', 25),
+                        border: `1px solid ${teamColors.secondary}40`,
+                      }}
                     >
-                      <div className="flex items-center gap-4 mb-4">
-                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                          <Users className="w-8 h-8 text-white" />
-                        </div>
-                        <div>
-                          <h3 className="text-xl font-bold text-white">{player.name}</h3>
-                          <p className="text-white/70">{player.role}</p>
-                          {player.nationality && (
-                            <p className="text-white/60 text-sm flex items-center gap-1">
-                              <Flag className="w-3 h-3" />
-                              {player.nationality}
-                            </p>
-                          )}
-                        </div>
-                      </div>
+                      {/* Hover background effect */}
+                      <motion.div
+                        className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                        style={{
+                          background: `radial-gradient(circle at 50% 50%, ${teamColors.secondary}30, transparent 70%)`,
+                        }}
+                      />
                       
-                      <div className="grid grid-cols-3 gap-4 text-center">
-                        <div>
-                          <div className="text-white font-bold">{playerStats[player.id]?.runs || 0}</div>
-                          <div className="text-white/60 text-xs">Runs</div>
-                        </div>
-                        <div>
-                          <div className="text-white font-bold">{playerStats[player.id]?.wickets || 0}</div>
-                          <div className="text-white/60 text-xs">Wickets</div>
-                        </div>
-                        <div>
-                          <div className="text-white font-bold">
-                            {playerStats[player.id]?.innings > 0 
-                              ? Math.round(playerStats[player.id].runs / (playerStats[player.id].innings - playerStats[player.id].notOuts) || 0)
-                              : 0
-                            }
+                      {/* Player status indicator */}
+                      <motion.div
+                        className="absolute top-3 right-3 w-3 h-3 bg-green-500 rounded-full"
+                        animate={{ 
+                          scale: [1, 1.3, 1],
+                          opacity: [0.8, 1, 0.8]
+                        }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                      />
+                      
+                      <div className="relative z-10 p-6">
+                        <div className="flex items-center gap-4 mb-6">
+                          <motion.div
+                            className="w-20 h-20 rounded-2xl flex items-center justify-center"
+                            style={{
+                              background: `linear-gradient(135deg, ${teamColors.primary}, ${teamColors.secondary})`,
+                            }}
+                            whileHover={{ rotate: 360 }}
+                            transition={{ duration: 0.8, ease: "easeInOut" }}
+                          >
+                            <Users className="w-10 h-10 text-white" />
+                          </motion.div>
+                          <div>
+                            <motion.h3 
+                              className="text-2xl font-black text-white mb-1"
+                              whileHover={{ scale: 1.05 }}
+                            >
+                              {player.name}
+                            </motion.h3>
+                            <motion.div 
+                              className="text-white/70 text-sm font-medium mb-1"
+                              animate={{ opacity: [0.7, 1, 0.7] }}
+                              transition={{ duration: 3, repeat: Infinity, delay: index * 0.2 }}
+                            >
+                              {player.role}
+                            </motion.div>
+                            {player.nationality && (
+                              <motion.div 
+                                className="text-white/60 text-sm flex items-center gap-1"
+                                animate={{ opacity: [0.6, 1, 0.6] }}
+                                transition={{ duration: 3, repeat: Infinity, delay: index * 0.3 }}
+                              >
+                                <motion.div
+                                  animate={{ rotate: [0, -10, 10, 0] }}
+                                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                                >
+                                  <Flag className="w-3 h-3" />
+                                </motion.div>
+                                {player.nationality}
+                              </motion.div>
+                            )}
                           </div>
-                          <div className="text-white/60 text-xs">Average</div>
+                        </div>
+                        
+                        {/* Enhanced Stats Grid */}
+                        <div className="grid grid-cols-3 gap-3">
+                          <motion.div
+                            className="text-center p-3 rounded-xl"
+                            style={{
+                              background: `linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(147, 51, 234, 0.2))`,
+                              border: `1px solid rgba(59, 130, 246, 0.3)`,
+                            }}
+                            whileHover={{ scale: 1.1, y: -3 }}
+                          >
+                            <motion.div
+                              className="text-xl font-black text-blue-400"
+                              initial={{ count: 0 }}
+                              animate={{ count: playerStats[player.id]?.runs || 0 }}
+                              transition={{ duration: 1.5, delay: 0.8 + index * 0.05 }}
+                            >
+                              {playerStats[player.id]?.runs || 0}
+                            </motion.div>
+                            <div className="text-white/60 text-xs font-medium">Runs</div>
+                          </motion.div>
+                          
+                          <motion.div
+                            className="text-center p-3 rounded-xl"
+                            style={{
+                              background: `linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(236, 72, 153, 0.2))`,
+                              border: `1px solid rgba(16, 185, 129, 0.3)`,
+                            }}
+                            whileHover={{ scale: 1.1, y: -3 }}
+                          >
+                            <motion.div
+                              className="text-xl font-black text-green-400"
+                              initial={{ count: 0 }}
+                              animate={{ count: playerStats[player.id]?.wickets || 0 }}
+                              transition={{ duration: 1.5, delay: 0.9 + index * 0.05 }}
+                            >
+                              {playerStats[player.id]?.wickets || 0}
+                            </motion.div>
+                            <div className="text-white/60 text-xs font-medium">Wickets</div>
+                          </motion.div>
+                          
+                          <motion.div
+                            className="text-center p-3 rounded-xl"
+                            style={{
+                              background: `linear-gradient(135deg, rgba(251, 146, 60, 0.2), rgba(239, 68, 68, 0.2))`,
+                              border: `1px solid rgba(251, 146, 60, 0.3)`,
+                            }}
+                            whileHover={{ scale: 1.1, y: -3 }}
+                          >
+                            <motion.div
+                              className="text-xl font-black text-orange-400"
+                              initial={{ count: 0 }}
+                              animate={{ count: 
+                                playerStats[player.id]?.innings > 0 
+                                  ? Math.round(playerStats[player.id].runs / (playerStats[player.id].innings - playerStats[player.id].notOuts) || 0)
+                                  : 0
+                              }}
+                              transition={{ duration: 1.5, delay: 1 + index * 0.05 }}
+                            >
+                              {playerStats[player.id]?.innings > 0 
+                                ? Math.round(playerStats[player.id].runs / (playerStats[player.id].innings - playerStats[player.id].notOuts) || 0)
+                                : 0
+                              }
+                            </motion.div>
+                            <div className="text-white/60 text-xs font-medium">Avg</div>
+                          </motion.div>
+                        </div>
+                        
+                        {/* Performance indicator */}
+                        <motion.div
+                          className="mt-4 h-1 bg-white/20 rounded-full overflow-hidden"
+                          initial={{ width: 0 }}
+                          animate={{ width: '100%' }}
+                          transition={{ delay: 1.2 + index * 0.05, duration: 0.5 }}
+                        >
+                          <motion.div
+                            className="h-full bg-gradient-to-r from-orange-400 to-red-400 rounded-full"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${Math.min(((playerStats[player.id]?.runs || 0) + (playerStats[player.id]?.wickets || 0) * 20) / 10, 100)}%` }}
+                            transition={{ delay: 1.5 + index * 0.05, duration: 1, ease: "easeOut" }}
+                          />
+                        </motion.div>
+                        
+                        {/* Hover particles */}
+                        <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+                          {[...Array(4)].map((_, i) => (
+                            <motion.div
+                              key={i}
+                              className="absolute w-1 h-1 bg-white rounded-full opacity-0 group-hover:opacity-100"
+                              style={{
+                                left: `${20 + i * 20}%`,
+                                top: `${30 + i * 10}px`,
+                              }}
+                              animate={{
+                                y: [0, -15, 0],
+                                opacity: [0, 1, 0],
+                              }}
+                              transition={{
+                                duration: 2,
+                                repeat: Infinity,
+                                delay: i * 0.2,
+                                ease: "easeInOut"
+                              }}
+                            />
+                          ))}
                         </div>
                       </div>
                     </motion.div>
