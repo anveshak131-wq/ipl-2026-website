@@ -914,7 +914,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
               <motion.div
                 className="flex items-center gap-3 px-6 py-3 rounded-full"
                 style={{
-                  ...getWPLGlassmorphism('purple', 25),
+                  ...getWPLGlassmorphism('purple', 20),
                   border: `1px solid ${teamColors.primary}60`,
                 }}
                 whileHover={{ 
@@ -934,7 +934,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
               <motion.div
                 className="flex items-center gap-3 px-6 py-3 rounded-full"
                 style={{
-                  ...getWPLGlassmorphism('pink', 25),
+                  ...getWPLGlassmorphism('pink', 20),
                   border: `1px solid ${teamColors.secondary}60`,
                 }}
                 whileHover={{ 
@@ -1575,7 +1575,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                   transition={{ delay: 0.3 }}
                   className="relative"
                   style={{
-                    ...getWPLGlassmorphism('blue', 25),
+                    ...getWPLGlassmorphism('violet', 20),
                     border: `1px solid rgba(59, 130, 246, 0.3)`,
                     borderRadius: '1.5rem',
                   }}
@@ -1976,7 +1976,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                       whileTap={{ scale: 0.95 }}
                       className="relative group overflow-hidden rounded-2xl"
                       style={{
-                        ...getWPLGlassmorphism('orange', 25),
+                        ...getWPLGlassmorphism('orange', 20),
                         border: `1px solid ${teamColors.secondary}40`,
                       }}
                     >
