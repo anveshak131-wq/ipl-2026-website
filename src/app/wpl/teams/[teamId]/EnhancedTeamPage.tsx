@@ -2522,171 +2522,390 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
         </div>
       </section>
       
-      {/* Scorecard Modal with Separate Tabs */}
-      {showScorecard && selectedMatch && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 rounded-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto border border-white/20">
-            <div className="sticky top-0 bg-gradient-to-r from-purple-900/90 to-blue-900/90 backdrop-blur-md p-6 border-b border-white/20">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h2 className="text-2xl font-bold text-white mb-2">Match Details</h2>
-                  <div className="text-white/80">
-                    {selectedMatch.opponent ? `vs ${selectedMatch.opponent}` : 'Match Details'}
-                  </div>
-                  <div className="text-white/60 text-sm">
-                    {selectedMatch.date} • {selectedMatch.venue}
-                  </div>
+      {/* Enhanced Match Details Modal */}
+      <AnimatePresence>
+        {showScorecard && selectedMatch && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                closeScorecard();
+              }
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="bg-gradient-to-br from-purple-900/95 via-blue-900/95 to-indigo-900/95 rounded-3xl max-w-7xl w-full max-h-[90vh] overflow-hidden border border-white/20 shadow-2xl shadow-purple-500/20"
+            >
+              {/* Enhanced Header */}
+              <div className="relative overflow-hidden">
+                {/* Animated Background Pattern */}
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20">
+                  <motion.div
+                    animate={{
+                      backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"],
+                    }}
+                    transition={{
+                      duration: 20,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                    className="absolute inset-0 opacity-30"
+                    style={{
+                      backgroundImage: `radial-gradient(circle at 20% 50%, rgba(147, 51, 234, 0.3) 0%, transparent 50%), 
+                                       radial-gradient(circle at 80% 50%, rgba(59, 130, 246, 0.3) 0%, transparent 50%)`,
+                      backgroundSize: "200% 200%",
+                    }}
+                  />
                 </div>
-                <button
-                  onClick={closeScorecard}
-                  className="text-white/60 hover:text-white transition-colors text-2xl font-bold"
-                >
-                  ×
-                </button>
-              </div>
-              
-              {/* Tab Navigation */}
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setActiveModalTab('scorecard')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                    activeModalTab === 'scorecard'
-                      ? 'bg-white/20 text-white border border-white/30'
-                      : 'text-white/70 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  📊 Scorecard
-                </button>
-                <button
-                  onClick={() => setActiveModalTab('playing11')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                    activeModalTab === 'playing11'
-                      ? 'bg-white/20 text-white border border-white/30'
-                      : 'text-white/70 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  👥 Playing 11
-                </button>
-              </div>
-            </div>
-
-            <div className="p-6">
-              {selectedScorecard ? (
-                <>
-                  {/* Scorecard Tab */}
-                  {activeModalTab === 'scorecard' && (
-                    <div className="space-y-6">
-                      {/* Match Result */}
-                      <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20">
-                        <h3 className="text-lg font-semibold text-white mb-2">Result</h3>
-                        <div className="text-white">
-                          {selectedScorecard.result?.winner} won by {selectedScorecard.result?.margin}
+                
+                <div className="relative p-8 border-b border-white/10">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      {/* Match Title with Animation */}
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.1 }}
+                      >
+                        <h2 className="text-3xl font-bold text-white mb-3 flex items-center gap-3">
+                          <motion.div
+                            animate={{ rotate: [0, 10, -10, 0] }}
+                            transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                            className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center"
+                          >
+                            <Trophy className="w-4 h-4 text-white" />
+                          </motion.div>
+                          Match Details
+                        </h2>
+                      </motion.div>
+                      
+                      {/* Teams Information */}
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="mb-4"
+                      >
+                        <div className="flex items-center gap-4 text-white/90 text-lg">
+                          <span className="font-semibold">{selectedMatch.team1?.shortName || 'Team 1'}</span>
+                          <span className="text-white/50">vs</span>
+                          <span className="font-semibold">{selectedMatch.team2?.shortName || 'Team 2'}</span>
                         </div>
-                        {selectedScorecard.result?.manOfTheMatch && (
-                          <div className="text-white/60 text-sm mt-1">
-                            Man of the Match: {selectedScorecard.result.manOfTheMatch}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Scorecard Innings */}
-                      {selectedScorecard.innings?.map((innings: any, index: number) => (
-                        <div key={index} className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-                          <h3 className="text-lg font-semibold text-white mb-4">
-                            Innings {index + 1} - {innings.battingTeamId === teamId ? team?.name : innings.battingTeamId}
-                          </h3>
-                          
-                          <div className="mb-4">
-                            <div className="text-white font-medium">
-                              {innings.totalRuns}/{innings.totalWickets} ({innings.totalOvers} overs)
-                            </div>
-                          </div>
-
-                          {/* Batting Scorecard */}
-                          <div className="mb-6">
-                            <h4 className="text-white font-medium mb-3">Batting Scorecard</h4>
-                            <div className="overflow-x-auto">
-                              <table className="w-full text-sm text-white">
-                                <thead>
-                                  <tr className="border-b border-white/20">
-                                    <th className="text-left py-2">Batsman</th>
-                                    <th className="text-center py-2">R</th>
-                                    <th className="text-center py-2">B</th>
-                                    <th className="text-center py-2">4s</th>
-                                    <th className="text-center py-2">6s</th>
-                                    <th className="text-center py-2">SR</th>
-                                    <th className="text-left py-2">Dismissal</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {innings.batting?.map((batsman: any, batsmanIndex: number) => (
-                                    <tr key={batsmanIndex} className="border-b border-white/10">
-                                      <td className="py-2">
-                                        <div className="flex items-center gap-2">
-                                          {batsman.name}
-                                          {batsman.isCaptain && <span className="text-yellow-400 text-xs">(c)</span>}
-                                          {batsman.isWicketKeeper && <span className="text-blue-400 text-xs">(wk)</span>}
-                                        </div>
-                                      </td>
-                                      <td className="text-center py-2 font-medium">{batsman.runs}</td>
-                                      <td className="text-center py-2">{batsman.balls}</td>
-                                      <td className="text-center py-2">{batsman.fours}</td>
-                                      <td className="text-center py-2">{batsman.sixes}</td>
-                                      <td className="text-center py-2">{batsman.strikeRate}</td>
-                                      <td className="py-2 text-white/60 text-xs">
-                                        {batsman.dismissal?.type === 'not-out' ? 'not out' : 
-                                         batsman.dismissal?.details || '-'}
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-
-                          {/* Bowling Scorecard */}
-                          <div>
-                            <h4 className="text-white font-medium mb-3">Bowling Scorecard</h4>
-                            <div className="overflow-x-auto">
-                              <table className="w-full text-sm text-white">
-                                <thead>
-                                  <tr className="border-b border-white/20">
-                                    <th className="text-left py-2">Bowler</th>
-                                    <th className="text-center py-2">O</th>
-                                    <th className="text-center py-2">R</th>
-                                    <th className="text-center py-2">W</th>
-                                    <th className="text-center py-2">Eco</th>
-                                    <th className="text-center py-2">0s</th>
-                                    <th className="text-center py-2">4s</th>
-                                    <th className="text-center py-2">6s</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {innings.bowling?.map((bowler: any, bowlerIndex: number) => (
-                                    <tr key={bowlerIndex} className="border-b border-white/10">
-                                      <td className="py-2">
-                                        <div className="flex items-center gap-2">
-                                          {bowler.name}
-                                          {bowler.isCaptain && <span className="text-yellow-400 text-xs">(c)</span>}
-                                        </div>
-                                      </td>
-                                      <td className="text-center py-2">{bowler.overs}</td>
-                                      <td className="text-center py-2">{bowler.runs}</td>
-                                      <td className="text-center py-2 font-medium">{bowler.wickets}</td>
-                                      <td className="text-center py-2">{bowler.economyRate}</td>
-                                      <td className="text-center py-2">{bowler.dots || 0}</td>
-                                      <td className="text-center py-2">{bowler.fours || 0}</td>
-                                      <td className="text-center py-2">{bowler.sixes || 0}</td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
+                      </motion.div>
+                      
+                      {/* Match Meta Information */}
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="flex items-center gap-6 text-white/60 text-sm"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4" />
+                          {selectedMatch.date}
                         </div>
-                      ))}
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4" />
+                          {selectedMatch.venue}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4" />
+                          {selectedMatch.time || '19:30'}
+                        </div>
+                      </motion.div>
                     </div>
-                  )}
+                    
+                    {/* Close Button */}
+                    <motion.button
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.4 }}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={closeScorecard}
+                      className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all duration-200 flex items-center justify-center border border-white/20"
+                    >
+                      <X className="w-5 h-5" />
+                    </motion.button>
+                  </div>
+                  
+                  {/* Enhanced Tab Navigation */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="flex gap-2 mt-6"
+                  >
+                    {[
+                      { id: 'scorecard', label: 'Scorecard', icon: '📊' },
+                      { id: 'playing11', label: 'Playing 11', icon: '👥' },
+                      { id: 'highlights', label: 'Highlights', icon: '⭐' },
+                      { id: 'stats', label: 'Statistics', icon: '📈' }
+                    ].map((tab, index) => (
+                      <motion.button
+                        key={tab.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.6 + index * 0.1 }}
+                        onClick={() => setActiveModalTab(tab.id as any)}
+                        className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 flex items-center gap-2 ${
+                          activeModalTab === tab.id
+                            ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg shadow-purple-500/25 border border-white/30'
+                            : 'text-white/70 hover:text-white hover:bg-white/10 border border-transparent'
+                        }`}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <motion.span
+                          animate={{ rotate: activeModalTab === tab.id ? [0, 360] : 0 }}
+                          transition={{ duration: 0.5 }}
+                        >
+                          {tab.icon}
+                        </motion.span>
+                        {tab.label}
+                      </motion.button>
+                    ))}
+                  </motion.div>
+                </div>
+              </div>
+
+              {/* Enhanced Content Area */}
+              <div className="p-8 overflow-y-auto max-h-[calc(90vh-200px)]">
+                {selectedScorecard ? (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.7 }}
+                    className="space-y-8"
+                  >
+                    {/* Scorecard Tab */}
+                    {activeModalTab === 'scorecard' && (
+                      <div className="space-y-8">
+                        {/* Enhanced Match Result */}
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.8 }}
+                          className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-md rounded-2xl p-6 border border-green-500/30"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                                <motion.div
+                                  animate={{ scale: [1, 1.2, 1] }}
+                                  transition={{ duration: 2, repeat: Infinity }}
+                                >
+                                  🏆
+                                </motion.div>
+                                Result
+                              </h3>
+                              <div className="text-2xl font-bold text-green-400">
+                                {selectedScorecard.result?.winner} won by {selectedScorecard.result?.margin}
+                              </div>
+                              {selectedScorecard.result?.manOfTheMatch && (
+                                <motion.div
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  transition={{ delay: 1 }}
+                                  className="text-white/80 text-sm mt-2 flex items-center gap-2"
+                                >
+                                  <Star className="w-4 h-4 text-yellow-400" />
+                                  Man of the Match: <span className="font-semibold text-yellow-400">{selectedScorecard.result.manOfTheMatch}</span>
+                                </motion.div>
+                              )}
+                            </div>
+                            <motion.div
+                              animate={{ rotate: [0, 5, -5, 0] }}
+                              transition={{ duration: 4, repeat: Infinity, repeatDelay: 2 }}
+                              className="text-6xl"
+                            >
+                              🎯
+                            </motion.div>
+                          </div>
+                        </motion.div>
+
+                        {/* Enhanced Scorecard Innings */}
+                        {selectedScorecard.innings?.map((innings: any, index: number) => (
+                          <motion.div
+                            key={index}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.9 + index * 0.1 }}
+                            className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/20"
+                          >
+                            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
+                              <motion.div
+                                animate={{ rotate: [0, 360] }}
+                                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                                className="w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center"
+                              >
+                                <span className="text-xs font-bold">{index + 1}</span>
+                              </motion.div>
+                              Innings {index + 1} - {innings.battingTeamId === teamId ? team?.name : innings.battingTeamId}
+                            </h3>
+                            
+                            {/* Enhanced Score Summary */}
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ delay: 1 + index * 0.1 }}
+                              className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl p-4 mb-6 border border-blue-500/30"
+                            >
+                              <div className="text-3xl font-bold text-white">
+                                {innings.totalRuns}/{innings.totalWickets} ({innings.totalOvers} overs)
+                              </div>
+                              <div className="text-white/60 text-sm mt-1">
+                                Run Rate: {((innings.totalRuns / (parseFloat(innings.totalOvers) || 1)) * 6).toFixed(2)}
+                              </div>
+                            </motion.div>
+
+                            {/* Enhanced Batting Scorecard */}
+                            <div className="mb-8">
+                              <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                                <motion.div
+                                  animate={{ scale: [1, 1.1, 1] }}
+                                  transition={{ duration: 2, repeat: Infinity }}
+                                >
+                                  🏏
+                                </motion.div>
+                                Batting Scorecard
+                              </h4>
+                              <div className="overflow-x-auto rounded-xl border border-white/10">
+                                <table className="w-full text-sm text-white">
+                                  <thead>
+                                    <tr className="bg-gradient-to-r from-purple-500/20 to-blue-500/20 border-b border-white/20">
+                                      <th className="text-left py-4 px-4 font-semibold">Batsman</th>
+                                      <th className="text-center py-4 px-2 font-semibold">R</th>
+                                      <th className="text-center py-4 px-2 font-semibold">B</th>
+                                      <th className="text-center py-4 px-2 font-semibold">4s</th>
+                                      <th className="text-center py-4 px-2 font-semibold">6s</th>
+                                      <th className="text-center py-4 px-2 font-semibold">SR</th>
+                                      <th className="text-left py-4 px-4 font-semibold">Dismissal</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {innings.batting?.map((batsman: any, batsmanIndex: number) => (
+                                      <motion.tr
+                                        key={batsmanIndex}
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: 1.1 + batsmanIndex * 0.05 }}
+                                        className="border-b border-white/10 hover:bg-white/5 transition-colors"
+                                      >
+                                        <td className="py-4 px-4">
+                                          <div className="flex items-center gap-2">
+                                            <span className="font-medium">{batsman.name}</span>
+                                            {batsman.isCaptain && (
+                                              <motion.span
+                                                initial={{ scale: 0 }}
+                                                animate={{ scale: 1 }}
+                                                className="text-yellow-400 text-xs font-bold bg-yellow-400/20 px-2 py-1 rounded"
+                                              >
+                                                (c)
+                                              </motion.span>
+                                            )}
+                                            {batsman.isWicketKeeper && (
+                                              <motion.span
+                                                initial={{ scale: 0 }}
+                                                animate={{ scale: 1 }}
+                                                className="text-blue-400 text-xs font-bold bg-blue-400/20 px-2 py-1 rounded"
+                                              >
+                                                (wk)
+                                              </motion.span>
+                                            )}
+                                          </div>
+                                        </td>
+                                        <td className="text-center py-4 px-2 font-bold text-lg">{batsman.runs}</td>
+                                        <td className="text-center py-4 px-2">{batsman.balls}</td>
+                                        <td className="text-center py-4 px-2">{batsman.fours}</td>
+                                        <td className="text-center py-4 px-2">{batsman.sixes}</td>
+                                        <td className="text-center py-4 px-2 font-medium">{batsman.strikeRate}</td>
+                                        <td className="py-4 px-4 text-white/60 text-sm">
+                                          {batsman.dismissal?.type === 'not-out' ? (
+                                            <span className="text-green-400 font-semibold">not out</span>
+                                          ) : (
+                                            batsman.dismissal?.details || '-'
+                                          )}
+                                        </td>
+                                      </motion.tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+
+                            {/* Enhanced Bowling Scorecard */}
+                            <div>
+                              <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                                <motion.div
+                                  animate={{ scale: [1, 1.1, 1] }}
+                                  transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                                >
+                                  🎯
+                                </motion.div>
+                                Bowling Scorecard
+                              </h4>
+                              <div className="overflow-x-auto rounded-xl border border-white/10">
+                                <table className="w-full text-sm text-white">
+                                  <thead>
+                                    <tr className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 border-b border-white/20">
+                                      <th className="text-left py-4 px-4 font-semibold">Bowler</th>
+                                      <th className="text-center py-4 px-2 font-semibold">O</th>
+                                      <th className="text-center py-4 px-2 font-semibold">R</th>
+                                      <th className="text-center py-4 px-2 font-semibold">W</th>
+                                      <th className="text-center py-4 px-2 font-semibold">Eco</th>
+                                      <th className="text-center py-4 px-2 font-semibold">0s</th>
+                                      <th className="text-center py-4 px-2 font-semibold">4s</th>
+                                      <th className="text-center py-4 px-2 font-semibold">6s</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {innings.bowling?.map((bowler: any, bowlerIndex: number) => (
+                                      <motion.tr
+                                        key={bowlerIndex}
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: 1.2 + bowlerIndex * 0.05 }}
+                                        className="border-b border-white/10 hover:bg-white/5 transition-colors"
+                                      >
+                                        <td className="py-4 px-4">
+                                          <div className="flex items-center gap-2">
+                                            <span className="font-medium">{bowler.name}</span>
+                                            {bowler.isCaptain && (
+                                              <motion.span
+                                                initial={{ scale: 0 }}
+                                                animate={{ scale: 1 }}
+                                                className="text-yellow-400 text-xs font-bold bg-yellow-400/20 px-2 py-1 rounded"
+                                              >
+                                                (c)
+                                              </motion.span>
+                                            )}
+                                          </div>
+                                        </td>
+                                        <td className="text-center py-4 px-2">{bowler.overs}</td>
+                                        <td className="text-center py-4 px-2">{bowler.runs}</td>
+                                        <td className="text-center py-4 px-2 font-bold text-lg text-purple-400">{bowler.wickets}</td>
+                                        <td className="text-center py-4 px-2 font-medium">{bowler.economyRate}</td>
+                                        <td className="text-center py-4 px-2">{bowler.dots || 0}</td>
+                                        <td className="text-center py-4 px-2">{bowler.fours || 0}</td>
+                                        <td className="text-center py-4 px-2">{bowler.sixes || 0}</td>
+                                      </motion.tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    )}
 
                   {/* Playing 11 Tab */}
                   {activeModalTab === 'playing11' && (
@@ -2740,7 +2959,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                                         {player.isCaptain && <span className="text-yellow-400 text-xs">(c)</span>}
                                       </div>
                                       <div className="text-white/60 text-sm">
-                                        {player.wickets} wickets
+                                        {player.wickets} wickets ({player.overs} overs)
                                       </div>
                                     </div>
                                     <div className="text-white/40 text-xs mt-1">
@@ -2755,21 +2974,92 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                       ))}
                     </div>
                   )}
-                </>
-              ) : (
-                <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-                  <div className="text-center text-white">
-                    <div className="text-lg font-medium mb-2">No Scorecard Available</div>
-                    <div className="text-white/60">
-                      Full scorecard and playing 11 details are not available for this match yet.
+
+                  {/* Highlights Tab */}
+                  {activeModalTab === 'highlights' && (
+                    <div className="space-y-6">
+                      <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+                        <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                          <Star className="w-5 h-5 text-yellow-400" />
+                          Match Highlights
+                        </h3>
+                        <div className="space-y-4">
+                          <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                            <div className="text-white font-medium mb-2">🏆 Man of the Match</div>
+                            <div className="text-white/80">{selectedScorecard.result?.manOfTheMatch || 'N/A'}</div>
+                          </div>
+                          <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                            <div className="text-white font-medium mb-2">🎯 Result Margin</div>
+                            <div className="text-white/80">{selectedScorecard.result?.margin || 'N/A'}</div>
+                          </div>
+                          <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                            <div className="text-white font-medium mb-2">⏰ Match Duration</div>
+                            <div className="text-white/80">Full 20 overs match</div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
+                  )}
+
+                  {/* Statistics Tab */}
+                  {activeModalTab === 'stats' && (
+                    <div className="space-y-6">
+                      <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
+                        <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                          <BarChart3 className="w-5 h-5 text-blue-400" />
+                          Match Statistics
+                        </h3>
+                        <div className="grid md:grid-cols-2 gap-6">
+                          {selectedScorecard.innings?.map((innings: any, index: number) => (
+                            <div key={index} className="bg-white/5 rounded-lg p-4 border border-white/10">
+                              <h4 className="text-white font-medium mb-3">
+                                Innings {index + 1} Stats
+                              </h4>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                  <span className="text-white/60">Total Runs:</span>
+                                  <span className="text-white font-medium">{innings.totalRuns}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-white/60">Wickets Lost:</span>
+                                  <span className="text-white font-medium">{innings.totalWickets}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-white/60">Overs Played:</span>
+                                  <span className="text-white font-medium">{innings.totalOvers}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-white/60">Run Rate:</span>
+                                  <span className="text-white font-medium">
+                                    {((innings.totalRuns / (parseFloat(innings.totalOvers) || 1)) * 6).toFixed(2)}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 text-center"
+                >
+                  <div className="text-6xl mb-4">📋</div>
+                  <div className="text-xl font-medium text-white mb-2">No Scorecard Available</div>
+                  <div className="text-white/60">
+                    Full scorecard and playing 11 details are not available for this match yet.
                   </div>
-                </div>
+                </motion.div>
               )}
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+    </AnimatePresence>
     </div>
   );
 }
