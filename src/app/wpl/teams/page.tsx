@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo, Suspense } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useMemo, Suspense, useRef } from 'react';
+import { motion, AnimatePresence, useScroll, useTransform, useSpring, useMotionValue, useInView } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -20,7 +20,7 @@ import TeamCardSkeleton from '@/components/teams/TeamCardSkeleton';
 import { CustomEmoji } from '@/components/emoji/Emoji';
 import AnimatedSection from '@/components/ui/AnimatedSection';
 import GradientText from '@/components/ui/GradientText';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Trophy, Users, Target, Star, Zap, Shield, Crown, Flame, TrendingUp, Award, Medal } from 'lucide-react';
 import WPLFloatingParticles from '@/components/animations/WPLFloatingParticles';
 import { WPLColors, getWPLGlassmorphism, getWPLHoverGlow } from '@/lib/wplColors';
 
@@ -32,6 +32,58 @@ function WPLTeamsPageContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { currentLeague, setCurrentLeague } = useLeague();
+    
+    // Enhanced mouse tracking for cursor animations
+    const cursorX = useMotionValue(0);
+    const cursorY = useMotionValue(0);
+    const [cursorVariant, setCursorVariant] = useState('default');
+    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+    const containerRef = useRef<HTMLDivElement>(null);
+    const heroRef = useRef<HTMLDivElement>(null);
+    const isInView = useInView(heroRef, { once: false, amount: 0.3 });
+    
+    // Scroll-based animations
+    const { scrollYProgress } = useScroll();
+    const scaleValue = useTransform(scrollYProgress, [0, 1], [1, 0.8]);
+    const rotateValue = useTransform(scrollYProgress, [0, 1], [0, 5]);
+    const opacityValue = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+    
+    // Spring animations for smooth interactions
+    const springConfig = { damping: 25, stiffness: 300 };
+    const scaleSpring = useSpring(scaleValue, springConfig);
+    const rotateSpring = useSpring(rotateValue, springConfig);
+
+    // Mouse tracking event handlers
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            if (containerRef.current) {
+                const rect = containerRef.current.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                setMousePosition({ x, y });
+                cursorX.set(x);
+                cursorY.set(y);
+            }
+        };
+
+        const handleMouseEnter = () => setCursorVariant('hover');
+        const handleMouseLeave = () => setCursorVariant('default');
+
+        const container = containerRef.current;
+        if (container) {
+            container.addEventListener('mousemove', handleMouseMove);
+            container.addEventListener('mouseenter', handleMouseEnter);
+            container.addEventListener('mouseleave', handleMouseLeave);
+        }
+
+        return () => {
+            if (container) {
+                container.removeEventListener('mousemove', handleMouseMove);
+                container.removeEventListener('mouseenter', handleMouseEnter);
+                container.removeEventListener('mouseleave', handleMouseLeave);
+            }
+        };
+    }, [cursorX, cursorY]);
 
     // Set league to WPL when page loads
     useEffect(() => {
@@ -338,7 +390,7 @@ function WPLTeamsPageContent() {
             <AuroraBackground />
             <WPLFloatingParticles />
 
-            <main className="relative py-16 min-h-screen">
+            <main className="relative py-16 min-h-screen" ref={containerRef}>
                 {/* Enhanced gradient overlays using exact WPL colors */}
                 <div 
                   className="absolute inset-0 pointer-events-none"
@@ -353,6 +405,7 @@ function WPLTeamsPageContent() {
                   }}
                 />
                 
+                {/* Enhanced floating orbs with mouse tracking */}
                 <motion.div 
                   className="absolute top-20 left-10 w-96 h-96 rounded-full blur-3xl"
                   style={{ 
@@ -386,74 +439,333 @@ function WPLTeamsPageContent() {
                     delay: 1.5
                   }}
                 />
+                
+                {/* Interactive mouse-following gradient */}
+                <motion.div
+                  className="absolute w-64 h-64 rounded-full blur-2xl pointer-events-none"
+                  style={{
+                    background: `radial-gradient(circle, ${WPLColors.purpleRGBA[30]}, ${WPLColors.pinkRGBA[20]}, transparent)`,
+                    left: mousePosition.x - 128,
+                    top: mousePosition.y - 128,
+                  }}
+                  transition={{ type: "spring", stiffness: 500, damping: 28 }}
+                />
 
                 <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {/* Hero Header */}
-                    <AnimatedSection direction="down" delay={0.1}>
+                    {/* Enhanced Hero Header with scroll animations */}
+                    <motion.div 
+                        ref={heroRef}
+                        className="mb-12 text-center"
+                        style={{
+                            scale: scaleSpring,
+                            rotate: rotateSpring,
+                            opacity: opacityValue,
+                        }}
+                    >
+                        {/* Animated badge */}
                         <motion.div 
-                            className="mb-8"
-                            initial={{ opacity: 0, y: -30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6 }}
+                            className="inline-flex items-center space-x-2 mb-6"
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.8, delay: 0.2 }}
+                            whileHover={{ 
+                                scale: 1.05,
+                                boxShadow: `0 0 30px ${WPLColors.purpleRGBA[40]}`
+                            }}
                         >
-                            <motion.div 
-                                className="inline-flex items-center space-x-2 mb-4"
-                                whileHover={{ scale: 1.05 }}
-                            >
-                                <span 
-                                  className="px-3 py-1 rounded-full text-xs font-bold flex items-center gap-2 transition-all duration-300 cursor-default"
-                                  style={{
-                                    ...getWPLGlassmorphism('purple', 20),
+                            <motion.span 
+                                className="px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 transition-all duration-300 cursor-default"
+                                style={{
+                                    ...getWPLGlassmorphism('purple', 25),
                                     color: WPLColors.textAccent,
-                                  }}
-                                  onMouseEnter={(e) => {
-                                    e.currentTarget.style.background = WPLColors.purpleRGBA[30];
-                                  }}
-                                  onMouseLeave={(e) => {
-                                    e.currentTarget.style.background = WPLColors.purpleRGBA[20];
-                                  }}
+                                    border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                                }}
+                                whileHover={{
+                                    background: WPLColors.purpleRGBA[35],
+                                    borderColor: WPLColors.purpleRGBA[50],
+                                }}
+                            >
+                                <motion.div
+                                    animate={{ rotate: [0, 360] }}
+                                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                                 >
-                                    <Sparkles className="w-4 h-4" /> WPL 2026 TEAMS
-                                </span>
-                            </motion.div>
-                            <motion.h1 
-                                className="text-5xl md:text-6xl font-black text-white mb-4 tracking-tight"
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.6, delay: 0.2 }}
-                            >
-                                Meet the <GradientText gradient="from-purple-400 via-pink-400 to-rose-400" animate>Champions</GradientText>
-                            </motion.h1>
-                            <motion.p 
-                                className="text-gray-300 text-lg max-w-2xl"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ duration: 0.6, delay: 0.3 }}
-                            >
-                                Explore all elite franchises competing for glory in the Women's Premier League
-                            </motion.p>
+                                    <Sparkles className="w-4 h-4" />
+                                </motion.div>
+                                WPL 2026 ELITE TEAMS
+                                <motion.div
+                                    animate={{ scale: [1, 1.2, 1] }}
+                                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                >
+                                    <Crown className="w-4 h-4 text-yellow-400" />
+                                </motion.div>
+                            </motion.span>
                         </motion.div>
-                    </AnimatedSection>
+                        
+                        {/* Enhanced main heading with staggered animation */}
+                        <motion.h1 
+                            className="text-6xl md:text-7xl lg:text-8xl font-black text-white mb-6 tracking-tight leading-none"
+                            initial={{ opacity: 0, y: 50 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 0.3 }}
+                        >
+                            <motion.span 
+                                className="block mb-2"
+                                initial={{ opacity: 0, x: -50 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.6, delay: 0.4 }}
+                            >
+                                Meet the
+                            </motion.span>
+                            <GradientText 
+                                gradient="from-purple-400 via-pink-400 to-rose-400" 
+                                animate
+                                className="block"
+                            >
+                                <motion.span
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.8, delay: 0.5 }}
+                                    whileHover={{ scale: 1.05 }}
+                                >
+                                    Champions
+                                </motion.span>
+                            </GradientText>
+                        </motion.h1>
+                        
+                        {/* Enhanced subtitle with icons */}
+                        <motion.p 
+                            className="text-gray-300 text-xl max-w-3xl mx-auto mb-8 leading-relaxed"
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 0.6 }}
+                        >
+                            <motion.span 
+                                className="inline-flex items-center gap-2"
+                                whileHover={{ scale: 1.02 }}
+                            >
+                                <Flame className="w-5 h-5 text-orange-400" />
+                                Explore all elite franchises competing for glory in the Women's Premier League
+                                <Trophy className="w-5 h-5 text-yellow-400" />
+                            </motion.span>
+                        </motion.p>
+                        
+                        {/* Enhanced CTA buttons */}
+                        <motion.div 
+                            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, delay: 0.7 }}
+                        >
+                            <motion.button
+                                className="group relative px-8 py-4 rounded-xl font-bold text-white overflow-hidden transition-all duration-300"
+                                style={{
+                                    background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[80]}, ${WPLColors.pinkRGBA[80]})`,
+                                    boxShadow: `0 10px 30px ${WPLColors.purpleRGBA[30]}`,
+                                }}
+                                whileHover={{ 
+                                    scale: 1.05,
+                                    boxShadow: `0 15px 40px ${WPLColors.purpleRGBA[50]}`,
+                                }}
+                                whileTap={{ scale: 0.98 }}
+                            >
+                                <span className="relative z-10 flex items-center gap-2">
+                                    <Zap className="w-5 h-5" />
+                                    Explore Teams
+                                    <motion.div
+                                        animate={{ x: [0, 5, 0] }}
+                                        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                                    >
+                                        <TrendingUp className="w-4 h-4" />
+                                    </motion.div>
+                                </span>
+                                <motion.div
+                                    className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                    initial={false}
+                                    animate={{ opacity: [0, 0.3, 0] }}
+                                    transition={{ duration: 2, repeat: Infinity }}
+                                />
+                            </motion.button>
+                            
+                            <motion.button
+                                className="px-8 py-4 rounded-xl font-bold text-white border-2 transition-all duration-300"
+                                style={{
+                                    borderColor: WPLColors.purpleRGBA[50],
+                                    background: getWPLGlassmorphism('purple', 15).background,
+                                }}
+                                whileHover={{ 
+                                    scale: 1.05,
+                                    borderColor: WPLColors.purpleRGBA[80],
+                                    background: WPLColors.purpleRGBA[25],
+                                }}
+                                whileTap={{ scale: 0.98 }}
+                            >
+                                <span className="flex items-center gap-2">
+                                    <Target className="w-5 h-5" />
+                                    Compare Teams
+                                </span>
+                            </motion.button>
+                        </motion.div>
+                    </motion.div>
 
-                    {/* Quick Stats Cards */}
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-                        <div className="rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-600/10 border border-purple-500/30 px-4 py-3 backdrop-blur-sm hover:scale-105 transition-transform duration-300">
-                            <p className="text-xs uppercase tracking-wide text-purple-300 font-semibold">Teams</p>
-                            <p className="text-2xl font-black text-white">{totalTeams}</p>
-                        </div>
-                        <div className="rounded-xl bg-gradient-to-br from-pink-500/20 to-pink-600/10 border border-pink-500/30 px-4 py-3 backdrop-blur-sm hover:scale-105 transition-transform duration-300">
-                            <p className="text-xs uppercase tracking-wide text-pink-300 font-semibold">Players</p>
-                            <p className="text-2xl font-black text-white">{totalPlayers}</p>
-                        </div>
-                        <div className="rounded-xl bg-gradient-to-br from-rose-500/20 to-rose-600/10 border border-rose-500/30 px-4 py-3 backdrop-blur-sm hover:scale-105 transition-transform duration-300">
-                            <p className="text-xs uppercase tracking-wide text-rose-300 font-semibold">Overseas</p>
-                            <p className="text-2xl font-black text-white">{totalOverseas}</p>
-                        </div>
-                        <div className="rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/10 border border-purple-500/30 px-4 py-3 backdrop-blur-sm hover:scale-105 transition-transform duration-300">
-                            <p className="text-xs uppercase tracking-wide text-purple-300 font-semibold">Captains</p>
-                            <p className="text-2xl font-black text-white">{totalCaptains}</p>
-                        </div>
-                    </div>
+                    {/* Enhanced Quick Stats Cards with staggered animations */}
+                    <motion.div 
+                        className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8"
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8, delay: 0.8 }}
+                    >
+                        <motion.div
+                            className="group relative rounded-2xl p-6 overflow-hidden cursor-pointer"
+                            style={{
+                                background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[25]}, ${WPLColors.purpleRGBA[15]})`,
+                                border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                            }}
+                            whileHover={{ 
+                                scale: 1.05,
+                                boxShadow: `0 20px 40px ${WPLColors.purpleRGBA[40]}`,
+                            }}
+                            whileTap={{ scale: 0.98 }}
+                        >
+                            <motion.div
+                                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                style={{
+                                    background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[40]}, ${WPLColors.pinkRGBA[30]})`,
+                                }}
+                            />
+                            <div className="relative z-10">
+                                <motion.div
+                                    animate={{ rotate: [0, 10, -10, 0] }}
+                                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                    className="mb-3"
+                                >
+                                    <Shield className="w-6 h-6 text-purple-300" />
+                                </motion.div>
+                                <p className="text-xs uppercase tracking-wider text-purple-300 font-bold mb-1">Teams</p>
+                                <motion.p 
+                                    className="text-3xl font-black text-white"
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{ type: "spring", stiffness: 200, delay: 0.9 }}
+                                >
+                                    {totalTeams}
+                                </motion.p>
+                            </div>
+                        </motion.div>
+
+                        <motion.div
+                            className="group relative rounded-2xl p-6 overflow-hidden cursor-pointer"
+                            style={{
+                                background: `linear-gradient(135deg, ${WPLColors.pinkRGBA[25]}, ${WPLColors.pinkRGBA[15]})`,
+                                border: `1px solid ${WPLColors.pinkRGBA[30]}`,
+                            }}
+                            whileHover={{ 
+                                scale: 1.05,
+                                boxShadow: `0 20px 40px ${WPLColors.pinkRGBA[40]}`,
+                            }}
+                            whileTap={{ scale: 0.98 }}
+                        >
+                            <motion.div
+                                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                style={{
+                                    background: `linear-gradient(135deg, ${WPLColors.pinkRGBA[40]}, ${WPLColors.roseRGBA[30]})`,
+                                }}
+                            />
+                            <div className="relative z-10">
+                                <motion.div
+                                    animate={{ rotate: [0, -10, 10, 0] }}
+                                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                                    className="mb-3"
+                                >
+                                    <Users className="w-6 h-6 text-pink-300" />
+                                </motion.div>
+                                <p className="text-xs uppercase tracking-wider text-pink-300 font-bold mb-1">Players</p>
+                                <motion.p 
+                                    className="text-3xl font-black text-white"
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{ type: "spring", stiffness: 200, delay: 1.0 }}
+                                >
+                                    {totalPlayers}
+                                </motion.p>
+                            </div>
+                        </motion.div>
+
+                        <motion.div
+                            className="group relative rounded-2xl p-6 overflow-hidden cursor-pointer"
+                            style={{
+                                background: `linear-gradient(135deg, ${WPLColors.roseRGBA[25]}, ${WPLColors.roseRGBA[15]})`,
+                                border: `1px solid ${WPLColors.roseRGBA[30]}`,
+                            }}
+                            whileHover={{ 
+                                scale: 1.05,
+                                boxShadow: `0 20px 40px ${WPLColors.roseRGBA[40]}`,
+                            }}
+                            whileTap={{ scale: 0.98 }}
+                        >
+                            <motion.div
+                                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                style={{
+                                    background: `linear-gradient(135deg, ${WPLColors.roseRGBA[40]}, ${WPLColors.orangeRGBA[30]})`,
+                                }}
+                            />
+                            <div className="relative z-10">
+                                <motion.div
+                                    animate={{ y: [0, -5, 0] }}
+                                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                    className="mb-3"
+                                >
+                                    <Star className="w-6 h-6 text-rose-300" />
+                                </motion.div>
+                                <p className="text-xs uppercase tracking-wider text-rose-300 font-bold mb-1">Overseas</p>
+                                <motion.p 
+                                    className="text-3xl font-black text-white"
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{ type: "spring", stiffness: 200, delay: 1.1 }}
+                                >
+                                    {totalOverseas}
+                                </motion.p>
+                            </div>
+                        </motion.div>
+
+                        <motion.div
+                            className="group relative rounded-2xl p-6 overflow-hidden cursor-pointer"
+                            style={{
+                                background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[25]}, ${WPLColors.pinkRGBA[15]})`,
+                                border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                            }}
+                            whileHover={{ 
+                                scale: 1.05,
+                                boxShadow: `0 20px 40px ${WPLColors.purpleRGBA[40]}`,
+                            }}
+                            whileTap={{ scale: 0.98 }}
+                        >
+                            <motion.div
+                                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                style={{
+                                    background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[40]}, ${WPLColors.pinkRGBA[30]})`,
+                                }}
+                            />
+                            <div className="relative z-10">
+                                <motion.div
+                                    animate={{ rotate: [0, 360] }}
+                                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                                    className="mb-3"
+                                >
+                                    <Crown className="w-6 h-6 text-yellow-400" />
+                                </motion.div>
+                                <p className="text-xs uppercase tracking-wider text-purple-300 font-bold mb-1">Captains</p>
+                                <motion.p 
+                                    className="text-3xl font-black text-white"
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{ type: "spring", stiffness: 200, delay: 1.2 }}
+                                >
+                                    {totalCaptains}
+                                </motion.p>
+                            </div>
+                        </motion.div>
+                    </motion.div>
 
                     {/* Filter Toolbar - Same as teams page but with WPL styling */}
                     <div className="sticky top-16 md:top-20 z-40 -mx-4 px-4 sm:mx-0 sm:px-0 mb-8 backdrop-blur-xl bg-slate-900/80 border-y border-purple-500/20 py-4 shadow-lg">
