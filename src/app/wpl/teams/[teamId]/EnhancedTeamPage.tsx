@@ -704,6 +704,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   };
 
   const teamColors = team.colors || { primary: '#8B5CF6', secondary: '#F59E0B' };
+  const logoUrl = getTeamLogo(team);
 
   return (
     <div className="min-h-screen" style={{
