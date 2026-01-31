@@ -83,6 +83,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   const [showScorecard, setShowScorecard] = useState(false);
   const [allScorecards, setAllScorecards] = useState<any[]>([]);
   const [activeModalTab, setActiveModalTab] = useState<'scorecard' | 'playing11'>('scorecard');
+  const [playerStats, setPlayerStats] = useState<{ [key: string]: any }>({});
 
   const hasFetchedData = useRef(false);
 
@@ -221,6 +222,11 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
               
               console.log('EnhancedTeamPage: Filtered scorecards for', foundTeam.shortName, ':', teamScorecards.length);
               calculateTeamStatsFromScorecards(teamScorecards, foundTeam.id);
+              
+              // Calculate individual player statistics from scorecards
+              const calculatedPlayerStats = calculatePlayerStats(players || [], teamScorecards);
+              setPlayerStats(calculatedPlayerStats);
+              console.log('EnhancedTeamPage: Calculated player stats for', Object.keys(calculatedPlayerStats).length, 'players');
             } else {
               // Fallback to basic match stats if scorecards fail
               calculateTeamStats(matches || []);
@@ -441,6 +447,53 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
     setSelectedMatch(null);
     setSelectedScorecard(null);
     setActiveModalTab('scorecard');
+  };
+
+  const calculatePlayerStats = (players: any[], scorecards: any[]) => {
+    const playerStats: { [key: string]: { runs: number; balls: number; wickets: number; innings: number; notOuts: number; overs: number; runsConceded: number; } } = {};
+    
+    // Initialize all players with zero stats
+    players.forEach(player => {
+      playerStats[player.id] = {
+        runs: 0,
+        balls: 0,
+        wickets: 0,
+        innings: 0,
+        notOuts: 0,
+        overs: 0,
+        runsConceded: 0
+      };
+    });
+
+    // Calculate stats from scorecards
+    scorecards.forEach(scorecard => {
+      scorecard.innings?.forEach((innings: any) => {
+        // Calculate batting stats
+        innings.batting?.forEach((batsman: any) => {
+          const playerId = batsman.playerId;
+          if (playerStats[playerId]) {
+            playerStats[playerId].runs += batsman.runs || 0;
+            playerStats[playerId].balls += batsman.balls || 0;
+            playerStats[playerId].innings += 1;
+            if (batsman.dismissal?.type === 'not-out') {
+              playerStats[playerId].notOuts += 1;
+            }
+          }
+        });
+
+        // Calculate bowling stats
+        innings.bowling?.forEach((bowler: any) => {
+          const playerId = bowler.playerId;
+          if (playerStats[playerId]) {
+            playerStats[playerId].wickets += bowler.wickets || 0;
+            playerStats[playerId].overs += parseFloat(bowler.overs) || 0;
+            playerStats[playerId].runsConceded += bowler.runs || 0;
+          }
+        });
+      });
+    });
+
+    return playerStats;
   };
 
   const calculateTeamStats = (teamMatches: Match[]) => {
@@ -897,22 +950,25 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                         </div>
                       </div>
                       
-                      {player.stats && (
-                        <div className="grid grid-cols-3 gap-4 text-center">
-                          <div>
-                            <div className="text-white font-bold">{player.stats.runs || 0}</div>
-                            <div className="text-white/60 text-xs">Runs</div>
-                          </div>
-                          <div>
-                            <div className="text-white font-bold">{player.stats.wickets || 0}</div>
-                            <div className="text-white/60 text-xs">Wickets</div>
-                          </div>
-                          <div>
-                            <div className="text-white font-bold">{player.stats.average || 0}</div>
-                            <div className="text-white/60 text-xs">Average</div>
-                          </div>
+                      <div className="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                          <div className="text-white font-bold">{playerStats[player.id]?.runs || 0}</div>
+                          <div className="text-white/60 text-xs">Runs</div>
                         </div>
-                      )}
+                        <div>
+                          <div className="text-white font-bold">{playerStats[player.id]?.wickets || 0}</div>
+                          <div className="text-white/60 text-xs">Wickets</div>
+                        </div>
+                        <div>
+                          <div className="text-white font-bold">
+                            {playerStats[player.id]?.innings > 0 
+                              ? Math.round(playerStats[player.id].runs / (playerStats[player.id].innings - playerStats[player.id].notOuts) || 0)
+                              : 0
+                            }
+                          </div>
+                          <div className="text-white/60 text-xs">Average</div>
+                        </div>
+                      </div>
                     </motion.div>
                   ))}
                 </div>
