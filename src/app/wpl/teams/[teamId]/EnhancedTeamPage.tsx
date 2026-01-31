@@ -88,32 +88,6 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   const [allScorecards, setAllScorecards] = useState<any[]>([]);
   const [activeModalTab, setActiveModalTab] = useState<'scorecard' | 'playing11'>('scorecard');
   
-  // Dynamic countdown timer state
-  const [timeLeft, setTimeLeft] = useState({
-    hours: 23,
-    minutes: 45,
-    seconds: 12
-  });
-
-  // Countdown timer effect
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        const totalSeconds = prev.hours * 3600 + prev.minutes * 60 + prev.seconds;
-        if (totalSeconds <= 0) return { hours: 0, minutes: 0, seconds: 0 };
-        
-        const newTotal = totalSeconds - 1;
-        return {
-          hours: Math.floor(newTotal / 3600),
-          minutes: Math.floor((newTotal % 3600) / 60),
-          seconds: newTotal % 60
-        };
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
   const [playerStats, setPlayerStats] = useState<{ [key: string]: any }>({});
 
   // Enhanced mouse tracking and animations
@@ -774,57 +748,6 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
 
       {/* Enhanced Hero Section with Dynamic Content */}
       <section className="relative z-10 py-20" ref={containerRef}>
-        {/* Live Match Ticker */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="sticky top-0 z-50 mb-8"
-        >
-          <div className="container mx-auto px-4">
-            <div className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 rounded-full flex items-center gap-3 shadow-lg">
-              <motion.div
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <div className="w-2 h-2 bg-white rounded-full"></div>
-              </motion.div>
-              <span className="text-sm font-bold">LIVE</span>
-              <span className="text-sm">RCB-W vs MI-W - 45/2 (6.3 overs)</span>
-              <ChevronRight className="w-4 h-4" />
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Next Match Countdown */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="mb-8"
-        >
-          <div className="container mx-auto px-4">
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl p-6 shadow-xl">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                <div>
-                  <h3 className="text-lg font-bold mb-2">Next Match</h3>
-                  <p className="text-2xl font-black">RCB-W vs DC-W</p>
-                  <p className="text-sm opacity-90">Tomorrow, 7:30 PM • M. Chinnaswamy Stadium</p>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-black mb-2">
-                    {String(timeLeft.hours).padStart(2, '0')}:{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}
-                  </div>
-                  <div className="text-sm opacity-90">Hours : Minutes : Seconds</div>
-                  <button className="mt-3 bg-white text-blue-600 px-4 py-2 rounded-lg font-bold text-sm hover:bg-gray-100 transition-colors">
-                    Set Reminder
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
         {/* Social Proof Bar */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -1082,8 +1005,11 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                   }}
                 >
                   <motion.div
-                    animate={{ scale: [1, 1.2, 1] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    animate={{ 
+                      scale: [1, 1.2, 1],
+                      rotate: [0, -10, 10, 0]
+                    }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                   >
                     <Flame className="w-5 h-5" style={{ color: WPLColors.warning }} />
                   </motion.div>
@@ -1097,10 +1023,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                   >
                     Women's Premier League
                   </span>
-                  <motion.div
-                    animate={{ rotate: [0, -10, 10, 0] }}
-                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                  >
+                  <motion.div>
                     <Trophy className="w-5 h-5" style={{ color: WPLColors.accent }} />
                   </motion.div>
                 </motion.div>
