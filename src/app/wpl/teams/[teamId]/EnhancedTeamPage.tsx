@@ -2707,15 +2707,25 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.1 }}
                       >
-                        <h2 className="text-3xl font-bold text-white mb-3 flex items-center gap-3">
+                        <h2 className="text-4xl font-black text-white mb-4 flex items-center gap-4">
                           <motion.div
-                            animate={{ rotate: [0, 10, -10, 0] }}
-                            transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                            className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center"
+                            animate={{ 
+                              rotate: [0, 10, -10, 0],
+                              scale: [1, 1.1, 1]
+                            }}
+                            transition={{ 
+                              duration: 3, 
+                              repeat: Infinity, 
+                              repeatDelay: 2,
+                              ease: "easeInOut"
+                            }}
+                            className="w-12 h-12 rounded-2xl bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 flex items-center justify-center shadow-lg shadow-orange-500/30"
                           >
-                            <Trophy className="w-4 h-4 text-white" />
+                            <span className="text-2xl">🔥</span>
                           </motion.div>
-                          Match Details
+                          <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
+                            Match Details
+                          </span>
                         </h2>
                       </motion.div>
                       
@@ -2724,12 +2734,28 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="mb-4"
+                        className="mb-6"
                       >
-                        <div className="flex items-center gap-4 text-white/90 text-lg">
-                          <span className="font-semibold">{selectedMatch.team1?.shortName || 'Team 1'}</span>
-                          <span className="text-white/50">vs</span>
-                          <span className="font-semibold">{selectedMatch.team2?.shortName || 'Team 2'}</span>
+                        <div className="flex items-center gap-6 text-white/90 text-2xl font-bold">
+                          <motion.span 
+                            className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent"
+                            whileHover={{ scale: 1.05 }}
+                          >
+                            {selectedMatch.team1?.shortName || 'Team 1'}
+                          </motion.span>
+                          <motion.div
+                            animate={{ scale: [1, 1.2, 1] }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                            className="text-3xl"
+                          >
+                            ⚡
+                          </motion.div>
+                          <motion.span 
+                            className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent"
+                            whileHover={{ scale: 1.05 }}
+                          >
+                            {selectedMatch.team2?.shortName || 'Team 2'}
+                          </motion.span>
                         </div>
                       </motion.div>
                       
@@ -2738,20 +2764,29 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.3 }}
-                        className="flex items-center gap-6 text-white/60 text-sm"
+                        className="flex flex-wrap items-center gap-6 text-white/70 text-sm"
                       >
-                        <div className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4" />
-                          {selectedMatch.date}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4" />
-                          {selectedMatch.venue}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4" />
-                          {selectedMatch.time || '19:30'}
-                        </div>
+                        <motion.div 
+                          className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-full backdrop-blur-sm border border-white/20"
+                          whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.2)" }}
+                        >
+                          <span className="text-lg">📅</span>
+                          <span className="font-medium">{selectedMatch.date}</span>
+                        </motion.div>
+                        <motion.div 
+                          className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-full backdrop-blur-sm border border-white/20"
+                          whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.2)" }}
+                        >
+                          <span className="text-lg">🏟️</span>
+                          <span className="font-medium">{selectedMatch.venue}</span>
+                        </motion.div>
+                        <motion.div 
+                          className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-full backdrop-blur-sm border border-white/20"
+                          whileHover={{ scale: 1.05, backgroundColor: "rgba(255,255,255,0.2)" }}
+                        >
+                          <span className="text-lg">⏰</span>
+                          <span className="font-medium">{selectedMatch.time || '19:30'}</span>
+                        </motion.div>
                       </motion.div>
                     </div>
                     
@@ -2760,12 +2795,12 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                       initial={{ opacity: 0, scale: 0 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 0.4 }}
-                      whileHover={{ scale: 1.1 }}
+                      whileHover={{ scale: 1.1, rotate: 90 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={closeScorecard}
-                      className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all duration-200 flex items-center justify-center border border-white/20"
+                      className="w-12 h-12 rounded-2xl bg-gradient-to-r from-red-500/20 to-pink-500/20 hover:from-red-500/30 hover:to-pink-500/30 text-white/80 hover:text-white transition-all duration-200 flex items-center justify-center border border-white/20 backdrop-blur-sm"
                     >
-                      <X className="w-5 h-5" />
+                      <span className="text-xl">✨</span>
                     </motion.button>
                   </div>
                   
@@ -2774,13 +2809,13 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5 }}
-                    className="flex gap-2 mt-6"
+                    className="flex gap-3 mt-8"
                   >
                     {[
-                      { id: 'scorecard', label: 'Scorecard', icon: '📊' },
-                      { id: 'playing11', label: 'Playing 11', icon: '👥' },
-                      { id: 'highlights', label: 'Highlights', icon: '⭐' },
-                      { id: 'stats', label: 'Statistics', icon: '📈' }
+                      { id: 'scorecard', label: 'Scorecard', icon: '📊', color: 'from-blue-500 to-cyan-500' },
+                      { id: 'playing11', label: 'Playing 11', icon: '👥', color: 'from-green-500 to-emerald-500' },
+                      { id: 'highlights', label: 'Highlights', icon: '⭐', color: 'from-yellow-500 to-orange-500' },
+                      { id: 'stats', label: 'Statistics', icon: '📈', color: 'from-purple-500 to-pink-500' }
                     ].map((tab, index) => (
                       <motion.button
                         key={tab.id}
@@ -2788,21 +2823,35 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.6 + index * 0.1 }}
                         onClick={() => setActiveModalTab(tab.id as any)}
-                        className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 flex items-center gap-2 ${
+                        className={`px-5 py-3 rounded-2xl font-bold transition-all duration-300 flex items-center gap-3 border ${
                           activeModalTab === tab.id
-                            ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg shadow-purple-500/25 border border-white/30'
-                            : 'text-white/70 hover:text-white hover:bg-white/10 border border-transparent'
+                            ? `bg-gradient-to-r ${tab.color} text-white shadow-xl shadow-lg transform scale-105 border-white/40`
+                            : 'text-white/70 hover:text-white hover:bg-white/10 border-white/20 backdrop-blur-sm'
                         }`}
-                        whileHover={{ scale: 1.05 }}
+                        whileHover={{ scale: 1.05, y: -2 }}
                         whileTap={{ scale: 0.95 }}
                       >
                         <motion.span
-                          animate={{ rotate: activeModalTab === tab.id ? [0, 360] : 0 }}
-                          transition={{ duration: 0.5 }}
+                          animate={{ 
+                            rotate: activeModalTab === tab.id ? [0, 360] : 0,
+                            scale: activeModalTab === tab.id ? [1, 1.2, 1] : 1
+                          }}
+                          transition={{ 
+                            duration: activeModalTab === tab.id ? 0.6 : 0.3,
+                            ease: "easeInOut"
+                          }}
+                          className="text-xl"
                         >
                           {tab.icon}
                         </motion.span>
-                        {tab.label}
+                        <span className="text-sm font-medium">{tab.label}</span>
+                        {activeModalTab === tab.id && (
+                          <motion.div
+                            layoutId="activeTab"
+                            className="absolute inset-0 rounded-2xl bg-white/10"
+                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                          />
+                        )}
                       </motion.button>
                     ))}
                   </motion.div>
@@ -2826,38 +2875,76 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                           initial={{ opacity: 0, scale: 0.95 }}
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ delay: 0.8 }}
-                          className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-md rounded-2xl p-6 border border-green-500/30"
+                          className="bg-gradient-to-br from-green-500/20 via-emerald-500/20 to-teal-500/20 backdrop-blur-md rounded-3xl p-8 border border-green-500/30 shadow-xl shadow-green-500/10"
                         >
                           <div className="flex items-center justify-between">
-                            <div>
-                              <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                            <div className="flex-1">
+                              <h3 className="text-2xl font-black text-white mb-4 flex items-center gap-3">
                                 <motion.div
-                                  animate={{ scale: [1, 1.2, 1] }}
-                                  transition={{ duration: 2, repeat: Infinity }}
+                                  animate={{ 
+                                    scale: [1, 1.3, 1],
+                                    rotate: [0, 10, -10, 0]
+                                  }}
+                                  transition={{ 
+                                    duration: 3, 
+                                    repeat: Infinity, 
+                                    ease: "easeInOut" 
+                                  }}
+                                  className="text-3xl"
                                 >
                                   🏆
                                 </motion.div>
-                                Result
+                                <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                                  Final Result
+                                </span>
                               </h3>
-                              <div className="text-2xl font-bold text-green-400">
+                              <motion.div 
+                                className="text-3xl font-black text-green-400 mb-3"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 1 }}
+                              >
                                 {selectedScorecard.result?.winner} won by {selectedScorecard.result?.margin}
-                              </div>
+                              </motion.div>
                               {selectedScorecard.result?.manOfTheMatch && (
                                 <motion.div
-                                  initial={{ opacity: 0 }}
-                                  animate={{ opacity: 1 }}
-                                  transition={{ delay: 1 }}
-                                  className="text-white/80 text-sm mt-2 flex items-center gap-2"
+                                  initial={{ opacity: 0, x: -20 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: 1.2 }}
+                                  className="flex items-center gap-3 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-sm rounded-2xl px-4 py-3 border border-yellow-500/30"
                                 >
-                                  <Star className="w-4 h-4 text-yellow-400" />
-                                  Man of the Match: <span className="font-semibold text-yellow-400">{selectedScorecard.result.manOfTheMatch}</span>
+                                  <motion.div
+                                    animate={{ 
+                                      scale: [1, 1.2, 1],
+                                      rotate: [0, 360]
+                                    }}
+                                    transition={{ 
+                                      duration: 4, 
+                                      repeat: Infinity, 
+                                      ease: "linear" 
+                                    }}
+                                    className="text-2xl"
+                                  >
+                                    ⭐
+                                  </motion.div>
+                                  <div>
+                                    <span className="text-yellow-400 font-bold">Man of the Match:</span>
+                                    <span className="text-white ml-2 font-semibold">{selectedScorecard.result.manOfTheMatch}</span>
+                                  </div>
                                 </motion.div>
                               )}
                             </div>
                             <motion.div
-                              animate={{ rotate: [0, 5, -5, 0] }}
-                              transition={{ duration: 4, repeat: Infinity, repeatDelay: 2 }}
-                              className="text-6xl"
+                              animate={{ 
+                                scale: [1, 1.1, 1],
+                                rotate: [0, 5, -5, 0]
+                              }}
+                              transition={{ 
+                                duration: 5, 
+                                repeat: Infinity, 
+                                ease: "easeInOut" 
+                              }}
+                              className="text-6xl opacity-50"
                             >
                               🎯
                             </motion.div>
@@ -2871,17 +2958,31 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.9 + index * 0.1 }}
-                            className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md rounded-2xl p-6 border border-white/20"
+                            className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md rounded-3xl p-8 border border-white/20 shadow-xl"
                           >
-                            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
+                            <h3 className="text-2xl font-black text-white mb-6 flex items-center gap-4">
                               <motion.div
-                                animate={{ rotate: [0, 360] }}
-                                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                                className="w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center"
+                                animate={{ 
+                                  rotate: [0, 360],
+                                  scale: [1, 1.1, 1]
+                                }}
+                                transition={{ 
+                                  duration: 20, 
+                                  repeat: Infinity, 
+                                  ease: "linear" 
+                                }}
+                                className="w-10 h-10 rounded-2xl bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center shadow-lg"
                               >
-                                <span className="text-xs font-bold">{index + 1}</span>
+                                <span className="text-sm font-bold text-white">{index + 1}</span>
                               </motion.div>
-                              Innings {index + 1} - {innings.battingTeamId === teamId ? team?.name : innings.battingTeamId}
+                              <div>
+                                <div className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                                  Innings {index + 1}
+                                </div>
+                                <div className="text-white/70 text-sm font-medium">
+                                  {innings.battingTeamId === teamId ? team?.name : innings.battingTeamId}
+                                </div>
+                              </div>
                             </h3>
                             
                             {/* Enhanced Score Summary */}
@@ -2889,26 +2990,60 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                               initial={{ opacity: 0, scale: 0.95 }}
                               animate={{ opacity: 1, scale: 1 }}
                               transition={{ delay: 1 + index * 0.1 }}
-                              className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-xl p-4 mb-6 border border-blue-500/30"
+                              className="bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-blue-500/30 shadow-lg"
                             >
-                              <div className="text-3xl font-bold text-white">
-                                {innings.totalRuns}/{innings.totalWickets} ({innings.totalOvers} overs)
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <div className="text-4xl font-black text-white mb-2">
+                                    {innings.totalRuns}/{innings.totalWickets}
+                                  </div>
+                                  <div className="text-white/60 text-sm">
+                                    ({innings.totalOvers} overs)
+                                  </div>
+                                </div>
+                                <motion.div
+                                  animate={{ 
+                                    scale: [1, 1.2, 1],
+                                    rotate: [0, 10, -10, 0]
+                                  }}
+                                  transition={{ 
+                                    duration: 3, 
+                                    repeat: Infinity, 
+                                    ease: "easeInOut" 
+                                  }}
+                                  className="text-4xl opacity-50"
+                                >
+                                  🎯
+                                </motion.div>
                               </div>
-                              <div className="text-white/60 text-sm mt-1">
-                                Run Rate: {((innings.totalRuns / (parseFloat(innings.totalOvers) || 1)) * 6).toFixed(2)}
+                              <div className="mt-4 flex items-center gap-2 bg-white/10 rounded-full px-3 py-1 backdrop-blur-sm border border-white/20">
+                                <span className="text-lg">⚡</span>
+                                <span className="text-white font-medium">
+                                  Run Rate: {((innings.totalRuns / (parseFloat(innings.totalOvers) || 1)) * 6).toFixed(2)}
+                                </span>
                               </div>
                             </motion.div>
 
                             {/* Enhanced Batting Scorecard */}
                             <div className="mb-8">
-                              <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                              <h4 className="text-xl font-black text-white mb-6 flex items-center gap-3">
                                 <motion.div
-                                  animate={{ scale: [1, 1.1, 1] }}
-                                  transition={{ duration: 2, repeat: Infinity }}
+                                  animate={{ 
+                                    scale: [1, 1.2, 1],
+                                    rotate: [0, -10, 10, 0]
+                                  }}
+                                  transition={{ 
+                                    duration: 3, 
+                                    repeat: Infinity, 
+                                    ease: "easeInOut" 
+                                  }}
+                                  className="text-2xl"
                                 >
                                   🏏
                                 </motion.div>
-                                Batting Scorecard
+                                <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                                  Batting Scorecard
+                                </span>
                               </h4>
                               <div className="overflow-x-auto rounded-xl border border-white/10">
                                 <table className="w-full text-sm text-white">
@@ -2976,14 +3111,25 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
 
                             {/* Enhanced Bowling Scorecard */}
                             <div>
-                              <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                              <h4 className="text-xl font-black text-white mb-6 flex items-center gap-3">
                                 <motion.div
-                                  animate={{ scale: [1, 1.1, 1] }}
-                                  transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                                  animate={{ 
+                                    scale: [1, 1.2, 1],
+                                    rotate: [0, 10, -10, 0]
+                                  }}
+                                  transition={{ 
+                                    duration: 3, 
+                                    repeat: Infinity, 
+                                    delay: 0.5,
+                                    ease: "easeInOut" 
+                                  }}
+                                  className="text-2xl"
                                 >
                                   🎯
                                 </motion.div>
-                                Bowling Scorecard
+                                <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                                  Bowling Scorecard
+                                </span>
                               </h4>
                               <div className="overflow-x-auto rounded-xl border border-white/10">
                                 <table className="w-full text-sm text-white">
