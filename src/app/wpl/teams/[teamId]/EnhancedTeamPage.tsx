@@ -702,36 +702,24 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
     );
   }
 
-  // Function to get correct logo path based on team shortName
-  const getTeamLogo = (team: Team) => {
-    if (team.logo && team.logo.startsWith('/logos/')) {
-      return team.logo;
-    }
-    
-    // Map team shortName to correct logo path
-    const logoMap: { [key: string]: string } = {
-      'RCB-W': '/logos/wpl_rcb_logo_animated.svg',
-      'MI-W': '/logos/wpl_mi_logo_animated.svg',
-      'DC-W': '/logos/wpl_dc_logo_animated.svg',
-      'GG-W': '/logos/wpl_gg_logo_animated.svg',
-      'UPW': '/logos/wpl_upw_logo_animated.svg',
-      'RCB': '/logos/rcb_logo_animated.svg',
-      'MI': '/logos/mi_logo_animated.svg',
-      'CSK': '/logos/csk_logo_animated.svg',
-      'KKR': '/logos/kkr_logo_animated.svg',
-      'SRH': '/logos/srh_logo_animated.svg',
-      'RR': '/logos/rr_logo_animated.svg',
-      'PBKS': '/logos/pbks_logo_animated.svg',
-      'LSG': '/logos/lsg_logo_animated.svg',
-      'GT': '/logos/gt_logo_animated.svg',
-      'DC': '/logos/dc_logo_animated.svg',
-    };
-    
-    return logoMap[team.shortName] || team.logo || null;
-  };
-
   const teamColors = team.colors || { primary: '#8B5CF6', secondary: '#F59E0B' };
-  const logoUrl = getTeamLogo(team);
+  const logoUrl = team.logo && team.logo.startsWith('/logos/') ? team.logo : 
+    (team.shortName === 'RCB-W' ? '/logos/wpl_rcb_logo_animated.svg' :
+     team.shortName === 'MI-W' ? '/logos/wpl_mi_logo_animated.svg' :
+     team.shortName === 'DC-W' ? '/logos/wpl_dc_logo_animated.svg' :
+     team.shortName === 'GG-W' ? '/logos/wpl_gg_logo_animated.svg' :
+     team.shortName === 'UPW' ? '/logos/wpl_upw_logo_animated.svg' :
+     team.shortName === 'RCB' ? '/logos/rcb_logo_animated.svg' :
+     team.shortName === 'MI' ? '/logos/mi_logo_animated.svg' :
+     team.shortName === 'CSK' ? '/logos/csk_logo_animated.svg' :
+     team.shortName === 'KKR' ? '/logos/kkr_logo_animated.svg' :
+     team.shortName === 'SRH' ? '/logos/srh_logo_animated.svg' :
+     team.shortName === 'RR' ? '/logos/rr_logo_animated.svg' :
+     team.shortName === 'PBKS' ? '/logos/pbks_logo_animated.svg' :
+     team.shortName === 'LSG' ? '/logos/lsg_logo_animated.svg' :
+     team.shortName === 'GT' ? '/logos/gt_logo_animated.svg' :
+     team.shortName === 'DC' ? '/logos/dc_logo_animated.svg' :
+     team.logo || null);
 
   return (
     <div className="min-h-screen" style={{
