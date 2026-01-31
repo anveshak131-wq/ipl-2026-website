@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform, useSpring, useMotionValue, useInView } from 'framer-motion';
 import { 
   Trophy, 
   Users, 
@@ -28,12 +28,13 @@ import {
   Twitter,
   Instagram,
   Youtube,
-  Facebook
+  Facebook,
+  Crown,
+  Flame,
+  Medal
 } from 'lucide-react';
-import { api } from '@/lib/data';
-import { Team, Player, Match, Trophy as TrophyType, CoachingStaff } from '@/types';
-import Image from 'next/image';
-import Link from 'next/link';
+import WPLFloatingParticles from '@/components/animations/WPLFloatingParticles';
+import { WPLColors, getWPLGlassmorphism, getWPLHoverGlow } from '@/lib/wplColors';
 
 interface EnhancedWPLTeamPageProps {
   teamId: string;
@@ -84,6 +85,27 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   const [allScorecards, setAllScorecards] = useState<any[]>([]);
   const [activeModalTab, setActiveModalTab] = useState<'scorecard' | 'playing11'>('scorecard');
   const [playerStats, setPlayerStats] = useState<{ [key: string]: any }>({});
+
+  // Enhanced mouse tracking and animations
+  const cursorX = useMotionValue(0);
+  const cursorY = useMotionValue(0);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isHoveringLogo, setIsHoveringLogo] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const logoRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(heroRef, { once: false, amount: 0.3 });
+  
+  // Scroll-based animations
+  const { scrollYProgress } = useScroll();
+  const scaleValue = useTransform(scrollYProgress, [0, 1], [1, 0.8]);
+  const rotateValue = useTransform(scrollYProgress, [0, 1], [0, 5]);
+  const opacityValue = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  
+  // Spring animations for smooth interactions
+  const springConfig = { damping: 25, stiffness: 300 };
+  const scaleSpring = useSpring(scaleValue, springConfig);
+  const rotateSpring = useSpring(rotateValue, springConfig);
 
   const hasFetchedData = useRef(false);
 
@@ -250,6 +272,38 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       setLoading(false);
     }
   };
+
+  // Mouse tracking event handlers
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        setMousePosition({ x, y });
+        cursorX.set(x);
+        cursorY.set(y);
+      }
+    };
+
+    const handleMouseEnter = () => setIsHoveringLogo(true);
+    const handleMouseLeave = () => setIsHoveringLogo(false);
+
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener('mousemove', handleMouseMove);
+      container.addEventListener('mouseenter', handleMouseEnter);
+      container.addEventListener('mouseleave', handleMouseLeave);
+    }
+
+    return () => {
+      if (container) {
+        container.removeEventListener('mousemove', handleMouseMove);
+        container.removeEventListener('mouseenter', handleMouseEnter);
+        container.removeEventListener('mouseleave', handleMouseLeave);
+      }
+    };
+  }, [cursorX, cursorY]);
 
   const calculateTeamStatsFromScorecards = (teamScorecards: any[], teamId: string) => {
     console.log('EnhancedTeamPage: Calculating stats from scorecards for team:', teamId);
@@ -659,59 +713,214 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
         </div>
       </motion.header>
 
-      {/* Hero Section */}
-      <section className="relative z-10 py-20">
+      {/* Enhanced Hero Section with Mouse Tracking */}
+      <section className="relative z-10 py-20" ref={containerRef}>
+        {/* Interactive mouse-following gradient */}
+        <motion.div
+          className="absolute w-96 h-96 rounded-full blur-3xl pointer-events-none"
+          style={{
+            background: `radial-gradient(circle, ${teamColors.primary}40, ${teamColors.secondary}30, transparent)`,
+            left: mousePosition.x - 192,
+            top: mousePosition.y - 192,
+          }}
+          transition={{ type: "spring", stiffness: 500, damping: 28 }}
+        />
+        
         <div className="container mx-auto px-4">
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            ref={heroRef}
+            style={{
+              scale: scaleSpring,
+              rotate: rotateSpring,
+              opacity: opacityValue,
+            }}
             className="text-center"
           >
-            <div className="relative inline-block mb-8">
+            {/* Enhanced Team Logo with Advanced Animations */}
+            <div className="relative inline-block mb-12">
+              {/* Floating particles around logo */}
               <motion.div
-                animate={{ 
-                  boxShadow: [
-                    "0 0 20px rgba(139, 92, 246, 0.5)",
-                    "0 0 40px rgba(139, 92, 246, 0.8)",
-                    "0 0 20px rgba(139, 92, 246, 0.5)"
-                  ]
-                }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="w-32 h-32 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20"
+                className="absolute inset-0 -z-10"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1, delay: 0.5 }}
               >
-                {team.logo ? (
-                  <Image
-                    src={team.logo}
-                    alt={team.name}
-                    width={120}
-                    height={120}
-                    className="rounded-xl"
+                {[...Array(6)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute w-2 h-2 bg-white rounded-full"
+                    style={{
+                      left: `${50 + Math.cos((i * 60) * Math.PI / 180) * 80}px`,
+                      top: `${50 + Math.sin((i * 60) * Math.PI / 180) * 80}px`,
+                    }}
+                    animate={{
+                      scale: [1, 1.5, 1],
+                      opacity: [0.5, 1, 0.5],
+                      rotate: [0, 180, 360],
+                    }}
+                    transition={{
+                      duration: 3 + i * 0.5,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      delay: i * 0.2,
+                    }}
                   />
-                ) : (
-                  <Shield className="w-16 h-16 text-white" />
-                )}
+                ))}
+              </motion.div>
+
+              <motion.div
+                ref={logoRef}
+                className="relative w-40 h-40 rounded-3xl overflow-hidden"
+                style={{
+                  ...getWPLGlassmorphism('purple', 20),
+                  border: `2px solid ${teamColors.primary}80`,
+                }}
+                whileHover={{ 
+                  scale: 1.1,
+                  rotate: [0, -5, 5, 0],
+                  boxShadow: `0 20px 60px ${teamColors.primary}60`,
+                }}
+                whileTap={{ scale: 0.95 }}
+                onHoverStart={() => setIsHoveringLogo(true)}
+                onHoverEnd={() => setIsHoveringLogo(false)}
+              >
+                {/* Animated background gradient */}
+                <motion.div
+                  className="absolute inset-0"
+                  animate={{
+                    background: [
+                      `linear-gradient(45deg, ${teamColors.primary}40, ${teamColors.secondary}40)`,
+                      `linear-gradient(135deg, ${teamColors.secondary}40, ${teamColors.primary}40)`,
+                      `linear-gradient(225deg, ${teamColors.primary}40, ${teamColors.secondary}40)`,
+                      `linear-gradient(315deg, ${teamColors.secondary}40, ${teamColors.primary}40)`,
+                    ],
+                  }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                />
+                
+                {/* Team Logo */}
+                <motion.div
+                  className="relative w-full h-full flex items-center justify-center p-4"
+                  animate={{
+                    rotate: isHoveringLogo ? [0, 360] : 0,
+                  }}
+                  transition={{ duration: isHoveringLogo ? 0.8 : 0, ease: "easeInOut" }}
+                >
+                  {team.logo ? (
+                    <Image
+                      src={team.logo}
+                      alt={team.name}
+                      width={120}
+                      height={120}
+                      className="rounded-2xl object-contain filter drop-shadow-lg"
+                      style={{
+                        filter: `drop-shadow(0 0 20px ${teamColors.primary})`,
+                      }}
+                    />
+                  ) : (
+                    <motion.div
+                      animate={{ rotate: [0, 360] }}
+                      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                    >
+                      <Shield 
+                        className="w-20 h-20 text-white" 
+                        style={{ filter: `drop-shadow(0 0 20px ${teamColors.primary})` }}
+                      />
+                    </motion.div>
+                  )}
+                </motion.div>
+
+                {/* Glow effect on hover */}
+                <motion.div
+                  className="absolute inset-0 rounded-3xl pointer-events-none"
+                  style={{
+                    background: `radial-gradient(circle, ${teamColors.primary}30, transparent)`,
+                  }}
+                  animate={{
+                    opacity: isHoveringLogo ? [0, 0.6, 0] : 0,
+                    scale: isHoveringLogo ? [1, 1.2, 1] : 1,
+                  }}
+                  transition={{ duration: 1.5, repeat: isHoveringLogo ? Infinity : 0 }}
+                />
               </motion.div>
             </div>
 
+            {/* Enhanced Team Name with Staggered Animation */}
             <motion.h1
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
-              className="text-6xl font-bold text-white mb-4"
-              style={{ textShadow: `0 0 30px ${teamColors.primary}` }}
+              className="text-7xl md:text-8xl font-black text-white mb-6 tracking-tight leading-none"
+              initial={{ opacity: 0, y: 50, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              style={{ 
+                textShadow: `0 0 40px ${teamColors.primary}, 0 0 80px ${teamColors.primary}40`,
+                background: `linear-gradient(135deg, ${teamColors.primary}, ${teamColors.secondary}, white)`,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+              whileHover={{ 
+                scale: 1.05,
+                textShadow: `0 0 60px ${teamColors.primary}, 0 0 120px ${teamColors.primary}60`,
+              }}
             >
-              {team.name}
+              <motion.span
+                className="block"
+                initial={{ opacity: 0, x: -100 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+              >
+                {team.name}
+              </motion.span>
             </motion.h1>
 
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-              className="text-xl text-white/80 mb-8"
+            {/* Enhanced Subtitle with Icons */}
+            <motion.div
+              className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
             >
-              {team.shortName} • Women's Premier League
-            </motion.p>
+              <motion.div
+                className="flex items-center gap-3 px-6 py-3 rounded-full"
+                style={{
+                  ...getWPLGlassmorphism('purple', 25),
+                  border: `1px solid ${teamColors.primary}60`,
+                }}
+                whileHover={{ 
+                  scale: 1.05,
+                  boxShadow: `0 10px 30px ${teamColors.primary}40`,
+                }}
+              >
+                <motion.div
+                  animate={{ rotate: [0, 360] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                >
+                  <Crown className="w-5 h-5 text-yellow-400" />
+                </motion.div>
+                <span className="text-white font-bold text-lg">{team.shortName}</span>
+              </motion.div>
+
+              <motion.div
+                className="flex items-center gap-3 px-6 py-3 rounded-full"
+                style={{
+                  ...getWPLGlassmorphism('pink', 25),
+                  border: `1px solid ${teamColors.secondary}60`,
+                }}
+                whileHover={{ 
+                  scale: 1.05,
+                  boxShadow: `0 10px 30px ${teamColors.secondary}40`,
+                }}
+              >
+                <Flame className="w-5 h-5 text-orange-400" />
+                <span className="text-white font-bold text-lg">Women's Premier League</span>
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <Trophy className="w-5 h-5 text-yellow-400" />
+                </motion.div>
+              </motion.div>
+            </motion.div>
 
             {/* Quick Stats */}
             <motion.div
