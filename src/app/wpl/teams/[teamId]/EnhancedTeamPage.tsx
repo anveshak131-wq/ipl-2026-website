@@ -703,23 +703,33 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   }
 
   const teamColors = team.colors || { primary: '#8B5CF6', secondary: '#F59E0B' };
-  const logoUrl = team.logo && team.logo.startsWith('/logos/') ? team.logo : 
-    (team.shortName === 'RCB-W' ? '/logos/wpl_rcb_logo_animated.svg' :
-     team.shortName === 'MI-W' ? '/logos/wpl_mi_logo_animated.svg' :
-     team.shortName === 'DC-W' ? '/logos/wpl_dc_logo_animated.svg' :
-     team.shortName === 'GG-W' ? '/logos/wpl_gg_logo_animated.svg' :
-     team.shortName === 'UPW' ? '/logos/wpl_upw_logo_animated.svg' :
-     team.shortName === 'RCB' ? '/logos/rcb_logo_animated.svg' :
-     team.shortName === 'MI' ? '/logos/mi_logo_animated.svg' :
-     team.shortName === 'CSK' ? '/logos/csk_logo_animated.svg' :
-     team.shortName === 'KKR' ? '/logos/kkr_logo_animated.svg' :
-     team.shortName === 'SRH' ? '/logos/srh_logo_animated.svg' :
-     team.shortName === 'RR' ? '/logos/rr_logo_animated.svg' :
-     team.shortName === 'PBKS' ? '/logos/pbks_logo_animated.svg' :
-     team.shortName === 'LSG' ? '/logos/lsg_logo_animated.svg' :
-     team.shortName === 'GT' ? '/logos/gt_logo_animated.svg' :
-     team.shortName === 'DC' ? '/logos/dc_logo_animated.svg' :
-     team.logo || null);
+  
+  const getLogoUrl = () => {
+    if (team.logo && team.logo.startsWith('/logos/')) {
+      return team.logo;
+    }
+    
+    switch (team.shortName) {
+      case 'RCB-W': return '/logos/wpl_rcb_logo_animated.svg';
+      case 'MI-W': return '/logos/wpl_mi_logo_animated.svg';
+      case 'DC-W': return '/logos/wpl_dc_logo_animated.svg';
+      case 'GG-W': return '/logos/wpl_gg_logo_animated.svg';
+      case 'UPW': return '/logos/wpl_upw_logo_animated.svg';
+      case 'RCB': return '/logos/rcb_logo_animated.svg';
+      case 'MI': return '/logos/mi_logo_animated.svg';
+      case 'CSK': return '/logos/csk_logo_animated.svg';
+      case 'KKR': return '/logos/kkr_logo_animated.svg';
+      case 'SRH': return '/logos/srh_logo_animated.svg';
+      case 'RR': return '/logos/rr_logo_animated.svg';
+      case 'PBKS': return '/logos/pbks_logo_animated.svg';
+      case 'LSG': return '/logos/lsg_logo_animated.svg';
+      case 'GT': return '/logos/gt_logo_animated.svg';
+      case 'DC': return '/logos/dc_logo_animated.svg';
+      default: return team.logo || null;
+    }
+  };
+  
+  const logoUrl = getLogoUrl();
 
   return (
     <div className="min-h-screen" style={{
@@ -1125,6 +1135,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                 </div>
               </motion.div>
             </motion.div>
+          </div>
 
             {/* Enhanced Quick Stats with AI-Inspired Design */}
             <motion.div
