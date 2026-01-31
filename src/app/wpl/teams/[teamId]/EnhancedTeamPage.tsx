@@ -34,7 +34,9 @@ import {
   Facebook,
   Crown,
   Flame,
-  Medal
+  Medal,
+  Menu,
+  X
 } from 'lucide-react';
 import WPLFloatingParticles from '@/components/animations/WPLFloatingParticles';
 import { WPLColors, getWPLGlassmorphism, getWPLHoverGlow } from '@/lib/wplColors';
@@ -79,6 +81,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   const [coachingStaff, setCoachingStaff] = useState<CoachingStaff[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState('all');
   const [teamStats, setTeamStats] = useState<TeamStats | null>(null);
@@ -724,23 +727,181 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
         />
       </div>
 
-      {/* Header */}
+      {/* Enhanced Sticky Navigation Bar */}
+      <motion.nav 
+        className="sticky top-0 z-50 backdrop-blur-lg bg-white/10 border-b border-white/20"
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ type: "spring", stiffness: 100 }}
+      >
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            {/* Team Logo and Name */}
+            <div className="flex items-center gap-3">
+              <Link href="/wpl/teams" className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
+                <ChevronRight className="w-4 h-4 rotate-180" />
+                <span className="hidden sm:inline text-sm">Teams</span>
+              </Link>
+              
+              <div className="flex items-center gap-3">
+                {logoUrl ? (
+                  <Image 
+                    src={logoUrl} 
+                    alt={team.name} 
+                    className="w-8 h-8 object-contain"
+                    width={32}
+                    height={32}
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                    <span className="text-white font-black text-xs">{team.shortName?.charAt(0) || 'T'}</span>
+                  </div>
+                )}
+                <div className="hidden md:block">
+                  <div className="text-white font-bold text-sm">{team.shortName}</div>
+                  <div className="text-white/60 text-xs">Women's Premier League</div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Primary Navigation - Desktop */}
+            <div className="hidden md:flex items-center gap-1">
+              {[
+                { id: 'overview', label: 'Overview', icon: Activity },
+                { id: 'squad', label: 'Squad', icon: Users },
+                { id: 'matches', label: 'Matches', icon: Calendar },
+                { id: 'stats', label: 'Stats', icon: BarChart3 },
+                { id: 'about', label: 'About', icon: Star }
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    activeTab === item.id
+                      ? 'text-white bg-white/20 shadow-lg'
+                      : 'text-white/70 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <item.icon className="w-4 h-4" />
+                    <span>{item.label}</span>
+                  </span>
+                  
+                  {/* Active indicator */}
+                  {activeTab === item.id && (
+                    <motion.div
+                      className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-white rounded-full"
+                      layoutId="activeNavIndicator"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                </button>
+              ))}
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2">
+              {/* Search Button */}
+              <button className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200">
+                <Search className="w-4 h-4" />
+              </button>
+              
+              {/* Share Button */}
+              <button className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200">
+                <Share2 className="w-4 h-4" />
+              </button>
+              
+              {/* Favorite Button */}
+              <motion.button 
+                className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <Heart className="w-4 h-4" />
+              </motion.button>
+              
+              {/* Mobile Menu Button */}
+              <button 
+                className="md:hidden p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
+                onClick={() => setShowMobileMenu(!showMobileMenu)}
+              >
+                {showMobileMenu ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </div>
+          </div>
+          
+          {/* Mobile Navigation Menu */}
+          <AnimatePresence>
+            {showMobileMenu && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="md:hidden border-t border-white/20 mt-2 pt-2"
+              >
+                <div className="grid grid-cols-2 gap-2 pb-3">
+                  {[
+                    { id: 'overview', label: 'Overview', icon: Activity },
+                    { id: 'squad', label: 'Squad', icon: Users },
+                    { id: 'matches', label: 'Matches', icon: Calendar },
+                    { id: 'stats', label: 'Stats', icon: BarChart3 },
+                    { id: 'about', label: 'About', icon: Star }
+                  ].map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => {
+                        setActiveTab(item.id);
+                        setShowMobileMenu(false);
+                      }}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                        activeTab === item.id
+                          ? 'text-white bg-white/20'
+                          : 'text-white/70 hover:text-white hover:bg-white/10'
+                      }`}
+                    >
+                      <item.icon className="w-4 h-4" />
+                      <span>{item.label}</span>
+                    </button>
+                  ))}
+                </div>
+                
+                {/* Mobile Quick Actions */}
+                <div className="flex gap-2 pt-2 border-t border-white/10">
+                  <button className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all">
+                    <Search className="w-4 h-4" />
+                    Search
+                  </button>
+                  <button className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-all">
+                    <Share2 className="w-4 h-4" />
+                    Share
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </motion.nav>
+
+      {/* Original Header - Now simplified */}
       <motion.header
         style={{ opacity: headerOpacity, scale: headerScale }}
         className="relative z-10 bg-black/20 backdrop-blur-lg border-b border-white/10"
       >
-        <div className="container mx-auto px-4 py-6">
+        <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link href="/wpl/teams" className="text-white/70 hover:text-white transition-colors">
-              ← Back to Teams
-            </Link>
-            <div className="flex gap-4">
-              <button className="p-2 text-white/70 hover:text-white transition-colors">
-                <Share2 className="w-5 h-5" />
-              </button>
-              <button className="p-2 text-white/70 hover:text-white transition-colors">
-                <Heart className="w-5 h-5" />
-              </button>
+            <div className="text-white/60 text-sm">
+              Season 2026 • WPL
+            </div>
+            <div className="flex items-center gap-4 text-white/60 text-sm">
+              <div className="flex items-center gap-1">
+                <Users className="w-4 h-4" />
+                <span>2.3M</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Trophy className="w-4 h-4" />
+                <span>3 Titles</span>
+              </div>
             </div>
           </div>
         </div>
@@ -1346,133 +1507,6 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
           </motion.div>
         </div>
       </section>
-
-      {/* Enhanced Navigation Tabs with AI-Inspired Design */}
-      <motion.section 
-        className="relative z-10 sticky top-0"
-        style={{
-          background: `linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%)`,
-          backdropFilter: 'blur(20px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          borderBottom: `1px solid ${teamColors.primary}30`,
-        }}
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 1.3 }}
-      >
-        <div className="container mx-auto px-4">
-          <div className="flex gap-2 overflow-x-auto py-6">
-            {['overview', 'squad', 'matches', 'stats', 'about'].map((tab, index) => (
-              <motion.button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`relative px-8 py-4 rounded-2xl font-bold text-sm uppercase tracking-wider transition-all duration-300 overflow-hidden group ${
-                  activeTab === tab
-                    ? 'text-white scale-105'
-                    : 'text-white/60 hover:text-white hover:scale-105'
-                }`}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 1.4 + index * 0.1, duration: 0.5 }}
-                whileHover={{ 
-                  scale: 1.05,
-                  transition: { duration: 0.2 }
-                }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {/* Animated background for active tab */}
-                {activeTab === tab && (
-                  <motion.div
-                    className="absolute inset-0 rounded-2xl"
-                    style={{
-                      background: `linear-gradient(135deg, ${teamColors.primary}40, ${teamColors.secondary}40)`,
-                    }}
-                    layoutId="activeTab"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  >
-                    <motion.div
-                      className="absolute inset-0 rounded-2xl opacity-50"
-                      style={{
-                        background: `radial-gradient(circle at 50% 50%, ${teamColors.primary}20, transparent 70%)`,
-                      }}
-                      animate={{
-                        scale: [1, 1.2, 1],
-                        opacity: [0.5, 0.8, 0.5],
-                      }}
-                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                    />
-                  </motion.div>
-                )}
-                
-                {/* Hover background */}
-                <motion.div
-                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{
-                    background: `linear-gradient(135deg, ${teamColors.primary}20, ${teamColors.secondary}20)`,
-                  }}
-                />
-                
-                {/* Tab content */}
-                <span className="relative z-10 flex items-center gap-2">
-                  {/* Tab icons */}
-                  {tab === 'overview' && <Activity className="w-4 h-4" />}
-                  {tab === 'squad' && <Users className="w-4 h-4" />}
-                  {tab === 'matches' && <Calendar className="w-4 h-4" />}
-                  {tab === 'stats' && <BarChart3 className="w-4 h-4" />}
-                  {tab === 'about' && <Star className="w-4 h-4" />}
-                  
-                  {tab}
-                  
-                  {/* Active indicator */}
-                  {activeTab === tab && (
-                    <motion.div
-                      className="w-2 h-2 bg-white rounded-full"
-                      animate={{ scale: [1, 1.5, 1] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                    />
-                  )}
-                </span>
-                
-                {/* Interactive particles on hover */}
-                {activeTab === tab && (
-                  <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
-                    {[...Array(3)].map((_, i) => (
-                      <motion.div
-                        key={i}
-                        className="absolute w-1 h-1 bg-white rounded-full"
-                        style={{
-                          left: `${20 + i * 30}%`,
-                          top: '50%',
-                        }}
-                        animate={{
-                          x: [0, 10, 0],
-                          y: [0, -10, 0],
-                          opacity: [0, 1, 0],
-                        }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          delay: i * 0.3,
-                          ease: "easeInOut"
-                        }}
-                      />
-                    ))}
-                  </div>
-                )}
-              </motion.button>
-            ))}
-          </div>
-          
-          {/* Animated underline */}
-          <motion.div
-            className="h-0.5 bg-gradient-to-r from-transparent via-white to-transparent"
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ delay: 1.8, duration: 1, ease: "easeOut" }}
-            style={{ originX: 0.5 }}
-          />
-        </div>
-      </motion.section>
 
       {/* Content Sections */}
       <section className="relative z-10 py-12">
