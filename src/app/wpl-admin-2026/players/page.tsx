@@ -30,6 +30,8 @@ export default function WPLPlayersManagementPage() {
   const [showEnhancedEditor, setShowEnhancedEditor] = useState(false);
   const [activeEditorTab, setActiveEditorTab] = useState<'basic' | 'style' | 'advanced'>('basic');
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [playerStatistics, setPlayerStatistics] = useState<any>(null);
+  const [isLoadingStats, setIsLoadingStats] = useState(false);
   
   // Enhanced editing state
   const [enhancedEditedPlayer, setEnhancedEditedPlayer] = useState({
@@ -112,6 +114,111 @@ export default function WPLPlayersManagementPage() {
     return flags[nationality] || '';
   };
 
+  // Fetch player statistics from scorecards
+  const fetchPlayerStatistics = async (playerName: string) => {
+    setIsLoadingStats(true);
+    try {
+      // Fetch all WPL scorecards
+      const response = await fetch('/api/scorecards?league=wpl');
+      const scorecards = await response.json();
+      
+      if (!scorecards || scorecards.length === 0) {
+        setPlayerStatistics({
+          matches: 0,
+          runs: 0,
+          wickets: 0,
+          average: 0,
+          lastUpdated: new Date().toISOString()
+        });
+        return;
+      }
+
+      let totalMatches = 0;
+      let totalRuns = 0;
+      let totalWickets = 0;
+      let inningsCount = 0;
+      let lastMatchDate = null;
+
+      // Process each scorecard
+      for (const scorecard of scorecards) {
+        if (!scorecard.scorecard) continue;
+        
+        // Check if player is in batting scorecard
+        if (scorecard.scorecard.batting) {
+          for (const team of Object.keys(scorecard.scorecard.batting)) {
+            const battingTeam = scorecard.scorecard.batting[team];
+            if (battingTeam.players) {
+              for (const player of battingTeam.players) {
+                if (player.name && player.name.toLowerCase().includes(playerName.toLowerCase())) {
+                  totalMatches++;
+                  totalRuns += player.runs || 0;
+                  if (player.runs && player.runs > 0) {
+                    inningsCount++;
+                  }
+                  lastMatchDate = scorecard.date || lastMatchDate;
+                }
+              }
+            }
+          }
+        }
+
+        // Check if player is in bowling scorecard
+        if (scorecard.scorecard.bowling) {
+          for (const team of Object.keys(scorecard.scorecard.bowling)) {
+            const bowlingTeam = scorecard.scorecard.bowling[team];
+            if (bowlingTeam.players) {
+              for (const player of bowlingTeam.players) {
+                if (player.name && player.name.toLowerCase().includes(playerName.toLowerCase())) {
+                  totalWickets += player.wickets || 0;
+                  if (!lastMatchDate) {
+                    lastMatchDate = scorecard.date || lastMatchDate;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // Calculate average (runs per innings)
+      const average = inningsCount > 0 ? Math.round(totalRuns / inningsCount) : 0;
+
+      // Calculate profile completeness based on available data
+      const currentPlayer = players.find(p => p.name?.toLowerCase().includes(playerName.toLowerCase()));
+      let completeness = 0;
+      if (currentPlayer) {
+        if (currentPlayer.name) completeness += 20;
+        if (currentPlayer.nationality) completeness += 20;
+        if (currentPlayer.age) completeness += 15;
+        if (currentPlayer.battingStyle) completeness += 15;
+        if (currentPlayer.bowlingStyle) completeness += 15;
+        if (currentPlayer.role) completeness += 15;
+      }
+
+      setPlayerStatistics({
+        matches: totalMatches,
+        runs: totalRuns,
+        wickets: totalWickets,
+        average: average,
+        lastUpdated: lastMatchDate || new Date().toISOString(),
+        profileCompleteness: completeness
+      });
+
+    } catch (error) {
+      console.error('Error fetching player statistics:', error);
+      setPlayerStatistics({
+        matches: 0,
+        runs: 0,
+        wickets: 0,
+        average: 0,
+        lastUpdated: new Date().toISOString(),
+        profileCompleteness: 0
+      });
+    } finally {
+      setIsLoadingStats(false);
+    }
+  };
+
   // Open enhanced editor for a player
   const openEnhancedEditor = (player: Player) => {
     setEnhancedEditedPlayer({
@@ -128,6 +235,11 @@ export default function WPLPlayersManagementPage() {
     });
     setValidationErrors([]);
     setShowEnhancedEditor(true);
+    
+    // Fetch player statistics when opening editor
+    if (player.name) {
+      fetchPlayerStatistics(player.name);
+    }
   };
 
   // Save enhanced player
@@ -1288,41 +1400,110 @@ export default function WPLPlayersManagementPage() {
               {/* Advanced Tab */}
               {activeEditorTab === 'advanced' && (
                 <div className="space-y-6">
+                  {/* Player Statistics */}
                   <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-                    <h4 className="text-white font-medium mb-3">Player Statistics</h4>
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-white font-medium">Player Statistics</h4>
+                      {isLoadingStats && (
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
+                          <span className="text-white/50 text-sm">Loading...</span>
+                        </div>
+                      )}
+                    </div>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
                         <span className="text-white/50">Matches:</span>
-                        <span className="text-white font-medium ml-2">-</span>
+                        <span className="text-white font-medium ml-2">
+                          {isLoadingStats ? '-' : (playerStatistics?.matches || 0)}
+                        </span>
                       </div>
                       <div>
                         <span className="text-white/50">Runs:</span>
-                        <span className="text-white font-medium ml-2">-</span>
+                        <span className="text-white font-medium ml-2">
+                          {isLoadingStats ? '-' : (playerStatistics?.runs || 0)}
+                        </span>
                       </div>
                       <div>
                         <span className="text-white/50">Wickets:</span>
-                        <span className="text-white font-medium ml-2">-</span>
+                        <span className="text-white font-medium ml-2">
+                          {isLoadingStats ? '-' : (playerStatistics?.wickets || 0)}
+                        </span>
                       </div>
                       <div>
                         <span className="text-white/50">Average:</span>
-                        <span className="text-white font-medium ml-2">-</span>
+                        <span className="text-white font-medium ml-2">
+                          {isLoadingStats ? '-' : (playerStatistics?.average || 0)}
+                        </span>
                       </div>
                     </div>
                   </div>
                   
+                  {/* Data Quality */}
                   <div className="p-4 bg-white/5 rounded-lg border border-white/10">
                     <h4 className="text-white font-medium mb-3">Data Quality</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-white/50">Profile Completeness:</span>
-                        <span className="text-green-400 font-medium">85%</span>
+                    <div className="space-y-3">
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-white/50 text-sm">Profile Completeness:</span>
+                          <span className="text-green-400 font-medium text-sm">
+                            {playerStatistics?.profileCompleteness || 0}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-white/10 rounded-full h-2">
+                          <div 
+                            className="bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 h-2 rounded-full transition-all duration-500"
+                            style={{ width: `${playerStatistics?.profileCompleteness || 0}%` }}
+                          ></div>
+                        </div>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-white/50">Last Updated:</span>
-                        <span className="text-white font-medium">-</span>
+                        <span className="text-white/50 text-sm">Last Updated:</span>
+                        <span className="text-white font-medium text-sm">
+                          {playerStatistics?.lastUpdated 
+                            ? new Date(playerStatistics.lastUpdated).toLocaleDateString()
+                            : '-'
+                          }
+                        </span>
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Performance Summary */}
+                  {playerStatistics && !isLoadingStats && (playerStatistics.matches > 0 || playerStatistics.runs > 0 || playerStatistics.wickets > 0) && (
+                    <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+                      <h4 className="text-white font-medium mb-3">Performance Summary</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className="text-white/50">Role Performance:</span>
+                          <span className="text-white font-medium">
+                            {enhancedEditedPlayer.role === 'Batter' && '🏏 Batsman'}
+                            {enhancedEditedPlayer.role === 'Bowler' && '🎯 Bowler'}
+                            {enhancedEditedPlayer.role === 'All-rounder' && '⚡ All-rounder'}
+                            {enhancedEditedPlayer.role === 'Wicket-keeper' && '🧤 Wicket-keeper'}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-white/50">Team:</span>
+                          <span className="text-white font-medium">
+                            {teams.find(t => t.id === enhancedEditedPlayer.teamId)?.name || 'Unknown'}
+                          </span>
+                        </div>
+                        {enhancedEditedPlayer.battingStyle && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-white/50">Batting:</span>
+                            <span className="text-white font-medium">{enhancedEditedPlayer.battingStyle}</span>
+                          </div>
+                        )}
+                        {enhancedEditedPlayer.bowlingStyle && enhancedEditedPlayer.bowlingStyle !== 'N/A' && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-white/50">Bowling:</span>
+                            <span className="text-white font-medium">{enhancedEditedPlayer.bowlingStyle}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
               
