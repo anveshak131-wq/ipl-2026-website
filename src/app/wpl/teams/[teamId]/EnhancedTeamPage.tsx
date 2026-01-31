@@ -92,6 +92,9 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   const [activeModalTab, setActiveModalTab] = useState<'scorecard' | 'playing11'>('scorecard');
   
   const [playerStats, setPlayerStats] = useState<{ [key: string]: any }>({});
+  const [showPlayerStats, setShowPlayerStats] = useState(false);
+  const [selectedPlayerForStats, setSelectedPlayerForStats] = useState<any | null>(null);
+  const [isLoadingPlayerStats, setIsLoadingPlayerStats] = useState(false);
 
   // Enhanced mouse tracking and animations
   const cursorX = useMotionValue(0);
@@ -508,6 +511,135 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
     setSelectedMatch(null);
     setSelectedScorecard(null);
     setActiveModalTab('scorecard');
+  };
+
+  const handlePlayerClick = async (player: any) => {
+    setSelectedPlayerForStats(player);
+    setIsLoadingPlayerStats(true);
+    setShowPlayerStats(true);
+    
+    try {
+      // Fetch all WPL scorecards
+      const response = await fetch('/api/scorecards?league=wpl');
+      const scorecards = await response.json();
+      
+      if (!scorecards || scorecards.length === 0) {
+        setPlayerStats(prev => ({
+          ...prev,
+          [player.id]: {
+            matches: 0,
+            runs: 0,
+            wickets: 0,
+            average: 0,
+            strikeRate: 0,
+            economy: 0,
+            innings: 0,
+            notOuts: 0,
+            overs: 0,
+            runsConceded: 0
+          }
+        }));
+        setIsLoadingPlayerStats(false);
+        return;
+      }
+
+      let totalRuns = 0;
+      let totalBalls = 0;
+      let totalWickets = 0;
+      let inningsCount = 0;
+      let notOuts = 0;
+      let totalOvers = 0;
+      let totalRunsConceded = 0;
+      let matchesPlayed = new Set();
+
+      // Process each scorecard
+      for (const scorecard of scorecards) {
+        if (!scorecard.innings) continue;
+        
+        // Process each innings
+        for (const innings of scorecard.innings) {
+          // Check if player is in batting scorecard
+          if (innings.batting) {
+            for (const batsman of innings.batting) {
+              if (batsman.name && batsman.name.toLowerCase().trim() === player.name.toLowerCase().trim()) {
+                totalRuns += batsman.runs || 0;
+                totalBalls += batsman.balls || 0;
+                inningsCount++;
+                if (batsman.dismissal?.type === 'not-out') {
+                  notOuts++;
+                }
+                matchesPlayed.add(scorecard.id);
+              }
+            }
+          }
+
+          // Check if player is in bowling scorecard
+          if (innings.bowling) {
+            for (const bowler of innings.bowling) {
+              if (bowler.name && bowler.name.toLowerCase().trim() === player.name.toLowerCase().trim()) {
+                totalWickets += bowler.wickets || 0;
+                totalOvers += parseFloat(bowler.overs) || 0;
+                totalRunsConceded += bowler.runs || 0;
+                matchesPlayed.add(scorecard.id);
+              }
+            }
+          }
+        }
+      }
+
+      // Calculate derived statistics
+      const average = inningsCount > 0 && (inningsCount - notOuts) > 0 
+        ? (totalRuns / (inningsCount - notOuts)).toFixed(2) 
+        : '0.00';
+      const strikeRate = totalBalls > 0 
+        ? ((totalRuns / totalBalls) * 100).toFixed(2) 
+        : '0.00';
+      const economy = totalOvers > 0 
+        ? (totalRunsConceded / totalOvers).toFixed(2) 
+        : '0.00';
+
+      setPlayerStats(prev => ({
+        ...prev,
+        [player.id]: {
+          matches: matchesPlayed.size,
+          runs: totalRuns,
+          wickets: totalWickets,
+          average: parseFloat(average),
+          strikeRate: parseFloat(strikeRate),
+          economy: parseFloat(economy),
+          innings: inningsCount,
+          notOuts: notOuts,
+          overs: totalOvers.toFixed(1),
+          runsConceded: totalRunsConceded,
+          balls: totalBalls
+        }
+      }));
+
+    } catch (error) {
+      console.error('Error fetching player statistics:', error);
+      setPlayerStats(prev => ({
+        ...prev,
+        [player.id]: {
+          matches: 0,
+          runs: 0,
+          wickets: 0,
+          average: 0,
+          strikeRate: 0,
+          economy: 0,
+          innings: 0,
+          notOuts: 0,
+          overs: 0,
+          runsConceded: 0
+        }
+      }));
+    } finally {
+      setIsLoadingPlayerStats(false);
+    }
+  };
+
+  const closePlayerStats = () => {
+    setShowPlayerStats(false);
+    setSelectedPlayerForStats(null);
   };
 
   const calculatePlayerStats = (players: any[], scorecards: any[]) => {
@@ -2115,7 +2247,8 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                         transition: { duration: 0.3 }
                       }}
                       whileTap={{ scale: 0.95 }}
-                      className="relative group overflow-hidden rounded-2xl"
+                      onClick={() => handlePlayerClick(player)}
+                      className="relative group overflow-hidden rounded-2xl cursor-pointer"
                       style={{
                         ...getWPLGlassmorphism('orange', 20),
                         border: `1px solid ${teamColors.secondary}40`,
@@ -3059,6 +3192,293 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
           </motion.div>
         </motion.div>
       )}
+      
+      {/* Player Statistics Modal */}
+      <AnimatePresence>
+        {showPlayerStats && selectedPlayerForStats && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                closePlayerStats();
+              }
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="bg-gradient-to-br from-purple-900/95 via-blue-900/95 to-indigo-900/95 rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-hidden border border-white/20 shadow-2xl shadow-purple-500/20"
+            >
+              {/* Enhanced Header */}
+              <div className="relative overflow-hidden">
+                {/* Animated Background Pattern */}
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20">
+                  <motion.div
+                    animate={{
+                      backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"],
+                    }}
+                    transition={{
+                      duration: 20,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                    className="absolute inset-0 opacity-30"
+                    style={{
+                      backgroundImage: `radial-gradient(circle at 20% 50%, rgba(147, 51, 234, 0.3) 0%, transparent 50%), 
+                                       radial-gradient(circle at 80% 50%, rgba(59, 130, 246, 0.3) 0%, transparent 50%)`,
+                      backgroundSize: "200% 200%",
+                    }}
+                  />
+                </div>
+                
+                <div className="relative p-8 border-b border-white/10">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      {/* Player Title with Animation */}
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.1 }}
+                      >
+                        <h2 className="text-3xl font-bold text-white mb-3 flex items-center gap-3">
+                          <motion.div
+                            animate={{ rotate: [0, 10, -10, 0] }}
+                            transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                            className="w-8 h-8 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 flex items-center justify-center"
+                          >
+                            <Users className="w-4 h-4 text-white" />
+                          </motion.div>
+                          Player Statistics
+                        </h2>
+                      </motion.div>
+                      
+                      {/* Player Information */}
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="mb-4"
+                      >
+                        <div className="text-2xl font-bold text-white mb-2">{selectedPlayerForStats.name}</div>
+                        <div className="flex items-center gap-4 text-white/90">
+                          <span className="font-medium">{selectedPlayerForStats.role}</span>
+                          {selectedPlayerForStats.nationality && (
+                            <span className="text-white/70">• {selectedPlayerForStats.nationality}</span>
+                          )}
+                        </div>
+                      </motion.div>
+                      
+                      {/* Team Information */}
+                      <motion.div
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.3 }}
+                        className="flex items-center gap-6 text-white/60 text-sm"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Shield className="w-4 h-4" />
+                          {team?.name}
+                        </div>
+                        {selectedPlayerForStats.jerseyNumber && (
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-lg">{selectedPlayerForStats.jerseyNumber}</span>
+                            <span>Jersey</span>
+                          </div>
+                        )}
+                      </motion.div>
+                    </div>
+                    
+                    {/* Close Button */}
+                    <motion.button
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.4 }}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={closePlayerStats}
+                      className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-all duration-200 flex items-center justify-center border border-white/20"
+                    >
+                      <X className="w-5 h-5" />
+                    </motion.button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Statistics Content */}
+              <div className="p-8 overflow-y-auto max-h-[calc(90vh-200px)]">
+                {isLoadingPlayerStats ? (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex flex-col items-center justify-center py-12"
+                  >
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                      className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full mb-4"
+                    />
+                    <div className="text-white text-lg">Loading player statistics...</div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="space-y-8"
+                  >
+                    {playerStats[selectedPlayerForStats.id] ? (
+                      <>
+                        {/* Batting Statistics */}
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.6 }}
+                          className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-md rounded-2xl p-6 border border-green-500/30"
+                        >
+                          <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                            <motion.div
+                              animate={{ scale: [1, 1.2, 1] }}
+                              transition={{ duration: 2, repeat: Infinity }}
+                            >
+                              🏏
+                            </motion.div>
+                            Batting Statistics
+                          </h3>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-white">
+                                {playerStats[selectedPlayerForStats.id].runs}
+                              </div>
+                              <div className="text-white/60 text-sm">Runs</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-white">
+                                {playerStats[selectedPlayerForStats.id].average}
+                              </div>
+                              <div className="text-white/60 text-sm">Average</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-white">
+                                {playerStats[selectedPlayerForStats.id].strikeRate}
+                              </div>
+                              <div className="text-white/60 text-sm">Strike Rate</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-white">
+                                {playerStats[selectedPlayerForStats.id].innings}
+                              </div>
+                              <div className="text-white/60 text-sm">Innings</div>
+                            </div>
+                          </div>
+                        </motion.div>
+
+                        {/* Bowling Statistics */}
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.7 }}
+                          className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-md rounded-2xl p-6 border border-blue-500/30"
+                        >
+                          <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                            <motion.div
+                              animate={{ scale: [1, 1.2, 1] }}
+                              transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
+                            >
+                              🎯
+                            </motion.div>
+                            Bowling Statistics
+                          </h3>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-white">
+                                {playerStats[selectedPlayerForStats.id].wickets}
+                              </div>
+                              <div className="text-white/60 text-sm">Wickets</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-white">
+                                {playerStats[selectedPlayerForStats.id].economy}
+                              </div>
+                              <div className="text-white/60 text-sm">Economy</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-white">
+                                {playerStats[selectedPlayerForStats.id].overs}
+                              </div>
+                              <div className="text-white/60 text-sm">Overs</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-white">
+                                {playerStats[selectedPlayerForStats.id].runsConceded}
+                              </div>
+                              <div className="text-white/60 text-sm">Runs Conceded</div>
+                            </div>
+                          </div>
+                        </motion.div>
+
+                        {/* Overall Performance */}
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.8 }}
+                          className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-md rounded-2xl p-6 border border-purple-500/30"
+                        >
+                          <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                            <motion.div
+                              animate={{ scale: [1, 1.2, 1] }}
+                              transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+                            >
+                              📊
+                            </motion.div>
+                            Overall Performance
+                          </h3>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-white">
+                                {playerStats[selectedPlayerForStats.id].matches}
+                              </div>
+                              <div className="text-white/60 text-sm">Matches</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-white">
+                                {playerStats[selectedPlayerForStats.id].notOuts}
+                              </div>
+                              <div className="text-white/60 text-sm">Not Outs</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-white">
+                                {playerStats[selectedPlayerForStats.id].balls}
+                              </div>
+                              <div className="text-white/60 text-sm">Balls Faced</div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      </>
+                    ) : (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="bg-white/10 backdrop-blur-md rounded-xl p-8 border border-white/20 text-center"
+                      >
+                        <div className="text-6xl mb-4">📊</div>
+                        <div className="text-xl font-medium text-white mb-2">No Statistics Available</div>
+                        <div className="text-white/60">
+                          This player hasn't played any matches yet or statistics are not available.
+                        </div>
+                      </motion.div>
+                    )}
+                  </motion.div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </AnimatePresence>
     </div>
   );
