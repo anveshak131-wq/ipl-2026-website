@@ -27,6 +27,23 @@ export default function WPLPlayersManagementPage() {
   const [showDuplicates, setShowDuplicates] = useState(false);
   const [potentialDuplicates, setPotentialDuplicates] = useState<Array<{players: Player[], reason: string}>>([]);
   const [useDeduplicatedView, setUseDeduplicatedView] = useState(false);
+  const [showEnhancedEditor, setShowEnhancedEditor] = useState(false);
+  const [activeEditorTab, setActiveEditorTab] = useState<'basic' | 'style' | 'advanced'>('basic');
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  
+  // Enhanced editing state
+  const [enhancedEditedPlayer, setEnhancedEditedPlayer] = useState({
+    name: "",
+    role: "Batter",
+    teamId: "",
+    age: "",
+    nationality: "",
+    jerseyNumber: "",
+    isCaptain: false,
+    bowlingStyle: "N/A",
+    battingStyle: "Right-handed bat",
+    specialization: ""
+  });
   const [newPlayer, setNewPlayer] = useState({
     name: "",
     role: "Batter",
@@ -45,6 +62,116 @@ export default function WPLPlayersManagementPage() {
     if (str.startsWith('Team ')) str = str.replace('Team ', '');
     if (str.toLowerCase().startsWith('team')) str = str.replace(/^team/i, '');
     return str;
+  };
+
+  // Validation function for enhanced player editor
+  const validateEnhancedPlayer = (player: typeof enhancedEditedPlayer) => {
+    const errors = [];
+    
+    // Name validation
+    if (!player.name || player.name.length < 2) {
+      errors.push("Player name is required and must be at least 2 characters");
+    }
+    
+    // Age validation
+    if (player.age && (parseInt(player.age) < 15 || parseInt(player.age) > 50)) {
+      errors.push("Age must be between 15 and 50");
+    }
+    
+    // Jersey number validation
+    if (player.jerseyNumber && (parseInt(player.jerseyNumber) < 0 || parseInt(player.jerseyNumber) > 99)) {
+      errors.push("Jersey number must be between 0 and 99");
+    }
+    
+    // Nationality validation
+    if (!player.nationality) {
+      errors.push("Nationality is required");
+    }
+    
+    // Role consistency check
+    if (player.role === 'Wicket-keeper' && player.bowlingStyle !== 'N/A') {
+      errors.push("Wicket-keepers should have bowling style set to N/A");
+    }
+    
+    return errors;
+  };
+
+  // Get nationality flag emoji
+  const getNationalityFlag = (nationality: string) => {
+    const flags: { [key: string]: string } = {
+      'India': '🇮🇳',
+      'Australia': '🇦🇺',
+      'England': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+      'New Zealand': '🇳🇿',
+      'South Africa': '🇿🇦',
+      'West Indies': '🏏',
+      'Sri Lanka': '🇱🇰',
+      'Bangladesh': '🇧🇩',
+      'Pakistan': '🇵🇰'
+    };
+    return flags[nationality] || '';
+  };
+
+  // Open enhanced editor for a player
+  const openEnhancedEditor = (player: Player) => {
+    setEnhancedEditedPlayer({
+      name: player.name || "",
+      role: player.role || "Batter",
+      teamId: player.teamId || "",
+      age: player.age?.toString() || "",
+      nationality: player.nationality || "",
+      jerseyNumber: player.jerseyNumber?.toString() || "",
+      isCaptain: player.isCaptain || false,
+      bowlingStyle: player.bowlingStyle || "N/A",
+      battingStyle: player.battingStyle || "Right-handed bat",
+      specialization: (player as any).specialization || ""
+    });
+    setValidationErrors([]);
+    setShowEnhancedEditor(true);
+  };
+
+  // Save enhanced player
+  const saveEnhancedPlayer = async () => {
+    const errors = validateEnhancedPlayer(enhancedEditedPlayer);
+    if (errors.length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("adminToken");
+      const updatedPlayerData = {
+        ...enhancedEditedPlayer,
+        age: enhancedEditedPlayer.age ? parseInt(enhancedEditedPlayer.age) : undefined,
+        jerseyNumber: enhancedEditedPlayer.jerseyNumber ? parseInt(enhancedEditedPlayer.jerseyNumber) : undefined,
+        teamId: enhancedEditedPlayer.teamId,
+        isCaptain: enhancedEditedPlayer.isCaptain,
+      };
+
+      const response = await fetch("/api/players", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(updatedPlayerData),
+      });
+
+      if (response.ok) {
+        const updatedPlayer = await response.json();
+        setPlayers(
+          players.map((p) => (p.id === updatedPlayer.id ? updatedPlayer : p)),
+        );
+        setShowEnhancedEditor(false);
+        alert("Player updated successfully!");
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.error || "Failed to save player"}`);
+      }
+    } catch (error) {
+      console.error("Error saving player:", error);
+      alert("Error saving player");
+    }
   };
 
   // Deduplicate players based on name, team, and role to handle API duplicates
@@ -237,9 +364,7 @@ export default function WPLPlayersManagementPage() {
   }, [isAuthenticated]);
 
   const handleEdit = (player: Player) => {
-    setEditingPlayer(player);
-    setEditedTeamId(player.teamId || "");
-    setEditedIsCaptain(player.isCaptain || false);
+    openEnhancedEditor(player);
   };
 
   const handleSave = async () => {
@@ -934,6 +1059,293 @@ export default function WPLPlayersManagementPage() {
           )}
         </div>
       </main>
+
+      {/* Enhanced Player Editor Modal */}
+      {showEnhancedEditor && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto border border-white/20">
+            {/* Header */}
+            <div className="p-6 border-b border-white/20">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                    <span className="text-white font-black text-xl">
+                      {enhancedEditedPlayer.name?.charAt(0) || 'P'}
+                    </span>
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">Edit Player Profile</h2>
+                    <p className="text-white/70">
+                      {enhancedEditedPlayer.name} • {teams.find(t => t.id === enhancedEditedPlayer.teamId)?.name || 'Unknown Team'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowEnhancedEditor(false)}
+                  className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            
+            {/* Tabbed Interface */}
+            <div className="flex border-b border-white/20">
+              {[
+                { id: 'basic', label: 'Basic Info', icon: '👤' },
+                { id: 'style', label: 'Playing Style', icon: '🏏' },
+                { id: 'advanced', label: 'Advanced', icon: '⚙️' }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveEditorTab(tab.id as any)}
+                  className={`px-6 py-3 text-sm font-medium transition-colors flex items-center gap-2 ${
+                    activeEditorTab === tab.id
+                      ? 'text-white border-b-2 border-purple-400'
+                      : 'text-white/70 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  <span>{tab.icon}</span>
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+            
+            {/* Form Content */}
+            <div className="p-6">
+              {/* Validation Errors */}
+              {validationErrors.length > 0 && (
+                <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-lg">
+                  <h4 className="text-red-400 font-medium mb-2">Please fix the following errors:</h4>
+                  <ul className="text-red-300 text-sm space-y-1">
+                    {validationErrors.map((error, index) => (
+                      <li key={index}>• {error}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {/* Basic Info Tab */}
+              {activeEditorTab === 'basic' && (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-white/70 text-sm font-medium mb-2">Player Name *</label>
+                      <input
+                        type="text"
+                        value={enhancedEditedPlayer.name}
+                        onChange={(e) => setEnhancedEditedPlayer(prev => ({ ...prev, name: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:border-purple-400 focus:outline-none"
+                        placeholder="Enter player name"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-white/70 text-sm font-medium mb-2">Jersey Number</label>
+                      <input
+                        type="number"
+                        value={enhancedEditedPlayer.jerseyNumber}
+                        onChange={(e) => setEnhancedEditedPlayer(prev => ({ ...prev, jerseyNumber: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:border-purple-400 focus:outline-none"
+                        placeholder="0-99"
+                        min="0"
+                        max="99"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-white/70 text-sm font-medium mb-2">Age</label>
+                      <input
+                        type="number"
+                        value={enhancedEditedPlayer.age}
+                        onChange={(e) => setEnhancedEditedPlayer(prev => ({ ...prev, age: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:border-purple-400 focus:outline-none"
+                        placeholder="15-50"
+                        min="15"
+                        max="50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-white/70 text-sm font-medium mb-2">Nationality *</label>
+                      <select
+                        value={enhancedEditedPlayer.nationality}
+                        onChange={(e) => setEnhancedEditedPlayer(prev => ({ ...prev, nationality: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:border-purple-400 focus:outline-none"
+                      >
+                        <option value="">Select Nationality</option>
+                        <option value="India">India 🇮🇳</option>
+                        <option value="Australia">Australia 🇦🇺</option>
+                        <option value="England">England 🏴󠁧󠁢󠁥󠁮󠁧󠁿</option>
+                        <option value="New Zealand">New Zealand 🇳🇿</option>
+                        <option value="South Africa">South Africa 🇿🇦</option>
+                        <option value="West Indies">West Indies 🏏</option>
+                        <option value="Sri Lanka">Sri Lanka 🇱🇰</option>
+                        <option value="Bangladesh">Bangladesh 🇧🇩</option>
+                        <option value="Pakistan">Pakistan 🇵🇰</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-white/70 text-sm font-medium mb-2">Team *</label>
+                      <select
+                        value={enhancedEditedPlayer.teamId}
+                        onChange={(e) => setEnhancedEditedPlayer(prev => ({ ...prev, teamId: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:border-purple-400 focus:outline-none"
+                      >
+                        <option value="">Select Team</option>
+                        {teams.map((team) => (
+                          <option key={team.id} value={team.id}>
+                            {team.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-white/70 text-sm font-medium mb-2">Primary Role *</label>
+                      <select
+                        value={enhancedEditedPlayer.role}
+                        onChange={(e) => setEnhancedEditedPlayer(prev => ({ ...prev, role: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:border-purple-400 focus:outline-none"
+                      >
+                        <option value="Batter">Batter 🏏</option>
+                        <option value="Bowler">Bowler 🎯</option>
+                        <option value="All-rounder">All-rounder ⚡</option>
+                        <option value="Wicket-keeper">Wicket-keeper 🧤</option>
+                      </select>
+                    </div>
+                  </div>
+                  
+                  {/* Captain Checkbox */}
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      id="captain"
+                      checked={enhancedEditedPlayer.isCaptain}
+                      onChange={(e) => setEnhancedEditedPlayer(prev => ({ ...prev, isCaptain: e.target.checked }))}
+                      className="w-5 h-5 rounded border-white/30 bg-white/10 text-purple-500 focus:ring-purple-500"
+                    />
+                    <label htmlFor="captain" className="text-white font-medium">
+                      Team Captain 👑
+                    </label>
+                  </div>
+                </div>
+              )}
+              
+              {/* Playing Style Tab */}
+              {activeEditorTab === 'style' && (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-white/70 text-sm font-medium mb-2">Batting Style *</label>
+                      <select
+                        value={enhancedEditedPlayer.battingStyle}
+                        onChange={(e) => setEnhancedEditedPlayer(prev => ({ ...prev, battingStyle: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:border-purple-400 focus:outline-none"
+                      >
+                        <option value="Right-handed bat">Right-handed bat 🏏</option>
+                        <option value="Left-handed bat">Left-handed bat 🏏</option>
+                        <option value="Right-hand bat">Right-hand bat</option>
+                        <option value="Left-hand bat">Left-hand bat</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-white/70 text-sm font-medium mb-2">Bowling Style *</label>
+                      <select
+                        value={enhancedEditedPlayer.bowlingStyle}
+                        onChange={(e) => setEnhancedEditedPlayer(prev => ({ ...prev, bowlingStyle: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:border-purple-400 focus:outline-none"
+                      >
+                        <option value="Right-arm fast">Right-arm fast 🚀</option>
+                        <option value="Left-arm fast">Left-arm fast 🚀</option>
+                        <option value="Right-arm medium">Right-arm medium</option>
+                        <option value="Left-arm medium">Left-arm medium</option>
+                        <option value="Right-arm off-break">Right-arm off-break 🔄</option>
+                        <option value="Left-arm orthodox">Left-arm orthodox 🔄</option>
+                        <option value="Right-arm leg-break">Right-arm leg-break 🔄</option>
+                        <option value="Left-arm chinaman">Left-arm chinaman 🔄</option>
+                        <option value="N/A">N/A (Batter/WK)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-white/70 text-sm font-medium mb-2">Specialization</label>
+                      <select
+                        value={enhancedEditedPlayer.specialization}
+                        onChange={(e) => setEnhancedEditedPlayer(prev => ({ ...prev, specialization: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:border-purple-400 focus:outline-none"
+                      >
+                        <option value="">None</option>
+                        <option value="Opening Batter">Opening Batter 🚀</option>
+                        <option value="Middle-order Batter">Middle-order Batter 🔥</option>
+                        <option value="Finisher">Finisher 💪</option>
+                        <option value="Fast Bowler">Fast Bowler ⚡</option>
+                        <option value="Spin Bowler">Spin Bowler 🌀</option>
+                        <option value="Death Bowler">Death Bowler 🎯</option>
+                        <option value="Power-hitter">Power-hitter 💥</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Advanced Tab */}
+              {activeEditorTab === 'advanced' && (
+                <div className="space-y-6">
+                  <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+                    <h4 className="text-white font-medium mb-3">Player Statistics</h4>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <span className="text-white/50">Matches:</span>
+                        <span className="text-white font-medium ml-2">-</span>
+                      </div>
+                      <div>
+                        <span className="text-white/50">Runs:</span>
+                        <span className="text-white font-medium ml-2">-</span>
+                      </div>
+                      <div>
+                        <span className="text-white/50">Wickets:</span>
+                        <span className="text-white font-medium ml-2">-</span>
+                      </div>
+                      <div>
+                        <span className="text-white/50">Average:</span>
+                        <span className="text-white font-medium ml-2">-</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+                    <h4 className="text-white font-medium mb-3">Data Quality</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-white/50">Profile Completeness:</span>
+                        <span className="text-green-400 font-medium">85%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-white/50">Last Updated:</span>
+                        <span className="text-white font-medium">-</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Action Buttons */}
+              <div className="flex gap-3 mt-8 pt-6 border-t border-white/20">
+                <button
+                  onClick={saveEnhancedPlayer}
+                  className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                >
+                  <Save className="w-4 h-4" />
+                  Save Changes
+                </button>
+                <button
+                  onClick={() => setShowEnhancedEditor(false)}
+                  className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
