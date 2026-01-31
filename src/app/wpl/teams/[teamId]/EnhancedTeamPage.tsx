@@ -675,6 +675,34 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
     );
   }
 
+  // Function to get correct logo path based on team shortName
+  const getTeamLogo = (team: Team) => {
+    if (team.logo && team.logo.startsWith('/logos/')) {
+      return team.logo;
+    }
+    
+    // Map team shortName to correct logo path
+    const logoMap: { [key: string]: string } = {
+      'RCB-W': '/logos/wpl_rcb_logo_animated.svg',
+      'MI-W': '/logos/wpl_mi_logo_animated.svg',
+      'DC-W': '/logos/wpl_dc_logo_animated.svg',
+      'GG-W': '/logos/wpl_gg_logo_animated.svg',
+      'UPW': '/logos/wpl_upw_logo_animated.svg',
+      'RCB': '/logos/rcb_logo_animated.svg',
+      'MI': '/logos/mi_logo_animated.svg',
+      'CSK': '/logos/csk_logo_animated.svg',
+      'KKR': '/logos/kkr_logo_animated.svg',
+      'SRH': '/logos/srh_logo_animated.svg',
+      'RR': '/logos/rr_logo_animated.svg',
+      'PBKS': '/logos/pbks_logo_animated.svg',
+      'LSG': '/logos/lsg_logo_animated.svg',
+      'GT': '/logos/gt_logo_animated.svg',
+      'DC': '/logos/dc_logo_animated.svg',
+    };
+    
+    return logoMap[team.shortName] || team.logo || null;
+  };
+
   const teamColors = team.colors || { primary: '#8B5CF6', secondary: '#F59E0B' };
 
   return (
@@ -809,9 +837,9 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                   }}
                   transition={{ duration: isHoveringLogo ? 0.8 : 0, ease: "easeInOut" }}
                 >
-                  {team.logo ? (
+                  {getTeamLogo(team) ? (
                     <Image
-                      src={team.logo}
+                      src={getTeamLogo(team)}
                       alt={team.name}
                       width={120}
                       height={120}
