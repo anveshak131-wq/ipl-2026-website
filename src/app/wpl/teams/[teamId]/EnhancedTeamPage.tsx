@@ -452,9 +452,11 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   const calculatePlayerStats = (players: any[], scorecards: any[]) => {
     const playerStats: { [key: string]: { runs: number; balls: number; wickets: number; innings: number; notOuts: number; overs: number; runsConceded: number; } } = {};
     
-    // Initialize all players with zero stats
+    // Initialize all players with zero stats and create a mapping for multiple IDs
+    const playerIdMap: { [key: string]: string[] } = {};
     players.forEach(player => {
-      playerStats[player.id] = {
+      const mainId = String(player.id);
+      playerStats[mainId] = {
         runs: 0,
         balls: 0,
         wickets: 0,
@@ -463,36 +465,76 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
         overs: 0,
         runsConceded: 0
       };
+      
+      // Create mapping for all possible IDs this player might have
+      const possibleIds = [
+        mainId,
+        String(player.id).replace(/^team/i, ''),
+        `wpl${player.id}`,
+        String(player.id).toLowerCase(),
+        String(player.id).toUpperCase()
+      ];
+      
+      // Map all possible IDs to this player's main ID
+      possibleIds.forEach(id => {
+        if (!playerIdMap[id]) {
+          playerIdMap[id] = [];
+        }
+        playerIdMap[id].push(mainId);
+      });
     });
+
+    console.log('Player ID mapping:', playerIdMap);
 
     // Calculate stats from scorecards
     scorecards.forEach(scorecard => {
       scorecard.innings?.forEach((innings: any) => {
         // Calculate batting stats
         innings.batting?.forEach((batsman: any) => {
-          const playerId = batsman.playerId;
-          if (playerStats[playerId]) {
-            playerStats[playerId].runs += batsman.runs || 0;
-            playerStats[playerId].balls += batsman.balls || 0;
-            playerStats[playerId].innings += 1;
-            if (batsman.dismissal?.type === 'not-out') {
-              playerStats[playerId].notOuts += 1;
+          const scorecardPlayerId = String(batsman.playerId);
+          console.log('Processing batsman:', batsman.name, 'ID:', scorecardPlayerId);
+          
+          // Find the main player ID using our mapping
+          const mainPlayerIds = playerIdMap[scorecardPlayerId];
+          if (mainPlayerIds && mainPlayerIds.length > 0) {
+            const mainPlayerId = mainPlayerIds[0]; // Use the first main ID
+            if (playerStats[mainPlayerId]) {
+              playerStats[mainPlayerId].runs += batsman.runs || 0;
+              playerStats[mainPlayerId].balls += batsman.balls || 0;
+              playerStats[mainPlayerId].innings += 1;
+              if (batsman.dismissal?.type === 'not-out') {
+                playerStats[mainPlayerId].notOuts += 1;
+              }
+              console.log('Added batting stats for', mainPlayerId, ':', batsman.runs, 'runs');
             }
+          } else {
+            console.log('No mapping found for player ID:', scorecardPlayerId);
           }
         });
 
         // Calculate bowling stats
         innings.bowling?.forEach((bowler: any) => {
-          const playerId = bowler.playerId;
-          if (playerStats[playerId]) {
-            playerStats[playerId].wickets += bowler.wickets || 0;
-            playerStats[playerId].overs += parseFloat(bowler.overs) || 0;
-            playerStats[playerId].runsConceded += bowler.runs || 0;
+          const scorecardPlayerId = String(bowler.playerId);
+          console.log('Processing bowler:', bowler.name, 'ID:', scorecardPlayerId);
+          
+          // Find the main player ID using our mapping
+          const mainPlayerIds = playerIdMap[scorecardPlayerId];
+          if (mainPlayerIds && mainPlayerIds.length > 0) {
+            const mainPlayerId = mainPlayerIds[0]; // Use the first main ID
+            if (playerStats[mainPlayerId]) {
+              playerStats[mainPlayerId].wickets += bowler.wickets || 0;
+              playerStats[mainPlayerId].overs += parseFloat(bowler.overs) || 0;
+              playerStats[mainPlayerId].runsConceded += bowler.runs || 0;
+              console.log('Added bowling stats for', mainPlayerId, ':', bowler.wickets, 'wickets');
+            }
+          } else {
+            console.log('No mapping found for bowler ID:', scorecardPlayerId);
           }
         });
       });
     });
 
+    console.log('Final player stats:', playerStats);
     return playerStats;
   };
 
