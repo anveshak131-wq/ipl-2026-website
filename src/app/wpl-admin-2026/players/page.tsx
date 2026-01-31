@@ -66,7 +66,7 @@ export default function WPLPlayersManagementPage() {
   };
 
   // Find potential duplicates for admin review (without auto-deleting)
-  const findPotentialDuplicates = (playersList: Player[]): Array<{players: Player[], reason: string}> => {
+  const findPotentialDuplicates = (playersList: Player[], teamsList: Team[]): Array<{players: Player[], reason: string}> => {
     const groups: { [key: string]: Player[] } = {};
     
     // Group players by similar criteria
@@ -80,18 +80,56 @@ export default function WPLPlayersManagementPage() {
     // Find groups with duplicates
     const duplicates = Object.entries(groups)
       .filter(([key, players]) => players.length > 1)
-      .map(([key, players]) => ({
-        players,
-        reason: `Same name "${players[0].name}" in team "${teams.find(t => t.id === players[0].teamId)?.name || 'Unknown'}"`
-      }));
+      .map(([key, players]) => {
+        const teamName = teamsList.find(t => t.id === players[0].teamId)?.name || 'Unknown Team';
+        return {
+          players,
+          reason: `Same name "${players[0].name}" in team "${teamName}"`
+        };
+      });
     
     return duplicates;
+  };
+
+  // Smart merge for known WPL duplicates with correct team assignments
+  const mergeKnownDuplicates = (playersList: Player[], teamsList: Team[]): Player[] => {
+    const knownMerges = [
+      { name: 'Richa Ghosh', correctTeamId: 'rcb-w', correctTeamName: 'RCB-W' },
+      { name: 'Harmanpreet Kaur', correctTeamId: 'mi-w', correctTeamName: 'MI-W' },
+      { name: 'Ashleigh Gardner', correctTeamId: 'gg', correctTeamName: 'GG' },
+      { name: 'Beth Mooney', correctTeamId: 'gg', correctTeamName: 'GG' }
+    ];
+
+    let updatedPlayers = [...playersList];
+    
+    for (const merge of knownMerges) {
+      // Find all duplicates for this player
+      const duplicates = updatedPlayers.filter(p => 
+        p.name.toLowerCase().trim() === merge.name.toLowerCase().trim()
+      );
+      
+      if (duplicates.length > 1) {
+        // Merge duplicates with correct team assignment
+        const merged = mergeDuplicatePlayers(duplicates);
+        merged.teamId = merge.correctTeamId;
+        
+        // Remove all duplicates and add merged one
+        updatedPlayers = updatedPlayers.filter(p => 
+          !duplicates.some(dp => dp.id === p.id)
+        );
+        updatedPlayers.push(merged);
+        
+        console.log(`Merged ${duplicates.length} "${merge.name}" entries into team ${merge.correctTeamName}`);
+      }
+    }
+    
+    return updatedPlayers;
   };
 
   // Merge duplicate players (keep the one with most complete data)
   const mergeDuplicatePlayers = (duplicateGroup: Player[]): Player => {
     // Sort by completeness of data (more fields = higher priority)
-    const sortedPlayers = duplicateGroup.sort((a, b) => {
+    const sortedPlayers = duplicateGroup.sort((a: Player, b: Player) => {
       const aScore = [
         a.name ? 1 : 0,
         a.role ? 1 : 0,
@@ -158,10 +196,6 @@ export default function WPLPlayersManagementPage() {
           name: p.name || "Unknown",
         }));
         
-        // Detect potential duplicates
-        const duplicates = findPotentialDuplicates(normalizedPlayers);
-        setPotentialDuplicates(duplicates);
-        
         setPlayers(normalizedPlayers);
 
         // Deduplicate teams by ID and normalize ids to strings
@@ -183,6 +217,15 @@ export default function WPLPlayersManagementPage() {
         }
 
         setTeams(finalTeams);
+        
+        // Apply smart merge for known duplicates
+        const mergedPlayers = mergeKnownDuplicates(normalizedPlayers, finalTeams);
+        setPlayers(mergedPlayers);
+        
+        // Detect potential duplicates after teams are loaded
+        const duplicates = findPotentialDuplicates(mergedPlayers, finalTeams);
+        setPotentialDuplicates(duplicates);
+        
         setIsLoading(false);
       } catch (error) {
         console.error("Error loading data:", error);
@@ -436,7 +479,7 @@ export default function WPLPlayersManagementPage() {
                             background: 'rgba(255, 255, 255, 0.1)',
                             color: '#FFF',
                           }}>
-                            ID: {player.id} {player.jerseyNumber && `(#${player.jerseyNumber})`}
+                            ID: {player.id}
                           </div>
                         ))}
                       </div>
