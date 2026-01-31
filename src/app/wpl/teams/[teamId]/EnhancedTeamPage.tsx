@@ -953,31 +953,286 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
               </motion.div>
             </motion.div>
 
-            {/* Quick Stats */}
+            {/* Enhanced Quick Stats with AI-Inspired Design */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6 }}
-              className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto"
+              className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto mb-16"
             >
               {teamStats && (
                 <>
-                  <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-                    <div className="text-3xl font-bold text-white mb-2">{teamStats.matchesPlayed}</div>
-                    <div className="text-white/70 text-sm">Matches</div>
-                  </div>
-                  <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-                    <div className="text-3xl font-bold text-green-400 mb-2">{teamStats.wins}</div>
-                    <div className="text-white/70 text-sm">Wins</div>
-                  </div>
-                  <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-                    <div className="text-3xl font-bold text-white mb-2">{teamStats.winPercentage}%</div>
-                    <div className="text-white/70 text-sm">Win Rate</div>
-                  </div>
-                  <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-                    <div className="text-3xl font-bold text-yellow-400 mb-2">{teamStats.highestScore}</div>
-                    <div className="text-white/70 text-sm">Highest Score</div>
-                  </div>
+                  {/* Matches Stat Card */}
+                  <motion.div
+                    className="relative group"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.7, duration: 0.5 }}
+                    whileHover={{ 
+                      scale: 1.05,
+                      rotateY: 5,
+                      z: 50
+                    }}
+                    style={{
+                      ...getWPLGlassmorphism('purple', 20),
+                      border: `1px solid ${teamColors.primary}40`,
+                    }}
+                  >
+                    <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <motion.div
+                        className="absolute inset-0 rounded-2xl"
+                        style={{
+                          background: `linear-gradient(135deg, ${teamColors.primary}20, ${teamColors.secondary}20)`,
+                        }}
+                        animate={{
+                          background: [
+                            `linear-gradient(135deg, ${teamColors.primary}20, ${teamColors.secondary}20)`,
+                            `linear-gradient(225deg, ${teamColors.secondary}20, ${teamColors.primary}20)`,
+                            `linear-gradient(315deg, ${teamColors.primary}20, ${teamColors.secondary}20)`,
+                          ],
+                        }}
+                        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                      />
+                    </div>
+                    
+                    <div className="relative z-10 p-6">
+                      <motion.div
+                        animate={{ rotate: [0, 360] }}
+                        transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                        className="mb-3"
+                      >
+                        <Calendar className="w-6 h-6 text-blue-400" />
+                      </motion.div>
+                      <motion.div 
+                        className="text-4xl font-black text-white mb-2"
+                        initial={{ count: 0 }}
+                        animate={{ count: teamStats.matchesPlayed }}
+                        transition={{ duration: 2, delay: 0.8 }}
+                      >
+                        {teamStats.matchesPlayed}
+                      </motion.div>
+                      <div className="text-white/70 text-sm font-medium">Matches</div>
+                      
+                      {/* Animated progress ring */}
+                      <motion.div
+                        className="absolute -top-2 -right-2 w-12 h-12 rounded-full border-2 border-blue-400"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 1, duration: 0.5 }}
+                      >
+                        <motion.div
+                          className="w-full h-full rounded-full border-2 border-blue-400 border-t-transparent"
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                        />
+                      </motion.div>
+                    </div>
+                  </motion.div>
+
+                  {/* Wins Stat Card */}
+                  <motion.div
+                    className="relative group"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.8, duration: 0.5 }}
+                    whileHover={{ 
+                      scale: 1.05,
+                      rotateY: -5,
+                      z: 50
+                    }}
+                    style={{
+                      ...getWPLGlassmorphism('pink', 20),
+                      border: `1px solid ${teamColors.secondary}40`,
+                    }}
+                  >
+                    <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <motion.div
+                        className="absolute inset-0 rounded-2xl"
+                        style={{
+                          background: `linear-gradient(135deg, ${teamColors.secondary}20, #10b98120)`,
+                        }}
+                        animate={{
+                          background: [
+                            `linear-gradient(135deg, ${teamColors.secondary}20, #10b98120)`,
+                            `linear-gradient(225deg, #10b98120, ${teamColors.secondary}20)`,
+                            `linear-gradient(315deg, ${teamColors.secondary}20, #10b98120)`,
+                          ],
+                        }}
+                        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                      />
+                    </div>
+                    
+                    <div className="relative z-10 p-6">
+                      <motion.div
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                        className="mb-3"
+                      >
+                        <Trophy className="w-6 h-6 text-green-400" />
+                      </motion.div>
+                      <motion.div 
+                        className="text-4xl font-black text-green-400 mb-2"
+                        initial={{ count: 0 }}
+                        animate={{ count: teamStats.wins }}
+                        transition={{ duration: 2, delay: 0.9 }}
+                      >
+                        {teamStats.wins}
+                      </motion.div>
+                      <div className="text-white/70 text-sm font-medium">Wins</div>
+                      
+                      {/* Victory particles */}
+                      {[...Array(3)].map((_, i) => (
+                        <motion.div
+                          key={i}
+                          className="absolute w-1 h-1 bg-green-400 rounded-full"
+                          style={{
+                            top: `${20 + i * 15}px`,
+                            right: `${10 + i * 5}px`,
+                          }}
+                          animate={{
+                            y: [0, -10, 0],
+                            opacity: [0, 1, 0],
+                          }}
+                          transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            delay: i * 0.3,
+                            ease: "easeInOut"
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </motion.div>
+
+                  {/* Win Rate Stat Card */}
+                  <motion.div
+                    className="relative group"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.9, duration: 0.5 }}
+                    whileHover={{ 
+                      scale: 1.05,
+                      rotateY: 5,
+                      z: 50
+                    }}
+                    style={{
+                      ...getWPLGlassmorphism('violet', 20),
+                      border: `1px solid #a855f740`,
+                    }}
+                  >
+                    <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <motion.div
+                        className="absolute inset-0 rounded-2xl"
+                        style={{
+                          background: `linear-gradient(135deg, #a855f720, #f59e0b20)`,
+                        }}
+                        animate={{
+                          background: [
+                            `linear-gradient(135deg, #a855f720, #f59e0b20)`,
+                            `linear-gradient(225deg, #f59e0b20, #a855f720)`,
+                            `linear-gradient(315deg, #a855f720, #f59e0b20)`,
+                          ],
+                        }}
+                        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                      />
+                    </div>
+                    
+                    <div className="relative z-10 p-6">
+                      <motion.div
+                        animate={{ rotate: [-10, 10, -10] }}
+                        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                        className="mb-3"
+                      >
+                        <Target className="w-6 h-6 text-purple-400" />
+                      </motion.div>
+                      <motion.div 
+                        className="text-4xl font-black text-white mb-2"
+                        initial={{ count: 0 }}
+                        animate={{ count: teamStats.winPercentage }}
+                        transition={{ duration: 2, delay: 1 }}
+                      >
+                        {teamStats.winPercentage}%
+                      </motion.div>
+                      <div className="text-white/70 text-sm font-medium">Win Rate</div>
+                      
+                      {/* Animated percentage indicator */}
+                      <motion.div
+                        className="absolute bottom-2 left-2 right-2 h-1 bg-white/20 rounded-full overflow-hidden"
+                      >
+                        <motion.div
+                          className="h-full bg-gradient-to-r from-purple-400 to-pink-400 rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${teamStats.winPercentage}%` }}
+                          transition={{ duration: 2, delay: 1.2, ease: "easeOut" }}
+                        />
+                      </motion.div>
+                    </div>
+                  </motion.div>
+
+                  {/* Highest Score Stat Card */}
+                  <motion.div
+                    className="relative group"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 1, duration: 0.5 }}
+                    whileHover={{ 
+                      scale: 1.05,
+                      rotateY: -5,
+                      z: 50
+                    }}
+                    style={{
+                      ...getWPLGlassmorphism('orange', 20),
+                      border: `1px solid #fb923c40`,
+                    }}
+                  >
+                    <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <motion.div
+                        className="absolute inset-0 rounded-2xl"
+                        style={{
+                          background: `linear-gradient(135deg, #fb923c20, #ef444420)`,
+                        }}
+                        animate={{
+                          background: [
+                            `linear-gradient(135deg, #fb923c20, #ef444420)`,
+                            `linear-gradient(225deg, #ef444420, #fb923c20)`,
+                            `linear-gradient(315deg, #fb923c20, #ef444420)`,
+                          ],
+                        }}
+                        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                      />
+                    </div>
+                    
+                    <div className="relative z-10 p-6">
+                      <motion.div
+                        animate={{ rotate: [0, -10, 10, 0] }}
+                        transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                        className="mb-3"
+                      >
+                        <Zap className="w-6 h-6 text-yellow-400" />
+                      </motion.div>
+                      <motion.div 
+                        className="text-4xl font-black text-yellow-400 mb-2"
+                        initial={{ count: 0 }}
+                        animate={{ count: teamStats.highestScore }}
+                        transition={{ duration: 2, delay: 1.1 }}
+                      >
+                        {teamStats.highestScore}
+                      </motion.div>
+                      <div className="text-white/70 text-sm font-medium">Highest Score</div>
+                      
+                      {/* Lightning bolt animation */}
+                      <motion.div
+                        className="absolute -top-1 -right-1"
+                        animate={{ 
+                          scale: [1, 1.5, 1],
+                          opacity: [0.5, 1, 0.5],
+                        }}
+                        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                      >
+                        <Zap className="w-4 h-4 text-yellow-300" />
+                      </motion.div>
+                    </div>
+                  </motion.div>
                 </>
               )}
             </motion.div>
@@ -985,26 +1240,132 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
         </div>
       </section>
 
-      {/* Navigation Tabs */}
-      <section className="relative z-10 sticky top-0 bg-black/30 backdrop-blur-xl border-b border-white/10">
+      {/* Enhanced Navigation Tabs with AI-Inspired Design */}
+      <motion.section 
+        className="relative z-10 sticky top-0"
+        style={{
+          background: `linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%)`,
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+          borderBottom: `1px solid ${teamColors.primary}30`,
+        }}
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 1.3 }}
+      >
         <div className="container mx-auto px-4">
-          <div className="flex gap-1 overflow-x-auto py-4">
-            {['overview', 'squad', 'matches', 'stats', 'about'].map((tab) => (
-              <button
+          <div className="flex gap-2 overflow-x-auto py-6">
+            {['overview', 'squad', 'matches', 'stats', 'about'].map((tab, index) => (
+              <motion.button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`px-6 py-3 rounded-lg font-medium transition-all capitalize ${
+                className={`relative px-8 py-4 rounded-2xl font-bold text-sm uppercase tracking-wider transition-all duration-300 overflow-hidden group ${
                   activeTab === tab
-                    ? 'bg-white/20 text-white border border-white/30'
-                    : 'text-white/70 hover:text-white hover:bg-white/10'
+                    ? 'text-white scale-105'
+                    : 'text-white/60 hover:text-white hover:scale-105'
                 }`}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 1.4 + index * 0.1, duration: 0.5 }}
+                whileHover={{ 
+                  scale: 1.05,
+                  transition: { duration: 0.2 }
+                }}
+                whileTap={{ scale: 0.95 }}
               >
-                {tab}
-              </button>
+                {/* Animated background for active tab */}
+                {activeTab === tab && (
+                  <motion.div
+                    className="absolute inset-0 rounded-2xl"
+                    style={{
+                      background: `linear-gradient(135deg, ${teamColors.primary}40, ${teamColors.secondary}40)`,
+                    }}
+                    layoutId="activeTab"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  >
+                    <motion.div
+                      className="absolute inset-0 rounded-2xl opacity-50"
+                      style={{
+                        background: `radial-gradient(circle at 50% 50%, ${teamColors.primary}20, transparent 70%)`,
+                      }}
+                      animate={{
+                        scale: [1, 1.2, 1],
+                        opacity: [0.5, 0.8, 0.5],
+                      }}
+                      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                  </motion.div>
+                )}
+                
+                {/* Hover background */}
+                <motion.div
+                  className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{
+                    background: `linear-gradient(135deg, ${teamColors.primary}20, ${teamColors.secondary}20)`,
+                  }}
+                />
+                
+                {/* Tab content */}
+                <span className="relative z-10 flex items-center gap-2">
+                  {/* Tab icons */}
+                  {tab === 'overview' && <Activity className="w-4 h-4" />}
+                  {tab === 'squad' && <Users className="w-4 h-4" />}
+                  {tab === 'matches' && <Calendar className="w-4 h-4" />}
+                  {tab === 'stats' && <BarChart3 className="w-4 h-4" />}
+                  {tab === 'about' && <Star className="w-4 h-4" />}
+                  
+                  {tab}
+                  
+                  {/* Active indicator */}
+                  {activeTab === tab && (
+                    <motion.div
+                      className="w-2 h-2 bg-white rounded-full"
+                      animate={{ scale: [1, 1.5, 1] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                  )}
+                </span>
+                
+                {/* Interactive particles on hover */}
+                {activeTab === tab && (
+                  <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
+                    {[...Array(3)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute w-1 h-1 bg-white rounded-full"
+                        style={{
+                          left: `${20 + i * 30}%`,
+                          top: '50%',
+                        }}
+                        animate={{
+                          x: [0, 10, 0],
+                          y: [0, -10, 0],
+                          opacity: [0, 1, 0],
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          delay: i * 0.3,
+                          ease: "easeInOut"
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </motion.button>
             ))}
           </div>
+          
+          {/* Animated underline */}
+          <motion.div
+            className="h-0.5 bg-gradient-to-r from-transparent via-white to-transparent"
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ delay: 1.8, duration: 1, ease: "easeOut" }}
+            style={{ originX: 0.5 }}
+          />
         </div>
-      </section>
+      </motion.section>
 
       {/* Content Sections */}
       <section className="relative z-10 py-12">
