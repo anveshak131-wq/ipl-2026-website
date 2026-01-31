@@ -802,83 +802,6 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                 ))}
               </motion.div>
 
-              <motion.div
-                ref={logoRef}
-                className="relative w-40 h-40 rounded-3xl overflow-hidden"
-                style={{
-                  ...getWPLGlassmorphism('purple', 20),
-                  border: `2px solid ${teamColors.primary}80`,
-                }}
-                whileHover={{ 
-                  scale: 1.1,
-                  rotate: [0, -5, 5, 0],
-                  boxShadow: `0 20px 60px ${teamColors.primary}60`,
-                }}
-                whileTap={{ scale: 0.95 }}
-                onHoverStart={() => setIsHoveringLogo(true)}
-                onHoverEnd={() => setIsHoveringLogo(false)}
-              >
-                {/* Animated background gradient */}
-                <motion.div
-                  className="absolute inset-0"
-                  animate={{
-                    background: [
-                      `linear-gradient(45deg, ${teamColors.primary}40, ${teamColors.secondary}40)`,
-                      `linear-gradient(135deg, ${teamColors.secondary}40, ${teamColors.primary}40)`,
-                      `linear-gradient(225deg, ${teamColors.primary}40, ${teamColors.secondary}40)`,
-                      `linear-gradient(315deg, ${teamColors.secondary}40, ${teamColors.primary}40)`,
-                    ],
-                  }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                />
-                
-                {/* Team Logo */}
-                <motion.div
-                  className="relative w-full h-full flex items-center justify-center p-4"
-                  animate={{
-                    rotate: isHoveringLogo ? [0, 360] : 0,
-                  }}
-                  transition={{ duration: isHoveringLogo ? 0.8 : 0, ease: "easeInOut" }}
-                >
-                  {getTeamLogo(team) ? (
-                    <Image
-                      src={getTeamLogo(team)}
-                      alt={team.name}
-                      width={120}
-                      height={120}
-                      className="rounded-2xl object-contain filter drop-shadow-lg"
-                      style={{
-                        filter: `drop-shadow(0 0 20px ${teamColors.primary})`,
-                      }}
-                    />
-                  ) : (
-                    <motion.div
-                      animate={{ rotate: [0, 360] }}
-                      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                    >
-                      <Shield 
-                        className="w-20 h-20 text-white" 
-                        style={{ filter: `drop-shadow(0 0 20px ${teamColors.primary})` }}
-                      />
-                    </motion.div>
-                  )}
-                </motion.div>
-
-                {/* Glow effect on hover */}
-                <motion.div
-                  className="absolute inset-0 rounded-3xl pointer-events-none"
-                  style={{
-                    background: `radial-gradient(circle, ${teamColors.primary}30, transparent)`,
-                  }}
-                  animate={{
-                    opacity: isHoveringLogo ? [0, 0.6, 0] : 0,
-                    scale: isHoveringLogo ? [1, 1.2, 1] : 1,
-                  }}
-                  transition={{ duration: 1.5, repeat: isHoveringLogo ? Infinity : 0 }}
-                />
-              </motion.div>
-            </div>
-
             {/* Modern Enhanced Header with Professional Typography */}
             <motion.div
               className="relative z-10 text-center mb-12"
@@ -947,37 +870,12 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                   style={{
                     fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
                     color: WPLColors.textPrimary,
-                    textShadow: `
-                      0 0 20px rgba(255, 255, 255, 0.5),
-                      0 0 40px ${teamColors.primary}60,
-                      0 0 60px ${teamColors.primary}40,
-                      0 2px 4px rgba(0, 0, 0, 0.8),
-                      0 4px 8px rgba(0, 0, 0, 0.6),
-                      0 8px 16px rgba(0, 0, 0, 0.4)
-                    `,
-                    background: `linear-gradient(135deg, 
-                      ${WPLColors.textPrimary} 0%, 
-                      ${teamColors.primary} 30%, 
-                      ${WPLColors.accent} 60%, 
-                      ${WPLColors.textPrimary} 100%
-                    )`,
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                    filter: 'drop-shadow(0 8px 16px rgba(0, 0, 0, 0.8))',
-                    letterSpacing: '-0.02em',
+                    textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)',
                     fontWeight: 900,
                   }}
                   whileHover={{ 
                     scale: 1.02,
-                    textShadow: `
-                      0 0 30px rgba(255, 255, 255, 0.7),
-                      0 0 60px ${teamColors.primary}80,
-                      0 0 90px ${teamColors.primary}60,
-                      0 4px 8px rgba(0, 0, 0, 0.9),
-                      0 8px 16px rgba(0, 0, 0, 0.7),
-                      0 16px 32px rgba(0, 0, 0, 0.5)
-                    `,
+                    textShadow: '4px 4px 8px rgba(0, 0, 0, 0.9)',
                   }}
                 >
                   <motion.span
