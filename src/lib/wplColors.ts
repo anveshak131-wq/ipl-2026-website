@@ -11,6 +11,7 @@ export const WPLColors = {
   rose: '#06B6D4',
   violet: '#A855F7',
   fuchsia: '#10B981',
+  orange: '#FB923C',
 
   // Background Colors
   base: '#0F172A',        // Slate 950
@@ -57,6 +58,14 @@ export const WPLColors = {
     40: 'rgba(168, 85, 247, 0.4)',
     50: 'rgba(168, 85, 247, 0.5)',
   },
+  orangeRGBA: {
+    10: 'rgba(251, 146, 60, 0.1)',
+    15: 'rgba(251, 146, 60, 0.15)',
+    20: 'rgba(251, 146, 60, 0.2)',
+    30: 'rgba(251, 146, 60, 0.3)',
+    40: 'rgba(251, 146, 60, 0.4)',
+    50: 'rgba(251, 146, 60, 0.5)',
+  },
 } as const;
 
 /**
@@ -75,12 +84,13 @@ export const getWPLGradient = (direction: 'to-r' | 'to-b' | 'to-br' | 'to-t' = '
 /**
  * Get glassmorphism style object
  */
-export const getWPLGlassmorphism = (color: 'purple' | 'pink' | 'rose' | 'violet' = 'purple', opacity: 10 | 15 | 20 = 20) => {
+export const getWPLGlassmorphism = (color: 'purple' | 'pink' | 'rose' | 'violet' | 'orange' = 'purple', opacity: 10 | 15 | 20 = 20) => {
   const colorMap = {
     purple: WPLColors.purpleRGBA,
     pink: WPLColors.pinkRGBA,
     rose: WPLColors.roseRGBA,
     violet: WPLColors.violetRGBA,
+    orange: WPLColors.orangeRGBA,
   };
 
   // Map opacity to a valid lower opacity value
@@ -103,12 +113,13 @@ export const getWPLGlassmorphism = (color: 'purple' | 'pink' | 'rose' | 'violet'
 /**
  * Get hover glow effect
  */
-export const getWPLHoverGlow = (color: 'purple' | 'pink' | 'rose' | 'violet' = 'purple') => {
+export const getWPLHoverGlow = (color: 'purple' | 'pink' | 'rose' | 'violet' | 'orange' = 'purple') => {
   const colorMap = {
     purple: WPLColors.purple,
     pink: WPLColors.pink,
     rose: WPLColors.rose,
     violet: WPLColors.violet,
+    orange: WPLColors.orange,
   };
 
   return {
