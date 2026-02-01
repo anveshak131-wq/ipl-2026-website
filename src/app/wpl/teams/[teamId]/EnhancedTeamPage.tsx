@@ -800,6 +800,24 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   const exportScorecard = (format: 'excel' | 'csv' | 'json') => {
     if (!selectedScorecard) return;
 
+    // Debug: Log the actual scorecard structure
+    console.log('Export Scorecard - Full Data Structure:', JSON.stringify(selectedScorecard, null, 2));
+    console.log('Export Scorecard - Available Keys:', Object.keys(selectedScorecard));
+    
+    // Check if innings data exists
+    if (selectedScorecard.innings) {
+      console.log('Export Scorecard - Innings Count:', selectedScorecard.innings.length);
+      selectedScorecard.innings.forEach((inning: any, index: number) => {
+        console.log(`Innings ${index + 1} - Team:`, inning.team);
+        console.log(`Innings ${index + 1} - Available Keys:`, Object.keys(inning));
+        console.log(`Innings ${index + 1} - Has Fall of Wickets:`, !!inning.fallOfWickets);
+        console.log(`Innings ${index + 1} - Has Powerplays:`, !!inning.powerplays);
+        console.log(`Innings ${index + 1} - Has Partnerships:`, !!inning.partnerships);
+      });
+    } else {
+      console.log('Export Scorecard - No innings data found');
+    }
+
     // Prepare comprehensive scorecard data with proper data extraction
     const scorecardData = {
       matchInfo: {
@@ -868,6 +886,11 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
         partnerships: inning.partnerships || []
       })) || []
     };
+
+    // Debug: Log the extracted data
+    console.log('Export Scorecard - Extracted Fall of Wickets:', scorecardData.fallOfWickets);
+    console.log('Export Scorecard - Extracted Powerplays:', scorecardData.powerplays);
+    console.log('Export Scorecard - Extracted Partnerships:', scorecardData.partnerships);
 
     const fileName = `match-scorecard-${selectedScorecard.matchId || selectedMatch?.id || 'unknown'}-${new Date().toISOString().split('T')[0]}`;
 
