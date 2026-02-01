@@ -929,67 +929,151 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       linkElement.click();
       
     } else if (format === 'excel') {
-      // Excel Export - Create HTML table that can be opened in Excel
-      let excelContent = '<html><head><meta charset="utf-8"><title>Match Scorecard</title></head><body>';
+      // Excel Export - Enhanced with structured tables for graphing
+      let excelContent = '<html><head><meta charset="utf-8"><title>Match Scorecard</title>';
+      excelContent += '<style>';
+      excelContent += 'table {border-collapse: collapse; width: 100%; margin-bottom: 20px;}';
+      excelContent += 'th, td {border: 1px solid #ccc; padding: 8px; text-align: left;}';
+      excelContent += 'th {background-color: #f2f2f2; font-weight: bold;}';
+      excelContent += '.numeric {text-align: right;}';
+      excelContent += '.header {font-size: 16px; font-weight: bold; margin: 20px 0 10px 0; color: #333;}';
+      excelContent += '</style></head><body>';
       
-      // Match Info
-      excelContent += '<h2>MATCH INFO</h2>';
-      excelContent += '<table border="1"><tr><th>Match ID</th><td>' + scorecardData.matchInfo.matchId + '</td></tr>';
+      // Match Info as Table
+      excelContent += '<div class="header">MATCH INFORMATION</div>';
+      excelContent += '<table><tr><th>Match ID</th><td>' + scorecardData.matchInfo.matchId + '</td></tr>';
       excelContent += '<tr><th>Team 1</th><td>' + (scorecardData.matchInfo.teams.team1?.name || 'N/A') + '</td></tr>';
       excelContent += '<tr><th>Team 2</th><td>' + (scorecardData.matchInfo.teams.team2?.name || 'N/A') + '</td></tr>';
       excelContent += '<tr><th>Venue</th><td>' + scorecardData.matchInfo.venue + '</td></tr>';
       excelContent += '<tr><th>Date</th><td>' + scorecardData.matchInfo.date + '</td></tr>';
-      excelContent += '<tr><th>Result</th><td>' + scorecardData.matchInfo.result?.winner + ' won by ' + scorecardData.matchInfo.result?.margin + '</td></tr></table><br>';
+      excelContent += '<tr><th>Time</th><td>' + (scorecardData.matchInfo.time || 'N/A') + '</td></tr>';
+      excelContent += '<tr><th>Winner</th><td>' + (scorecardData.matchInfo.result?.winner || 'N/A') + '</td></tr>';
+      excelContent += '<tr><th>Win Margin</th><td>' + (scorecardData.matchInfo.result?.margin || 'N/A') + '</td></tr>';
+      excelContent += '<tr><th>Man of the Match</th><td>' + (scorecardData.matchInfo.result?.manOfTheMatch || 'N/A') + '</td></tr></table>';
       
-      // Fall of Wickets
+      // Fall of Wickets - Enhanced for Graphing
       if (scorecardData.fallOfWickets.length > 0) {
-        excelContent += '<h2>FALL OF WICKETS</h2>';
-        excelContent += '<table border="1"><tr><th>Wicket Number</th><th>Batsman</th><th>Runs at Dismissal</th><th>Over</th><th>Ball</th><th>Dismissal Type</th></tr>';
+        excelContent += '<div class="header">FALL OF WICKETS</div>';
+        excelContent += '<table><tr><th>Wicket Number</th><th>Batsman</th><th>Runs at Dismissal</th><th>Over</th><th>Ball</th><th>Dismissal Type</th><th>Cumulative Score</th><th>Partnership Runs</th></tr>';
+        let cumulativeScore = 0;
         scorecardData.fallOfWickets.forEach((fow: any) => {
-          excelContent += `<tr><td>${fow.wicketNumber}</td><td>${fow.batsman}</td><td>${fow.runs}</td><td>${fow.over}</td><td>${fow.ball}</td><td>${fow.dismissalType}</td></tr>`;
+          cumulativeScore = fow.runs || cumulativeScore;
+          const partnershipRuns = fow.partnershipRuns || 0;
+          excelContent += `<tr><td class="numeric">${fow.wicketNumber}</td><td>${fow.batsman}</td><td class="numeric">${fow.runs}</td><td class="numeric">${fow.over}</td><td class="numeric">${fow.ball}</td><td>${fow.dismissalType}</td><td class="numeric">${cumulativeScore}</td><td class="numeric">${partnershipRuns}</td></tr>`;
         });
-        excelContent += '</table><br>';
+        excelContent += '</table>';
       }
       
-      // Powerplays
+      // Powerplays - Enhanced for Graphing
       if (scorecardData.powerplays.length > 0) {
-        excelContent += '<h2>POWERPLAYS</h2>';
-        excelContent += '<table border="1"><tr><th>Powerplay</th><th>Start Over</th><th>End Over</th><th>Runs</th><th>Wickets</th><th>Description</th></tr>';
+        excelContent += '<div class="header">POWERPLAYS ANALYSIS</div>';
+        excelContent += '<table><tr><th>Powerplay</th><th>Start Over</th><th>End Over</th><th>Total Overs</th><th>Runs</th><th>Wickets</th><th>Run Rate</th><th>Economy Rate</th><th>Description</th></tr>';
         scorecardData.powerplays.forEach((pp: any) => {
-          excelContent += `<tr><td>${pp.name}</td><td>${pp.startOver}</td><td>${pp.endOver}</td><td>${pp.runs}</td><td>${pp.wickets}</td><td>${pp.description}</td></tr>`;
+          const totalOvers = pp.endOver - pp.startOver + 1;
+          const runRate = totalOvers > 0 ? (pp.runs / totalOvers).toFixed(2) : 0;
+          const economyRate = totalOvers > 0 ? (pp.runs / totalOvers).toFixed(2) : 0;
+          excelContent += `<tr><td>${pp.name}</td><td class="numeric">${pp.startOver}</td><td class="numeric">${pp.endOver}</td><td class="numeric">${totalOvers}</td><td class="numeric">${pp.runs}</td><td class="numeric">${pp.wickets}</td><td class="numeric">${runRate}</td><td class="numeric">${economyRate}</td><td>${pp.description}</td></tr>`;
         });
-        excelContent += '</table><br>';
+        excelContent += '</table>';
       }
       
-      // Partnerships
+      // Partnerships - Enhanced for Graphing
       if (scorecardData.partnerships.length > 0) {
-        excelContent += '<h2>PARTNERSHIPS</h2>';
-        excelContent += '<table border="1"><tr><th>Partnership</th><th>Batsman 1</th><th>Batsman 2</th><th>Runs</th><th>Balls</th><th>Start Over</th><th>End Over</th></tr>';
+        excelContent += '<div class="header">PARTNERSHIPS ANALYSIS</div>';
+        excelContent += '<table><tr><th>Partnership Number</th><th>Batsman 1</th><th>Batsman 2</th><th>Runs</th><th>Balls</th><th>Strike Rate</th><th>Start Over</th><th>End Over</th><th>Duration (Overs)</th><th>Contribution (%)</th></tr>';
         scorecardData.partnerships.forEach((part: any) => {
-          excelContent += `<tr><td>${part.partnershipNumber}</td><td>${part.batsman1}</td><td>${part.batsman2}</td><td>${part.runs}</td><td>${part.balls}</td><td>${part.startOver}</td><td>${part.endOver}</td></tr>`;
+          const strikeRate = part.balls > 0 ? ((part.runs / part.balls) * 100).toFixed(2) : 0;
+          const duration = (part.endOver - part.startOver).toFixed(1);
+          const contribution = part.teamTotal ? ((part.runs / part.teamTotal) * 100).toFixed(1) : 0;
+          excelContent += `<tr><td class="numeric">${part.partnershipNumber}</td><td>${part.batsman1}</td><td>${part.batsman2}</td><td class="numeric">${part.runs}</td><td class="numeric">${part.balls}</td><td class="numeric">${strikeRate}</td><td class="numeric">${part.startOver}</td><td class="numeric">${part.endOver}</td><td class="numeric">${duration}</td><td class="numeric">${contribution}%</td></tr>`;
         });
-        excelContent += '</table><br>';
+        excelContent += '</table>';
       }
       
-      // Batting and Bowling Scorecards
+      // Enhanced Batting Scorecards - Perfect for Graphing
       scorecardData.innings.forEach((inning: any, index: number) => {
-        excelContent += `<h2>INNINGS ${index + 1} - ${inning.team}</h2>`;
+        excelContent += `<div class="header">INNINGS ${index + 1} - ${inning.team} BATTING ANALYSIS</div>`;
+        excelContent += '<table><tr><th>Batsman</th><th>Runs</th><th>Balls</th><th>Strike Rate</th><th>Fours</th><th>Sixes</th><th>Boundary %</th><th>Dot Balls</th><th>Dot Ball %</th><th>Dismissal</th><th>Captain</th><th>Wicket Keeper</th><th>Contribution (%)</th></tr>';
         
-        excelContent += '<h3>BATTING SCORECARD</h3>';
-        excelContent += '<table border="1"><tr><th>Batsman</th><th>Runs</th><th>Balls</th><th>Fours</th><th>Sixes</th><th>Strike Rate</th><th>Dismissal</th><th>Captain</th><th>Wicket Keeper</th></tr>';
+        const teamTotal = inning.batting.reduce((sum: number, batsman: any) => sum + (batsman.runs || 0), 0);
+        
         inning.batting.forEach((batsman: any) => {
-          excelContent += `<tr><td>${batsman.name}</td><td>${batsman.runs}</td><td>${batsman.balls}</td><td>${batsman.fours}</td><td>${batsman.sixes}</td><td>${batsman.strikeRate}</td><td>${batsman.dismissal}</td><td>${batsman.captain || 'No'}</td><td>${batsman.wicketKeeper || 'No'}</td></tr>`;
+          const strikeRate = batsman.balls > 0 ? ((batsman.runs / batsman.balls) * 100).toFixed(2) : 0;
+          const boundaryRuns = ((batsman.fours || 0) * 4) + ((batsman.sixes || 0) * 6);
+          const boundaryPercent = batsman.runs > 0 ? ((boundaryRuns / batsman.runs) * 100).toFixed(1) : 0;
+          const dotBalls = (batsman.balls || 0) - (batsman.fours || 0) - (batsman.sixes || 0);
+          const dotBallPercent = batsman.balls > 0 ? ((dotBalls / batsman.balls) * 100).toFixed(1) : 0;
+          const contribution = teamTotal > 0 ? ((batsman.runs / teamTotal) * 100).toFixed(1) : 0;
+          
+          excelContent += `<tr><td>${batsman.name}</td><td class="numeric">${batsman.runs}</td><td class="numeric">${batsman.balls}</td><td class="numeric">${strikeRate}</td><td class="numeric">${batsman.fours || 0}</td><td class="numeric">${batsman.sixes || 0}</td><td class="numeric">${boundaryPercent}%</td><td class="numeric">${dotBalls}</td><td class="numeric">${dotBallPercent}%</td><td>${batsman.dismissal}</td><td>${batsman.captain || 'No'}</td><td>${batsman.wicketKeeper || 'No'}</td><td class="numeric">${contribution}%</td></tr>`;
         });
-        excelContent += '</table><br>';
+        excelContent += '</table>';
         
-        excelContent += '<h3>BOWLING SCORECARD</h3>';
-        excelContent += '<table border="1"><tr><th>Bowler</th><th>Overs</th><th>Runs</th><th>Wickets</th><th>Economy</th><th>Maidens</th><th>Dots</th><th>Fours</th><th>Sixes</th><th>Wides</th><th>No Balls</th></tr>';
+        // Enhanced Bowling Scorecards - Perfect for Graphing
+        excelContent += `<div class="header">INNINGS ${index + 1} - ${inning.team} BOWLING ANALYSIS</div>`;
+        excelContent += '<table><tr><th>Bowler</th><th>Overs</th><th>Runs</th><th>Wickets</th><th>Economy</th><th>Maidens</th><th>Dots</th><th>Dot Ball %</th><th>Fours</th><th>Sixes</th><th>Wides</th><th>No Balls</th><th>Extras</th><th>Strike Rate</th><th>Average</th><th>Wickets Per Over</th></tr>';
+        
         inning.bowling.forEach((bowler: any) => {
-          excelContent += `<tr><td>${bowler.name}</td><td>${bowler.overs}</td><td>${bowler.runs}</td><td>${bowler.wickets}</td><td>${bowler.economy}</td><td>${bowler.maidens}</td><td>${bowler.dots}</td><td>${bowler.fours}</td><td>${bowler.sixes}</td><td>${bowler.wides}</td><td>${bowler.noBalls}</td></tr>`;
+          const economy = bowler.overs > 0 ? (bowler.runs / bowler.overs).toFixed(2) : 0;
+          const dotBallPercent = bowler.balls > 0 ? ((bowler.dots / bowler.balls) * 100).toFixed(1) : 0;
+          const extras = (bowler.wides || 0) + (bowler.noBalls || 0);
+          const strikeRate = bowler.wickets > 0 ? ((bowler.balls / bowler.wickets) / 6).toFixed(1) : 0;
+          const average = bowler.wickets > 0 ? (bowler.runs / bowler.wickets).toFixed(2) : 0;
+          const wicketsPerOver = bowler.overs > 0 ? (bowler.wickets / bowler.overs).toFixed(2) : 0;
+          
+          excelContent += `<tr><td>${bowler.name}</td><td class="numeric">${bowler.overs}</td><td class="numeric">${bowler.runs}</td><td class="numeric">${bowler.wickets}</td><td class="numeric">${economy}</td><td class="numeric">${bowler.maidens || 0}</td><td class="numeric">${bowler.dots || 0}</td><td class="numeric">${dotBallPercent}%</td><td class="numeric">${bowler.fours || 0}</td><td class="numeric">${bowler.sixes || 0}</td><td class="numeric">${bowler.wides || 0}</td><td class="numeric">${bowler.noBalls || 0}</td><td class="numeric">${extras}</td><td class="numeric">${strikeRate}</td><td class="numeric">${average}</td><td class="numeric">${wicketsPerOver}</td></tr>`;
         });
-        excelContent += '</table><br>';
+        excelContent += '</table>';
+        
+        // Over-by-Over Summary (if available)
+        if (inning.overByOver) {
+          excelContent += `<div class="header">INNINGS ${index + 1} - OVER BY OVER ANALYSIS</div>`;
+          excelContent += '<table><tr><th>Over</th><th>Runs</th><th>Cumulative Runs</th><th>Wickets</th><th>Run Rate</th><th>Cumulative Run Rate</th></tr>';
+          let cumulativeRuns = 0;
+          inning.overByOver.forEach((over: any) => {
+            cumulativeRuns += over.runs;
+            const runRate = over.runs;
+            const cumulativeRunRate = cumulativeRuns / over.over;
+            excelContent += `<tr><td class="numeric">${over.over}</td><td class="numeric">${over.runs}</td><td class="numeric">${cumulativeRuns}</td><td class="numeric">${over.wickets}</td><td class="numeric">${runRate}</td><td class="numeric">${cumulativeRunRate.toFixed(2)}</td></tr>`;
+          });
+          excelContent += '</table>';
+        }
       });
       
+      // Summary Statistics Table
+      excelContent += '<div class="header">MATCH SUMMARY STATISTICS</div>';
+      excelContent += '<table><tr><th>Statistic</th><th>Team 1</th><th>Team 2</th></tr>';
+      
+      // Calculate summary stats
+      scorecardData.innings.forEach((inning: any, index: number) => {
+        const teamName = inning.team;
+        const totalRuns = inning.batting.reduce((sum: number, batsman: any) => sum + (batsman.runs || 0), 0);
+        const totalBalls = inning.batting.reduce((sum: number, batsman: any) => sum + (batsman.balls || 0), 0);
+        const totalWickets = inning.bowling.reduce((sum: number, bowler: any) => sum + (bowler.wickets || 0), 0);
+        const runRate = totalBalls > 0 ? ((totalRuns / totalBalls) * 6).toFixed(2) : 0;
+        const highestScore = Math.max(...inning.batting.map((b: any) => b.runs || 0));
+        const bestBowling = Math.max(...inning.bowling.map((b: any) => b.wickets || 0));
+        
+        if (index === 0) {
+          excelContent += `<tr><td>Total Runs</td><td class="numeric">${totalRuns}</td><td></td></tr>`;
+          excelContent += `<tr><td>Total Wickets</td><td class="numeric">${totalWickets}</td><td></td></tr>`;
+          excelContent += `<tr><td>Run Rate</td><td class="numeric">${runRate}</td><td></td></tr>`;
+          excelContent += `<tr><td>Highest Individual Score</td><td class="numeric">${highestScore}</td><td></td></tr>`;
+          excelContent += `<tr><td>Best Bowling Figures</td><td class="numeric">${bestBowling} wickets</td><td></td></tr>`;
+        } else {
+          // Update the second column for team 2
+          const rows = excelContent.split('</tr>');
+          const lastRowIndex = rows.length - 2;
+          rows[lastRowIndex] = rows[lastRowIndex].replace('<td></td>', `<td class="numeric">${totalRuns}</td>`);
+          rows[lastRowIndex - 1] = rows[lastRowIndex - 1].replace('<td></td>', `<td class="numeric">${totalWickets}</td>`);
+          rows[lastRowIndex - 2] = rows[lastRowIndex - 2].replace('<td></td>', `<td class="numeric">${runRate}</td>`);
+          rows[lastRowIndex - 3] = rows[lastRowIndex - 3].replace('<td></td>', `<td class="numeric">${highestScore}</td>`);
+          rows[lastRowIndex - 4] = rows[lastRowIndex - 4].replace('<td></td>', `<td class="numeric">${bestBowling} wickets</td>`);
+          excelContent = rows.join('</tr>');
+        }
+      });
+      
+      excelContent += '</table>';
       excelContent += '</body></html>';
       
       const dataUri = 'data:application/vnd.ms-excel;charset=utf-8,' + encodeURIComponent(excelContent);
