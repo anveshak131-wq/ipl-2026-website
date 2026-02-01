@@ -639,6 +639,35 @@ export default function ScorecardAdminPage() {
       lines.push(`Extras,${(inn.extras.wides || 0) + (inn.extras.noBalls || 0) + (inn.extras.byes || 0) + (inn.extras.legByes || 0)}`);
       lines.push(`Total,${inn.totalRuns || 0}/${inn.totalWickets || 0} (${inn.totalOvers || ''})`);
       lines.push('');
+
+      // Fall of Wickets
+      if (inn.fallOfWickets && inn.fallOfWickets.length > 0) {
+        lines.push('Fall of Wickets');
+        lines.push('Player,Score at Dismissal,Over');
+        inn.fallOfWickets.forEach((fow, index) => {
+          lines.push(`${escapeCsv(fow.player || '')},${escapeCsv(fow.score || '')},${escapeCsv(fow.over || '')}`);
+        });
+        lines.push('');
+      }
+
+      // Powerplays
+      if (inn.powerplays) {
+        lines.push('Powerplays');
+        lines.push('Powerplay Type,Overs,Runs');
+        lines.push(`Mandatory,${inn.powerplays.mandatory.overs},${inn.powerplays.mandatory.runs}`);
+        lines.push(`Optional,${inn.powerplays.optional.overs},${inn.powerplays.optional.runs}`);
+        lines.push('');
+      }
+
+      // Partnerships
+      if (inn.partnerships && inn.partnerships.length > 0) {
+        lines.push('Partnerships');
+        lines.push('Batsman 1,Batsman 1 Runs,Batsman 1 Balls,Batsman 2,Batsman 2 Runs,Batsman 2 Balls,Total Partnership Runs');
+        inn.partnerships.forEach((part) => {
+          lines.push(`${escapeCsv(part.batsman1 || '')},${escapeCsv(part.batsman1Runs || '')},${escapeCsv(part.batsman1Balls || '')},${escapeCsv(part.batsman2 || '')},${escapeCsv(part.batsman2Runs || '')},${escapeCsv(part.batsman2Balls || '')},${escapeCsv(part.totalRuns || '')}`);
+        });
+        lines.push('');
+      }
     });
 
     // Result
@@ -2039,6 +2068,183 @@ export default function ScorecardAdminPage() {
       // Add sheets to workbook
       XLSX.utils.book_append_sheet(wb, battingWS, `Innings${inn.inningsNumber}_Batting`);
       XLSX.utils.book_append_sheet(wb, bowlingWS, `Innings${inn.inningsNumber}_Bowling`);
+
+      // Fall of Wickets Sheet
+      if (inn.fallOfWickets && inn.fallOfWickets.length > 0) {
+        const fowData = [
+          [`🏏 INNINGS ${inn.inningsNumber} - ${battingTeamName.toUpperCase()} FALL OF WICKETS 🏏`, '', '', '', ''],
+          ['🎯 FALL OF WICKETS', '', '', '', ''],
+          ['', '', '', '', ''],
+          ['🏏 Player', '🎯 Score at Dismissal', '⚪ Over', '🏏 Wicket Number', '⏱️ Time'],
+        ];
+
+        // Add Fall of Wickets data
+        inn.fallOfWickets.forEach((fow, index) => {
+          fowData.push([
+            fow.player || '',
+            fow.score || '',
+            fow.over || '',
+            index + 1,
+            fow.over || ''
+          ]);
+        });
+
+        const fowWS = XLSX.utils.aoa_to_sheet(fowData);
+        
+        // Style Fall of Wickets sheet
+        const fowRange = XLSX.utils.decode_range(fowWS['!ref'] || 'A1');
+        for (let row = fowRange.s.r; row <= fowRange.e.r; row++) {
+          for (let col = fowRange.s.c; col <= fowRange.e.c; col++) {
+            const cellRef = XLSX.utils.encode_cell({ r: row, c: col });
+            if (!fowWS[cellRef]) continue;
+            
+            fowWS[cellRef].s = {
+              font: { name: 'Calibri', sz: 11 },
+              alignment: { vertical: 'center', horizontal: col === 0 ? 'left' : 'center' },
+              border: {
+                top: { style: 'thin', color: { auto: 1 } },
+                bottom: { style: 'thin', color: { auto: 1 } },
+                left: { style: 'thin', color: { auto: 1 } },
+                right: { style: 'thin', color: { auto: 1 } }
+              }
+            };
+
+            if (row === 0) {
+              fowWS[cellRef].s.fill = { fgColor: { rgb: colors.danger } };
+              fowWS[cellRef].s.font = { name: 'Calibri', sz: 14, bold: true, color: { rgb: 'FFFFFF' } };
+            } else if (row === 1) {
+              fowWS[cellRef].s.fill = { fgColor: { rgb: colors.warning } };
+              fowWS[cellRef].s.font = { name: 'Calibri', sz: 12, bold: true, color: { rgb: '000000' } };
+            } else if (row === 3) {
+              fowWS[cellRef].s.fill = { fgColor: { rgb: colors.info } };
+              fowWS[cellRef].s.font = { name: 'Calibri', sz: 11, bold: true, color: { rgb: 'FFFFFF' } };
+            }
+          }
+        }
+
+        XLSX.utils.book_append_sheet(wb, fowWS, `Innings${inn.inningsNumber}_FallOfWickets`);
+      }
+
+      // Powerplays Sheet
+      if (inn.powerplays) {
+        const ppData = [
+          [`🏏 INNINGS ${inn.inningsNumber} - ${battingTeamName.toUpperCase()} POWERPLAYS 🏏`, '', '', '', ''],
+          ['⚡ POWERPLAYS ANALYSIS', '', '', '', ''],
+          ['', '', '', '', ''],
+          ['⚡ Powerplay Type', '🎯 Overs', '🎯 Runs', '📊 Run Rate', '📝 Description'],
+        ];
+
+        // Add Powerplays data
+        ppData.push([
+          'Mandatory',
+          inn.powerplays.mandatory.overs,
+          inn.powerplays.mandatory.runs,
+          inn.powerplays.mandatory.runs > 0 ? (inn.powerplays.mandatory.runs / parseFloat(inn.powerplays.mandatory.overs)).toFixed(2) : 0,
+          'Mandatory powerplay overs'
+        ]);
+        
+        ppData.push([
+          'Optional',
+          inn.powerplays.optional.overs,
+          inn.powerplays.optional.runs,
+          inn.powerplays.optional.runs > 0 ? (inn.powerplays.optional.runs / parseFloat(inn.powerplays.optional.overs)).toFixed(2) : 0,
+          'Optional powerplay overs'
+        ]);
+
+        const ppWS = XLSX.utils.aoa_to_sheet(ppData);
+        
+        // Style Powerplays sheet
+        const ppRange = XLSX.utils.decode_range(ppWS['!ref'] || 'A1');
+        for (let row = ppRange.s.r; row <= ppRange.e.r; row++) {
+          for (let col = ppRange.s.c; col <= ppRange.e.c; col++) {
+            const cellRef = XLSX.utils.encode_cell({ r: row, c: col });
+            if (!ppWS[cellRef]) continue;
+            
+            ppWS[cellRef].s = {
+              font: { name: 'Calibri', sz: 11 },
+              alignment: { vertical: 'center', horizontal: col === 0 || col === 4 ? 'left' : 'center' },
+              border: {
+                top: { style: 'thin', color: { auto: 1 } },
+                bottom: { style: 'thin', color: { auto: 1 } },
+                left: { style: 'thin', color: { auto: 1 } },
+                right: { style: 'thin', color: { auto: 1 } }
+              }
+            };
+
+            if (row === 0) {
+              ppWS[cellRef].s.fill = { fgColor: { rgb: colors.cyan } };
+              ppWS[cellRef].s.font = { name: 'Calibri', sz: 14, bold: true, color: { rgb: 'FFFFFF' } };
+            } else if (row === 1) {
+              ppWS[cellRef].s.fill = { fgColor: { rgb: colors.info } };
+              ppWS[cellRef].s.font = { name: 'Calibri', sz: 12, bold: true, color: { rgb: 'FFFFFF' } };
+            } else if (row === 3) {
+              ppWS[cellRef].s.fill = { fgColor: { rgb: colors.purple } };
+              ppWS[cellRef].s.font = { name: 'Calibri', sz: 11, bold: true, color: { rgb: 'FFFFFF' } };
+            }
+          }
+        }
+
+        XLSX.utils.book_append_sheet(wb, ppWS, `Innings${inn.inningsNumber}_Powerplays`);
+      }
+
+      // Partnerships Sheet
+      if (inn.partnerships && inn.partnerships.length > 0) {
+        const partData = [
+          [`🏏 INNINGS ${inn.inningsNumber} - ${battingTeamName.toUpperCase()} PARTNERSHIPS 🏏`, '', '', '', '', '', '', ''],
+          ['🤝 PARTNERSHIPS ANALYSIS', '', '', '', '', '', '', ''],
+          ['', '', '', '', '', '', '', ''],
+          ['🤝 Partnership Number', '🏏 Batsman 1', '🏏 Batsman 1 Runs', '🏏 Batsman 1 Balls', '🏏 Batsman 2', '🏏 Batsman 2 Runs', '🏏 Batsman 2 Balls', '🎯 Total Partnership Runs'],
+        ];
+
+        // Add Partnerships data
+        inn.partnerships.forEach((part, index) => {
+          partData.push([
+            index + 1,
+            part.batsman1 || '',
+            part.batsman1Runs || '',
+            part.batsman1Balls || '',
+            part.batsman2 || '',
+            part.batsman2Runs || '',
+            part.batsman2Balls || '',
+            part.totalRuns || ''
+          ]);
+        });
+
+        const partWS = XLSX.utils.aoa_to_sheet(partData);
+        
+        // Style Partnerships sheet
+        const partRange = XLSX.utils.decode_range(partWS['!ref'] || 'A1');
+        for (let row = partRange.s.r; row <= partRange.e.r; row++) {
+          for (let col = partRange.s.c; col <= partRange.e.c; col++) {
+            const cellRef = XLSX.utils.encode_cell({ r: row, c: col });
+            if (!partWS[cellRef]) continue;
+            
+            partWS[cellRef].s = {
+              font: { name: 'Calibri', sz: 11 },
+              alignment: { vertical: 'center', horizontal: (col === 1 || col === 4) ? 'left' : 'center' },
+              border: {
+                top: { style: 'thin', color: { auto: 1 } },
+                bottom: { style: 'thin', color: { auto: 1 } },
+                left: { style: 'thin', color: { auto: 1 } },
+                right: { style: 'thin', color: { auto: 1 } }
+              }
+            };
+
+            if (row === 0) {
+              partWS[cellRef].s.fill = { fgColor: { rgb: colors.pink } };
+              partWS[cellRef].s.font = { name: 'Calibri', sz: 14, bold: true, color: { rgb: 'FFFFFF' } };
+            } else if (row === 1) {
+              partWS[cellRef].s.fill = { fgColor: { rgb: colors.success } };
+              partWS[cellRef].s.font = { name: 'Calibri', sz: 12, bold: true, color: { rgb: '000000' } };
+            } else if (row === 3) {
+              partWS[cellRef].s.fill = { fgColor: { rgb: colors.warning } };
+              partWS[cellRef].s.font = { name: 'Calibri', sz: 11, bold: true, color: { rgb: '000000' } };
+            }
+          }
+        }
+
+        XLSX.utils.book_append_sheet(wb, partWS, `Innings${inn.inningsNumber}_Partnerships`);
+      }
     });
 
     // Add match info sheet
