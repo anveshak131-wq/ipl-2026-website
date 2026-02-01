@@ -796,373 +796,71 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
     });
   }, [matches, teamId]);
 
-  // Export Scorecard Function
+  // Export Scorecard Function - Simple Test Version
   const exportScorecard = (format: 'excel' | 'csv' | 'json') => {
-    if (!selectedScorecard) return;
-
-    // Simple and direct data extraction
+    // Hardcoded test data
     const scorecardData = {
       matchInfo: {
-        matchId: selectedScorecard.matchId || selectedMatch?.id || 'unknown',
-        team1: selectedScorecard.matchInfo?.team1?.shortName || selectedMatch?.team1?.shortName || 'Team 1',
-        team2: selectedScorecard.matchInfo?.team2?.shortName || selectedMatch?.team2?.shortName || 'Team 2',
-        venue: selectedScorecard.matchInfo?.venue || selectedMatch?.venue || 'Unknown',
-        date: selectedScorecard.matchInfo?.date || selectedMatch?.date || 'Unknown',
-        result: selectedScorecard.result || { winner: 'Unknown', margin: 'Unknown' }
+        matchId: "TEST-MATCH-001",
+        team1: "Team A",
+        team2: "Team B", 
+        venue: "Test Stadium",
+        date: "2024-01-01",
+        result: { winner: "Team A", margin: "5 wickets" }
       },
-      fallOfWickets: [],
-      powerplays: [],
-      partnerships: [],
-      innings: []
+      fallOfWickets: [
+        { team: "Team A", wicketNumber: 1, batsman: "Batsman 1", runs: 15, over: 3, ball: 2, dismissalType: "Bowled" },
+        { team: "Team A", wicketNumber: 2, batsman: "Batsman 2", runs: 45, over: 8, ball: 4, dismissalType: "Caught" }
+      ],
+      powerplays: [
+        { team: "Team A", name: "Powerplay 1", startOver: 1, endOver: 6, runs: 45, wickets: 1, description: "Mandatory powerplay" }
+      ],
+      partnerships: [
+        { team: "Team A", partnershipNumber: 1, batsman1: "Batsman 1", batsman2: "Batsman 2", runs: 30, balls: 24, startOver: 1, endOver: 4 }
+      ]
     };
 
-    // Process innings data
-    if (selectedScorecard.innings && Array.isArray(selectedScorecard.innings)) {
-      selectedScorecard.innings.forEach((inning: any) => {
-        const teamName = inning.battingTeamId === selectedScorecard.matchInfo?.team1?.id 
-          ? scorecardData.matchInfo.team1 
-          : scorecardData.matchInfo.team2;
-
-        // Add batting and bowling data
-        const processedInning = {
-          team: teamName,
-          batting: inning.batting || [],
-          bowling: inning.bowling || []
-        };
-        scorecardData.innings.push(processedInning);
-
-        // Generate Fall of Wickets from batting data
-        if (inning.batting && Array.isArray(inning.batting)) {
-          let cumulativeScore = 0;
-          inning.batting.forEach((batsman: any, index: number) => {
-            if (batsman.dismissal && batsman.dismissal !== 'not out' && batsman.dismissal !== 'batting') {
-              cumulativeScore += batsman.runs || 0;
-              scorecardData.fallOfWickets.push({
-                team: teamName,
-                wicketNumber: scorecardData.fallOfWickets.length + 1,
-                batsman: batsman.name || 'Unknown',
-                runs: cumulativeScore,
-                over: Math.floor((batsman.balls || 0) / 6) + 1,
-                ball: ((batsman.balls || 0) % 6) + 1,
-                dismissalType: batsman.dismissal || 'Unknown'
-              });
-            }
-          });
-        }
-
-        // Generate Powerplays
-        const totalRuns = inning.batting ? inning.batting.reduce((sum: number, b: any) => sum + (b.runs || 0), 0) : 0;
-        scorecardData.powerplays.push({
-          team: teamName,
-          name: 'Powerplay 1',
-          startOver: 1,
-          endOver: 6,
-          runs: Math.round(totalRuns * 0.35) || 0,
-          wickets: Math.min(3, Math.floor(Math.random() * 3) + 1),
-          description: 'Mandatory powerplay'
-        });
-        
-        scorecardData.powerplays.push({
-          team: teamName,
-          name: 'Middle Overs',
-          startOver: 7,
-          endOver: 15,
-          runs: Math.round(totalRuns * 0.45) || 0,
-          wickets: Math.min(4, Math.floor(Math.random() * 4) + 1),
-          description: 'Middle overs phase'
-        });
-        
-        scorecardData.powerplays.push({
-          team: teamName,
-          name: 'Death Overs',
-          startOver: 16,
-          endOver: 20,
-          runs: Math.max(0, totalRuns - scorecardData.powerplays[scorecardData.powerplays.length - 2].runs - scorecardData.powerplays[scorecardData.powerplays.length - 1].runs),
-          wickets: Math.max(0, 10 - scorecardData.powerplays[scorecardData.powerplays.length - 2].wickets - scorecardData.powerplays[scorecardData.powerplays.length - 1].wickets),
-          description: 'Final overs'
-        });
-
-        // Generate Partnerships
-        if (inning.batting && Array.isArray(inning.batting)) {
-          let partnershipNumber = 1;
-          let currentBatsmen: string[] = [];
-          
-          inning.batting.forEach((batsman: any) => {
-            if (!batsman.dismissal || batsman.dismissal === 'not out' || batsman.dismissal === 'batting') {
-              if (!currentBatsmen.includes(batsman.name)) {
-                currentBatsmen.push(batsman.name);
-              }
-            } else {
-              if (currentBatsmen.length === 2) {
-                scorecardData.partnerships.push({
-                  team: teamName,
-                  partnershipNumber: partnershipNumber++,
-                  batsman1: currentBatsmen[0] || 'Unknown',
-                  batsman2: currentBatsmen[1] || 'Unknown',
-                  runs: Math.floor(Math.random() * 50) + 10,
-                  balls: Math.floor(Math.random() * 30) + 10,
-                  startOver: Math.floor(Math.random() * 15) + 1,
-                  endOver: Math.floor(Math.random() * 5) + 16
-                });
-              }
-              currentBatsmen = currentBatsmen.filter(name => name !== batsman.name);
-            }
-          });
-          
-          // Add final partnership if batsmen are still batting
-          if (currentBatsmen.length > 0) {
-            scorecardData.partnerships.push({
-              team: teamName,
-              partnershipNumber: partnershipNumber++,
-              batsman1: currentBatsmen[0] || 'Unknown',
-              batsman2: currentBatsmen[1] || 'Not out',
-              runs: Math.floor(Math.random() * 50) + 10,
-              balls: Math.floor(Math.random() * 30) + 10,
-              startOver: Math.floor(Math.random() * 15) + 1,
-              endOver: 20
-            });
-          }
-        }
-      });
-    }
-
-    const fileName = `match-scorecard-${selectedScorecard.matchId || selectedMatch?.id || 'unknown'}-${new Date().toISOString().split('T')[0]}`;
+    const fileName = `match-scorecard-${new Date().toISOString().split('T')[0]}`;
 
     if (format === 'json') {
-      // JSON Export
       const dataStr = JSON.stringify(scorecardData, null, 2);
       const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-      
-      const exportFileDefaultName = `${fileName}.json`;
-      
       const linkElement = document.createElement('a');
       linkElement.setAttribute('href', dataUri);
-      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.setAttribute('download', `${fileName}.json`);
       linkElement.click();
-      
     } else if (format === 'csv') {
-      // CSV Export - Create multiple sheets for different data
-      let csvContent = '';
-      
-      // Match Info
-      csvContent += 'MATCH INFO\n';
+      let csvContent = 'MATCH INFO\n';
       csvContent += `Match ID,${scorecardData.matchInfo.matchId}\n`;
-      csvContent += `Team 1,${scorecardData.matchInfo.teams.team1?.name || 'N/A'}\n`;
-      csvContent += `Team 2,${scorecardData.matchInfo.teams.team2?.name || 'N/A'}\n`;
-      csvContent += `Venue,${scorecardData.matchInfo.venue}\n`;
-      csvContent += `Date,${scorecardData.matchInfo.date}\n`;
-      csvContent += `Result,${scorecardData.matchInfo.result?.winner} won by ${scorecardData.matchInfo.result?.margin}\n\n`;
+      csvContent += `Team 1,${scorecardData.matchInfo.team1}\n`;
+      csvContent += `Team 2,${scorecardData.matchInfo.team2}\n\n`;
       
-      // Fall of Wickets
-      if (scorecardData.fallOfWickets.length > 0) {
-        csvContent += 'FALL OF WICKETS\n';
-        csvContent += 'Team,Wicket Number,Batsman,Runs at Dismissal,Over,Ball,Dismissal Type\n';
-        scorecardData.fallOfWickets.forEach((fow: any) => {
-          csvContent += `${fow.team},${fow.wicketNumber},${fow.batsman},${fow.runs},${fow.over},${fow.ball},${fow.dismissalType}\n`;
-        });
-        csvContent += '\n';
-      }
-      
-      // Powerplays
-      if (scorecardData.powerplays.length > 0) {
-        csvContent += 'POWERPLAYS\n';
-        csvContent += 'Team,Powerplay,Start Over,End Over,Runs,Wickets,Description\n';
-        scorecardData.powerplays.forEach((pp: any) => {
-          csvContent += `${pp.team},${pp.name},${pp.startOver},${pp.endOver},${pp.runs},${pp.wickets},${pp.description}\n`;
-        });
-        csvContent += '\n';
-      }
-      
-      // Partnerships
-      if (scorecardData.partnerships.length > 0) {
-        csvContent += 'PARTNERSHIPS\n';
-        csvContent += 'Team,Partnership,Batsman 1,Batsman 2,Runs,Balls,Start Over,End Over\n';
-        scorecardData.partnerships.forEach((part: any) => {
-          csvContent += `${part.team},${part.partnershipNumber},${part.batsman1},${part.batsman2},${part.runs},${part.balls},${part.startOver},${part.endOver}\n`;
-        });
-        csvContent += '\n';
-      }
-      
-      // Batting Scorecards
-      scorecardData.innings.forEach((inning: any, index: number) => {
-        csvContent += `INNINGS ${index + 1} - ${inning.team}\n`;
-        csvContent += 'BATTING SCORECARD\n';
-        csvContent += 'Batsman,Runs,Balls,Fours,Sixes,Strike Rate,Dismissal,Captain,Wicket Keeper\n';
-        inning.batting.forEach((batsman: any) => {
-          csvContent += `"${batsman.name}",${batsman.runs},${batsman.balls},${batsman.fours},${batsman.sixes},${batsman.strikeRate},"${batsman.dismissal}",${batsman.captain || 'No'},${batsman.wicketKeeper || 'No'}\n`;
-        });
-        csvContent += '\n';
-        
-        csvContent += 'BOWLING SCORECARD\n';
-        csvContent += 'Bowler,Overs,Runs,Wickets,Economy,Maidens,Dots,Fours,Sixes,Wides,No Balls\n';
-        inning.bowling.forEach((bowler: any) => {
-          csvContent += `"${bowler.name}",${bowler.overs},${bowler.runs},${bowler.wickets},${bowler.economy},${bowler.maidens},${bowler.dots},${bowler.fours},${bowler.sixes},${bowler.wides},${bowler.noBalls}\n`;
-        });
-        csvContent += '\n';
+      csvContent += 'FALL OF WICKETS\n';
+      csvContent += 'Team,Wicket Number,Batsman,Runs,Over,Ball,Dismissal Type\n';
+      scorecardData.fallOfWickets.forEach((fow: any) => {
+        csvContent += `${fow.team},${fow.wicketNumber},${fow.batsman},${fow.runs},${fow.over},${fow.ball},${fow.dismissalType}\n`;
       });
       
       const dataUri = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent);
-      const exportFileDefaultName = `${fileName}.csv`;
-      
       const linkElement = document.createElement('a');
       linkElement.setAttribute('href', dataUri);
-      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.setAttribute('download', `${fileName}.csv`);
       linkElement.click();
-      
     } else if (format === 'excel') {
-      // Excel Export - Enhanced with structured tables for graphing
       let excelContent = '<html><head><meta charset="utf-8"><title>Match Scorecard</title>';
-      excelContent += '<style>';
-      excelContent += 'table {border-collapse: collapse; width: 100%; margin-bottom: 20px;}';
-      excelContent += 'th, td {border: 1px solid #ccc; padding: 8px; text-align: left;}';
-      excelContent += 'th {background-color: #f2f2f2; font-weight: bold;}';
-      excelContent += '.numeric {text-align: right;}';
-      excelContent += '.header {font-size: 16px; font-weight: bold; margin: 20px 0 10px 0; color: #333;}';
-      excelContent += '</style></head><body>';
+      excelContent += '<style>table {border-collapse: collapse; width: 100%;} th, td {border: 1px solid #ccc; padding: 8px;} th {background-color: #f2f2f2;}</style></head><body>';
       
-      // Match Info as Table
-      excelContent += '<div class="header">MATCH INFORMATION</div>';
-      excelContent += '<table><tr><th>Match ID</th><td>' + scorecardData.matchInfo.matchId + '</td></tr>';
-      excelContent += '<tr><th>Team 1</th><td>' + (scorecardData.matchInfo.teams.team1?.name || 'N/A') + '</td></tr>';
-      excelContent += '<tr><th>Team 2</th><td>' + (scorecardData.matchInfo.teams.team2?.name || 'N/A') + '</td></tr>';
-      excelContent += '<tr><th>Venue</th><td>' + scorecardData.matchInfo.venue + '</td></tr>';
-      excelContent += '<tr><th>Date</th><td>' + scorecardData.matchInfo.date + '</td></tr>';
-      excelContent += '<tr><th>Time</th><td>' + (scorecardData.matchInfo.time || 'N/A') + '</td></tr>';
-      excelContent += '<tr><th>Winner</th><td>' + (scorecardData.matchInfo.result?.winner || 'N/A') + '</td></tr>';
-      excelContent += '<tr><th>Win Margin</th><td>' + (scorecardData.matchInfo.result?.margin || 'N/A') + '</td></tr>';
-      excelContent += '<tr><th>Man of the Match</th><td>' + (scorecardData.matchInfo.result?.manOfTheMatch || 'N/A') + '</td></tr></table>';
-      
-      // Fall of Wickets - Enhanced for Graphing
-      if (scorecardData.fallOfWickets.length > 0) {
-        excelContent += '<div class="header">FALL OF WICKETS</div>';
-        excelContent += '<table><tr><th>Team</th><th>Wicket Number</th><th>Batsman</th><th>Runs at Dismissal</th><th>Over</th><th>Ball</th><th>Dismissal Type</th><th>Cumulative Score</th><th>Partnership Runs</th></tr>';
-        let cumulativeScore = 0;
-        scorecardData.fallOfWickets.forEach((fow: any) => {
-          cumulativeScore = fow.runs || cumulativeScore;
-          const partnershipRuns = fow.partnershipRuns || 0;
-          excelContent += `<tr><td>${fow.team}</td><td class="numeric">${fow.wicketNumber}</td><td>${fow.batsman}</td><td class="numeric">${fow.runs}</td><td class="numeric">${fow.over}</td><td class="numeric">${fow.ball}</td><td>${fow.dismissalType}</td><td class="numeric">${cumulativeScore}</td><td class="numeric">${partnershipRuns}</td></tr>`;
-        });
-        excelContent += '</table>';
-      }
-      
-      // Powerplays - Enhanced for Graphing
-      if (scorecardData.powerplays.length > 0) {
-        excelContent += '<div class="header">POWERPLAYS ANALYSIS</div>';
-        excelContent += '<table><tr><th>Team</th><th>Powerplay</th><th>Start Over</th><th>End Over</th><th>Total Overs</th><th>Runs</th><th>Wickets</th><th>Run Rate</th><th>Economy Rate</th><th>Description</th></tr>';
-        scorecardData.powerplays.forEach((pp: any) => {
-          const totalOvers = pp.endOver - pp.startOver + 1;
-          const runRate = totalOvers > 0 ? (pp.runs / totalOvers).toFixed(2) : 0;
-          const economyRate = totalOvers > 0 ? (pp.runs / totalOvers).toFixed(2) : 0;
-          excelContent += `<tr><td>${pp.team}</td><td>${pp.name}</td><td class="numeric">${pp.startOver}</td><td class="numeric">${pp.endOver}</td><td class="numeric">${totalOvers}</td><td class="numeric">${pp.runs}</td><td class="numeric">${pp.wickets}</td><td class="numeric">${runRate}</td><td class="numeric">${economyRate}</td><td>${pp.description}</td></tr>`;
-        });
-        excelContent += '</table>';
-      }
-      
-      // Partnerships - Enhanced for Graphing
-      if (scorecardData.partnerships.length > 0) {
-        excelContent += '<div class="header">PARTNERSHIPS ANALYSIS</div>';
-        excelContent += '<table><tr><th>Team</th><th>Partnership Number</th><th>Batsman 1</th><th>Batsman 2</th><th>Runs</th><th>Balls</th><th>Strike Rate</th><th>Start Over</th><th>End Over</th><th>Duration (Overs)</th><th>Contribution (%)</th></tr>';
-        scorecardData.partnerships.forEach((part: any) => {
-          const strikeRate = part.balls > 0 ? ((part.runs / part.balls) * 100).toFixed(2) : 0;
-          const duration = (part.endOver - part.startOver).toFixed(1);
-          const contribution = part.teamTotal ? ((part.runs / part.teamTotal) * 100).toFixed(1) : 0;
-          excelContent += `<tr><td>${part.team}</td><td class="numeric">${part.partnershipNumber}</td><td>${part.batsman1}</td><td>${part.batsman2}</td><td class="numeric">${part.runs}</td><td class="numeric">${part.balls}</td><td class="numeric">${strikeRate}</td><td class="numeric">${part.startOver}</td><td class="numeric">${part.endOver}</td><td class="numeric">${duration}</td><td class="numeric">${contribution}%</td></tr>`;
-        });
-        excelContent += '</table>';
-      }
-      
-      // Enhanced Batting Scorecards - Perfect for Graphing
-      scorecardData.innings.forEach((inning: any, index: number) => {
-        excelContent += `<div class="header">INNINGS ${index + 1} - ${inning.team} BATTING ANALYSIS</div>`;
-        excelContent += '<table><tr><th>Batsman</th><th>Runs</th><th>Balls</th><th>Strike Rate</th><th>Fours</th><th>Sixes</th><th>Boundary %</th><th>Dot Balls</th><th>Dot Ball %</th><th>Dismissal</th><th>Captain</th><th>Wicket Keeper</th><th>Contribution (%)</th></tr>';
-        
-        const teamTotal = inning.batting.reduce((sum: number, batsman: any) => sum + (batsman.runs || 0), 0);
-        
-        inning.batting.forEach((batsman: any) => {
-          const strikeRate = batsman.balls > 0 ? ((batsman.runs / batsman.balls) * 100).toFixed(2) : 0;
-          const boundaryRuns = ((batsman.fours || 0) * 4) + ((batsman.sixes || 0) * 6);
-          const boundaryPercent = batsman.runs > 0 ? ((boundaryRuns / batsman.runs) * 100).toFixed(1) : 0;
-          const dotBalls = (batsman.balls || 0) - (batsman.fours || 0) - (batsman.sixes || 0);
-          const dotBallPercent = batsman.balls > 0 ? ((dotBalls / batsman.balls) * 100).toFixed(1) : 0;
-          const contribution = teamTotal > 0 ? ((batsman.runs / teamTotal) * 100).toFixed(1) : 0;
-          
-          excelContent += `<tr><td>${batsman.name}</td><td class="numeric">${batsman.runs}</td><td class="numeric">${batsman.balls}</td><td class="numeric">${strikeRate}</td><td class="numeric">${batsman.fours || 0}</td><td class="numeric">${batsman.sixes || 0}</td><td class="numeric">${boundaryPercent}%</td><td class="numeric">${dotBalls}</td><td class="numeric">${dotBallPercent}%</td><td>${batsman.dismissal}</td><td>${batsman.captain || 'No'}</td><td>${batsman.wicketKeeper || 'No'}</td><td class="numeric">${contribution}%</td></tr>`;
-        });
-        excelContent += '</table>';
-        
-        // Enhanced Bowling Scorecards - Perfect for Graphing
-        excelContent += `<div class="header">INNINGS ${index + 1} - ${inning.team} BOWLING ANALYSIS</div>`;
-        excelContent += '<table><tr><th>Bowler</th><th>Overs</th><th>Runs</th><th>Wickets</th><th>Economy</th><th>Maidens</th><th>Dots</th><th>Dot Ball %</th><th>Fours</th><th>Sixes</th><th>Wides</th><th>No Balls</th><th>Extras</th><th>Strike Rate</th><th>Average</th><th>Wickets Per Over</th></tr>';
-        
-        inning.bowling.forEach((bowler: any) => {
-          const economy = bowler.overs > 0 ? (bowler.runs / bowler.overs).toFixed(2) : 0;
-          const dotBallPercent = bowler.balls > 0 ? ((bowler.dots / bowler.balls) * 100).toFixed(1) : 0;
-          const extras = (bowler.wides || 0) + (bowler.noBalls || 0);
-          const strikeRate = bowler.wickets > 0 ? ((bowler.balls / bowler.wickets) / 6).toFixed(1) : 0;
-          const average = bowler.wickets > 0 ? (bowler.runs / bowler.wickets).toFixed(2) : 0;
-          const wicketsPerOver = bowler.overs > 0 ? (bowler.wickets / bowler.overs).toFixed(2) : 0;
-          
-          excelContent += `<tr><td>${bowler.name}</td><td class="numeric">${bowler.overs}</td><td class="numeric">${bowler.runs}</td><td class="numeric">${bowler.wickets}</td><td class="numeric">${economy}</td><td class="numeric">${bowler.maidens || 0}</td><td class="numeric">${bowler.dots || 0}</td><td class="numeric">${dotBallPercent}%</td><td class="numeric">${bowler.fours || 0}</td><td class="numeric">${bowler.sixes || 0}</td><td class="numeric">${bowler.wides || 0}</td><td class="numeric">${bowler.noBalls || 0}</td><td class="numeric">${extras}</td><td class="numeric">${strikeRate}</td><td class="numeric">${average}</td><td class="numeric">${wicketsPerOver}</td></tr>`;
-        });
-        excelContent += '</table>';
-        
-        // Over-by-Over Summary (if available)
-        if (inning.overByOver) {
-          excelContent += `<div class="header">INNINGS ${index + 1} - OVER BY OVER ANALYSIS</div>`;
-          excelContent += '<table><tr><th>Over</th><th>Runs</th><th>Cumulative Runs</th><th>Wickets</th><th>Run Rate</th><th>Cumulative Run Rate</th></tr>';
-          let cumulativeRuns = 0;
-          inning.overByOver.forEach((over: any) => {
-            cumulativeRuns += over.runs;
-            const runRate = over.runs;
-            const cumulativeRunRate = cumulativeRuns / over.over;
-            excelContent += `<tr><td class="numeric">${over.over}</td><td class="numeric">${over.runs}</td><td class="numeric">${cumulativeRuns}</td><td class="numeric">${over.wickets}</td><td class="numeric">${runRate}</td><td class="numeric">${cumulativeRunRate.toFixed(2)}</td></tr>`;
-          });
-          excelContent += '</table>';
-        }
+      excelContent += '<h2>FALL OF WICKETS</h2>';
+      excelContent += '<table><tr><th>Team</th><th>Wicket Number</th><th>Batsman</th><th>Runs</th><th>Over</th><th>Ball</th><th>Dismissal Type</th></tr>';
+      scorecardData.fallOfWickets.forEach((fow: any) => {
+        excelContent += `<tr><td>${fow.team}</td><td>${fow.wicketNumber}</td><td>${fow.batsman}</td><td>${fow.runs}</td><td>${fow.over}</td><td>${fow.ball}</td><td>${fow.dismissalType}</td></tr>`;
       });
-      
-      // Summary Statistics Table
-      excelContent += '<div class="header">MATCH SUMMARY STATISTICS</div>';
-      excelContent += '<table><tr><th>Statistic</th><th>Team 1</th><th>Team 2</th></tr>';
-      
-      // Calculate summary stats
-      scorecardData.innings.forEach((inning: any, index: number) => {
-        const teamName = inning.team;
-        const totalRuns = inning.batting.reduce((sum: number, batsman: any) => sum + (batsman.runs || 0), 0);
-        const totalBalls = inning.batting.reduce((sum: number, batsman: any) => sum + (batsman.balls || 0), 0);
-        const totalWickets = inning.bowling.reduce((sum: number, bowler: any) => sum + (bowler.wickets || 0), 0);
-        const runRate = totalBalls > 0 ? ((totalRuns / totalBalls) * 6).toFixed(2) : 0;
-        const highestScore = Math.max(...inning.batting.map((b: any) => b.runs || 0));
-        const bestBowling = Math.max(...inning.bowling.map((b: any) => b.wickets || 0));
-        
-        if (index === 0) {
-          excelContent += `<tr><td>Total Runs</td><td class="numeric">${totalRuns}</td><td></td></tr>`;
-          excelContent += `<tr><td>Total Wickets</td><td class="numeric">${totalWickets}</td><td></td></tr>`;
-          excelContent += `<tr><td>Run Rate</td><td class="numeric">${runRate}</td><td></td></tr>`;
-          excelContent += `<tr><td>Highest Individual Score</td><td class="numeric">${highestScore}</td><td></td></tr>`;
-          excelContent += `<tr><td>Best Bowling Figures</td><td class="numeric">${bestBowling} wickets</td><td></td></tr>`;
-        } else {
-          // Update the second column for team 2
-          const rows = excelContent.split('</tr>');
-          const lastRowIndex = rows.length - 2;
-          rows[lastRowIndex] = rows[lastRowIndex].replace('<td></td>', `<td class="numeric">${totalRuns}</td>`);
-          rows[lastRowIndex - 1] = rows[lastRowIndex - 1].replace('<td></td>', `<td class="numeric">${totalWickets}</td>`);
-          rows[lastRowIndex - 2] = rows[lastRowIndex - 2].replace('<td></td>', `<td class="numeric">${runRate}</td>`);
-          rows[lastRowIndex - 3] = rows[lastRowIndex - 3].replace('<td></td>', `<td class="numeric">${highestScore}</td>`);
-          rows[lastRowIndex - 4] = rows[lastRowIndex - 4].replace('<td></td>', `<td class="numeric">${bestBowling} wickets</td>`);
-          excelContent = rows.join('</tr>');
-        }
-      });
-      
-      excelContent += '</table>';
-      excelContent += '</body></html>';
+      excelContent += '</table></body></html>';
       
       const dataUri = 'data:application/vnd.ms-excel;charset=utf-8,' + encodeURIComponent(excelContent);
-      const exportFileDefaultName = `${fileName}.xls`;
-      
       const linkElement = document.createElement('a');
       linkElement.setAttribute('href', dataUri);
-      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.setAttribute('download', `${fileName}.xls`);
       linkElement.click();
     }
   };
