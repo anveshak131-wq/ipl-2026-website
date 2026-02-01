@@ -758,28 +758,42 @@ export default function ScorecardAdminPage() {
       
       console.log('PDF document created, setting up colors...');
     
-    // Premium Color Palette
+    // 2025 Professional Color Palette - Based on Design Recommendations
     const colors = {
-      primary: [255, 87, 51],        // Vibrant Orange-Red
-      secondary: [138, 43, 226],     // Blue Violet
-      accent: [255, 215, 0],         // Gold
-      success: [46, 213, 115],        // Emerald Green
-      danger: [239, 68, 68],         // Red
-      warning: [245, 158, 11],       // Amber
-      info: [59, 130, 246],          // Blue
-      dark: [30, 41, 59],            // Dark Blue
-      light: [248, 250, 252],        // Light Gray
-      purple: [168, 85, 247],        // Purple
-      pink: [236, 72, 153],          // Pink
-      cyan: [6, 182, 212],           // Cyan
-      lime: [132, 204, 22],          // Lime
-      indigo: [99, 102, 241],        // Indigo
-      rose: [244, 63, 94],           // Rose
+      // 2025 Pantone Color of the Year: Mocha Mousse
+      mochaMousse: [150, 75, 0],        // #964B00 - Primary accent
+      etherealBlue: [168, 218, 220],     // #A8DADC - Secondary
+      wheatfieldBeige: [245, 245, 220],  // #F5F5DC - Background
+      moonlitGrey: [74, 74, 74],         // #4A4A4A - Text
+      warmYellow: [255, 209, 102],       // #FFD166 - Highlights
+      burntOrange: [230, 57, 70],        // #E63946 - Important data
+      creamyPastel: [241, 250, 238],     // #F1FAEE - Subtle backgrounds
+      
+      // Professional alternatives
+      professionalBlue: [44, 62, 80],    // #2C3E50
+      lightGrey: [248, 249, 250],        // #F8F9FA
+      successGreen: [46, 213, 115],      // #2ED573
+      dangerRed: [239, 68, 68],          // #EF4444
+      warningAmber: [245, 158, 11],      // #F59E0B
+      infoBlue: [59, 130, 246],          // #3B82F6
     };
     
-    let y = 40;
-    const lineHeight = 18;
-    const sectionSpacing = 25;
+    // 2025 Typography & Layout Standards - Professional Design Guidelines
+    let y = 60; // Increased top margin for professional layout
+    const lineHeight = 22; // 1.2x spacing for better readability
+    const sectionSpacing = 30; // Increased spacing for visual hierarchy
+    const pageMargin = 72; // 1 inch margins for professional documents
+    const contentWidth = pageWidth - (pageMargin * 2);
+    
+    // Professional typography sizes based on 2025 recommendations
+    const typography = {
+      title: 24,           // Main titles
+      subtitle: 18,        // Section headers
+      heading: 14,         // Subsection headers
+      body: 12,           // Body text (optimal for print)
+      caption: 10,        // Captions and footnotes
+      small: 9,           // Small text
+    };
     
     // Helper function to add gradient background
     const addGradientBackground = (startY: number, height: number, color1: number[], color2: number[]) => {
@@ -799,19 +813,23 @@ export default function ScorecardAdminPage() {
       doc.line(40, yPos + 3, pageWidth - 40, yPos + 3);
     };
     
-    // Helper function to add colorful text
+    // Helper function to add colorful text with 2025 design standards
     const addColorfulText = (text: string, x: number, yPos: number, color: number[], fontSize: number, fontWeight: string = 'normal', align: 'left' = 'left') => {
       safeSetTextColor(...color);
       doc.setFontSize(fontSize);
       
-      // Set font based on weight - jsPDF has limited font options
+      // Set font based on weight - using professional fonts for 2025 standards
       if (fontWeight === 'bold') {
-        doc.setFont('helvetica', 'bold');
+        doc.setFont('helvetica', 'bold'); // Professional sans-serif for accessibility
+      } else if (fontWeight === 'italic') {
+        doc.setFont('helvetica', 'italic');
       } else {
         doc.setFont('helvetica', 'normal');
       }
       
-      safeText(text, x, yPos, { align });
+      // Left-align body text for accessibility (2025 standard)
+      const finalAlign = (fontSize === typography.body || fontSize === typography.caption) ? 'left' : align;
+      safeText(text, x, yPos, { align: finalAlign });
     };
     
     // Safe rect function with validation
@@ -1001,7 +1019,7 @@ export default function ScorecardAdminPage() {
       
       // Draw grid lines
       safeSetDrawColor(220, 220, 220);
-      for (let i = 0; i <= 4; i++) {
+      for (let i = 0; i <= 4; i++) { // Reduced grid lines for cleaner look
         const gridY = y + (i * height / 4);
         doc.line(x, gridY, x + width, gridY);
       }
@@ -1227,59 +1245,75 @@ export default function ScorecardAdminPage() {
       safeRect(x, y, width, height, 'D');
     };
     
-    // Ultra-Premium Title Header with Gradient
-    addGradientBackground(0, 100, colors.primary, colors.secondary);
+    // Professional Header with 2025 Design Standards
+    addGradientBackground(0, 100, colors.mochaMousse, colors.etherealBlue);
     
-    // Add decorative stars pattern
+    // Add subtle decorative pattern (minimalist approach for 2025)
     safeSetTextColor(255, 255, 255);
     doc.setFontSize(8);
-    for (let i = 0; i < 20; i++) {
-      const x = Math.random() * pageWidth;
-      const y = Math.random() * 100;
-      safeText('*', x, y);
+    for (let i = 0; i < 8; i++) { // Reduced pattern for cleaner look
+      const x = 50 + (i * (pageWidth - 100) / 7);
+      const y = 20 + Math.random() * 60;
+      safeText('◆', x, y); // Professional diamond symbol
     }
     
-    addColorfulText('WPL 2026 PREMIUM SCORECARD', pageWidth / 2, 35, [255, 255, 255], 26, 'bold', 'center');
-    addColorfulText('WOMEN\'S PREMIER LEAGUE', pageWidth / 2, 60, [255, 215, 0], 16, 'bold', 'center');
+    // Main title with 2025 typography standards
+    addColorfulText('WPL 2026 PREMIUM SCORECARD', pageWidth / 2, 35, [255, 255, 255], typography.title, 'bold', 'center');
+    addColorfulText('WOMEN\'S PREMIER LEAGUE', pageWidth / 2, 60, colors.warmYellow, typography.subtitle, 'bold', 'center');
     
-    // Team names with colorful background - wider box to accommodate long names
-    safeSetFillColor(...colors.accent);
-    const teamNameBoxWidth = Math.min(450, pageWidth - 100); // Wider box, but not wider than page
+    // Team names with professional background
+    safeSetFillColor(...colors.creamyPastel);
+    const teamNameBoxWidth = Math.min(450, pageWidth - 100);
     const teamNameBoxX = (pageWidth - teamNameBoxWidth) / 2;
     doc.roundedRect(teamNameBoxX, 75, teamNameBoxWidth, 30, 5, 5, 'F');
     
-    // Truncate team names if too long
+    // Smart team name truncation
     let teamNameText = `${sc.matchInfo.team1.name} vs ${sc.matchInfo.team2.name}`;
-    const maxTeamNameLength = Math.floor(teamNameBoxWidth / 8); // Approx 8 chars per pixel
+    const maxTeamNameLength = Math.floor(teamNameBoxWidth / 8);
     if (teamNameText.length > maxTeamNameLength) {
       teamNameText = teamNameText.substring(0, maxTeamNameLength - 3) + '...';
     }
     
-    addColorfulText(teamNameText, pageWidth / 2, 95, colors.dark, 14, 'bold', 'center');
+    addColorfulText(teamNameText, pageWidth / 2, 95, colors.moonlitGrey, typography.heading, 'bold', 'center');
     
-    // Match Information Section with Enhanced Design
+    // Match Information Section with 2025 Design Standards
     y = 130;
-    addColorfulText('MATCH INFORMATION', pageWidth / 2, y, colors.primary, 16, 'bold', 'center');
-    addDecorativePattern(y + 8, colors.primary);
+    addColorfulText('MATCH INFORMATION', pageWidth / 2, y, colors.mochaMousse, typography.subtitle, 'bold', 'center');
+    addDecorativePattern(y + 8, colors.mochaMousse);
     y += 25;
     
-    // Create info boxes with colors and proper text truncation
+    // Create info boxes with 2025 professional design
     const infoBoxes = [
       { 
         label: 'Venue', 
         value: sc.matchInfo.venue || 'Stadium', 
-        color: colors.info,
-        maxLength: 25 // Truncate venue names
+        color: colors.infoBlue,
+        maxLength: 25
       },
-      { label: 'Date', value: sc.matchInfo.date || 'TBD', color: colors.success },
-      { label: 'Time', value: sc.matchInfo.time || 'TBD', color: colors.warning },
-      { label: 'Toss', value: `${sc.matchInfo.toss?.winner || 'N/A'} (${sc.matchInfo.toss?.decision || 'N/A'})`, color: colors.purple }
+      { 
+        label: 'Date', 
+        value: sc.matchInfo.date || 'TBD', 
+        color: colors.successGreen,
+        maxLength: 20
+      },
+      { 
+        label: 'Time', 
+        value: sc.matchInfo.time || 'TBD', 
+        color: colors.warningAmber,
+        maxLength: 15
+      },
+      { 
+        label: 'Toss', 
+        value: `${sc.matchInfo.toss?.winner || 'TBD'} won toss and chose to ${sc.matchInfo.toss?.decision || 'bat'}`, 
+        color: colors.burntOrange,
+        maxLength: 30
+      }
     ];
     
     infoBoxes.forEach((box, index) => {
-      const boxWidth = pageWidth / 2 - 120; // Reduced width for more gap
-      const horizontalGap = 30; // Gap between left and right boxes
-      const verticalGap = 50; // Increased vertical gap
+      const boxWidth = pageWidth / 2 - 120;
+      const horizontalGap = 30;
+      const verticalGap = 50;
       
       const xPos = 50 + (index % 2) * (boxWidth + horizontalGap);
       const yPos = y + Math.floor(index / 2) * verticalGap;
@@ -1292,11 +1326,12 @@ export default function ScorecardAdminPage() {
       
       safeSetFillColor(...box.color);
       doc.roundedRect(xPos - 5, yPos - 15, boxWidth, 35, 3, 3, 'F');
-      addColorfulText(box.label, xPos + 5, yPos, [255, 255, 255], 9, 'bold');
-      addColorfulText(displayValue, xPos + 5, yPos + 12, [255, 255, 255], 11);
+      
+      addColorfulText(box.label, xPos, yPos, [255, 255, 255], typography.body, 'bold');
+      addColorfulText(displayValue, xPos, yPos + lineHeight, [255, 255, 255], typography.caption);
     });
     
-    y += 120; // Increased to account for larger vertical gap
+    y += 120;
     
     // Process each innings with ultra-enhanced design
     sc.innings.forEach((inn, innIndex) => {
@@ -1304,8 +1339,8 @@ export default function ScorecardAdminPage() {
       
       if (y > pageHeight - 250) { doc.addPage(); y = 40; }
       
-      // Innings Header with Gradient - truncate long team names
-      addGradientBackground(y - 15, 50, colors.secondary, colors.purple);
+      // Innings Header with 2025 Professional Design
+      addGradientBackground(y - 15, 50, colors.mochaMousse, colors.etherealBlue);
       
       // Truncate team name for header if too long
       let headerTeamName = battingTeamName.toUpperCase();
