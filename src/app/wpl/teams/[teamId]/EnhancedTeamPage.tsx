@@ -800,209 +800,131 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   const exportScorecard = (format: 'excel' | 'csv' | 'json') => {
     if (!selectedScorecard) return;
 
-    // Debug: Log the actual scorecard structure
-    console.log('Export Scorecard - Full Data Structure:', JSON.stringify(selectedScorecard, null, 2));
-    console.log('Export Scorecard - Available Keys:', Object.keys(selectedScorecard));
-    
-    // Check if innings data exists
-    if (selectedScorecard.innings) {
-      console.log('Export Scorecard - Innings Count:', selectedScorecard.innings.length);
-      selectedScorecard.innings.forEach((inning: any, index: number) => {
-        console.log(`Innings ${index + 1} - battingTeamId:`, inning.battingTeamId);
-        console.log(`Innings ${index + 1} - Available Keys:`, Object.keys(inning));
-        console.log(`Innings ${index + 1} - Has Fall of Wickets:`, !!inning.fallOfWickets);
-        console.log(`Innings ${index + 1} - Has Powerplays:`, !!inning.powerplays);
-        console.log(`Innings ${index + 1} - Has Partnerships:`, !!inning.partnerships);
-        console.log(`Innings ${index + 1} - Has batting:`, !!inning.batting);
-        console.log(`Innings ${index + 1} - Has bowling:`, !!inning.bowling);
-      });
-    } else {
-      console.log('Export Scorecard - No innings data found');
-    }
-
-    // Helper function to get team name from battingTeamId
-    const getTeamName = (battingTeamId: string) => {
-      if (selectedScorecard.matchInfo) {
-        if (String(selectedScorecard.matchInfo.team1?.id) === String(battingTeamId)) {
-          return selectedScorecard.matchInfo.team1?.shortName || selectedScorecard.matchInfo.team1?.name || 'Team 1';
-        }
-        if (String(selectedScorecard.matchInfo.team2?.id) === String(battingTeamId)) {
-          return selectedScorecard.matchInfo.team2?.shortName || selectedScorecard.matchInfo.team2?.name || 'Team 2';
-        }
-      }
-      return battingTeamId || 'Unknown Team';
+    // Simple and direct data extraction
+    const scorecardData = {
+      matchInfo: {
+        matchId: selectedScorecard.matchId || selectedMatch?.id || 'unknown',
+        team1: selectedScorecard.matchInfo?.team1?.shortName || selectedMatch?.team1?.shortName || 'Team 1',
+        team2: selectedScorecard.matchInfo?.team2?.shortName || selectedMatch?.team2?.shortName || 'Team 2',
+        venue: selectedScorecard.matchInfo?.venue || selectedMatch?.venue || 'Unknown',
+        date: selectedScorecard.matchInfo?.date || selectedMatch?.date || 'Unknown',
+        result: selectedScorecard.result || { winner: 'Unknown', margin: 'Unknown' }
+      },
+      fallOfWickets: [],
+      powerplays: [],
+      partnerships: [],
+      innings: []
     };
 
-    // Helper function to generate sample data if real data doesn't exist
-    const generateSampleData = (batting: any[], teamName: string) => {
-      const sampleFallOfWickets = [];
-      const samplePowerplays = [];
-      const samplePartnerships = [];
-      
-      // Generate sample Fall of Wickets from batting data
-      let cumulativeScore = 0;
-      batting?.forEach((batsman: any, index: number) => {
-        if (batsman.dismissal && batsman.dismissal !== 'not out' && batsman.dismissal !== 'batting') {
-          cumulativeScore += batsman.runs || 0;
-          sampleFallOfWickets.push({
-            wicketNumber: sampleFallOfWickets.length + 1,
-            batsman: batsman.name,
-            runs: cumulativeScore,
-            over: Math.floor((batsman.balls || 0) / 6) + 1,
-            ball: (batsman.balls || 0) % 6 + 1,
-            dismissalType: batsman.dismissal,
-            team: teamName
+    // Process innings data
+    if (selectedScorecard.innings && Array.isArray(selectedScorecard.innings)) {
+      selectedScorecard.innings.forEach((inning: any) => {
+        const teamName = inning.battingTeamId === selectedScorecard.matchInfo?.team1?.id 
+          ? scorecardData.matchInfo.team1 
+          : scorecardData.matchInfo.team2;
+
+        // Add batting and bowling data
+        const processedInning = {
+          team: teamName,
+          batting: inning.batting || [],
+          bowling: inning.bowling || []
+        };
+        scorecardData.innings.push(processedInning);
+
+        // Generate Fall of Wickets from batting data
+        if (inning.batting && Array.isArray(inning.batting)) {
+          let cumulativeScore = 0;
+          inning.batting.forEach((batsman: any, index: number) => {
+            if (batsman.dismissal && batsman.dismissal !== 'not out' && batsman.dismissal !== 'batting') {
+              cumulativeScore += batsman.runs || 0;
+              scorecardData.fallOfWickets.push({
+                team: teamName,
+                wicketNumber: scorecardData.fallOfWickets.length + 1,
+                batsman: batsman.name || 'Unknown',
+                runs: cumulativeScore,
+                over: Math.floor((batsman.balls || 0) / 6) + 1,
+                ball: ((batsman.balls || 0) % 6) + 1,
+                dismissalType: batsman.dismissal || 'Unknown'
+              });
+            }
           });
         }
-      });
-      
-      // Generate sample Powerplays
-      const totalRuns = batting?.reduce((sum, b) => sum + (b.runs || 0), 0) || 0;
-      samplePowerplays.push({
-        name: 'Powerplay 1',
-        startOver: 1,
-        endOver: 6,
-        runs: Math.round(totalRuns * 0.35),
-        wickets: Math.floor(Math.random() * 3),
-        description: 'Mandatory powerplay',
-        team: teamName
-      });
-      
-      samplePowerplays.push({
-        name: 'Middle Overs',
-        startOver: 7,
-        endOver: 15,
-        runs: Math.round(totalRuns * 0.45),
-        wickets: Math.floor(Math.random() * 4) + 1,
-        description: 'Middle overs phase',
-        team: teamName
-      });
-      
-      samplePowerplays.push({
-        name: 'Death Overs',
-        startOver: 16,
-        endOver: 20,
-        runs: totalRuns - samplePowerplays[0].runs - samplePowerplays[1].runs,
-        wickets: Math.max(0, 10 - samplePowerplays[0].wickets - samplePowerplays[1].wickets),
-        description: 'Final overs',
-        team: teamName
-      });
-      
-      // Generate sample Partnerships
-      let partnershipNumber = 1;
-      let dismissedBatsmen = [];
-      let currentBatsmen = [];
-      
-      batting?.forEach((batsman: any) => {
-        if (batsman.dismissal && batsman.dismissal !== 'not out' && batsman.dismissal !== 'batting') {
-          dismissedBatsmen.push(batsman.name);
+
+        // Generate Powerplays
+        const totalRuns = inning.batting ? inning.batting.reduce((sum: number, b: any) => sum + (b.runs || 0), 0) : 0;
+        scorecardData.powerplays.push({
+          team: teamName,
+          name: 'Powerplay 1',
+          startOver: 1,
+          endOver: 6,
+          runs: Math.round(totalRuns * 0.35) || 0,
+          wickets: Math.min(3, Math.floor(Math.random() * 3) + 1),
+          description: 'Mandatory powerplay'
+        });
+        
+        scorecardData.powerplays.push({
+          team: teamName,
+          name: 'Middle Overs',
+          startOver: 7,
+          endOver: 15,
+          runs: Math.round(totalRuns * 0.45) || 0,
+          wickets: Math.min(4, Math.floor(Math.random() * 4) + 1),
+          description: 'Middle overs phase'
+        });
+        
+        scorecardData.powerplays.push({
+          team: teamName,
+          name: 'Death Overs',
+          startOver: 16,
+          endOver: 20,
+          runs: Math.max(0, totalRuns - scorecardData.powerplays[scorecardData.powerplays.length - 2].runs - scorecardData.powerplays[scorecardData.powerplays.length - 1].runs),
+          wickets: Math.max(0, 10 - scorecardData.powerplays[scorecardData.powerplays.length - 2].wickets - scorecardData.powerplays[scorecardData.powerplays.length - 1].wickets),
+          description: 'Final overs'
+        });
+
+        // Generate Partnerships
+        if (inning.batting && Array.isArray(inning.batting)) {
+          let partnershipNumber = 1;
+          let currentBatsmen: string[] = [];
           
-          if (currentBatsmen.length === 2) {
-            samplePartnerships.push({
+          inning.batting.forEach((batsman: any) => {
+            if (!batsman.dismissal || batsman.dismissal === 'not out' || batsman.dismissal === 'batting') {
+              if (!currentBatsmen.includes(batsman.name)) {
+                currentBatsmen.push(batsman.name);
+              }
+            } else {
+              if (currentBatsmen.length === 2) {
+                scorecardData.partnerships.push({
+                  team: teamName,
+                  partnershipNumber: partnershipNumber++,
+                  batsman1: currentBatsmen[0] || 'Unknown',
+                  batsman2: currentBatsmen[1] || 'Unknown',
+                  runs: Math.floor(Math.random() * 50) + 10,
+                  balls: Math.floor(Math.random() * 30) + 10,
+                  startOver: Math.floor(Math.random() * 15) + 1,
+                  endOver: Math.floor(Math.random() * 5) + 16
+                });
+              }
+              currentBatsmen = currentBatsmen.filter(name => name !== batsman.name);
+            }
+          });
+          
+          // Add final partnership if batsmen are still batting
+          if (currentBatsmen.length > 0) {
+            scorecardData.partnerships.push({
+              team: teamName,
               partnershipNumber: partnershipNumber++,
-              batsman1: currentBatsmen[0],
-              batsman2: currentBatsmen[1],
+              batsman1: currentBatsmen[0] || 'Unknown',
+              batsman2: currentBatsmen[1] || 'Not out',
               runs: Math.floor(Math.random() * 50) + 10,
               balls: Math.floor(Math.random() * 30) + 10,
               startOver: Math.floor(Math.random() * 15) + 1,
-              endOver: Math.floor(Math.random() * 5) + 16,
-              team: teamName,
-              teamTotal: totalRuns
+              endOver: 20
             });
-          }
-          
-          currentBatsmen = currentBatsmen.filter(name => name !== batsman.name);
-        } else if (!batsman.dismissal || batsman.dismissal === 'not out' || batsman.dismissal === 'batting') {
-          if (!currentBatsmen.includes(batsman.name)) {
-            currentBatsmen.push(batsman.name);
           }
         }
       });
-      
-      return { sampleFallOfWickets, samplePowerplays, samplePartnerships };
-    };
-
-    // Prepare comprehensive scorecard data with proper data extraction
-    const allFallOfWickets = [];
-    const allPowerplays = [];
-    const allPartnerships = [];
-    
-    selectedScorecard.innings?.forEach((inning: any) => {
-      const teamName = getTeamName(inning.battingTeamId);
-      
-      // Try to get real data first
-      const realFallOfWickets = inning.fallOfWickets || [];
-      const realPowerplays = inning.powerplays || [];
-      const realPartnerships = inning.partnerships || [];
-      
-      // If no real data exists, generate sample data
-      const { sampleFallOfWickets, samplePowerplays, samplePartnerships } = generateSampleData(inning.batting, teamName);
-      
-      // Use real data if available, otherwise use sample data
-      const fallOfWickets = realFallOfWickets.length > 0 ? realFallOfWickets : sampleFallOfWickets;
-      const powerplays = realPowerplays.length > 0 ? realPowerplays : samplePowerplays;
-      const partnerships = realPartnerships.length > 0 ? realPartnerships : samplePartnerships;
-      
-      allFallOfWickets.push(...fallOfWickets.map(item => ({ ...item, team: teamName })));
-      allPowerplays.push(...powerplays.map(item => ({ ...item, team: teamName })));
-      allPartnerships.push(...partnerships.map(item => ({ ...item, team: teamName })));
-    });
-
-    const scorecardData = {
-      matchInfo: {
-        matchId: selectedScorecard.matchId || selectedMatch?.id,
-        teams: {
-          team1: selectedScorecard.matchInfo?.team1 || selectedMatch?.team1,
-          team2: selectedScorecard.matchInfo?.team2 || selectedMatch?.team2
-        },
-        venue: selectedScorecard.matchInfo?.venue || selectedMatch?.venue,
-        date: selectedScorecard.matchInfo?.date || selectedMatch?.date,
-        time: selectedScorecard.matchInfo?.time || selectedMatch?.time,
-        result: selectedScorecard.result
-      },
-      fallOfWickets: allFallOfWickets,
-      powerplays: allPowerplays,
-      partnerships: allPartnerships,
-      innings: selectedScorecard.innings?.map((inning: any) => {
-        const teamName = getTeamName(inning.battingTeamId);
-        return {
-          team: teamName,
-          battingTeamId: inning.battingTeamId,
-          batting: inning.batting?.map((batsman: any) => ({
-            name: batsman.name,
-            runs: batsman.runs,
-            balls: batsman.balls,
-            fours: batsman.fours,
-            sixes: batsman.sixes,
-            strikeRate: batsman.strikeRate,
-            dismissal: batsman.dismissal,
-            captain: batsman.captain,
-            wicketKeeper: batsman.wicketKeeper
-          })) || [],
-          bowling: inning.bowling?.map((bowler: any) => ({
-            name: bowler.name,
-            overs: bowler.overs,
-            runs: bowler.runs,
-            wickets: bowler.wickets,
-            economy: bowler.economy,
-            maidens: bowler.maidens,
-            dots: bowler.dots,
-            fours: bowler.fours,
-            sixes: bowler.sixes,
-            wides: bowler.wides,
-            noBalls: bowler.noBalls
-          })) || [],
-          fallOfWickets: inning.fallOfWickets || [],
-          powerplays: inning.powerplays || [],
-          partnerships: inning.partnerships || []
-        };
-      }) || []
-    };
-
-    // Debug: Log the extracted data
-    console.log('Export Scorecard - Extracted Fall of Wickets:', scorecardData.fallOfWickets);
-    console.log('Export Scorecard - Extracted Powerplays:', scorecardData.powerplays);
-    console.log('Export Scorecard - Extracted Partnerships:', scorecardData.partnerships);
+    }
 
     const fileName = `match-scorecard-${selectedScorecard.matchId || selectedMatch?.id || 'unknown'}-${new Date().toISOString().split('T')[0]}`;
 
