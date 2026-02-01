@@ -796,6 +796,212 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
     });
   }, [matches, teamId]);
 
+  // Export Scorecard Function
+  const exportScorecard = (format: 'excel' | 'csv' | 'json') => {
+    if (!selectedScorecard) return;
+
+    // Prepare comprehensive scorecard data
+    const scorecardData = {
+      matchInfo: {
+        matchId: selectedScorecard.matchId || selectedMatch?.id,
+        teams: {
+          team1: selectedScorecard.team1 || selectedMatch?.team1,
+          team2: selectedScorecard.team2 || selectedMatch?.team2
+        },
+        venue: selectedScorecard.venue || selectedMatch?.venue,
+        date: selectedScorecard.date || selectedMatch?.date,
+        time: selectedScorecard.time || selectedMatch?.time,
+        result: selectedScorecard.result
+      },
+      fallOfWickets: selectedScorecard.fallOfWickets || [],
+      powerplays: selectedScorecard.powerplays || [],
+      partnerships: selectedScorecard.partnerships || [],
+      innings: selectedScorecard.innings?.map((inning: any) => ({
+        team: inning.team,
+        batting: inning.batting?.map((batsman: any) => ({
+          name: batsman.name,
+          runs: batsman.runs,
+          balls: batsman.balls,
+          fours: batsman.fours,
+          sixes: batsman.sixes,
+          strikeRate: batsman.strikeRate,
+          dismissal: batsman.dismissal,
+          captain: batsman.captain,
+          wicketKeeper: batsman.wicketKeeper
+        })) || [],
+        bowling: inning.bowling?.map((bowler: any) => ({
+          name: bowler.name,
+          overs: bowler.overs,
+          runs: bowler.runs,
+          wickets: bowler.wickets,
+          economy: bowler.economy,
+          maidens: bowler.maidens,
+          dots: bowler.dots,
+          fours: bowler.fours,
+          sixes: bowler.sixes,
+          wides: bowler.wides,
+          noBalls: bowler.noBalls
+        })) || []
+      })) || []
+    };
+
+    const fileName = `match-scorecard-${selectedScorecard.matchId || selectedMatch?.id || 'unknown'}-${new Date().toISOString().split('T')[0]}`;
+
+    if (format === 'json') {
+      // JSON Export
+      const dataStr = JSON.stringify(scorecardData, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      
+      const exportFileDefaultName = `${fileName}.json`;
+      
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+      
+    } else if (format === 'csv') {
+      // CSV Export - Create multiple sheets for different data
+      let csvContent = '';
+      
+      // Match Info
+      csvContent += 'MATCH INFO\n';
+      csvContent += `Match ID,${scorecardData.matchInfo.matchId}\n`;
+      csvContent += `Team 1,${scorecardData.matchInfo.teams.team1?.name || 'N/A'}\n`;
+      csvContent += `Team 2,${scorecardData.matchInfo.teams.team2?.name || 'N/A'}\n`;
+      csvContent += `Venue,${scorecardData.matchInfo.venue}\n`;
+      csvContent += `Date,${scorecardData.matchInfo.date}\n`;
+      csvContent += `Result,${scorecardData.matchInfo.result?.winner} won by ${scorecardData.matchInfo.result?.margin}\n\n`;
+      
+      // Fall of Wickets
+      if (scorecardData.fallOfWickets.length > 0) {
+        csvContent += 'FALL OF WICKETS\n';
+        csvContent += 'Wicket Number,Batsman,Runs at Dismissal,Over,Ball,Dismissal Type\n';
+        scorecardData.fallOfWickets.forEach((fow: any) => {
+          csvContent += `${fow.wicketNumber},${fow.batsman},${fow.runs},${fow.over},${fow.ball},${fow.dismissalType}\n`;
+        });
+        csvContent += '\n';
+      }
+      
+      // Powerplays
+      if (scorecardData.powerplays.length > 0) {
+        csvContent += 'POWERPLAYS\n';
+        csvContent += 'Powerplay,Start Over,End Over,Runs,Wickets,Description\n';
+        scorecardData.powerplays.forEach((pp: any) => {
+          csvContent += `${pp.name},${pp.startOver},${pp.endOver},${pp.runs},${pp.wickets},${pp.description}\n`;
+        });
+        csvContent += '\n';
+      }
+      
+      // Partnerships
+      if (scorecardData.partnerships.length > 0) {
+        csvContent += 'PARTNERSHIPS\n';
+        csvContent += 'Partnership,Batsman 1,Batsman 2,Runs,Balls,Start Over,End Over\n';
+        scorecardData.partnerships.forEach((part: any) => {
+          csvContent += `${part.partnershipNumber},${part.batsman1},${part.batsman2},${part.runs},${part.balls},${part.startOver},${part.endOver}\n`;
+        });
+        csvContent += '\n';
+      }
+      
+      // Batting Scorecards
+      scorecardData.innings.forEach((inning: any, index: number) => {
+        csvContent += `INNINGS ${index + 1} - ${inning.team}\n`;
+        csvContent += 'BATTING SCORECARD\n';
+        csvContent += 'Batsman,Runs,Balls,Fours,Sixes,Strike Rate,Dismissal,Captain,Wicket Keeper\n';
+        inning.batting.forEach((batsman: any) => {
+          csvContent += `"${batsman.name}",${batsman.runs},${batsman.balls},${batsman.fours},${batsman.sixes},${batsman.strikeRate},"${batsman.dismissal}",${batsman.captain || 'No'},${batsman.wicketKeeper || 'No'}\n`;
+        });
+        csvContent += '\n';
+        
+        csvContent += 'BOWLING SCORECARD\n';
+        csvContent += 'Bowler,Overs,Runs,Wickets,Economy,Maidens,Dots,Fours,Sixes,Wides,No Balls\n';
+        inning.bowling.forEach((bowler: any) => {
+          csvContent += `"${bowler.name}",${bowler.overs},${bowler.runs},${bowler.wickets},${bowler.economy},${bowler.maidens},${bowler.dots},${bowler.fours},${bowler.sixes},${bowler.wides},${bowler.noBalls}\n`;
+        });
+        csvContent += '\n';
+      });
+      
+      const dataUri = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent);
+      const exportFileDefaultName = `${fileName}.csv`;
+      
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+      
+    } else if (format === 'excel') {
+      // Excel Export - Create HTML table that can be opened in Excel
+      let excelContent = '<html><head><meta charset="utf-8"><title>Match Scorecard</title></head><body>';
+      
+      // Match Info
+      excelContent += '<h2>MATCH INFO</h2>';
+      excelContent += '<table border="1"><tr><th>Match ID</th><td>' + scorecardData.matchInfo.matchId + '</td></tr>';
+      excelContent += '<tr><th>Team 1</th><td>' + (scorecardData.matchInfo.teams.team1?.name || 'N/A') + '</td></tr>';
+      excelContent += '<tr><th>Team 2</th><td>' + (scorecardData.matchInfo.teams.team2?.name || 'N/A') + '</td></tr>';
+      excelContent += '<tr><th>Venue</th><td>' + scorecardData.matchInfo.venue + '</td></tr>';
+      excelContent += '<tr><th>Date</th><td>' + scorecardData.matchInfo.date + '</td></tr>';
+      excelContent += '<tr><th>Result</th><td>' + scorecardData.matchInfo.result?.winner + ' won by ' + scorecardData.matchInfo.result?.margin + '</td></tr></table><br>';
+      
+      // Fall of Wickets
+      if (scorecardData.fallOfWickets.length > 0) {
+        excelContent += '<h2>FALL OF WICKETS</h2>';
+        excelContent += '<table border="1"><tr><th>Wicket Number</th><th>Batsman</th><th>Runs at Dismissal</th><th>Over</th><th>Ball</th><th>Dismissal Type</th></tr>';
+        scorecardData.fallOfWickets.forEach((fow: any) => {
+          excelContent += `<tr><td>${fow.wicketNumber}</td><td>${fow.batsman}</td><td>${fow.runs}</td><td>${fow.over}</td><td>${fow.ball}</td><td>${fow.dismissalType}</td></tr>`;
+        });
+        excelContent += '</table><br>';
+      }
+      
+      // Powerplays
+      if (scorecardData.powerplays.length > 0) {
+        excelContent += '<h2>POWERPLAYS</h2>';
+        excelContent += '<table border="1"><tr><th>Powerplay</th><th>Start Over</th><th>End Over</th><th>Runs</th><th>Wickets</th><th>Description</th></tr>';
+        scorecardData.powerplays.forEach((pp: any) => {
+          excelContent += `<tr><td>${pp.name}</td><td>${pp.startOver}</td><td>${pp.endOver}</td><td>${pp.runs}</td><td>${pp.wickets}</td><td>${pp.description}</td></tr>`;
+        });
+        excelContent += '</table><br>';
+      }
+      
+      // Partnerships
+      if (scorecardData.partnerships.length > 0) {
+        excelContent += '<h2>PARTNERSHIPS</h2>';
+        excelContent += '<table border="1"><tr><th>Partnership</th><th>Batsman 1</th><th>Batsman 2</th><th>Runs</th><th>Balls</th><th>Start Over</th><th>End Over</th></tr>';
+        scorecardData.partnerships.forEach((part: any) => {
+          excelContent += `<tr><td>${part.partnershipNumber}</td><td>${part.batsman1}</td><td>${part.batsman2}</td><td>${part.runs}</td><td>${part.balls}</td><td>${part.startOver}</td><td>${part.endOver}</td></tr>`;
+        });
+        excelContent += '</table><br>';
+      }
+      
+      // Batting and Bowling Scorecards
+      scorecardData.innings.forEach((inning: any, index: number) => {
+        excelContent += `<h2>INNINGS ${index + 1} - ${inning.team}</h2>`;
+        
+        excelContent += '<h3>BATTING SCORECARD</h3>';
+        excelContent += '<table border="1"><tr><th>Batsman</th><th>Runs</th><th>Balls</th><th>Fours</th><th>Sixes</th><th>Strike Rate</th><th>Dismissal</th><th>Captain</th><th>Wicket Keeper</th></tr>';
+        inning.batting.forEach((batsman: any) => {
+          excelContent += `<tr><td>${batsman.name}</td><td>${batsman.runs}</td><td>${batsman.balls}</td><td>${batsman.fours}</td><td>${batsman.sixes}</td><td>${batsman.strikeRate}</td><td>${batsman.dismissal}</td><td>${batsman.captain || 'No'}</td><td>${batsman.wicketKeeper || 'No'}</td></tr>`;
+        });
+        excelContent += '</table><br>';
+        
+        excelContent += '<h3>BOWLING SCORECARD</h3>';
+        excelContent += '<table border="1"><tr><th>Bowler</th><th>Overs</th><th>Runs</th><th>Wickets</th><th>Economy</th><th>Maidens</th><th>Dots</th><th>Fours</th><th>Sixes</th><th>Wides</th><th>No Balls</th></tr>';
+        inning.bowling.forEach((bowler: any) => {
+          excelContent += `<tr><td>${bowler.name}</td><td>${bowler.overs}</td><td>${bowler.runs}</td><td>${bowler.wickets}</td><td>${bowler.economy}</td><td>${bowler.maidens}</td><td>${bowler.dots}</td><td>${bowler.fours}</td><td>${bowler.sixes}</td><td>${bowler.wides}</td><td>${bowler.noBalls}</td></tr>`;
+        });
+        excelContent += '</table><br>';
+      });
+      
+      excelContent += '</body></html>';
+      
+      const dataUri = 'data:application/vnd.ms-excel;charset=utf-8,' + encodeURIComponent(excelContent);
+      const exportFileDefaultName = `${fileName}.xls`;
+      
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center">
@@ -3190,6 +3396,71 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                     {/* Scorecard Tab */}
                     {activeModalTab === 'scorecard' && (
                       <div className="space-y-8">
+                        {/* Export Options */}
+                        <motion.div
+                          initial={{ opacity: 0, y: -20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.75 }}
+                          className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-3">
+                                <motion.div
+                                  animate={{ 
+                                    scale: [1, 1.2, 1],
+                                    rotate: [0, -10, 10, 0]
+                                  }}
+                                  transition={{ 
+                                    duration: 3, 
+                                    repeat: Infinity, 
+                                    ease: "easeInOut" 
+                                  }}
+                                  className="text-2xl"
+                                >
+                                  📤
+                                </motion.div>
+                                Export Scorecard Data
+                              </h3>
+                              <p className="text-white/60 text-sm">Download complete match data including Fall of Wickets, Powerplays, and Partnerships</p>
+                            </div>
+                            
+                            <div className="flex gap-3">
+                              {/* Excel Export */}
+                              <motion.button
+                                whileHover={{ scale: 1.05, y: -2 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => exportScorecard('excel')}
+                                className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300"
+                              >
+                                <span className="text-lg">📊</span>
+                                Excel
+                              </motion.button>
+                              
+                              {/* CSV Export */}
+                              <motion.button
+                                whileHover={{ scale: 1.05, y: -2 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => exportScorecard('csv')}
+                                className="px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300"
+                              >
+                                <span className="text-lg">📋</span>
+                                CSV
+                              </motion.button>
+                              
+                              {/* JSON Export */}
+                              <motion.button
+                                whileHover={{ scale: 1.05, y: -2 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => exportScorecard('json')}
+                                className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300"
+                              >
+                                <span className="text-lg">🔧</span>
+                                JSON
+                              </motion.button>
+                            </div>
+                          </div>
+                        </motion.div>
                         {/* Enhanced Match Result */}
                         <motion.div
                           initial={{ opacity: 0, scale: 0.95 }}
