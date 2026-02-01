@@ -800,7 +800,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   const exportScorecard = (format: 'excel' | 'csv' | 'json') => {
     if (!selectedScorecard) return;
 
-    // Prepare comprehensive scorecard data
+    // Prepare comprehensive scorecard data with proper data extraction
     const scorecardData = {
       matchInfo: {
         matchId: selectedScorecard.matchId || selectedMatch?.id,
@@ -813,9 +813,30 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
         time: selectedScorecard.time || selectedMatch?.time,
         result: selectedScorecard.result
       },
-      fallOfWickets: selectedScorecard.fallOfWickets || [],
-      powerplays: selectedScorecard.powerplays || [],
-      partnerships: selectedScorecard.partnerships || [],
+      // Extract Fall of Wickets from innings data
+      fallOfWickets: selectedScorecard.innings?.flatMap((inning: any) => 
+        (inning.fallOfWickets || []).map((fow: any) => ({
+          ...fow,
+          team: inning.team
+        }))
+      ) || [],
+      
+      // Extract Powerplays from innings data
+      powerplays: selectedScorecard.innings?.flatMap((inning: any) => 
+        (inning.powerplays || []).map((pp: any) => ({
+          ...pp,
+          team: inning.team
+        }))
+      ) || [],
+      
+      // Extract Partnerships from innings data
+      partnerships: selectedScorecard.innings?.flatMap((inning: any) => 
+        (inning.partnerships || []).map((part: any) => ({
+          ...part,
+          team: inning.team
+        }))
+      ) || [],
+      
       innings: selectedScorecard.innings?.map((inning: any) => ({
         team: inning.team,
         batting: inning.batting?.map((batsman: any) => ({
@@ -841,7 +862,10 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
           sixes: bowler.sixes,
           wides: bowler.wides,
           noBalls: bowler.noBalls
-        })) || []
+        })) || [],
+        fallOfWickets: inning.fallOfWickets || [],
+        powerplays: inning.powerplays || [],
+        partnerships: inning.partnerships || []
       })) || []
     };
 
@@ -875,9 +899,9 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       // Fall of Wickets
       if (scorecardData.fallOfWickets.length > 0) {
         csvContent += 'FALL OF WICKETS\n';
-        csvContent += 'Wicket Number,Batsman,Runs at Dismissal,Over,Ball,Dismissal Type\n';
+        csvContent += 'Team,Wicket Number,Batsman,Runs at Dismissal,Over,Ball,Dismissal Type\n';
         scorecardData.fallOfWickets.forEach((fow: any) => {
-          csvContent += `${fow.wicketNumber},${fow.batsman},${fow.runs},${fow.over},${fow.ball},${fow.dismissalType}\n`;
+          csvContent += `${fow.team},${fow.wicketNumber},${fow.batsman},${fow.runs},${fow.over},${fow.ball},${fow.dismissalType}\n`;
         });
         csvContent += '\n';
       }
@@ -885,9 +909,9 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       // Powerplays
       if (scorecardData.powerplays.length > 0) {
         csvContent += 'POWERPLAYS\n';
-        csvContent += 'Powerplay,Start Over,End Over,Runs,Wickets,Description\n';
+        csvContent += 'Team,Powerplay,Start Over,End Over,Runs,Wickets,Description\n';
         scorecardData.powerplays.forEach((pp: any) => {
-          csvContent += `${pp.name},${pp.startOver},${pp.endOver},${pp.runs},${pp.wickets},${pp.description}\n`;
+          csvContent += `${pp.team},${pp.name},${pp.startOver},${pp.endOver},${pp.runs},${pp.wickets},${pp.description}\n`;
         });
         csvContent += '\n';
       }
@@ -895,9 +919,9 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       // Partnerships
       if (scorecardData.partnerships.length > 0) {
         csvContent += 'PARTNERSHIPS\n';
-        csvContent += 'Partnership,Batsman 1,Batsman 2,Runs,Balls,Start Over,End Over\n';
+        csvContent += 'Team,Partnership,Batsman 1,Batsman 2,Runs,Balls,Start Over,End Over\n';
         scorecardData.partnerships.forEach((part: any) => {
-          csvContent += `${part.partnershipNumber},${part.batsman1},${part.batsman2},${part.runs},${part.balls},${part.startOver},${part.endOver}\n`;
+          csvContent += `${part.team},${part.partnershipNumber},${part.batsman1},${part.batsman2},${part.runs},${part.balls},${part.startOver},${part.endOver}\n`;
         });
         csvContent += '\n';
       }
@@ -954,12 +978,12 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       // Fall of Wickets - Enhanced for Graphing
       if (scorecardData.fallOfWickets.length > 0) {
         excelContent += '<div class="header">FALL OF WICKETS</div>';
-        excelContent += '<table><tr><th>Wicket Number</th><th>Batsman</th><th>Runs at Dismissal</th><th>Over</th><th>Ball</th><th>Dismissal Type</th><th>Cumulative Score</th><th>Partnership Runs</th></tr>';
+        excelContent += '<table><tr><th>Team</th><th>Wicket Number</th><th>Batsman</th><th>Runs at Dismissal</th><th>Over</th><th>Ball</th><th>Dismissal Type</th><th>Cumulative Score</th><th>Partnership Runs</th></tr>';
         let cumulativeScore = 0;
         scorecardData.fallOfWickets.forEach((fow: any) => {
           cumulativeScore = fow.runs || cumulativeScore;
           const partnershipRuns = fow.partnershipRuns || 0;
-          excelContent += `<tr><td class="numeric">${fow.wicketNumber}</td><td>${fow.batsman}</td><td class="numeric">${fow.runs}</td><td class="numeric">${fow.over}</td><td class="numeric">${fow.ball}</td><td>${fow.dismissalType}</td><td class="numeric">${cumulativeScore}</td><td class="numeric">${partnershipRuns}</td></tr>`;
+          excelContent += `<tr><td>${fow.team}</td><td class="numeric">${fow.wicketNumber}</td><td>${fow.batsman}</td><td class="numeric">${fow.runs}</td><td class="numeric">${fow.over}</td><td class="numeric">${fow.ball}</td><td>${fow.dismissalType}</td><td class="numeric">${cumulativeScore}</td><td class="numeric">${partnershipRuns}</td></tr>`;
         });
         excelContent += '</table>';
       }
@@ -967,12 +991,12 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       // Powerplays - Enhanced for Graphing
       if (scorecardData.powerplays.length > 0) {
         excelContent += '<div class="header">POWERPLAYS ANALYSIS</div>';
-        excelContent += '<table><tr><th>Powerplay</th><th>Start Over</th><th>End Over</th><th>Total Overs</th><th>Runs</th><th>Wickets</th><th>Run Rate</th><th>Economy Rate</th><th>Description</th></tr>';
+        excelContent += '<table><tr><th>Team</th><th>Powerplay</th><th>Start Over</th><th>End Over</th><th>Total Overs</th><th>Runs</th><th>Wickets</th><th>Run Rate</th><th>Economy Rate</th><th>Description</th></tr>';
         scorecardData.powerplays.forEach((pp: any) => {
           const totalOvers = pp.endOver - pp.startOver + 1;
           const runRate = totalOvers > 0 ? (pp.runs / totalOvers).toFixed(2) : 0;
           const economyRate = totalOvers > 0 ? (pp.runs / totalOvers).toFixed(2) : 0;
-          excelContent += `<tr><td>${pp.name}</td><td class="numeric">${pp.startOver}</td><td class="numeric">${pp.endOver}</td><td class="numeric">${totalOvers}</td><td class="numeric">${pp.runs}</td><td class="numeric">${pp.wickets}</td><td class="numeric">${runRate}</td><td class="numeric">${economyRate}</td><td>${pp.description}</td></tr>`;
+          excelContent += `<tr><td>${pp.team}</td><td>${pp.name}</td><td class="numeric">${pp.startOver}</td><td class="numeric">${pp.endOver}</td><td class="numeric">${totalOvers}</td><td class="numeric">${pp.runs}</td><td class="numeric">${pp.wickets}</td><td class="numeric">${runRate}</td><td class="numeric">${economyRate}</td><td>${pp.description}</td></tr>`;
         });
         excelContent += '</table>';
       }
@@ -980,12 +1004,12 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       // Partnerships - Enhanced for Graphing
       if (scorecardData.partnerships.length > 0) {
         excelContent += '<div class="header">PARTNERSHIPS ANALYSIS</div>';
-        excelContent += '<table><tr><th>Partnership Number</th><th>Batsman 1</th><th>Batsman 2</th><th>Runs</th><th>Balls</th><th>Strike Rate</th><th>Start Over</th><th>End Over</th><th>Duration (Overs)</th><th>Contribution (%)</th></tr>';
+        excelContent += '<table><tr><th>Team</th><th>Partnership Number</th><th>Batsman 1</th><th>Batsman 2</th><th>Runs</th><th>Balls</th><th>Strike Rate</th><th>Start Over</th><th>End Over</th><th>Duration (Overs)</th><th>Contribution (%)</th></tr>';
         scorecardData.partnerships.forEach((part: any) => {
           const strikeRate = part.balls > 0 ? ((part.runs / part.balls) * 100).toFixed(2) : 0;
           const duration = (part.endOver - part.startOver).toFixed(1);
           const contribution = part.teamTotal ? ((part.runs / part.teamTotal) * 100).toFixed(1) : 0;
-          excelContent += `<tr><td class="numeric">${part.partnershipNumber}</td><td>${part.batsman1}</td><td>${part.batsman2}</td><td class="numeric">${part.runs}</td><td class="numeric">${part.balls}</td><td class="numeric">${strikeRate}</td><td class="numeric">${part.startOver}</td><td class="numeric">${part.endOver}</td><td class="numeric">${duration}</td><td class="numeric">${contribution}%</td></tr>`;
+          excelContent += `<tr><td>${part.team}</td><td class="numeric">${part.partnershipNumber}</td><td>${part.batsman1}</td><td>${part.batsman2}</td><td class="numeric">${part.runs}</td><td class="numeric">${part.balls}</td><td class="numeric">${strikeRate}</td><td class="numeric">${part.startOver}</td><td class="numeric">${part.endOver}</td><td class="numeric">${duration}</td><td class="numeric">${contribution}%</td></tr>`;
         });
         excelContent += '</table>';
       }
