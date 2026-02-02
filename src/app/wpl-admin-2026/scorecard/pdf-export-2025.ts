@@ -1225,9 +1225,17 @@ export class ProfessionalPDFExporter {
         y += 320;
         this.addProfessionalText('HOW THIS GRAPH WORKS:', 50, y, this.colors.mochaMousse, 12, 'bold');
         y += 20;
-        this.addProfessionalText('This bar chart shows the total runs scored by each batsman in the innings. The height of each bar represents the number of runs scored.', 50, y, this.colors.moonlitGrey, 10);
+        
+        // Data-driven explanation for runs chart
+        const topScorer = battingData.reduce((max, b) => b.runs > max.runs ? b : max, battingData[0]);
+        const totalRuns = battingData.reduce((sum, b) => sum + b.runs, 0);
+        const playersWithRuns = battingData.filter(b => b.runs > 0).length;
+        
+        this.addProfessionalText(`This bar chart shows the run distribution where ${topScorer.label} led with ${topScorer.runs} runs out of ${totalRuns} total team runs.`, 50, y, this.colors.moonlitGrey, 10);
         y += 15;
-        this.addProfessionalText('Higher bars indicate better batting performance. This helps identify the top contributors to the team\'s total score.', 50, y, this.colors.moonlitGrey, 10);
+        this.addProfessionalText(`${playersWithRuns} batsmen contributed runs, showing the scoring responsibility was shared among ${playersWithRuns > 3 ? 'multiple contributors' : 'few key players'}.`, 50, y, this.colors.moonlitGrey, 10);
+        y += 15;
+        this.addProfessionalText(`The chart reveals ${topScorer.runs > 30 ? 'a dominant individual performance' : 'balanced team scoring'} with ${topScorer.runs > totalRuns * 0.3 ? 'over 30% of team runs' : 'significant contribution'} from the top scorer.`, 50, y, this.colors.moonlitGrey, 10);
       } else {
         this.addProfessionalText('No batting data available', this.pageWidth / 2, y, this.colors.moonlitGrey, 14, 'center');
       }
@@ -1266,9 +1274,17 @@ export class ProfessionalPDFExporter {
         y += 30;
         this.addProfessionalText('HOW THIS GRAPH WORKS:', 50, y, this.colors.mochaMousse, 12, 'bold');
         y += 20;
-        this.addProfessionalText('This line chart shows the strike rate (runs per 100 balls) for each batsman in their batting position. Strike rate measures scoring efficiency.', 50, y, this.colors.moonlitGrey, 10);
+        
+        // Data-driven explanation for strike rate chart
+        const highestSR = validStrikeRateData.reduce((max, b) => b.strikeRate > max.strikeRate ? b : max, validStrikeRateData[0]);
+        const lowestSR = validStrikeRateData.reduce((min, b) => b.strikeRate < min.strikeRate ? b : min, validStrikeRateData[0]);
+        const avgSR = Math.round(validStrikeRateData.reduce((sum, b) => sum + b.strikeRate, 0) / validStrikeRateData.length);
+        
+        this.addProfessionalText(`This line chart reveals strike rate variation from ${lowestSR.label}'s ${lowestSR.strikeRate.toFixed(1)} to ${highestSR.label}'s ${highestSR.strikeRate.toFixed(1)}, showing ${highestSR.strikeRate > 150 ? 'explosive' : 'controlled'} batting aggression.`, 50, y, this.colors.moonlitGrey, 10);
         y += 15;
-        this.addProfessionalText('Higher strike rates indicate aggressive scoring. The line progression reveals how batting approach changes through the order.', 50, y, this.colors.moonlitGrey, 10);
+        this.addProfessionalText(`The average strike rate of ${avgSR} indicates ${avgSR > 120 ? 'an aggressive batting approach' : avgSR > 90 ? 'moderate scoring' : 'conservative batting'} throughout the innings.`, 50, y, this.colors.moonlitGrey, 10);
+        y += 15;
+        this.addProfessionalText(`${highestSR.strikeRate > lowestSR.strikeRate * 2 ? 'Significant variation' : 'Consistent approach'} in strike rates shows ${validStrikeRateData.length > 4 ? 'diverse batting roles' : 'similar batting strategies'} across the order.`, 50, y, this.colors.moonlitGrey, 10);
       } else {
         this.addProfessionalText('No batting data available', this.pageWidth / 2, y, this.colors.moonlitGrey, 14, 'center');
       }
@@ -1290,9 +1306,17 @@ export class ProfessionalPDFExporter {
         y += 200;
         this.addProfessionalText('HOW THIS GRAPH WORKS:', 50, y, this.colors.mochaMousse, 12, 'bold');
         y += 20;
-        this.addProfessionalText('This pie chart shows how wickets are distributed among bowlers. Each slice represents a bowler\'s contribution to total wickets.', 50, y, this.colors.moonlitGrey, 10);
+        
+        // Data-driven explanation for bowling pie chart
+        const topWicketTaker = wicketData.reduce((max, b) => b.value > max.value ? b : max, wicketData[0]);
+        const totalWickets = wicketData.reduce((sum, b) => sum + b.value, 0);
+        const wicketTakingBowlers = wicketData.length;
+        
+        this.addProfessionalText(`This pie chart shows ${topWicketTaker.label} dominated with ${topWicketTaker.value} wickets (${Math.round(topWicketTaker.value/totalWickets*100)}%) of ${totalWickets} total wickets, demonstrating ${topWicketTaker.value > totalWickets/2 ? 'overwhelming' : 'strong'} bowling performance.`, 50, y, this.colors.moonlitGrey, 10);
         y += 15;
-        this.addProfessionalText('Larger slices indicate bowlers who took more wickets. This helps identify the most effective bowlers in the innings.', 50, y, this.colors.moonlitGrey, 10);
+        this.addProfessionalText(`${wicketTakingBowlers} bowlers shared the wickets, indicating ${wicketTakingBowlers > 3 ? 'balanced bowling attack' : 'reliance on key performers'} throughout the innings.`, 50, y, this.colors.moonlitGrey, 10);
+        y += 15;
+        this.addProfessionalText(`The wicket distribution reveals ${topWicketTaker.value/totalWickets > 0.5 ? 'a primary strike bowler' : 'shared bowling responsibility'} strategy, with ${totalWickets/wicketTakingBowlers > 2 ? 'effective' : 'moderate'} average of ${(totalWickets/wicketTakingBowlers).toFixed(1)} wickets per bowler.`, 50, y, this.colors.moonlitGrey, 10);
       } else {
         this.addProfessionalText('No wickets data available', this.pageWidth / 2, y, this.colors.moonlitGrey, 14, 'center');
       }
@@ -1390,6 +1414,18 @@ export class ProfessionalPDFExporter {
         this.addProfessionalText('This horizontal bar chart shows each bowler\'s economy rate (runs conceded per over). Lower bars indicate better economy.', 50, y, this.colors.moonlitGrey, 10);
         y += 15;
         this.addProfessionalText('Economy rate measures bowling efficiency. Lower values mean the bowler conceded fewer runs per over, which is crucial for limiting scoring.', 50, y, this.colors.moonlitGrey, 10);
+        
+        // Data-driven explanation for economy chart
+        const bestEconomy = economyData.reduce((min, b) => b.value < min.value ? b : min, economyData[0]);
+        const worstEconomy = economyData.reduce((max, b) => b.value > max.value ? b : max, economyData[0]);
+        const avgEconomy = (economyData.reduce((sum, b) => sum + b.value, 0) / economyData.length).toFixed(2);
+        const economicalBowlers = economyData.filter(b => b.value < 8).length;
+        
+        this.addProfessionalText(`This economy analysis shows ${bestEconomy.label} was most economical at ${bestEconomy.value.toFixed(2)} runs per over, while ${worstEconomy.label} struggled at ${worstEconomy.value.toFixed(2)}, indicating ${worstEconomy.value > 10 ? 'expensive' : 'costly'} bowling.`, 50, y, this.colors.moonlitGrey, 10);
+        y += 15;
+        this.addProfessionalText(`${economicalBowlers} of ${economyData.length} bowlers maintained economy under 8.0, showing ${economicalBowlers > economyData.length/2 ? 'strong' : 'mixed'} bowling control throughout the innings.`, 50, y, this.colors.moonlitGrey, 10);
+        y += 15;
+        this.addProfessionalText(`The average economy of ${avgEconomy} reflects ${parseFloat(avgEconomy) < 8 ? 'excellent' : parseFloat(avgEconomy) < 9 ? 'good' : parseFloat(avgEconomy) < 10 ? 'average' : 'poor'} overall bowling performance, with ${bestEconomy.value < 6 ? 'outstanding' : 'solid'} economy from the best bowler.`, 50, y, this.colors.moonlitGrey, 10);
       } else {
         this.addProfessionalText('No economy data available', this.pageWidth / 2, y, this.colors.moonlitGrey, 14, 'center');
       }
