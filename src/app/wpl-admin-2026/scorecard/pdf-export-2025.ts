@@ -59,31 +59,26 @@ export class ProfessionalPDFExporter {
     this.pageHeight = this.doc.internal.pageSize.getHeight();
   }
 
-  // Helper function to add professional text with 2025 standards
-  private addProfessionalText(
-    text: string, 
-    x: number, 
-    y: number, 
-    color: number[], 
-    fontSize: number, 
-    fontWeight: string = 'normal', 
-    align: 'left' | 'center' = 'left'
-  ) {
+  // Helper function to add colorful text with 2025 design standards
+  private addProfessionalText(text: string | number, x: number, y: number, color: number[], fontSize: number, fontWeight: string = 'normal', align: 'left' | 'center' = 'left') {
     this.doc.setTextColor(...color);
     this.doc.setFontSize(fontSize);
     
     // Set font based on weight - using professional fonts for 2025 standards
     if (fontWeight === 'bold') {
-      this.doc.setFont('helvetica', 'bold');
+      this.doc.setFont('helvetica', 'bold'); // Professional sans-serif for accessibility
     } else if (fontWeight === 'italic') {
       this.doc.setFont('helvetica', 'italic');
     } else {
       this.doc.setFont('helvetica', 'normal');
     }
     
+    // Convert text to string to prevent jsPDF errors
+    const textString = String(text);
+    
     // Left-align body text for accessibility (2025 standard)
-    const finalAlign = (fontSize === this.typography.body || fontSize === this.typography.caption) ? 'left' : align;
-    this.doc.text(text, x, y, { align: finalAlign });
+    const finalAlign: 'left' | 'center' = (fontSize === this.typography.body || fontSize === this.typography.caption) ? 'left' : align;
+    this.doc.text(textString, x, y, { align: finalAlign });
   }
 
   // Helper function to add gradient background
