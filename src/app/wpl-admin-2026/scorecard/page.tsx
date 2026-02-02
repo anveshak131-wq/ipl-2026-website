@@ -743,7 +743,14 @@ export default function ScorecardAdminPage() {
   // Export scorecard to ultra-enhanced PDF with colorful fonts and premium design
   const exportScorecardPDF = async (sc: Scorecard) => {
     try {
-      console.log('Starting PDF export...');
+      console.log('Starting 2025 Professional PDF export...');
+      
+      // Import the 2025 PDF exporter
+      const { exportScorecardPDF2025 } = await import('./pdf-export-2025');
+      
+      await exportScorecardPDF2025(sc);
+      console.log('2025 Professional PDF exported successfully');
+      return;
       
       const jspdfAny = (window as any).jspdf || (window as any).jsPDF || null;
       const jsPDFCtor = jspdfAny && jspdfAny.jsPDF ? jspdfAny.jsPDF : (window as any).jsPDF;

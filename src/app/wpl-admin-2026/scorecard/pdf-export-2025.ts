@@ -231,7 +231,8 @@ export class ProfessionalPDFExporter {
     y += 120;
     
     // Process each innings with 2025 professional design
-    scorecard.innings.forEach((inn: any, innIndex: number) => {
+    if (scorecard.innings && Array.isArray(scorecard.innings)) {
+      scorecard.innings.forEach((inn: any, innIndex: number) => {
       const battingTeamName = inn.battingTeamId === scorecard.matchInfo.team1.id ? 
         scorecard.matchInfo.team1.name : scorecard.matchInfo.team2.name;
       
@@ -283,7 +284,8 @@ export class ProfessionalPDFExporter {
       y += this.layout.lineHeight;
       
       // Batting Data
-      inn.batting?.forEach((batter: any) => {
+      if (inn.batting && Array.isArray(inn.batting)) {
+        inn.batting.forEach((batter: any) => {
         if (y > this.pageHeight - 100) {
           this.doc.addPage();
           y = 40;
@@ -306,6 +308,7 @@ export class ProfessionalPDFExporter {
         
         y += this.layout.lineHeight;
       });
+      }
       
       y += this.layout.sectionSpacing;
       
@@ -331,7 +334,8 @@ export class ProfessionalPDFExporter {
       y += this.layout.lineHeight;
       
       // Bowling Data
-      inn.bowling?.forEach((bowler: any) => {
+      if (inn.bowling && Array.isArray(inn.bowling)) {
+        inn.bowling.forEach((bowler: any) => {
         if (y > this.pageHeight - 100) {
           this.doc.addPage();
           y = 40;
@@ -353,6 +357,7 @@ export class ProfessionalPDFExporter {
         
         y += this.layout.lineHeight;
       });
+      }
       
       y += this.layout.sectionSpacing;
       
@@ -376,7 +381,8 @@ export class ProfessionalPDFExporter {
         
         y += this.layout.lineHeight;
         
-        inn.fallOfWickets.forEach((fow: any) => {
+        if (inn.fallOfWickets && Array.isArray(inn.fallOfWickets)) {
+          inn.fallOfWickets.forEach((fow: any) => {
           if (y > this.pageHeight - 100) {
             this.doc.addPage();
             y = 40;
@@ -396,6 +402,7 @@ export class ProfessionalPDFExporter {
           
           y += this.layout.lineHeight;
         });
+        }
         
         y += this.layout.sectionSpacing;
       }
@@ -463,7 +470,8 @@ export class ProfessionalPDFExporter {
         
         y += this.layout.lineHeight;
         
-        inn.partnerships.forEach((partnership: any) => {
+        if (inn.partnerships && Array.isArray(inn.partnerships)) {
+          inn.partnerships.forEach((partnership: any) => {
           if (y > this.pageHeight - 100) {
             this.doc.addPage();
             y = 40;
@@ -485,10 +493,12 @@ export class ProfessionalPDFExporter {
           
           y += this.layout.lineHeight;
         });
+        }
         
         y += this.layout.sectionSpacing;
       }
     });
+    }
     
     // Match Result Section with 2025 Design
     if (scorecard.result) {
