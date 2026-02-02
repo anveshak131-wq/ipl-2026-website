@@ -76,15 +76,42 @@ interface Innings {
   batting: Batter[];
   bowling: Bowler[];
   partnerships?: Partnership[];
+  extras?: {
+    wides: number;
+    noBalls: number;
+    byes: number;
+    legByes: number;
+  };
+  totalRuns?: number;
+  totalWickets?: number;
+  totalOvers?: number;
+  fallOfWickets?: any[];
+  powerplays?: {
+    mandatory: { overs: string; runs: number };
+    optional: { overs: string; runs: number };
+  };
 }
 
 interface Scorecard {
-  matchInfo: Match;
+  id?: string;
+  matchId: string;
+  league: string;
+  matchInfo: {
+    matchId?: string;
+    team1: { id: number; name: string; shortName?: string };
+    team2: { id: number; name: string; shortName?: string };
+    venue: string;
+    date: string;
+    time: string;
+    toss?: { winner: string; decision: string };
+    weather?: string;
+    status?: string;
+  };
   innings: Innings[];
   result?: {
     winner: string;
     margin: string;
-    manOfTheMatch: string;
+    manOfTheMatch?: string;
   };
 }
 
@@ -168,8 +195,9 @@ export class ExcelExporter2025 {
     if (!this.scorecard) {
       console.warn('No scorecard data provided, using empty structure');
       this.scorecard = {
+        matchId: 'unknown',
+        league: 'WPL',
         matchInfo: {
-          id: 'unknown',
           team1: { id: 1, name: 'Team 1' },
           team2: { id: 2, name: 'Team 2' },
           venue: 'Unknown Venue',
@@ -183,7 +211,6 @@ export class ExcelExporter2025 {
     if (!this.scorecard.matchInfo) {
       console.warn('No match info found, creating default structure');
       this.scorecard.matchInfo = {
-        id: 'unknown',
         team1: { id: 1, name: 'Team 1' },
         team2: { id: 2, name: 'Team 2' },
         venue: 'Unknown Venue',
@@ -221,10 +248,10 @@ export class ExcelExporter2025 {
 
     // Match data
     const matchData = [
-      ['Team 1', this.scorecard.matchInfo.team1.name, 'Team 2', this.scorecard.matchInfo.team2.name],
+      ['Team 1', this.scorecard.matchInfo.team1.name || 'Unknown', 'Team 2', this.scorecard.matchInfo.team2.name || 'Unknown'],
       ['Venue', this.scorecard.matchInfo.venue || 'Unknown', 'Date', this.formatDate(this.scorecard.matchInfo.date)],
-      ['Toss Winner', this.scorecard.matchInfo.tossWinner || 'Unknown', 'Decision', this.scorecard.matchInfo.tossDecision || 'Unknown'],
-      ['Overs', this.scorecard.matchInfo.overs || '20', 'Result', this.getMatchResult()]
+      ['Toss Winner', this.scorecard.matchInfo.toss?.winner || 'Unknown', 'Decision', this.scorecard.matchInfo.toss?.decision || 'Unknown'],
+      ['Time', this.scorecard.matchInfo.time || 'Unknown', 'Status', this.scorecard.matchInfo.status || 'Unknown']
     ];
 
     XLSX.utils.sheet_add_aoa(ws, matchData, { origin: 'A3' });
