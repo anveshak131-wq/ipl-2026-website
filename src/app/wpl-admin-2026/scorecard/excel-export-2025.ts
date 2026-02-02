@@ -901,11 +901,66 @@ export class ExcelExporter2025 {
   }
 
   private calculateSummaryStats(): string[][] {
+    let totalRuns = 0;
+    let totalWickets = 0;
+    let highestScore = 0;
+    let bestEconomy = 999;
+    let partnerships = 0;
+    let powerplayRuns = 0;
+    let totalBalls = 0;
+    
+    // Process innings data
+    if (this.scorecard.innings && this.scorecard.innings.length > 0) {
+      const innings = this.scorecard.innings[0];
+      
+      // Get totals from innings
+      totalRuns = innings.totalRuns || 0;
+      totalWickets = innings.totalWickets || 0;
+      totalBalls = (innings.totalOvers || 0) * 6;
+      
+      // Calculate batting stats
+      if (innings.batting && Array.isArray(innings.batting)) {
+        innings.batting.forEach(batter => {
+          const runs = batter.runs || 0;
+          if (runs > highestScore) {
+            highestScore = runs;
+          }
+        });
+      }
+      
+      // Calculate bowling stats
+      if (innings.bowling && Array.isArray(innings.bowling)) {
+        innings.bowling.forEach(bowler => {
+          const overs = bowler.overs || 0;
+          const runs = bowler.runs || 0;
+          if (overs > 0) {
+            const economy = runs / overs;
+            if (economy < bestEconomy) {
+              bestEconomy = economy;
+            }
+          }
+        });
+      }
+      
+      // Count partnerships
+      if (innings.partnerships && Array.isArray(innings.partnerships)) {
+        partnerships = innings.partnerships.length;
+      }
+      
+      // Get powerplay runs
+      if (innings.powerplays) {
+        powerplayRuns = (innings.powerplays.mandatory?.runs || 0) + (innings.powerplays.optional?.runs || 0);
+      }
+    }
+    
+    const runRate = totalBalls > 0 ? (totalRuns / totalBalls) * 6 : 0;
+    const avgStrikeRate = totalBalls > 0 ? (totalRuns / totalBalls) * 100 : 0;
+    
     return [
-      ['Total Runs', '145', 'Total Wickets', '6'],
-      ['Run Rate', '7.25', 'Strike Rate', '118.4'],
-      ['Highest Score', '45', 'Best Economy', '3.50'],
-      ['Partnerships', '5', 'Powerplay Runs', '42']
+      ['Total Runs', totalRuns.toString(), 'Total Wickets', totalWickets.toString()],
+      ['Run Rate', runRate.toFixed(2), 'Avg Strike Rate', avgStrikeRate.toFixed(1)],
+      ['Highest Score', highestScore.toString(), 'Best Economy', bestEconomy === 999 ? 'N/A' : bestEconomy.toFixed(2)],
+      ['Partnerships', partnerships.toString(), 'Powerplay Runs', powerplayRuns.toString()]
     ];
   }
 
@@ -918,14 +973,100 @@ export class ExcelExporter2025 {
   private generateKeyHighlights(): string[][] { return []; }
   private generatePerformanceGrades(): string[][] { return []; }
   private addGraphDataToSheet(ws: XLSX.WorkSheet): void { }
-  private calculateRunsPercentage(runs: number): string { return '0%'; }
-  private calculateBoundaryPercentage(fours: number, sixes: number, runs: number): string { return '0%'; }
-  private calculateDotBallPercentage(balls: number, runs: number, fours: number, sixes: number): string { return '0%'; }
-  private calculateImpactScore(stats: any): number { return 0; }
-  private getPerformanceBadge(stats: any): string { return '⭐'; }
+  private calculateRunsPercentage(runs: number): string {
+    if (!this.scorecard.innings || this.scorecard.innings.length === 0) return '0%';
+    
+    const innings = this.scorecard.innings[0];
+    const totalRuns = innings.totalRuns || 0;
+    
+    if (totalRuns === 0) return '0%';
+    
+    const percentage = (runs / totalRuns) * 100;
+    return `${percentage.toFixed(1)}%`;
+  }
+
+  private calculateBoundaryPercentage(fours: number, sixes: number, runs: number): string {
+    if (runs === 0) return '0%';
+    
+    const boundaryRuns = (fours * 4) + (sixes * 6);
+    const percentage = (boundaryRuns / runs) * 100;
+    return `${percentage.toFixed(1)}%`;
+  }
+
+  private calculateDotBallPercentage(balls: number, runs: number, fours: number, sixes: number): string {
+    if (balls === 0) return '0%';
+    
+    const boundaryBalls = fours + sixes;
+    const scoringBalls = boundaryBalls + Math.ceil(runs / 1); // Approximate scoring balls
+    const dotBalls = balls - scoringBalls;
+    
+    if (dotBalls < 0) return '0%';
+    
+    const percentage = (dotBalls / balls) * 100;
+    return `${percentage.toFixed(1)}%`;
+  }
+
+  private calculateImpactScore(stats: any): number {
+    let score = 0;
+    
+    // Base score from runs
+    score += stats.runs * 0.5;
+    
+    // Bonus for strike rate
+    if (stats.strikeRate > 130) score += 20;
+    else if (stats.strikeRate > 110) score += 10;
+    else if (stats.strikeRate > 90) score += 5;
+    
+    // Bonus for boundaries
+    score += (stats.fours * 2) + (stats.sixes * 4);
+    
+    // Bonus for half-centuries and centuries
+    if (stats.runs >= 100) score += 50;
+    else if (stats.runs >= 50) score += 25;
+    
+    return Math.round(score);
+  }
+
+  private getPerformanceBadge(stats: any): string {
+    if (stats.runs >= 100) return '💯';
+    if (stats.runs >= 50) return '🌟';
+    if (stats.strikeRate > 130) return '⚡';
+    if (stats.runs >= 30) return '👍';
+    if (stats.runs >= 20) return '✅';
+    return '📊';
+  }
   private generateBattingInsights(data: any[]): string[][] { return []; }
-  private calculateBowlingPerformance(bowler: any): number { return 0; }
-  private getBowlingBadge(score: number, wickets: number): string { return '⭐'; }
+  private calculateBowlingPerformance(bowler: any): number {
+    let score = 0;
+    
+    // Base score from wickets
+    score += (bowler.wickets || 0) * 20;
+    
+    // Economy rate bonus/penalty
+    const economy = bowler.overs > 0 ? (bowler.runs / bowler.overs) : 0;
+    if (economy < 6) score += 30;
+    else if (economy < 7) score += 20;
+    else if (economy < 8) score += 10;
+    else if (economy > 10) score -= 10;
+    
+    // Bonus for maidens
+    score += (bowler.maidens || 0) * 10;
+    
+    // Bonus for 3+ wickets
+    if (bowler.wickets >= 3) score += 15;
+    if (bowler.wickets >= 5) score += 25;
+    
+    return Math.max(0, Math.round(score));
+  }
+
+  private getBowlingBadge(score: number, wickets: number): string {
+    if (wickets >= 5) return '🔥';
+    if (wickets >= 3) return '⭐';
+    if (score >= 50) return '🎯';
+    if (score >= 30) return '✅';
+    if (wickets >= 1) return '👍';
+    return '📊';
+  }
   private generateBowlingInsights(data: any[]): string[][] { return []; }
   private calculatePartnershipContribution(runs: number): string { return '0%'; }
   private getPartnershipType(runs: number, balls: number): string { return 'Normal'; }
