@@ -718,28 +718,44 @@ export class ProfessionalPDFExporter {
       this.addDecorativePattern(y + 8, this.colors.mochaMousse);
       y += 30;
       
-      // Prepare data for graphs
+      // Prepare data for graphs with proper cricket data structure
       const battingData = inn.batting ? inn.batting.map((b: any) => ({
         label: b.name?.substring(0, 15) || 'Unknown',
         runs: parseInt(b.runs) || 0,
         balls: parseInt(b.balls) || 0,
         strikeRate: parseFloat(b.strikeRate) || 0,
         fours: parseInt(b.fours) || 0,
-        sixes: parseInt(b.sixes) || 0
+        sixes: parseInt(b.sixes) || 0,
+        dismissal: b.dismissal?.type || 'Not Out'
       })) : [];
       
       const bowlingData = inn.bowling ? inn.bowling.map((b: any) => ({
         label: b.name?.substring(0, 15) || 'Unknown',
         overs: parseFloat(b.overs) || 0,
+        balls: parseInt(b.balls) || 0,
         runs: parseInt(b.runs) || 0,
         wickets: parseInt(b.wickets) || 0,
-        economy: parseFloat(b.economy) || 0
+        economy: parseFloat(b.economyRate) || 0,
+        maidens: parseInt(b.maidens) || 0,
+        dots: parseInt(b.dots) || 0,
+        wides: parseInt(b.wides) || 0,
+        noBalls: parseInt(b.noBalls) || 0
       })) : [];
       
       const partnershipData = inn.partnerships ? inn.partnerships.map((p: any) => ({
         label: `${p.batsman1?.substring(0, 10)} & ${p.batsman2?.substring(0, 10)}`,
-        runs: parseInt(p.totalRuns) || 0,
-        balls: parseInt(p.totalBalls) || 0
+        batsman1Runs: parseInt(p.batsman1Runs) || 0,
+        batsman1Balls: parseInt(p.batsman1Balls) || 0,
+        batsman2Runs: parseInt(p.batsman2Runs) || 0,
+        batsman2Balls: parseInt(p.batsman2Balls) || 0,
+        totalRuns: parseInt(p.totalRuns) || 0,
+        totalBalls: (parseInt(p.batsman1Balls) || 0) + (parseInt(p.batsman2Balls) || 0)
+      })) : [];
+      
+      const fallOfWicketsData = inn.fallOfWickets ? inn.fallOfWickets.map((fow: any) => ({
+        player: fow.player || 'Unknown',
+        score: fow.score || '0/0',
+        over: parseFloat(fow.over) || 0
       })) : [];
       
       // Graph 1: Bar Chart - Runs scored by each batsman (Full Page)
@@ -749,9 +765,22 @@ export class ProfessionalPDFExporter {
       y += 40;
       this.addProfessionalText('Runs scored by each batsman', this.pageWidth / 2, y, this.colors.infoBlue, 14, 'center');
       y += 30;
-      this.addBarChart(50, y, this.pageWidth - 100, 300, 
-        battingData.map(b => ({label: b.label, value: b.runs})),
-        this.colors.infoBlue, 'Runs by Batsman');
+      
+      if (battingData.length > 0) {
+        this.addBarChart(50, y, this.pageWidth - 100, 300, 
+          battingData.map(b => ({label: b.label, value: b.runs})),
+          this.colors.infoBlue, 'Runs by Batsman');
+        
+        // Explanation
+        y += 320;
+        this.addProfessionalText('HOW THIS GRAPH WORKS:', 50, y, this.colors.mochaMousse, 12, 'bold');
+        y += 20;
+        this.addProfessionalText('This bar chart shows the total runs scored by each batsman in the innings. The height of each bar represents the number of runs scored.', 50, y, this.colors.moonlitGrey, 10);
+        y += 15;
+        this.addProfessionalText('Higher bars indicate better batting performance. This helps identify the top contributors to the team\'s total score.', 50, y, this.colors.moonlitGrey, 10);
+      } else {
+        this.addProfessionalText('No batting data available', this.pageWidth / 2, y, this.colors.moonlitGrey, 14, 'center');
+      }
       
       // Graph 2: Line Chart - Strike Rate progression (Full Page)
       this.doc.addPage();
@@ -760,9 +789,22 @@ export class ProfessionalPDFExporter {
       y += 40;
       this.addProfessionalText('Strike rate progression through batting order', this.pageWidth / 2, y, this.colors.warningAmber, 14, 'center');
       y += 30;
-      this.addLineChart(50, y, this.pageWidth - 100, 350,
-        battingData.map((b, i) => ({x: i + 1, y: b.strikeRate})),
-        this.colors.warningAmber, 'Strike Rate Progression');
+      
+      if (battingData.length > 0) {
+        this.addLineChart(50, y, this.pageWidth - 100, 350,
+          battingData.map((b, i) => ({x: i + 1, y: b.strikeRate})),
+          this.colors.warningAmber, 'Strike Rate Progression');
+        
+        // Explanation
+        y += 370;
+        this.addProfessionalText('HOW THIS GRAPH WORKS:', 50, y, this.colors.mochaMousse, 12, 'bold');
+        y += 20;
+        this.addProfessionalText('This line chart shows the strike rate (runs per 100 balls) for each batsman in their batting position. Strike rate measures scoring efficiency.', 50, y, this.colors.moonlitGrey, 10);
+        y += 15;
+        this.addProfessionalText('Higher strike rates indicate aggressive scoring. The line progression reveals how batting approach changes through the order.', 50, y, this.colors.moonlitGrey, 10);
+      } else {
+        this.addProfessionalText('No batting data available', this.pageWidth / 2, y, this.colors.moonlitGrey, 14, 'center');
+      }
       
       // Graph 3: Pie Chart - Wickets distribution by bowler (Full Page)
       this.doc.addPage();
@@ -776,6 +818,14 @@ export class ProfessionalPDFExporter {
         this.addPieChart(this.pageWidth / 2, y + 100, 80, wicketData,
           [this.colors.dangerRed, this.colors.successGreen, this.colors.infoBlue, this.colors.warningAmber, this.colors.mochaMousse],
           'Wickets Distribution');
+        
+        // Explanation
+        y += 200;
+        this.addProfessionalText('HOW THIS GRAPH WORKS:', 50, y, this.colors.mochaMousse, 12, 'bold');
+        y += 20;
+        this.addProfessionalText('This pie chart shows how wickets are distributed among bowlers. Each slice represents a bowler\'s contribution to total wickets.', 50, y, this.colors.moonlitGrey, 10);
+        y += 15;
+        this.addProfessionalText('Larger slices indicate bowlers who took more wickets. This helps identify the most effective bowlers in the innings.', 50, y, this.colors.moonlitGrey, 10);
       } else {
         this.addProfessionalText('No wickets data available', this.pageWidth / 2, y, this.colors.moonlitGrey, 14, 'center');
       }
@@ -798,6 +848,14 @@ export class ProfessionalPDFExporter {
         ];
         this.addRadarChart(this.pageWidth / 2, y + 120, 100, radarData, this.colors.etherealBlue, 
           `${topBatsman.label} Performance`);
+        
+        // Explanation
+        y += 250;
+        this.addProfessionalText('HOW THIS GRAPH WORKS:', 50, y, this.colors.mochaMousse, 12, 'bold');
+        y += 20;
+        this.addProfessionalText('This radar chart displays multiple batting metrics for the top scorer. Each axis represents a different aspect of performance.', 50, y, this.colors.moonlitGrey, 10);
+        y += 15;
+        this.addProfessionalText('The filled area shows overall performance. Larger areas indicate better all-round performance across all metrics.', 50, y, this.colors.moonlitGrey, 10);
       } else {
         this.addProfessionalText('No batting data available', this.pageWidth / 2, y, this.colors.moonlitGrey, 14, 'center');
       }
@@ -811,8 +869,16 @@ export class ProfessionalPDFExporter {
         this.addProfessionalText('Partnership runs vs balls faced correlation', this.pageWidth / 2, y, this.colors.infoBlue, 14, 'center');
         y += 30;
         this.addScatterPlot(50, y, this.pageWidth - 100, 350,
-          partnershipData.map(p => ({x: p.balls, y: p.runs})),
+          partnershipData.map(p => ({x: p.totalBalls, y: p.totalRuns})),
           this.colors.infoBlue, 'Partnership Analysis');
+        
+        // Explanation
+        y += 370;
+        this.addProfessionalText('HOW THIS GRAPH WORKS:', 50, y, this.colors.mochaMousse, 12, 'bold');
+        y += 20;
+        this.addProfessionalText('This scatter plot shows the relationship between balls faced and runs scored in partnerships. Each dot represents one partnership.', 50, y, this.colors.moonlitGrey, 10);
+        y += 15;
+        this.addProfessionalText('Dots higher and to the right indicate longer, more productive partnerships. This helps identify key partnerships that built the innings.', 50, y, this.colors.moonlitGrey, 10);
       } else {
         this.addProfessionalText('No partnership data available', this.pageWidth / 2, y, this.colors.moonlitGrey, 14, 'center');
       }
@@ -831,6 +897,14 @@ export class ProfessionalPDFExporter {
       });
       this.addAreaChart(50, y, this.pageWidth - 100, 350, cumulativeData, this.colors.successGreen, 'Cumulative Runs');
       
+      // Explanation
+      y += 370;
+      this.addProfessionalText('HOW THIS GRAPH WORKS:', 50, y, this.colors.mochaMousse, 12, 'bold');
+      y += 20;
+      this.addProfessionalText('This area chart shows the cumulative total of runs as wickets fell. The filled area represents the team\'s growing score.', 50, y, this.colors.moonlitGrey, 10);
+      y += 15;
+      this.addProfessionalText('Steeper sections indicate periods of rapid scoring. This reveals when the team accelerated or slowed down during the innings.', 50, y, this.colors.moonlitGrey, 10);
+      
       // Graph 7: Horizontal Bar Chart - Economy rates comparison (Full Page)
       this.doc.addPage();
       y = 80;
@@ -841,6 +915,14 @@ export class ProfessionalPDFExporter {
         this.addProfessionalText('Economy rates comparison (lower is better)', this.pageWidth / 2, y, this.colors.warningAmber, 14, 'center');
         y += 30;
         this.addHorizontalBarChart(50, y, this.pageWidth - 100, 400, economyData.slice(0, 8), this.colors.warningAmber, 'Economy Rates');
+        
+        // Explanation
+        y += 420;
+        this.addProfessionalText('HOW THIS GRAPH WORKS:', 50, y, this.colors.mochaMousse, 12, 'bold');
+        y += 20;
+        this.addProfessionalText('This horizontal bar chart shows each bowler\'s economy rate (runs conceded per over). Lower bars indicate better economy.', 50, y, this.colors.moonlitGrey, 10);
+        y += 15;
+        this.addProfessionalText('Economy rate measures bowling efficiency. Lower values mean the bowler conceded fewer runs per over, which is crucial for limiting scoring.', 50, y, this.colors.moonlitGrey, 10);
       } else {
         this.addProfessionalText('No economy data available', this.pageWidth / 2, y, this.colors.moonlitGrey, 14, 'center');
       }
@@ -864,25 +946,48 @@ export class ProfessionalPDFExporter {
           {label: '6s', value: totalSixes * 6},
           {label: 'Others', value: nonBoundaryRuns}
         ], [this.colors.successGreen, this.colors.dangerRed, this.colors.infoBlue], 'Runs Contribution');
+        
+        // Explanation
+        y += 200;
+        this.addProfessionalText('HOW THIS GRAPH WORKS:', 50, y, this.colors.mochaMousse, 12, 'bold');
+        y += 20;
+        this.addProfessionalText('This donut chart breaks down the team\'s total runs into scoring methods: fours, sixes, and other runs (singles, doubles, triples).', 50, y, this.colors.moonlitGrey, 10);
+        y += 15;
+        this.addProfessionalText('Larger sections indicate the primary scoring method. This reveals the team\'s batting style - boundary-heavy or rotation-based.', 50, y, this.colors.moonlitGrey, 10);
       } else {
         this.addProfessionalText('No scoring data available', this.pageWidth / 2, y, this.colors.moonlitGrey, 14, 'center');
       }
       
-      // Graph 9: Stacked Bar Chart - Over by over performance (Full Page)
+      // Graph 9: Stacked Bar Chart - Fall of Wickets (Full Page)
       this.doc.addPage();
       y = 80;
-      this.addProfessionalText('GRAPH 9: PHASE-WISE PERFORMANCE', this.pageWidth / 2, y, this.colors.mochaMousse, 18, 'bold', 'center');
+      this.addProfessionalText('GRAPH 9: FALL OF WICKETS ANALYSIS', this.pageWidth / 2, y, this.colors.mochaMousse, 18, 'bold', 'center');
       y += 40;
-      this.addProfessionalText('Over by over performance analysis', this.pageWidth / 2, y, this.colors.mochaMousse, 14, 'center');
+      this.addProfessionalText('Wickets fallen with team score at each dismissal', this.pageWidth / 2, y, this.colors.mochaMousse, 14, 'center');
       y += 30;
-      const overData = [
-        {label: 'Powerplay (1-6)', values: [35, 12, 8]}, // Sample: runs, wickets, extras
-        {label: 'Middle Overs (7-15)', values: [65, 15, 12]},
-        {label: 'Death Overs (16-20)', values: [55, 8, 10]}
-      ];
-      this.addStackedBarChart(50, y, this.pageWidth - 100, 350, overData,
-        [this.colors.infoBlue, this.colors.dangerRed, this.colors.warningAmber],
-        'Over by Over Performance');
+      
+      if (fallOfWicketsData.length > 0) {
+        const fowData = fallOfWicketsData.map(fow => {
+          const scoreParts = fow.score.split('/');
+          return {
+            label: `${fow.player.substring(0, 12)} (${fow.over} ov)`,
+            values: [parseInt(scoreParts[0]) || 0, parseInt(scoreParts[1]) || 0, 0] // runs, wickets, extras
+          };
+        });
+        this.addStackedBarChart(50, y, this.pageWidth - 100, 350, fowData,
+          [this.colors.infoBlue, this.colors.dangerRed, this.colors.warningAmber],
+          'Fall of Wickets');
+        
+        // Explanation
+        y += 370;
+        this.addProfessionalText('HOW THIS GRAPH WORKS:', 50, y, this.colors.mochaMousse, 12, 'bold');
+        y += 20;
+        this.addProfessionalText('This stacked bar chart shows the team score when each wicket fell. Blue shows runs, red shows wickets, and the total height shows team score.', 50, y, this.colors.moonlitGrey, 10);
+        y += 15;
+        this.addProfessionalText('This reveals how the team built their innings and when key partnerships were broken. Critical for understanding batting collapse patterns.', 50, y, this.colors.moonlitGrey, 10);
+      } else {
+        this.addProfessionalText('No fall of wickets data available', this.pageWidth / 2, y, this.colors.moonlitGrey, 14, 'center');
+      }
       
       // Graph 10: Heatmap - Performance matrix (Full Page)
       this.doc.addPage();
@@ -900,6 +1005,14 @@ export class ProfessionalPDFExporter {
       ]);
       this.addHeatmap(50, y, this.pageWidth - 100, 300, performanceMatrix,
         ['Runs', 'SR', '4s', '6s', 'Overs'], 'Performance Heatmap');
+      
+      // Explanation
+      y += 320;
+      this.addProfessionalText('HOW THIS GRAPH WORKS:', 50, y, this.colors.mochaMousse, 12, 'bold');
+      y += 20;
+      this.addProfessionalText('This heatmap shows performance intensity across multiple metrics for top batsmen. Darker colors indicate higher values.', 50, y, this.colors.moonlitGrey, 10);
+      y += 15;
+      this.addProfessionalText('Each row represents a batsman, each column a metric. This allows quick comparison of player strengths across different aspects of batting.', 50, y, this.colors.moonlitGrey, 10);
       
       y += 350;
       
