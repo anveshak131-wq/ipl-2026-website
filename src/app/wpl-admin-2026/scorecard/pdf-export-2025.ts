@@ -169,7 +169,8 @@ export class ProfessionalPDFExporter {
       
       // Draw point
       this.doc.setFillColor(...color);
-      this.doc.circle(x1, y1, 2, 'F');
+      this.doc.ellipse(x1, y1, 2, 2, 'F');
+      
     }
     
     // Last point
@@ -177,7 +178,7 @@ export class ProfessionalPDFExporter {
     const lastX = x + 20 + (lastPoint.x / Math.max(...data.map(d => d.x))) * chartWidth;
     const lastY = y + height - 20 - ((lastPoint.y - minValue) / (maxValue - minValue)) * chartHeight;
     this.doc.setFillColor(...color);
-    this.doc.circle(lastX, lastY, 2, 'F');
+    this.doc.ellipse(lastX, lastY, 2, 2, 'F');
   }
   
   // 3. Pie Chart - Wickets distribution by bowler
@@ -196,7 +197,8 @@ export class ProfessionalPDFExporter {
       
       // Draw pie slice
       this.doc.setFillColor(...colors[index % colors.length]);
-      this.doc.circle(x, y, radius, 'S'); // Draw circle outline
+      // Draw circle outline using ellipse
+      this.doc.ellipse(x, y, radius, radius, 'S');
       
       // Fill sector (approximation using triangle)
       const startRad = (currentAngle * Math.PI) / 180;
@@ -303,7 +305,7 @@ export class ProfessionalPDFExporter {
     data.forEach(point => {
       const plotX = x + 20 + (point.x / maxX) * chartWidth;
       const plotY = y + height - 20 - (point.y / maxY) * chartHeight;
-      this.doc.circle(plotX, plotY, 3, 'F');
+      this.doc.ellipse(plotX, plotY, 3, 3, 'F');
     });
   }
   
