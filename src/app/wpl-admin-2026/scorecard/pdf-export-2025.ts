@@ -200,15 +200,14 @@ export class ProfessionalPDFExporter {
       // Draw circle outline using ellipse
       this.doc.ellipse(x, y, radius, radius, 'S');
       
-      // Fill sector (approximation using triangle)
+      // Fill sector (simplified as filled triangle approximation)
       const startRad = (currentAngle * Math.PI) / 180;
       const endRad = (endAngle * Math.PI) / 180;
       
-      this.doc.triangle(
-        x, y,
-        x + radius * Math.cos(startRad), y + radius * Math.sin(startRad),
-        x + radius * Math.cos(endRad), y + radius * Math.sin(endRad)
-      );
+      // Draw lines from center to create pie slice
+      this.doc.setDrawColor(...colors[index % colors.length]);
+      this.doc.line(x, y, x + radius * Math.cos(startRad), y + radius * Math.sin(startRad));
+      this.doc.line(x, y, x + radius * Math.cos(endRad), y + radius * Math.sin(endRad));
       
       // Label
       const labelAngle = (currentAngle + endAngle) / 2;
@@ -398,24 +397,16 @@ export class ProfessionalPDFExporter {
       // Draw donut slice
       this.doc.setFillColor(...colors[index % colors.length]);
       
-      // Approximate donut slice using two triangles
+      // Approximate donut slice using lines
       const startRad = (currentAngle * Math.PI) / 180;
       const endRad = (endAngle * Math.PI) / 180;
       
-      // Outer triangle
-      this.doc.triangle(
-        x + innerRadius * Math.cos(startRad), y + innerRadius * Math.sin(startRad),
-        x + outerRadius * Math.cos(startRad), y + outerRadius * Math.sin(startRad),
-        x + outerRadius * Math.cos(endRad), y + outerRadius * Math.sin(endRad)
-      );
-      
-      // Inner triangle
-      this.doc.setFillColor(255, 255, 255);
-      this.doc.triangle(
-        x + innerRadius * Math.cos(startRad), y + innerRadius * Math.sin(startRad),
-        x + innerRadius * Math.cos(endRad), y + innerRadius * Math.sin(endRad),
-        x + outerRadius * Math.cos(endRad), y + outerRadius * Math.sin(endRad)
-      );
+      // Draw outer arc lines
+      this.doc.setDrawColor(...colors[index % colors.length]);
+      this.doc.line(x + innerRadius * Math.cos(startRad), y + innerRadius * Math.sin(startRad),
+                     x + outerRadius * Math.cos(startRad), y + outerRadius * Math.sin(startRad));
+      this.doc.line(x + innerRadius * Math.cos(endRad), y + innerRadius * Math.sin(endRad),
+                     x + outerRadius * Math.cos(endRad), y + outerRadius * Math.sin(endRad));
       
       currentAngle = endAngle;
     });
