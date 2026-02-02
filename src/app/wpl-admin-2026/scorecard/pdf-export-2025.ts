@@ -155,42 +155,124 @@ export class ProfessionalPDFExporter {
     // Title
     this.addProfessionalText(title, x + width/2, y - 10, this.colors.mochaMousse, 10, 'bold', 'center');
     
-    if (data.length < 2) return;
+    if (data.length < 2) {
+      this.addProfessionalText('Insufficient data for line chart', x + width/2, y + height/2, this.colors.moonlitGrey, 10, 'center');
+      return;
+    }
     
     const maxValue = Math.max(...data.map(d => d.y));
     const minValue = Math.min(...data.map(d => d.y));
-    const chartWidth = width - 40;
-    const chartHeight = height - 40;
+    const maxX = Math.max(...data.map(d => d.x));
+    const chartWidth = width - 60;
+    const chartHeight = height - 60;
+    const chartX = x + 40;
+    const chartY = y + 30;
     
     // Draw axes
     this.doc.setDrawColor(...this.colors.moonlitGrey);
-    this.doc.line(x + 20, y + 20, x + 20, y + height - 20); // Y-axis
-    this.doc.line(x + 20, y + height - 20, x + width - 20, y + height - 20); // X-axis
+    this.doc.setLineWidth(2);
     
-    // Draw line
+    // Y-axis
+    this.doc.line(chartX, chartY, chartX, chartY + chartHeight);
+    // X-axis  
+    this.doc.line(chartX, chartY + chartHeight, chartX + chartWidth, chartY + chartHeight);
+    
+    // Draw grid lines and labels
+    this.doc.setLineWidth(0.5);
+    this.doc.setDrawColor(...this.colors.lightGrey);
+    
+    // Y-axis grid lines and labels
+    const ySteps = 5;
+    for (let i = 0; i <= ySteps; i++) {
+      const yPos = chartY + chartHeight - (i * chartHeight / ySteps);
+      const value = Math.round(minValue + (i * (maxValue - minValue) / ySteps));
+      
+      // Grid line
+      this.doc.line(chartX, yPos, chartX + chartWidth, yPos);
+      
+      // Y-axis label
+      this.addProfessionalText(value.toString(), chartX - 25, yPos + 3, this.colors.moonlitGrey, 8, 'right');
+    }
+    
+    // X-axis grid lines and labels
+    const xSteps = Math.min(data.length - 1, 10);
+    for (let i = 0; i <= xSteps; i++) {
+      const xPos = chartX + (i * chartWidth / xSteps);
+      const dataIndex = Math.floor((i * (data.length - 1)) / xSteps);
+      
+      // Grid line
+      this.doc.line(xPos, chartY, xPos, chartY + chartHeight);
+      
+      // X-axis label (batting position)
+      this.addProfessionalText((dataIndex + 1).toString(), xPos, chartY + chartHeight + 15, this.colors.moonlitGrey, 8, 'center');
+    }
+    
+    // Draw line and data points
     this.doc.setDrawColor(...color);
     this.doc.setLineWidth(2);
     
     for (let i = 0; i < data.length - 1; i++) {
-      const x1 = x + 20 + (data[i].x / Math.max(...data.map(d => d.x))) * chartWidth;
-      const y1 = y + height - 20 - ((data[i].y - minValue) / (maxValue - minValue)) * chartHeight;
-      const x2 = x + 20 + (data[i + 1].x / Math.max(...data.map(d => d.x))) * chartWidth;
-      const y2 = y + height - 20 - ((data[i + 1].y - minValue) / (maxValue - minValue)) * chartHeight;
+      const x1 = chartX + (data[i].x / maxX) * chartWidth;
+      const y1 = chartY + chartHeight - ((data[i].y - minValue) / (maxValue - minValue)) * chartHeight;
+      const x2 = chartX + (data[i + 1].x / maxX) * chartWidth;
+      const y2 = chartY + chartHeight - ((data[i + 1].y - minValue) / (maxValue - minValue)) * chartHeight;
       
+      // Draw line segment
       this.doc.line(x1, y1, x2, y2);
-      
-      // Draw point
-      this.doc.setFillColor(...color);
-      this.safeRect(x1 - 2, y1 - 2, 4, 4, 'F');
-      
     }
     
-    // Last point
-    const lastPoint = data[data.length - 1];
-    const lastX = x + 20 + (lastPoint.x / Math.max(...data.map(d => d.x))) * chartWidth;
-    const lastY = y + height - 20 - ((lastPoint.y - minValue) / (maxValue - minValue)) * chartHeight;
-    this.doc.setFillColor(...color);
-    this.safeRect(lastX - 2, lastY - 2, 4, 4, 'F');
+    // Draw all data points with labels
+    data.forEach((point, index) => {
+      const plotX = chartX + (point.x / maxX) * chartWidth;
+      const plotY = chartY + chartHeight - ((point.y - minValue) / (maxValue - minValue)) * chartHeight;
+      
+      // Draw data point
+      this.doc.setFillColor(...color);
+      this.safeRect(plotX - 4, plotY - 4, 8, 8, 'F');
+      
+      // Add value label for each point
+      const valueLabel = `${Math.round(point.y)}`;
+      this.addProfessionalText(valueLabel, plotX, plotY - 12, this.colors.mochaMousse, 7, 'center');
+      
+      // Add position label
+      const positionLabel = `P${index + 1}`;
+      this.addProfessionalText(positionLabel, plotX, plotY + 15, this.colors.moonlitGrey, 6, 'center');
+    });
+    
+    // Add statistics
+    const avgStrikeRate = Math.round(data.reduce((sum, p) => sum + p.y, 0) / data.length);
+    const maxStrikeRate = Math.round(maxValue);
+    const minStrikeRate = Math.round(minValue);
+    
+    const statsX = chartX + chartWidth - 120;
+    const statsY = chartY;
+    
+    this.addProfessionalText('STATISTICS:', statsX, statsY, this.colors.mochaMousse, 9, 'bold');
+    statsY += 15;
+    this.addProfessionalText(`Average: ${avgStrikeRate}`, statsX, statsY, this.colors.moonlitGrey, 7);
+    statsY += 12;
+    this.addProfessionalText(`Highest: ${maxStrikeRate}`, statsX, statsY, this.colors.moonlitGrey, 7);
+    statsY += 12;
+    this.addProfessionalText(`Lowest: ${minStrikeRate}`, statsX, statsY, this.colors.moonlitGrey, 7);
+    
+    // Axis labels
+    this.addProfessionalText('Batting Position', chartX + chartWidth/2, chartY + chartHeight + 35, this.colors.moonlitGrey, 9, 'center');
+    this.addProfessionalText('Strike Rate', chartX - 35, chartY - 10, this.colors.moonlitGrey, 9, 'center');
+    
+    // Add trend analysis
+    let trend = 'Stable';
+    if (data.length > 1) {
+      const firstHalf = data.slice(0, Math.floor(data.length / 2));
+      const secondHalf = data.slice(Math.floor(data.length / 2));
+      const firstAvg = firstHalf.reduce((sum, p) => sum + p.y, 0) / firstHalf.length;
+      const secondAvg = secondHalf.reduce((sum, p) => sum + p.y, 0) / secondHalf.length;
+      
+      if (secondAvg > firstAvg * 1.1) trend = 'Increasing';
+      else if (secondAvg < firstAvg * 0.9) trend = 'Decreasing';
+    }
+    
+    this.addProfessionalText(`Trend: ${trend}`, chartX, chartY - 25, this.colors.mochaMousse, 9, 'bold');
+    this.addProfessionalText('Strike rate progression through batting order', chartX, chartY - 15, this.colors.infoBlue, 8);
   }
   
   // 3. Pie Chart - Wickets distribution by bowler
