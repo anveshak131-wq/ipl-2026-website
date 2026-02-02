@@ -719,15 +719,21 @@ export class ProfessionalPDFExporter {
       y += 30;
       
       // Prepare data for graphs with proper cricket data structure
-      const battingData = inn.batting ? inn.batting.map((b: any) => ({
-        label: b.name?.substring(0, 15) || 'Unknown',
-        runs: parseInt(b.runs) || 0,
-        balls: parseInt(b.balls) || 0,
-        strikeRate: parseFloat(b.strikeRate) || 0,
-        fours: parseInt(b.fours) || 0,
-        sixes: parseInt(b.sixes) || 0,
-        dismissal: b.dismissal?.type || 'Not Out'
-      })) : [];
+      const battingData = inn.batting ? inn.batting.map((b: any) => {
+        const runs = parseInt(b.runs) || 0;
+        const balls = parseInt(b.balls) || 0;
+        const strikeRate = balls > 0 ? parseFloat(((runs / balls) * 100).toFixed(2)) : 0;
+        
+        return {
+          label: b.name?.substring(0, 15) || 'Unknown',
+          runs: runs,
+          balls: balls,
+          strikeRate: parseFloat(b.strikeRate) || strikeRate, // Use provided or calculated
+          fours: parseInt(b.fours) || 0,
+          sixes: parseInt(b.sixes) || 0,
+          dismissal: b.dismissal?.type || 'Not Out'
+        };
+      }) : [];
       
       const bowlingData = inn.bowling ? inn.bowling.map((b: any) => ({
         label: b.name?.substring(0, 15) || 'Unknown',
@@ -791,12 +797,29 @@ export class ProfessionalPDFExporter {
       y += 30;
       
       if (battingData.length > 0) {
-        this.addLineChart(50, y, this.pageWidth - 100, 350,
-          battingData.map((b, i) => ({x: i + 1, y: b.strikeRate})),
-          this.colors.warningAmber, 'Strike Rate Progression');
+        // Filter out players with 0 strike rate for better visualization
+        const validStrikeRateData = battingData.filter(b => b.strikeRate > 0);
+        
+        if (validStrikeRateData.length > 0) {
+          this.addLineChart(50, y, this.pageWidth - 100, 350,
+            validStrikeRateData.map((b, i) => ({x: i + 1, y: b.strikeRate})),
+            this.colors.warningAmber, 'Strike Rate Progression');
+          
+          // Add data labels below the chart
+          y += 370;
+          this.addProfessionalText('STRIKE RATE DATA:', 50, y, this.colors.mochaMousse, 12, 'bold');
+          y += 20;
+          validStrikeRateData.forEach((batsman, index) => {
+            const dataText = `${index + 1}. ${batsman.label}: ${batsman.runs} runs off ${batsman.balls} balls = ${batsman.strikeRate} SR`;
+            this.addProfessionalText(dataText, 50, y, this.colors.moonlitGrey, 9);
+            y += 15;
+          });
+        } else {
+          this.addProfessionalText('No valid strike rate data available (all players have 0 strike rate)', this.pageWidth / 2, y, this.colors.moonlitGrey, 12, 'center');
+        }
         
         // Explanation
-        y += 370;
+        y += 30;
         this.addProfessionalText('HOW THIS GRAPH WORKS:', 50, y, this.colors.mochaMousse, 12, 'bold');
         y += 20;
         this.addProfessionalText('This line chart shows the strike rate (runs per 100 balls) for each batsman in their batting position. Strike rate measures scoring efficiency.', 50, y, this.colors.moonlitGrey, 10);
