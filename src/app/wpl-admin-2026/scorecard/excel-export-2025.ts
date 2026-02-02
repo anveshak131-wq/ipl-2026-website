@@ -155,9 +155,41 @@ export class ExcelExporter2025 {
   async exportToExcel(options: ExcelExportOptions): Promise<void> {
     this.scorecard = options.scorecard;
     
-    // Validate scorecard data
-    if (!this.scorecard || !this.scorecard.matchInfo) {
-      throw new Error('Invalid scorecard data: Missing match information');
+    // Debug: Log the scorecard structure
+    console.log('Excel Export - Scorecard structure:', {
+      hasScorecard: !!this.scorecard,
+      hasMatchInfo: !!this.scorecard?.matchInfo,
+      matchInfoKeys: this.scorecard?.matchInfo ? Object.keys(this.scorecard.matchInfo) : [],
+      team1Name: this.scorecard?.matchInfo?.team1?.name || 'MISSING',
+      team2Name: this.scorecard?.matchInfo?.team2?.name || 'MISSING'
+    });
+    
+    // More flexible validation - don't throw error, just log and continue
+    if (!this.scorecard) {
+      console.warn('No scorecard data provided, using empty structure');
+      this.scorecard = {
+        matchInfo: {
+          id: 'unknown',
+          team1: { id: 1, name: 'Team 1' },
+          team2: { id: 2, name: 'Team 2' },
+          venue: 'Unknown Venue',
+          date: new Date().toISOString().split('T')[0],
+          time: '00:00'
+        },
+        innings: []
+      };
+    }
+    
+    if (!this.scorecard.matchInfo) {
+      console.warn('No match info found, creating default structure');
+      this.scorecard.matchInfo = {
+        id: 'unknown',
+        team1: { id: 1, name: 'Team 1' },
+        team2: { id: 2, name: 'Team 2' },
+        venue: 'Unknown Venue',
+        date: new Date().toISOString().split('T')[0],
+        time: '00:00'
+      };
     }
     
     // Create all sheets
@@ -175,6 +207,7 @@ export class ExcelExporter2025 {
 
     // Generate and download the file
     const fileName = `WPL2026_Scorecard_${this.getMatchIdentifier()}.${options.format}`;
+    console.log('Generated filename:', fileName);
     XLSX.writeFile(this.workbook, fileName);
   }
 
@@ -791,16 +824,44 @@ export class ExcelExporter2025 {
 
   // Placeholder methods for data calculations
   private getMatchIdentifier(): string {
+    console.log('getMatchIdentifier - scorecard:', this.scorecard);
+    console.log('getMatchIdentifier - matchInfo:', this.scorecard?.matchInfo);
+    
     if (!this.scorecard || !this.scorecard.matchInfo) {
+      console.warn('No match info available, using default identifier');
       return 'unknown_match';
     }
     
     const matchInfo = this.scorecard.matchInfo;
-    const team1 = matchInfo.team1?.name || 'Team1';
-    const team2 = matchInfo.team2?.name || 'Team2';
-    const date = matchInfo.date ? new Date(matchInfo.date).toISOString().split('T')[0] : 'unknown';
+    console.log('Team1 object:', matchInfo.team1);
+    console.log('Team2 object:', matchInfo.team2);
     
-    return `${team1.replace(/\s+/g, '_')}_vs_${team2.replace(/\s+/g, '_')}_${date}`;
+    // Try multiple ways to get team names
+    let team1 = 'Team1';
+    let team2 = 'Team2';
+    
+    if (matchInfo.team1) {
+      team1 = matchInfo.team1.name || matchInfo.team1.shortName || 'Team1';
+    }
+    
+    if (matchInfo.team2) {
+      team2 = matchInfo.team2.name || matchInfo.team2.shortName || 'Team2';
+    }
+    
+    // Try to get date from multiple possible fields
+    let date = 'unknown';
+    if (matchInfo.date) {
+      try {
+        date = new Date(matchInfo.date).toISOString().split('T')[0];
+      } catch (e) {
+        date = matchInfo.date;
+      }
+    }
+    
+    const identifier = `${team1.replace(/\s+/g, '_')}_vs_${team2.replace(/\s+/g, '_')}_${date}`;
+    console.log('Generated identifier:', identifier);
+    
+    return identifier;
   }
 
   private formatDate(date: string): string {

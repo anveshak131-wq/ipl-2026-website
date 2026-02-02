@@ -1864,6 +1864,17 @@ export default function ScorecardAdminPage() {
   // Export scorecard to enhanced Excel with 2025 design standards
   const exportScorecardExcel = async (sc: Scorecard) => {
     try {
+      // Debug: Log the scorecard data being passed
+      console.log('Page.tsx - Exporting scorecard:', {
+        hasScorecard: !!sc,
+        hasMatchInfo: !!sc?.matchInfo,
+        matchInfoKeys: sc?.matchInfo ? Object.keys(sc.matchInfo) : [],
+        team1Name: sc?.matchInfo?.team1?.name || 'MISSING',
+        team2Name: sc?.matchInfo?.team2?.name || 'MISSING',
+        venue: sc?.matchInfo?.venue || 'MISSING',
+        date: sc?.matchInfo?.date || 'MISSING'
+      });
+      
       // Dynamic import of the Excel exporter
       const { ExcelExporter2025 } = await import('./excel-export-2025');
       
