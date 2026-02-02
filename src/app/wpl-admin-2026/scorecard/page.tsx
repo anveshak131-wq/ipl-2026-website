@@ -1861,107 +1861,124 @@ export default function ScorecardAdminPage() {
     }
   };
 
-  // Export scorecard to enhanced Excel with premium styling
+  // Export scorecard to enhanced Excel with 2025 design standards
   const exportScorecardExcel = async (sc: Scorecard) => {
-    const XLSX = (window as any).XLSX;
-    if (!XLSX) throw new Error('SheetJS not available');
-
-    // Create workbook with enhanced styling
-    const wb = XLSX.utils.book_new();
-    
-    // Define premium color scheme
-    const colors = {
-      header: 'FF6F3D',      // Orange-Red
-      accent: 'FFD700',      // Gold
-      success: '2ED573',     // Green
-      danger: 'EF4444',      // Red
-      warning: 'F59E0B',     // Amber
-      info: '3B82F6',        // Blue
-      purple: 'A855F7',      // Purple
-      pink: 'EC4899',        // Pink
-      cyan: '06B6D4',        // Cyan
-      light: 'F8FAFC',       // Light Gray
-    };
-
-    // Match Info Sheet
-    const matchInfoData = [
-      ['🏆 WPL 2026 PREMIUM SCORECARD 🏆', '', '', '', ''],
-      ['📊 MATCH INFORMATION', '', '', '', ''],
-      ['', '', '', '', ''],
-      ['🏟️ Venue', sc.matchInfo.venue || 'Stadium', '', '', ''],
-      ['📅 Date', sc.matchInfo.date || 'TBD', '', '', ''],
-      ['⏰ Time', sc.matchInfo.time || 'TBD', '', '', ''],
-      ['🎲 Toss Winner', sc.matchInfo.toss?.winner || 'N/A', '', '', ''],
-      ['🎲 Toss Decision', sc.matchInfo.toss?.decision || 'N/A', '', '', ''],
-      ['', '', '', '', ''],
-      ['⭐ MATCH RESULT', '', '', '', ''],
-      ['🥇 Winner', sc.result?.winner || 'To be determined', '', '', ''],
-      ['📊 Margin', sc.result?.margin || 'N/A', '', '', ''],
-      ['🏅 Man of the Match', sc.result?.manOfTheMatch || 'N/A', '', '', ''],
-    ];
-
-    const matchInfoWS = XLSX.utils.aoa_to_sheet(matchInfoData);
-    
-    // Style match info sheet
-    const matchInfoRange = XLSX.utils.decode_range(matchInfoWS['!ref'] || 'A1');
-    for (let row = matchInfoRange.s.r; row <= matchInfoRange.e.r; row++) {
-      for (let col = matchInfoRange.s.c; col <= matchInfoRange.e.c; col++) {
-        const cellRef = XLSX.utils.encode_cell({ r: row, c: col });
-        if (!matchInfoWS[cellRef]) continue;
-        
-        matchInfoWS[cellRef].s = {
-          font: { name: 'Calibri', sz: 12 },
-          alignment: { vertical: 'center', horizontal: 'left' },
-          border: {
-            top: { style: 'thin', color: { auto: 1 } },
-            bottom: { style: 'thin', color: { auto: 1 } },
-            left: { style: 'thin', color: { auto: 1 } },
-            right: { style: 'thin', color: { auto: 1 } }
-          }
-        };
-
-        // Special styling for headers
-        if (row === 0) {
-          matchInfoWS[cellRef].s.fill = { fgColor: { rgb: colors.header } };
-          matchInfoWS[cellRef].s.font = { name: 'Calibri', sz: 16, bold: true, color: { rgb: 'FFFFFF' } };
-          matchInfoWS[cellRef].s.alignment = { horizontal: 'center', vertical: 'center' };
-        } else if (row === 1 || row === 9) {
-          matchInfoWS[cellRef].s.fill = { fgColor: { rgb: colors.accent } };
-          matchInfoWS[cellRef].s.font = { name: 'Calibri', sz: 14, bold: true, color: { rgb: '000000' } };
-        } else if (row === 3 || row === 10) {
-          matchInfoWS[cellRef].s.font = { name: 'Calibri', sz: 11, bold: true, color: { rgb: colors.info } };
-        }
-      }
-    }
-
-    // Process each innings
-    sc.innings.forEach((inn, innIndex) => {
-      const battingTeamName = inn.battingTeamId === sc.matchInfo.team1.id ? sc.matchInfo.team1.name : sc.matchInfo.team2.name;
+    try {
+      // Dynamic import of the Excel exporter
+      const { ExcelExporter2025 } = await import('./excel-export-2025');
       
-      // Batting Sheet
-      const battingData = [
-        [`🏏 INNINGS ${inn.inningsNumber} - ${battingTeamName.toUpperCase()} 🏏`, '', '', '', '', '', '', ''],
-        ['🎯 BATTING SCORECARD', '', '', '', '', '', '', ''],
-        ['', '', '', '', '', '', '', ''],
-        ['🏏 Batter', '🎯 Runs', '⚪ Balls', '🔷 4s', '🔶 6s', '📊 Strike Rate', '❌ Dismissal', '⏱️ Minutes'],
+      const exporter = new ExcelExporter2025();
+      
+      await exporter.exportToExcel({
+        scorecard: sc,
+        includeGraphs: true,
+        includeAnalytics: true,
+        format: 'xlsx'
+      });
+      
+      setMessage('✅ Excel exported successfully with modern design!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error('Excel export error:', error);
+      
+      // Fallback to basic export if new exporter fails
+      const XLSX = (window as any).XLSX;
+      if (!XLSX) throw new Error('SheetJS not available');
+
+      // Create basic workbook as fallback
+      const wb = XLSX.utils.book_new();
+      
+      // Basic match info sheet
+      const matchInfoData = [
+        ['WPL 2026 SCORECARD', '', '', '', ''],
+        ['MATCH INFORMATION', '', '', '', ''],
+        ['Venue', sc.matchInfo.venue || 'Stadium', '', '', ''],
+        ['Date', sc.matchInfo.date || 'TBD', '', '', ''],
+        ['Time', sc.matchInfo.time || 'TBD', '', '', ''],
+        ['Toss Winner', sc.matchInfo.toss?.winner || 'N/A', '', '', ''],
+        ['Toss Decision', sc.matchInfo.toss?.decision || 'N/A', '', '', ''],
+        ['Winner', sc.result?.winner || 'To be determined', '', '', ''],
+        ['Margin', sc.result?.margin || 'N/A', '', '', ''],
+        ['Man of the Match', sc.result?.manOfTheMatch || 'N/A', '', '', ''],
       ];
 
-      // Add batting data
-      inn.batting.forEach(b => {
-        let dismissalText = '🏏 not out';
-        if (b.dismissal) {
-          if (b.dismissal.type === 'caught') {
-            dismissalText = `🤲 c ${b.dismissal.fielderId || 'fielder'} b ${b.dismissal.bowlerId || 'bowler'}`;
-          } else if (b.dismissal.type === 'bowled') {
-            dismissalText = `🎳 b ${b.dismissal.bowlerId || 'bowler'}`;
-          } else if (b.dismissal.type === 'lbw') {
-            dismissalText = `⚖️ lbw b ${b.dismissal.bowlerId || 'bowler'}`;
-          } else if (b.dismissal.type === 'run_out') {
-            dismissalText = `🏃 run out`;
-          } else {
-            dismissalText = `❌ ${b.dismissal.details || b.dismissal.type}`;
+      const matchInfoWS = XLSX.utils.aoa_to_sheet(matchInfoData);
+      XLSX.utils.book_append_sheet(wb, matchInfoWS, 'Match Info');
+
+      // Process each innings with basic data
+      sc.innings.forEach((inn, innIndex) => {
+        const battingTeamName = inn.battingTeamId === sc.matchInfo.team1.id ? sc.matchInfo.team1.name : sc.matchInfo.team2.name;
+        
+        // Basic batting sheet
+        const battingData = [
+          [`INNINGS ${inn.inningsNumber} - ${battingTeamName}`, '', '', '', '', '', '', ''],
+          ['BATTING SCORECARD', '', '', '', '', '', '', ''],
+          ['Batter', 'Runs', 'Balls', '4s', '6s', 'Strike Rate', 'Dismissal', 'Minutes'],
+        ];
+
+        // Add batting data
+        inn.batting.forEach(b => {
+          const sr = b.balls > 0 ? ((b.runs / b.balls) * 100).toFixed(1) : '0.0';
+          let dismissalText = 'Not Out';
+          if (b.dismissal) {
+            dismissalText = b.dismissal.details || b.dismissal.type;
           }
-        }
+          
+          battingData.push([
+            b.name,
+            b.runs,
+            b.balls,
+            b.fours || 0,
+            b.sixes || 0,
+            sr,
+            dismissalText,
+            b.minutes || 0
+          ]);
+        });
+
+        const battingWS = XLSX.utils.aoa_to_sheet(battingData);
+        XLSX.utils.book_append_sheet(wb, battingWS, `Innings${innIndex + 1}_Batting`);
+
+        // Basic bowling sheet
+        const bowlingData = [
+          [`INNINGS ${inn.inningsNumber} - BOWLING`, '', '', '', '', '', '', ''],
+          ['BOWLING SCORECARD', '', '', '', '', '', '', ''],
+          ['Bowler', 'Overs', 'Runs', 'Wickets', 'Maidens', 'Economy', 'Dots', 'Economy Rate'],
+        ];
+
+        // Add bowling data
+        inn.bowling.forEach(b => {
+          const economy = b.overs > 0 ? (b.runs / b.overs).toFixed(2) : '0.00';
+          
+          bowlingData.push([
+            b.name,
+            b.overs.toFixed(1),
+            b.runs,
+            b.wickets,
+            b.maidens || 0,
+            economy,
+            b.dots || 0,
+            economy
+          ]);
+        });
+
+        const bowlingWS = XLSX.utils.aoa_to_sheet(bowlingData);
+        XLSX.utils.book_append_sheet(wb, bowlingWS, `Innings${innIndex + 1}_Bowling`);
+      });
+
+      // Generate filename
+      const team1 = sc.matchInfo.team1.name.replace(/\s+/g, '_');
+      const team2 = sc.matchInfo.team2.name.replace(/\s+/g, '_');
+      const date = sc.matchInfo.date ? new Date(sc.matchInfo.date).toISOString().split('T')[0] : 'unknown';
+      const filename = `WPL2026_${team1}_vs_${team2}_${date}.xlsx`;
+      
+      // Save the file
+      XLSX.writeFile(wb, filename);
+      
+      setMessage('✅ Excel exported (basic format)');
+      setTimeout(() => setMessage(''), 3000);
+    }
+  };
         
         battingData.push([
           b.name || b.playerId || '',
