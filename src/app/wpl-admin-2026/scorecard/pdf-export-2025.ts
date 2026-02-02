@@ -695,27 +695,106 @@ export class ProfessionalPDFExporter {
     // Title
     this.addProfessionalText(title, x + width/2, y - 10, this.colors.mochaMousse, 10, 'bold', 'center');
     
-    if (data.length === 0) return;
+    if (data.length === 0) {
+      this.addProfessionalText('No bowling data available', x + width/2, y + height/2, this.colors.moonlitGrey, 10, 'center');
+      return;
+    }
     
     const maxValue = Math.max(...data.map(d => d.value));
-    const barHeight = (height - 30) / data.length;
-    const chartWidth = width - 80;
+    const chartWidth = width - 120; // Leave space for labels
+    const chartHeight = height - 60;
+    const chartX = x + 100; // Space for player names
+    const chartY = y + 30;
+    const barHeight = Math.min(25, chartHeight / data.length - 5); // Adequate bar height
+    const barSpacing = 5;
     
-    data.forEach((item, index) => {
+    // Draw axes
+    this.doc.setDrawColor(...this.colors.moonlitGrey);
+    this.doc.setLineWidth(2);
+    
+    // Y-axis (vertical line for player names)
+    this.doc.line(chartX, chartY, chartX, chartY + chartHeight);
+    // X-axis (horizontal line for bars)
+    this.doc.line(chartX, chartY + chartHeight, chartX + chartWidth, chartY + chartHeight);
+    
+    // Draw grid lines and value labels
+    this.doc.setLineWidth(0.5);
+    this.doc.setDrawColor(...this.colors.lightGrey);
+    
+    const xSteps = 5;
+    for (let i = 0; i <= xSteps; i++) {
+      const xPos = chartX + (i * chartWidth / xSteps);
+      const value = (i * maxValue / xSteps).toFixed(1);
+      
+      // Grid line
+      this.doc.line(xPos, chartY, xPos, chartY + chartHeight);
+      
+      // X-axis label (economy rate)
+      this.addProfessionalText(value, xPos, chartY + chartHeight + 15, this.colors.moonlitGrey, 8, 'center');
+    }
+    
+    // Sort data by economy rate (best economy first)
+    const sortedData = [...data].sort((a, b) => a.value - b.value);
+    
+    // Draw bars with labels
+    sortedData.forEach((item, index) => {
+      const barY = chartY + 10 + (index * (barHeight + barSpacing));
       const barWidth = (item.value / maxValue) * chartWidth;
-      const barY = y + 15 + (index * barHeight);
       
-      // Bar
+      // Draw bar
       this.doc.setFillColor(...color);
-      this.safeRect(x + 60, barY, barWidth, barHeight * 0.8, 'F');
+      this.safeRect(chartX, barY, barWidth, barHeight, 'F');
       
-      // Value label
-      this.addProfessionalText(item.value.toFixed(2), x + 55, barY + barHeight * 0.4, this.colors.moonlitGrey, 8, 'right');
+      // Player name on the left
+      this.addProfessionalText(item.label.length > 15 ? item.label.substring(0, 15) + '...' : item.label, 
+                               chartX - 10, barY + barHeight/2, this.colors.moonlitGrey, 8, 'right');
       
-      // Y-axis label
-      this.addProfessionalText(item.label.length > 10 ? item.label.substring(0, 10) + '...' : item.label, 
-                               x + 55, barY + barHeight * 0.4, this.colors.moonlitGrey, 7, 'right');
+      // Economy rate value on the right of bar
+      this.addProfessionalText(item.value.toFixed(2), chartX + barWidth + 5, barY + barHeight/2, this.colors.mochaMousse, 9, 'left');
+      
+      // Add performance indicator
+      let performance = '';
+      let performanceColor = this.colors.moonlitGrey;
+      if (item.value < 6) {
+        performance = 'Excellent';
+        performanceColor = this.colors.successGreen;
+      } else if (item.value < 8) {
+        performance = 'Good';
+        performanceColor = this.colors.infoBlue;
+      } else if (item.value < 10) {
+        performance = 'Average';
+        performanceColor = this.colors.warningAmber;
+      } else {
+        performance = 'Poor';
+        performanceColor = this.colors.dangerRed;
+      }
+      
+      this.addProfessionalText(performance, chartX + chartWidth + 10, barY + barHeight/2, performanceColor, 7, 'left');
     });
+    
+    // Add statistics
+    const avgEconomy = (data.reduce((sum, item) => sum + item.value, 0) / data.length).toFixed(2);
+    const bestEconomy = Math.min(...data.map(d => d.value)).toFixed(2);
+    const worstEconomy = Math.max(...data.map(d => d.value)).toFixed(2);
+    
+    const statsX = chartX + chartWidth + 80;
+    const statsY = chartY;
+    
+    this.addProfessionalText('STATISTICS:', statsX, statsY, this.colors.mochaMousse, 9, 'bold');
+    statsY += 15;
+    this.addProfessionalText(`Average: ${avgEconomy}`, statsX, statsY, this.colors.moonlitGrey, 7);
+    statsY += 12;
+    this.addProfessionalText(`Best: ${bestEconomy}`, statsX, statsY, this.colors.successGreen, 7);
+    statsY += 12;
+    this.addProfessionalText(`Worst: ${worstEconomy}`, statsX, statsY, this.colors.dangerRed, 7);
+    
+    // Axis labels
+    this.addProfessionalText('Economy Rate (runs per over)', chartX + chartWidth/2, chartY + chartHeight + 35, this.colors.moonlitGrey, 9, 'center');
+    this.addProfessionalText('Bowlers', chartX - 50, chartY + chartHeight/2, this.colors.moonlitGrey, 9, 'center');
+    
+    // Add performance guide
+    this.addProfessionalText('PERFORMANCE GUIDE:', chartX, chartY - 20, this.colors.mochaMousse, 8, 'bold');
+    this.addProfessionalText('<6.0: Excellent | 6.0-8.0: Good | 8.0-10.0: Average | >10.0: Poor', chartX, chartY - 10, this.colors.infoBlue, 7);
   }
   
   // 8. Donut Chart - Runs contribution (4s, 6s, singles)
