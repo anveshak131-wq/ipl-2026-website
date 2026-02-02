@@ -301,27 +301,36 @@ export class ProfessionalPDFExporter {
         color: colors[index % colors.length]
       });
       
-      // Draw pie slice
+      // Draw filled pie slice using polygon approximation
       this.doc.setFillColor(...colors[index % colors.length]);
-      // Draw circle outline using rectangle approximation
       this.doc.setDrawColor(...colors[index % colors.length]);
-      for (let angle = 0; angle < 360; angle += 10) {
-        const rad = (angle * Math.PI) / 180;
-        const x1 = x + radius * Math.cos(rad);
-        const y1 = y + radius * Math.sin(rad);
-        const x2 = x + radius * Math.cos((angle + 10) * Math.PI / 180);
-        const y2 = y + radius * Math.sin((angle + 10) * Math.PI / 180);
-        this.doc.line(x1, y1, x2, y2);
-      }
       
-      // Fill sector (simplified as filled triangle approximation)
       const startRad = (currentAngle * Math.PI) / 180;
       const endRad = (endAngle * Math.PI) / 180;
       
-      // Draw lines from center to create pie slice
-      this.doc.setDrawColor(...colors[index % colors.length]);
-      this.doc.line(x, y, x + radius * Math.cos(startRad), y + radius * Math.sin(startRad));
-      this.doc.line(x, y, x + radius * Math.cos(endRad), y + radius * Math.sin(endRad));
+      // Create polygon points for the pie slice
+      const slicePoints: {x: number, y: number}[] = [];
+      
+      // Add center point
+      slicePoints.push({x: x, y: y});
+      
+      // Add points along the arc
+      const arcSteps = Math.max(5, Math.floor(anglePercentage / 5)); // More steps for larger slices
+      for (let i = 0; i <= arcSteps; i++) {
+        const angle = currentAngle + (i * anglePercentage / arcSteps);
+        const rad = (angle * Math.PI) / 180;
+        const pointX = x + radius * Math.cos(rad);
+        const pointY = y + radius * Math.sin(rad);
+        slicePoints.push({x: pointX, y: pointY});
+      }
+      
+      // Draw the filled slice by connecting all points
+      for (let i = 0; i < slicePoints.length - 1; i++) {
+        this.doc.line(slicePoints[i].x, slicePoints[i].y, slicePoints[i + 1].x, slicePoints[i + 1].y);
+      }
+      
+      // Close the slice by connecting back to center
+      this.doc.line(slicePoints[slicePoints.length - 1].x, slicePoints[slicePoints.length - 1].y, x, y);
       
       // Label with percentage
       const labelAngle = (currentAngle + endAngle) / 2;
@@ -336,6 +345,18 @@ export class ProfessionalPDFExporter {
       
       currentAngle = endAngle;
     });
+    
+    // Draw outer circle border
+    this.doc.setDrawColor(...this.colors.moonlitGrey);
+    this.doc.setLineWidth(1);
+    for (let angle = 0; angle < 360; angle += 10) {
+      const rad = (angle * Math.PI) / 180;
+      const x1 = x + radius * Math.cos(rad);
+      const y1 = y + radius * Math.sin(rad);
+      const x2 = x + radius * Math.cos((angle + 10) * Math.PI / 180);
+      const y2 = y + radius * Math.sin((angle + 10) * Math.PI / 180);
+      this.doc.line(x1, y1, x2, y2);
+    }
     
     // Draw legend
     const legendX = x + radius + 40;
