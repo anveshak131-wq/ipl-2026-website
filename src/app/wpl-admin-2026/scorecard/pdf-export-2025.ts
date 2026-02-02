@@ -346,25 +346,135 @@ export class ProfessionalPDFExporter {
     // Title
     this.addProfessionalText(title, x + width/2, y - 10, this.colors.mochaMousse, 10, 'bold', 'center');
     
-    if (data.length === 0) return;
+    if (data.length === 0) {
+      this.addProfessionalText('No partnership data available', x + width/2, y + height/2, this.colors.moonlitGrey, 10, 'center');
+      return;
+    }
     
     const maxX = Math.max(...data.map(d => d.x));
     const maxY = Math.max(...data.map(d => d.y));
-    const chartWidth = width - 40;
-    const chartHeight = height - 40;
+    const chartWidth = width - 60;
+    const chartHeight = height - 60;
+    const chartX = x + 40;
+    const chartY = y + 30;
     
     // Draw axes
     this.doc.setDrawColor(...this.colors.moonlitGrey);
-    this.doc.line(x + 20, y + 20, x + 20, y + height - 20); // Y-axis
-    this.doc.line(x + 20, y + height - 20, x + width - 20, y + height - 20); // X-axis
+    this.doc.setLineWidth(2);
     
-    // Draw points
+    // Y-axis
+    this.doc.line(chartX, chartY, chartX, chartY + chartHeight);
+    // X-axis  
+    this.doc.line(chartX, chartY + chartHeight, chartX + chartWidth, chartY + chartHeight);
+    
+    // Draw grid lines and labels
+    this.doc.setLineWidth(0.5);
+    this.doc.setDrawColor(...this.colors.lightGrey);
+    
+    // Y-axis grid lines and labels
+    const ySteps = 5;
+    for (let i = 0; i <= ySteps; i++) {
+      const yPos = chartY + chartHeight - (i * chartHeight / ySteps);
+      const value = Math.round((i * maxY) / ySteps);
+      
+      // Grid line
+      this.doc.line(chartX, yPos, chartX + chartWidth, yPos);
+      
+      // Y-axis label
+      this.addProfessionalText(value.toString(), chartX - 25, yPos + 3, this.colors.moonlitGrey, 8, 'right');
+    }
+    
+    // X-axis grid lines and labels
+    const xSteps = 5;
+    for (let i = 0; i <= xSteps; i++) {
+      const xPos = chartX + (i * chartWidth / xSteps);
+      const value = Math.round((i * maxX) / xSteps);
+      
+      // Grid line
+      this.doc.line(xPos, chartY, xPos, chartY + chartHeight);
+      
+      // X-axis label
+      this.addProfessionalText(value.toString(), xPos, chartY + chartHeight + 15, this.colors.moonlitGrey, 8, 'center');
+    }
+    
+    // Draw data points with labels
     this.doc.setFillColor(...color);
-    data.forEach(point => {
-      const plotX = x + 20 + (point.x / maxX) * chartWidth;
-      const plotY = y + height - 20 - (point.y / maxY) * chartHeight;
-      this.safeRect(plotX - 3, plotY - 3, 6, 6, 'F');
+    this.doc.setDrawColor(...color);
+    this.doc.setLineWidth(1);
+    
+    data.forEach((point, index) => {
+      const plotX = chartX + (point.x / maxX) * chartWidth;
+      const plotY = chartY + chartHeight - (point.y / maxY) * chartHeight;
+      
+      // Draw data point
+      this.safeRect(plotX - 4, plotY - 4, 8, 8, 'F');
+      
+      // Add data label for each point
+      const label = `P${index + 1}`;
+      this.addProfessionalText(label, plotX, plotY - 10, this.colors.mochaMousse, 7, 'center');
+      
+      // Add value label for key points
+      if (point.x > maxX * 0.7 || point.y > maxY * 0.7) {
+        const valueLabel = `(${point.x}, ${point.y})`;
+        this.addProfessionalText(valueLabel, plotX, plotY + 12, this.colors.moonlitGrey, 6, 'center');
+      }
     });
+    
+    // Draw legend
+    const legendX = chartX + chartWidth - 100;
+    const legendY = chartY;
+    
+    this.addProfessionalText('LEGEND:', legendX, legendY, this.colors.mochaMousse, 9, 'bold');
+    legendY += 15;
+    
+    // Legend item
+    this.doc.setFillColor(...color);
+    this.safeRect(legendX, legendY - 4, 8, 8, 'F');
+    this.addProfessionalText(`Partnership (Balls, Runs)`, legendX + 12, legendY, this.colors.moonlitGrey, 8);
+    legendY += 15;
+    
+    // Add statistics
+    this.addProfessionalText('STATISTICS:', legendX, legendY, this.colors.mochaMousse, 9, 'bold');
+    legendY += 15;
+    
+    const avgBalls = Math.round(data.reduce((sum, p) => sum + p.x, 0) / data.length);
+    const avgRuns = Math.round(data.reduce((sum, p) => sum + p.y, 0) / data.length);
+    const maxPartnership = data.reduce((max, p) => p.y > max.y ? p : max, data[0]);
+    
+    this.addProfessionalText(`Avg: ${avgBalls} balls, ${avgRuns} runs`, legendX, legendY, this.colors.moonlitGrey, 7);
+    legendY += 12;
+    this.addProfessionalText(`Best: ${maxPartnership.x}b, ${maxPartnership.y}r`, legendX, legendY, this.colors.moonlitGrey, 7);
+    
+    // Axis labels
+    this.addProfessionalText('Balls Faced', chartX + chartWidth/2, chartY + chartHeight + 35, this.colors.moonlitGrey, 9, 'center');
+    this.addProfessionalText('Runs Scored', chartX - 35, chartY - 10, this.colors.moonlitGrey, 9, 'center');
+    
+    // Add correlation analysis
+    const correlation = this.calculateCorrelation(data);
+    const correlationText = `Correlation: ${correlation.toFixed(2)}`;
+    const correlationInterpretation = correlation > 0.7 ? 'Strong Positive' : 
+                                     correlation > 0.3 ? 'Moderate Positive' : 
+                                     correlation > -0.3 ? 'Weak' : 'Negative';
+    
+    this.addProfessionalText(correlationText, chartX, chartY - 25, this.colors.mochaMousse, 9, 'bold');
+    this.addProfessionalText(correlationInterpretation, chartX, chartY - 15, this.colors.infoBlue, 8);
+  }
+  
+  // Helper method to calculate correlation coefficient
+  private calculateCorrelation(data: {x: number, y: number}[]): number {
+    if (data.length < 2) return 0;
+    
+    const n = data.length;
+    const sumX = data.reduce((sum, p) => sum + p.x, 0);
+    const sumY = data.reduce((sum, p) => sum + p.y, 0);
+    const sumXY = data.reduce((sum, p) => sum + p.x * p.y, 0);
+    const sumX2 = data.reduce((sum, p) => sum + p.x * p.x, 0);
+    const sumY2 = data.reduce((sum, p) => sum + p.y * p.y, 0);
+    
+    const correlation = (n * sumXY - sumX * sumY) / 
+      Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+    
+    return isNaN(correlation) ? 0 : correlation;
   }
   
   // 6. Area Chart - Cumulative runs progression
