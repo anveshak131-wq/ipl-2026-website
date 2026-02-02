@@ -422,7 +422,7 @@ export class ProfessionalPDFExporter {
     
     // Draw legend
     const legendX = chartX + chartWidth - 100;
-    const legendY = chartY;
+    let legendY = chartY;
     
     this.addProfessionalText('LEGEND:', legendX, legendY, this.colors.mochaMousse, 9, 'bold');
     legendY += 15;
