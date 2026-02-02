@@ -203,9 +203,21 @@ export class ProfessionalPDFExporter {
     const total = data.reduce((sum, item) => sum + item.value, 0);
     let currentAngle = -90; // Start from top
     
+    // Draw pie slices and collect legend data
+    const legendData: {label: string, value: number, percentage: number, color: number[]}[] = [];
+    
     data.forEach((item, index) => {
-      const percentage = (item.value / total) * 360;
-      const endAngle = currentAngle + percentage;
+      const percentage = (item.value / total) * 100;
+      const anglePercentage = (item.value / total) * 360;
+      const endAngle = currentAngle + anglePercentage;
+      
+      // Store legend data
+      legendData.push({
+        label: item.label,
+        value: item.value,
+        percentage: percentage,
+        color: colors[index % colors.length]
+      });
       
       // Draw pie slice
       this.doc.setFillColor(...colors[index % colors.length]);
@@ -229,16 +241,43 @@ export class ProfessionalPDFExporter {
       this.doc.line(x, y, x + radius * Math.cos(startRad), y + radius * Math.sin(startRad));
       this.doc.line(x, y, x + radius * Math.cos(endRad), y + radius * Math.sin(endRad));
       
-      // Label
+      // Label with percentage
       const labelAngle = (currentAngle + endAngle) / 2;
       const labelRad = (labelAngle * Math.PI) / 180;
       const labelX = x + (radius * 0.7) * Math.cos(labelRad);
       const labelY = y + (radius * 0.7) * Math.sin(labelRad);
       
-      this.addProfessionalText(`${Math.round(percentage)}%`, labelX, labelY, [255, 255, 255], 8, 'bold', 'center');
+      // Only show percentage if slice is big enough
+      if (percentage > 5) {
+        this.addProfessionalText(`${Math.round(percentage)}%`, labelX, labelY, [255, 255, 255], 8, 'bold', 'center');
+      }
       
       currentAngle = endAngle;
     });
+    
+    // Draw legend
+    const legendX = x + radius + 40;
+    let legendY = y - radius;
+    const legendItemHeight = 20;
+    
+    this.addProfessionalText('LEGEND:', legendX, legendY, this.colors.mochaMousse, 10, 'bold');
+    legendY += 20;
+    
+    legendData.forEach((item, index) => {
+      // Color box
+      this.doc.setFillColor(...item.color);
+      this.safeRect(legendX, legendY - 5, 12, 12, 'F');
+      
+      // Label text
+      const labelText = `${item.label}: ${item.value} wickets (${Math.round(item.percentage)}%)`;
+      this.addProfessionalText(labelText, legendX + 18, legendY, this.colors.moonlitGrey, 9);
+      
+      legendY += legendItemHeight;
+    });
+    
+    // Total wickets
+    legendY += 10;
+    this.addProfessionalText(`Total: ${total} wickets`, legendX, legendY, this.colors.mochaMousse, 10, 'bold');
   }
   
   // 4. Radar Chart - Player performance comparison
@@ -410,9 +449,21 @@ export class ProfessionalPDFExporter {
     const total = data.reduce((sum, item) => sum + item.value, 0);
     let currentAngle = -90;
     
+    // Draw donut slices and collect legend data
+    const legendData: {label: string, value: number, percentage: number, color: number[]}[] = [];
+    
     data.forEach((item, index) => {
-      const percentage = (item.value / total) * 360;
-      const endAngle = currentAngle + percentage;
+      const percentage = (item.value / total) * 100;
+      const anglePercentage = (item.value / total) * 360;
+      const endAngle = currentAngle + anglePercentage;
+      
+      // Store legend data
+      legendData.push({
+        label: item.label,
+        value: item.value,
+        percentage: percentage,
+        color: colors[index % colors.length]
+      });
       
       // Draw donut slice
       this.doc.setFillColor(...colors[index % colors.length]);
@@ -428,11 +479,46 @@ export class ProfessionalPDFExporter {
       this.doc.line(x + innerRadius * Math.cos(endRad), y + innerRadius * Math.sin(endRad),
                      x + outerRadius * Math.cos(endRad), y + outerRadius * Math.sin(endRad));
       
+      // Label with percentage if slice is big enough
+      const labelAngle = (currentAngle + endAngle) / 2;
+      const labelRad = (labelAngle * Math.PI) / 180;
+      const labelRadius = (innerRadius + outerRadius) / 2;
+      const labelX = x + labelRadius * Math.cos(labelRad);
+      const labelY = y + labelRadius * Math.sin(labelRad);
+      
+      if (percentage > 5) {
+        this.addProfessionalText(`${Math.round(percentage)}%`, labelX, labelY, [255, 255, 255], 8, 'bold', 'center');
+      }
+      
       currentAngle = endAngle;
     });
     
     // Center text
     this.addProfessionalText(total.toString(), x, y, this.colors.mochaMousse, 12, 'bold', 'center');
+    
+    // Draw legend
+    const legendX = x + outerRadius + 40;
+    let legendY = y - outerRadius;
+    const legendItemHeight = 20;
+    
+    this.addProfessionalText('LEGEND:', legendX, legendY, this.colors.mochaMousse, 10, 'bold');
+    legendY += 20;
+    
+    legendData.forEach((item, index) => {
+      // Color box
+      this.doc.setFillColor(...item.color);
+      this.safeRect(legendX, legendY - 5, 12, 12, 'F');
+      
+      // Label text
+      const labelText = `${item.label}: ${item.value} runs (${Math.round(item.percentage)}%)`;
+      this.addProfessionalText(labelText, legendX + 18, legendY, this.colors.moonlitGrey, 9);
+      
+      legendY += legendItemHeight;
+    });
+    
+    // Total runs
+    legendY += 10;
+    this.addProfessionalText(`Total: ${total} runs`, legendX, legendY, this.colors.mochaMousse, 10, 'bold');
   }
   
   // 9. Stacked Bar Chart - Over by over runs
