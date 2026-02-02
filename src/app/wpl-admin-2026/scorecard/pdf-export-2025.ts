@@ -81,12 +81,24 @@ export class ProfessionalPDFExporter {
     this.doc.text(textString, x, y, { align: finalAlign });
   }
 
-  // Helper function to add gradient background
+  // Helper function to safely draw rectangles
+  private safeRect(x: number, y: number, width: number, height: number, style: string = 'F') {
+    if (!isFinite(x) || !isFinite(y) || !isFinite(width) || !isFinite(height) || 
+        width <= 0 || height <= 0) {
+      console.warn('Invalid rectangle parameters:', { x, y, width, height, style });
+      return;
+    }
+    try {
+      this.doc.rect(x, y, width, height, style);
+    } catch (error) {
+      console.error('Error drawing rectangle:', error, { x, y, width, height, style });
+    }
+  }
   private addGradientBackground(startY: number, height: number, color1: number[], color2: number[]) {
     this.doc.setFillColor(...color1);
-    this.doc.rect(0, startY, this.pageWidth, height / 2, 'F');
+    this.safeRect(0, startY, this.pageWidth, height / 2, 'F');
     this.doc.setFillColor(...color2);
-    this.doc.rect(0, startY + height / 2, this.pageWidth, height / 2, 'F');
+    this.safeRect(0, startY + height / 2, this.pageWidth, height / 2, 'F');
   }
 
   // Helper function to add decorative pattern
@@ -105,7 +117,7 @@ export class ProfessionalPDFExporter {
   private addBarChart(x: number, y: number, width: number, height: number, data: {label: string, value: number}[], color: number[], title: string) {
     this.doc.setDrawColor(...this.colors.moonlitGrey);
     this.doc.setLineWidth(1);
-    this.doc.rect(x, y, width, height);
+    this.safeRect(x, y, width, height);
     
     // Title
     this.addProfessionalText(title, x + width/2, y - 10, this.colors.mochaMousse, 10, 'bold', 'center');
@@ -123,7 +135,7 @@ export class ProfessionalPDFExporter {
       
       // Bar
       this.doc.setFillColor(...color);
-      this.doc.rect(barX, barY, barWidth * 0.8, barHeight, 'F');
+      this.safeRect(barX, barY, barWidth * 0.8, barHeight, 'F');
       
       // Value label
       this.addProfessionalText(item.value.toString(), barX + barWidth * 0.4, barY - 5, this.colors.moonlitGrey, 8, 'center');
@@ -138,7 +150,7 @@ export class ProfessionalPDFExporter {
   private addLineChart(x: number, y: number, width: number, height: number, data: {x: number, y: number}[], color: number[], title: string) {
     this.doc.setDrawColor(...this.colors.moonlitGrey);
     this.doc.setLineWidth(1);
-    this.doc.rect(x, y, width, height);
+    this.safeRect(x, y, width, height);
     
     // Title
     this.addProfessionalText(title, x + width/2, y - 10, this.colors.mochaMousse, 10, 'bold', 'center');
@@ -169,7 +181,7 @@ export class ProfessionalPDFExporter {
       
       // Draw point
       this.doc.setFillColor(...color);
-      this.doc.rect(x1 - 2, y1 - 2, 4, 4, 'F');
+      this.safeRect(x1 - 2, y1 - 2, 4, 4, 'F');
       
     }
     
@@ -178,7 +190,7 @@ export class ProfessionalPDFExporter {
     const lastX = x + 20 + (lastPoint.x / Math.max(...data.map(d => d.x))) * chartWidth;
     const lastY = y + height - 20 - ((lastPoint.y - minValue) / (maxValue - minValue)) * chartHeight;
     this.doc.setFillColor(...color);
-    this.doc.rect(lastX - 2, lastY - 2, 4, 4, 'F');
+    this.safeRect(lastX - 2, lastY - 2, 4, 4, 'F');
   }
   
   // 3. Pie Chart - Wickets distribution by bowler
@@ -290,7 +302,7 @@ export class ProfessionalPDFExporter {
   private addScatterPlot(x: number, y: number, width: number, height: number, data: {x: number, y: number}[], color: number[], title: string) {
     this.doc.setDrawColor(...this.colors.moonlitGrey);
     this.doc.setLineWidth(1);
-    this.doc.rect(x, y, width, height);
+    this.safeRect(x, y, width, height);
     
     // Title
     this.addProfessionalText(title, x + width/2, y - 10, this.colors.mochaMousse, 10, 'bold', 'center');
@@ -312,7 +324,7 @@ export class ProfessionalPDFExporter {
     data.forEach(point => {
       const plotX = x + 20 + (point.x / maxX) * chartWidth;
       const plotY = y + height - 20 - (point.y / maxY) * chartHeight;
-      this.doc.rect(plotX - 3, plotY - 3, 6, 6, 'F');
+      this.safeRect(plotX - 3, plotY - 3, 6, 6, 'F');
     });
   }
   
@@ -320,7 +332,7 @@ export class ProfessionalPDFExporter {
   private addAreaChart(x: number, y: number, width: number, height: number, data: {x: number, y: number}[], color: number[], title: string) {
     this.doc.setDrawColor(...this.colors.moonlitGrey);
     this.doc.setLineWidth(1);
-    this.doc.rect(x, y, width, height);
+    this.safeRect(x, y, width, height);
     
     // Title
     this.addProfessionalText(title, x + width/2, y - 10, this.colors.mochaMousse, 10, 'bold', 'center');
@@ -360,7 +372,7 @@ export class ProfessionalPDFExporter {
   private addHorizontalBarChart(x: number, y: number, width: number, height: number, data: {label: string, value: number}[], color: number[], title: string) {
     this.doc.setDrawColor(...this.colors.moonlitGrey);
     this.doc.setLineWidth(1);
-    this.doc.rect(x, y, width, height);
+    this.safeRect(x, y, width, height);
     
     // Title
     this.addProfessionalText(title, x + width/2, y - 10, this.colors.mochaMousse, 10, 'bold', 'center');
@@ -377,7 +389,7 @@ export class ProfessionalPDFExporter {
       
       // Bar
       this.doc.setFillColor(...color);
-      this.doc.rect(x + 60, barY, barWidth, barHeight * 0.8, 'F');
+      this.safeRect(x + 60, barY, barWidth, barHeight * 0.8, 'F');
       
       // Value label
       this.addProfessionalText(item.value.toFixed(2), x + 55, barY + barHeight * 0.4, this.colors.moonlitGrey, 8, 'right');
@@ -427,7 +439,7 @@ export class ProfessionalPDFExporter {
   private addStackedBarChart(x: number, y: number, width: number, height: number, data: {label: string, values: number[]}[], colors: number[][], title: string) {
     this.doc.setDrawColor(...this.colors.moonlitGrey);
     this.doc.setLineWidth(1);
-    this.doc.rect(x, y, width, height);
+    this.safeRect(x, y, width, height);
     
     // Title
     this.addProfessionalText(title, x + width/2, y - 10, this.colors.mochaMousse, 10, 'bold', 'center');
@@ -447,7 +459,7 @@ export class ProfessionalPDFExporter {
         currentY -= segmentHeight;
         
         this.doc.setFillColor(...colors[valueIndex % colors.length]);
-        this.doc.rect(barX, currentY, barWidth * 0.8, segmentHeight, 'F');
+        this.safeRect(barX, currentY, barWidth * 0.8, segmentHeight, 'F');
       });
       
       // X-axis label
@@ -459,7 +471,7 @@ export class ProfessionalPDFExporter {
   private addHeatmap(x: number, y: number, width: number, height: number, data: number[][], labels: string[], title: string) {
     this.doc.setDrawColor(...this.colors.moonlitGrey);
     this.doc.setLineWidth(1);
-    this.doc.rect(x, y, width, height);
+    this.safeRect(x, y, width, height);
     
     // Title
     this.addProfessionalText(title, x + width/2, y - 10, this.colors.mochaMousse, 10, 'bold', 'center');
@@ -484,7 +496,7 @@ export class ProfessionalPDFExporter {
         ];
         
         this.doc.setFillColor(...color);
-        this.doc.rect(cellX, cellY, cellWidth, cellHeight, 'F');
+        this.safeRect(cellX, cellY, cellWidth, cellHeight, 'F');
         
         // Value text
         this.addProfessionalText(value.toString(), cellX + cellWidth/2, cellY + cellHeight/2, 
