@@ -376,35 +376,101 @@ export class ProfessionalPDFExporter {
     // Title
     this.addProfessionalText(title, x + width/2, y - 10, this.colors.mochaMousse, 10, 'bold', 'center');
     
-    if (data.length < 2) return;
+    if (data.length < 2) {
+      this.addProfessionalText('Insufficient data for area chart', x + width/2, y + height/2, this.colors.moonlitGrey, 10, 'center');
+      return;
+    }
     
     const maxValue = Math.max(...data.map(d => d.y));
-    const chartWidth = width - 40;
-    const chartHeight = height - 40;
+    const maxX = Math.max(...data.map(d => d.x));
+    const chartWidth = width - 60;
+    const chartHeight = height - 60;
+    const chartX = x + 40;
+    const chartY = y + 30;
+    
+    // Draw axes
+    this.doc.setDrawColor(...this.colors.moonlitGrey);
+    this.doc.setLineWidth(2);
+    
+    // Y-axis
+    this.doc.line(chartX, chartY, chartX, chartY + chartHeight);
+    // X-axis  
+    this.doc.line(chartX, chartY + chartHeight, chartX + chartWidth, chartY + chartHeight);
+    
+    // Draw grid lines and labels
+    this.doc.setLineWidth(0.5);
+    this.doc.setDrawColor(...this.colors.lightGrey);
+    
+    // Y-axis grid lines and labels
+    const ySteps = 5;
+    for (let i = 0; i <= ySteps; i++) {
+      const yPos = chartY + chartHeight - (i * chartHeight / ySteps);
+      const value = Math.round((i * maxValue) / ySteps);
+      
+      // Grid line
+      this.doc.line(chartX, yPos, chartX + chartWidth, yPos);
+      
+      // Y-axis label
+      this.addProfessionalText(value.toString(), chartX - 25, yPos + 3, this.colors.moonlitGrey, 8, 'right');
+    }
+    
+    // X-axis grid lines and labels
+    const xSteps = Math.min(data.length - 1, 10);
+    for (let i = 0; i <= xSteps; i++) {
+      const xPos = chartX + (i * chartWidth / xSteps);
+      const dataIndex = Math.floor((i * (data.length - 1)) / xSteps);
+      
+      // Grid line
+      this.doc.line(xPos, chartY, xPos, chartY + chartHeight);
+      
+      // X-axis label (wicket number)
+      this.addProfessionalText((dataIndex + 1).toString(), xPos, chartY + chartHeight + 15, this.colors.moonlitGrey, 8, 'center');
+    }
     
     // Draw filled area
-    this.doc.setFillColor(...color.map(c => c + 150));
+    this.doc.setFillColor(...color.map(c => c + 180)); // Lighter fill
     this.doc.setDrawColor(...color);
     this.doc.setLineWidth(2);
     
-    // Start from bottom left
+    // Create area path
     let path = [];
-    path.push({x: x + 20, y: y + height - 20});
+    
+    // Start from bottom left of chart
+    path.push({x: chartX, y: chartY + chartHeight});
     
     // Add data points
-    data.forEach(point => {
-      const plotX = x + 20 + (point.x / Math.max(...data.map(d => d.x))) * chartWidth;
-      const plotY = y + height - 20 - (point.y / maxValue) * chartHeight;
+    data.forEach((point, index) => {
+      const plotX = chartX + (index / (data.length - 1)) * chartWidth;
+      const plotY = chartY + chartHeight - (point.y / maxValue) * chartHeight;
       path.push({x: plotX, y: plotY});
     });
     
     // Close path at bottom right
-    path.push({x: x + width - 20, y: y + height - 20});
+    path.push({x: chartX + chartWidth, y: chartY + chartHeight});
     
-    // Draw area (simplified as filled polygon)
+    // Draw filled area (polygon)
     for (let i = 0; i < path.length - 1; i++) {
       this.doc.line(path[i].x, path[i].y, path[i + 1].x, path[i + 1].y);
     }
+    
+    // Draw data points and values on top
+    data.forEach((point, index) => {
+      const plotX = chartX + (index / (data.length - 1)) * chartWidth;
+      const plotY = chartY + chartHeight - (point.y / maxValue) * chartHeight;
+      
+      // Data point
+      this.doc.setFillColor(...color);
+      this.safeRect(plotX - 3, plotY - 3, 6, 6, 'F');
+      
+      // Value label (show for some points to avoid crowding)
+      if (index % Math.ceil(data.length / 5) === 0 || index === data.length - 1) {
+        this.addProfessionalText(point.y.toString(), plotX, plotY - 10, this.colors.mochaMousse, 8, 'center');
+      }
+    });
+    
+    // Axis labels
+    this.addProfessionalText('Wickets', chartX + chartWidth/2, chartY + chartHeight + 35, this.colors.moonlitGrey, 9, 'center');
+    this.addProfessionalText('Cumulative Runs', chartX - 35, chartY - 10, this.colors.moonlitGrey, 9, 'center');
   }
   
   // 7. Horizontal Bar Chart - Economy rates comparison
