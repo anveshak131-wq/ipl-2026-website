@@ -155,6 +155,11 @@ export class ExcelExporter2025 {
   async exportToExcel(options: ExcelExportOptions): Promise<void> {
     this.scorecard = options.scorecard;
     
+    // Validate scorecard data
+    if (!this.scorecard || !this.scorecard.matchInfo) {
+      throw new Error('Invalid scorecard data: Missing match information');
+    }
+    
     // Create all sheets
     this.createMatchOverviewSheet();
     this.createBattingAnalysisSheet();
@@ -574,26 +579,32 @@ export class ExcelExporter2025 {
     if (this.scorecard.innings && this.scorecard.innings.length > 0) {
       const innings = this.scorecard.innings[0];
       
-      innings.batting.forEach((batter: Batter, index: number) => {
-        const strikeRate = batter.balls > 0 ? (batter.runs / batter.balls) * 100 : 0;
-        
-        battingData.push({
-          position: index + 1,
-          player: batter.player?.name || 'Unknown',
-          runs: batter.runs,
-          balls: batter.balls,
-          strikeRate: strikeRate,
-          fours: batter.fours || 0,
-          sixes: batter.sixes || 0,
-          minutes: batter.minutes || 0,
-          dismissal: this.formatDismissal(batter.dismissal),
-          performanceBadge: this.getPerformanceBadge({
-            runs: batter.runs,
+      if (innings.batting && Array.isArray(innings.batting)) {
+        innings.batting.forEach((batter: Batter, index: number) => {
+          // Safe data extraction with fallbacks
+          const runs = batter.runs || 0;
+          const balls = batter.balls || 0;
+          const strikeRate = balls > 0 ? (runs / balls) * 100 : 0;
+          const playerName = batter.name || batter.playerId || `Player ${index + 1}`;
+          
+          battingData.push({
+            position: index + 1,
+            player: playerName,
+            runs: runs,
+            balls: balls,
             strikeRate: strikeRate,
-            balls: batter.balls
-          })
+            fours: batter.fours || 0,
+            sixes: batter.sixes || 0,
+            minutes: batter.minutes || 0,
+            dismissal: this.formatDismissal(batter.dismissal),
+            performanceBadge: this.getPerformanceBadge({
+              runs: runs,
+              strikeRate: strikeRate,
+              balls: balls
+            })
+          });
         });
-      });
+      }
     }
     
     return battingData;
@@ -605,22 +616,29 @@ export class ExcelExporter2025 {
     if (this.scorecard.innings && this.scorecard.innings.length > 0) {
       const innings = this.scorecard.innings[0];
       
-      innings.bowling.forEach((bowler: Bowler) => {
-        const economy = bowler.overs > 0 ? bowler.runs / bowler.overs : 0;
-        const performanceScore = this.calculateBowlingPerformance(bowler);
-        
-        bowlingData.push({
-          bowler: bowler.player?.name || 'Unknown',
-          overs: bowler.overs,
-          runs: bowler.runs,
-          wickets: bowler.wickets,
-          economy: economy,
-          maidens: bowler.maidens || 0,
-          dots: bowler.dots || 0,
-          performanceScore: performanceScore,
-          badge: this.getBowlingBadge(performanceScore, bowler.wickets)
+      if (innings.bowling && Array.isArray(innings.bowling)) {
+        innings.bowling.forEach((bowler: Bowler) => {
+          // Safe data extraction with fallbacks
+          const overs = bowler.overs || 0;
+          const runs = bowler.runs || 0;
+          const wickets = bowler.wickets || 0;
+          const economy = overs > 0 ? runs / overs : 0;
+          const performanceScore = this.calculateBowlingPerformance(bowler);
+          const bowlerName = bowler.name || bowler.playerId || 'Unknown Bowler';
+          
+          bowlingData.push({
+            bowler: bowlerName,
+            overs: overs,
+            runs: runs,
+            wickets: wickets,
+            economy: economy,
+            maidens: bowler.maidens || 0,
+            dots: bowler.dots || 0,
+            performanceScore: performanceScore,
+            badge: this.getBowlingBadge(performanceScore, wickets)
+          });
         });
-      });
+      }
     }
     
     return bowlingData;
@@ -632,16 +650,19 @@ export class ExcelExporter2025 {
     if (this.scorecard.innings && this.scorecard.innings.length > 0) {
       const innings = this.scorecard.innings[0];
       
-      if (innings.partnerships) {
+      if (innings.partnerships && Array.isArray(innings.partnerships)) {
         innings.partnerships.forEach((partnership: Partnership, index: number) => {
-          const strikeRate = partnership.balls > 0 ? (partnership.runs / partnership.balls) * 100 : 0;
+          // Safe data extraction with fallbacks
+          const runs = partnership.runs || 0;
+          const balls = partnership.balls || 0;
+          const strikeRate = balls > 0 ? (runs / balls) * 100 : 0;
           
           partnerships.push({
             partnership: index + 1,
-            batsman1: partnership.batsman1?.name || 'Unknown',
-            batsman2: partnership.batsman2?.name || 'Unknown',
-            runs: partnership.runs,
-            balls: partnership.balls,
+            batsman1: partnership.batsman1?.name || partnership.batsman1?.id || 'Unknown',
+            batsman2: partnership.batsman2?.name || partnership.batsman2?.id || 'Unknown',
+            runs: runs,
+            balls: balls,
             strikeRate: strikeRate
           });
         });
@@ -770,7 +791,16 @@ export class ExcelExporter2025 {
 
   // Placeholder methods for data calculations
   private getMatchIdentifier(): string {
-    return `${this.scorecard.matchInfo.team1.name}_vs_${this.scorecard.matchInfo.team2.name}_${Date.now()}`;
+    if (!this.scorecard || !this.scorecard.matchInfo) {
+      return 'unknown_match';
+    }
+    
+    const matchInfo = this.scorecard.matchInfo;
+    const team1 = matchInfo.team1?.name || 'Team1';
+    const team2 = matchInfo.team2?.name || 'Team2';
+    const date = matchInfo.date ? new Date(matchInfo.date).toISOString().split('T')[0] : 'unknown';
+    
+    return `${team1.replace(/\s+/g, '_')}_vs_${team2.replace(/\s+/g, '_')}_${date}`;
   }
 
   private formatDate(date: string): string {

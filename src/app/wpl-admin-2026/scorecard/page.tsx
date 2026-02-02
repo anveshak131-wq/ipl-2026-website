@@ -1885,18 +1885,24 @@ export default function ScorecardAdminPage() {
       const XLSX = (window as any).XLSX;
       if (!XLSX) throw new Error('SheetJS not available');
 
+      // Validate scorecard data
+      if (!sc || !sc.matchInfo) {
+        throw new Error('Invalid scorecard data: Missing match information');
+      }
+
       // Create basic workbook as fallback
       const wb = XLSX.utils.book_new();
       
-      // Basic match info sheet
+      // Basic match info sheet with safe data access
+      const matchInfo = sc.matchInfo;
       const matchInfoData = [
         ['WPL 2026 SCORECARD', '', '', '', ''],
         ['MATCH INFORMATION', '', '', '', ''],
-        ['Venue', sc.matchInfo.venue || 'Stadium', '', '', ''],
-        ['Date', sc.matchInfo.date || 'TBD', '', '', ''],
-        ['Time', sc.matchInfo.time || 'TBD', '', '', ''],
-        ['Toss Winner', sc.matchInfo.toss?.winner || 'N/A', '', '', ''],
-        ['Toss Decision', sc.matchInfo.toss?.decision || 'N/A', '', '', ''],
+        ['Venue', matchInfo.venue || 'Stadium', '', '', ''],
+        ['Date', matchInfo.date || 'TBD', '', '', ''],
+        ['Time', matchInfo.time || 'TBD', '', '', ''],
+        ['Toss Winner', matchInfo.toss?.winner || matchInfo.tossWinner || 'N/A', '', '', ''],
+        ['Toss Decision', matchInfo.toss?.decision || matchInfo.tossDecision || 'N/A', '', '', ''],
         ['Winner', sc.result?.winner || 'To be determined', '', '', ''],
         ['Margin', sc.result?.margin || 'N/A', '', '', ''],
         ['Man of the Match', sc.result?.manOfTheMatch || 'N/A', '', '', ''],
@@ -1906,70 +1912,79 @@ export default function ScorecardAdminPage() {
       XLSX.utils.book_append_sheet(wb, matchInfoWS, 'Match Info');
 
       // Process each innings with basic data
-      sc.innings.forEach((inn, innIndex) => {
-        const battingTeamName = inn.battingTeamId === sc.matchInfo.team1.id ? sc.matchInfo.team1.name : sc.matchInfo.team2.name;
-        
-        // Basic batting sheet
-        const battingData = [
-          [`INNINGS ${inn.inningsNumber} - ${battingTeamName}`, '', '', '', '', '', '', ''],
-          ['BATTING SCORECARD', '', '', '', '', '', '', ''],
-          ['Batter', 'Runs', 'Balls', '4s', '6s', 'Strike Rate', 'Dismissal', 'Minutes'],
-        ];
+      if (sc.innings && Array.isArray(sc.innings)) {
+        sc.innings.forEach((inn, innIndex) => {
+          // Safe team name extraction
+          const battingTeamName = inn.battingTeamId === matchInfo.team1?.id ? 
+            (matchInfo.team1?.name || 'Team 1') : 
+            (matchInfo.team2?.name || 'Team 2');
+          
+          // Basic batting sheet
+          const battingData = [
+            [`INNINGS ${inn.inningsNumber || innIndex + 1} - ${battingTeamName}`, '', '', '', '', '', '', ''],
+            ['BATTING SCORECARD', '', '', '', '', '', '', ''],
+            ['Batter', 'Runs', 'Balls', '4s', '6s', 'Strike Rate', 'Dismissal', 'Minutes'],
+          ];
 
-        // Add batting data
-        inn.batting.forEach(b => {
-          const sr = b.balls > 0 ? ((b.runs / b.balls) * 100).toFixed(1) : '0.0';
-          let dismissalText = 'Not Out';
-          if (b.dismissal) {
-            dismissalText = b.dismissal.details || b.dismissal.type;
+          // Add batting data with safe access
+          if (inn.batting && Array.isArray(inn.batting)) {
+            inn.batting.forEach((b) => {
+              const sr = b.balls > 0 ? ((b.runs / b.balls) * 100).toFixed(1) : '0.0';
+              let dismissalText = 'Not Out';
+              if (b.dismissal) {
+                dismissalText = b.dismissal.details || b.dismissal.type || 'Out';
+              }
+              
+              battingData.push([
+                b.name || b.playerId || 'Unknown',
+                b.runs || 0,
+                b.balls || 0,
+                b.fours || 0,
+                b.sixes || 0,
+                sr,
+                dismissalText,
+                b.minutes || 0
+              ]);
+            });
           }
-          
-          battingData.push([
-            b.name,
-            b.runs,
-            b.balls,
-            b.fours || 0,
-            b.sixes || 0,
-            sr,
-            dismissalText,
-            b.minutes || 0
-          ]);
+
+          const battingWS = XLSX.utils.aoa_to_sheet(battingData);
+          XLSX.utils.book_append_sheet(wb, battingWS, `Innings${innIndex + 1}_Batting`);
+
+          // Basic bowling sheet
+          const bowlingData = [
+            [`INNINGS ${inn.inningsNumber || innIndex + 1} - BOWLING`, '', '', '', '', '', '', ''],
+            ['BOWLING SCORECARD', '', '', '', '', '', '', ''],
+            ['Bowler', 'Overs', 'Runs', 'Wickets', 'Maidens', 'Economy', 'Dots', 'Economy Rate'],
+          ];
+
+          // Add bowling data with safe access
+          if (inn.bowling && Array.isArray(inn.bowling)) {
+            inn.bowling.forEach((b) => {
+              const economy = b.overs > 0 ? (b.runs / b.overs).toFixed(2) : '0.00';
+              
+              bowlingData.push([
+                b.name || b.playerId || 'Unknown',
+                (b.overs || 0).toFixed(1),
+                b.runs || 0,
+                b.wickets || 0,
+                b.maidens || 0,
+                economy,
+                b.dots || 0,
+                economy
+              ]);
+            });
+          }
+
+          const bowlingWS = XLSX.utils.aoa_to_sheet(bowlingData);
+          XLSX.utils.book_append_sheet(wb, bowlingWS, `Innings${innIndex + 1}_Bowling`);
         });
+      }
 
-        const battingWS = XLSX.utils.aoa_to_sheet(battingData);
-        XLSX.utils.book_append_sheet(wb, battingWS, `Innings${innIndex + 1}_Batting`);
-
-        // Basic bowling sheet
-        const bowlingData = [
-          [`INNINGS ${inn.inningsNumber} - BOWLING`, '', '', '', '', '', '', ''],
-          ['BOWLING SCORECARD', '', '', '', '', '', '', ''],
-          ['Bowler', 'Overs', 'Runs', 'Wickets', 'Maidens', 'Economy', 'Dots', 'Economy Rate'],
-        ];
-
-        // Add bowling data
-        inn.bowling.forEach(b => {
-          const economy = b.overs > 0 ? (b.runs / b.overs).toFixed(2) : '0.00';
-          
-          bowlingData.push([
-            b.name,
-            b.overs.toFixed(1),
-            b.runs,
-            b.wickets,
-            b.maidens || 0,
-            economy,
-            b.dots || 0,
-            economy
-          ]);
-        });
-
-        const bowlingWS = XLSX.utils.aoa_to_sheet(bowlingData);
-        XLSX.utils.book_append_sheet(wb, bowlingWS, `Innings${innIndex + 1}_Bowling`);
-      });
-
-      // Generate filename
-      const team1 = sc.matchInfo.team1.name.replace(/\s+/g, '_');
-      const team2 = sc.matchInfo.team2.name.replace(/\s+/g, '_');
-      const date = sc.matchInfo.date ? new Date(sc.matchInfo.date).toISOString().split('T')[0] : 'unknown';
+      // Generate filename with safe data access
+      const team1 = (matchInfo.team1?.name || 'Team1').replace(/\s+/g, '_');
+      const team2 = (matchInfo.team2?.name || 'Team2').replace(/\s+/g, '_');
+      const date = matchInfo.date ? new Date(matchInfo.date).toISOString().split('T')[0] : 'unknown';
       const filename = `WPL2026_${team1}_vs_${team2}_${date}.xlsx`;
       
       // Save the file
