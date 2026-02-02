@@ -169,7 +169,7 @@ export class ProfessionalPDFExporter {
       
       // Draw point
       this.doc.setFillColor(...color);
-      this.doc.ellipse(x1, y1, 2, 2, 'F');
+      this.doc.rect(x1 - 2, y1 - 2, 4, 4, 'F');
       
     }
     
@@ -178,7 +178,7 @@ export class ProfessionalPDFExporter {
     const lastX = x + 20 + (lastPoint.x / Math.max(...data.map(d => d.x))) * chartWidth;
     const lastY = y + height - 20 - ((lastPoint.y - minValue) / (maxValue - minValue)) * chartHeight;
     this.doc.setFillColor(...color);
-    this.doc.ellipse(lastX, lastY, 2, 2, 'F');
+    this.doc.rect(lastX - 2, lastY - 2, 4, 4, 'F');
   }
   
   // 3. Pie Chart - Wickets distribution by bowler
@@ -197,8 +197,16 @@ export class ProfessionalPDFExporter {
       
       // Draw pie slice
       this.doc.setFillColor(...colors[index % colors.length]);
-      // Draw circle outline using ellipse
-      this.doc.ellipse(x, y, radius, radius, 'S');
+      // Draw circle outline using rectangle approximation
+      this.doc.setDrawColor(...colors[index % colors.length]);
+      for (let angle = 0; angle < 360; angle += 10) {
+        const rad = (angle * Math.PI) / 180;
+        const x1 = x + radius * Math.cos(rad);
+        const y1 = y + radius * Math.sin(rad);
+        const x2 = x + radius * Math.cos((angle + 10) * Math.PI / 180);
+        const y2 = y + radius * Math.sin((angle + 10) * Math.PI / 180);
+        this.doc.line(x1, y1, x2, y2);
+      }
       
       // Fill sector (simplified as filled triangle approximation)
       const startRad = (currentAngle * Math.PI) / 180;
@@ -304,7 +312,7 @@ export class ProfessionalPDFExporter {
     data.forEach(point => {
       const plotX = x + 20 + (point.x / maxX) * chartWidth;
       const plotY = y + height - 20 - (point.y / maxY) * chartHeight;
-      this.doc.ellipse(plotX, plotY, 3, 3, 'F');
+      this.doc.rect(plotX - 3, plotY - 3, 6, 6, 'F');
     });
   }
   
