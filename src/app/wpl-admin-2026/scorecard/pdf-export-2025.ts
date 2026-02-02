@@ -245,7 +245,7 @@ export class ProfessionalPDFExporter {
     const minStrikeRate = Math.round(minValue);
     
     const statsX = chartX + chartWidth - 120;
-    const statsY = chartY;
+    let statsY = chartY;
     
     this.addProfessionalText('STATISTICS:', statsX, statsY, this.colors.mochaMousse, 9, 'bold');
     statsY += 15;
