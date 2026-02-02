@@ -713,14 +713,14 @@ export class ProfessionalPDFExporter {
       
       y += this.layout.sectionSpacing;
       
-      // ===== COMPREHENSIVE DATA VISUALIZATION SECTION =====
+      // ===== COMPREHENSIVE DATA VISUALIZATION SECTION - ONE GRAPH PER PAGE =====
       this.addProfessionalText('DATA ANALYSIS & VISUALIZATION', this.pageWidth / 2, y, this.colors.mochaMousse, 16, 'bold', 'center');
       this.addDecorativePattern(y + 8, this.colors.mochaMousse);
       y += 30;
       
       // Prepare data for graphs
       const battingData = inn.batting ? inn.batting.map((b: any) => ({
-        label: b.name?.substring(0, 10) || 'Unknown',
+        label: b.name?.substring(0, 15) || 'Unknown',
         runs: parseInt(b.runs) || 0,
         balls: parseInt(b.balls) || 0,
         strikeRate: parseFloat(b.strikeRate) || 0,
@@ -729,7 +729,7 @@ export class ProfessionalPDFExporter {
       })) : [];
       
       const bowlingData = inn.bowling ? inn.bowling.map((b: any) => ({
-        label: b.name?.substring(0, 10) || 'Unknown',
+        label: b.name?.substring(0, 15) || 'Unknown',
         overs: parseFloat(b.overs) || 0,
         runs: parseInt(b.runs) || 0,
         wickets: parseInt(b.wickets) || 0,
@@ -737,35 +737,58 @@ export class ProfessionalPDFExporter {
       })) : [];
       
       const partnershipData = inn.partnerships ? inn.partnerships.map((p: any) => ({
-        label: `${p.batsman1?.substring(0, 8)} & ${p.batsman2?.substring(0, 8)}`,
+        label: `${p.batsman1?.substring(0, 10)} & ${p.batsman2?.substring(0, 10)}`,
         runs: parseInt(p.totalRuns) || 0,
         balls: parseInt(p.totalBalls) || 0
       })) : [];
       
-      // Graph 1: Bar Chart - Runs scored by each batsman
-      if (y > this.pageHeight - 180) { this.doc.addPage(); y = 40; }
-      this.addBarChart(50, y, 200, 120, 
+      // Graph 1: Bar Chart - Runs scored by each batsman (Full Page)
+      this.doc.addPage();
+      y = 80;
+      this.addProfessionalText('GRAPH 1: BATTING PERFORMANCE ANALYSIS', this.pageWidth / 2, y, this.colors.mochaMousse, 18, 'bold', 'center');
+      y += 40;
+      this.addProfessionalText('Runs scored by each batsman', this.pageWidth / 2, y, this.colors.infoBlue, 14, 'center');
+      y += 30;
+      this.addBarChart(50, y, this.pageWidth - 100, 300, 
         battingData.map(b => ({label: b.label, value: b.runs})),
         this.colors.infoBlue, 'Runs by Batsman');
       
-      // Graph 2: Line Chart - Strike Rate progression
-      this.addLineChart(280, y, 200, 120,
+      // Graph 2: Line Chart - Strike Rate progression (Full Page)
+      this.doc.addPage();
+      y = 80;
+      this.addProfessionalText('GRAPH 2: STRIKE RATE ANALYSIS', this.pageWidth / 2, y, this.colors.mochaMousse, 18, 'bold', 'center');
+      y += 40;
+      this.addProfessionalText('Strike rate progression through batting order', this.pageWidth / 2, y, this.colors.warningAmber, 14, 'center');
+      y += 30;
+      this.addLineChart(50, y, this.pageWidth - 100, 350,
         battingData.map((b, i) => ({x: i + 1, y: b.strikeRate})),
         this.colors.warningAmber, 'Strike Rate Progression');
-      y += 140;
       
-      // Graph 3: Pie Chart - Wickets distribution by bowler
-      if (y > this.pageHeight - 180) { this.doc.addPage(); y = 40; }
+      // Graph 3: Pie Chart - Wickets distribution by bowler (Full Page)
+      this.doc.addPage();
+      y = 80;
+      this.addProfessionalText('GRAPH 3: BOWLING PERFORMANCE ANALYSIS', this.pageWidth / 2, y, this.colors.mochaMousse, 18, 'bold', 'center');
+      y += 40;
       const wicketData = bowlingData.map(b => ({label: b.label, value: b.wickets})).filter(b => b.value > 0);
       if (wicketData.length > 0) {
-        this.addPieChart(150, y + 60, 50, wicketData,
-          [this.colors.dangerRed, this.colors.successGreen, this.colors.infoBlue, this.colors.warningAmber],
+        this.addProfessionalText('Wickets distribution by bowler', this.pageWidth / 2, y, this.colors.dangerRed, 14, 'center');
+        y += 30;
+        this.addPieChart(this.pageWidth / 2, y + 100, 80, wicketData,
+          [this.colors.dangerRed, this.colors.successGreen, this.colors.infoBlue, this.colors.warningAmber, this.colors.mochaMousse],
           'Wickets Distribution');
+      } else {
+        this.addProfessionalText('No wickets data available', this.pageWidth / 2, y, this.colors.moonlitGrey, 14, 'center');
       }
       
-      // Graph 4: Radar Chart - Top batsman performance
+      // Graph 4: Radar Chart - Top batsman performance (Full Page)
+      this.doc.addPage();
+      y = 80;
+      this.addProfessionalText('GRAPH 4: PLAYER PERFORMANCE RADAR', this.pageWidth / 2, y, this.colors.mochaMousse, 18, 'bold', 'center');
+      y += 40;
       if (battingData.length > 0) {
         const topBatsman = battingData.reduce((prev, current) => prev.runs > current.runs ? prev : current);
+        this.addProfessionalText(`${topBatsman.label} - Performance Analysis`, this.pageWidth / 2, y, this.colors.etherealBlue, 14, 'center');
+        y += 30;
         const radarData = [
           {label: 'Runs', value: Math.min(topBatsman.runs / 10, 10)},
           {label: 'SR', value: Math.min(topBatsman.strikeRate / 20, 10)},
@@ -773,75 +796,112 @@ export class ProfessionalPDFExporter {
           {label: '6s', value: Math.min(topBatsman.sixes, 10)},
           {label: 'Balls', value: Math.min(topBatsman.balls / 10, 10)}
         ];
-        this.addRadarChart(350, y + 60, 50, radarData, this.colors.etherealBlue, 
+        this.addRadarChart(this.pageWidth / 2, y + 120, 100, radarData, this.colors.etherealBlue, 
           `${topBatsman.label} Performance`);
+      } else {
+        this.addProfessionalText('No batting data available', this.pageWidth / 2, y, this.colors.moonlitGrey, 14, 'center');
       }
-      y += 140;
       
-      // Graph 5: Scatter Plot - Partnership runs vs balls
-      if (y > this.pageHeight - 180) { this.doc.addPage(); y = 40; }
+      // Graph 5: Scatter Plot - Partnership runs vs balls (Full Page)
+      this.doc.addPage();
+      y = 80;
+      this.addProfessionalText('GRAPH 5: PARTNERSHIP ANALYSIS', this.pageWidth / 2, y, this.colors.mochaMousse, 18, 'bold', 'center');
+      y += 40;
       if (partnershipData.length > 0) {
-        this.addScatterPlot(50, y, 200, 120,
+        this.addProfessionalText('Partnership runs vs balls faced correlation', this.pageWidth / 2, y, this.colors.infoBlue, 14, 'center');
+        y += 30;
+        this.addScatterPlot(50, y, this.pageWidth - 100, 350,
           partnershipData.map(p => ({x: p.balls, y: p.runs})),
           this.colors.infoBlue, 'Partnership Analysis');
+      } else {
+        this.addProfessionalText('No partnership data available', this.pageWidth / 2, y, this.colors.moonlitGrey, 14, 'center');
       }
       
-      // Graph 6: Area Chart - Cumulative runs progression
+      // Graph 6: Area Chart - Cumulative runs progression (Full Page)
+      this.doc.addPage();
+      y = 80;
+      this.addProfessionalText('GRAPH 6: TEAM MOMENTUM ANALYSIS', this.pageWidth / 2, y, this.colors.mochaMousse, 18, 'bold', 'center');
+      y += 40;
+      this.addProfessionalText('Cumulative runs progression', this.pageWidth / 2, y, this.colors.successGreen, 14, 'center');
+      y += 30;
       let cumulativeRuns = 0;
       const cumulativeData = battingData.map((b, i) => {
         cumulativeRuns += b.runs;
         return {x: i + 1, y: cumulativeRuns};
       });
-      this.addAreaChart(280, y, 200, 120, cumulativeData, this.colors.successGreen, 'Cumulative Runs');
-      y += 140;
+      this.addAreaChart(50, y, this.pageWidth - 100, 350, cumulativeData, this.colors.successGreen, 'Cumulative Runs');
       
-      // Graph 7: Horizontal Bar Chart - Economy rates comparison
-      if (y > this.pageHeight - 180) { this.doc.addPage(); y = 40; }
+      // Graph 7: Horizontal Bar Chart - Economy rates comparison (Full Page)
+      this.doc.addPage();
+      y = 80;
+      this.addProfessionalText('GRAPH 7: BOWLING ECONOMY ANALYSIS', this.pageWidth / 2, y, this.colors.mochaMousse, 18, 'bold', 'center');
+      y += 40;
       const economyData = bowlingData.map(b => ({label: b.label, value: b.economy})).filter(b => b.value > 0);
       if (economyData.length > 0) {
-        this.addHorizontalBarChart(50, y, 300, 120, economyData.slice(0, 6), this.colors.warningAmber, 'Economy Rates');
+        this.addProfessionalText('Economy rates comparison (lower is better)', this.pageWidth / 2, y, this.colors.warningAmber, 14, 'center');
+        y += 30;
+        this.addHorizontalBarChart(50, y, this.pageWidth - 100, 400, economyData.slice(0, 8), this.colors.warningAmber, 'Economy Rates');
+      } else {
+        this.addProfessionalText('No economy data available', this.pageWidth / 2, y, this.colors.moonlitGrey, 14, 'center');
       }
       
-      // Graph 8: Donut Chart - Runs contribution breakdown
+      // Graph 8: Donut Chart - Runs contribution breakdown (Full Page)
+      this.doc.addPage();
+      y = 80;
+      this.addProfessionalText('GRAPH 8: SCORING PATTERNS ANALYSIS', this.pageWidth / 2, y, this.colors.mochaMousse, 18, 'bold', 'center');
+      y += 40;
       if (battingData.length > 0) {
+        this.addProfessionalText('Runs contribution breakdown', this.pageWidth / 2, y, this.colors.infoBlue, 14, 'center');
+        y += 30;
         const totalRuns = battingData.reduce((sum, b) => sum + b.runs, 0);
         const totalFours = battingData.reduce((sum, b) => sum + b.fours, 0);
         const totalSixes = battingData.reduce((sum, b) => sum + b.sixes, 0);
         const boundaryRuns = (totalFours * 4) + (totalSixes * 6);
         const nonBoundaryRuns = totalRuns - boundaryRuns;
         
-        this.addDonutChart(400, y + 60, 50, 25, [
+        this.addDonutChart(this.pageWidth / 2, y + 120, 100, 50, [
           {label: '4s', value: totalFours * 4},
           {label: '6s', value: totalSixes * 6},
           {label: 'Others', value: nonBoundaryRuns}
         ], [this.colors.successGreen, this.colors.dangerRed, this.colors.infoBlue], 'Runs Contribution');
+      } else {
+        this.addProfessionalText('No scoring data available', this.pageWidth / 2, y, this.colors.moonlitGrey, 14, 'center');
       }
-      y += 140;
       
-      // Graph 9: Stacked Bar Chart - Over by over performance (sample data)
-      if (y > this.pageHeight - 180) { this.doc.addPage(); y = 40; }
+      // Graph 9: Stacked Bar Chart - Over by over performance (Full Page)
+      this.doc.addPage();
+      y = 80;
+      this.addProfessionalText('GRAPH 9: PHASE-WISE PERFORMANCE', this.pageWidth / 2, y, this.colors.mochaMousse, 18, 'bold', 'center');
+      y += 40;
+      this.addProfessionalText('Over by over performance analysis', this.pageWidth / 2, y, this.colors.mochaMousse, 14, 'center');
+      y += 30;
       const overData = [
-        {label: 'Ov 1-5', values: [25, 15, 10]}, // Sample: runs, wickets, extras
-        {label: 'Ov 6-10', values: [35, 8, 12]},
-        {label: 'Ov 11-15', values: [40, 12, 8]},
-        {label: 'Ov 16-20', values: [50, 5, 15]}
+        {label: 'Powerplay (1-6)', values: [35, 12, 8]}, // Sample: runs, wickets, extras
+        {label: 'Middle Overs (7-15)', values: [65, 15, 12]},
+        {label: 'Death Overs (16-20)', values: [55, 8, 10]}
       ];
-      this.addStackedBarChart(50, y, 250, 120, overData,
+      this.addStackedBarChart(50, y, this.pageWidth - 100, 350, overData,
         [this.colors.infoBlue, this.colors.dangerRed, this.colors.warningAmber],
         'Over by Over Performance');
       
-      // Graph 10: Heatmap - Performance matrix
-      const performanceMatrix = battingData.slice(0, 5).map(batsman => [
+      // Graph 10: Heatmap - Performance matrix (Full Page)
+      this.doc.addPage();
+      y = 80;
+      this.addProfessionalText('GRAPH 10: PERFORMANCE MATRIX', this.pageWidth / 2, y, this.colors.mochaMousse, 18, 'bold', 'center');
+      y += 40;
+      this.addProfessionalText('Multi-dimensional performance analysis', this.pageWidth / 2, y, this.colors.mochaMousse, 14, 'center');
+      y += 30;
+      const performanceMatrix = battingData.slice(0, 6).map(batsman => [
         batsman.runs,
         batsman.strikeRate,
         batsman.fours,
         batsman.sixes,
         Math.floor(batsman.balls / 6) // Overs faced
       ]);
-      this.addHeatmap(330, y, 150, 120, performanceMatrix,
+      this.addHeatmap(50, y, this.pageWidth - 100, 300, performanceMatrix,
         ['Runs', 'SR', '4s', '6s', 'Overs'], 'Performance Heatmap');
       
-      y += 140;
+      y += 350;
       
       // Bowling Section with 2025 Design
       this.addProfessionalText('BOWLING PERFORMANCE', this.pageWidth / 2, y, this.colors.successGreen, 16, 'bold', 'center');
