@@ -99,6 +99,399 @@ export class ProfessionalPDFExporter {
     this.doc.line(40, yPos + 3, this.pageWidth - 40, yPos + 3);
   }
 
+  // ===== COMPREHENSIVE DATA VISUALIZATION FUNCTIONS =====
+  
+  // 1. Bar Chart - Runs scored by each batsman
+  private addBarChart(x: number, y: number, width: number, height: number, data: {label: string, value: number}[], color: number[], title: string) {
+    this.doc.setDrawColor(...this.colors.moonlitGrey);
+    this.doc.setLineWidth(1);
+    this.doc.rect(x, y, width, height);
+    
+    // Title
+    this.addProfessionalText(title, x + width/2, y - 10, this.colors.mochaMousse, 10, 'bold', 'center');
+    
+    if (data.length === 0) return;
+    
+    const maxValue = Math.max(...data.map(d => d.value));
+    const barWidth = (width - 40) / data.length;
+    const chartHeight = height - 30;
+    
+    data.forEach((item, index) => {
+      const barHeight = (item.value / maxValue) * chartHeight;
+      const barX = x + 20 + (index * barWidth);
+      const barY = y + height - 20 - barHeight;
+      
+      // Bar
+      this.doc.setFillColor(...color);
+      this.doc.rect(barX, barY, barWidth * 0.8, barHeight, 'F');
+      
+      // Value label
+      this.addProfessionalText(item.value.toString(), barX + barWidth * 0.4, barY - 5, this.colors.moonlitGrey, 8, 'center');
+      
+      // X-axis label (rotated)
+      this.addProfessionalText(item.label.length > 8 ? item.label.substring(0, 8) + '...' : item.label, 
+                               barX + barWidth * 0.4, y + height - 5, this.colors.moonlitGrey, 7, 'center');
+    });
+  }
+  
+  // 2. Line Chart - Run rate progression over overs
+  private addLineChart(x: number, y: number, width: number, height: number, data: {x: number, y: number}[], color: number[], title: string) {
+    this.doc.setDrawColor(...this.colors.moonlitGrey);
+    this.doc.setLineWidth(1);
+    this.doc.rect(x, y, width, height);
+    
+    // Title
+    this.addProfessionalText(title, x + width/2, y - 10, this.colors.mochaMousse, 10, 'bold', 'center');
+    
+    if (data.length < 2) return;
+    
+    const maxValue = Math.max(...data.map(d => d.y));
+    const minValue = Math.min(...data.map(d => d.y));
+    const chartWidth = width - 40;
+    const chartHeight = height - 40;
+    
+    // Draw axes
+    this.doc.setDrawColor(...this.colors.moonlitGrey);
+    this.doc.line(x + 20, y + 20, x + 20, y + height - 20); // Y-axis
+    this.doc.line(x + 20, y + height - 20, x + width - 20, y + height - 20); // X-axis
+    
+    // Draw line
+    this.doc.setDrawColor(...color);
+    this.doc.setLineWidth(2);
+    
+    for (let i = 0; i < data.length - 1; i++) {
+      const x1 = x + 20 + (data[i].x / Math.max(...data.map(d => d.x))) * chartWidth;
+      const y1 = y + height - 20 - ((data[i].y - minValue) / (maxValue - minValue)) * chartHeight;
+      const x2 = x + 20 + (data[i + 1].x / Math.max(...data.map(d => d.x))) * chartWidth;
+      const y2 = y + height - 20 - ((data[i + 1].y - minValue) / (maxValue - minValue)) * chartHeight;
+      
+      this.doc.line(x1, y1, x2, y2);
+      
+      // Draw point
+      this.doc.setFillColor(...color);
+      this.doc.circle(x1, y1, 2, 'F');
+    }
+    
+    // Last point
+    const lastPoint = data[data.length - 1];
+    const lastX = x + 20 + (lastPoint.x / Math.max(...data.map(d => d.x))) * chartWidth;
+    const lastY = y + height - 20 - ((lastPoint.y - minValue) / (maxValue - minValue)) * chartHeight;
+    this.doc.setFillColor(...color);
+    this.doc.circle(lastX, lastY, 2, 'F');
+  }
+  
+  // 3. Pie Chart - Wickets distribution by bowler
+  private addPieChart(x: number, y: number, radius: number, data: {label: string, value: number}[], colors: number[][], title: string) {
+    // Title
+    this.addProfessionalText(title, x, y - radius - 15, this.colors.mochaMousse, 10, 'bold', 'center');
+    
+    if (data.length === 0) return;
+    
+    const total = data.reduce((sum, item) => sum + item.value, 0);
+    let currentAngle = -90; // Start from top
+    
+    data.forEach((item, index) => {
+      const percentage = (item.value / total) * 360;
+      const endAngle = currentAngle + percentage;
+      
+      // Draw pie slice
+      this.doc.setFillColor(...colors[index % colors.length]);
+      this.doc.circle(x, y, radius, 'S'); // Draw circle outline
+      
+      // Fill sector (approximation using triangle)
+      const startRad = (currentAngle * Math.PI) / 180;
+      const endRad = (endAngle * Math.PI) / 180;
+      
+      this.doc.triangle(
+        x, y,
+        x + radius * Math.cos(startRad), y + radius * Math.sin(startRad),
+        x + radius * Math.cos(endRad), y + radius * Math.sin(endRad)
+      );
+      
+      // Label
+      const labelAngle = (currentAngle + endAngle) / 2;
+      const labelRad = (labelAngle * Math.PI) / 180;
+      const labelX = x + (radius * 0.7) * Math.cos(labelRad);
+      const labelY = y + (radius * 0.7) * Math.sin(labelRad);
+      
+      this.addProfessionalText(`${Math.round(percentage)}%`, labelX, labelY, [255, 255, 255], 8, 'bold', 'center');
+      
+      currentAngle = endAngle;
+    });
+  }
+  
+  // 4. Radar Chart - Player performance comparison
+  private addRadarChart(x: number, y: number, radius: number, data: {label: string, value: number}[], color: number[], title: string) {
+    // Title
+    this.addProfessionalText(title, x, y - radius - 15, this.colors.mochaMousse, 10, 'bold', 'center');
+    
+    if (data.length < 3) return;
+    
+    const angleStep = (2 * Math.PI) / data.length;
+    const maxValue = Math.max(...data.map(d => d.value));
+    
+    // Draw grid
+    this.doc.setDrawColor(...this.colors.lightGrey);
+    for (let i = 1; i <= 5; i++) {
+      const gridRadius = (radius * i) / 5;
+      for (let j = 0; j < data.length; j++) {
+        const angle = j * angleStep - Math.PI / 2;
+        const x1 = x + gridRadius * Math.cos(angle);
+        const y1 = y + gridRadius * Math.sin(angle);
+        const angle2 = (j + 1) * angleStep - Math.PI / 2;
+        const x2 = x + gridRadius * Math.cos(angle2);
+        const y2 = y + gridRadius * Math.sin(angle2);
+        this.doc.line(x1, y1, x2, y2);
+      }
+    }
+    
+    // Draw axes
+    for (let i = 0; i < data.length; i++) {
+      const angle = i * angleStep - Math.PI / 2;
+      const x1 = x + radius * Math.cos(angle);
+      const y1 = y + radius * Math.sin(angle);
+      this.doc.line(x, y, x1, y1);
+      
+      // Label
+      const labelX = x + (radius + 15) * Math.cos(angle);
+      const labelY = y + (radius + 15) * Math.sin(angle);
+      this.addProfessionalText(data[i].label, labelX, labelY, this.colors.moonlitGrey, 7, 'center');
+    }
+    
+    // Draw data polygon
+    this.doc.setDrawColor(...color);
+    this.doc.setFillColor(...color.map(c => c + 100));
+    this.doc.setLineWidth(2);
+    
+    for (let i = 0; i < data.length; i++) {
+      const angle = i * angleStep - Math.PI / 2;
+      const value = (data[i].value / maxValue) * radius;
+      const x1 = x + value * Math.cos(angle);
+      const y1 = y + value * Math.sin(angle);
+      const angle2 = ((i + 1) % data.length) * angleStep - Math.PI / 2;
+      const value2 = (data[(i + 1) % data.length].value / maxValue) * radius;
+      const x2 = x + value2 * Math.cos(angle2);
+      const y2 = y + value2 * Math.sin(angle2);
+      
+      this.doc.line(x1, y1, x2, y2);
+    }
+  }
+  
+  // 5. Scatter Plot - Partnership runs vs balls
+  private addScatterPlot(x: number, y: number, width: number, height: number, data: {x: number, y: number}[], color: number[], title: string) {
+    this.doc.setDrawColor(...this.colors.moonlitGrey);
+    this.doc.setLineWidth(1);
+    this.doc.rect(x, y, width, height);
+    
+    // Title
+    this.addProfessionalText(title, x + width/2, y - 10, this.colors.mochaMousse, 10, 'bold', 'center');
+    
+    if (data.length === 0) return;
+    
+    const maxX = Math.max(...data.map(d => d.x));
+    const maxY = Math.max(...data.map(d => d.y));
+    const chartWidth = width - 40;
+    const chartHeight = height - 40;
+    
+    // Draw axes
+    this.doc.setDrawColor(...this.colors.moonlitGrey);
+    this.doc.line(x + 20, y + 20, x + 20, y + height - 20); // Y-axis
+    this.doc.line(x + 20, y + height - 20, x + width - 20, y + height - 20); // X-axis
+    
+    // Draw points
+    this.doc.setFillColor(...color);
+    data.forEach(point => {
+      const plotX = x + 20 + (point.x / maxX) * chartWidth;
+      const plotY = y + height - 20 - (point.y / maxY) * chartHeight;
+      this.doc.circle(plotX, plotY, 3, 'F');
+    });
+  }
+  
+  // 6. Area Chart - Cumulative runs progression
+  private addAreaChart(x: number, y: number, width: number, height: number, data: {x: number, y: number}[], color: number[], title: string) {
+    this.doc.setDrawColor(...this.colors.moonlitGrey);
+    this.doc.setLineWidth(1);
+    this.doc.rect(x, y, width, height);
+    
+    // Title
+    this.addProfessionalText(title, x + width/2, y - 10, this.colors.mochaMousse, 10, 'bold', 'center');
+    
+    if (data.length < 2) return;
+    
+    const maxValue = Math.max(...data.map(d => d.y));
+    const chartWidth = width - 40;
+    const chartHeight = height - 40;
+    
+    // Draw filled area
+    this.doc.setFillColor(...color.map(c => c + 150));
+    this.doc.setDrawColor(...color);
+    this.doc.setLineWidth(2);
+    
+    // Start from bottom left
+    let path = [];
+    path.push({x: x + 20, y: y + height - 20});
+    
+    // Add data points
+    data.forEach(point => {
+      const plotX = x + 20 + (point.x / Math.max(...data.map(d => d.x))) * chartWidth;
+      const plotY = y + height - 20 - (point.y / maxValue) * chartHeight;
+      path.push({x: plotX, y: plotY});
+    });
+    
+    // Close path at bottom right
+    path.push({x: x + width - 20, y: y + height - 20});
+    
+    // Draw area (simplified as filled polygon)
+    for (let i = 0; i < path.length - 1; i++) {
+      this.doc.line(path[i].x, path[i].y, path[i + 1].x, path[i + 1].y);
+    }
+  }
+  
+  // 7. Horizontal Bar Chart - Economy rates comparison
+  private addHorizontalBarChart(x: number, y: number, width: number, height: number, data: {label: string, value: number}[], color: number[], title: string) {
+    this.doc.setDrawColor(...this.colors.moonlitGrey);
+    this.doc.setLineWidth(1);
+    this.doc.rect(x, y, width, height);
+    
+    // Title
+    this.addProfessionalText(title, x + width/2, y - 10, this.colors.mochaMousse, 10, 'bold', 'center');
+    
+    if (data.length === 0) return;
+    
+    const maxValue = Math.max(...data.map(d => d.value));
+    const barHeight = (height - 30) / data.length;
+    const chartWidth = width - 80;
+    
+    data.forEach((item, index) => {
+      const barWidth = (item.value / maxValue) * chartWidth;
+      const barY = y + 15 + (index * barHeight);
+      
+      // Bar
+      this.doc.setFillColor(...color);
+      this.doc.rect(x + 60, barY, barWidth, barHeight * 0.8, 'F');
+      
+      // Value label
+      this.addProfessionalText(item.value.toFixed(2), x + 55, barY + barHeight * 0.4, this.colors.moonlitGrey, 8, 'right');
+      
+      // Y-axis label
+      this.addProfessionalText(item.label.length > 10 ? item.label.substring(0, 10) + '...' : item.label, 
+                               x + 55, barY + barHeight * 0.4, this.colors.moonlitGrey, 7, 'right');
+    });
+  }
+  
+  // 8. Donut Chart - Runs contribution (4s, 6s, singles)
+  private addDonutChart(x: number, y: number, outerRadius: number, innerRadius: number, data: {label: string, value: number}[], colors: number[][], title: string) {
+    // Title
+    this.addProfessionalText(title, x, y - outerRadius - 15, this.colors.mochaMousse, 10, 'bold', 'center');
+    
+    if (data.length === 0) return;
+    
+    const total = data.reduce((sum, item) => sum + item.value, 0);
+    let currentAngle = -90;
+    
+    data.forEach((item, index) => {
+      const percentage = (item.value / total) * 360;
+      const endAngle = currentAngle + percentage;
+      
+      // Draw donut slice
+      this.doc.setFillColor(...colors[index % colors.length]);
+      
+      // Approximate donut slice using two triangles
+      const startRad = (currentAngle * Math.PI) / 180;
+      const endRad = (endAngle * Math.PI) / 180;
+      
+      // Outer triangle
+      this.doc.triangle(
+        x + innerRadius * Math.cos(startRad), y + innerRadius * Math.sin(startRad),
+        x + outerRadius * Math.cos(startRad), y + outerRadius * Math.sin(startRad),
+        x + outerRadius * Math.cos(endRad), y + outerRadius * Math.sin(endRad)
+      );
+      
+      // Inner triangle
+      this.doc.setFillColor(255, 255, 255);
+      this.doc.triangle(
+        x + innerRadius * Math.cos(startRad), y + innerRadius * Math.sin(startRad),
+        x + innerRadius * Math.cos(endRad), y + innerRadius * Math.sin(endRad),
+        x + outerRadius * Math.cos(endRad), y + outerRadius * Math.sin(endRad)
+      );
+      
+      currentAngle = endAngle;
+    });
+    
+    // Center text
+    this.addProfessionalText(total.toString(), x, y, this.colors.mochaMousse, 12, 'bold', 'center');
+  }
+  
+  // 9. Stacked Bar Chart - Over by over runs
+  private addStackedBarChart(x: number, y: number, width: number, height: number, data: {label: string, values: number[]}[], colors: number[][], title: string) {
+    this.doc.setDrawColor(...this.colors.moonlitGrey);
+    this.doc.setLineWidth(1);
+    this.doc.rect(x, y, width, height);
+    
+    // Title
+    this.addProfessionalText(title, x + width/2, y - 10, this.colors.mochaMousse, 10, 'bold', 'center');
+    
+    if (data.length === 0) return;
+    
+    const maxTotal = Math.max(...data.map(d => d.values.reduce((a, b) => a + b, 0)));
+    const barWidth = (width - 40) / data.length;
+    const chartHeight = height - 30;
+    
+    data.forEach((item, index) => {
+      const barX = x + 20 + (index * barWidth);
+      let currentY = y + height - 20;
+      
+      item.values.forEach((value, valueIndex) => {
+        const segmentHeight = (value / maxTotal) * chartHeight;
+        currentY -= segmentHeight;
+        
+        this.doc.setFillColor(...colors[valueIndex % colors.length]);
+        this.doc.rect(barX, currentY, barWidth * 0.8, segmentHeight, 'F');
+      });
+      
+      // X-axis label
+      this.addProfessionalText(item.label, barX + barWidth * 0.4, y + height - 5, this.colors.moonlitGrey, 7, 'center');
+    });
+  }
+  
+  // 10. Heatmap - Performance matrix
+  private addHeatmap(x: number, y: number, width: number, height: number, data: number[][], labels: string[], title: string) {
+    this.doc.setDrawColor(...this.colors.moonlitGrey);
+    this.doc.setLineWidth(1);
+    this.doc.rect(x, y, width, height);
+    
+    // Title
+    this.addProfessionalText(title, x + width/2, y - 10, this.colors.mochaMousse, 10, 'bold', 'center');
+    
+    if (data.length === 0) return;
+    
+    const cellWidth = (width - 40) / data[0].length;
+    const cellHeight = (height - 40) / data.length;
+    const maxValue = Math.max(...data.flat());
+    
+    data.forEach((row, rowIndex) => {
+      row.forEach((value, colIndex) => {
+        const cellX = x + 20 + (colIndex * cellWidth);
+        const cellY = y + 20 + (rowIndex * cellHeight);
+        
+        // Color intensity based on value
+        const intensity = value / maxValue;
+        const color = [
+          Math.floor(255 * (1 - intensity) + 255 * intensity),
+          Math.floor(255 * (1 - intensity) + 100 * intensity),
+          Math.floor(255 * (1 - intensity) + 100 * intensity)
+        ];
+        
+        this.doc.setFillColor(...color);
+        this.doc.rect(cellX, cellY, cellWidth, cellHeight, 'F');
+        
+        // Value text
+        this.addProfessionalText(value.toString(), cellX + cellWidth/2, cellY + cellHeight/2, 
+                               intensity > 0.5 ? [255, 255, 255] : [0, 0, 0], 6, 'center');
+      });
+    });
+  }
+
   // Generate professional PDF with 2025 design standards
   async generatePDF(options: PDFExportOptions): Promise<void> {
     const { scorecard } = options;
@@ -306,6 +699,136 @@ export class ProfessionalPDFExporter {
       }
       
       y += this.layout.sectionSpacing;
+      
+      // ===== COMPREHENSIVE DATA VISUALIZATION SECTION =====
+      this.addProfessionalText('DATA ANALYSIS & VISUALIZATION', this.pageWidth / 2, y, this.colors.mochaMousse, 16, 'bold', 'center');
+      this.addDecorativePattern(y + 8, this.colors.mochaMousse);
+      y += 30;
+      
+      // Prepare data for graphs
+      const battingData = inn.batting ? inn.batting.map((b: any) => ({
+        label: b.name?.substring(0, 10) || 'Unknown',
+        runs: parseInt(b.runs) || 0,
+        balls: parseInt(b.balls) || 0,
+        strikeRate: parseFloat(b.strikeRate) || 0,
+        fours: parseInt(b.fours) || 0,
+        sixes: parseInt(b.sixes) || 0
+      })) : [];
+      
+      const bowlingData = inn.bowling ? inn.bowling.map((b: any) => ({
+        label: b.name?.substring(0, 10) || 'Unknown',
+        overs: parseFloat(b.overs) || 0,
+        runs: parseInt(b.runs) || 0,
+        wickets: parseInt(b.wickets) || 0,
+        economy: parseFloat(b.economy) || 0
+      })) : [];
+      
+      const partnershipData = inn.partnerships ? inn.partnerships.map((p: any) => ({
+        label: `${p.batsman1?.substring(0, 8)} & ${p.batsman2?.substring(0, 8)}`,
+        runs: parseInt(p.totalRuns) || 0,
+        balls: parseInt(p.totalBalls) || 0
+      })) : [];
+      
+      // Graph 1: Bar Chart - Runs scored by each batsman
+      if (y > this.pageHeight - 180) { this.doc.addPage(); y = 40; }
+      this.addBarChart(50, y, 200, 120, 
+        battingData.map(b => ({label: b.label, value: b.runs})),
+        this.colors.infoBlue, 'Runs by Batsman');
+      
+      // Graph 2: Line Chart - Strike Rate progression
+      this.addLineChart(280, y, 200, 120,
+        battingData.map((b, i) => ({x: i + 1, y: b.strikeRate})),
+        this.colors.warningAmber, 'Strike Rate Progression');
+      y += 140;
+      
+      // Graph 3: Pie Chart - Wickets distribution by bowler
+      if (y > this.pageHeight - 180) { this.doc.addPage(); y = 40; }
+      const wicketData = bowlingData.map(b => ({label: b.label, value: b.wickets})).filter(b => b.value > 0);
+      if (wicketData.length > 0) {
+        this.addPieChart(150, y + 60, 50, wicketData,
+          [this.colors.dangerRed, this.colors.successGreen, this.colors.infoBlue, this.colors.warningAmber],
+          'Wickets Distribution');
+      }
+      
+      // Graph 4: Radar Chart - Top batsman performance
+      if (battingData.length > 0) {
+        const topBatsman = battingData.reduce((prev, current) => prev.runs > current.runs ? prev : current);
+        const radarData = [
+          {label: 'Runs', value: Math.min(topBatsman.runs / 10, 10)},
+          {label: 'SR', value: Math.min(topBatsman.strikeRate / 20, 10)},
+          {label: '4s', value: Math.min(topBatsman.fours, 10)},
+          {label: '6s', value: Math.min(topBatsman.sixes, 10)},
+          {label: 'Balls', value: Math.min(topBatsman.balls / 10, 10)}
+        ];
+        this.addRadarChart(350, y + 60, 50, radarData, this.colors.etherealBlue, 
+          `${topBatsman.label} Performance`);
+      }
+      y += 140;
+      
+      // Graph 5: Scatter Plot - Partnership runs vs balls
+      if (y > this.pageHeight - 180) { this.doc.addPage(); y = 40; }
+      if (partnershipData.length > 0) {
+        this.addScatterPlot(50, y, 200, 120,
+          partnershipData.map(p => ({x: p.balls, y: p.runs})),
+          this.colors.infoBlue, 'Partnership Analysis');
+      }
+      
+      // Graph 6: Area Chart - Cumulative runs progression
+      let cumulativeRuns = 0;
+      const cumulativeData = battingData.map((b, i) => {
+        cumulativeRuns += b.runs;
+        return {x: i + 1, y: cumulativeRuns};
+      });
+      this.addAreaChart(280, y, 200, 120, cumulativeData, this.colors.successGreen, 'Cumulative Runs');
+      y += 140;
+      
+      // Graph 7: Horizontal Bar Chart - Economy rates comparison
+      if (y > this.pageHeight - 180) { this.doc.addPage(); y = 40; }
+      const economyData = bowlingData.map(b => ({label: b.label, value: b.economy})).filter(b => b.value > 0);
+      if (economyData.length > 0) {
+        this.addHorizontalBarChart(50, y, 300, 120, economyData.slice(0, 6), this.colors.warningAmber, 'Economy Rates');
+      }
+      
+      // Graph 8: Donut Chart - Runs contribution breakdown
+      if (battingData.length > 0) {
+        const totalRuns = battingData.reduce((sum, b) => sum + b.runs, 0);
+        const totalFours = battingData.reduce((sum, b) => sum + b.fours, 0);
+        const totalSixes = battingData.reduce((sum, b) => sum + b.sixes, 0);
+        const boundaryRuns = (totalFours * 4) + (totalSixes * 6);
+        const nonBoundaryRuns = totalRuns - boundaryRuns;
+        
+        this.addDonutChart(400, y + 60, 50, 25, [
+          {label: '4s', value: totalFours * 4},
+          {label: '6s', value: totalSixes * 6},
+          {label: 'Others', value: nonBoundaryRuns}
+        ], [this.colors.successGreen, this.colors.dangerRed, this.colors.infoBlue], 'Runs Contribution');
+      }
+      y += 140;
+      
+      // Graph 9: Stacked Bar Chart - Over by over performance (sample data)
+      if (y > this.pageHeight - 180) { this.doc.addPage(); y = 40; }
+      const overData = [
+        {label: 'Ov 1-5', values: [25, 15, 10]}, // Sample: runs, wickets, extras
+        {label: 'Ov 6-10', values: [35, 8, 12]},
+        {label: 'Ov 11-15', values: [40, 12, 8]},
+        {label: 'Ov 16-20', values: [50, 5, 15]}
+      ];
+      this.addStackedBarChart(50, y, 250, 120, overData,
+        [this.colors.infoBlue, this.colors.dangerRed, this.colors.warningAmber],
+        'Over by Over Performance');
+      
+      // Graph 10: Heatmap - Performance matrix
+      const performanceMatrix = battingData.slice(0, 5).map(batsman => [
+        batsman.runs,
+        batsman.strikeRate,
+        batsman.fours,
+        batsman.sixes,
+        Math.floor(batsman.balls / 6) // Overs faced
+      ]);
+      this.addHeatmap(330, y, 150, 120, performanceMatrix,
+        ['Runs', 'SR', '4s', '6s', 'Overs'], 'Performance Heatmap');
+      
+      y += 140;
       
       // Bowling Section with 2025 Design
       this.addProfessionalText('BOWLING PERFORMANCE', this.pageWidth / 2, y, this.colors.successGreen, 16, 'bold', 'center');
