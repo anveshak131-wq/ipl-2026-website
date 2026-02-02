@@ -778,7 +778,7 @@ export class ProfessionalPDFExporter {
     const worstEconomy = Math.max(...data.map(d => d.value)).toFixed(2);
     
     const statsX = chartX + chartWidth + 80;
-    const statsY = chartY;
+    let statsY = chartY;
     
     this.addProfessionalText('STATISTICS:', statsX, statsY, this.colors.mochaMousse, 9, 'bold');
     statsY += 15;
