@@ -1864,6 +1864,8 @@ export default function ScorecardAdminPage() {
   // Export scorecard to enhanced Excel with 2025 design standards
   const exportScorecardExcel = async (sc: Scorecard) => {
     try {
+      console.log('🚀 Starting Excel export with new ExcelExporter2025...');
+      
       // Debug: Log the scorecard data being passed
       console.log('Page.tsx - Exporting scorecard:', {
         hasScorecard: !!sc,
@@ -1872,14 +1874,21 @@ export default function ScorecardAdminPage() {
         team1Name: sc?.matchInfo?.team1?.name || 'MISSING',
         team2Name: sc?.matchInfo?.team2?.name || 'MISSING',
         venue: sc?.matchInfo?.venue || 'MISSING',
-        date: sc?.matchInfo?.date || 'MISSING'
+        date: sc?.matchInfo?.date || 'MISSING',
+        hasInnings: !!sc?.innings,
+        inningsLength: sc?.innings?.length || 0,
+        firstInningsBatting: sc?.innings?.[0]?.batting || [],
+        firstInningsBowling: sc?.innings?.[0]?.bowling || []
       });
       
       // Dynamic import of the Excel exporter
+      console.log('📦 Importing ExcelExporter2025...');
       const { ExcelExporter2025 } = await import('./excel-export-2025');
       
+      console.log('✅ ExcelExporter2025 imported successfully');
       const exporter = new ExcelExporter2025();
       
+      console.log('🎯 Calling exporter.exportToExcel...');
       await exporter.exportToExcel({
         scorecard: sc,
         includeGraphs: true,
@@ -1887,10 +1896,12 @@ export default function ScorecardAdminPage() {
         format: 'xlsx'
       });
       
+      console.log('🎉 Excel export completed successfully!');
       setMessage('✅ Excel exported successfully with modern design!');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
-      console.error('Excel export error:', error);
+      console.error('❌ ExcelExporter2025 failed, using fallback:', error);
+      console.log('🔄 Falling back to basic Excel export...');
       
       // Fallback to basic export if new exporter fails
       const XLSX = (window as any).XLSX;
