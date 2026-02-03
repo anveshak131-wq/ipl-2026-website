@@ -84,6 +84,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState('all');
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [teamStats, setTeamStats] = useState<TeamStats | null>(null);
   const [selectedMatch, setSelectedMatch] = useState<any | null>(null);
   const [selectedScorecard, setSelectedScorecard] = useState<any | null>(null);
