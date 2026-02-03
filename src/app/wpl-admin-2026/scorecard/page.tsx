@@ -1861,159 +1861,26 @@ export default function ScorecardAdminPage() {
     }
   };
 
-  // Export scorecard to enhanced Excel with 2025 design standards
+  // Export scorecard to Excel - SIMPLE VERSION
   const exportScorecardExcel = async (sc: Scorecard) => {
     try {
-      console.log('🚀 Starting Excel export with new ExcelExporter2025...');
+      console.log('🚀 Starting SIMPLE Excel export...');
       
-      // Debug: Log the scorecard data being passed
-      console.log('Page.tsx - Exporting scorecard:', {
-        hasScorecard: !!sc,
-        hasMatchInfo: !!sc?.matchInfo,
-        matchInfoKeys: sc?.matchInfo ? Object.keys(sc.matchInfo) : [],
-        team1Name: sc?.matchInfo?.team1?.name || 'MISSING',
-        team2Name: sc?.matchInfo?.team2?.name || 'MISSING',
-        venue: sc?.matchInfo?.venue || 'MISSING',
-        date: sc?.matchInfo?.date || 'MISSING',
-        hasInnings: !!sc?.innings,
-        inningsLength: sc?.innings?.length || 0,
-        firstInningsBatting: sc?.innings?.[0]?.batting || [],
-        firstInningsBowling: sc?.innings?.[0]?.bowling || []
-      });
+      // Import the simple Excel export function
+      const { exportSimpleExcel } = await import('./excel-simple');
       
-      // Dynamic import of the Excel exporter
-      console.log('📦 Importing ExcelExporter2025...');
-      const { ExcelExporter2025 } = await import('./excel-export-2025');
+      console.log('📦 Simple Excel export imported successfully');
+      console.log('🎯 Calling exportSimpleExcel...');
       
-      console.log('✅ ExcelExporter2025 imported successfully');
-      const exporter = new ExcelExporter2025();
+      // Call the simple export function
+      exportSimpleExcel(sc);
       
-      console.log('🎯 Calling exporter.exportToExcel...');
-      await exporter.exportToExcel({
-        scorecard: sc,
-        includeGraphs: true,
-        includeAnalytics: true,
-        format: 'xlsx'
-      });
-      
-      console.log('🎉 Excel export completed successfully!');
-      setMessage('✅ Excel exported successfully with modern design!');
+      console.log('🎉 Simple Excel export completed successfully!');
+      setMessage('✅ Excel exported successfully!');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
-      console.error('❌ ExcelExporter2025 failed, using fallback:', error);
-      console.log('🔄 Falling back to basic Excel export...');
-      
-      // Fallback to basic export if new exporter fails
-      const XLSX = (window as any).XLSX;
-      if (!XLSX) throw new Error('SheetJS not available');
-
-      // Validate scorecard data
-      if (!sc || !sc.matchInfo) {
-        throw new Error('Invalid scorecard data: Missing match information');
-      }
-
-      // Create basic workbook as fallback
-      const wb = XLSX.utils.book_new();
-      
-      // Basic match info sheet with safe data access
-      const matchInfo = sc.matchInfo;
-      const matchInfoData = [
-        ['WPL 2026 SCORECARD', '', '', '', ''],
-        ['MATCH INFORMATION', '', '', '', ''],
-        ['Venue', matchInfo.venue || 'Stadium', '', '', ''],
-        ['Date', matchInfo.date || 'TBD', '', '', ''],
-        ['Time', matchInfo.time || 'TBD', '', '', ''],
-        ['Toss Winner', matchInfo.toss?.winner || matchInfo.tossWinner || 'N/A', '', '', ''],
-        ['Toss Decision', matchInfo.toss?.decision || matchInfo.tossDecision || 'N/A', '', '', ''],
-        ['Winner', sc.result?.winner || 'To be determined', '', '', ''],
-        ['Margin', sc.result?.margin || 'N/A', '', '', ''],
-        ['Man of the Match', sc.result?.manOfTheMatch || 'N/A', '', '', ''],
-      ];
-
-      const matchInfoWS = XLSX.utils.aoa_to_sheet(matchInfoData);
-      XLSX.utils.book_append_sheet(wb, matchInfoWS, 'Match Info');
-
-      // Process each innings with basic data
-      if (sc.innings && Array.isArray(sc.innings)) {
-        sc.innings.forEach((inn, innIndex) => {
-          // Safe team name extraction
-          const battingTeamName = inn.battingTeamId === matchInfo.team1?.id ? 
-            (matchInfo.team1?.name || 'Team 1') : 
-            (matchInfo.team2?.name || 'Team 2');
-          
-          // Basic batting sheet
-          const battingData = [
-            [`INNINGS ${inn.inningsNumber || innIndex + 1} - ${battingTeamName}`, '', '', '', '', '', '', ''],
-            ['BATTING SCORECARD', '', '', '', '', '', '', ''],
-            ['Batter', 'Runs', 'Balls', '4s', '6s', 'Strike Rate', 'Dismissal', 'Minutes'],
-          ];
-
-          // Add batting data with safe access
-          if (inn.batting && Array.isArray(inn.batting)) {
-            inn.batting.forEach((b) => {
-              const sr = b.balls > 0 ? ((b.runs / b.balls) * 100).toFixed(1) : '0.0';
-              let dismissalText = 'Not Out';
-              if (b.dismissal) {
-                dismissalText = b.dismissal.details || b.dismissal.type || 'Out';
-              }
-              
-              battingData.push([
-                b.name || b.playerId || 'Unknown',
-                b.runs || 0,
-                b.balls || 0,
-                b.fours || 0,
-                b.sixes || 0,
-                sr,
-                dismissalText,
-                b.minutes || 0
-              ]);
-            });
-          }
-
-          const battingWS = XLSX.utils.aoa_to_sheet(battingData);
-          XLSX.utils.book_append_sheet(wb, battingWS, `Innings${innIndex + 1}_Batting`);
-
-          // Basic bowling sheet
-          const bowlingData = [
-            [`INNINGS ${inn.inningsNumber || innIndex + 1} - BOWLING`, '', '', '', '', '', '', ''],
-            ['BOWLING SCORECARD', '', '', '', '', '', '', ''],
-            ['Bowler', 'Overs', 'Runs', 'Wickets', 'Maidens', 'Economy', 'Dots', 'Economy Rate'],
-          ];
-
-          // Add bowling data with safe access
-          if (inn.bowling && Array.isArray(inn.bowling)) {
-            inn.bowling.forEach((b) => {
-              const economy = b.overs > 0 ? (b.runs / b.overs).toFixed(2) : '0.00';
-              
-              bowlingData.push([
-                b.name || b.playerId || 'Unknown',
-                (b.overs || 0).toFixed(1),
-                b.runs || 0,
-                b.wickets || 0,
-                b.maidens || 0,
-                economy,
-                b.dots || 0,
-                economy
-              ]);
-            });
-          }
-
-          const bowlingWS = XLSX.utils.aoa_to_sheet(bowlingData);
-          XLSX.utils.book_append_sheet(wb, bowlingWS, `Innings${innIndex + 1}_Bowling`);
-        });
-      }
-
-      // Generate filename with safe data access
-      const team1 = (matchInfo.team1?.name || 'Team1').replace(/\s+/g, '_');
-      const team2 = (matchInfo.team2?.name || 'Team2').replace(/\s+/g, '_');
-      const date = matchInfo.date ? new Date(matchInfo.date).toISOString().split('T')[0] : 'unknown';
-      const filename = `WPL2026_${team1}_vs_${team2}_${date}.xlsx`;
-      
-      // Save the file
-      XLSX.writeFile(wb, filename);
-      
-      setMessage(' Excel exported (basic format)');
-      setTimeout(() => setMessage(''), 3000);
+      console.error('❌ Simple Excel export failed:', error);
+      alert(`Excel export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
