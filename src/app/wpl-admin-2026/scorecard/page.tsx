@@ -1861,26 +1861,26 @@ export default function ScorecardAdminPage() {
     }
   };
 
-  // Export scorecard to COMPREHENSIVE Excel with ALL scorecard data
+  // Export scorecard to FIXED COMPREHENSIVE Excel with ALL scorecard data
   const exportScorecardExcel = async (sc: Scorecard) => {
     try {
-      console.log('🚀 Starting COMPREHENSIVE Excel export with ALL scorecard data...');
+      console.log('🚀 Starting FIXED COMPREHENSIVE Excel export with ALL scorecard data...');
       
-      // Import the comprehensive Excel export function
-      const { exportComprehensiveExcel } = await import('./excel-comprehensive');
+      // Import the FIXED comprehensive Excel export function
+      const { exportComprehensiveExcelFixed } = await import('./excel-comprehensive-fixed');
       
-      console.log('📦 Comprehensive Excel export imported successfully');
-      console.log('🎯 Calling exportComprehensiveExcel...');
+      console.log('📦 Fixed Comprehensive Excel export imported successfully');
+      console.log('🎯 Calling exportComprehensiveExcelFixed...');
       
-      // Call the comprehensive export function
-      exportComprehensiveExcel(sc);
+      // Call the FIXED comprehensive export function
+      exportComprehensiveExcelFixed(sc);
       
-      console.log('🎉 Comprehensive Excel export completed successfully!');
-      setMessage('✅ Comprehensive Excel exported with ALL scorecard data!');
+      console.log('🎉 Fixed Comprehensive Excel export completed successfully!');
+      setMessage('✅ Fixed Comprehensive Excel exported with ALL scorecard data!');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
-      console.error('❌ Comprehensive Excel export failed:', error);
-      alert(`Comprehensive Excel export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('❌ Fixed Comprehensive Excel export failed:', error);
+      alert(`Fixed Comprehensive Excel export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 

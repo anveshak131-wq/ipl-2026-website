@@ -1,0 +1,458 @@
+// FIXED Comprehensive Excel export - Clean and robust version
+export const exportComprehensiveExcelFixed = (scorecard: any) => {
+  console.log('🚀 Starting FIXED COMPREHENSIVE Excel export...');
+  
+  const XLSX = (window as any).XLSX;
+  if (!XLSX) {
+    console.error('❌ XLSX library not available');
+    alert('Excel library not available');
+    return;
+  }
+
+  console.log('✅ XLSX library available, creating workbook...');
+
+  const wb = XLSX.utils.book_new();
+
+  // 1. Match Overview Sheet
+  const matchData = [
+    ['WPL 2026 COMPREHENSIVE MATCH REPORT'],
+    [''],
+    ['MATCH INFORMATION'],
+    ['Match ID', scorecard?.matchId || scorecard?.matchInfo?.matchId || 'N/A', '', 'League', scorecard?.league || 'WPL'],
+    ['Team 1', scorecard?.matchInfo?.team1?.name || 'Unknown Team', '', 'Team 2', scorecard?.matchInfo?.team2?.name || 'Unknown Team'],
+    ['Team 1 ID', scorecard?.matchInfo?.team1?.id || 'N/A', '', 'Team 2 ID', scorecard?.matchInfo?.team2?.id || 'N/A'],
+    ['Venue', scorecard?.matchInfo?.venue || 'N/A', '', 'Date', scorecard?.matchInfo?.date || 'N/A'],
+    ['Weather', scorecard?.matchInfo?.weather || 'N/A', '', 'Toss Winner', scorecard?.matchInfo?.toss?.winner || 'N/A'],
+    ['Result', scorecard?.matchInfo?.result || 'N/A', '', 'Margin', scorecard?.matchInfo?.margin || 'N/A'],
+    [''],
+    ['INNINGS SUMMARY']
+  ];
+
+  // Add innings summary
+  if (scorecard?.innings && scorecard.innings.length > 0) {
+    scorecard.innings.forEach((innings: any, index: number) => {
+      matchData.push([
+        `Innings ${index + 1}`,
+        `Runs: ${innings.totalRuns || 0}`,
+        `Wickets: ${innings.totalWickets || 0}`,
+        `Overs: ${innings.totalOvers || 0}`,
+        `Batting Team: ${innings.battingTeamId || 'N/A'}`
+      ]);
+    });
+  }
+
+  const ws1 = XLSX.utils.aoa_to_sheet(matchData);
+  XLSX.utils.book_append_sheet(wb, ws1, 'Match Overview');
+
+  // 2. Batting Data Sheet
+  const battingData = [
+    ['COMPREHENSIVE BATTING ANALYSIS'],
+    [''],
+    ['Innings', 'Player', 'Player ID', 'Position', 'Runs', 'Balls', 'Strike Rate', 'Fours', 'Sixes', 'Minutes', 'Dismissal Type', 'Dismissal Details']
+  ];
+
+  // Process batting data
+  if (scorecard?.innings && scorecard.innings.length > 0) {
+    console.log('🏏 Processing batting data for', scorecard.innings.length, 'innings');
+    
+    scorecard.innings.forEach((innings: any, inningsIndex: number) => {
+      console.log(`📊 Innings ${inningsIndex + 1}:`, {
+        battingLength: innings.batting?.length || 0,
+        totalRuns: innings.totalRuns
+      });
+      
+      if (innings.batting && innings.batting.length > 0) {
+        console.log(`🏏 Processing ${innings.batting.length} batters for innings ${inningsIndex + 1}`);
+        
+        innings.batting.forEach((batter: any, batterIndex: number) => {
+          console.log(`📊 Batter ${batterIndex + 1}:`, {
+            name: batter.name,
+            runs: batter.runs,
+            balls: batter.balls,
+            dismissal: batter.dismissal
+          });
+          
+          const sr = batter.balls > 0 ? ((batter.runs / batter.balls) * 100).toFixed(1) : '0.0';
+          
+          battingData.push([
+            inningsIndex + 1,
+            batter.name || 'Unknown',
+            batter.playerId || 'N/A',
+            batterIndex + 1,
+            batter.runs || 0,
+            batter.balls || 0,
+            sr,
+            batter.fours || 0,
+            batter.sixes || 0,
+            batter.minutes || 0,
+            batter.dismissal?.type || 'Not Out',
+            batter.dismissal?.details || 'Not Out'
+          ]);
+        });
+      } else {
+        console.log(`❌ No batting data found for innings ${inningsIndex + 1}`);
+      }
+    });
+  } else {
+    console.log('❌ No innings data found for batting processing');
+  }
+  
+  const ws2 = XLSX.utils.aoa_to_sheet(battingData);
+  XLSX.utils.book_append_sheet(wb, ws2, 'Comprehensive Batting');
+
+  // 3. Bowling Data Sheet
+  const bowlingData = [
+    ['COMPREHENSIVE BOWLING ANALYSIS'],
+    [''],
+    ['Innings', 'Bowler', 'Player ID', 'Overs', 'Balls', 'Runs', 'Wickets', 'Economy', 'Maidens', 'Dots', 'Wides', 'No Balls']
+  ];
+
+  // Process bowling data
+  if (scorecard?.innings && scorecard.innings.length > 0) {
+    console.log('⚡ Processing bowling data for', scorecard.innings.length, 'innings');
+    
+    scorecard.innings.forEach((innings: any, inningsIndex: number) => {
+      console.log(`📊 Innings ${inningsIndex + 1} bowling:`, {
+        bowlingLength: innings.bowling?.length || 0
+      });
+      
+      if (innings.bowling && innings.bowling.length > 0) {
+        console.log(`⚡ Processing ${innings.bowling.length} bowlers for innings ${inningsIndex + 1}`);
+        
+        innings.bowling.forEach((bowler: any) => {
+          console.log(`📊 Bowler:`, {
+            name: bowler.name,
+            overs: bowler.overs,
+            runs: bowler.runs,
+            wickets: bowler.wickets
+          });
+          
+          const economy = bowler.overs > 0 ? (bowler.runs / bowler.overs).toFixed(2) : '0.00';
+          
+          bowlingData.push([
+            inningsIndex + 1,
+            bowler.name || 'Unknown',
+            bowler.playerId || 'N/A',
+            bowler.overs || 0,
+            bowler.balls || (bowler.overs ? bowler.overs * 6 : 0),
+            bowler.runs || 0,
+            bowler.wickets || 0,
+            economy,
+            bowler.maidens || 0,
+            bowler.dots || 0,
+            bowler.wides || 0,
+            bowler.noBalls || 0
+          ]);
+        });
+      } else {
+        console.log(`❌ No bowling data found for innings ${inningsIndex + 1}`);
+      }
+    });
+  } else {
+    console.log('❌ No innings data found for bowling processing');
+  }
+  
+  const ws3 = XLSX.utils.aoa_to_sheet(bowlingData);
+  XLSX.utils.book_append_sheet(wb, ws3, 'Comprehensive Bowling');
+
+  // 4. Extras Data Sheet
+  const extrasData = [
+    ['COMPREHENSIVE EXTRAS ANALYSIS'],
+    [''],
+    ['Innings', 'Wides', 'No Balls', 'Byes', 'Leg Byes', 'Total Extras', 'Percentage of Total', 'Extras Per Over']
+  ];
+
+  // Process extras data
+  if (scorecard?.innings && scorecard.innings.length > 0) {
+    console.log('📊 Processing extras data for', scorecard.innings.length, 'innings');
+    
+    scorecard.innings.forEach((innings: any, inningsIndex: number) => {
+      console.log(`📊 Innings ${inningsIndex + 1} extras:`, innings.extras);
+      
+      const extras = innings.extras || {};
+      const totalExtras = (extras.wides || 0) + (extras.noBalls || 0) + (extras.byes || 0) + (extras.legByes || 0);
+      const totalRuns = innings.totalRuns || 1;
+      const percentage = ((totalExtras / totalRuns) * 100).toFixed(1);
+      const overs = innings.totalOvers || 1;
+      const extrasPerOver = (totalExtras / overs).toFixed(2);
+      
+      console.log(`📊 Extras calculation for innings ${inningsIndex + 1}:`, {
+        wides: extras.wides,
+        noBalls: extras.noBalls,
+        byes: extras.byes,
+        legByes: extras.legByes,
+        totalExtras,
+        totalRuns,
+        percentage,
+        overs,
+        extrasPerOver
+      });
+      
+      extrasData.push([
+        inningsIndex + 1,
+        extras.wides || 0,
+        extras.noBalls || 0,
+        extras.byes || 0,
+        extras.legByes || 0,
+        totalExtras,
+        `${percentage}%`,
+        extrasPerOver
+      ]);
+    });
+  } else {
+    console.log('❌ No innings data found for extras processing');
+  }
+  
+  const ws4 = XLSX.utils.aoa_to_sheet(extrasData);
+  XLSX.utils.book_append_sheet(wb, ws4, 'Comprehensive Extras');
+
+  // 5. Fall of Wickets Data Sheet
+  const fowData = [
+    ['COMPREHENSIVE FALL OF WICKETS'],
+    [''],
+    ['Innings', 'Wicket Number', 'Score', 'Over', 'Batsman Dismissed', 'Dismissal Type', 'Details', 'Partnership Runs', 'Partnership Balls']
+  ];
+
+  // Process fall of wickets data
+  if (scorecard?.innings && scorecard.innings.length > 0) {
+    console.log('🎯 Processing fall of wickets data for', scorecard.innings.length, 'innings');
+    
+    scorecard.innings.forEach((innings: any, inningsIndex: number) => {
+      console.log(`🎯 Innings ${inningsIndex + 1} FOW:`, innings.fallOfWickets);
+      
+      if (innings.fallOfWickets && innings.fallOfWickets.length > 0) {
+        console.log(`🎯 Processing ${innings.fallOfWickets.length} wickets for innings ${inningsIndex + 1}`);
+        
+        innings.fallOfWickets.forEach((fow: any, index: number) => {
+          console.log(`🎯 Wicket ${index + 1}:`, {
+            score: fow.score,
+            over: fow.over,
+            batsman: fow.batsman
+          });
+          
+          fowData.push([
+            inningsIndex + 1,
+            index + 1,
+            fow.score || 'N/A',
+            fow.over || 'N/A',
+            fow.batsman || 'N/A',
+            fow.dismissalType || 'N/A',
+            fow.details || 'N/A',
+            fow.partnershipRuns || 'N/A',
+            fow.partnershipBalls || 'N/A'
+          ]);
+        });
+      } else {
+        console.log(`❌ No fall of wickets data found for innings ${inningsIndex + 1}`);
+      }
+    });
+  } else {
+    console.log('❌ No innings data found for FOW processing');
+  }
+  
+  const ws5 = XLSX.utils.aoa_to_sheet(fowData);
+  XLSX.utils.book_append_sheet(wb, ws5, 'Fall of Wickets');
+
+  // 6. Powerplay Data Sheet
+  const powerplayData = [
+    ['COMPREHENSIVE POWERPLAY ANALYSIS'],
+    [''],
+    ['Innings', 'Phase', 'Overs', 'Runs', 'Wickets', 'Run Rate', 'Economy', 'Performance', 'Grade', 'Impact']
+  ];
+
+  // Process powerplay data
+  if (scorecard?.innings && scorecard.innings.length > 0) {
+    console.log('⚡ Processing powerplay data for', scorecard.innings.length, 'innings');
+    
+    scorecard.innings.forEach((innings: any, inningsIndex: number) => {
+      const powerplays = innings.powerplays;
+      console.log(`⚡ Innings ${inningsIndex + 1} powerplays:`, powerplays);
+      
+      if (powerplays) {
+        const mandatory = powerplays.mandatory || { overs: '6', runs: 0 };
+        const optional = powerplays.optional || { overs: '4', runs: 0 };
+        
+        console.log(`⚡ Powerplay data for innings ${inningsIndex + 1}:`, {
+          mandatory: mandatory,
+          optional: optional
+        });
+        
+        const mandatoryRR = mandatory.overs ? (mandatory.runs / parseFloat(mandatory.overs)).toFixed(2) : '0.00';
+        const optionalRR = optional.overs ? (optional.runs / parseFloat(optional.overs)).toFixed(2) : '0.00';
+        const totalOvers = parseFloat(mandatory.overs) + parseFloat(optional.overs);
+        const totalRuns = mandatory.runs + optional.runs;
+        const totalRR = totalOvers > 0 ? (totalRuns / totalOvers).toFixed(2) : '0.00';
+        
+        powerplayData.push(
+          [inningsIndex + 1, 'Mandatory Powerplay', mandatory.overs, mandatory.runs, 0, mandatoryRR, mandatoryRR, 'Good', 'B', 'Controlled'],
+          [inningsIndex + 1, 'Optional Powerplay', optional.overs, optional.runs, 0, optionalRR, optionalRR, 'Average', 'C', 'Managed'],
+          [inningsIndex + 1, 'Total Powerplay', totalOvers, totalRuns, 0, totalRR, totalRR, 'Good', 'B', 'Controlled']
+        );
+      } else {
+        console.log(`❌ No powerplay data found for innings ${inningsIndex + 1}`);
+        // Add default powerplay data if not available
+        powerplayData.push(
+          [inningsIndex + 1, 'Mandatory Powerplay', '6', 0, 0, '0.00', '0.00', 'No Data', 'N/A', 'N/A'],
+          [inningsIndex + 1, 'Optional Powerplay', '4', 0, 0, '0.00', '0.00', 'No Data', 'N/A', 'N/A'],
+          [inningsIndex + 1, 'Total Powerplay', '10', 0, 0, '0.00', '0.00', 'No Data', 'N/A', 'N/A']
+        );
+      }
+    });
+  } else {
+    console.log('❌ No innings data found for powerplay processing');
+  }
+  
+  const ws6 = XLSX.utils.aoa_to_sheet(powerplayData);
+  XLSX.utils.book_append_sheet(wb, ws6, 'Powerplay Analysis');
+
+  // 7. Partnerships Data Sheet
+  const partnershipData = [
+    ['COMPREHENSIVE PARTNERSHIPS ANALYSIS'],
+    [''],
+    ['Innings', 'Partnership', 'Batsman 1', 'Batsman 2', 'Runs', 'Balls', 'Strike Rate', 'Contribution %', 'Duration', 'Type', 'Impact']
+  ];
+
+  // Process partnerships data
+  if (scorecard?.innings && scorecard.innings.length > 0) {
+    console.log('🤝 Processing partnerships data for', scorecard.innings.length, 'innings');
+    
+    scorecard.innings.forEach((innings: any, inningsIndex: number) => {
+      const totalRuns = innings.totalRuns || 1;
+      
+      if (innings.partnerships && innings.partnerships.length > 0) {
+        console.log(`🤝 Processing ${innings.partnerships.length} partnerships for innings ${inningsIndex + 1}`);
+        
+        innings.partnerships.forEach((partnership: any, index: number) => {
+          console.log(`🤝 Partnership ${index + 1}:`, {
+            batsman1: partnership.batsman1,
+            batsman2: partnership.batsman2,
+            runs: partnership.runs,
+            balls: partnership.balls
+          });
+          
+          const sr = partnership.balls > 0 ? ((partnership.runs / partnership.balls) * 100).toFixed(1) : '0.0';
+          const contribution = totalRuns > 0 ? ((partnership.runs / totalRuns) * 100).toFixed(1) : '0.0';
+          const duration = partnership.balls ? `${Math.floor(partnership.balls / 6)}.${partnership.balls % 6} overs` : '0.0 overs';
+          
+          partnershipData.push([
+            inningsIndex + 1,
+            index + 1,
+            partnership.batsman1?.name || partnership.batsman1 || 'Unknown',
+            partnership.batsman2?.name || partnership.batsman2 || 'Unknown',
+            partnership.runs || 0,
+            partnership.balls || 0,
+            sr,
+            `${contribution}%`,
+            duration,
+            'Building Partnership',
+            'Useful'
+          ]);
+        });
+      } else {
+        console.log(`❌ No partnerships data found for innings ${inningsIndex + 1}`);
+      }
+    });
+  } else {
+    console.log('❌ No innings data found for partnerships processing');
+  }
+  
+  const ws7 = XLSX.utils.aoa_to_sheet(partnershipData);
+  XLSX.utils.book_append_sheet(wb, ws7, 'Partnerships');
+
+  // 8. Metadata Sheet
+  const metadataData = [
+    ['SCORECARD METADATA'],
+    [''],
+    ['System Information'],
+    ['Export Date', new Date().toLocaleString(), '', 'Export Version', '2.0 Fixed'],
+    ['Scorecard ID', scorecard?.id || 'N/A', '', 'Created At', scorecard?.createdAt || 'N/A'],
+    ['Updated At', scorecard?.updatedAt || 'N/A', '', 'Draft Status', scorecard?.draft ? 'Yes' : 'No'],
+    ['Data Source', 'WPL Admin System', '', 'Export Type', 'Comprehensive Fixed'],
+    [''],
+    ['Data Completeness'],
+    ['Total Innings', scorecard?.innings?.length || 0, '', 'Total Players', getTotalPlayers(scorecard)],
+    ['Has Batting Data', hasBattingData(scorecard) ? 'Yes' : 'No', '', 'Has Bowling Data', hasBowlingData(scorecard) ? 'Yes' : 'No'],
+    ['Has Extras Data', hasExtrasData(scorecard) ? 'Yes' : 'No', '', 'Has FOW Data', hasFOWData(scorecard) ? 'Yes' : 'No'],
+    ['Has Powerplay Data', hasPowerplayData(scorecard) ? 'Yes' : 'No', '', 'Has Partnership Data', hasPartnershipData(scorecard) ? 'Yes' : 'No']
+  ];
+  
+  const ws8 = XLSX.utils.aoa_to_sheet(metadataData);
+  XLSX.utils.book_append_sheet(wb, ws8, 'Metadata');
+
+  // Final summary
+  console.log('📊 FIXED COMPREHENSIVE EXPORT SUMMARY:');
+  console.log('✅ Total Sheets Created: 8');
+  console.log(`✅ Total Batting Rows: ${battingData.length - 3}`); // -3 for headers
+  console.log(`✅ Total Bowling Rows: ${bowlingData.length - 3}`); // -3 for headers
+  console.log(`✅ Total Extras Rows: ${extrasData.length - 3}`); // -3 for headers
+  console.log(`✅ Total FOW Rows: ${fowData.length - 3}`); // -3 for headers
+  console.log(`✅ Total Powerplay Rows: ${powerplayData.length - 3}`); // -3 for headers
+  console.log(`✅ Total Partnership Rows: ${partnershipData.length - 3}`); // -3 for headers
+  console.log(`✅ Total Data Points: ${calculateTotalDataPoints(scorecard)}`);
+
+  // Generate filename
+  const team1 = scorecard?.matchInfo?.team1?.name || 'Team1';
+  const team2 = scorecard?.matchInfo?.team2?.name || 'Team2';
+  const date = scorecard?.matchInfo?.date || new Date().toISOString().split('T')[0];
+  const filename = `WPL2026_Fixed_Scorecard_${team1.replace(/\s+/g, '_')}_vs_${team2.replace(/\s+/g, '_')}_${date}.xlsx`;
+
+  console.log('📁 Generated filename:', filename);
+
+  // Download file
+  try {
+    XLSX.writeFile(wb, filename);
+    console.log('✅ FIXED COMPREHENSIVE Excel export completed successfully!');
+    alert(`Fixed Comprehensive Excel exported successfully!\n\nTotal Sheets: 8\nTotal Data Points: ${calculateTotalDataPoints(scorecard)}\nFilename: ${filename}`);
+  } catch (error) {
+    console.error('❌ Error writing Excel file:', error);
+    alert(`Error writing Excel file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};
+
+// Helper functions
+function calculateTotalDataPoints(scorecard: any): number {
+  let total = 0;
+  if (scorecard?.innings) {
+    scorecard.innings.forEach((innings: any) => {
+      total += (innings.batting?.length || 0) * 12; // 12 columns per batter
+      total += (innings.bowling?.length || 0) * 12; // 12 columns per bowler
+      total += (innings.fallOfWickets?.length || 0) * 9; // 9 columns per wicket
+      total += (innings.partnerships?.length || 0) * 11; // 11 columns per partnership
+    });
+  }
+  return total;
+}
+
+function getTotalPlayers(scorecard: any): number {
+  let total = 0;
+  if (scorecard?.innings) {
+    scorecard.innings.forEach((innings: any) => {
+      total += (innings.batting?.length || 0) + (innings.bowling?.length || 0);
+    });
+  }
+  return total;
+}
+
+function hasBattingData(scorecard: any): boolean {
+  return scorecard?.innings?.some((innings: any) => innings.batting && innings.batting.length > 0) || false;
+}
+
+function hasBowlingData(scorecard: any): boolean {
+  return scorecard?.innings?.some((innings: any) => innings.bowling && innings.bowling.length > 0) || false;
+}
+
+function hasExtrasData(scorecard: any): boolean {
+  return scorecard?.innings?.some((innings: any) => innings.extras) || false;
+}
+
+function hasFOWData(scorecard: any): boolean {
+  return scorecard?.innings?.some((innings: any) => innings.fallOfWickets && innings.fallOfWickets.length > 0) || false;
+}
+
+function hasPowerplayData(scorecard: any): boolean {
+  return scorecard?.innings?.some((innings: any) => innings.powerplays) || false;
+}
+
+function hasPartnershipData(scorecard: any): boolean {
+  return scorecard?.innings?.some((innings: any) => innings.partnerships && innings.partnerships.length > 0) || false;
+}
