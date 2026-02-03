@@ -636,11 +636,25 @@ export class ExcelExporter2025 {
   private processBattingData(): BattingStats[] {
     const battingData: BattingStats[] = [];
     
+    console.log('processBattingData - scorecard structure:', {
+      hasInnings: !!this.scorecard.innings,
+      inningsLength: this.scorecard.innings?.length || 0,
+      firstInnings: this.scorecard.innings?.[0] || null
+    });
+    
     if (this.scorecard.innings && this.scorecard.innings.length > 0) {
       const innings = this.scorecard.innings[0];
       
+      console.log('processBattingData - innings structure:', {
+        hasBatting: !!innings.batting,
+        battingLength: innings.batting?.length || 0,
+        battingData: innings.batting || []
+      });
+      
       if (innings.batting && Array.isArray(innings.batting)) {
         innings.batting.forEach((batter: Batter, index: number) => {
+          console.log(`Processing batter ${index}:`, batter);
+          
           // Safe data extraction with fallbacks
           const runs = batter.runs || 0;
           const balls = batter.balls || 0;
@@ -667,17 +681,32 @@ export class ExcelExporter2025 {
       }
     }
     
+    console.log('processBattingData - result:', battingData);
     return battingData;
   }
 
   private processBowlingData(): BowlingStats[] {
     const bowlingData: BowlingStats[] = [];
     
+    console.log('processBowlingData - scorecard structure:', {
+      hasInnings: !!this.scorecard.innings,
+      inningsLength: this.scorecard.innings?.length || 0,
+      firstInnings: this.scorecard.innings?.[0] || null
+    });
+    
     if (this.scorecard.innings && this.scorecard.innings.length > 0) {
       const innings = this.scorecard.innings[0];
       
+      console.log('processBowlingData - innings structure:', {
+        hasBowling: !!innings.bowling,
+        bowlingLength: innings.bowling?.length || 0,
+        bowlingData: innings.bowling || []
+      });
+      
       if (innings.bowling && Array.isArray(innings.bowling)) {
         innings.bowling.forEach((bowler: Bowler) => {
+          console.log('Processing bowler:', bowler);
+          
           // Safe data extraction with fallbacks
           const overs = bowler.overs || 0;
           const runs = bowler.runs || 0;
@@ -701,6 +730,7 @@ export class ExcelExporter2025 {
       }
     }
     
+    console.log('processBowlingData - result:', bowlingData);
     return bowlingData;
   }
 
