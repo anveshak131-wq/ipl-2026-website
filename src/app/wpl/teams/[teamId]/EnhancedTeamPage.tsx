@@ -749,7 +749,8 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
     const losses = completedMatches.filter(m => m.result?.winner !== teamId && m.result?.winner).length;
     
     const scores = completedMatches.map(m => {
-      const teamInnings = m.innings?.find(i => i.teamId === teamId);
+      const innings = Array.isArray(m.innings) ? m.innings : [];
+      const teamInnings = innings.find(i => i.teamId === teamId);
       return teamInnings?.totalRuns || 0;
     }).filter(score => score > 0);
     
@@ -769,8 +770,10 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
 
   const filteredPlayers = useMemo(() => {
     return players.filter(player => {
-      const matchesSearch = player.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesRole = selectedRole === 'all' || player.role === selectedRole;
+      const safeName = (player.name || '').toLowerCase();
+      const safeRole = player.role || '';
+      const matchesSearch = safeName.includes(searchQuery.toLowerCase());
+      const matchesRole = selectedRole === 'all' || safeRole === selectedRole;
       return matchesSearch && matchesRole;
     });
   }, [players, searchQuery, selectedRole]);
@@ -779,7 +782,8 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
     return matches.map(match => {
       const isTeam1 = match.team1?.id === teamId;
       const opponent = isTeam1 ? match.team2?.name : match.team1?.name;
-      const teamInnings = match.innings?.find(i => i.teamId === teamId);
+      const innings = Array.isArray(match.innings) ? match.innings : [];
+      const teamInnings = innings.find(i => i.teamId === teamId);
       const score = teamInnings ? `${teamInnings.totalRuns}/${teamInnings.wickets}` : 'N/A';
       
       return {
