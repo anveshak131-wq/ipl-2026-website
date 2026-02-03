@@ -380,17 +380,14 @@ function WPLTeamsPageContent() {
     const hasActiveFilters = searchTerm || sortBy !== 'name' || titleFilter !== 'all' || homeGroundFilter !== 'all' || showFavoritesFirst;
 
     return (
-        <div 
-          className="min-h-screen"
-          style={{
-            background: `linear-gradient(to bottom, ${WPLColors.base}, ${WPLColors.gradientStart}66, ${WPLColors.gradientMid}33, ${WPLColors.base})`,
-          }}
-        >
+        <div className="min-h-screen wpl-teams-page">
             <Navbar />
-            <AuroraBackground />
+            <div className="wpl-teams-aurora">
+                <AuroraBackground />
+            </div>
             <WPLFloatingParticles />
 
-            <main className="relative py-16 min-h-screen" ref={containerRef}>
+            <main className="relative py-16 min-h-screen wpl-teams-shell" ref={containerRef}>
                 {/* Enhanced gradient overlays using exact WPL colors */}
                 <div 
                   className="absolute inset-0 pointer-events-none"
@@ -455,161 +452,163 @@ function WPLTeamsPageContent() {
                     {/* Enhanced Hero Header with scroll animations */}
                     <motion.div 
                         ref={heroRef}
-                        className="mb-12 text-center"
+                        className="mb-12 text-center wpl-teams-hero"
                         style={{
                             scale: scaleSpring,
                             rotate: rotateSpring,
                             opacity: opacityValue,
                         }}
                     >
-                        {/* Animated badge */}
-                        <motion.div 
-                            className="inline-flex items-center space-x-2 mb-6"
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.8, delay: 0.2 }}
-                            whileHover={{ 
-                                scale: 1.05,
-                                boxShadow: `0 0 30px ${WPLColors.purpleRGBA[40]}`
-                            }}
-                        >
-                            <motion.span 
-                                className="px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 transition-all duration-300 cursor-default"
-                                style={{
-                                    ...getWPLGlassmorphism('purple', 25),
-                                    color: WPLColors.textAccent,
-                                    border: `1px solid ${WPLColors.purpleRGBA[30]}`,
-                                }}
-                                whileHover={{
-                                    background: WPLColors.purpleRGBA[35],
-                                    borderColor: WPLColors.purpleRGBA[50],
-                                }}
-                            >
-                                <motion.div
-                                    animate={{ rotate: [0, 360] }}
-                                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                                >
-                                    <Sparkles className="w-4 h-4" />
-                                </motion.div>
-                                WPL 2026 ELITE TEAMS
-                                <motion.div
-                                    animate={{ scale: [1, 1.2, 1] }}
-                                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                                >
-                                    <Crown className="w-4 h-4 text-yellow-400" />
-                                </motion.div>
-                            </motion.span>
-                        </motion.div>
-                        
-                        {/* Enhanced main heading with staggered animation */}
-                        <motion.h1 
-                            className="text-6xl md:text-7xl lg:text-8xl font-black text-white mb-6 tracking-tight leading-none"
-                            initial={{ opacity: 0, y: 50 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.8, delay: 0.3 }}
-                        >
-                            <motion.span 
-                                className="block mb-2"
-                                initial={{ opacity: 0, x: -50 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ duration: 0.6, delay: 0.4 }}
-                            >
-                                Meet the
-                            </motion.span>
-                            <GradientText 
-                                gradient="from-purple-400 via-pink-400 to-rose-400" 
-                                animate
-                                className="block"
-                            >
-                                <motion.span
-                                    initial={{ opacity: 0, scale: 0.8 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ duration: 0.8, delay: 0.5 }}
-                                    whileHover={{ scale: 1.05 }}
-                                >
-                                    Champions
-                                </motion.span>
-                            </GradientText>
-                        </motion.h1>
-                        
-                        {/* Enhanced subtitle with icons */}
-                        <motion.p 
-                            className="text-gray-300 text-xl max-w-3xl mx-auto mb-8 leading-relaxed"
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.8, delay: 0.6 }}
-                        >
-                            <motion.span 
-                                className="inline-flex items-center gap-2"
-                                whileHover={{ scale: 1.02 }}
-                            >
-                                <Flame className="w-5 h-5 text-orange-400" />
-                                Explore all elite franchises competing for glory in the Women's Premier League
-                                <Trophy className="w-5 h-5 text-yellow-400" />
-                            </motion.span>
-                        </motion.p>
-                        
-                        {/* Enhanced CTA buttons */}
-                        <motion.div 
-                            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.8, delay: 0.7 }}
-                        >
-                            <motion.button
-                                className="group relative px-8 py-4 rounded-xl font-bold text-white overflow-hidden transition-all duration-300"
-                                style={{
-                                    background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[80]}, ${WPLColors.pinkRGBA[80]})`,
-                                    boxShadow: `0 10px 30px ${WPLColors.purpleRGBA[30]}`,
-                                }}
+                        <div className="wpl-teams-hero-panel">
+                            {/* Animated badge */}
+                            <motion.div 
+                                className="inline-flex items-center space-x-2 mb-6"
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.8, delay: 0.2 }}
                                 whileHover={{ 
                                     scale: 1.05,
-                                    boxShadow: `0 15px 40px ${WPLColors.purpleRGBA[50]}`,
+                                    boxShadow: `0 0 30px ${WPLColors.purpleRGBA[40]}`
                                 }}
-                                whileTap={{ scale: 0.98 }}
                             >
-                                <span className="relative z-10 flex items-center gap-2">
-                                    <Zap className="w-5 h-5" />
-                                    Explore Teams
+                                <motion.span 
+                                    className="wpl-teams-badge px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 transition-all duration-300 cursor-default"
+                                    style={{
+                                        ...getWPLGlassmorphism('purple', 25),
+                                        color: WPLColors.textAccent,
+                                        border: `1px solid ${WPLColors.purpleRGBA[30]}`,
+                                    }}
+                                    whileHover={{
+                                        background: WPLColors.purpleRGBA[35],
+                                        borderColor: WPLColors.purpleRGBA[50],
+                                    }}
+                                >
                                     <motion.div
-                                        animate={{ x: [0, 5, 0] }}
-                                        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                                        animate={{ rotate: [0, 360] }}
+                                        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                                     >
-                                        <TrendingUp className="w-4 h-4" />
+                                        <Sparkles className="w-4 h-4" />
                                     </motion.div>
-                                </span>
-                                <motion.div
-                                    className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                                    initial={false}
-                                    animate={{ opacity: [0, 0.3, 0] }}
-                                    transition={{ duration: 2, repeat: Infinity }}
-                                />
-                            </motion.button>
+                                    WPL 2026 ELITE TEAMS
+                                    <motion.div
+                                        animate={{ scale: [1, 1.2, 1] }}
+                                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                    >
+                                        <Crown className="w-4 h-4 text-yellow-400" />
+                                    </motion.div>
+                                </motion.span>
+                            </motion.div>
                             
-                            <motion.button
-                                className="px-8 py-4 rounded-xl font-bold text-white border-2 transition-all duration-300"
-                                style={{
-                                    borderColor: WPLColors.purpleRGBA[50],
-                                    background: getWPLGlassmorphism('purple', 15).background,
-                                }}
-                                whileHover={{ 
-                                    scale: 1.05,
-                                    borderColor: WPLColors.purpleRGBA[80],
-                                    background: WPLColors.purpleRGBA[25],
-                                }}
-                                whileTap={{ scale: 0.98 }}
+                            {/* Enhanced main heading with staggered animation */}
+                            <motion.h1 
+                                className="wpl-teams-title text-6xl md:text-7xl lg:text-8xl font-black text-white mb-6 tracking-tight leading-none"
+                                initial={{ opacity: 0, y: 50 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8, delay: 0.3 }}
                             >
-                                <span className="flex items-center gap-2">
-                                    <Target className="w-5 h-5" />
-                                    Compare Teams
-                                </span>
-                            </motion.button>
-                        </motion.div>
+                                <motion.span 
+                                    className="block mb-2"
+                                    initial={{ opacity: 0, x: -50 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.6, delay: 0.4 }}
+                                >
+                                    Meet the
+                                </motion.span>
+                                <GradientText 
+                                    gradient="from-purple-400 via-pink-400 to-rose-400" 
+                                    animate
+                                    className="block"
+                                >
+                                    <motion.span
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ duration: 0.8, delay: 0.5 }}
+                                        whileHover={{ scale: 1.05 }}
+                                    >
+                                        Champions
+                                    </motion.span>
+                                </GradientText>
+                            </motion.h1>
+                            
+                            {/* Enhanced subtitle with icons */}
+                            <motion.p 
+                                className="wpl-teams-subtitle text-gray-300 text-xl max-w-3xl mx-auto mb-8 leading-relaxed"
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8, delay: 0.6 }}
+                            >
+                                <motion.span 
+                                    className="inline-flex items-center gap-2"
+                                    whileHover={{ scale: 1.02 }}
+                                >
+                                    <Flame className="w-5 h-5 text-orange-400" />
+                                    Explore all elite franchises competing for glory in the Women's Premier League
+                                    <Trophy className="w-5 h-5 text-yellow-400" />
+                                </motion.span>
+                            </motion.p>
+                            
+                            {/* Enhanced CTA buttons */}
+                            <motion.div 
+                                className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.8, delay: 0.7 }}
+                            >
+                                <motion.button
+                                    className="group relative px-8 py-4 rounded-xl font-bold text-white overflow-hidden transition-all duration-300"
+                                    style={{
+                                        background: `linear-gradient(135deg, ${WPLColors.purpleRGBA[80]}, ${WPLColors.pinkRGBA[80]})`,
+                                        boxShadow: `0 10px 30px ${WPLColors.purpleRGBA[30]}`,
+                                    }}
+                                    whileHover={{ 
+                                        scale: 1.05,
+                                        boxShadow: `0 15px 40px ${WPLColors.purpleRGBA[50]}`,
+                                    }}
+                                    whileTap={{ scale: 0.98 }}
+                                >
+                                    <span className="relative z-10 flex items-center gap-2">
+                                        <Zap className="w-5 h-5" />
+                                        Explore Teams
+                                        <motion.div
+                                            animate={{ x: [0, 5, 0] }}
+                                            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                                        >
+                                            <TrendingUp className="w-4 h-4" />
+                                        </motion.div>
+                                    </span>
+                                    <motion.div
+                                        className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                        initial={false}
+                                        animate={{ opacity: [0, 0.3, 0] }}
+                                        transition={{ duration: 2, repeat: Infinity }}
+                                    />
+                                </motion.button>
+                                
+                                <motion.button
+                                    className="px-8 py-4 rounded-xl font-bold text-white border-2 transition-all duration-300"
+                                    style={{
+                                        borderColor: WPLColors.purpleRGBA[50],
+                                        background: getWPLGlassmorphism('purple', 15).background,
+                                    }}
+                                    whileHover={{ 
+                                        scale: 1.05,
+                                        borderColor: WPLColors.purpleRGBA[80],
+                                        background: WPLColors.purpleRGBA[25],
+                                    }}
+                                    whileTap={{ scale: 0.98 }}
+                                >
+                                    <span className="flex items-center gap-2">
+                                        <Target className="w-5 h-5" />
+                                        Compare Teams
+                                    </span>
+                                </motion.button>
+                            </motion.div>
+                        </div>
                     </motion.div>
 
                     {/* Enhanced Quick Stats Cards with staggered animations */}
                     <motion.div 
-                        className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8"
+                        className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8 wpl-teams-stats"
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, delay: 0.8 }}
@@ -768,7 +767,7 @@ function WPLTeamsPageContent() {
                     </motion.div>
 
                     {/* Filter Toolbar - Same as teams page but with WPL styling */}
-                    <div className="sticky top-16 md:top-20 z-40 -mx-4 px-4 sm:mx-0 sm:px-0 mb-8 backdrop-blur-xl bg-slate-900/80 border-y border-purple-500/20 py-4 shadow-lg">
+                    <div className="sticky top-16 md:top-20 z-40 -mx-4 px-4 sm:mx-0 sm:px-0 mb-8 backdrop-blur-xl bg-slate-900/80 border-y border-purple-500/20 py-4 shadow-lg wpl-teams-toolbar">
                         <div className="flex flex-col gap-4">
                             <div className="relative">
                                 <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-gray-400">
@@ -781,7 +780,7 @@ function WPLTeamsPageContent() {
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     placeholder="Search WPL teams..."
-                                    className="w-full pl-11 pr-4 py-3 rounded-xl bg-slate-800/60 border border-purple-500/20 text-white placeholder-gray-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/30 transition-all"
+                                    className="wpl-teams-input w-full pl-11 pr-4 py-3 rounded-xl bg-slate-800/60 border border-purple-500/20 text-white placeholder-gray-400 focus:outline-none focus:border-purple-400 focus:ring-2 focus:ring-purple-400/30 transition-all"
                                 />
                                 {searchTerm && (
                                     <button
@@ -829,7 +828,7 @@ function WPLTeamsPageContent() {
                                             <select
                                                 value={homeGroundFilter}
                                                 onChange={(e) => setHomeGroundFilter(e.target.value)}
-                                                className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800/60 text-white border border-purple-500/20 focus:border-purple-400 focus:outline-none hover:border-purple-400/50 transition-all cursor-pointer"
+                                                className="wpl-teams-select px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800/60 text-white border border-purple-500/20 focus:border-purple-400 focus:outline-none hover:border-purple-400/50 transition-all cursor-pointer"
                                             >
                                                 <option value="all">All Grounds</option>
                                                 {allHomeGrounds.map(ground => (
@@ -846,7 +845,7 @@ function WPLTeamsPageContent() {
                                     <select
                                         value={sortBy}
                                         onChange={(e) => setSortBy(e.target.value as SortOption)}
-                                        className="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800/60 text-white border border-purple-500/20 focus:border-purple-400 focus:outline-none hover:border-purple-400/50 transition-all cursor-pointer"
+                                        className="wpl-teams-select px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-800/60 text-white border border-purple-500/20 focus:border-purple-400 focus:outline-none hover:border-purple-400/50 transition-all cursor-pointer"
                                     >
                                         <option value="name">Name (A-Z)</option>
                                         <option value="titles">Titles (Most first)</option>
@@ -1028,8 +1027,11 @@ function WPLTeamsPageContent() {
 export default function WPLTeamsPage() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen bg-gradient-to-b from-gray-950 via-purple-950/20 to-gray-950">
+            <div className="min-h-screen wpl-teams-page">
                 <Navbar />
+                <div className="wpl-teams-aurora">
+                    <AuroraBackground />
+                </div>
                 <div className="flex items-center justify-center h-96">
                     <LoadingSpinner size="lg" />
                 </div>
@@ -1040,4 +1042,3 @@ export default function WPLTeamsPage() {
         </Suspense>
     );
 }
-
