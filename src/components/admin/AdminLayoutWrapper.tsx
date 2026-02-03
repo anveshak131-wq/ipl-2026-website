@@ -16,10 +16,15 @@ export function AdminLayoutWrapper({ children }: AdminLayoutWrapperProps) {
   
   // Check if current route is an admin route
   const isAdminRoute = pathname?.startsWith('/ipl-admin-2026') || pathname?.startsWith('/wpl-admin-2026');
+  const isWplAdmin = pathname?.startsWith('/wpl-admin-2026');
   
   if (isAdminRoute) {
     // For admin routes, return children without TermsGuard
-    return <>{children}</>;
+    return (
+      <div className={`admin-root ${isWplAdmin ? 'wpl-admin-root' : 'ipl-admin-root'}`}>
+        {children}
+      </div>
+    );
   }
   
   // For non-admin routes, apply TermsGuard

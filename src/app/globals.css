@@ -1,5 +1,7 @@
 /* Import Inter font for modern typography */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300..800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -27,6 +29,72 @@
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  .admin-root {
+    min-height: 100vh;
+  }
+
+  .wpl-admin-root {
+    position: relative;
+    min-height: 100vh;
+    color: #eef2ff;
+    font-family: 'Manrope', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background:
+      radial-gradient(1200px 700px at 10% 0%, rgba(76, 29, 149, 0.45), transparent 60%),
+      radial-gradient(1000px 600px at 90% 10%, rgba(17, 94, 89, 0.45), transparent 55%),
+      radial-gradient(900px 500px at 50% 100%, rgba(15, 23, 42, 0.85), transparent 60%),
+      linear-gradient(180deg, #0b1120 0%, #0f172a 40%, #111827 100%);
+    overflow-x: hidden;
+  }
+
+  .wpl-admin-root > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .wpl-admin-root::before {
+    content: '';
+    position: fixed;
+    inset: -20%;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(129, 140, 248, 0.12), transparent 45%),
+      radial-gradient(circle at 80% 10%, rgba(94, 234, 212, 0.12), transparent 40%),
+      radial-gradient(circle at 50% 80%, rgba(14, 116, 144, 0.15), transparent 45%);
+    animation: wpl-aurora 24s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wpl-admin-root::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+    background-size: 140px 140px;
+    opacity: 0.4;
+    mix-blend-mode: screen;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wpl-admin-root h1,
+  .wpl-admin-root h2,
+  .wpl-admin-root h3,
+  .wpl-admin-root h4,
+  .wpl-admin-root h5,
+  .wpl-admin-root h6 {
+    font-family: 'Sora', 'Manrope', 'Inter', sans-serif;
+    letter-spacing: -0.02em;
+    text-shadow: none;
+  }
+
+  .wpl-admin-root p {
+    color: rgba(226, 232, 255, 0.84);
+  }
+
+  .wpl-admin-root .min-h-screen {
+    background: transparent !important;
   }
 
   /* Premium typography system with better hierarchy */
@@ -220,6 +288,26 @@
   to {
     transform: translateX(0);
     opacity: 1;
+  }
+}
+
+@keyframes wpl-aurora {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translate3d(-2%, 2%, 0) scale(1.03);
+    opacity: 0.7;
+  }
+}
+
+@keyframes wpl-glow {
+  0%, 100% {
+    box-shadow: 0 18px 40px rgba(79, 70, 229, 0.2);
+  }
+  50% {
+    box-shadow: 0 24px 60px rgba(14, 116, 144, 0.35);
   }
 }
 
@@ -752,6 +840,183 @@
   .admin-btn-ghost:hover {
     background: rgba(255, 255, 255, 0.06);
     color: #e2e8f0;
+  }
+
+  /* WPL Admin Theme */
+  .wpl-admin-sidebar {
+    position: relative;
+    background: linear-gradient(160deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.88) 45%, rgba(30, 27, 75, 0.9) 100%);
+    border-right: 1px solid rgba(148, 163, 184, 0.2);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    box-shadow: 12px 0 40px rgba(2, 6, 23, 0.4);
+    z-index: 20;
+    animation: wpl-glow 14s ease-in-out infinite;
+  }
+
+  .wpl-admin-sidebar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top left, rgba(129, 140, 248, 0.18), transparent 40%);
+    pointer-events: none;
+  }
+
+  .wpl-admin-sidebar::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-right: 1px solid rgba(94, 234, 212, 0.2);
+    mask: linear-gradient(180deg, transparent 0%, black 20%, black 80%, transparent 100%);
+    pointer-events: none;
+  }
+
+  .wpl-admin-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    color: #e2e8f0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+  }
+
+  .wpl-admin-brand-dot {
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #38bdf8, #818cf8);
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.6);
+  }
+
+  .wpl-admin-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    color: #bae6fd;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .wpl-admin-pill-muted {
+    background: rgba(99, 102, 241, 0.12);
+    border-color: rgba(99, 102, 241, 0.35);
+    color: #c7d2fe;
+  }
+
+  .wpl-admin-icon-btn {
+    align-items: center;
+    justify-content: center;
+    height: 2.4rem;
+    width: 2.4rem;
+    border-radius: 0.8rem;
+    background: rgba(148, 163, 184, 0.1);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    color: #e2e8f0;
+    transition: all 0.25s ease;
+  }
+
+  .wpl-admin-icon-btn:hover {
+    background: rgba(148, 163, 184, 0.2);
+    border-color: rgba(148, 163, 184, 0.35);
+    transform: translateY(-1px);
+  }
+
+  .wpl-admin-fab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 1rem;
+    color: #f8fafc;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.85), rgba(99, 102, 241, 0.85));
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    box-shadow: 0 12px 28px rgba(30, 64, 175, 0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .wpl-admin-fab:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 40px rgba(30, 64, 175, 0.4);
+  }
+
+  .wpl-admin-nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.9rem;
+    color: rgba(226, 232, 240, 0.8);
+    font-size: 0.95rem;
+    transition: all 0.25s ease;
+    border: 1px solid transparent;
+  }
+
+  .wpl-admin-nav-item:hover {
+    color: #ffffff;
+    background: rgba(15, 23, 42, 0.6);
+    border-color: rgba(148, 163, 184, 0.2);
+    transform: translateX(2px);
+  }
+
+  .wpl-admin-nav-item.active {
+    background: linear-gradient(120deg, rgba(99, 102, 241, 0.25), rgba(14, 116, 144, 0.25));
+    border-color: rgba(129, 140, 248, 0.4);
+    color: #ffffff;
+    box-shadow: 0 12px 26px rgba(15, 23, 42, 0.35);
+  }
+
+  .wpl-admin-nav-item.active::after {
+    content: '';
+    position: absolute;
+    right: 12px;
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: #38bdf8;
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.8);
+  }
+
+  .wpl-admin-nav-item.is-collapsed {
+    justify-content: center;
+    padding: 0.75rem 0.5rem;
+  }
+
+  .wpl-admin-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 0.9rem;
+    background: rgba(15, 23, 42, 0.55);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+  }
+
+  .wpl-admin-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.16);
+    border: 1px solid rgba(34, 197, 94, 0.4);
+    color: #bbf7d0;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
   }
 
   /* Admin Input System */

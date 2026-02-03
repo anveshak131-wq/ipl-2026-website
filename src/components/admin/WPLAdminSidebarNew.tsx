@@ -40,7 +40,8 @@ export default function WPLAdminSidebarNew() {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-4 left-4 z-50 lg:hidden p-2 bg-purple-600 rounded-lg text-white hover:bg-purple-700 transition-colors"
+        className="wpl-admin-fab fixed top-4 left-4 z-50 lg:hidden"
+        aria-label={isOpen ? 'Close navigation' : 'Open navigation'}
       >
         {isOpen ? <X size={24} /> : <Menu size={24} />}
       </button>
@@ -48,35 +49,37 @@ export default function WPLAdminSidebarNew() {
       {/* Overlay for mobile */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-slate-950/60 backdrop-blur-[2px] z-40 lg:hidden"
           onClick={() => setIsOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`
-          fixed top-0 left-0 h-screen bg-gradient-to-b from-purple-900 to-purple-800 
-          border-r border-purple-700 shadow-2xl z-50 transition-all duration-300 ease-in-out
-          flex flex-col
-          ${collapsed ? 'w-20' : 'w-64'}
-          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:translate-x-0
-        `}
+        className={`wpl-admin-sidebar fixed top-0 left-0 h-screen z-50 transition-all duration-300 ease-in-out flex flex-col ${
+          collapsed ? 'w-20' : 'w-72'
+        } ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
       >
         {/* Header */}
-        <div className="p-6 border-b border-purple-700 flex-shrink-0">
+        <div className="p-6 flex-shrink-0 border-b border-white/10">
           <div className="flex items-center justify-between">
             {!collapsed && (
-              <div>
-                <h1 className="text-2xl font-bold text-white">WPL Admin</h1>
-                <p className="text-purple-300 text-sm mt-1">2026 Season</p>
+              <div className="space-y-2">
+                <div className="wpl-admin-brand">
+                  <span className="wpl-admin-brand-dot" />
+                  <span>WPL Command</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-slate-200/80">
+                  <span className="wpl-admin-pill">2026 Season</span>
+                  <span className="wpl-admin-pill wpl-admin-pill-muted">Live Ops</span>
+                </div>
               </div>
             )}
             <button
               onClick={() => setCollapsed(!collapsed)}
-              className="p-2 rounded-lg hover:bg-purple-700 text-white transition-colors hidden lg:block"
+              className="wpl-admin-icon-btn hidden lg:flex"
               title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             >
               <ChevronRight 
                 size={20} 
@@ -87,8 +90,13 @@ export default function WPLAdminSidebarNew() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-purple-600 scrollbar-track-purple-900">
-          <div className="space-y-2">
+        <nav className="flex-1 overflow-y-auto px-4 py-5 scrollbar-thin scrollbar-thumb-indigo-500/60 scrollbar-track-transparent">
+          <div className={`mb-3 ${collapsed ? 'hidden' : 'block'}`}>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400/80">
+              Navigation
+            </p>
+          </div>
+          <div className="space-y-1.5">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
@@ -98,19 +106,13 @@ export default function WPLAdminSidebarNew() {
                   key={item.href}
                   href={item.href}
                   onClick={() => setIsOpen(false)}
-                  className={`
-                    flex items-center gap-3 px-4 py-3 rounded-lg transition-all
-                    ${active 
-                      ? 'bg-purple-600 text-white shadow-lg' 
-                      : 'text-purple-200 hover:bg-purple-700/50 hover:text-white'
-                    }
-                    ${collapsed ? 'justify-center' : ''}
-                  `}
+                  className={`wpl-admin-nav-item ${active ? 'active' : ''} ${collapsed ? 'is-collapsed' : ''}`}
+                  aria-current={active ? 'page' : undefined}
                   title={collapsed ? item.label : undefined}
                 >
-                  <Icon size={20} className="flex-shrink-0" />
+                  <Icon size={20} className="flex-shrink-0 text-slate-100/80" />
                   {!collapsed && (
-                    <span className="font-medium">{item.label}</span>
+                    <span className="font-medium tracking-tight">{item.label}</span>
                   )}
                 </Link>
               );
@@ -120,17 +122,20 @@ export default function WPLAdminSidebarNew() {
 
         {/* Footer */}
         {!collapsed && (
-          <div className="p-4 border-t border-purple-700 flex-shrink-0">
-            <div className="text-center text-purple-300 text-sm">
-              <p>Women's Premier League</p>
-              <p className="text-xs mt-1">Admin Panel v1.0</p>
+          <div className="p-4 border-t border-white/10 flex-shrink-0">
+            <div className="wpl-admin-footer">
+              <div>
+                <p className="text-sm font-semibold text-white/90">Women's Premier League</p>
+                <p className="text-xs text-slate-300/80">Admin Console v2</p>
+              </div>
+              <span className="wpl-admin-status">Online</span>
             </div>
           </div>
         )}
       </aside>
 
       {/* Spacer for content */}
-      <div className={`${collapsed ? 'lg:ml-20' : 'lg:ml-64'} transition-all duration-300`} />
+      <div className={`${collapsed ? 'lg:ml-20' : 'lg:ml-72'} transition-all duration-300`} />
     </>
   );
 }
