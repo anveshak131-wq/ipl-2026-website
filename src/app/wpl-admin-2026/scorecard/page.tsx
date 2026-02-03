@@ -2314,8 +2314,10 @@ export default function ScorecardAdminPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm text-gray-400 mb-2">Venue</label>
+                    <label htmlFor="venue" className="block text-sm text-gray-400 mb-2">Venue</label>
                     <input
+                      id="venue"
+                      name="venue"
                       type="text"
                       value={scorecard.matchInfo.venue}
                       onChange={(e) => updateMatchInfo('venue', e.target.value)}
@@ -2323,8 +2325,10 @@ export default function ScorecardAdminPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm text-gray-400 mb-2">Date</label>
+                    <label htmlFor="date" className="block text-sm text-gray-400 mb-2">Date</label>
                     <input
+                      id="date"
+                      name="date"
                       type="date"
                       value={scorecard.matchInfo.date}
                       onChange={(e) => updateMatchInfo('date', e.target.value)}
