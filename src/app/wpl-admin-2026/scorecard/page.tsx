@@ -1861,26 +1861,26 @@ export default function ScorecardAdminPage() {
     }
   };
 
-  // Export scorecard to Excel - SIMPLE VERSION
+  // Export scorecard to Enhanced Excel with professional styling
   const exportScorecardExcel = async (sc: Scorecard) => {
     try {
-      console.log('🚀 Starting SIMPLE Excel export...');
+      console.log('🚀 Starting ENHANCED Excel export...');
       
-      // Import the simple Excel export function
-      const { exportSimpleExcel } = await import('./excel-simple');
+      // Import the enhanced Excel export function
+      const { exportEnhancedExcel } = await import('./excel-enhanced');
       
-      console.log('📦 Simple Excel export imported successfully');
-      console.log('🎯 Calling exportSimpleExcel...');
+      console.log('📦 Enhanced Excel export imported successfully');
+      console.log('🎯 Calling exportEnhancedExcel...');
       
-      // Call the simple export function
-      exportSimpleExcel(sc);
+      // Call the enhanced export function
+      exportEnhancedExcel(sc);
       
-      console.log('🎉 Simple Excel export completed successfully!');
-      setMessage('✅ Excel exported successfully!');
+      console.log('🎉 Enhanced Excel export completed successfully!');
+      setMessage('✅ Enhanced Excel exported with professional styling and comprehensive analysis!');
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
-      console.error('❌ Simple Excel export failed:', error);
-      alert(`Excel export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('❌ Enhanced Excel export failed:', error);
+      alert(`Enhanced Excel export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
