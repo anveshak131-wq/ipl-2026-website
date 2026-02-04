@@ -41,6 +41,57 @@ import {
 import WPLFloatingParticles from '@/components/animations/WPLFloatingParticles';
 import { WPLColors, getWPLGlassmorphism, getWPLHoverGlow } from '@/lib/wplColors';
 
+// Import types
+interface Team {
+  id: string | number;
+  name: string;
+  shortName: string;
+  logo?: string;
+  homeVenue?: string;
+  captain?: string;
+  coach?: string;
+  founded?: string;
+  colors?: string[];
+  description?: string;
+  social?: {
+    twitter?: string;
+    instagram?: string;
+    youtube?: string;
+    facebook?: string;
+  };
+}
+
+interface Player {
+  id: string | number;
+  name: string;
+  team?: string | Team;
+  role?: string;
+  battingStyle?: string;
+  bowlingStyle?: string;
+  country?: string;
+  image?: string;
+  jerseyNumber?: number;
+  age?: number;
+  matches?: number;
+  runs?: number;
+  wickets?: number;
+  average?: number;
+  strikeRate?: number;
+  economy?: number;
+}
+
+interface Match {
+  id: string;
+  team1: string | Team;
+  team2: string | Team;
+  date: string;
+  time?: string;
+  venue?: string;
+  result?: string;
+  status?: string;
+  league?: string;
+}
+
 interface EnhancedWPLTeamPageProps {
   teamId: string;
 }
@@ -99,6 +150,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
 
   // Enhanced state for advanced interactions
   const [isHoveringCard, setIsHoveringCard] = useState<string | null>(null);
+  const [isHoveringLogo, setIsHoveringLogo] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isParallaxEnabled, setIsParallaxEnabled] = useState(true);
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
@@ -754,13 +806,15 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       return teamInnings?.totalRuns || 0;
     }).filter(score => score > 0);
     
+    const highestScore = scores.length > 0 ? Math.max(...scores) : 0;
+    const lowestScore = scores.length > 0 ? Math.min(...scores) : 0;
     const stats: TeamStats = {
       matchesPlayed: completedMatches.length,
       wins,
       losses,
       titles: 0, // Would need separate API call
-      highestScore: Math.max(...scores),
-      lowestScore: Math.min(...scores),
+      highestScore,
+      lowestScore,
       averageScore: scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : 0,
       winPercentage: completedMatches.length > 0 ? Math.round((wins / completedMatches.length) * 100) : 0
     };
