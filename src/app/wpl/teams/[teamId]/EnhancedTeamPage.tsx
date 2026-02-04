@@ -348,21 +348,21 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   };
 
   // Mouse tracking event handlers
+  const handleMouseMove = (e: MouseEvent) => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      setMousePosition({ x, y });
+      cursorX.set(x);
+      cursorY.set(y);
+    }
+  };
+
+  const handleMouseEnter = () => setIsHoveringLogo(true);
+  const handleMouseLeave = () => setIsHoveringLogo(false);
+
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        setMousePosition({ x, y });
-        cursorX.set(x);
-        cursorY.set(y);
-      }
-    };
-
-    const handleMouseEnter = () => setIsHoveringLogo(true);
-    const handleMouseLeave = () => setIsHoveringLogo(false);
-
     const container = containerRef.current;
     if (container) {
       container.addEventListener('mousemove', handleMouseMove);
