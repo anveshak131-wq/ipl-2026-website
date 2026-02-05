@@ -1103,8 +1103,8 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
           className="absolute w-96 h-96 rounded-full blur-3xl pointer-events-none"
           style={{
             background: `radial-gradient(circle, ${teamColors.primary}40, ${teamColors.secondary}30, transparent)`,
-            left: mousePosition.x - 192,
-            top: mousePosition.y - 192,
+            left: (mousePosition?.x || 0) - 192,
+            top: (mousePosition?.y || 0) - 192,
           }}
           transition={{ type: "spring", stiffness: 500, damping: 28 }}
         />
@@ -1578,8 +1578,8 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
           className="absolute w-96 h-96 rounded-full blur-3xl pointer-events-none"
           style={{
             background: `radial-gradient(circle, ${teamColors.primary}40, ${teamColors.secondary}30, transparent)`,
-            left: mousePosition.x - 192,
-            top: mousePosition.y - 192,
+            left: (mousePosition?.x || 0) - 192,
+            top: (mousePosition?.y || 0) - 192,
           }}
           transition={{ type: "spring", stiffness: 500, damping: 28 }}
         />

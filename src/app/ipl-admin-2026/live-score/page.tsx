@@ -152,7 +152,7 @@ export default function AdminLiveScorePage() {
 
       // Convert state to API format
       const extendedState = state as any;
-
+      
       const scoreUpdate = {
         team1: {
           name: selectedMatch.team1.shortName || selectedMatch.team1.name,
