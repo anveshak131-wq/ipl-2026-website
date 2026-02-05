@@ -1099,15 +1099,17 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
         ))}
         
         {/* Mouse-following gradient */}
-        <motion.div
-          className="absolute w-96 h-96 rounded-full blur-3xl pointer-events-none"
-          style={{
-            background: `radial-gradient(circle, ${teamColors.primary}40, ${teamColors.secondary}30, transparent)`,
-            left: (mousePosition?.x || 0) - 192,
-            top: (mousePosition?.y || 0) - 192,
-          }}
-          transition={{ type: "spring", stiffness: 500, damping: 28 }}
-        />
+        {mousePosition && (
+          <motion.div
+            className="absolute w-96 h-96 rounded-full blur-3xl pointer-events-none"
+            style={{
+              background: `radial-gradient(circle, ${teamColors.primary}40, ${teamColors.secondary}30, transparent)`,
+              left: (mousePosition?.x || 0) - 192,
+              top: (mousePosition?.y || 0) - 192,
+            }}
+            transition={{ type: "spring", stiffness: 500, damping: 28 }}
+          />
+        )}
       </div>
 
       {/* Enhanced Sticky Navigation Bar */}
@@ -1574,15 +1576,17 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
         </motion.div>
 
         {/* Interactive mouse-following gradient */}
-        <motion.div
-          className="absolute w-96 h-96 rounded-full blur-3xl pointer-events-none"
-          style={{
-            background: `radial-gradient(circle, ${teamColors.primary}40, ${teamColors.secondary}30, transparent)`,
-            left: (mousePosition?.x || 0) - 192,
-            top: (mousePosition?.y || 0) - 192,
-          }}
-          transition={{ type: "spring", stiffness: 500, damping: 28 }}
-        />
+        {mousePosition && (
+          <motion.div
+            className="absolute w-96 h-96 rounded-full blur-3xl pointer-events-none"
+            style={{
+              background: `radial-gradient(circle, ${teamColors.primary}40, ${teamColors.secondary}30, transparent)`,
+              left: (mousePosition?.x || 0) - 192,
+              top: (mousePosition?.y || 0) - 192,
+            }}
+            transition={{ type: "spring", stiffness: 500, damping: 28 }}
+          />
+        )}
         
         <div className="container mx-auto px-4">
           <motion.div
