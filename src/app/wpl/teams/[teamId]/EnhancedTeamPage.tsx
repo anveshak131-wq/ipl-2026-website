@@ -1102,8 +1102,8 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
           />
         ))}
         
-        {/* Mouse-following gradient */}
-        {isInitialized && mousePosition && (
+        {/* Mouse-following gradient - TEMPORARILY DISABLED */}
+        {/* {isInitialized && mousePosition && (
           <motion.div
             className="absolute w-96 h-96 rounded-full blur-3xl pointer-events-none"
             style={{
@@ -1113,7 +1113,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
             }}
             transition={{ type: "spring", stiffness: 500, damping: 28 }}
           />
-        )}
+        )} */}
       </div>
 
       {/* Enhanced Sticky Navigation Bar */}
@@ -1579,8 +1579,8 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
           </div>
         </motion.div>
 
-        {/* Interactive mouse-following gradient */}
-        {isInitialized && mousePosition && (
+        {/* Interactive mouse-following gradient - TEMPORARILY DISABLED */}
+        {/* {isInitialized && mousePosition && (
           <motion.div
             className="absolute w-96 h-96 rounded-full blur-3xl pointer-events-none"
             style={{
@@ -1590,7 +1590,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
             }}
             transition={{ type: "spring", stiffness: 500, damping: 28 }}
           />
-        )}
+        )} */}
         
         <div className="container mx-auto px-4">
           <motion.div
