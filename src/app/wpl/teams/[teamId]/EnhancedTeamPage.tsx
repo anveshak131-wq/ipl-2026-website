@@ -136,6 +136,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState('all');
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isInitialized, setIsInitialized] = useState(false);
   const [teamStats, setTeamStats] = useState<TeamStats | null>(null);
   const [selectedMatch, setSelectedMatch] = useState<any | null>(null);
   const [selectedScorecard, setSelectedScorecard] = useState<any | null>(null);
@@ -356,6 +357,9 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       setMousePosition({ x, y });
       cursorX.set(x);
       cursorY.set(y);
+      if (!isInitialized) {
+        setIsInitialized(true);
+      }
     }
   };
 
@@ -377,7 +381,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
         container.removeEventListener('mouseleave', handleMouseLeave);
       }
     };
-  }, [cursorX, cursorY]);
+  }, [cursorX, cursorY, isInitialized]);
 
   const calculateTeamStatsFromScorecards = (teamScorecards: any[], teamId: string) => {
     console.log('EnhancedTeamPage: Calculating stats from scorecards for team:', teamId);
@@ -1099,7 +1103,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
         ))}
         
         {/* Mouse-following gradient */}
-        {mousePosition && (
+        {isInitialized && mousePosition && (
           <motion.div
             className="absolute w-96 h-96 rounded-full blur-3xl pointer-events-none"
             style={{
@@ -1576,7 +1580,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
         </motion.div>
 
         {/* Interactive mouse-following gradient */}
-        {mousePosition && (
+        {isInitialized && mousePosition && (
           <motion.div
             className="absolute w-96 h-96 rounded-full blur-3xl pointer-events-none"
             style={{
