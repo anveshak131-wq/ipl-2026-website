@@ -104,7 +104,7 @@ export function exportToNumbersSimple(scorecard: ScorecardData) {
           : 'not out';
 
         csvRows.push(
-          `"${bat.playerName}","${dismissal}",${bat.runs},${bat.balls},${bat.fours},${bat.sixes},${bat.strikeRate.toFixed(2)}`
+          `"${bat.playerName}","${dismissal}",${bat.runs},${bat.balls},${bat.fours},${bat.sixes},${bat.strikeRate ? bat.strikeRate.toFixed(2) : '0.00'}`
         );
       });
 
@@ -166,7 +166,7 @@ export function exportToNumbersSimple(scorecard: ScorecardData) {
 
       innings.bowling.forEach(bowl => {
         csvRows.push(
-          `"${bowl.bowlerName}",${bowl.overs},${bowl.maidens},${bowl.runs},${bowl.wickets},${bowl.economy.toFixed(2)},${bowl.wides || 0},${bowl.noBalls || 0}`
+          `"${bowl.bowlerName}",${bowl.overs},${bowl.maidens},${bowl.runs},${bowl.wickets},${bowl.economy ? bowl.economy.toFixed(2) : '0.00'},${bowl.wides || 0},${bowl.noBalls || 0}`
         );
       });
 

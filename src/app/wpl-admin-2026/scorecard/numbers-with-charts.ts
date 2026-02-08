@@ -108,7 +108,7 @@ export function exportToNumbersWithCharts(scorecard: ScorecardData) {
   csvRows.push('"=== CHART 2: STRIKE RATES (Column Chart) ==="');
   csvRows.push('"Player","Strike Rate","Runs","Balls"');
   allBatters
-    .filter(b => b.balls >= 10)
+    .filter(b => b.balls >= 10 && b.strikeRate)
     .sort((a, b) => b.strikeRate - a.strikeRate)
     .slice(0, 10)
     .forEach(bat => {
@@ -139,7 +139,7 @@ export function exportToNumbersWithCharts(scorecard: ScorecardData) {
     .sort((a, b) => b.wickets - a.wickets)
     .slice(0, 10)
     .forEach(bowl => {
-      csvRows.push(`"${bowl.bowlerName}",${bowl.wickets},${bowl.runs},${bowl.economy.toFixed(2)}`);
+      csvRows.push(`"${bowl.bowlerName}",${bowl.wickets},${bowl.runs},${bowl.economy ? bowl.economy.toFixed(2) : '0.00'}`);
     });
   csvRows.push('');
   csvRows.push('');
@@ -148,7 +148,7 @@ export function exportToNumbersWithCharts(scorecard: ScorecardData) {
   csvRows.push('"=== CHART 5: ECONOMY RATES (Column Chart) ==="');
   csvRows.push('"Bowler","Economy","Overs","Runs","Wickets"');
   allBowlers
-    .filter(b => b.overs >= 2)
+    .filter(b => b.overs >= 2 && b.economy)
     .sort((a, b) => a.economy - b.economy)
     .slice(0, 10)
     .forEach(bowl => {
@@ -210,7 +210,7 @@ export function exportToNumbersWithCharts(scorecard: ScorecardData) {
   allBatters
     .filter(b => b.balls >= 5)
     .forEach(bat => {
-      csvRows.push(`"${bat.playerName}",${bat.balls},${bat.runs},${bat.strikeRate.toFixed(2)}`);
+      csvRows.push(`"${bat.playerName}",${bat.balls},${bat.runs},${bat.strikeRate ? bat.strikeRate.toFixed(2) : '0.00'}`);
     });
   csvRows.push('');
   csvRows.push('');
@@ -240,7 +240,7 @@ export function exportToNumbersWithCharts(scorecard: ScorecardData) {
     .filter(b => b.maidens > 0)
     .sort((a, b) => b.maidens - a.maidens)
     .forEach(bowl => {
-      csvRows.push(`"${bowl.bowlerName}",${bowl.maidens},${bowl.overs},${bowl.economy.toFixed(2)}`);
+      csvRows.push(`"${bowl.bowlerName}",${bowl.maidens},${bowl.overs},${bowl.economy ? bowl.economy.toFixed(2) : '0.00'}`);
     });
   csvRows.push('');
   csvRows.push('');

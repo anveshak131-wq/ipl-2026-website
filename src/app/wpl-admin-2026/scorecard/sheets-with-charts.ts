@@ -189,7 +189,7 @@ async function createSpreadsheetWithCharts(scorecard: ScorecardData): Promise<st
         bat.balls,
         bat.fours,
         bat.sixes,
-        bat.strikeRate,
+        bat.strikeRate || 0,
         bat.isOut ? (bat.dismissalType || 'out') : 'not out',
       ]);
     });
@@ -210,7 +210,7 @@ async function createSpreadsheetWithCharts(scorecard: ScorecardData): Promise<st
         bowl.maidens,
         bowl.runs,
         bowl.wickets,
-        bowl.economy,
+        bowl.economy || 0,
         bowl.wides || 0,
         bowl.noBalls || 0,
       ]);
@@ -243,7 +243,7 @@ async function createSpreadsheetWithCharts(scorecard: ScorecardData): Promise<st
 
   // Chart 2: Strike Rates (Column Chart)
   const strikeRates = getAllBatters(scorecard)
-    .filter(b => b.balls >= 10)
+    .filter(b => b.balls >= 10 && b.strikeRate)
     .sort((a, b) => b.strikeRate - a.strikeRate)
     .slice(0, 10);
   
@@ -291,7 +291,7 @@ async function createSpreadsheetWithCharts(scorecard: ScorecardData): Promise<st
     ['Bowler', 'Wickets', 'Runs', 'Economy'],
   ];
   wicketTakers.forEach(bowl => {
-    chart4Data.push([bowl.bowlerName, bowl.wickets, bowl.runs, bowl.economy]);
+    chart4Data.push([bowl.bowlerName, bowl.wickets, bowl.runs, bowl.economy || 0]);
   });
   dataToWrite.push({
     range: 'Chart 4 - Wicket Takers!A1',
@@ -300,7 +300,7 @@ async function createSpreadsheetWithCharts(scorecard: ScorecardData): Promise<st
 
   // Chart 5: Economy Rates (Column Chart)
   const economyRates = getAllBowlers(scorecard)
-    .filter(b => b.overs >= 2)
+    .filter(b => b.overs >= 2 && b.economy)
     .sort((a, b) => a.economy - b.economy)
     .slice(0, 10);
   
