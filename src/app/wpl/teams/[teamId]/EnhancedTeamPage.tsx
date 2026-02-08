@@ -1096,34 +1096,12 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       linkElement.click();
     } else if (format === 'pdf') {
       try {
-        // Try to use the professional PDF exporter (2025) if available
-        const mod = await import('../../../wpl-admin-2026/scorecard/pdf-export-2025');
-        if (mod && typeof mod.exportScorecardPDF2025 === 'function') {
-          // If we have a real selected scorecard, pass it; otherwise pass our sample
-          const sc = (selectedScorecard && selectedScorecard.matchInfo) ? selectedScorecard : scorecardData;
-          await mod.exportScorecardPDF2025(sc);
-          return;
-        }
+        const { exportScorecardAsPDF } = await import('./scorecard-pdf-export');
+        // Use real scorecard data when available, otherwise the sample data
+        const sc = (selectedScorecard && selectedScorecard.matchInfo) ? selectedScorecard : scorecardData;
+        await exportScorecardAsPDF(sc);
       } catch (err) {
-        console.error('PDF export failed (2025 exporter):', err);
-        // Fallback to simple print-based PDF using exportUtils if needed
-      }
-
-      // Fallback: render a printable window and trigger browser print (basic PDF)
-      try {
-        const printable = document.createElement('div');
-        printable.style.padding = '20px';
-        printable.innerHTML = `
-          <h2>Match Scorecard</h2>
-          <pre style="white-space:pre-wrap;">${JSON.stringify(scorecardData, null, 2)}</pre>
-        `;
-        const w = window.open('', '_blank');
-        if (!w) throw new Error('Unable to open print window');
-        w.document.write('<html><head><title>Scorecard</title></head><body>' + printable.innerHTML + '</body></html>');
-        w.document.close();
-        setTimeout(() => w.print(), 300);
-      } catch (err) {
-        console.error('PDF fallback export failed:', err);
+        console.error('PDF export failed:', err);
         alert('PDF export failed: ' + (err instanceof Error ? err.message : 'Unknown error'));
       }
     }
