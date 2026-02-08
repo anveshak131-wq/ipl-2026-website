@@ -440,11 +440,11 @@ function WPLTeamsPageContent() {
                 {/* Interactive mouse-following gradient */}
                 <motion.div
                   className="absolute w-64 h-64 rounded-full blur-2xl pointer-events-none"
-                  style={{
-                    background: `radial-gradient(circle, ${WPLColors.purpleRGBA[30]}, ${WPLColors.pinkRGBA[20]}, transparent)`,
-                    left: mousePosition.x - 128,
-                    top: mousePosition.y - 128,
-                  }}
+                                style={{
+                                        background: `radial-gradient(circle, ${WPLColors.purpleRGBA[30]}, ${WPLColors.pinkRGBA[20]}, transparent)`,
+                                        left: (mousePosition?.x ?? 0) - 128,
+                                        top: (mousePosition?.y ?? 0) - 128,
+                                    }}
                   transition={{ type: "spring", stiffness: 500, damping: 28 }}
                 />
 
