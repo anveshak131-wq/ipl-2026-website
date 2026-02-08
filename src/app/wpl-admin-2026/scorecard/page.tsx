@@ -1996,6 +1996,50 @@ export default function ScorecardAdminPage() {
     }
   };
 
+  // Export scorecard to Apple Numbers (Simple)
+  const exportScorecardNumbersSimple = async (sc: Scorecard) => {
+    try {
+      console.log('🚀 Starting Apple Numbers simple export...');
+      
+      // Import the simple Numbers export function
+      const { exportToNumbersSimple } = await import('./numbers-simple');
+      
+      console.log('📦 Apple Numbers simple export imported successfully');
+      
+      // Export to CSV for Numbers
+      exportToNumbersSimple(sc);
+      
+      console.log('🎉 Apple Numbers simple export completed successfully!');
+      setMessage('✅ CSV for Apple Numbers exported successfully!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error('❌ Apple Numbers simple export failed:', error);
+      alert(`Apple Numbers export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
+  // Export scorecard to Apple Numbers with Charts
+  const exportScorecardNumbersWithCharts = async (sc: Scorecard) => {
+    try {
+      console.log('🚀 Starting Apple Numbers export with charts...');
+      
+      // Import the charts Numbers export function
+      const { exportToNumbersWithCharts } = await import('./numbers-with-charts');
+      
+      console.log('📦 Apple Numbers with charts export imported successfully');
+      
+      // Export to CSV with chart data for Numbers
+      exportToNumbersWithCharts(sc);
+      
+      console.log('🎉 Apple Numbers with charts export completed successfully!');
+      setMessage('✅ CSV with chart data for Apple Numbers exported!');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      console.error('❌ Apple Numbers with charts export failed:', error);
+      alert(`Apple Numbers with charts export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white flex items-center justify-center">
@@ -3229,6 +3273,38 @@ export default function ScorecardAdminPage() {
                 className="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 rounded font-bold transition"
               >
                 📈 Sheets + Charts
+              </button>
+              <button
+                onClick={async () => {
+                  if (!scorecard) return;
+                  setMessage('');
+                  try {
+                    await exportScorecardNumbersSimple(scorecard);
+                  } catch (e) {
+                    console.error('Export Apple Numbers error', e);
+                    setMessage('✗ Error exporting to Apple Numbers');
+                    setTimeout(() => setMessage(''), 3000);
+                  }
+                }}
+                className="px-6 py-3 bg-orange-600 hover:bg-orange-500 rounded font-bold transition"
+              >
+                🍎 Apple Numbers
+              </button>
+              <button
+                onClick={async () => {
+                  if (!scorecard) return;
+                  setMessage('');
+                  try {
+                    await exportScorecardNumbersWithCharts(scorecard);
+                  } catch (e) {
+                    console.error('Export Apple Numbers with charts error', e);
+                    setMessage('✗ Error exporting Apple Numbers with charts');
+                    setTimeout(() => setMessage(''), 3000);
+                  }
+                }}
+                className="px-6 py-3 bg-amber-600 hover:bg-amber-500 rounded font-bold transition"
+              >
+                📊 Numbers + Charts
               </button>
             </div>
           </div>

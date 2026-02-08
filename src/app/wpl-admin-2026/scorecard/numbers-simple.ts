@@ -1,0 +1,201 @@
+/**
+ * Apple Numbers Export - Simple Version
+ * Exports scorecard data as CSV optimized for Apple Numbers
+ */
+
+interface BattingEntry {
+  playerName: string;
+  runs: number;
+  balls: number;
+  fours: number;
+  sixes: number;
+  strikeRate: number;
+  isOut: boolean;
+  dismissalType?: string;
+  fielders?: string[];
+}
+
+interface BowlingEntry {
+  bowlerName: string;
+  overs: number;
+  maidens: number;
+  runs: number;
+  wickets: number;
+  economy: number;
+  wides?: number;
+  noBalls?: number;
+}
+
+interface InningsData {
+  battingTeam: string;
+  bowlingTeam: string;
+  batting: BattingEntry[];
+  bowling: BowlingEntry[];
+  extras?: {
+    wides?: number;
+    noBalls?: number;
+    byes?: number;
+    legByes?: number;
+    total?: number;
+  };
+  total?: {
+    runs: number;
+    wickets: number;
+    overs: number;
+  };
+  fallOfWickets?: Array<{
+    runs: number;
+    wickets: number;
+    playerName: string;
+    overs: number;
+  }>;
+  partnerships?: Array<{
+    player1: string;
+    player2: string;
+    runs: number;
+    balls: number;
+  }>;
+}
+
+interface ScorecardData {
+  matchId: string;
+  team1: string;
+  team2: string;
+  venue?: string;
+  date?: string;
+  result?: string;
+  innings: InningsData[];
+}
+
+/**
+ * Export scorecard to CSV format optimized for Apple Numbers
+ */
+export function exportToNumbersSimple(scorecard: ScorecardData) {
+  const csvRows: string[] = [];
+
+  // Title section
+  csvRows.push(`"${scorecard.team1} vs ${scorecard.team2}"`);
+  csvRows.push('');
+  
+  // Match information
+  csvRows.push('"MATCH INFORMATION"');
+  if (scorecard.venue) csvRows.push(`"Venue","${scorecard.venue}"`);
+  if (scorecard.date) csvRows.push(`"Date","${scorecard.date}"`);
+  if (scorecard.result) csvRows.push(`"Result","${scorecard.result}"`);
+  csvRows.push('');
+  csvRows.push('');
+
+  // Process each innings
+  scorecard.innings.forEach((innings, inningsIndex) => {
+    const inningsNumber = inningsIndex + 1;
+
+    // Innings header
+    csvRows.push(`"INNINGS ${inningsNumber} - ${innings.battingTeam}"`);
+    csvRows.push('');
+
+    // Batting section
+    if (innings.batting && innings.batting.length > 0) {
+      csvRows.push('"BATTING"');
+      csvRows.push('"Batter","Dismissal","Runs","Balls","4s","6s","Strike Rate"');
+
+      innings.batting.forEach(bat => {
+        const dismissal = bat.isOut
+          ? `${bat.dismissalType || 'out'}${bat.fielders && bat.fielders.length > 0 ? ` (${bat.fielders.join(', ')})` : ''}`
+          : 'not out';
+
+        csvRows.push(
+          `"${bat.playerName}","${dismissal}",${bat.runs},${bat.balls},${bat.fours},${bat.sixes},${bat.strikeRate.toFixed(2)}`
+        );
+      });
+
+      csvRows.push('');
+
+      // Extras
+      if (innings.extras) {
+        const extrasTotal = innings.extras.total || 0;
+        const extrasBreakdown = [];
+        if (innings.extras.wides) extrasBreakdown.push(`wd ${innings.extras.wides}`);
+        if (innings.extras.noBalls) extrasBreakdown.push(`nb ${innings.extras.noBalls}`);
+        if (innings.extras.byes) extrasBreakdown.push(`b ${innings.extras.byes}`);
+        if (innings.extras.legByes) extrasBreakdown.push(`lb ${innings.extras.legByes}`);
+
+        csvRows.push(`"Extras","${extrasBreakdown.join(', ')}",${extrasTotal}`);
+      }
+
+      // Total
+      if (innings.total) {
+        csvRows.push(
+          `"TOTAL","${innings.total.wickets} wkts, ${innings.total.overs} ov",${innings.total.runs}`
+        );
+      }
+
+      csvRows.push('');
+      csvRows.push('');
+
+      // Fall of Wickets
+      if (innings.fallOfWickets && innings.fallOfWickets.length > 0) {
+        csvRows.push('"FALL OF WICKETS"');
+        csvRows.push('"Score","Batter","Overs"');
+
+        innings.fallOfWickets.forEach(fow => {
+          csvRows.push(`"${fow.runs}-${fow.wickets}","${fow.playerName}",${fow.overs}`);
+        });
+
+        csvRows.push('');
+        csvRows.push('');
+      }
+
+      // Partnerships
+      if (innings.partnerships && innings.partnerships.length > 0) {
+        csvRows.push('"PARTNERSHIPS"');
+        csvRows.push('"Player 1","Player 2","Runs","Balls"');
+
+        innings.partnerships.forEach(p => {
+          csvRows.push(`"${p.player1}","${p.player2}",${p.runs},${p.balls}`);
+        });
+
+        csvRows.push('');
+        csvRows.push('');
+      }
+    }
+
+    // Bowling section
+    if (innings.bowling && innings.bowling.length > 0) {
+      csvRows.push('"BOWLING"');
+      csvRows.push('"Bowler","Overs","Maidens","Runs","Wickets","Economy","Wides","No Balls"');
+
+      innings.bowling.forEach(bowl => {
+        csvRows.push(
+          `"${bowl.bowlerName}",${bowl.overs},${bowl.maidens},${bowl.runs},${bowl.wickets},${bowl.economy.toFixed(2)},${bowl.wides || 0},${bowl.noBalls || 0}`
+        );
+      });
+
+      csvRows.push('');
+      csvRows.push('');
+    }
+
+    csvRows.push('');
+  });
+
+  // Footer
+  csvRows.push('');
+  csvRows.push('"Generated by SportsUP18"');
+  csvRows.push(`"Date: ${new Date().toLocaleDateString()}"`);
+
+  // Create CSV blob and download
+  const csvContent = csvRows.join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+
+  const filename = `${scorecard.team1}_vs_${scorecard.team2}_Numbers.csv`;
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+
+  console.log(`✅ Numbers CSV exported: ${filename}`);
+}
