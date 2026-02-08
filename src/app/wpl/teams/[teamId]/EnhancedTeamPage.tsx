@@ -59,6 +59,25 @@ interface Team {
     youtube?: string;
     facebook?: string;
   };
+
+  // Resolve team display names (short / full) from team object or id
+  const resolveTeam = (t: any) => {
+    if (!t) return { short: 'TBD', full: 'TBD' };
+    if (typeof t === 'object') {
+      return {
+        short: (t.shortName && String(t.shortName)) || (t.name && String(t.name)) || String(t.id || 'TBD'),
+        full: (t.name && String(t.name)) || (t.shortName && String(t.shortName)) || String(t.id || 'TBD')
+      };
+    }
+    // t is string or number => try to find in allTeams
+    const idStr = String(t);
+    const found = allTeams.find(a => String(a.id) === idStr || (a.shortName && a.shortName.toLowerCase() === idStr.toLowerCase()));
+    if (found) return { short: found.shortName || found.name, full: found.name || found.shortName };
+    return { short: idStr, full: idStr };
+  };
+
+  const getTeamShort = (t: any) => resolveTeam(t).short;
+  const getTeamFull = (t: any) => resolveTeam(t).full;
 }
 
 interface Player {
@@ -137,6 +156,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   const [selectedRole, setSelectedRole] = useState('all');
   const [isInitialized, setIsInitialized] = useState(false);
   const [teamStats, setTeamStats] = useState<TeamStats | null>(null);
+  const [allTeams, setAllTeams] = useState<Team[]>([]);
   const [selectedMatch, setSelectedMatch] = useState<any | null>(null);
   const [selectedScorecard, setSelectedScorecard] = useState<any | null>(null);
   const [showScorecard, setShowScorecard] = useState(false);
@@ -320,6 +340,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       if (teamsResponse.ok) {
         const teams = await teamsResponse.json();
         console.log('EnhancedTeamPage: Received teams:', teams.length);
+        setAllTeams(teams || []);
         
         // Simple team matching
         const normalizedTeamId = teamId.toLowerCase().trim();
@@ -633,11 +654,11 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       return (
         sc.matchId === match.id || 
         (sc.matchInfo && match.team1 && match.team2 && (
-          // Match by team combination (ignore date since scorecards have null dates)
-          ((sc.matchInfo.team1?.shortName === match.team1.shortName && 
-            sc.matchInfo.team2?.shortName === match.team2.shortName) ||
-           (sc.matchInfo.team1?.shortName === match.team2.shortName && 
-            sc.matchInfo.team2?.shortName === match.team1.shortName))
+          // Match by normalized team short names (handles objects or id strings)
+          ((getTeamShort(sc.matchInfo.team1) === getTeamShort(match.team1) && 
+            getTeamShort(sc.matchInfo.team2) === getTeamShort(match.team2)) ||
+           (getTeamShort(sc.matchInfo.team1) === getTeamShort(match.team2) && 
+            getTeamShort(sc.matchInfo.team2) === getTeamShort(match.team1)))
         ))
       );
     });
@@ -667,10 +688,10 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
     return allScorecards.some(sc => 
       sc.matchId === match.id || 
       (sc.matchInfo && match.team1 && match.team2 && (
-        ((sc.matchInfo.team1?.shortName === match.team1.shortName && 
-          sc.matchInfo.team2?.shortName === match.team2.shortName) ||
-         (sc.matchInfo.team1?.shortName === match.team2.shortName && 
-          sc.matchInfo.team2?.shortName === match.team1.shortName))
+        ((getTeamShort(sc.matchInfo.team1) === getTeamShort(match.team1) && 
+          getTeamShort(sc.matchInfo.team2) === getTeamShort(match.team2)) ||
+         (getTeamShort(sc.matchInfo.team1) === getTeamShort(match.team2) && 
+          getTeamShort(sc.matchInfo.team2) === getTeamShort(match.team1)))
       ))
     );
   };
@@ -961,7 +982,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   }, [matches, teamId]);
 
   // Export Scorecard Function - Complete Data Version
-  const exportScorecard = (format: 'excel' | 'csv' | 'json') => {
+  const exportScorecard = async (format: 'excel' | 'csv' | 'json' | 'pdf') => {
     // Complete test data with ALL sections clearly visible
     const scorecardData = {
       matchInfo: {
@@ -1075,6 +1096,38 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       linkElement.setAttribute('href', dataUri);
       linkElement.setAttribute('download', `${fileName}.xls`);
       linkElement.click();
+    } else if (format === 'pdf') {
+      try {
+        // Try to use the professional PDF exporter (2025) if available
+        const mod = await import('../../wpl-admin-2026/scorecard/pdf-export-2025');
+        if (mod && typeof mod.exportScorecardPDF2025 === 'function') {
+          // If we have a real selected scorecard, pass it; otherwise pass our sample
+          const sc = (selectedScorecard && selectedScorecard.matchInfo) ? selectedScorecard : scorecardData;
+          await mod.exportScorecardPDF2025(sc);
+          return;
+        }
+      } catch (err) {
+        console.error('PDF export failed (2025 exporter):', err);
+        // Fallback to simple print-based PDF using exportUtils if needed
+      }
+
+      // Fallback: render a printable window and trigger browser print (basic PDF)
+      try {
+        const printable = document.createElement('div');
+        printable.style.padding = '20px';
+        printable.innerHTML = `
+          <h2>Match Scorecard</h2>
+          <pre style="white-space:pre-wrap;">${JSON.stringify(scorecardData, null, 2)}</pre>
+        `;
+        const w = window.open('', '_blank');
+        if (!w) throw new Error('Unable to open print window');
+        w.document.write('<html><head><title>Scorecard</title></head><body>' + printable.innerHTML + '</body></html>');
+        w.document.close();
+        setTimeout(() => w.print(), 300);
+      } catch (err) {
+        console.error('PDF fallback export failed:', err);
+        alert('PDF export failed: ' + (err instanceof Error ? err.message : 'Unknown error'));
+      }
     }
   };
 
@@ -3551,10 +3604,10 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                                   <span className="text-3xl md:text-4xl">🏏</span>
                                 </motion.div>
                                 <div className="text-white font-black text-lg md:text-xl mb-1">
-                                  {match.team1?.shortName || 'TBD'}
+                                  {getTeamShort(match.team1) || 'TBD'}
                                 </div>
                                 <div className="text-white/60 text-xs md:text-sm font-medium line-clamp-2">
-                                  {match.team1?.name || 'Team 1'}
+                                  {getTeamFull(match.team1) || 'Team 1'}
                                 </div>
                               </motion.div>
                               
@@ -3611,10 +3664,10 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                                   <span className="text-3xl md:text-4xl">🏏</span>
                                 </motion.div>
                                 <div className="text-white font-black text-lg md:text-xl mb-1">
-                                  {match.team2?.shortName || 'TBD'}
+                                  {getTeamShort(match.team2) || 'TBD'}
                                 </div>
                                 <div className="text-white/60 text-xs md:text-sm font-medium line-clamp-2">
-                                  {match.team2?.name || 'Team 2'}
+                                  {getTeamFull(match.team2) || 'Team 2'}
                                 </div>
                               </motion.div>
                             </div>
@@ -4153,6 +4206,17 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
                               >
                                 <span className="text-lg">🔧</span>
                                 JSON
+                              </motion.button>
+                              
+                              {/* PDF Export */}
+                              <motion.button
+                                whileHover={{ scale: 1.05, y: -2 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => exportScorecard('pdf')}
+                                className="px-4 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-xl transition-all duration-300"
+                              >
+                                <span className="text-lg">📄</span>
+                                PDF
                               </motion.button>
                             </div>
                           </div>
