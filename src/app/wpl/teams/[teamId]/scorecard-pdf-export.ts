@@ -87,13 +87,11 @@ export async function exportScorecardAsPDF(data: any): Promise<void> {
   const team2 = mi.team2?.shortName || mi.team2?.name || str(mi.team2) || 'Team 2';
   const venue = mi.venue || 'Venue TBD';
   const date  = mi.date  || new Date().toISOString().split('T')[0];
-  const resultWinner = mi.result?.winner || '';
-  const resultMargin = mi.result?.margin || '';
+  const tossText = mi.toss ? `${mi.toss.winner} won the toss and chose to ${mi.toss.decision}` : '';
+  const resultWinner = data.result?.winner || mi.result?.winner || '';
+  const resultMargin = data.result?.margin || mi.result?.margin || '';
+  const resultMOM    = data.result?.manOfTheMatch || mi.result?.manOfTheMatch || '';
   const resultText = resultWinner ? `${resultWinner} won by ${resultMargin}` : 'Result Pending';
-
-  const fow: any[]  = data.fallOfWickets || [];
-  const pp: any[]   = data.powerplays    || [];
-  const parts: any[] = data.partnerships  || [];
 
   // Also check innings-level data (from admin scorecards)
   const innings: any[] = data.innings || [];
@@ -122,12 +120,12 @@ export async function exportScorecardAsPDF(data: any): Promise<void> {
   y = 140;
 
   // ── Match Info Card ────────────────────────────────────────────
+  const cardH = 120 + (tossText ? 18 : 0) + (resultMOM ? 18 : 0);
   setF(C.light);
-  rect(M, y, W - 2 * M, 120, 'F');
-  // border
+  rect(M, y, W - 2 * M, cardH, 'F');
   doc.setDrawColor(...C.purple);
   doc.setLineWidth(1.5);
-  doc.rect(M, y, W - 2 * M, 120);
+  doc.rect(M, y, W - 2 * M, cardH);
 
   const infoX = M + 20;
   y += 25;
@@ -138,135 +136,150 @@ export async function exportScorecardAsPDF(data: any): Promise<void> {
   y += 18;
   text(`📍 ${venue}`, infoX, y, C.slate, 10, 'normal');
   text(`📅 ${date}`, infoX + 260, y, C.slate, 10, 'normal');
+  if (tossText) { y += 16; text(`🪙 ${tossText}`, infoX, y, C.slate, 9, 'italic'); }
   y += 18;
 
   // result badge
-  const badgeW = 260;
+  const badgeW = 300;
   const badgeX = infoX;
   setF(resultWinner ? C.green : C.orange);
   rect(badgeX, y - 2, badgeW, 22, 'F');
   text(`🏆  ${resultText}`, badgeX + 8, y + 13, C.white, 10, 'bold');
-  y += 40;
+  if (resultMOM) {
+    y += 26;
+    text(`⭐ Man of the Match: ${resultMOM}`, infoX, y + 4, C.purple, 10, 'bold');
+  }
+  y += 28;
 
   // ═══════════════════════════════════════════════════════════════
-  // FALL OF WICKETS
+  // FALL OF WICKETS  (per innings)
   // ═══════════════════════════════════════════════════════════════
-  const fowData = fow.length > 0 ? fow : (hasInningsData ? extractFOW(innings) : []);
-  if (fowData.length > 0) {
-    y += 15;
-    needPage(40 + fowData.length * 22);
-    drawSectionHeader(doc, y, W, M, '📉  FALL OF WICKETS', C.red);
-    y += 30;
+  if (hasInningsData) {
+    innings.forEach((inn: any, innIdx: number) => {
+      const fowArr: any[] = inn.fallOfWickets || [];
+      if (fowArr.length === 0) return;
+      const iTeam = inn.teamName || inn.teamId || (innIdx === 0 ? team1 : team2);
+      y += 15;
+      needPage(40 + fowArr.length * 22);
+      drawSectionHeader(doc, y, W, M, `📉  FALL OF WICKETS — ${iTeam}`, C.red);
+      y += 30;
 
-    // table header
-    const cols = ['#', 'Batsman', 'Score', 'Over', 'Dismissal', 'Bowler'];
-    const colW = [30, 130, 60, 50, 100, 130];
-    let cx = M;
-    setF(C.dark);
-    rect(M, y, W - 2 * M, 20, 'F');
-    cols.forEach((h, i) => {
-      text(h, cx + 6, y + 14, C.white, 8, 'bold');
-      cx += colW[i];
-    });
-    y += 20;
-
-    fowData.forEach((w: any, idx: number) => {
-      needPage(22);
-      const bg = idx % 2 === 0 ? C.light : C.white;
-      setF(bg);
+      const cols = ['#', 'Player', 'Score', 'Over'];
+      const colW = [40, 200, 120, 120];
+      let cx = M;
+      setF(C.dark);
       rect(M, y, W - 2 * M, 20, 'F');
-      cx = M;
-      const vals = [
-        str(w.wicketNumber ?? idx + 1),
-        str(w.batsman),
-        str(w.runs),
-        w.over != null ? `${w.over}.${w.ball ?? 0}` : '',
-        str(w.dismissalType),
-        str(w.bowler),
-      ];
-      vals.forEach((v, i) => {
-        text(v, cx + 6, y + 14, C.dark, 8, 'normal');
+      cols.forEach((h, i) => {
+        text(h, cx + 6, y + 14, C.white, 8, 'bold');
         cx += colW[i];
       });
       y += 20;
-    });
 
-    // border around table
-    doc.setDrawColor(...C.slate);
-    doc.setLineWidth(0.5);
-    doc.rect(M, y - 20 * fowData.length - 20, W - 2 * M, 20 * fowData.length + 20);
-  }
+      fowArr.forEach((f: any, idx: number) => {
+        needPage(22);
+        setF(idx % 2 === 0 ? C.light : C.white);
+        rect(M, y, W - 2 * M, 20, 'F');
+        cx = M;
+        const vals = [
+          str(idx + 1),
+          str(f.player || f.batsman || ''),
+          str(f.score || f.runs || ''),
+          str(f.over || ''),
+        ];
+        vals.forEach((v, i) => {
+          text(v, cx + 6, y + 14, C.dark, 8, 'normal');
+          cx += colW[i];
+        });
+        y += 20;
+      });
 
-  // ═══════════════════════════════════════════════════════════════
-  // POWERPLAYS
-  // ═══════════════════════════════════════════════════════════════
-  const ppData = pp.length > 0 ? pp : (hasInningsData ? extractPP(innings) : []);
-  if (ppData.length > 0) {
-    y += 25;
-    needPage(40 + ppData.length * 46);
-    drawSectionHeader(doc, y, W, M, '⚡  POWERPLAYS', C.cyan);
-    y += 30;
-
-    ppData.forEach((p: any, idx: number) => {
-      needPage(50);
-      // card
-      setF(idx % 2 === 0 ? C.light : C.white);
-      rect(M, y, W - 2 * M, 40, 'F');
-      doc.setDrawColor(...C.cyan);
-      doc.setLineWidth(0.8);
-      doc.rect(M, y, W - 2 * M, 40);
-
-      // left accent
-      setF(C.cyan);
-      rect(M, y, 4, 40, 'F');
-
-      text(str(p.name || `Powerplay ${idx + 1}`), M + 14, y + 16, C.dark, 10, 'bold');
-      text(str(p.description || ''), M + 14, y + 30, C.muted, 8, 'italic');
-
-      const rx = W - M - 160;
-      text(`Overs ${p.startOver || '?'}–${p.endOver || '?'}`, rx, y + 16, C.slate, 9, 'normal');
-      text(`${p.runs ?? '–'} runs  /  ${p.wickets ?? '–'} wkts`, rx, y + 30, C.purple, 9, 'bold');
-
-      y += 46;
+      doc.setDrawColor(...C.slate);
+      doc.setLineWidth(0.5);
+      doc.rect(M, y - 20 * fowArr.length - 20, W - 2 * M, 20 * fowArr.length + 20);
     });
   }
 
   // ═══════════════════════════════════════════════════════════════
-  // PARTNERSHIPS
+  // POWERPLAYS  (per innings)
   // ═══════════════════════════════════════════════════════════════
-  const partData = parts.length > 0 ? parts : (hasInningsData ? extractPartnerships(innings) : []);
-  if (partData.length > 0) {
-    y += 25;
-    needPage(40 + partData.length * 55);
-    drawSectionHeader(doc, y, W, M, '🤝  PARTNERSHIPS', C.green);
-    y += 30;
+  if (hasInningsData) {
+    innings.forEach((inn: any, innIdx: number) => {
+      const ppItems: { type: string; overs: string; runs: any }[] = [];
+      if (inn.powerplays?.mandatory) ppItems.push({ type: 'Mandatory', overs: str(inn.powerplays.mandatory.overs), runs: inn.powerplays.mandatory.runs ?? '-' });
+      if (inn.powerplays?.optional)  ppItems.push({ type: 'Optional',  overs: str(inn.powerplays.optional.overs),  runs: inn.powerplays.optional.runs  ?? '-' });
+      if (inn.powerplay)             ppItems.push({ type: 'Powerplay', overs: str(inn.powerplay.overs), runs: inn.powerplay.runs ?? '-' });
+      if (ppItems.length === 0) return;
 
-    // bar chart
-    const maxRuns = Math.max(...partData.map((p: any) => Number(p.runs) || 0), 1);
-    const barAreaW = W - 2 * M - 20;
+      const iTeam = inn.teamName || inn.teamId || (innIdx === 0 ? team1 : team2);
+      y += 25;
+      needPage(40 + ppItems.length * 46);
+      drawSectionHeader(doc, y, W, M, `⚡  POWERPLAYS — ${iTeam}`, C.cyan);
+      y += 30;
 
-    partData.forEach((p: any, idx: number) => {
-      needPage(50);
-      const runs  = Number(p.runs) || 0;
-      const balls = Number(p.balls) || 0;
-      const sr    = balls > 0 ? ((runs / balls) * 100).toFixed(1) : '–';
-      const barW  = (runs / maxRuns) * (barAreaW * 0.5);
+      ppItems.forEach((p, idx) => {
+        needPage(50);
+        setF(idx % 2 === 0 ? C.light : C.white);
+        rect(M, y, W - 2 * M, 36, 'F');
+        doc.setDrawColor(...C.cyan);
+        doc.setLineWidth(0.8);
+        doc.rect(M, y, W - 2 * M, 36);
 
-      // row bg
-      setF(idx % 2 === 0 ? C.light : C.white);
-      rect(M, y, W - 2 * M, 44, 'F');
+        setF(C.cyan);
+        rect(M, y, 4, 36, 'F');
 
-      // partnership label
-      text(`${idx + 1}. ${str(p.batsman1)} & ${str(p.batsman2)}`, M + 10, y + 16, C.dark, 9, 'bold');
-      text(`Overs ${p.startOver || '?'}–${p.endOver || '?'}`, M + 10, y + 30, C.muted, 8, 'normal');
+        text(p.type, M + 14, y + 16, C.dark, 10, 'bold');
+        const rx = W - M - 160;
+        text(`Overs: ${p.overs || '-'}`, rx, y + 16, C.slate, 9, 'normal');
+        text(`${p.runs} runs`, rx, y + 30, C.purple, 9, 'bold');
 
-      // bar
-      const barX = M + 240;
-      setF(C.green);
-      rect(barX, y + 6, barW, 14, 'F');
-      text(`${runs} (${balls}b)  SR ${sr}`, barX + barW + 8, y + 16, C.dark, 8, 'bold');
+        y += 42;
+      });
+    });
+  }
 
-      y += 48;
+  // ═══════════════════════════════════════════════════════════════
+  // PARTNERSHIPS  (per innings)
+  // ═══════════════════════════════════════════════════════════════
+  if (hasInningsData) {
+    innings.forEach((inn: any, innIdx: number) => {
+      const pArr: any[] = inn.partnerships || [];
+      if (pArr.length === 0) return;
+      const iTeam = inn.teamName || inn.teamId || (innIdx === 0 ? team1 : team2);
+
+      y += 25;
+      needPage(40 + pArr.length * 55);
+      drawSectionHeader(doc, y, W, M, `🤝  PARTNERSHIPS — ${iTeam}`, C.green);
+      y += 30;
+
+      const maxRuns = Math.max(...pArr.map((p: any) => Number(p.totalRuns || p.runs) || 0), 1);
+      const barAreaW = W - 2 * M - 20;
+
+      pArr.forEach((p: any, idx: number) => {
+        needPage(55);
+        const totalRuns  = Number(p.totalRuns || p.runs) || 0;
+        const b1r = str(p.batsman1Runs ?? p.runs1 ?? '');
+        const b1b = str(p.batsman1Balls ?? p.balls1 ?? '');
+        const b2r = str(p.batsman2Runs ?? p.runs2 ?? '');
+        const b2b = str(p.batsman2Balls ?? p.balls2 ?? '');
+        const barW = (totalRuns / maxRuns) * (barAreaW * 0.45);
+
+        setF(idx % 2 === 0 ? C.light : C.white);
+        rect(M, y, W - 2 * M, 48, 'F');
+
+        // partnership label
+        text(`${idx + 1}. ${str(p.batsman1)} & ${str(p.batsman2)}`, M + 10, y + 16, C.dark, 9, 'bold');
+        // detail line
+        const detail = `${str(p.batsman1)}: ${b1r}(${b1b})   ${str(p.batsman2)}: ${b2r}(${b2b})`;
+        text(detail, M + 10, y + 32, C.muted, 7, 'normal');
+
+        // bar
+        const barX = M + 280;
+        setF(C.green);
+        rect(barX, y + 6, barW, 14, 'F');
+        text(`${totalRuns} runs`, barX + barW + 8, y + 16, C.dark, 8, 'bold');
+
+        y += 52;
+      });
     });
   }
 
@@ -308,9 +321,18 @@ export async function exportScorecardAsPDF(data: any): Promise<void> {
           const runs_b  = Number(b.runs) || 0;
           const balls_b = Number(b.balls) || 0;
           const sr_b    = balls_b > 0 ? ((runs_b / balls_b) * 100).toFixed(1) : '0.0';
+          // Handle dismissal — can be object { type, details } or string
+          let dismissalStr = 'not out';
+          if (typeof b.dismissal === 'object' && b.dismissal) {
+            dismissalStr = b.dismissal.details || b.dismissal.type || 'not out';
+          } else if (typeof b.dismissal === 'string' && b.dismissal) {
+            dismissalStr = b.dismissal;
+          } else if (b.howOut) {
+            dismissalStr = str(b.howOut);
+          }
           const vals = [
             str(b.name || b.batsman),
-            str(b.dismissal || b.howOut || 'not out'),
+            dismissalStr,
             str(runs_b),
             str(balls_b),
             str(b.fours ?? b['4s'] ?? 0),
@@ -324,6 +346,21 @@ export async function exportScorecardAsPDF(data: any): Promise<void> {
           });
           y += 20;
         });
+      }
+
+      // Extras + Total row
+      if (batting.length > 0) {
+        const ex = inn.extras || {};
+        needPage(24);
+        setF(C.light);
+        rect(M, y, W - 2 * M, 20, 'F');
+        text('Extras', M + 4, y + 14, C.slate, 8, 'bold');
+        text(`W ${ex.wides||0}  NB ${ex.noBalls||0}  B ${ex.byes||0}  LB ${ex.legByes||0}`, M + 134, y + 14, C.slate, 8, 'normal');
+        y += 20;
+        setF(C.purple);
+        rect(M, y, W - 2 * M, 20, 'F');
+        text(`TOTAL: ${total}/${wickets}  (${overs} ov)`, M + 4, y + 14, C.white, 9, 'bold');
+        y += 22;
       }
 
       // Bowling table
@@ -349,14 +386,17 @@ export async function exportScorecardAsPDF(data: any): Promise<void> {
           setF(bi % 2 === 0 ? C.light : C.white);
           rect(M, y, W - 2 * M, 20, 'F');
           cx = M;
+          const bwOvers = Number(bw.overs) || 0;
+          const bwRuns  = Number(bw.runs)  || 0;
+          const econ = bw.economyRate ?? bw.economy ?? (bwOvers > 0 ? (bwRuns / bwOvers).toFixed(1) : '-');
           const vals = [
             str(bw.name || bw.bowler),
             str(bw.overs ?? 0),
             str(bw.maidens ?? 0),
-            str(bw.runs ?? 0),
+            str(bwRuns),
             str(bw.wickets ?? 0),
-            str(bw.economy ?? '–'),
-            str(bw.dots ?? '–'),
+            str(econ),
+            str(bw.dots ?? '-'),
           ];
           vals.forEach((v, i) => {
             const isBold = i === 0 || i === 4;
@@ -405,28 +445,4 @@ function drawSectionHeader(
   doc.text(title, M + 14, y + 15);
 }
 
-// ─── data extractors for admin-shaped scorecards ─────────────────
-function extractFOW(innings: any[]): any[] {
-  const arr: any[] = [];
-  innings.forEach(inn => {
-    (inn.fallOfWickets || []).forEach((f: any) => arr.push(f));
-  });
-  return arr;
-}
-function extractPP(innings: any[]): any[] {
-  const arr: any[] = [];
-  innings.forEach(inn => {
-    if (inn.powerplays?.mandatory) arr.push({ name: 'Mandatory PP', ...inn.powerplays.mandatory });
-    if (inn.powerplays?.optional)  arr.push({ name: 'Optional PP',  ...inn.powerplays.optional  });
-  });
-  return arr;
-}
-function extractPartnerships(innings: any[]): any[] {
-  const arr: any[] = [];
-  innings.forEach(inn => {
-    (inn.partnerships || []).forEach((p: any, i: number) =>
-      arr.push({ ...p, partnershipNumber: i + 1 })
-    );
-  });
-  return arr;
-}
+

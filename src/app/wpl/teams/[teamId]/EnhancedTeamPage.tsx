@@ -979,127 +979,270 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
     });
   }, [matches, teamId]);
 
-  // Export Scorecard Function - Complete Data Version
-  const exportScorecard = async (format: 'excel' | 'csv' | 'json' | 'pdf') => {
-    // Complete test data with ALL sections clearly visible
-    const scorecardData = {
+  // ── Helpers to normalise admin scorecard data for export ──────
+  const buildExportData = (sc: any) => {
+    const mi = sc.matchInfo || {};
+    const t1 = mi.team1?.shortName || mi.team1?.name || (typeof mi.team1 === 'string' ? mi.team1 : 'Team 1');
+    const t2 = mi.team2?.shortName || mi.team2?.name || (typeof mi.team2 === 'string' ? mi.team2 : 'Team 2');
+    const innings: any[] = sc.innings || [];
+
+    // Build per-innings batting / bowling arrays
+    const inningsData = innings.map((inn: any, idx: number) => {
+      const teamName = inn.teamName || inn.teamId || (idx === 0 ? t1 : t2);
+      const batting = (inn.batting || []).map((b: any) => ({
+        name: b.name || b.batsman || '',
+        runs: Number(b.runs) || 0,
+        balls: Number(b.balls) || 0,
+        fours: Number(b.fours ?? b['4s'] ?? 0),
+        sixes: Number(b.sixes ?? b['6s'] ?? 0),
+        strikeRate: b.balls > 0 ? ((Number(b.runs) / Number(b.balls)) * 100).toFixed(1) : '0.0',
+        dismissal: typeof b.dismissal === 'object'
+          ? (b.dismissal?.details || b.dismissal?.type || 'not out')
+          : (b.dismissal || b.howOut || 'not out'),
+      }));
+      const bowling = (inn.bowling || []).map((bw: any) => ({
+        name: bw.name || bw.bowler || '',
+        overs: bw.overs ?? 0,
+        maidens: bw.maidens ?? 0,
+        runs: bw.runs ?? 0,
+        wickets: bw.wickets ?? 0,
+        economy: bw.economyRate ?? bw.economy ?? (bw.overs > 0 ? (Number(bw.runs) / Number(bw.overs)).toFixed(1) : '0.0'),
+        wides: bw.wides ?? 0,
+        noBalls: bw.noBalls ?? 0,
+        dots: bw.dots ?? '-',
+      }));
+      const extras = inn.extras || {};
+      const fow = (inn.fallOfWickets || []).map((f: any, i: number) => ({
+        wicketNumber: i + 1,
+        player: f.player || f.batsman || '',
+        score: f.score || f.runs || '',
+        over: f.over || '',
+      }));
+      const pps: any[] = [];
+      if (inn.powerplays?.mandatory) pps.push({ type: 'Mandatory', overs: inn.powerplays.mandatory.overs || '', runs: inn.powerplays.mandatory.runs ?? '' });
+      if (inn.powerplays?.optional)  pps.push({ type: 'Optional',  overs: inn.powerplays.optional.overs  || '', runs: inn.powerplays.optional.runs  ?? '' });
+      if (inn.powerplay) pps.push({ type: 'Powerplay', overs: inn.powerplay.overs || '', runs: inn.powerplay.runs ?? '' });
+      const partnerships = (inn.partnerships || []).map((p: any, i: number) => ({
+        number: i + 1,
+        batsman1: p.batsman1 || '',
+        batsman1Runs: p.batsman1Runs ?? p.runs1 ?? '',
+        batsman1Balls: p.batsman1Balls ?? p.balls1 ?? '',
+        batsman2: p.batsman2 || '',
+        batsman2Runs: p.batsman2Runs ?? p.runs2 ?? '',
+        batsman2Balls: p.batsman2Balls ?? p.balls2 ?? '',
+        totalRuns: p.totalRuns ?? p.runs ?? '',
+      }));
+      return {
+        teamName,
+        totalRuns: inn.totalRuns ?? inn.total ?? '-',
+        totalWickets: inn.totalWickets ?? inn.wickets ?? '-',
+        totalOvers: inn.totalOvers ?? inn.overs ?? '-',
+        batting,
+        bowling,
+        extras,
+        fallOfWickets: fow,
+        powerplays: pps,
+        partnerships,
+      };
+    });
+
+    return {
       matchInfo: {
-        matchId: "TEST-MATCH-001",
-        team1: "Team A",
-        team2: "Team B", 
-        venue: "Test Stadium",
-        date: "2024-01-01",
-        result: { winner: "Team A", margin: "5 wickets" }
+        matchId: sc.matchId || sc.id || '',
+        team1: t1,
+        team2: t2,
+        venue: mi.venue || '',
+        date: mi.date || '',
+        toss: mi.toss ? `${mi.toss.winner} won toss and chose to ${mi.toss.decision}` : '',
       },
-      fallOfWickets: [
-        { team: "Team A", wicketNumber: 1, batsman: "Batsman 1", runs: 15, over: 3, ball: 2, dismissalType: "Bowled", bowler: "Bowler 1" },
-        { team: "Team A", wicketNumber: 2, batsman: "Batsman 2", runs: 45, over: 8, ball: 4, dismissalType: "Caught", bowler: "Bowler 2" },
-        { team: "Team A", wicketNumber: 3, batsman: "Batsman 3", runs: 78, over: 12, ball: 1, dismissalType: "LBW", bowler: "Bowler 1" },
-        { team: "Team A", wicketNumber: 4, batsman: "Batsman 4", runs: 125, over: 16, ball: 3, dismissalType: "Run Out", bowler: "-" },
-        { team: "Team A", wicketNumber: 5, batsman: "Batsman 5", runs: 156, over: 18, ball: 5, dismissalType: "Caught", bowler: "Bowler 3" }
-      ],
-      powerplays: [
-        { team: "Team A", name: "Powerplay 1", startOver: 1, endOver: 6, runs: 45, wickets: 1, description: "Mandatory powerplay" },
-        { team: "Team A", name: "Powerplay 2", startOver: 7, endOver: 15, runs: 78, wickets: 3, description: "Middle overs phase" },
-        { team: "Team A", name: "Powerplay 3", startOver: 16, endOver: 20, runs: 33, wickets: 1, description: "Death overs" }
-      ],
-      partnerships: [
-        { team: "Team A", partnershipNumber: 1, batsman1: "Batsman 1", batsman2: "Batsman 2", runs: 30, balls: 24, startOver: 1, endOver: 4 },
-        { team: "Team A", partnershipNumber: 2, batsman1: "Batsman 2", batsman2: "Batsman 3", runs: 45, balls: 36, startOver: 5, endOver: 9 },
-        { team: "Team A", partnershipNumber: 3, batsman1: "Batsman 3", batsman2: "Batsman 4", runs: 67, balls: 48, startOver: 10, endOver: 15 },
-        { team: "Team A", partnershipNumber: 4, batsman1: "Batsman 4", batsman2: "Batsman 5", runs: 31, balls: 18, startOver: 16, endOver: 18 }
-      ]
+      result: {
+        winner: sc.result?.winner || '',
+        margin: sc.result?.margin || '',
+        manOfTheMatch: sc.result?.manOfTheMatch || '',
+      },
+      innings: inningsData,
     };
+  };
 
-    const fileName = `match-scorecard-${new Date().toISOString().split('T')[0]}`;
+  // Export Scorecard Function — pulls real data from admin scorecard
+  const exportScorecard = async (format: 'excel' | 'csv' | 'json' | 'pdf') => {
+    if (!selectedScorecard || !selectedScorecard.matchInfo) {
+      alert('No scorecard data available for this match.');
+      return;
+    }
 
+    const data = buildExportData(selectedScorecard);
+    const t1 = data.matchInfo.team1;
+    const t2 = data.matchInfo.team2;
+    const fileName = `${t1}_vs_${t2}_Scorecard_${new Date().toISOString().split('T')[0]}`.replace(/\s+/g, '_');
+
+    // ── JSON ─────────────────────────────────────────────────────
     if (format === 'json') {
-      const dataStr = JSON.stringify(scorecardData, null, 2);
-      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-      const linkElement = document.createElement('a');
-      linkElement.setAttribute('href', dataUri);
-      linkElement.setAttribute('download', `${fileName}.json`);
-      linkElement.click();
-      
-    } else if (format === 'csv') {
-      let csvContent = 'MATCH INFO\n';
-      csvContent += `Match ID,${scorecardData.matchInfo.matchId}\n`;
-      csvContent += `Team 1,${scorecardData.matchInfo.team1}\n`;
-      csvContent += `Team 2,${scorecardData.matchInfo.team2}\n`;
-      csvContent += `Venue,${scorecardData.matchInfo.venue}\n`;
-      csvContent += `Date,${scorecardData.matchInfo.date}\n`;
-      csvContent += `Result,${scorecardData.matchInfo.result.winner} won by ${scorecardData.matchInfo.result.margin}\n\n`;
-      
-      csvContent += 'FALL OF WICKETS\n';
-      csvContent += 'Team,Wicket Number,Batsman,Runs at Dismissal,Over,Ball,Dismissal Type,Bowler\n';
-      scorecardData.fallOfWickets.forEach((fow: any) => {
-        csvContent += `${fow.team},${fow.wicketNumber},${fow.batsman},${fow.runs},${fow.over},${fow.ball},${fow.dismissalType},${fow.bowler}\n`;
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `${fileName}.json`; a.click();
+      URL.revokeObjectURL(url);
+      return;
+    }
+
+    // ── CSV ──────────────────────────────────────────────────────
+    if (format === 'csv') {
+      let csv = '';
+      // Match Info
+      csv += 'MATCH INFORMATION\n';
+      csv += `Match ID,${data.matchInfo.matchId}\n`;
+      csv += `Team 1,${t1}\nTeam 2,${t2}\n`;
+      csv += `Venue,"${data.matchInfo.venue}"\nDate,${data.matchInfo.date}\n`;
+      if (data.matchInfo.toss) csv += `Toss,"${data.matchInfo.toss}"\n`;
+      csv += `Result,"${data.result.winner ? data.result.winner + ' won by ' + data.result.margin : 'Pending'}"\n`;
+      if (data.result.manOfTheMatch) csv += `Man of the Match,${data.result.manOfTheMatch}\n`;
+      csv += '\n';
+
+      data.innings.forEach((inn: any, idx: number) => {
+        csv += `INNINGS ${idx + 1} — ${inn.teamName}  (${inn.totalRuns}/${inn.totalWickets} in ${inn.totalOvers} overs)\n\n`;
+
+        // Batting
+        csv += 'BATTING\nBatter,Dismissal,Runs,Balls,4s,6s,SR\n';
+        inn.batting.forEach((b: any) => {
+          csv += `"${b.name}","${b.dismissal}",${b.runs},${b.balls},${b.fours},${b.sixes},${b.strikeRate}\n`;
+        });
+        // Extras
+        const ex = inn.extras;
+        csv += `\nExtras,"W ${ex.wides || 0}  NB ${ex.noBalls || 0}  B ${ex.byes || 0}  LB ${ex.legByes || 0}"\n`;
+        csv += '\n';
+
+        // Bowling
+        csv += 'BOWLING\nBowler,Overs,Maidens,Runs,Wickets,Economy,Wides,No Balls,Dots\n';
+        inn.bowling.forEach((bw: any) => {
+          csv += `"${bw.name}",${bw.overs},${bw.maidens},${bw.runs},${bw.wickets},${bw.economy},${bw.wides},${bw.noBalls},${bw.dots}\n`;
+        });
+        csv += '\n';
+
+        // Fall of Wickets
+        if (inn.fallOfWickets.length > 0) {
+          csv += 'FALL OF WICKETS\n#,Player,Score,Over\n';
+          inn.fallOfWickets.forEach((f: any) => {
+            csv += `${f.wicketNumber},"${f.player}",${f.score},${f.over}\n`;
+          });
+          csv += '\n';
+        }
+
+        // Powerplays
+        if (inn.powerplays.length > 0) {
+          csv += 'POWERPLAYS\nType,Overs,Runs\n';
+          inn.powerplays.forEach((p: any) => {
+            csv += `${p.type},${p.overs},${p.runs}\n`;
+          });
+          csv += '\n';
+        }
+
+        // Partnerships
+        if (inn.partnerships.length > 0) {
+          csv += 'PARTNERSHIPS\n#,Batsman 1,Runs,Balls,Batsman 2,Runs,Balls,Total Runs\n';
+          inn.partnerships.forEach((p: any) => {
+            csv += `${p.number},"${p.batsman1}",${p.batsman1Runs},${p.batsman1Balls},"${p.batsman2}",${p.batsman2Runs},${p.batsman2Balls},${p.totalRuns}\n`;
+          });
+          csv += '\n';
+        }
       });
-      csvContent += '\n';
-      
-      csvContent += 'POWERPLAYS\n';
-      csvContent += 'Team,Powerplay Name,Start Over,End Over,Runs,Wickets,Description\n';
-      scorecardData.powerplays.forEach((pp: any) => {
-        csvContent += `${pp.team},${pp.name},${pp.startOver},${pp.endOver},${pp.runs},${pp.wickets},${pp.description}\n`;
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `${fileName}.csv`; a.click();
+      URL.revokeObjectURL(url);
+      return;
+    }
+
+    // ── EXCEL (HTML table → .xls) ────────────────────────────────
+    if (format === 'excel') {
+      const esc = (v: any) => String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+      let html = '<html><head><meta charset="utf-8"><style>';
+      html += 'body{font-family:Calibri,Arial,sans-serif}';
+      html += 'table{border-collapse:collapse;width:100%;margin-bottom:24px}';
+      html += 'th,td{border:1px solid #bbb;padding:6px 10px;text-align:left}';
+      html += 'th{background:#4B0082;color:#fff;font-weight:bold}';
+      html += '.section{background:#f0e6ff;font-size:16px;font-weight:bold;padding:10px}';
+      html += '.sub{background:#f9f5ff;font-weight:bold}';
+      html += '</style></head><body>';
+
+      // Match Info
+      html += '<table><tr><td class="section" colspan="2">MATCH INFORMATION</td></tr>';
+      html += `<tr><th>Match ID</th><td>${esc(data.matchInfo.matchId)}</td></tr>`;
+      html += `<tr><th>Team 1</th><td>${esc(t1)}</td></tr>`;
+      html += `<tr><th>Team 2</th><td>${esc(t2)}</td></tr>`;
+      html += `<tr><th>Venue</th><td>${esc(data.matchInfo.venue)}</td></tr>`;
+      html += `<tr><th>Date</th><td>${esc(data.matchInfo.date)}</td></tr>`;
+      if (data.matchInfo.toss) html += `<tr><th>Toss</th><td>${esc(data.matchInfo.toss)}</td></tr>`;
+      html += `<tr><th>Result</th><td>${data.result.winner ? esc(data.result.winner + ' won by ' + data.result.margin) : 'Pending'}</td></tr>`;
+      if (data.result.manOfTheMatch) html += `<tr><th>Man of the Match</th><td>${esc(data.result.manOfTheMatch)}</td></tr>`;
+      html += '</table>';
+
+      data.innings.forEach((inn: any, idx: number) => {
+        // Batting
+        html += `<table><tr><td class="section" colspan="7">INNINGS ${idx + 1} — ${esc(inn.teamName)}  (${esc(inn.totalRuns)}/${esc(inn.totalWickets)}, ${esc(inn.totalOvers)} ov)</td></tr>`;
+        html += '<tr><th>Batter</th><th>Dismissal</th><th>R</th><th>B</th><th>4s</th><th>6s</th><th>SR</th></tr>';
+        inn.batting.forEach((b: any) => {
+          html += `<tr><td><b>${esc(b.name)}</b></td><td>${esc(b.dismissal)}</td><td><b>${b.runs}</b></td><td>${b.balls}</td><td>${b.fours}</td><td>${b.sixes}</td><td>${b.strikeRate}</td></tr>`;
+        });
+        const ex = inn.extras;
+        html += `<tr class="sub"><td>Extras</td><td colspan="6">W ${ex.wides||0}  NB ${ex.noBalls||0}  B ${ex.byes||0}  LB ${ex.legByes||0}</td></tr>`;
+        html += '</table>';
+
+        // Bowling
+        html += `<table><tr><td class="section" colspan="9">BOWLING — ${esc(inn.teamName)}</td></tr>`;
+        html += '<tr><th>Bowler</th><th>O</th><th>M</th><th>R</th><th>W</th><th>Econ</th><th>Wd</th><th>NB</th><th>Dots</th></tr>';
+        inn.bowling.forEach((bw: any) => {
+          html += `<tr><td><b>${esc(bw.name)}</b></td><td>${bw.overs}</td><td>${bw.maidens}</td><td>${bw.runs}</td><td><b>${bw.wickets}</b></td><td>${bw.economy}</td><td>${bw.wides}</td><td>${bw.noBalls}</td><td>${bw.dots}</td></tr>`;
+        });
+        html += '</table>';
+
+        // Fall of Wickets
+        if (inn.fallOfWickets.length > 0) {
+          html += `<table><tr><td class="section" colspan="4">FALL OF WICKETS — ${esc(inn.teamName)}</td></tr>`;
+          html += '<tr><th>#</th><th>Player</th><th>Score</th><th>Over</th></tr>';
+          inn.fallOfWickets.forEach((f: any) => {
+            html += `<tr><td>${f.wicketNumber}</td><td>${esc(f.player)}</td><td>${esc(f.score)}</td><td>${esc(f.over)}</td></tr>`;
+          });
+          html += '</table>';
+        }
+
+        // Powerplays
+        if (inn.powerplays.length > 0) {
+          html += `<table><tr><td class="section" colspan="3">POWERPLAYS — ${esc(inn.teamName)}</td></tr>`;
+          html += '<tr><th>Type</th><th>Overs</th><th>Runs</th></tr>';
+          inn.powerplays.forEach((p: any) => {
+            html += `<tr><td>${esc(p.type)}</td><td>${esc(p.overs)}</td><td>${esc(p.runs)}</td></tr>`;
+          });
+          html += '</table>';
+        }
+
+        // Partnerships
+        if (inn.partnerships.length > 0) {
+          html += `<table><tr><td class="section" colspan="8">PARTNERSHIPS — ${esc(inn.teamName)}</td></tr>`;
+          html += '<tr><th>#</th><th>Batsman 1</th><th>Runs</th><th>Balls</th><th>Batsman 2</th><th>Runs</th><th>Balls</th><th>Total</th></tr>';
+          inn.partnerships.forEach((p: any) => {
+            html += `<tr><td>${p.number}</td><td>${esc(p.batsman1)}</td><td>${esc(p.batsman1Runs)}</td><td>${esc(p.batsman1Balls)}</td><td>${esc(p.batsman2)}</td><td>${esc(p.batsman2Runs)}</td><td>${esc(p.batsman2Balls)}</td><td>${esc(p.totalRuns)}</td></tr>`;
+          });
+          html += '</table>';
+        }
       });
-      csvContent += '\n';
-      
-      csvContent += 'PARTNERSHIPS\n';
-      csvContent += 'Team,Partnership Number,Batsman 1,Batsman 2,Runs,Balls,Start Over,End Over\n';
-      scorecardData.partnerships.forEach((part: any) => {
-        csvContent += `${part.team},${part.partnershipNumber},${part.batsman1},${part.batsman2},${part.runs},${part.balls},${part.startOver},${part.endOver}\n`;
-      });
-      
-      const dataUri = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent);
-      const linkElement = document.createElement('a');
-      linkElement.setAttribute('href', dataUri);
-      linkElement.setAttribute('download', `${fileName}.csv`);
-      linkElement.click();
-      
-    } else if (format === 'excel') {
-      let excelContent = '<html><head><meta charset="utf-8"><title>Match Scorecard</title>';
-      excelContent += '<style>table {border-collapse: collapse; width: 100%; margin-bottom: 20px;} th, td {border: 1px solid #ccc; padding: 8px;} th {background-color: #f2f2f2; font-weight: bold;} h2 {color: #333; margin-top: 30px;}</style></head><body>';
-      
-      excelContent += '<h2>MATCH INFORMATION</h2>';
-      excelContent += '<table><tr><th>Match ID</th><td>' + scorecardData.matchInfo.matchId + '</td></tr>';
-      excelContent += '<tr><th>Team 1</th><td>' + scorecardData.matchInfo.team1 + '</td></tr>';
-      excelContent += '<tr><th>Team 2</th><td>' + scorecardData.matchInfo.team2 + '</td></tr>';
-      excelContent += '<tr><th>Venue</th><td>' + scorecardData.matchInfo.venue + '</td></tr>';
-      excelContent += '<tr><th>Date</th><td>' + scorecardData.matchInfo.date + '</td></tr>';
-      excelContent += '<tr><th>Result</th><td>' + scorecardData.matchInfo.result.winner + ' won by ' + scorecardData.matchInfo.result.margin + '</td></tr></table>';
-      
-      excelContent += '<h2>FALL OF WICKETS</h2>';
-      excelContent += '<table><tr><th>Team</th><th>Wicket Number</th><th>Batsman</th><th>Runs at Dismissal</th><th>Over</th><th>Ball</th><th>Dismissal Type</th><th>Bowler</th></tr>';
-      scorecardData.fallOfWickets.forEach((fow: any) => {
-        excelContent += `<tr><td>${fow.team}</td><td>${fow.wicketNumber}</td><td>${fow.batsman}</td><td>${fow.runs}</td><td>${fow.over}</td><td>${fow.ball}</td><td>${fow.dismissalType}</td><td>${fow.bowler}</td></tr>`;
-      });
-      excelContent += '</table>';
-      
-      excelContent += '<h2>POWERPLAYS</h2>';
-      excelContent += '<table><tr><th>Team</th><th>Powerplay Name</th><th>Start Over</th><th>End Over</th><th>Runs</th><th>Wickets</th><th>Description</th></tr>';
-      scorecardData.powerplays.forEach((pp: any) => {
-        excelContent += `<tr><td>${pp.team}</td><td>${pp.name}</td><td>${pp.startOver}</td><td>${pp.endOver}</td><td>${pp.runs}</td><td>${pp.wickets}</td><td>${pp.description}</td></tr>`;
-      });
-      excelContent += '</table>';
-      
-      excelContent += '<h2>PARTNERSHIPS</h2>';
-      excelContent += '<table><tr><th>Team</th><th>Partnership Number</th><th>Batsman 1</th><th>Batsman 2</th><th>Runs</th><th>Balls</th><th>Start Over</th><th>End Over</th></tr>';
-      scorecardData.partnerships.forEach((part: any) => {
-        excelContent += `<tr><td>${part.team}</td><td>${part.partnershipNumber}</td><td>${part.batsman1}</td><td>${part.batsman2}</td><td>${part.runs}</td><td>${part.balls}</td><td>${part.startOver}</td><td>${part.endOver}</td></tr>`;
-      });
-      excelContent += '</table></body></html>';
-      
-      const dataUri = 'data:application/vnd.ms-excel;charset=utf-8,' + encodeURIComponent(excelContent);
-      const linkElement = document.createElement('a');
-      linkElement.setAttribute('href', dataUri);
-      linkElement.setAttribute('download', `${fileName}.xls`);
-      linkElement.click();
-    } else if (format === 'pdf') {
+
+      html += '</body></html>';
+      const blob = new Blob([html], { type: 'application/vnd.ms-excel;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `${fileName}.xls`; a.click();
+      URL.revokeObjectURL(url);
+      return;
+    }
+
+    // ── PDF ──────────────────────────────────────────────────────
+    if (format === 'pdf') {
       try {
         const { exportScorecardAsPDF } = await import('./scorecard-pdf-export');
-        // Use real scorecard data when available, otherwise the sample data
-        const sc = (selectedScorecard && selectedScorecard.matchInfo) ? selectedScorecard : scorecardData;
-        await exportScorecardAsPDF(sc);
+        await exportScorecardAsPDF(selectedScorecard);
       } catch (err) {
         console.error('PDF export failed:', err);
         alert('PDF export failed: ' + (err instanceof Error ? err.message : 'Unknown error'));
