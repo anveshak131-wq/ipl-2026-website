@@ -1097,7 +1097,7 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
     } else if (format === 'pdf') {
       try {
         // Try to use the professional PDF exporter (2025) if available
-        const mod = await import('../../wpl-admin-2026/scorecard/pdf-export-2025');
+        const mod = await import('../../../wpl-admin-2026/scorecard/pdf-export-2025');
         if (mod && typeof mod.exportScorecardPDF2025 === 'function') {
           // If we have a real selected scorecard, pass it; otherwise pass our sample
           const sc = (selectedScorecard && selectedScorecard.matchInfo) ? selectedScorecard : scorecardData;
