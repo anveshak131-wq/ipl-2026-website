@@ -37,7 +37,6 @@ function WPLTeamsPageContent() {
     const cursorX = useMotionValue(0);
     const cursorY = useMotionValue(0);
     const [cursorVariant, setCursorVariant] = useState('default');
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const containerRef = useRef<HTMLDivElement>(null);
     const heroRef = useRef<HTMLDivElement>(null);
     const isInView = useInView(heroRef, { once: false, amount: 0.3 });
@@ -60,7 +59,6 @@ function WPLTeamsPageContent() {
                 const rect = containerRef.current.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
-                setMousePosition({ x, y });
                 cursorX.set(x);
                 cursorY.set(y);
             }

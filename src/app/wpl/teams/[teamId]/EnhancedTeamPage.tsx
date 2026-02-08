@@ -135,7 +135,6 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState('all');
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isInitialized, setIsInitialized] = useState(false);
   const [teamStats, setTeamStats] = useState<TeamStats | null>(null);
   const [selectedMatch, setSelectedMatch] = useState<any | null>(null);
@@ -354,7 +353,6 @@ export default function EnhancedWPLTeamPage({ teamId }: EnhancedWPLTeamPageProps
       const rect = containerRef.current.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      setMousePosition({ x, y });
       cursorX.set(x);
       cursorY.set(y);
       if (!isInitialized) {
