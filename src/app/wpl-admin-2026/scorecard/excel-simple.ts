@@ -1,23 +1,12 @@
-// Comprehensive Excel export with proper data extraction
+// Professional Excel export with styled tables
 export const exportSimpleExcel = (scorecard: any) => {
-  console.log('🚀 Starting Excel export...');
-  console.log('📊 Received scorecard:', JSON.stringify(scorecard, null, 2).substring(0, 1000));
+  console.log('🚀 Starting Professional Excel export with styled tables...');
   
   const XLSX = (window as any).XLSX;
   if (!XLSX) {
     alert('Excel library not available. Please refresh the page and try again.');
     return;
   }
-
-  // Debug: Log the scorecard structure
-  console.log('📊 Scorecard structure:', {
-    hasScorecard: !!scorecard,
-    hasMatchInfo: !!scorecard?.matchInfo,
-    hasInnings: !!scorecard?.innings,
-    inningsCount: scorecard?.innings?.length || 0,
-    team1: scorecard?.matchInfo?.team1,
-    team2: scorecard?.matchInfo?.team2,
-  });
 
   // Create workbook
   const wb = XLSX.utils.book_new();
@@ -39,14 +28,15 @@ export const exportSimpleExcel = (scorecard: any) => {
   // Get team names
   const team1Name = getTeamName(scorecard?.matchInfo?.team1);
   const team2Name = getTeamName(scorecard?.matchInfo?.team2);
+  const innings = scorecard?.innings || [];
 
   // ============================================
-  // Sheet 1: Match Overview
+  // Sheet 1: Match Overview with Table
   // ============================================
-  const matchData: any[][] = [
-    ['WPL 2026 MATCH SCORECARD'],
+  const matchOverviewData = [
+    ['🏏 WPL 2026 MATCH SCORECARD'],
     [''],
-    ['MATCH INFORMATION'],
+    ['Field', 'Value'],
     ['Match ID', scorecard?.matchId || scorecard?.id || 'N/A'],
     ['League', scorecard?.league || 'WPL'],
     ['Team 1', team1Name],
@@ -55,58 +45,74 @@ export const exportSimpleExcel = (scorecard: any) => {
     ['Date', scorecard?.matchInfo?.date || 'Unknown Date'],
     ['Time', scorecard?.matchInfo?.time || 'N/A'],
     ['Status', scorecard?.matchInfo?.status || scorecard?.status || 'In Progress'],
-    [''],
-    ['TOSS'],
-    ['Winner', scorecard?.matchInfo?.toss?.winner || 'N/A'],
-    ['Decision', scorecard?.matchInfo?.toss?.decision || 'N/A'],
-    [''],
-    ['RESULT'],
-    ['Winner', scorecard?.result?.winner || 'To be decided'],
+    ['Toss Winner', scorecard?.matchInfo?.toss?.winner || 'N/A'],
+    ['Toss Decision', scorecard?.matchInfo?.toss?.decision || 'N/A'],
+    ['Result Winner', scorecard?.result?.winner || 'To be decided'],
     ['Margin', scorecard?.result?.margin || 'N/A'],
-    ['Man of the Match', scorecard?.result?.manOfTheMatch || 'N/A'],
-    [''],
-    ['INNINGS SUMMARY'],
+    ['Man of Match', scorecard?.result?.manOfTheMatch || 'N/A'],
   ];
 
-  // Add innings summary
-  const innings = scorecard?.innings || [];
-  if (innings.length > 0) {
-    innings.forEach((inn: any, idx: number) => {
-      const battingTeam = inn.battingTeamId ? 
-        (String(inn.battingTeamId) === String(scorecard?.matchInfo?.team1?.id) ? team1Name : team2Name) :
-        `Innings ${idx + 1}`;
-      matchData.push([
-        `Innings ${idx + 1}`,
-        battingTeam,
-        `${inn.totalRuns || calculateTotalRuns(inn)}/${inn.totalWickets || calculateTotalWickets(inn)}`,
-        `(${inn.totalOvers || calculateTotalOvers(inn)} ov)`
-      ]);
-    });
-  } else {
-    matchData.push(['No innings data available']);
-  }
+  const ws1 = XLSX.utils.aoa_to_sheet(matchOverviewData);
   
-  const ws1 = XLSX.utils.aoa_to_sheet(matchData);
-  // Set column widths
-  ws1['!cols'] = [{ wch: 20 }, { wch: 30 }, { wch: 15 }, { wch: 15 }];
+  // Add table formatting to Match Overview
+  ws1['!cols'] = [{ wch: 20 }, { wch: 40 }];
+  
+  // Define table range for Match Overview (rows 3-16, columns A-B)
+  if (!ws1['!ref']) ws1['!ref'] = 'A1:B16';
+  
+  // Add autofilter to create table-like appearance
+  ws1['!autofilter'] = { ref: 'A3:B16' };
+  
   XLSX.utils.book_append_sheet(wb, ws1, 'Match Overview');
 
   // ============================================
-  // Sheet 2 & 3: Batting for each innings
+  // Sheet 2: Innings Summary Table
+  // ============================================
+  const inningsSummaryData = [
+    ['📊 INNINGS SUMMARY'],
+    [''],
+    ['Innings', 'Batting Team', 'Score', 'Overs', 'Run Rate'],
+  ];
+
+  innings.forEach((inn: any, idx: number) => {
+    const battingTeam = inn.battingTeamId ? 
+      (String(inn.battingTeamId) === String(scorecard?.matchInfo?.team1?.id) ? team1Name : team2Name) :
+      `Team ${idx + 1}`;
+    const totalRuns = inn.totalRuns || calculateTotalRuns(inn);
+    const totalWickets = inn.totalWickets || calculateTotalWickets(inn);
+    const totalOvers = inn.totalOvers || calculateTotalOvers(inn);
+    const oversNum = parseFloat(String(totalOvers).replace('.', '')) || 1;
+    const runRate = (totalRuns / (Math.floor(oversNum / 10) + (oversNum % 10) / 6 || 1)).toFixed(2);
+    
+    inningsSummaryData.push([
+      `Innings ${idx + 1}`,
+      battingTeam,
+      `${totalRuns}/${totalWickets}`,
+      String(totalOvers),
+      runRate
+    ]);
+  });
+
+  const wsSum = XLSX.utils.aoa_to_sheet(inningsSummaryData);
+  wsSum['!cols'] = [{ wch: 12 }, { wch: 30 }, { wch: 12 }, { wch: 10 }, { wch: 12 }];
+  wsSum['!autofilter'] = { ref: `A3:E${3 + innings.length}` };
+  XLSX.utils.book_append_sheet(wb, wsSum, 'Innings Summary');
+
+  // ============================================
+  // Batting Sheets with Tables
   // ============================================
   innings.forEach((inn: any, inningsIdx: number) => {
     const battingTeam = inn.battingTeamId ? 
       (String(inn.battingTeamId) === String(scorecard?.matchInfo?.team1?.id) ? team1Name : team2Name) :
-      `Innings ${inningsIdx + 1}`;
+      `Team ${inningsIdx + 1}`;
     
     const battingData: any[][] = [
-      [`BATTING - ${battingTeam} (Innings ${inningsIdx + 1})`],
+      [`🏏 BATTING - ${battingTeam}`],
       [''],
-      ['#', 'Player', 'Dismissal', 'Runs', 'Balls', 'SR', '4s', '6s', 'Minutes']
+      ['#', 'Batter', 'Dismissal', 'R', 'B', 'SR', '4s', '6s', 'Mins'],
     ];
 
     const batting = inn.batting || [];
-    console.log(`📊 Innings ${inningsIdx + 1} batting:`, batting.length, 'batters');
     
     if (batting.length > 0) {
       batting.forEach((batter: any, idx: number) => {
@@ -121,63 +127,72 @@ export const exportSimpleExcel = (scorecard: any) => {
           dismissalText,
           runs,
           balls,
-          sr,
+          parseFloat(sr),
           batter.fours ?? 0,
           batter.sixes ?? 0,
-          batter.minutes ?? ''
+          batter.minutes ?? '-'
         ]);
       });
       
-      // Add extras
+      // Extras row
       const extras = inn.extras || {};
       const extrasTotal = (extras.wides || 0) + (extras.noBalls || 0) + (extras.byes || 0) + (extras.legByes || 0);
-      battingData.push(['']);
-      battingData.push(['', 'Extras', `(w ${extras.wides || 0}, nb ${extras.noBalls || 0}, b ${extras.byes || 0}, lb ${extras.legByes || 0})`, extrasTotal]);
+      battingData.push(['', 'EXTRAS', `(w${extras.wides || 0} nb${extras.noBalls || 0} b${extras.byes || 0} lb${extras.legByes || 0})`, extrasTotal, '', '', '', '', '']);
       
-      // Add total
+      // Total row
       const totalRuns = inn.totalRuns || calculateTotalRuns(inn);
       const totalWickets = inn.totalWickets || calculateTotalWickets(inn);
       const totalOvers = inn.totalOvers || calculateTotalOvers(inn);
-      battingData.push(['', 'TOTAL', `(${totalWickets} wkts, ${totalOvers} ov)`, totalRuns]);
+      battingData.push(['', 'TOTAL', `(${totalWickets} wkts, ${totalOvers} ov)`, totalRuns, '', '', '', '', '']);
     } else {
-      battingData.push(['', 'No batting data available']);
+      battingData.push(['', 'No batting data', '', '', '', '', '', '', '']);
     }
     
-    // Add Fall of Wickets if available
+    // Fall of Wickets section
     if (inn.fallOfWickets && inn.fallOfWickets.length > 0) {
       battingData.push(['']);
-      battingData.push(['FALL OF WICKETS']);
+      battingData.push(['📉 FALL OF WICKETS']);
+      battingData.push(['Wkt', 'Player', 'Score', 'Over']);
       inn.fallOfWickets.forEach((fow: any, idx: number) => {
-        battingData.push([
-          `${idx + 1}`,
-          fow.player || 'Unknown',
-          fow.score || 'N/A',
-          fow.over ? `(${fow.over} ov)` : ''
-        ]);
+        battingData.push([idx + 1, fow.player || 'Unknown', fow.score || 'N/A', fow.over || '-']);
       });
     }
 
     const wsB = XLSX.utils.aoa_to_sheet(battingData);
-    wsB['!cols'] = [{ wch: 5 }, { wch: 25 }, { wch: 35 }, { wch: 8 }, { wch: 8 }, { wch: 10 }, { wch: 5 }, { wch: 5 }, { wch: 10 }];
-    XLSX.utils.book_append_sheet(wb, wsB, `Batting Inn ${inningsIdx + 1}`);
+    wsB['!cols'] = [
+      { wch: 4 },   // #
+      { wch: 22 },  // Batter
+      { wch: 30 },  // Dismissal
+      { wch: 6 },   // R
+      { wch: 6 },   // B
+      { wch: 8 },   // SR
+      { wch: 5 },   // 4s
+      { wch: 5 },   // 6s
+      { wch: 6 }    // Mins
+    ];
+    
+    // Add table with autofilter
+    const battingEndRow = 3 + batting.length;
+    wsB['!autofilter'] = { ref: `A3:I${battingEndRow}` };
+    
+    XLSX.utils.book_append_sheet(wb, wsB, `Bat ${inningsIdx + 1} ${battingTeam.substring(0, 10)}`);
   });
 
   // ============================================
-  // Sheet 4 & 5: Bowling for each innings
+  // Bowling Sheets with Tables
   // ============================================
   innings.forEach((inn: any, inningsIdx: number) => {
     const bowlingTeam = inn.battingTeamId ? 
       (String(inn.battingTeamId) === String(scorecard?.matchInfo?.team1?.id) ? team2Name : team1Name) :
-      `Bowling ${inningsIdx + 1}`;
+      `Team ${inningsIdx + 1}`;
     
     const bowlingData: any[][] = [
-      [`BOWLING - ${bowlingTeam} (Innings ${inningsIdx + 1})`],
+      [`🎯 BOWLING - ${bowlingTeam}`],
       [''],
-      ['#', 'Bowler', 'Overs', 'Maidens', 'Runs', 'Wickets', 'Economy', 'Dots', 'Wides', 'No Balls']
+      ['#', 'Bowler', 'O', 'M', 'R', 'W', 'Econ', 'Dots', 'Wd', 'NB'],
     ];
 
     const bowling = inn.bowling || [];
-    console.log(`📊 Innings ${inningsIdx + 1} bowling:`, bowling.length, 'bowlers');
     
     if (bowling.length > 0) {
       bowling.forEach((bowler: any, idx: number) => {
@@ -192,23 +207,39 @@ export const exportSimpleExcel = (scorecard: any) => {
           bowler.maidens ?? 0,
           runs,
           bowler.wickets ?? 0,
-          economy,
-          bowler.dots ?? '',
-          bowler.wides ?? '',
-          bowler.noBalls ?? ''
+          parseFloat(economy),
+          bowler.dots ?? '-',
+          bowler.wides ?? '-',
+          bowler.noBalls ?? '-'
         ]);
       });
     } else {
-      bowlingData.push(['', 'No bowling data available']);
+      bowlingData.push(['', 'No bowling data', '', '', '', '', '', '', '', '']);
     }
 
     const wsB = XLSX.utils.aoa_to_sheet(bowlingData);
-    wsB['!cols'] = [{ wch: 5 }, { wch: 25 }, { wch: 8 }, { wch: 10 }, { wch: 8 }, { wch: 10 }, { wch: 10 }, { wch: 8 }, { wch: 8 }, { wch: 10 }];
-    XLSX.utils.book_append_sheet(wb, wsB, `Bowling Inn ${inningsIdx + 1}`);
+    wsB['!cols'] = [
+      { wch: 4 },   // #
+      { wch: 22 },  // Bowler
+      { wch: 6 },   // O
+      { wch: 4 },   // M
+      { wch: 6 },   // R
+      { wch: 4 },   // W
+      { wch: 7 },   // Econ
+      { wch: 6 },   // Dots
+      { wch: 4 },   // Wd
+      { wch: 4 }    // NB
+    ];
+    
+    // Add table with autofilter
+    const bowlingEndRow = 3 + bowling.length;
+    wsB['!autofilter'] = { ref: `A3:J${bowlingEndRow}` };
+    
+    XLSX.utils.book_append_sheet(wb, wsB, `Bowl ${inningsIdx + 1} ${bowlingTeam.substring(0, 10)}`);
   });
 
   // ============================================
-  // Sheet: Partnerships (if available)
+  // Partnerships Table Sheet
   // ============================================
   let hasPartnerships = false;
   innings.forEach((inn: any) => {
@@ -219,46 +250,125 @@ export const exportSimpleExcel = (scorecard: any) => {
 
   if (hasPartnerships) {
     const partnershipData: any[][] = [
-      ['PARTNERSHIPS'],
+      ['🤝 PARTNERSHIPS'],
       [''],
-      ['Innings', 'Batter 1', 'Runs', 'Balls', 'Batter 2', 'Runs', 'Balls', 'Total']
+      ['Inn', 'Wkt', 'Batter 1', 'R', 'B', 'Batter 2', 'R', 'B', 'Total', 'Balls'],
     ];
 
+    let rowCount = 0;
     innings.forEach((inn: any, inningsIdx: number) => {
       if (inn.partnerships && inn.partnerships.length > 0) {
-        partnershipData.push([`--- Innings ${inningsIdx + 1} ---`]);
-        inn.partnerships.forEach((p: any) => {
+        inn.partnerships.forEach((p: any, pIdx: number) => {
           partnershipData.push([
-            '',
+            inningsIdx + 1,
+            pIdx + 1,
             p.batsman1 || 'Unknown',
             p.batsman1Runs || 0,
             p.batsman1Balls || 0,
             p.batsman2 || 'Unknown',
             p.batsman2Runs || 0,
             p.batsman2Balls || 0,
-            p.totalRuns || 0
+            p.totalRuns || 0,
+            (parseInt(p.batsman1Balls) || 0) + (parseInt(p.batsman2Balls) || 0)
           ]);
+          rowCount++;
         });
       }
     });
 
     const wsP = XLSX.utils.aoa_to_sheet(partnershipData);
-    wsP['!cols'] = [{ wch: 12 }, { wch: 20 }, { wch: 8 }, { wch: 8 }, { wch: 20 }, { wch: 8 }, { wch: 8 }, { wch: 8 }];
+    wsP['!cols'] = [
+      { wch: 5 },   // Inn
+      { wch: 5 },   // Wkt
+      { wch: 18 },  // Batter 1
+      { wch: 5 },   // R
+      { wch: 5 },   // B
+      { wch: 18 },  // Batter 2
+      { wch: 5 },   // R
+      { wch: 5 },   // B
+      { wch: 7 },   // Total
+      { wch: 7 }    // Balls
+    ];
+    wsP['!autofilter'] = { ref: `A3:J${3 + rowCount}` };
     XLSX.utils.book_append_sheet(wb, wsP, 'Partnerships');
   }
 
   // ============================================
+  // Complete Scorecard Table (All in one)
+  // ============================================
+  const completeData: any[][] = [
+    ['📋 COMPLETE SCORECARD - WPL 2026'],
+    [''],
+    [`${team1Name} vs ${team2Name}`],
+    [`Venue: ${scorecard?.matchInfo?.venue || 'N/A'} | Date: ${scorecard?.matchInfo?.date || 'N/A'}`],
+    [''],
+  ];
+
+  // Add each innings as a table
+  innings.forEach((inn: any, inningsIdx: number) => {
+    const battingTeam = inn.battingTeamId ? 
+      (String(inn.battingTeamId) === String(scorecard?.matchInfo?.team1?.id) ? team1Name : team2Name) :
+      `Team ${inningsIdx + 1}`;
+    const totalRuns = inn.totalRuns || calculateTotalRuns(inn);
+    const totalWickets = inn.totalWickets || calculateTotalWickets(inn);
+    const totalOvers = inn.totalOvers || calculateTotalOvers(inn);
+    
+    completeData.push([`INNINGS ${inningsIdx + 1}: ${battingTeam} - ${totalRuns}/${totalWickets} (${totalOvers} ov)`]);
+    completeData.push(['Batter', 'Dismissal', 'R', 'B', 'SR', '4s', '6s']);
+    
+    (inn.batting || []).forEach((batter: any) => {
+      const runs = batter.runs ?? 0;
+      const balls = batter.balls ?? 0;
+      const sr = balls > 0 ? ((runs / balls) * 100).toFixed(1) : '0.0';
+      completeData.push([
+        getPlayerName(batter),
+        formatDismissal(batter.dismissal),
+        runs,
+        balls,
+        sr,
+        batter.fours ?? 0,
+        batter.sixes ?? 0
+      ]);
+    });
+    
+    completeData.push(['']);
+    completeData.push(['Bowler', 'O', 'M', 'R', 'W', 'Econ', '']);
+    
+    (inn.bowling || []).forEach((bowler: any) => {
+      const overs = bowler.overs ?? 0;
+      const runs = bowler.runs ?? 0;
+      const economy = overs > 0 ? (runs / overs).toFixed(2) : '0.00';
+      completeData.push([
+        getPlayerName(bowler),
+        overs,
+        bowler.maidens ?? 0,
+        runs,
+        bowler.wickets ?? 0,
+        economy,
+        ''
+      ]);
+    });
+    
+    completeData.push(['']);
+    completeData.push(['']);
+  });
+
+  const wsComplete = XLSX.utils.aoa_to_sheet(completeData);
+  wsComplete['!cols'] = [{ wch: 22 }, { wch: 28 }, { wch: 6 }, { wch: 6 }, { wch: 8 }, { wch: 5 }, { wch: 5 }];
+  XLSX.utils.book_append_sheet(wb, wsComplete, 'Full Scorecard');
+
+  // ============================================
   // Generate filename and download
   // ============================================
-  const safeTeam1 = team1Name.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 15);
-  const safeTeam2 = team2Name.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 15);
+  const safeTeam1 = team1Name.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 12);
+  const safeTeam2 = team2Name.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 12);
   const date = scorecard?.matchInfo?.date || new Date().toISOString().split('T')[0];
   const filename = `WPL2026_${safeTeam1}_vs_${safeTeam2}_${date}.xlsx`;
 
   try {
     XLSX.writeFile(wb, filename);
     console.log('✅ Excel export completed successfully!');
-    alert('✅ Excel exported successfully!');
+    alert('✅ Excel exported with styled tables!');
   } catch (writeError) {
     console.error('❌ Error writing Excel file:', writeError);
     alert(`Error saving Excel file: ${writeError instanceof Error ? writeError.message : 'Unknown error'}`);
