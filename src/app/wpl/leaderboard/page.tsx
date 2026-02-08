@@ -788,6 +788,9 @@ export default function WPLLeaderboardPage() {
                                   transition={{ duration: 0.3 }}
                                 >
                                   {stat.teamName}
+                                  {isQualifyingPosition && (
+                                    <span className="ml-2 text-green-400 text-base font-bold">(Q)</span>
+                                  )}
                                 </motion.h3>
                                 
                                 {/* Stats Grid */}
